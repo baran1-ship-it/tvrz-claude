@@ -41,7 +41,7 @@ def _box_kol(self, m, size, mat, uvo=None, rnd=None, collide=False):
 Part.box = _box_kol
 
 _DBG = os.environ.get("PUCHART_DBG"); _DBGL = []   # ladění kolizí: PUCHART_DBG="x,z,y" vypíše kolizní kvádry do 2 m
-POCH = []; ZABR = []   # pochozí plochy (plošiny, pavlače, podlahy) a zábradlí – hlídač volných hran (Míša 4. 11.)
+POCH = []; ZABR = []; ZAB_REC = []   # pochozí plochy (plošiny, pavlače, podlahy) a zábradlí – hlídač volných hran (Míša 4. 11.)
 STAVBY = []   # záznamy staveb pro test smyslu (hra/data/stavby_kontrola.json): vstupy budov, kozy mostů
 NABEHY = []   # nájezdy na prahy [x, z, y, spad, délka, kdo] → hra/data/nabehy.json (test smyslu nabeh_vyska)
 NASTUPY = []   # nástupy mostů [x, z, y] → hra/data/nastupy_mostu.json: cesty.py tam zvedne cestu (násyp v terénu, ne hranol)
@@ -359,6 +359,10 @@ def ochoz2(P, a, b, t, koruna, vn, s0=None, s1=None, mezery=(), kryty=False, sir
         sl = [k for k in ks if u0 - 0.05 <= k <= u1 + 0.05]
         if not sl: continue
         q0, q1 = a + d * u0 + hr, a + d * u1 + hr
+        if not kryty:   # lehká pavlač: zábradlí do společného celku (zabradli_stavba – navazuje na schody a podesty)
+            ZAB_REC.append({"P": P, "a": hz(q0), "b": hz(q1), "ya": koruna, "yb": koruna, "dolu": 0.18})
+            kol(P, (q0 + q1) / 2 + UP * (koruna + 0.55), d, (0.12, 1.1, (q1 - q0).length)); ZABR.append((q0.copy(), q1.copy(), koruna, "ochoz2"))
+            continue
         for k in sl:
             q = a + d * k + hr
             P.beam(q + UP * (koruna - 0.18), q + UP * (koruna + (2.3 if kryty else 1.0)), 0.12, 0.12, "dub", up=d, j=0.3)
@@ -673,12 +677,7 @@ def zabradli(P, p0, p1, y):
     if os.environ.get("PUCHART_DBGZ"):
         _q = [float(x) for x in os.environ["PUCHART_DBGZ"].split(",")]
         if min((Vector((_q[0], 0, _q[1])) - hz(p_)).length for p_ in (p0, p1, (p0 + p1) / 2)) < 1.5: print("DBGZ", [round(v, 2) for v in (p0.x, p0.z, p1.x, p1.z, y)], ZABR[-1][3], _s._getframe(2).f_code.co_name, _s._getframe(2).f_lineno, flush=True)
-    s_ = d.normalized().cross(UP).normalized()
-    P.beam(p0 + UP * (y + 1.0), p1 + UP * (y + 1.0), 0.15, 0.1, "dub", j=0.2, ext=0.1, collide=None)                         # madlo na hlavách sloupků (čep), přesah přes krajní
-    P.beam(p0 + s_ * 0.09 + UP * (y + 0.5), p1 + s_ * 0.09 + UP * (y + 0.5), 0.06, 0.08, "dub", j=0.2, ext=0.08, collide=None)   # střední tyč přiložená z líce sloupků (0,05 + 0,03 + vůle)
-    n = max(1, round(L / 1.2))
-    for i in range(n + 1):
-        q = p0.lerp(p1, i / n); P.beam(q + UP * (y - 0.02), q + UP * (y + 1.0), 0.1, 0.1, "dub", up=d, j=0.4)
+    ZAB_REC.append({"P": P, "a": hz(p0), "b": hz(p1), "ya": y, "yb": y, "dolu": 0.02})   # staví se až zabradli_stavba() – spojení konců
     kol(P, (p0 + p1) / 2 + UP * (y + 0.55), d, (0.1, 1.1, L))
 
 def podlaha(P, c, d, iw, idp, y, otvory=(), tl=0.24, mat="prkna_ven"):
@@ -942,10 +941,7 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
             kol(P, a + d * ((t0 + t1) / 2) + UP * ((top + g - 0.3) / 2), d, (w - 0.1, top - g + 0.3, t1 - t0))
     for sg in zabradli:   # sloupky přiložené z vnějšího líce schodnice (plát s kolíkem), madlo na jejich hlavách
         o = s * sg * (w / 2 + 0.02)
-        P.beam(a + o + UP * (y0 + 1.0), a + d * run + o + UP * (y1 + 1.0), 0.12, 0.1, "dub", j=0.4, ext=0.1, collide=None)
-        for i in range(max(2, int(run / 1.3)) + 1):
-            tt = i / max(2, int(run / 1.3)); q = a + d * (run * tt) + o
-            P.beam(q + UP * (y0 + (y1 - y0) * tt - 0.34), q + UP * (y0 + (y1 - y0) * tt + 1.0), 0.1, 0.1, "dub", up=d, j=0.5)
+        ZAB_REC.append({"P": P, "a": hz(a + o), "b": hz(a + d * run + o), "ya": y0, "yb": y1, "dolu": 0.34})
         nk = max(1, math.ceil(run / 0.5))   # kolize po svislých dílech 0,5 m podél sklonu: celá délka jako viditelné zábradlí, nic nepřečnívá patu
         for i in range(nk):                  # (šikmý kvádr musel být o 1,5 m kratší – konce zábradlí byly bez kolize, povrch_kolize 3. 11.)
             t0_, t1_ = run * i / nk, run * (i + 1) / nk; yl = y0 + (y1 - y0) * t0_ / run; yh = y0 + (y1 - y0) * t1_ / run
@@ -1777,6 +1773,43 @@ def postav_B(P):
                          bod(sa - sdir * 0.5, y0), bod(c + Vector((0, 0, 0.5)), y0)]
     return G
 
+def zabradli_stavba():
+    """Zábradlí jako celek (Míša 10. 11.: „podívej se, jak zábradlí v KCD a v realitě přirozeně navazuje“): všechny kusy
+    (ochozy, podesty, otvory, ramena schodů) se nejdřív sesbírají; konce blíž než 0,45 m (a výškou do 0,25 m) se spojí do
+    jednoho společného sloupku, madlo jde z kusu na kus bez mezery a bez zdvojených sloupků (rovné madlo se na rohu
+    lomí do šikmého madla schodů). Sloupky po ≤ 1,2 m, krajní vždy; střední tyč v půli výšky; vše dub."""
+    E_ = []   # konce: [rec, 'a'|'b']
+    for r in ZAB_REC: E_ += [(r, "a"), (r, "b")]
+    par = list(range(len(E_)))
+    def f(i):
+        while par[i] != i: par[i] = par[par[i]]; i = par[i]
+        return i
+    for i in range(len(E_)):
+        ri, ki = E_[i]
+        for j in range(i + 1, len(E_)):
+            rj, kj = E_[j]
+            if ri is rj: continue
+            if (ri[ki] - rj[kj]).length < 0.45 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: par[f(i)] = f(j)
+    sk = {}
+    for i in range(len(E_)): sk.setdefault(f(i), []).append(i)
+    for g in sk.values():
+        if len(g) < 2: continue
+        c = sum((E_[i][0][E_[i][1]] for i in g), Vector()) / len(g); yy = max(E_[i][0]["y" + E_[i][1]] for i in g)
+        for i in g: E_[i][0][E_[i][1]] = c.copy(); E_[i][0]["y" + E_[i][1]] = yy
+    hotove = set()
+    for r in ZAB_REC:
+        P, a, b, ya, yb = r["P"], r["a"], r["b"], r["ya"], r["yb"]; d = b - a; L = d.length
+        if L < 0.1: continue
+        s_ = d.normalized().cross(UP).normalized()
+        P.beam(a + UP * (ya + 1.0), b + UP * (yb + 1.0), 0.13, 0.1, "dub", j=0.2, ext=0.0, collide=None)              # madlo: konec ve středu krajního sloupku
+        P.beam(a + s_ * 0.08 + UP * (ya + 0.5), b + s_ * 0.08 + UP * (yb + 0.5), 0.06, 0.08, "dub", j=0.2, ext=0.0, collide=None)
+        n = max(1, round(L / 1.2))
+        for i in range(n + 1):
+            q = a.lerp(b, i / n); yq = ya + (yb - ya) * i / n; kl = (round(q.x * 20), round(q.z * 20), round(yq * 10))
+            if kl in hotove: continue   # společný sloupek dvou kusů jen jednou
+            hotove.add(kl); P.beam(q + UP * (yq - r["dolu"]), q + UP * (yq + 1.06), 0.1, 0.1, "dub", up=d, j=0.4)
+    ZAB_REC.clear()
+
 def stavba(suf):
     H.TRAMY.clear(); POCH.clear(); ZABR.clear(); SCHODY.clear(); BUDOVY.clear(); STUPNE.clear(); portaly.ZAZNAM.clear()
     if _DBG and suf == "_daleko":
@@ -1786,8 +1819,10 @@ def stavba(suf):
     import bpy
     SV.clear(); TR.clear(); STAVBY.clear(); lib.MOVABLE.clear()
     for o in list(bpy.data.objects): bpy.data.objects.remove(o)
+    ZAB_REC.clear()
     PA = Part("hrad_A"); postav_A(PA)
     PB = Part("hrad_B"); postav_B(PB)
+    zabradli_stavba()
     if suf == "":   # kolizní kvádry jako neprůhledné clony pro rozbor viditelnosti (nastroje/viditelnost.py, scény)
         kv = []
         for Pt in (PA, PB):
