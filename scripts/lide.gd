@@ -131,7 +131,7 @@ func nova_postava(o: Dictionary) -> Dictionary:
 	# rychlost klipu (chuze_klip_m_s) x tempo postavy - nohy neklouzou
 	var chp: Array = P["chuze_postav"]["klipy"]
 	c["chuze"] = String(chp[_rng.randi() % chp.size()])
-	c["rych"] = float(P["klip_m_s"][c["chuze"]]) * float(c["tempo"])
+	c["rych"] = float(P["klip_m_s"].get(c["chuze"], P["klip_m_s"]["Walk_Loop"])) * float(c["tempo"])
 	c["stani"] = _vazeny(P["stani"]["klipy"])
 	c["sed_poza"] = _vazeny(P["sedani"]["pozy"]["klipy"])
 	_hlava(c)
@@ -1965,6 +1965,9 @@ func _process_vlastni(dt: float) -> void:
 						c["obmena"] = _delka(c, String(P["sedani"]["vstup_klip"]))
 			# rozjezd a brzdeni (RDR2: plynule zrychleni misto prechodovych klipu), otoceni nejvys otaceni_max_st_s
 			var v_cil := 0.0 if ceka else float(c["rych"])
+			if not (c.get("nese", {}) as Dictionary).is_empty():
+				# s nakladem (korbel, misa) pomaleji - rychlost klipu nošení x tempo (nohy neklouzou)
+				v_cil = minf(v_cil, float(P["klip_m_s"].get(String(cn["obchuzka_nese"]["chuze"]), v_cil)) * float(c.get("tempo", 1.0)))
 			var dv := v_cil - float(c["v"])
 			c["v"] = float(c["v"]) + clampf(dv, -float(pr["brzdeni_m_s2"]) * dt, float(pr["zrychleni_m_s2"]) * dt)
 			if k.length() > 0.35:

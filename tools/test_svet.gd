@@ -7127,7 +7127,9 @@ func _mista_prace(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> void:
 	for rid: String in ["hostinsky", "senkyrka"]:
 		var ma := false
 		for bl: Dictionary in P["role"][rid]["rozvrh"]:
-			ma = ma or (P["cinnosti"][String(bl["cinnost"])] as Dictionary).has("obchuzka") and String(bl["kde"]).begins_with("hostinec")
+			# 10. 11.: i moznosti bloku (denni pribeh - obsluha jen pri hostech)
+			for m9: Dictionary in [bl] + (bl.get("moznosti", []) as Array):
+				ma = ma or (P["cinnosti"][String(m9["cinnost"])] as Dictionary).has("obchuzka") and String(m9["kde"]).begins_with("hostinec")
 		if not ma:
 			ch.call("hostinec %s: v rozvrhu neni obsluha mezi stoly" % rid)
 	# rozestup: tri postavy se stejnym cilem (nosi u studny) -> cile aspon misto_m od sebe

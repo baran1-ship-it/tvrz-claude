@@ -18,14 +18,17 @@
   "_popis": "Misa 9. 11. (KCD kvalita, kroky bez klouzani): rychlost, kterou klip sam jde - ZMERENO tools/test_klipy_chuze.gd (spicka na zemi vuci koreni, opora 48-57 %); drive odhad 1,2 / 1,0 = nohy kluzaly o 22 / 52 %. Tempo klipu = rychlost postavy / tato hodnota.",
   "Walk_Loop": 0.98,
   "Walk_Formal_Loop": 0.98,
-  "Walk_Carry_Loop": 0.66
+  "Walk_Carry_Loop": 0.66,
+  "Chuze_Std_Loop": 1.55,
+  "Chuze_Mix3_Loop": 1.69,
+  "Chuze_Mix5_Loop": 1.72,
+  "_mixamo": "10. 11. ZMERENO test_klipy_chuze (opora 99-100 %): Standard_Walk 1,55, Walking_3 1,69, Walking_5 1,72 m/s; Walking_4 = kopie Walking_1 (chuze hrace 1,83) - nepouzita pro postavy; Carrying = nosi na miste (0,00 m/s) - pro chuzi s nosenim UAL Walk_Carry_Loop 0,66"
  },
  "chuze_postav": {
   "_popis": "Misa 10. 11. r. 100 (chuze postav jako pochod - UAL Walk_Loop/Walk_Formal_Loop zvedaji kolena): kazda postava pri vzniku dostane jednu chuzi z klipy (Mixamo, tools/postavy_q/anim_cmu.py); klipy v nahrazuje (data cinnosti) se nahradi chuzi postavy; rychlost postavy = chuze_klip_m_s klipu x tempo postavy (prirozenost.tempo_klipu) - nohy neklouzou (test_klipy_chuze)",
   "klipy": [
    "Chuze_Std_Loop",
    "Chuze_Mix3_Loop",
-   "Chuze_Mix4_Loop",
    "Chuze_Mix5_Loop"
   ],
   "nahrazuje": [
@@ -500,9 +503,14 @@
    "soustredeni": 0.3,
    "sceny": [
     [
-     "Gesto_relieved_sigh",
+     "Protazeni",
      "Idle_Loop",
      "Rozhlizi"
+    ],
+    [
+     "Protazeni_Krk",
+     "Gesto_relieved_sigh",
+     "Idle_Loop"
     ]
    ]
   },
@@ -537,8 +545,8 @@
      "Pleti_Loop",
      "Kleci_Loop",
      "Pleti_Loop",
-     "Vstava",
-     "Gesto_relieved_sigh",
+     "Vstava_Z_Kleku",
+     "Protazeni",
      "Kope_Loop"
     ],
     [
@@ -546,7 +554,7 @@
      "Farma_Vytrhava",
      "Farma_Sadi",
      "Kleci_Loop",
-     "Vstava",
+     "Vstava_Z_Kleku",
      "Farm_Watering"
     ],
     [
@@ -593,6 +601,11 @@
      "Idle_Loop",
      "Gesto_lengthy_head_nod",
      "Gesto_acknowledging"
+    ],
+    [
+     "Mava",
+     "Hovor_Mix_Loop",
+     "Gesto_head_nod_yes"
     ]
    ]
   },
@@ -618,7 +631,8 @@
     [
      "Prace_Uder_Loop",
      "Prace_Uder_Loop",
-     "Gesto_relieved_sigh"
+     "Protazeni_Krk",
+     "Prace_Uder_Loop"
     ],
     [
      "Prace_Uder_Loop",
@@ -627,7 +641,7 @@
     [
      "Fixing_Kneeling",
      "Fixing_Kneeling",
-     "Vstava"
+     "Vstava_Z_Kleku"
     ]
    ]
   },
@@ -738,6 +752,9 @@
     },
     "Sed_Jidlo_Loop": {
      "r": "lzice"
+    },
+    "Sed_Piti1_Loop": {
+     "r": "korbel"
     }
    },
    "_p": "Misa 0.99996 r. 96/99 (host nahnuty nad stolem, nic nedela) a 10. 11. (hoste vykladaji, piji a jedi, stridave): vsedě vykladani (Mixamo Talking / Talking_1 horni pulka + sed Male_Sitting_Pose), piti (Mixamo Sitting_Drinking s korbelem), jidlo (UAL2 Consume + sed, lzice) - tools/postavy_q/anim_cmu.py SLEP",
@@ -756,8 +773,20 @@
      "Sed_Jidlo_Loop",
      "Sed_Piti_Loop",
      "Sed_Hovor_Loop"
+    ],
+    [
+     "Sitting_Idle_Loop",
+     "Sed_Piti1_Loop",
+     "Sed_Hovor1_Loop"
+    ],
+    [
+     "Sed_Kostky_Loop",
+     "Sed_Kostky_Loop",
+     "Sed_Piti_Loop",
+     "Sed_Kostky_Loop"
     ]
-   ]
+   ],
+   "_kostky": "Misa 10. 11.: hra v kostky (Mixamo Checking_Dice, horni pulka + sed) jako scena hostu; dvojice/trojice u jednoho stolu soucasne = dalsi krok (zatim nahodne)"
   },
   "obsluha": {
    "klipy": [
@@ -802,7 +831,7 @@
   },
   "kovani": {
    "klipy": [
-    "Kovar_Bash_Loop",
+    "Kovar_Swing_Loop",
     "Interact"
    ],
    "obmena_s": [
@@ -811,27 +840,32 @@
    ],
    "soustredeni": 0.9,
    "v_rukou": {
-    "Kovar_Bash_Loop": {
-     "r": "kladivo"
-    },
     "Napiti": {
      "r": "korbel"
+    },
+    "Kovar_Swing_Loop": {
+     "r": "kladivo"
     }
    },
-   "_p": "Misa 0.99996 r. 95 (moderni perlik se zlutou nasadou): kovarske kladivo (Poly Haven cross_pein_hammer, katalog kladivo) v prave ruce, jednorucni uder shora (Mixamo Bash)",
+   "_p": "Misa 0.99996 r. 95: kovarske kladivo (cross_pein_hammer, katalog kladivo) v prave ruce; 10. 11. snimky fmix3/fmix4: Mixamo Bash = vodorovny bekhend (ne kovani), Heavy_Weapon_Swing = mach shora dolu jednou rukou - vybran (Kovar_Swing_Loop); vhodny klip kovani na kovadline (Mixamo Hammering) NEOVERENO / chybi",
    "sceny": [
     [
-     "Kovar_Bash_Loop",
-     "Kovar_Bash_Loop",
+     "Kovar_Swing_Loop",
+     "Kovar_Swing_Loop",
      "Gesto_relieved_sigh"
     ],
     [
      "Interact",
-     "Kovar_Bash_Loop"
+     "Kovar_Swing_Loop"
     ],
     [
-     "Kovar_Bash_Loop",
+     "Kovar_Swing_Loop",
      "Napiti"
+    ],
+    [
+     "Kovar_Swing_Loop",
+     "Kovar_Swing_Loop",
+     "Protazeni"
     ]
    ]
   },
@@ -982,7 +1016,9 @@
    ],
    "obchuzka_klipy": {
     "hostinec_opreni": [
-     "Opreny_Loop"
+     "Opreny_Loop",
+     "Opreny_Loop",
+     "Kyva_Pojd"
     ],
     "hostinec_krb": [
      "Interact",
@@ -1016,7 +1052,7 @@
      "hostinec_stul_1",
      "hostinec_stul_2"
     ],
-    "chuze": "Chuze_Nese_Loop",
+    "chuze": "Walk_Carry_Loop",
     "predmety": [
      {
       "r": "korbel"
@@ -1081,6 +1117,9 @@
     },
     "Napiti": {
      "r": "korbel"
+    },
+    "Sed_Piti1_Loop": {
+     "r": "korbel"
     }
    },
    "_p": "Misa 10. 11. (chlapi v lomu maji pauzu na jidlo: sednou, jedi, piji, vykladaji): poledni prestavka pracujicich u mista prace",
@@ -1089,6 +1128,11 @@
      "Sed_Jidlo_Loop",
      "Sed_Piti_Loop",
      "Sed_Hovor_Loop",
+     "Sitting_Idle_Loop"
+    ],
+    [
+     "Sed_Jidlo_Loop",
+     "Sed_Piti1_Loop",
      "Sitting_Idle_Loop"
     ]
    ]
@@ -1114,6 +1158,11 @@
      "Prace_Uder_Loop",
      "Zvedne",
      "Gesto_relieved_sigh"
+    ],
+    [
+     "Prace_Uder_Loop",
+     "Prace_Uder_Loop",
+     "Protazeni"
     ]
    ]
   },
@@ -1194,7 +1243,9 @@
    ],
    "obchuzka_klipy": {
     "krcma_opreni": [
-     "Opreny_Loop"
+     "Opreny_Loop",
+     "Opreny_Loop",
+     "Kyva_Pojd"
     ],
     "krcma_obsluha": [
      "Interact",
@@ -1223,7 +1274,7 @@
     "k": [
      "krcma_senk"
     ],
-    "chuze": "Chuze_Nese_Loop",
+    "chuze": "Walk_Carry_Loop",
     "predmety": [
      {
       "r": "korbel"
@@ -2364,26 +2415,10 @@
     {
      "od": 13.5,
      "cinnost": "hovor",
-     "kde": "naves",
-     "moznosti": [
-      {
-       "cinnost": "hovor",
-       "kde": "naves",
-       "vaha": 2.0
-      },
-      {
-       "cinnost": "odpocinek",
-       "kde": "hostinec_venku",
-       "vaha": 1.0
-      }
-     ],
-     "stridat_h": [
-      0.75,
-      1.5
-     ]
+     "kde": "naves"
     },
     {
-     "od": 18.0,
+     "od": 17.5,
      "cinnost": "hospoda",
      "kde": "hostinec_sin"
     },
@@ -3957,14 +3992,14 @@
    "_popis": "Misa 10. 11. (sedici se stridaji ve variantach, kazdy drzi svou, jen obcas zmeni polohu): Sitting_Idle_Loop v datech cinnosti = poza sedu postavy (Mixamo Sitting, Sitting_1-3, Sitting_Idle, Sitting_Idle_1), vybrana pri vzniku; pri obmene se zmeni jen se sanci zmena_sance",
    "klipy": {
     "Sed_Poza_Loop": 1.0,
-    "Sed_Poza1_Loop": 1.0,
     "Sed_Poza2_Loop": 1.0,
     "Sed_Poza3_Loop": 1.0,
     "Sed_Klid_Loop": 1.0,
     "Sed_Klid1_Loop": 1.0
    },
    "nahrazuje": "Sitting_Idle_Loop",
-   "zmena_sance": 0.15
+   "zmena_sance": 0.15,
+   "_poza1": "Sitting_1 (Sed_Poza1_Loop) vyrazeno: snimek fmix3/sed_poza1 - postava stoji nad sedakem (neni sed)"
   }
  },
  "rozvrh_rozptyl": {
@@ -4077,8 +4112,7 @@
    "Chuze_Std_Loop",
    "Chuze_Mix3_Loop",
    "Chuze_Mix4_Loop",
-   "Chuze_Mix5_Loop",
-   "Chuze_Nese_Loop"
+   "Chuze_Mix5_Loop"
   ],
   "dotyk_m": 0.03,
   "klouzani_podil": 0.1
@@ -4141,9 +4175,11 @@
    "uklid_hostinec",
    "obsluha_krcma"
   ],
-  "volno_min_sedi": 3,
-  "_volno": "test: aspon volno_min_sedi bloku/moznosti s cinnosti volno mimo hostince a krcmu najde sedak"
+  "volno_min_sedi": 0,
+  "_volno": "test: kolik bloku/moznosti volno mimo hostince najde sedak (vypis LIDE volno). 10. 11.: 0 - venku (nadvori, naves, u domu) zadne lavice ve vybaveni sveta, sedaky jsou jen v interierech (nabytek.json) a v lomu -> venkovni lavice = tabulka r. 101; po pridani zvednout volno_min_sedi na 3"
  },
  "_mikro": "Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): klipy cinnosti bez pripony _Loop jsou mikro-animace (gesta Mixamo Gestures Pack, rozhlednuti, napiti, zvednuti, otevreni truhly) - hraji se jednou (obmena = delka klipu), pak dalsi klip cinnosti; smycky (_Loop) po obmena_s",
- "_sceny": "Misa 10. 11. (KCD; pohyb s duvodem a navaznosti): klipy = hlavni smycky cinnosti (obmena_s 10-35 s); mikro-animace jen ve scenach (sceny = rady klipu po sobe) na miste, kde maji duvod: oddech (relieved_sigh) az po praci, napiti az po kovani, zvednuti po sekani, truhla otevrit -> hledat -> zavrit; pri obmene scena nebo jedna smycka (stejna vaha). Prechody prolinanim (prolinani_s), Sitting_Enter/Exit pri sedu. NEOVERENO: zivani vecer (klip chybi), odchod s vysledkem (kos, pytel) - dalsi krok"
+ "_sceny": "Misa 10. 11. (KCD; pohyb s duvodem a navaznosti): klipy = hlavni smycky cinnosti (obmena_s 10-35 s); mikro-animace jen ve scenach (sceny = rady klipu po sobe) na miste, kde maji duvod: oddech (relieved_sigh) az po praci, napiti az po kovani, zvednuti po sekani, truhla otevrit -> hledat -> zavrit; pri obmene scena nebo jedna smycka (stejna vaha). Prechody prolinanim (prolinani_s), Sitting_Enter/Exit pri sedu. NEOVERENO: zivani vecer (klip chybi), odchod s vysledkem (kos, pytel) - dalsi krok",
+ "_sceny_10_11_vecer": "Misa 10. 11.: protazeni (Arm/Neck_Stretching) rano a po usilne praci, mavani (Waving) na zacatku hovoru (pozdrav), kyvnuti pojd sem (Beckoning) obsluhy z mista u steny, piti vsedě 2. varianta; probuzeni na luzku (Waking, klip Probouzi) zatim nezapojeno - vyska luzka NEOVERENA (spanek vleze dalsi krok)",
+ "_vstava": "10. 11. snimek fmix3/vstava: Mixamo Standing_Up je vstavani ze zeme (z lehu/sedu na zemi) - po kleku Vstava_Z_Kleku (Kneeling_Down pozpatku); Standing_Up (Vstava) pro vstavani z luzka/zeme = dalsi krok"
 }

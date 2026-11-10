@@ -52,7 +52,7 @@ CLIPS = [
     ("Kovar_Bash_Loop", "Bash.fbx", 0.0, None, "r"),
     ("Kovar_Swing_Loop", "Heavy_Weapon_Swing.fbx", 0.0, None, "r"),
     # r. 96/99 hostinec: piti vsedě a sed (panev srovnana na UAL Sitting_Idle_Loop - SED_VZOR, data sedani.vyska_klipu_m)
-    ("Sed_Piti_Loop", "Sitting_Drinking.fbx", 0.0, None, "r"),
+    # 10. 11. snimek fmix4/piti_bok: prevod Sitting_Drinking stoji nad sedakem (neni sed) - piti vsedě je slepene (SLEP)
     ("Sed_Loop", "Male_Sitting_Pose.fbx", 0.0, None, ""),
     # Misa 10. 11. (hostinec: obsluha nosi hostum, hoste vykladaji): chuze s nosenim, hovor vestoje (Mixamo)
     ("Chuze_Nese_Loop", "Carrying.fbx", 0.0, None, "r"),
@@ -66,6 +66,9 @@ CLIPS = [
     ("Vstava", "Standing_Up.fbx", 0.0, None, ""),
     # Misa 10. 11. zahon: kleknuti -> pleti vkleče -> vstavani
     ("Klekne", "Kneeling_Down.fbx", 0.0, None, ""),
+    # 10. 11. snimek fmix3/vstava: Standing_Up vstava z lehu na zemi (sedi s natazenyma nohama), ne z kleku ->
+    # vstavani z kleku = Kneeling_Down pozpatku (POZPATKU)
+    ("Vstava_Z_Kleku", "Kneeling_Down.fbx", 0.0, None, ""),
     ("Kleci_Loop", "Kneeling.fbx", 0.0, None, ""),
     ("Pleti_Loop", "Pull_Plant.fbx", 0.0, None, ""),
     ("Seje2", "Dig_And_Plant_Seeds_1.fbx", 0.0, None, ""),
@@ -110,14 +113,19 @@ CLIPS = [
     "hard_head_nod", "head_nod_yes", "lengthy_head_nod", "look_away_gesture", "relieved_sigh", "sarcastic_head_nod",
     "shaking_head_no", "thoughtful_head_shake")]
 # slepene klipy: horni pulka tela (pater, ruce, hlava) z prvniho klipu, panev a nohy z druheho (sed) - vykladani vsedě
-SLEP = [("Sed_Hovor_Loop", "Hovor_Mix_Loop", "Sed_Loop"), ("Sed_Hovor1_Loop", "Hovor_Mix1_Loop", "Sed_Loop"),
-        ("Sed_Jidlo_Loop", "Ual_Consume", "Sed_Loop"), ("Sed_Kostky_Loop", "Kostky", "Sed_Loop")]          # jidlo vsedě: UAL2 Consume (ji vestoje) + sed
+# 10. 11. snimek fmix4: Male_Sitting_Pose (Sed_Loop) je rozvaleny zaklon -> spodek ze Sitting_Idle (Sed_Klid_Loop, vzpřímeny)
+SLEP = [("Sed_Hovor_Loop", "Hovor_Mix_Loop", "Sed_Klid_Loop"), ("Sed_Hovor1_Loop", "Hovor_Mix1_Loop", "Sed_Klid_Loop"),
+        ("Sed_Jidlo_Loop", "Ual_Consume", "Sed_Klid_Loop"), ("Sed_Kostky_Loop", "Kostky", "Sed_Klid_Loop"),
+        ("Sed_Piti_Loop", "Napiti", "Sed_Klid_Loop")]          # jidlo vsedě: UAL2 Consume (ji vestoje) + sed
 # klipy UAL ponechane jen jako zdroj slepeni (UAL1.glb nese i klipy UAL2? ne - Consume je v UAL2.glb, nacte se zvlast)
 UAL_ZDROJ = {"Consume": "Ual_Consume"}
-DOLNI = {"root", "pelvis"} | {f"{b}_{t}" for b in ("thigh", "calf", "foot", "ball") for t in ("l", "r")}
+# 10. 11. snimek fmix3/hovor_sed: s panvi sedu a patri horniho klipu (stani) byl trup zakloneny ~30 st - spodni pater
+# (spine_01, spine_02) taky ze sedu, horni klip jen hrudnik, ruce, krk a hlava
+DOLNI = {"root", "pelvis", "spine_01", "spine_02"} | {f"{b}_{t}" for b in ("thigh", "calf", "foot", "ball") for t in ("l", "r")}
 # klipy vsedě (jmeno Sed_*): stredni poloha panve = jako v UAL Sitting_Idle_Loop, aby platila jedna vyska sedaku
 # (postavy.json sedani.vyska_klipu_m) - Mixamo sed je nahrany na jine zidli (vyska panve z klidove pozy nesedi)
 SED_VZOR = "Sitting_Idle_Loop"
+POZPATKU = {"Vstava_Z_Kleku"}
 MAP = {"Hips": "pelvis", "LowerBack": "spine_01", "Spine": "spine_02", "Spine1": "spine_03", "Neck": "neck_01", "Head": "Head"}
 for s, t in (("Left", "l"), ("Right", "r")):
     MAP.update({f"{s}Shoulder": f"clavicle_{t}", f"{s}Arm": f"upperarm_{t}", f"{s}ForeArm": f"lowerarm_{t}", f"{s}Hand": f"hand_{t}",
@@ -296,6 +304,8 @@ def prenes(name, cid, t0, dl, uchop):
         seq = L[i0:iend]
     else:
         seq = L[i0:i0 + nlen]
+    if name in POZPATKU:
+        seq = seq[::-1]
     act = bpy.data.actions.new(name)
     for bn in order:
         prev = None

@@ -1164,3 +1164,24 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   lesB 688 → 626; stín slunce v lese po změně jen −9 / −64 kreslení (dřív stín z listí). Snímky build/fstrom prohlédnuty:
   koruny plné, stín stromů zůstal (elipsoid); uvnitř korun místy tmavší skvrny (jádro bez alfy ukazuje barvu průhledných
   míst textury) – sledovat na tabletu. Výkon na tabletu NEOVĚŘENO.
+- 10. 11. večer (pomocník, ř. 93/95/96/99/100 + Míšovy doplňky „živé postavy jako v KCD“): **animace Mixamo** převádí
+  `tools/postavy_q/anim_cmu.py` (91 klipů v `modely/postavy/anim/UAL_prace.glb`; sed `Sed_*` srovnán pánví na UAL
+  Sitting_Idle_Loop → platí `sedani.vyska_klipu_m`; `SLEP` = horní půlka stojícího klipu + sed (vykládání, jídlo, kostky,
+  spodní páteř ze sedu – jinak záklon 30°); `POZPATKU` = Kneeling_Down obráceně jako vstávání z kleku; Standing_Up je
+  vstávání ze země, ne z kleku). **Data** `pravidla/svet/postavy.json`: `stani` (Idle_Loop → stání postavy podle vah),
+  `chuze_postav` (Standard_Walk 1,55 / Walking_3 1,69 / Walking_5 1,72 m/s změřeno, rychlost = klip × tempo),
+  `sedani.pozy` (každý svůj sed, změna se šancí), `podminky` + rozvrh `moznosti` (jen_kdyz / jen_kdyz_ne; obsluha jen
+  s hosty, přestávka jen bez hostů), `pohledy` (občasný pohled na hosta/souseda), `u_steny` (místo opřený u stěny
+  paprskem na kolizi), `sceny` (řady klipů s důvodem), `obchuzka_klipy/obmena_s/pozoruje/nese`, `pribeh` (pravidla testu)
+  a `pribeh` text u obyvatel. **lide.gd**: `_volba/_prevolit/podminka`, `_obchuzka_dalsi` (cesta přes dveře – příčina
+  ř. 93 „za domem“), na místě obchůzky nejdřív činnost místa (příčina „kolečka“), `_nahrada` (stání/chůze/sed postavy),
+  `_pohled`, místo `dvur`. **Testy**: lide_chovani bod 9 `_pribeh_kontrola`. Kovář: `kladivo` (cross_pein_hammer 1k,
+  katalog `res`), klip Heavy_Weapon_Swing (Bash = bekhend). Ověřeno: test_klipy_chuze OK, test_drzeni OK (198),
+  lide_chovani + postavy_vzhled OK (beh lide3), snímky build/fmix3–5 prohlédnuty a smazány (sed vzpřímený, vstávání z kleku,
+  usedání/vstávání, kladivo v ruce). NEOVĚŘENO: ve hře (hostinec, opření u stěny, nošení), tablet. `UAL_prace.glb` a
+  `kladivo.glb` jsou v `modely/` (gitignore) – jen na tomto stroji.
+  **Pozor (pád 10. 11.):** `godot --headless -s skript.gd` bez `< /dev/null` při SCRIPT ERROR **visí** v debuggeru
+  (test_klipy_chuze 20 min na 2 % CPU) – ve vlastních .sh u Godotu vždy `< /dev/null`. Disk: mazán jen
+  `~/.cache/mesa_shader_cache` a `app_userdata/*/shader_cache` (Godot si je znovu vytvoří).
+  Další kroky: tabulka ř. 101–108 (venkovní lavice – volno zatím nikde nesedí, mlynáři, poutníci, kostky po tazích,
+  ostatní role, místa vsi, zívnutí/spánek, dvojice sedící+stojící).
