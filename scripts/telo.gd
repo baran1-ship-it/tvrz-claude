@@ -15,6 +15,8 @@ const Pravidla := preload("res://scripts/pravidla.gd")
 # cisla z pravidla/svet/jizda.json (telo)
 static var RAMENA_MAX := float(Pravidla.cti("jizda", "telo", "ramena_k_pohledu_max_st"))
 static var KLIPY: Dictionary = Pravidla.cti("jizda", "telo", "klipy_m_s")
+## klip chuze hrace (Misa 10. 11.: svizna chuze 2,0 m/s (jizda.json telo.klip_chuze) - UAL Walk_Loop jde 0,98 m/s)
+static var KLIP_CHUZE := String(Pravidla.cti("jizda", "telo", "klip_chuze"))
 static var OKO_PRED := float(Pravidla.cti("jizda", "telo", "oko_pred_hlavou_m"))     # oko pred kosti hlavy (sit hlavy)
 static var DOLU_VZAD := float(Pravidla.cti("jizda", "telo", "hlava_dolu_vzad_m"))    # pri pohledu dolu krk vpred
 static var OTOCENI_TRUPU := float(Pravidla.cti("jizda", "telo", "otoceni_trupu"))  # jak rychle trup dobiha pohled
@@ -101,7 +103,7 @@ func setup(p_player: CharacterBody3D, muz := true) -> bool:
 	ap.add_animation_library("", lib)
 	# kazdy klip, ktery strom pouziva, musi v knihovne byt (jinak tise T-poza)
 	var chybi: Array = []
-	for jm: String in ["Idle_Loop", "Walk_Loop", "Jog_Fwd_Loop", "Sprint_Loop", "Jump_Loop", "Interact", "Driving_Loop"] + AKCE.values() + DRZENI.values().map(func(v: Array) -> String: return v[0]):
+	for jm: String in ["Idle_Loop", KLIP_CHUZE, "Jog_Fwd_Loop", "Sprint_Loop", "Jump_Loop", "Interact", "Driving_Loop"] + AKCE.values() + DRZENI.values().map(func(v: Array) -> String: return v[0]):
 		if not lib.has_animation(jm):
 			chybi.append(jm)
 	if not chybi.is_empty():
@@ -163,7 +165,7 @@ func _strom() -> void:
 	var bs := AnimationNodeBlendSpace1D.new()
 	# body prolnuti = rychlost, kterou klip sam jde (jizda.json telo.klipy_m_s, test_klipy_chuze) - nohy nekluzou;
 	# sync: chuze a klus v prolnuti ve stejne fazi kroku (jinak se mezi body michaly dva ruzne kroky)
-	for b: Array in [["Idle_Loop", 0.0], ["Walk_Loop", float(KLIPY["Walk_Loop"])], ["Jog_Fwd_Loop", float(KLIPY["Jog_Fwd_Loop"])], ["Sprint_Loop", float(KLIPY["Sprint_Loop"])]]:
+	for b: Array in [["Idle_Loop", 0.0], [KLIP_CHUZE, float(KLIPY[KLIP_CHUZE])], ["Jog_Fwd_Loop", float(KLIPY["Jog_Fwd_Loop"])], ["Sprint_Loop", float(KLIPY["Sprint_Loop"])]]:
 		var n := AnimationNodeAnimation.new()
 		n.animation = b[0]
 		bs.add_blend_point(n, b[1])
@@ -559,7 +561,7 @@ func _process(delta: float) -> void:
 		cil = yaw_k + clampf(rel, -BOK_MAX, BOK_MAX)
 	at.set("parameters/pohyb/blend_position", hv)
 	# tempo: mezi body prolnuti 1 (body = rychlosti klipu), pod chuzi a nad sprintem rychlost / rychlost klipu
-	var vw := float(KLIPY["Walk_Loop"])
+	var vw := float(KLIPY[KLIP_CHUZE])
 	var vs := float(KLIPY["Sprint_Loop"])
 	var tempo := 1.0
 	if hv > 0.3 and hv < vw:
