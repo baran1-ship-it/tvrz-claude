@@ -1065,6 +1065,10 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   171 082 → 107 500. Mezi „před“ a „po“ proběhl export tvrze 9. 11. 18:00 (les se neměnil – NEOVĚŘENO).
   Před (xvfb, `build/les88/pred_les*.png`, tráva pod stromy všude): lesA kreslení 436 / louka 269 086 instancí, lesB
   688 / 227 178, lesC 449 / 324 807; bez louky −60/−60/−76 kreslení, bez rostlin −163/−295/−244.
+- **Focení lesa padá na LIMIT (10. 11., příčina):** 3 snímky + `TVRZ_MERENI_AB=louka,rostliny` (na každý snímek 2× skrýt
+  skupinu a 35 snímků) = 1935 s ve volném stroji (9. 11., les_foto_pred); při dvou souběžných bězích a zátěži ~8–9 na
+  4 jádrech přes výchozí `BEH_LIMIT` 2400 s (les_foto_po 2403 s, lesC chyběl). Proto `BEH_LIMIT=4000`, nebo lesA/lesB
+  a lesC zvlášť.
 - **ZBÝVÁ (10. 11. 02:40, disk 743 MB < `beh_volno_mb` 800 – nic nespuštěno, mazat smí jen člověk):** snímky po
   `TVRZ_MERENI_AB=louka,rostliny tools/beh.sh les_foto_po foto "lesA;205,2.8,250,213,1.8,300;build/les88/po_lesA.png|lesB;175,-2.0,893,200,-4.3,880;build/les88/po_lesB.png|lesC;-3,-1.7,490,-20,-2.6,520;build/les88/po_lesC.png"`
   (prohlédnout: holá zem louky pod stromy 6b?), test `les_trava` s prahem louky (běh 10. 11. 02:00: hustota 0,019 OK,
