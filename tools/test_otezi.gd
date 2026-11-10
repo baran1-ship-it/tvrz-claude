@@ -40,8 +40,8 @@ func _over(co: String, ok: bool, msg: String) -> void:
 
 func _process(_d: float) -> bool:
 	snimek += 1
-	if snimek < 20:
-		return false
+	if snimek < 20 or snimek > 20:
+		return snimek > 20                     # jen jednou (9. 11.: chyba ve skriptu = smycka kazdy snimek, 47 MB logu)
 	var D: Dictionary = Pravidla.cti("jizda", "kun", "otezi")
 	var ot: MeshInstance3D = (load("res://scripts/otezi.gd") as GDScript).new()
 	root.add_child(ot)
@@ -54,6 +54,8 @@ func _process(_d: float) -> bool:
 			if ks.get_bone_name(i).begins_with(String(D["kost_hlavy"])):
 				hl = i
 		var hp := ks.global_transform * ks.get_bone_global_pose(hl).origin
+		var ksr: Array = ot.get("_krouzky")
+		print("OTEZI kostra %s, klid hlavy %s, poza hlavy %s, krouzky (soustava kosti hlavy) %s" % [ks.global_transform, ks.get_bone_global_rest(hl).origin, ks.get_bone_global_pose(hl).origin, ksr])
 		var ud: Array = ot.call("udidla")
 		var rozpeti := (ud[0] as Vector3).distance_to(ud[1])
 		var od := maxf((ud[0] as Vector3).distance_to(hp), (ud[1] as Vector3).distance_to(hp))
@@ -64,8 +66,8 @@ func _process(_d: float) -> bool:
 		var vp := -kun.global_basis.z
 		ot.call("aktualizuj", sedlo + vp * 0.4 + kun.global_basis.x * 0.12 + Vector3.UP * 0.3, sedlo + vp * 0.4 - kun.global_basis.x * 0.12 + Vector3.UP * 0.3)
 		var im: ImmediateMesh = ot.mesh
-		var n: int = im.surface_get_array_len(0) if im.get_surface_count() > 0 else 0
-		_over("remen", n > 0, "%d vrcholu" % n)
+		var n: int = im.get_surface_count()
+		_over("remen", n > 0 and im.get_aabb().size.length() > 0.1, "%d povrchu, obal %.2f m" % [n, im.get_aabb().size.length()])
 	print("TEST OTEZI %s" % ("OK" if chyb == 0 else "CHYBA"))
 	quit(1 if chyb > 0 else 0)
 	return true

@@ -93,6 +93,7 @@ func setup(kun: Node3D, data: Dictionary) -> bool:
 			st += kraj[i]
 		st /= float(n)
 		_krouzky.append(kostra.get_bone_global_rest(_hlava).affine_inverse() * st)
+		print_verbose("otezi: krouzek %+.0f v kostre %s (hlava %s / %s, nos %.3f po ose)" % [strana, st, a0, a1, smax])
 	_im = ImmediateMesh.new()
 	mesh = _im
 	top_level = true
