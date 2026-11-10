@@ -131,7 +131,7 @@ def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-
             V_[k] = len(verts); p_ = a + d * xs[i] + UP * ys[j] + vo * (t / 2 - q)
             verts0.append(p_)   # bez zdrsnění – měření délky hran (test zdi_bez_svu měří síť reliéfu, ne posun kamenů)
             if y_hrubne is not None and ys[j] > y_hrubne:   # zídka a stínky z lomového kamene: hrany nerovné (Míša 10. 11.: „ne hladké a přesné
-                p_ = p_ + hrubost(p_)                         # hrany“) – posun podle polohy ve světě, sousední díly stejně (bez švů)
+                h_ = hrubost(p_); h_ = h_ - vo * h_.dot(vo); p_ = p_ + h_   # jen podél zdi a svisle – líce zůstanou v rovině kolize (povrch_kolize 10. 11.: stínka u ochozu vylezla z kolize);                        # hrany“) – posun podle polohy ve světě, sousední díly stejně (bez švů)
             verts.append(p_)
         return V_[k]
     def quad(ks, n):
