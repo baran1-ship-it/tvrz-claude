@@ -5,10 +5,8 @@ Kde zdroj sám říká „NEOVĚŘENO“ (na tabletu nezměřeno, snímkem neov�
 Pořadí čtení pro nový kontejner: `CLAUDE.md` → tento soubor → `docs/predani.md` (pasti a poučení) → poslední sekce
 `docs/radce.md` → `docs/rozpracovane/misa_28_chyby.md` (otevřené řádky).
 
-> **Pozor (zjištěno při psaní, 10. 11.):** v HEAD jsou konfliktní značky `<<<<<<< Updated upstream` v
-> `pravidla/svet/postavy.json` (neplatný JSON) a `scripts/kun.gd` – i v commitu f85ba5a, který je měl vrátit, a už
-> v 20c8ecf. Hra/testy s postavami a koněm se nenačtou, dokud to někdo nevyřeší (příčina: `git stash pop`,
-> `docs/predani.md` „Souběžné běhy Godotu“). Tento dokument nic neopravuje.
+> **Ověřeno 10. 11. stavitelem:** konfliktní značky v `postavy.json` a `kun.gd` už v HEAD nejsou (`git grep` čisté,
+> JSON platný); hlášení pomocníka bylo ze staršího stavu. Poučení: ve sdílené složce žádný `pull --autostash` ani `stash`.
 
 ---
 
@@ -306,7 +304,7 @@ NEOVĚŘENO NA ZAŘÍZENÍ. Regrese: poslední dobrá × první špatná → roz
 | historie stavu a měření do 28. 10. | `docs/stav.md`, `docs/stav_historie.md` (nepravidelně udržované) |
 
 **Rozpory a mezery v podkladech (zjištěné při psaní):**
-1. `pravidla/svet/postavy.json` a `scripts/kun.gd` mají v HEAD konfliktní značky (oprava f85ba5a se vrátila k už rozbitému 20c8ecf).
+1. (vyřešeno, ověřeno 10. 11.) konfliktní značky v `postavy.json` a `kun.gd` – v HEAD už nejsou.
 2. `CLAUDE.md` a `kvalita.json` odkazují na `docs/ZAVER_tablet_grafika.md`, který na této větvi není (jen `origin/ccr-f2d32673-9fi7m5`).
 3. Rozpočty výkonu si odporují (`stav.md` 1500 kreslení / 2 M troj. / 700 MB × ZÁVĚR < 400 / 1,2 M / 300 MB × naměřená VRAM 930 MB).
 4. Pořadí vody: `CLAUDE.md` terén → cesty → budovy → voda × `pipeline.md` voda jako krok 2.
