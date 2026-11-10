@@ -100,10 +100,13 @@
    "jistota": "KRESBA (nárožní věžička se stanovou střechou na rekonstrukci předního hradu; text GC80T08 jinak „bezvěžový“)",
    "patro_nad_ochozem": 2.6,
    "pozn": "komora v úrovni ochozu (průchod z ochozu) + strážní patro po strmých dřevěných schodech, otvor v podlaze se zábradlím",
-   "dvere_ochoz3": false,
+   "dvere_ochoz3": true,
    "pozn_ochoz3": "4. 11. (Míša: „to místo hradeb mezi věžemi zpřístupnit, dveře z věžičky“): ochoz na jižní hradbě mezi věžičkou a palácem (úsek 3), dveře ze západní stěny věžičky v úrovni ochozu",
    "zarovnat": true,
-   "pozn_zarovnat": "Míša 5. 11.: věž zarovnaná s hradbou (náčrt) – vnější líce v rovině líců plášťových zdí, ne přes roh"
+   "pozn_zarovnat": "Míša 5. 11.: věž zarovnaná s hradbou (náčrt) – vnější líce v rovině líců plášťových zdí, ne přes roh",
+   "prizemi": false,
+   "pozn_10_11": "Míša 10. 11.: do přízemí malé věže se nedá dostat → přízemí z nádvoří se schody na ochoz; na hradbu vedle věže dveře a malý ochoz (dvere_ochoz3)",
+   "pozn_prizemi": "10. 11.: přízemí z nádvoří rozpracované (blender prizemi) – 3 ramena po stěnách ve vnitřku 3,7 m narážejí na stěny (smysl:schody_nastup_vystup, pruchod:A_vezicka_prizemi) → vypnuto, řešit širší věží nebo točitými schody"
   },
   "ochoz": {
    "useky": [
@@ -1094,5 +1097,9 @@
   "pozn3": "sloupky zábradlí (do 1,4 m) bez vlastní kolize – zábradlí má rovný panel, natočený sloupek z něj trčel a postava se o něj zachytila (B_ochoz_vez)",
   "tram_min_m": 0.12,
   "pozn4": "dřevo: silný trám (nejmenší rozměr ≥ 0,12 m) má kolizi v každém směru (vzpěry a kozy pod mosty); tenké díly jen svislé ≥ 1,4 m; krátké svislé sloupky (zábradlí) ne"
+ },
+ "hrubost_zdiva": {
+  "amp_m": 0.06,
+  "zdroj": "Míša 10. 11.: „všude na obou hradech jsem nechtěl ty hladké a přesné hrany“ (stínky, zídka) – lomové zdivo z droby má nerovné hrany; posun vrcholů ±6 cm podle polohy ve světě"
  }
 }

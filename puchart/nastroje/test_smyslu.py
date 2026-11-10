@@ -406,8 +406,8 @@ def _zed_nad_strechou(f):
 _zs = _zed_nad_strechou(K + "/hra/modely/hrady/puchart.glb")
 TEST("zed_nad_strechou", len(_zs) <= KC.get("zed_nad_strechou_max", 20), "vrcholů zdi nad střechou: %d %s" % (len(_zs), _zs[:4]))
 # kamenný potok (Míša 10. 11.): kameny v korytě na každých 10 m toku, pata na dně (ne pod ním, ne ve vzduchu)
-_kk = json.load(open(D + "koryto_kameny.json"))["kameny"] if os.path.exists(D + "koryto_kameny.json") else []
-_ka = np.array([r[1:4] for r in _kk]) if _kk else np.zeros((0, 3))
+_kk = np.fromfile(D + "koryto_kameny.bin", np.float32).reshape(-1, 6) if os.path.exists(D + "koryto_kameny.bin") else np.zeros((0, 6))
+_ka = _kk[:, 1:4].astype(float)
 _th = json.load(open(D + "toky_hladina.json"))["toky"]; _bez = 0; _vse = 0
 from scipy.spatial import cKDTree as _KD2
 _kt = _KD2(_ka[:, [0, 2]]) if len(_ka) else None

@@ -23,6 +23,7 @@ A, B = D["A"], D["B"]
 
 # ------------------------------------------------------------------ kolize zdiva automaticky
 _KA = json.load(open(os.path.join(H.K, "pravidla/svet/hrad_puchart.json")))["kolize_auto"]
+HR_ = json.load(open(os.path.join(H.K, "pravidla/svet/hrad_puchart.json")))["hrubost_zdiva"]
 PEVNE = _KA["materialy"]; SVISLE = set(_KA.get("jen_svisle", []))   # materiál -> min. tloušťka; dřevo jen svislé díly
 _box = Part.box
 def _auto_kol(self, m, size, mat):
@@ -97,7 +98,13 @@ def _kol(P, m, size, mat):
 
 ZDI_SIT = []   # záznam zdí stavěných jako jedna síť – hlídač švů (build/zdi.json, test smyslu zdi_bez_svu)
 RELIEF_KROK = json.load(open(os.path.join(H.K, "pravidla/svet/hrad_vzhled.json")))["zdivo"]["mrizka_m"] * 1.33   # < mrizka·1,4: reliéf síť zdi nedělí
-def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-1e9, y_stinky=None):
+def hrubost(p, a=None):
+    """Posun vrcholu lomového zdiva (0–8 cm do všech stran) podle polohy ve světě – stejný bod = stejný posun ve všech dílech."""
+    a = a or HR_["amp_m"]
+    def h(k): return (math.sin(p.x * 12.9898 * k + p.y * 78.233 + p.z * 37.719 * k) * 43758.5453) % 1.0 * 2 - 1
+    return Vector((h(1.0) * a, h(1.7) * a * 1.2, h(2.3) * a))
+
+def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-1e9, y_stinky=None, y_hrubne=None):
     """Zeď jako JEDNA síť se sdílenými vrcholy (Míša 5. 11.: „černé čáry máš pořád a všude“ – skládaná zeď z kvádrů má
     vnitřní čela, jejichž hrana leží v rovině líce souseda: hloubkový buffer je nerozliší a čelo prosvítá černou čárou).
     Mřížka xs (podél osy d od a) × ys (výšky); hloubka(x, y) středu buňky = do jaké hloubky od líce (vo) je buňka plná, None = prázdná.
@@ -116,11 +123,15 @@ def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-
     Q = sorted({round(q, 5) for r in D for q in r if q is not None} | {round(-PR, 5)})
     if H.DETAIL: Q = jemne(Q)   # společné hloubkové hladiny pro všechna ostění (sdílené vrcholy i v tloušťce zdi)
     def qs(q0, q1): return [q for q in Q if q0 - 1e-6 <= q <= q1 + 1e-6]
-    V_ = {}; verts = []; faces = []
+    V_ = {}; verts = []; verts0 = []; faces = []
     def v(i, j, q):
         k = (i, j, round(q, 5))
         if k not in V_:
-            V_[k] = len(verts); verts.append(a + d * xs[i] + UP * ys[j] + vo * (t / 2 - q))
+            V_[k] = len(verts); p_ = a + d * xs[i] + UP * ys[j] + vo * (t / 2 - q)
+            verts0.append(p_)   # bez zdrsnění – měření délky hran (test zdi_bez_svu měří síť reliéfu, ne posun kamenů)
+            if y_hrubne is not None and ys[j] > y_hrubne:   # zídka a stínky z lomového kamene: hrany nerovné (Míša 10. 11.: „ne hladké a přesné
+                p_ = p_ + hrubost(p_)                         # hrany“) – posun podle polohy ve světě, sousední díly stejně (bez švů)
+            verts.append(p_)
         return V_[k]
     def quad(ks, n):
         p0, p1, p2 = (verts[k] for k in ks[:3])
@@ -159,7 +170,7 @@ def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-
             P.mesh([tuple(p) for p in verts], faces, mat)
         if H.DETAIL:
             vid = [f for f in faces if min(verts[k].y for k in f) > y_jemne - 1e-6] or faces   # pata v zemi se nedělí (není vidět)
-            dl = max(max((verts[f[k]] - verts[f[k - 1]]).length for k in range(4)) for f in vid)
+            dl = max(max((verts0[f[k]] - verts0[f[k - 1]]).length for k in range(4)) for f in vid)
             ZDI_SIT.append({"bod": [round(a.x, 2), round(a.z, 2)], "ploch": len(faces), "max_hrana": round(dl, 3)})
 
 def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5, ext0=None, ext1=None, parapet=1.0, par=None,
@@ -244,7 +255,7 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
         if ym < koruna + parapet + 0.9 + PR:
             return 0.55 + PR if any(k0 - PR <= xm <= k1 + PR and ym < koruna + parapet + hs_ + PR for k0, k1, hs_ in stinky) else None
         return None
-    stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=cela, y_jemne=min(y0 for _, _, y0 in pata) + 1.5 - 0.3, y_stinky=(koruna + parapet if (cimburi and stinky) else None))   # pata 1,5 m pod nejnižším terénem
+    stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=cela, y_jemne=min(y0 for _, _, y0 in pata) + 1.5 - 0.3, y_stinky=(koruna + parapet if (cimburi and stinky) else None), y_hrubne=(koruna + 0.1 if parapet > 0 else None))   # pata 1,5 m pod nejnižším terénem
 
 def pokos_ext(poly, i, t):
     """Délka přesahu konců úseku i za vrcholy tak, aby se vnější líce sousedních úseků sešly přesně v pokosu (Míša 5. 11.:
@@ -1352,9 +1363,9 @@ def postav_A(P):
         rv = A["vezicka"]["roh"]; wv = A["vezicka"]["rozmer"] / 2
         par = (-t / 2, L - wv) if i == rv - 1 else ((wv, L + t / 2) if i == rv else None)
         if A["vezicka"].get("zarovnat"):   # zarovnaná věžička: zeď nad úrovní koruny končí u věže (vnitřek věže volný – schody věžičky)
-            wz = 2 * wv - t / 2
-            if i == rv - 1: ot.append((L - wz / 2 + 0.6, wz + 1.2, kor - 0.02, 30.0)); par = (-t / 2, L - 2 * wv + t / 2)
-            if i == rv: ot.append((wz / 2 - 0.6, wz + 1.2, kor - 0.02, 30.0)); par = (2 * wv - t / 2, L + t / 2)
+            wz = 2 * wv - t / 2; y_o = (A["nadvori_y"] - 2.0) if A["vezicka"].get("prizemi") else (kor - 0.02)   # s přízemím zeď končí u věže už od nádvoří
+            if i == rv - 1: ot.append((L - wz / 2 + 0.6, wz + 1.2, y_o, 30.0 + kor - y_o)); par = (-t / 2, L - 2 * wv + t / 2)
+            if i == rv: ot.append((wz / 2 - 0.6, wz + 1.2, y_o, 30.0 + kor - y_o)); par = (2 * wv - t / 2, L + t / 2)
         e0_, e1_ = pokos_ext(j, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, par=par, cela=(False, False), ext0=e0_, ext1=e1_, cimburi=A.get("cimburi", True))   # čela kusů v nároží by v tupém úhlu vyčnívala z líce (Míša 5. 11.: švy) – roh kryje klín naroze()
     naroze(P, j, t, kor, vynechat=(A["vezicka"]["roh"],))
     a, b, L, d, vn = U[br["usek"]]; C = (a + b) / 2
@@ -1371,9 +1382,24 @@ def postav_A(P):
     if vz.get("dvere_ochoz3"):   # dveře ze západní stěny (+s) na ochoz jižní hradby k paláci (úsek ri)
         sS = dE.cross(UP).normalized(); q3 = pochozi(U, ri, w / 2 + 0.6); o3 = (q3 - rc).dot(dE)
         o3 = max(-(w / 2 - tv - 0.55), min(w / 2 - tv - 0.55, o3)); dv_v.append(("+s", o3, 1.0, kor))
-    vez2(P, rc, dE, w, w, kor, kor + vz["nad_korunou"], "jehlan", dvere=dv_v, tw=tv,
+    dno_v = kor; pat_v = [kor, kor + vz["patro_nad_ochozem"]]; ste_v = [0]
+    if vz.get("prizemi"):   # přízemí z nádvoří (Míša 10. 11.: „do malé věže se do přízemí nedá dostat“): věž od nádvoří, dveře na
+        ny_ = A["nadvori_y"]; dno_v = ny_   # stranu k nádvoří, schody po stěnách v ramenech ~2,2 m (45°) až na ochoz
+        cen_ = V(tuple(np.mean(np.array(j, float), axis=0))); sS_ = dE.cross(UP).normalized()
+        sd_ = max((("+d", dE), ("-d", -dE), ("+s", sS_), ("-s", -sS_)), key=lambda q: q[1].dot(cen_ - rc)); nd_ = sd_[1]
+        pd_ = rc + nd_ * (w / 2 + 0.6); ny_ = round(ter(pd_.x, pd_.z) + 0.02, 2); dno_v = ny_   # práh nad terénem u dveří (nádvoří tu klesá)
+        dv_v.append((sd_[0], 0.0, 1.1, ny_))
+        nr_ = max(1, math.ceil((kor - ny_) / 2.3)); pat_v = [ny_ + (kor - ny_) * k / nr_ for k in range(nr_)] + pat_v
+        poradi_ = {"-d": 0, "+s": 1, "+d": 2, "-s": 3}   # stěna s dveřmi (lokálně 0 S/−d, 1 V/+s, 2 J/+d, 3 Z/−s) nemá první rameno
+        st0_ = (poradi_[sd_[0]] + 2) % 4; ste_v = [(st0_ + k) % 4 for k in range(nr_)] + [0]
+        if ste_v[nr_ - 1] == 0 and nr_ > 1: ste_v = [(st0_ + 1 + k) % 4 for k in range(nr_)] + [0]
+    vez2(P, rc, dE, w, w, dno_v, kor + vz["nad_korunou"], "jehlan", dvere=dv_v, tw=tv,
          strilny=[(st_, 0.0, kor + vz["patro_nad_ochozem"] + 1.2) for st_ in ("+d", "+s", "-s")])
-    ram_v = vnitrek_veze(P, rc, dE, w - 2 * tv, w - 2 * tv, [kor, kor + vz["patro_nad_ochozem"]], [0], sq=0.7, run=2.64)
+    ram_all_ = vnitrek_veze(P, rc, dE, w - 2 * tv, w - 2 * tv, pat_v, ste_v, sq=0.7, run=2.3 if vz.get("prizemi") else 2.64)
+    ram_v = ram_all_[-1:]
+    if vz.get("prizemi"):
+        TR["A_vezicka_prizemi"] = [bod(rc + nd_ * (w / 2 + 2.5)), bod(rc + nd_ * (w / 2 - tv - 0.4))] + \
+            sum(([bod(r_[0] + r_[2] * 0.4, r_[3]), bod(r_[1] - r_[2] * 0.05, None, 0.2)] for r_ in ram_all_[:-1]), [])
     if vz.get("dvere_ochoz3"):   # ochoz úseku ri: od líce věžičky po líc paláce (budova na tomto úseku)
         a3, b3, L3, d3, vn3 = U[ri]
         pal = [bd_ for bd_ in A["budovy"] if bd_["usek"] == ri]

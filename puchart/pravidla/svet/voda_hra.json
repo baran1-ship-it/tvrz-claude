@@ -144,12 +144,12 @@
  "pozn_lavky_5_11": "lávka brod_velicka zrušena – stála 15 m od mostu údolní cesty (Míša 5. 11.: „dva mosty vedle sebe“)",
  "kameny_koryta": {
   "krok_m": 0.5,
-  "valouny_na_m2": 1.2,
-  "balvany_na_m": 0.25,
-  "breh_na_m2": 0.35,
+  "valouny_na_m2": 2.2,
+  "balvany_na_m": 0.3,
+  "breh_na_m2": 0.6,
   "valoun_m": [
-   0.15,
-   0.4
+   0.1,
+   0.32
   ],
   "balvan_m": [
    0.6,
@@ -163,11 +163,19 @@
    0.05,
    0.35
   ],
-  "breh_pas_m": 1.2,
+  "breh_pas_m": 1.5,
   "brod_volno_m": 2.0,
   "most_volno_m": 1.5,
-  "dosah_m": 70,
+  "dosah_m": 45,
   "bunka_m": 25,
-  "zdroj": "AOPK (voda_hra.json: kamenité koryto Veličky), geologie droba/břidlice (ČGS, skaly.json), Míša 10. 11.: „kamenný potok – brod a potok nemají jediný kámen“; podhorský tok: valouny po celém dně, balvany vyčnívají nad hladinu, kamení na březích (štěrkové lavice). Hustoty NEOVERENO (odhad z fotek podhorských potoků), na brodu volný pruh cesty."
+  "zdroj": "AOPK (voda_hra.json: kamenité koryto Veličky), geologie droba/břidlice (ČGS, skaly.json), Míša 10. 11.: „kamenný potok – brod a potok nemají jediný kámen“; podhorský tok: valouny po celém dně, balvany vyčnívají nad hladinu, kamení na březích (štěrkové lavice). Hustoty NEOVERENO (odhad z fotek podhorských potoků), na brodu volný pruh cesty.",
+  "okraj_na_m2": 2.5,
+  "okraj_pas_m": 0.7,
+  "okraj_m": [
+   0.15,
+   0.5
+  ],
+  "pozn_10_11b": "Míša 10. 11.: „je to divný přechod, podívej se na fotky potoka ve skutečnosti, je to samý kámen“ – dno souvisle valouny (5/m²), okraj vody pás kamenů přes čáru břehu (zakrývá přechod hlína–voda), balvany 0,3/m",
+  "pozn_rozpocet": "skenované kameny 200 troj.; v dohledu 45 m ~1 300 kamenů ≈ 0,26 M troj. (hlídač scén)"
  }
 }

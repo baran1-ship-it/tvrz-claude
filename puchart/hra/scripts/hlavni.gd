@@ -515,22 +515,16 @@ func _kameny_koryta() -> void:
 	var tvary := {}
 	for mi in n.find_children("valoun_*", "MeshInstance3D", true, false): tvary[int(String(mi.name).split("_")[1])] = (mi as MeshInstance3D).mesh
 	n.free()
-	var sm: ShaderMaterial = null
-	for t in tvary.values():
-		var mt := (t as Mesh).surface_get_material(0) as StandardMaterial3D
-		if mt:
-			sm = ShaderMaterial.new(); sm.shader = load("res://shaders/skala.gdshader")
-			sm.set_shader_parameter("tex_a", mt.albedo_texture); sm.set_shader_parameter("tex_n", mt.normal_texture)
-			sm.set_shader_parameter("meritko", 1.0 / 1.2); sm.set_shader_parameter("mech", 0.0); sm.set_shader_parameter("jas", 1.15)   # omleté valouny světlejší (droba za sucha šedá)
-			break
+	var sm: Material = null   # vlastní materiál skenu (droba, mech v puklinách – Poly Haven rock_moss_set_01)
 	var bm := float(d["bunka_m"]); var skup := {}
-	for r in d["kameny"]:
-		var tv := int(r[0])
+	var raw := FileAccess.get_file_as_bytes("res://data/koryto_kameny.bin").to_float32_array()
+	for i in range(0, raw.size(), 6):
+		var tv := int(raw[i])
 		if not tvary.has(tv): continue
-		var p := Vector3(float(r[1]), float(r[2]), float(r[3]))
+		var p := Vector3(raw[i + 1], raw[i + 2], raw[i + 3])
 		var k := Vector3i(int(floor(p.x / bm)), int(floor(p.z / bm)), tv)
 		if not skup.has(k): skup[k] = []
-		skup[k].append(Transform3D(Basis(Vector3.UP, float(r[4])).scaled(Vector3.ONE * float(r[5])), p))
+		skup[k].append(Transform3D(Basis(Vector3.UP, raw[i + 4]).scaled(Vector3.ONE * raw[i + 5]), p))
 	var uzel := Node3D.new(); uzel.name = "KamenyKoryta"; add_child(uzel)
 	for k in skup:
 		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = tvary[k.z]

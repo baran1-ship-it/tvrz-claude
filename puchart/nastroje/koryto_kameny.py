@@ -46,6 +46,9 @@ for k, t in TH.items():
         if rg.random() < C["balvany_na_m"] * a: dej(rg.uniform(-w / 2 * 0.8, w / 2 * 0.8), C["balvan_m"], "balvan")
         for sg in (-1, 1):
             for _ in range(rg.poisson(C["breh_na_m2"] * C["breh_pas_m"] * a)): dej(sg * (w / 2 + rg.uniform(0, C["breh_pas_m"])), C["breh_kamen_m"], "breh")
-json.dump({"popis": "kameny v korytech (nastroje/koryto_kameny.py): [tvar 0–5, x, y, z, otočení, měřítko]", "glb": "res://modely/hrady/kameny_koryta.glb",
-           "dosah_m": C["dosah_m"], "bunka_m": C["bunka_m"], "kameny": out}, open(os.path.join(K, "hra/data/koryto_kameny.json"), "w"))
+            for _ in range(rg.poisson(C.get("okraj_na_m2", 0) * 2 * C.get("okraj_pas_m", 0.5) * a)):   # pás přes čáru vody a břehu
+                dej(sg * (w / 2 + rg.uniform(-C["okraj_pas_m"], C["okraj_pas_m"])), C["okraj_m"], "okraj")
+np.array(out, np.float32).tofile(os.path.join(K, "hra/data/koryto_kameny.bin"))   # 245 tis. kamenů: binárně (JSON 10 MB se na tabletu parsuje dlouho)
+json.dump({"popis": "kameny v korytech (nastroje/koryto_kameny.py): koryto_kameny.bin = float32 [tvar 0–5, x, y, z, otočení, měřítko]", "glb": "res://modely/hrady/kameny_koryta.glb",
+           "dosah_m": C["dosah_m"], "bunka_m": C["bunka_m"], "pocet": len(out)}, open(os.path.join(K, "hra/data/koryto_kameny.json"), "w"))
 print("kamenů v korytech", len(out))
