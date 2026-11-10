@@ -15,3 +15,4 @@ mapa kostí Mixamo → UAL), pak glb do modely/postavy/anim/.
 - gesta/ (Gestures Pack Basic, 15 gest: kývání, vrtění hlavou, mávnutí, přešlápnutí…; 10. 11.; postava Dreyar ze zipu vynechána)
 - Pick_Fruit.fbx, Pick_Fruit_1.fbx, Pick_Fruit_2.fbx (10. 11.; poslano s kuzi 8 MB, kuze odstranena v Blenderu)
 - farma/ (Farming Pack, 25: krabice, klečení, sázení, vytrhávání, zalévání, dojení krávy, trakař, nošení, trhání ovoce; 10. 11.)
+- Idle.fbx, Breathing_Idle.fbx, Old_Man_Idle.fbx, Action_Idle_To_Standing_Idle.fbx (10. 11., stání postav r. 100)
