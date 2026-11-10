@@ -4201,6 +4201,116 @@ func _listi(mesh: Mesh) -> Material:
 	return null
 
 
+var _koruny_cache := {}
+var _jadro_sh: Shader
+
+
+## Jadro koruny (10. 11., Misa „trvale brzdi jen stromy“; postup Puchartu 12ad855): trojuhelniky listi (listi.gdshader),
+## jejichz teziste lezi uvnitr elipsoidu obalu listi x k, dostanou shader bez alfy a discard (listi_jadro.gdshader) -
+## GPU je odmitne testem hloubky driv, nez je stinuje; obrys koruny zustava pruhledny.
+func _jadro_koruny(m: Mesh, k: float) -> Mesh:
+	if _jadro_sh == null:
+		_jadro_sh = load("res://shaders/listi_jadro.gdshader")
+	var out := ArrayMesh.new()
+	for i in m.get_surface_count():
+		var mat := m.surface_get_material(i)
+		var ar := m.surface_get_arrays(i)
+		if not (mat is ShaderMaterial and (mat as ShaderMaterial).shader == _listi_sh) or ar[Mesh.ARRAY_INDEX] == null:
+			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, ar)
+			out.surface_set_material(out.get_surface_count() - 1, mat)
+			continue
+		var v: PackedVector3Array = ar[Mesh.ARRAY_VERTEX]
+		var ix: PackedInt32Array = ar[Mesh.ARRAY_INDEX]
+		var bb := AABB(v[0], Vector3.ZERO)
+		for p in v:
+			bb = bb.expand(p)
+		var c := bb.get_center()
+		var r := (bb.size * 0.5).max(Vector3(0.1, 0.1, 0.1))
+		var vn := PackedInt32Array()
+		var ob := PackedInt32Array()
+		for t in range(0, ix.size(), 3):
+			var q := (v[ix[t]] + v[ix[t + 1]] + v[ix[t + 2]]) / 3.0 - c
+			var cil := vn if (q / r).length() < k else ob
+			cil.append(ix[t])
+			cil.append(ix[t + 1])
+			cil.append(ix[t + 2])
+		for cast: Array in [[ob, mat], [vn, null]]:
+			if (cast[0] as PackedInt32Array).is_empty():
+				continue
+			var a2 := ar.duplicate()
+			a2[Mesh.ARRAY_INDEX] = cast[0]
+			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a2)
+			var mm: Material = cast[1]
+			if mm == null:
+				var jm := ShaderMaterial.new()
+				jm.shader = _jadro_sh
+				jm.resource_name = mat.resource_name + "_jadro"
+				for pn: String in ["barva", "tint", "stred", "vyska", "sila_vetru", "objem", "vitr_smer"]:
+					jm.set_shader_parameter(pn, (mat as ShaderMaterial).get_shader_parameter(pn))
+				mm = jm
+			out.surface_set_material(out.get_surface_count() - 1, mm)
+	return out
+
+
+## Stinove teleso stromu: elipsoid koruny (obal listi x stin_obal) + valec kmene - stin slunce bez kresleni listi.
+func _stin_koruny(m: Mesh, kc: Dictionary) -> Mesh:
+	var lb := AABB()
+	var prvni := true
+	var vy := 0.0
+	for i in m.get_surface_count():
+		var mat := m.surface_get_material(i)
+		var v: PackedVector3Array = m.surface_get_arrays(i)[Mesh.ARRAY_VERTEX]
+		for p in v:
+			vy = maxf(vy, p.y)
+		if not (mat is ShaderMaterial):
+			continue
+		for p in v:
+			if prvni:
+				lb = AABB(p, Vector3.ZERO)
+				prvni = false
+			else:
+				lb = lb.expand(p)
+	if prvni:
+		return null
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var sf := SphereMesh.new()
+	sf.radial_segments = 10
+	sf.rings = 6
+	sf.radius = 0.5
+	sf.height = 1.0
+	st.append_from(sf, 0, Transform3D(Basis.from_scale(lb.size * float(kc["stin_obal"])), lb.get_center()))
+	var kv := CylinderMesh.new()
+	kv.radial_segments = 6
+	kv.rings = 1
+	var rk := maxf(float(kc["kmen_r_min_m"]), vy * float(kc["kmen_r_podil"]))
+	kv.top_radius = rk
+	kv.bottom_radius = rk * 1.3
+	kv.height = maxf(lb.position.y + lb.size.y * 0.3, 0.5)
+	st.append_from(kv, 0, Transform3D(Basis(), Vector3(lb.get_center().x, kv.height * 0.5, lb.get_center().z)))
+	return st.commit()
+
+
+## Stin stromu z telesa misto z listi: plny strom stin nevrha, teleso jen do stinu (SHADOWS_ONLY) do stin_dosah_m.
+func _stin_koruny_mmi(mmi: MultiMeshInstance3D, stin: Mesh, list: Array, on: int, root: Node) -> void:
+	if stin == null or on == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+		return
+	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var ms := MultiMesh.new()
+	ms.transform_format = MultiMesh.TRANSFORM_3D
+	ms.mesh = stin
+	ms.instance_count = list.size()
+	for i in list.size():
+		ms.set_instance_transform(i, list[i])
+	var si := MultiMeshInstance3D.new()
+	si.multimesh = ms
+	si.name = String(mmi.name) + "_stin"
+	si.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+	si.visibility_range_end = minf(mmi.visibility_range_end, float(Pravidla.cti("les_podrost", "koruny", "stin_dosah_m")))
+	si.visibility_range_end_margin = mmi.visibility_range_end_margin
+	root.add_child(si)
+
+
 func _obal(st: SurfaceTool, cen: Vector3, sz: Vector3, r: RandomNumberGenerator) -> void:
 	# koule s UV pro texturu listi (opakuje se zhruba po 2,5 m), nerovny povrch
 	var ny := 4
@@ -12903,6 +13013,15 @@ func _plants(parent: Node3D, quality: int) -> void:
 			for pf: String in ZJEDNODUSIT:
 				if kind.begins_with(pf):
 					mesh = _zjednodus(mesh, int(ZJEDNODUSIT[pf]))
+		# koruny stromu (10. 11., Puchart 12ad855; les_podrost.json koruny): jadro bez alfy (early-Z) + stinove teleso
+		var stin_koruny: Mesh = null
+		if not kind.contains("_daleko") and (_strom_tvar(kind) != "" or skupina(kind) == "strom"):
+			if not _koruny_cache.has(kind):
+				var kc: Dictionary = Pravidla.cti("les_podrost", "koruny")
+				var mj: Mesh = _jadro_koruny(mesh, float(kc["jadro"])) if float(kc["jadro"]) > 0.0 else mesh
+				_koruny_cache[kind] = [mj, _stin_koruny(mj, kc) if bool(kc["stin_proxy"]) else null]
+			mesh = _koruny_cache[kind][0]
+			stin_koruny = _koruny_cache[kind][1]
 		if kind == "divoka_trava":
 			mesh = mesh.duplicate()
 			for i in mesh.get_surface_count():
@@ -13022,6 +13141,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 				mmi.visibility_range_end = STROM_PREP
 				mmi.visibility_range_end_margin = 10.0
 				mmi.cast_shadow = on
+				_stin_koruny_mmi(mmi, stin_koruny, list, on, root)
 				for xf: Transform3D in list:
 					var bc := Vector2i(floori(xf.origin.x / IMP_BUNKA), floori(xf.origin.z / IMP_BUNKA))
 					if not imp.has(imp_druh):
@@ -13035,6 +13155,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 				mmi.visibility_range_end = STROM_PREP
 				mmi.visibility_range_end_margin = 10.0
 				mmi.cast_shadow = on
+				_stin_koruny_mmi(mmi, stin_koruny, list, on, root)
 				var mm2 := MultiMesh.new()
 				mm2.transform_format = MultiMesh.TRANSFORM_3D
 				mm2.mesh = tvar_mesh

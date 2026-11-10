@@ -3,7 +3,8 @@ shader_type spatial;
 // 1) vitr: koruna se kyva (vic nahore), listy se chveji (kazdy jinak podle polohy); stejny smer jako trava
 // 2) normaly od stredu koruny (radce Jednotny vzhled: "normaly od stredu koruny") - koruna se nasviti jako objem,
 //    ne jako jednotlive ploche karty; zadni strana karet prosvita (translucence)
-render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled, depth_prepass_alpha;
+// 10. 11.: bez depth_prepass_alpha – s alfa nůžkami zbytečný, kreslil listí dvakrát (Puchart: troj. 1,16 -> 1,89 M)
+render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled;
 
 uniform sampler2D barva : source_color, filter_linear_mipmap, repeat_enable;
 uniform vec4 tint : source_color = vec4(1.0);

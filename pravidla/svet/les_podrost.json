@@ -55,5 +55,14 @@
    1.0
   ],
   "_podrost": "ridky podrost pod zapojem (louka._rozsej, vrstva trsu): na_m2 kusu na m2 x smoothstep(zapoj_od, zapoj_do, zapoj); podil kapradi (atlas trav bunka 6, 0,55 m), byliny (5, jitrocel 0,28 m), zbytek nizke trsy (1-3); velikost = nasobek vysky [od, do]. Pro srovnani: louka ~8 vejiru/m2 + trsy - podrost je ~2-4 % ceny. KCD: kapradi, mech, ridke trsy v hrabance."
+ },
+ "koruny": {
+  "_popis": "10. 11. (Míša: trvale brzdí jen stromy; postup Puchartu 12ad855, les p95 −56 % na PC): jadro = listy stromu s těžištěm uvnitř elipsoidu obalu listí × jadro bez alfy (listi_jadro.gdshader, early-Z); stin_proxy = stín slunce vrhá elipsoid koruny × stin_obal + válec kmene (SHADOWS_ONLY do stin_dosah_m), listí stín nevrhá; kmen_r_podil = poloměr kmene / výška stromu (min kmen_r_min_m).",
+  "jadro": 0.6,
+  "stin_proxy": true,
+  "stin_obal": 0.85,
+  "stin_dosah_m": 40.0,
+  "kmen_r_podil": 0.012,
+  "kmen_r_min_m": 0.12
  }
 }
