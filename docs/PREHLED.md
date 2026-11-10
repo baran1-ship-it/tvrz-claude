@@ -160,6 +160,14 @@ Soupis čísel natvrdo a rozporů v kódu: `docs/soupis_pravidel.md` + `docs/sou
 
 ## 5. Jak optimalizovat pro tablet
 
+**Rešerše 10. 11. (Míša):** `docs/rozpracovane/reserse_10_11_optimalizace_tablet.md` (pořadí 12 kroků: měřit → špičky →
+strop 30 od spuštění → tráva → stínové proxy …) a `docs/rozpracovane/reserse_10_11_github_asie.md` (2. kolo). **Pozor, oprava
+z 2. kola:** podle zdrojáku 4.4.1 se jedno stínované slunce kreslí v ZÁKLADNÍM průchodu (průchodů = max(1, P + D)), ne druhým
+průchodem – tvrzení „tráva se kvůli slunci kreslí dvakrát“ v `reserse_trava_godot.md` je chybné; naměřená úspora unshaded
+7–16 ms platí, ale jde o něco uvnitř průchodu (čtení stínové mapy, filtr) → levnější zásahy: tráva bez čtení stínu, filtr
+stínu 2 → 1. Zavedeno 10. 11.: trasa má variantu `stiny` (slunce bez stínu) místo `bez_postav`, u špiček volná paměť,
+halda a VRAM. Rozhodnutí pro Míšu: strop 30 snímků od spuštění (krok 3), zkouška herního prostoru Xiaomi.
+
 **Rozpočty** (zdroje se liší – viz §8): `docs/stav.md` „Rozpočet“: ≤ 1500 kreslení, troj. 2 M (tolerance 2,75 M), GPU < 700 MB;
 `docs/predani.md` §4: ≤ 2,5 M troj., APK < 100 MB; ZÁVĚR tablet (větev `origin/ccr-f2d32673-9fi7m5`
 `docs/ZAVER_tablet_grafika.md` §4): troj. ≤ 1,2 M, kreslení < 400, textury ≤ 300 MB, RAM ≤ 1,2 GB; rešerše
