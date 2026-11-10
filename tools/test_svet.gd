@@ -6469,7 +6469,8 @@ func _lide_chovani() -> void:
 		var bi: int = lide.call("_blok", c, 17.85)
 		if String(c["role"]["rozvrh"][bi]["cinnost"]) == "hovor":
 			lide.call("_novy_blok", c, bi, false)
-			hovori.append(c)
+			if String(c.get("cinnost_ted", "hovor")) == "hovor":      # moznost bloku (denni pribeh) muze byt jina
+				hovori.append(c)
 	var sami := 0
 	for c: Dictionary in hovori:
 		var p: Vector2 = c["misto"]
@@ -6556,6 +6557,8 @@ func _lide_chovani() -> void:
 	var postele := 0
 	var diry: Array = []
 	for c: Dictionary in ll:
+		if bool((c["o"] as Dictionary).get("poutnik", false)):
+			continue                                  # poutnici nespi (postavy.json poutnici)
 		var sp: Dictionary = (c["o"] as Dictionary).get("spanek", {})
 		if sp.is_empty() or (String(sp.get("postel", "")) == "" and String(sp.get("dira", "")) == ""):
 			ch.call("%s: chybi zaznam spanek (postel nebo dira)" % c["id"])

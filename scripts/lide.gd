@@ -161,7 +161,7 @@ static func poutnici() -> Array:
 	for i in int(pt["pocet"]):
 		var j: Array = pt["jmena"][i % (pt["jmena"] as Array).size()]
 		out.append({"id": "poutnik_%d" % (i + 1), "jmeno": j[0], "role": pt["role"], "muz": bool(j[1]),
-				"domov": pt["domov"], "spanek": {"dira": pt["spanek"]}})
+				"domov": pt["domov"], "spanek": {"dira": pt["spanek"]}, "poutnik": true})
 	return out
 
 
@@ -1621,8 +1621,13 @@ func _do_postele(c: Dictionary, cn: Dictionary) -> void:
 	c["postel_y"] = u.position.y                       # vyska z postele, ne paprskem
 	c["v_posteli"] = true
 	ruce(c, {})
-	_klip(c, String(sp["klip"]), float(sp.get("tempo", 0.0)))      # Mixamo spanek dycha (tempo 1), UAL LayToIdle stoji (0)
-	(c["ap"] as AnimationPlayer).seek(0.0, true)
+	# lehnuti bez prolinani (prolinani ze stani do lehu by postavu chvili ukazalo stojici v luzku - test spanek 10. 11.);
+	# Mixamo spanek dycha (tempo 1), UAL LayToIdle stoji (tempo 0)
+	var ap0: AnimationPlayer = c["ap"]
+	ap0.play(String(sp["klip"]), 0.0)
+	c["klip"] = String(sp["klip"])
+	ap0.speed_scale = float(sp.get("tempo", 0.0)) * float(c.get("tempo", 1.0))
+	ap0.seek(0.0, true)
 	c["obmena"] = 1e9
 
 

@@ -4792,11 +4792,13 @@
   "uhly_st": [
    0.0,
    180.0,
-   90.0
+   90.0,
+   270.0
   ],
   "polomer_m": 0.65,
   "natoceni_st": 30.0,
-  "_popis": "hovor ve skupine (plan krok 3.5): misto hovoru ma sloty po obvodu kruhu polomer_m (uhly_st, prvni dva proti sobe = dvojice), postava stoji celem ke stredu; nova postava jde ke skupine, kde uz nekdo ceka a je volno, jinak na prazdne misto"
+  "_popis": "hovor ve skupine (plan krok 3.5): misto hovoru ma sloty po obvodu kruhu polomer_m (uhly_st, prvni dva proti sobe = dvojice), postava stoji celem ke stredu; nova postava jde ke skupine, kde uz nekdo ceka a je volno, jinak na prazdne misto",
+  "_ctvrty": "10. 11.: ctvrte misto (270 st) - na navsi vecer 3 selky + bylinkarka/rychtar (denni pribeh), jinak zbyl jeden sam"
  },
  "dvere": {
   "predpona": "Pohyb_dvere",
