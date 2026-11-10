@@ -25,3 +25,4 @@ mapa kostí Mixamo → UAL), pak glb do modely/postavy/anim/.
 - Sleeping_Idle_2.fbx (kuze odstranena), Checking_Dice.fbx (kostky v krcme) (10. 11.)
 - Dice_Idle, Shaking_Dice, Throwing_Dice, Revealing_Dice, Pointing (10. 11., hra v kostky celá)
 - Bash_1.fbx (10. 11.): jednorucni uder shora – prava ruka z pasu (sn. 22) k hlave (sn. 46) a dolu k pasu (sn. 58) = kovarske buseni
+- Standing_Melee_Attack_Downward.fbx (10. 11.): silny uder shora – ruka nad hlavu (sn. 22), dolu (sn. 28) s predklonem
