@@ -10,7 +10,7 @@ uniform float meritko = 0.38;          // 1 / velikost fotky v m
 uniform float jas = 0.78;
 uniform vec3 barva_droby = vec3(0.62, 0.66, 0.68);   // tmavě modrošedá droba (fotky puchart_skaly)
 uniform float mech = 0.0;              // 1 = police s mechem (skala_mech)
-uniform vec3 barva_mech = vec3(0.27, 0.33, 0.15);   // tmavě olivový mech (fotky puchart_skaly)
+uniform vec3 barva_mech = vec3(0.26, 0.30, 0.15);   // tmavě olivový mech (fotky puchart_skaly)
 uniform vec3 barva_rez = vec3(1.12, 0.98, 0.80);
 uniform vec3 barva_lisejnik = vec3(0.55, 0.57, 0.52);
 
@@ -51,8 +51,11 @@ void fragment() {
 	float st = smoothstep(0.55, 0.8, noise(vec2((wp.x + wp.z) * 1.7, wp.y * 0.12))) * (1.0 - w.y);
 	c *= 1.0 - st * 0.3;
 	// mech: nahoru hledící plochy a police (mech), šum ve skvrnách
-	float up = smoothstep(-0.1, 0.8, n.y);   // i šikmé a strmé stěny (fotky), převisy bez mechu
-	float m = up * smoothstep(0.42, 0.62, fbm(wp.xz * 0.45 + vec2(wp.y * 0.35, 0.0)) * 0.8 + 0.12 * up + mech * 0.25) * 0.85;
+	// mech jen místy (Míša 10. 11. nad fotkou 88596: „ty to máš na velkých plochách, originál je má sem tam“): skvrny ~1–2 m,
+	// hlavně na římsách a mírnějších plochách, na strmé stěně jen ojediněle; mezi nimi holá droba
+	float up = smoothstep(0.0, 0.75, n.y);
+	float sk = fbm(wp.xz * 0.9 + vec2(wp.y * 0.8, 1.3)) * 0.7 + noise(wp.xz * 3.1 + wp.y * 2.3) * 0.3;
+	float m = smoothstep(0.68, 0.8, sk + 0.12 * up + mech * 0.06 + (0.45 - g) * 0.35) * (0.35 + 0.65 * up);   // víc v tmavých puklinách textury
 	c = mix(c, barva_mech * (0.35 + 1.3 * g), m);   // struktura kamene prosvítá
 	ALBEDO = c * jas;
 	ROUGHNESS = mix(0.95, 0.85, m);

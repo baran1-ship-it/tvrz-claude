@@ -123,4 +123,18 @@ kromě lesa p95 34,5. VRAM 380 MB (+164, impostory 2048 – odhad byl ~100). Les
 | voda 70 % | 1120×700 | 23,6 | 45,3 | 59 | 83 | 683 | 1,65 | 489 |
 | vyhlídka 70 % | 1120×700 | 25,1 | 29,8 | 33 | 0 | 872 | 1,33 | 486 |
 Les 70 % je POMALEJŠÍ než les 100 % (62 vs 42 ms p95) – druhý průchod běží zahřátý, tablet zpomaluje teplem i s Game Turbo.
-Srovnání bez Game Turbo na téže sestavě chybí (7f0ca2c bez GT nezapsáno) → stejnou APK projet znovu s Game Turbo vypnutým po vychladnutí.
+Srovnání s měřením téže sestavy BEZ Game Turbo (Míša 9. 11. 12:21, snímek v konverzaci):
+| úsek | p95 bez GT | p95 s GT | záseky bez / s GT |
+|---|---|---|---|
+| hrad 100 % | 29,0 | 29,3 | 0 / 1 |
+| les 100 % | 94,7 | 41,7 | 477 / 84 |
+| voda 100 % | 62,7 | 36,4 | 364 / 35 |
+| vyhlídka 100 % | 46,0 (max 26 s!) | 44,2 (max 83 ms) | 446 / 292 |
+| hrad 70 % | 21,0 | 22,5 | 0 / 0 |
+| les 70 % | 61,0 | 62,4 | 131 / 196 |
+| voda 70 % | 43,7 | 45,3 | 83 / 83 |
+| vyhlídka 70 % | 31,6 | 29,8 | 0 / 0 |
+Závěr: Game Turbo výrazně pomáhá v první polovině trasy (les 100 % p95 −53 ms, záseky 477 → 84, bez 26s zamrznutí). V druhé
+polovině (tablet už zahřátý) je výsledek stejný – teplo pak brzdí stejně. Game Turbo tedy oddálí zpomalení, neodstraní ho.
+→ do návodu k instalaci: přidat hru do Game Turbo (i Havran, stejný tablet). Teplo dál řešit ve hře (rozpočty, 30 FPS strop).
+NEOVERENO: start obou běhů nemusel být ze stejně studeného tabletu.

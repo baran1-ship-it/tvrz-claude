@@ -63,6 +63,13 @@ func _start() -> void:
 			(k as MeshInstance3D).visible = false
 		# barva vrcholu = odstín/AO po plochách (hrady.barva_kusu) – jako albedo dělala ze skály čtverce („minecraft“, Míša 9. 11.)
 		var _sh_skala: Shader = load("res://shaders/skala.gdshader")
+		var _droba: StandardMaterial3D = null   # police s mechem dostanou taky drobu – mech dělá shader jen místy (Míša 10. 11.)
+		for mi_ in sk.find_children("*", "MeshInstance3D", true, false):
+			var m0_ := (mi_ as MeshInstance3D).mesh
+			if m0_ == null or _droba != null: continue
+			for i_ in m0_.get_surface_count():
+				var t_ := m0_.surface_get_material(i_) as StandardMaterial3D
+				if t_ and t_.resource_name.begins_with("skala") and not t_.resource_name.begins_with("skala_mech"): _droba = t_; break
 		for mi_ in sk.find_children("*", "MeshInstance3D", true, false):
 			var ms_ := (mi_ as MeshInstance3D).mesh
 			if ms_ == null: continue
@@ -71,7 +78,8 @@ func _start() -> void:
 				if mt_ == null: continue
 				# skála jako v KCD: triplanár s plynulým přechodem, tónové skvrny, lišejník, mech nahoře (shaders/skala.gdshader, Míša 10. 11.)
 				var sm_ := ShaderMaterial.new(); sm_.shader = _sh_skala
-				sm_.set_shader_parameter("tex_a", mt_.albedo_texture); sm_.set_shader_parameter("tex_n", mt_.normal_texture)
+				var zd_ := _droba if (_droba and mt_.resource_name.begins_with("skala_mech")) else mt_
+				sm_.set_shader_parameter("tex_a", zd_.albedo_texture); sm_.set_shader_parameter("tex_n", zd_.normal_texture)
 				sm_.set_shader_parameter("meritko", 1.0 / 2.6); sm_.set_shader_parameter("mech", 1.0 if mt_.resource_name.begins_with("skala_mech") else 0.0)
 				sm_.set_shader_parameter("jas", 0.85)
 				ms_.surface_set_material(i_, sm_)
