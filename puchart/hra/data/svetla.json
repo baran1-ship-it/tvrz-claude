@@ -8,7 +8,8 @@
     18.2
    ],
    "energie": 0.9,
-   "dosah": 4.0
+   "dosah": 4.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -17,7 +18,8 @@
     18.2
    ],
    "energie": 0.9,
-   "dosah": 4.0
+   "dosah": 4.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -26,7 +28,8 @@
     2.38
    ],
    "energie": 1.0,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -35,7 +38,8 @@
     -4.06
    ],
    "energie": 0.9,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -44,7 +48,8 @@
     2.28
    ],
    "energie": 1.2,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "svicen"
   },
   {
    "pos": [
@@ -53,7 +58,8 @@
     -1.98
    ],
    "energie": 0.9,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "svicen"
   },
   {
    "pos": [
@@ -62,7 +68,8 @@
     -5.44
    ],
    "energie": 0.8,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "svicen"
   },
   {
    "pos": [
@@ -71,7 +78,8 @@
     1.88
    ],
    "energie": 1.1,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -80,7 +88,8 @@
     -4.55
    ],
    "energie": 1.1,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -89,7 +98,8 @@
     3.47
    ],
    "energie": 1.4,
-   "dosah": 5.0
+   "dosah": 5.0,
+   "svit": "ohen"
   },
   {
    "pos": [
@@ -98,7 +108,8 @@
     13.85
    ],
    "energie": 1.0,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "svicen"
   },
   {
    "pos": [
@@ -107,7 +118,8 @@
     13.85
    ],
    "energie": 1.0,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "svicen"
   },
   {
    "pos": [
@@ -116,7 +128,8 @@
     1.32
    ],
    "energie": 1.4,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -125,7 +138,8 @@
     -3.76
    ],
    "energie": 1.4,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -134,7 +148,8 @@
     -5.21
    ],
    "energie": 0.8,
-   "dosah": 4.0
+   "dosah": 4.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -143,7 +158,8 @@
     -4.05
    ],
    "energie": 1.0,
-   "dosah": 5.0
+   "dosah": 5.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -152,7 +168,8 @@
     -45.0
    ],
    "energie": 1.0,
-   "dosah": 5.0
+   "dosah": 5.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -161,7 +178,8 @@
     131.1
    ],
    "energie": 1.1,
-   "dosah": 5.0
+   "dosah": 5.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -170,7 +188,8 @@
     131.1
    ],
    "energie": 1.1,
-   "dosah": 5.0
+   "dosah": 5.0,
+   "svit": "louc"
   },
   {
    "pos": [
@@ -179,7 +198,8 @@
     146.6
    ],
    "energie": 1.0,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "svicen"
   },
   {
    "pos": [
@@ -188,7 +208,8 @@
     146.6
    ],
    "energie": 1.0,
-   "dosah": 6.0
+   "dosah": 6.0,
+   "svit": "svicen"
   },
   {
    "pos": [

@@ -46,7 +46,8 @@ STAVBY = []   # záznamy staveb pro test smyslu (hra/data/stavby_kontrola.json):
 NABEHY = []   # nájezdy na prahy [x, z, y, spad, délka, kdo] → hra/data/nabehy.json (test smyslu nabeh_vyska)
 NASTUPY = []   # nástupy mostů [x, z, y] → hra/data/nastupy_mostu.json: cesty.py tam zvedne cestu (násyp v terénu, ne hranol)
 SV = []   # světla (pochodně) pro hru: hra/data/svetla.json – věže a sklepy jsou bez nich černé
-def svetlo(p, energie=1.4, dosah=6.0): SV.append({"pos": [round(p.x, 2), round(p.y, 2), round(p.z, 2)], "energie": energie, "dosah": dosah})
+def svetlo(p, energie=1.4, dosah=6.0, svit="louc"):   # svit: louc = louč v držáku na zdi (sklep, kobky, věže, chodby), svicen = obytná místnost, ohen = ohniště bez předmětu (Míša 10. 11.: „do sklepa určitě nepatří svícen, ale louč“)
+    SV.append({"pos": [round(p.x, 2), round(p.y, 2), round(p.z, 2)], "energie": energie, "dosah": dosah, "svit": svit})
 TR = {}   # trasy pro test průchodu (hra/data/pruchody.json): [[x, z, y_ocekavana | null], ...]
 def bod(p, y=None, tol=None):
     b = [round(p.x, 2), round(p.z, 2), None if y is None else round(y, 2)]
@@ -1024,7 +1025,7 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
             for k_ in range(n_):
                 yt_ = podl - hs_ * (k_ + 0.5); q_ = top + nn * (rs_ * (k_ + 0.5) + 0.05); gq_ = min(ter(*(q_ + nn * a_).xz) for a_ in (-rs_ / 2, rs_ / 2)) - 0.25
                 P.box(M(q_ + UP * ((yt_ + gq_) / 2), basis=frame(hz(nn))), (vs[2] + 0.4 - k_ * 0.04, yt_ - gq_, rs_ + 0.01), "kvadr_schod", collide=None)
-        svetlo(c + UP * (podl + 2.0), 1.0, 6.0)
+        svetlo(c + UP * (podl + 2.0), 1.0, 6.0, svit="svicen")
         jm_b = "budova_%s_%d_%d" % (typ, round(c.x), round(c.z))
         TR[jm_b] = [bod(dvere + nn * (tz + 3.0)), bod(dvere + nn * (tz + 0.6)), bod(dvere - nn * 0.6, podl), bod(c, podl)]
         if typ == "palac" and patro_y:   # palác: schody do patra podél stěny naproti dveřím, otvor se zábradlím
@@ -1034,7 +1035,7 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
             if podkrovi and not patro2_y:   # nejvyšší podlaží = podkroví pod střechou: schody u štítové zdi do středu (Míša 5. 11.)
                 pkv_ = podkrovi_vystup(P, c, d, li, hloubka, t, podl + patro_y, podl + hk, H.STRECHA_POMER, kon=1, smer=-1 if sg > 0 else 1)   # od protější stěny než rameno z přízemí (jeho otvor v podlaze)
             ram = vnitrek_veze(P, c, d, li, wi, [podl, podl + patro_y] + ([podl + (patro2_y or hk)] if (podkrovi and patro2_y) else []), [0 if sg > 0 else 2, 2 if sg > 0 else 0], sq=1.1, sirka=1.0)
-            svetlo(c + UP * (podl + patro_y + 2.0), 1.0, 6.0)
+            svetlo(c + UP * (podl + patro_y + 2.0), 1.0, 6.0, svit="svicen")
             sa, se, sdir, y0_, y1_ = ram[0]
             w_ = (c - sa) - sdir * (c - sa).dot(sdir); w_.y = 0; w_ = w_.normalized()   # k patě schodů z volné strany, ne napříč bokem schodiště (test 3. 11.)
             TR[jm_b] += [bod(sa - sdir * 0.45 + w_ * 1.3, podl), bod(sa - sdir * 0.45, podl), bod(sa + sdir * 0.8), bod(se + sdir * 0.5, y1_), bod(se + sdir * 0.5 + w_ * 1.6, y1_), bod(c, y1_)]   # od schodů nejdřív od zdi, ne přes otvor v podlaze
@@ -1338,8 +1339,8 @@ def palac_A(P, p0, p1, bd, PI):
     nabeh(P, prah, s, F0, vs_["sirka"] + 0.4, L=2.2, spad=F0 - zem + 0.15)
     # světla: kuchyně (ohniště), síň dole, světnice, síň, komora, podkroví
     for (u, v, y, e) in ((2.5, 0.0, F0, 1.0), (9.0, 0.0, F0, 0.9), (2.6, 0.0, F1, 1.2), (6.9, 0.0, F1, 0.9), (10.4, 0.0, F1, 0.8), (3.0, 0.0, F2, 1.1), (9.5, 0.0, F2, 1.1)):
-        svetlo(W(u, v, y + 2.1), e, 6.0)
-    svetlo(W(1.4, 0, F0) + UP * 1.0, 1.4, 5.0)   # žhavé ohniště
+        svetlo(W(u, v, y + 2.1), e, 6.0, svit="svicen" if y == F1 else "louc")   # přízemí (kuchyně, zásoby) a podkroví: louč; obytné patro: svícen
+    svetlo(W(1.4, 0, F0) + UP * 1.0, 1.4, 5.0, svit="ohen")   # žhavé ohniště
     # trasy testu: přízemí (síň → kuchyně), patro po schodech a pavlači do síně a podkroví, světnice, komora
     vs = PI["vstup"]
     pav = lambda u: bod(W(u, h / 2 + t / 2 + PV["sirka"] / 2), F1)

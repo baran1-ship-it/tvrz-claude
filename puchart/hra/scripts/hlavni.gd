@@ -197,6 +197,55 @@ func _svetla(h: Node3D) -> void:
 		l.light_energy = s["energie"]; l.omni_range = s["dosah"]; l.shadow_enabled = false
 		l.distance_fade_enabled = true; l.distance_fade_begin = 35.0; l.distance_fade_length = 10.0
 		h.add_child(l)
+		if not s.get("den", false) and s.get("svit", "louc") != "ohen": _k_svicnum.append(l); l.set_meta("svit", s.get("svit", "louc"))
+	if not _k_svicnum.is_empty(): _svicny.call_deferred()
+
+## Světlo místnosti s předmětem Havrana (Míša 10. 11.: „když je místnost tmavá, dej tam louč nebo svícen, vezmi předměty z Havrana“;
+## „do sklepa určitě nepatří svícen, ale louč“): svit=louc (sklep, kobky, věže, chodby) = louč v železném držáku na zdi ve 1,9 m,
+## svit=svicen (obytné místnosti paláců) = stojací svícen u zdi. Modely z Havranových balíků (modely/predmety, textury zmenšené
+## na 256 px – Havran 0.59: 2k textury předmětů = záseky a pád při vstupu do budovy), načtené jednou při startu.
+## Paprsek dolů najde podlahu, v 8 směrech nejbližší stěnu (≤ 3 m), světlo se přesune k plameni.
+var _k_svicnum: Array = []
+var _svicnu := 0
+func _svicny() -> void:
+	if _foto != "" and get_node_or_null("Hrad"): _kolize_uzlu(get_node("Hrad"))   # snímek: kolize jinak nestaví
+	for i in 4: await get_tree().physics_frame   # kolize hradu (_kolize_hradu deferred)
+	var md := {"svicen": "res://modely/predmety/svicen_stojaci.glb", "louc": "res://modely/predmety/louc.glb", "drzak": "res://modely/predmety/drzak_louce.glb"}
+	var sc := {}
+	for k in md:
+		if ResourceLoader.exists(md[k]): sc[k] = load(md[k])
+	var ss := get_world_3d().direct_space_state
+	for l: OmniLight3D in _k_svicnum:
+		var typ: String = l.get_meta("svit", "louc")
+		if not sc.has(typ): continue
+		var p := l.global_position
+		var dol := ss.intersect_ray(PhysicsRayQueryParameters3D.create(p, p - Vector3(0, 4.0, 0)))
+		if dol.is_empty(): continue
+		var y0: float = dol["position"].y
+		var nej := {}; var nd := 3.0
+		for k in 8:
+			var sm := Vector3(cos(k * PI / 4), 0, sin(k * PI / 4)); var o := Vector3(p.x, y0 + 1.0, p.z)
+			var r := ss.intersect_ray(PhysicsRayQueryParameters3D.create(o, o + sm * 3.0))
+			if not r.is_empty() and o.distance_to(r["position"]) < nd and absf((r["normal"] as Vector3).y) < 0.3: nd = o.distance_to(r["position"]); nej = r
+		if nej.is_empty(): continue
+		var nrm: Vector3 = nej["normal"]; nrm.y = 0; nrm = nrm.normalized()
+		var uzel := Node3D.new(); l.get_parent().add_child(uzel)
+		if typ == "svicen":
+			var q: Vector3 = nej["position"] + nrm * 0.35; q.y = y0
+			var n: Node3D = sc["svicen"].instantiate(); uzel.add_child(n); uzel.global_position = q; uzel.rotation.y = randf() * TAU
+			l.global_position = q + Vector3(0, 1.62, 0)
+		else:   # louč: držák na zdi, louč skloněná od zdi o 25°, plamen na horním konci
+			var q: Vector3 = nej["position"] + nrm * 0.06; q.y = y0 + 1.75
+			uzel.global_position = q; uzel.look_at(q + nrm, Vector3.UP)   # −z uzlu = od zdi
+			if sc.has("drzak"):
+				var dz: Node3D = sc["drzak"].instantiate(); uzel.add_child(dz); dz.rotation.y = PI / 2
+			var lc: Node3D = sc["louc"].instantiate(); uzel.add_child(lc)
+			lc.position = Vector3(0, 0.02, -0.08); lc.rotation.x = deg_to_rad(-25.0)
+			l.global_position = uzel.to_global(Vector3(0, 0.02 + 0.6 * cos(deg_to_rad(25.0)), -0.08 - 0.6 * sin(deg_to_rad(25.0))))
+		for mi in uzel.find_children("*", "GeometryInstance3D", true, false): (mi as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		l.light_energy = maxf(l.light_energy, 2.2); l.omni_range = maxf(l.omni_range, 8.0); l.omni_attenuation = 0.7   # místnost nesmí zůstat tmavá
+		_svicnu += 1
+	print("SVICNY %d/%d" % [_svicnu, _k_svicnum.size()])
 
 func _test_pruchod() -> void:
 	await get_tree().create_timer(2.0).timeout   # kolize hradu (deferred) a terén kolem
