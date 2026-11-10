@@ -1201,3 +1201,14 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - 10. 11. ř. 91 (žlab mlýna prázdný): voda ve žlabu v datech je, ale shader `voda` (maly_tok) měl alfu 0,12–0,55 nad světlým
   dnem → skoro neviditelná. Alfa malých toků teď uniform `maly_tok_alfa` 0,25–0,65 – NEOVĚŘENO snímkem/tabletem.
   Zbývá test `mlyn_zlab`: bod 6 osy (598,9; 914,0) terén světa 8 cm nad hladinou → při dalším exportu (zapuštění žlabu).
+- 10. 11. pozdě večer (pomocník, ř. 101–108): **venkovní lavice** – `nabytek.json u_domu` (lavice u stěny vstupu každého
+  domu vsi) a `venku` (nádvoří, náves, krčma, lom) staví `svet.gd _nabytek_venku` za běhu (hledá volné místo: ne stavba,
+  průchod, záhon, cesta, svah) – **bez exportu světa**; dřívější „lavice u domů“ ze svet.json stojí v jizbách. **Kostky**
+  `postavy.json kostky` + `lide.gd kostky_krok` (tahy, reakce, napití). **Dvojice** ve `volno` (`dvojice_stoji`).
+  **Poutníci** `postavy.json poutnici` (generovaní obyvatelé, `poutnik: true`, bez spánku, louč se světlem bez stínu).
+  **Mlynáři** (mletí uvnitř skrytý, nošení pytlů, `mlyn_dvur` = `od_m` před dveřmi; větrný mlýn vlastní role
+  `mlynar_vetrak`). **Spánek** Mixamo Laying_Sleeping (pánev srovnaná na UAL LayToIdle, `LEH_VZOR` v anim_cmu.py; lehnutí
+  bez prolínání – s prolínáním test spanek hlásil „nelezi“). **Kovář** Bash_1 výřez (`t0` 0,8 s, `dl` 1,3 s; u Mixamo
+  výřezu se konec prolne do začátku) + Standing_Melee_Attack_Downward. Chůze postav tempem 0,90–0,95 (`chuze_postav.tempo`).
+  Hovor: 4. místo ve skupině (`hovor_skupina.uhly_st`). Testy: lide_chovani OK (beh lide7: kostky, dvojice, volno 3+,
+  spánek), test_klipy_chuze + test_drzeni OK (234). NEOVĚŘENO: tablet; snímky ve hře – viz zpráva pomocníka.
