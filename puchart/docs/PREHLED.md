@@ -78,6 +78,6 @@ Platí i pro Puchart; co už máme, co přebíráme, co je jen hypotéza.
 - **Hypotézy (A/B až po měření):** stínové proxy stromů (stín vrhá hrubý neprůhledný tvar), neprůhledný střed korun,
   depth prepass na Adrenu, méně čtení textur u skal a zdiva (zdivo má 7 vzorkovačů + parallax).
 - **Úklid:** jeden dokument rozpočtů (rozpočty se v projektech rozcházejí – agent pak optimalizuje ke špatnému cíli).
-- **Zkouška Herního prostoru Xiaomi (Míša 10. 11.: ano, do příští měřicí APK):** měřicí trasa 1× normálně, tablet
-  vychladnout, 2× s hrou přidanou do Herního prostoru (Game Turbo) v režimu Výkon. Porovnat p95 a čas do zpomalení
+- **Zkouška Herního prostoru Xiaomi (Míša 10. 11.: ano, do příští měřicí APK):** Míša 10. 11.: Puchart TEST i Odkaz Havrana JUŽ JSOU v Game Turbo – dosavadní měření byla v herním režimu. Zkouška naopak:
+  1× jako dosud (Game Turbo), tablet vychladnout, 2× s Puchart TEST v Game Turbo vypnutým; zapsat režim (Výkon/Vyvážený). Porovnat p95 a čas do zpomalení
   zahřátím. Pomůže-li, přidat do návodu k instalaci (i pro Havrana – stejný tablet).
