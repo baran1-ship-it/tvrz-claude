@@ -21422,7 +21422,11 @@
      544.56
     ]
    ],
-   "pozn": "napojeno na údolní cestu (II/440) přes Veličku – dnes most u odbočky (Street View hajovna_01, červené zábradlí)"
+   "pozn": "napojeno na údolní cestu (II/440) přes Veličku – dnes most u odbočky (Street View hajovna_01, červené zábradlí)",
+   "delka_m": 726,
+   "max_rez_m": 3.8,
+   "max_nasyp_m": 0.6,
+   "max_pricny": 0.038
   }
  ],
  "vysledek": {
@@ -21754,6 +21758,12 @@
    "delka_m": 64,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
+   "max_pricny": 0.038
+  },
+  "hajovna": {
+   "delka_m": 726,
+   "max_rez_m": 3.8,
+   "max_nasyp_m": 0.6,
    "max_pricny": 0.038
   }
  }
