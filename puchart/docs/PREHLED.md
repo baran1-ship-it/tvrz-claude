@@ -81,3 +81,10 @@ Platí i pro Puchart; co už máme, co přebíráme, co je jen hypotéza.
 - **Herní prostor Xiaomi (Game Turbo) – změřeno 10. 11.** (`docs/ab_srovnani.md`): v první, studené polovině trasy les p95 94,7 → 41,7 ms
   a záseky 477 → 84; zahřátý tablet ve druhé polovině stejně pomalý. Doporučení: hru přidat do Game Turbo (návod k instalaci,
   i pro Havrana); teplo dál řešit ve hře.
+
+## 7. Rozpracováno 10. 11. – vydat najednou (Míša: „počkám na vše“)
+- Zbývající chyby: 148 vstup na ochoz vstupní věžičky podél hradby, 149 rozbité zábradlí, 150 křížení desek ochozu, 159 pruhy louky, plamen louče.
+- Menu z Havrana převzít (ne psát znovu): `scripts/menu_hrace.gd`, `predmety.gd`, `dovednosti.gd`, `pravidla.gd`, erby kategorií, katalog
+  `modely/predmety.json` + modely z Havranových balíků (textury zmenšit na 256–512 px, načítat při startu – Havran 0.59 záseky/pád),
+  propojka na Puchart (life.sfx, hud.toast, player, day). **Hlavní menu: výběr hry Příběh / Pískoviště jako v Havranovi**; v pískovišti
+  stránka Stavění v menu hráče.
