@@ -783,15 +783,8 @@
      "Sitting_Idle_Loop",
      "Sed_Piti1_Loop",
      "Sed_Hovor1_Loop"
-    ],
-    [
-     "Sed_Kostky_Loop",
-     "Sed_Kostky_Loop",
-     "Sed_Piti_Loop",
-     "Sed_Kostky_Loop"
     ]
-   ],
-   "_kostky": "Misa 10. 11.: hra v kostky (Mixamo Checking_Dice, horni pulka + sed) jako scena hostu; dvojice/trojice u jednoho stolu soucasne = dalsi krok (zatim nahodne)"
+   ]
   },
   "obsluha": {
    "klipy": [
@@ -836,41 +829,39 @@
   },
   "kovani": {
    "klipy": [
-    "Kovar_Swing_Loop",
-    "Interact"
+    "Prace_Kovar_Buseni_Loop"
    ],
    "obmena_s": [
-    15.0,
-    30.0
+    12.0,
+    25.0
    ],
    "soustredeni": 0.9,
    "v_rukou": {
+    "Prace_Kovar_Buseni_Loop": {
+     "r": "kladivo"
+    },
     "Napiti": {
      "r": "korbel"
-    },
-    "Kovar_Swing_Loop": {
-     "r": "kladivo"
     }
    },
-   "_p": "Misa 0.99996 r. 95: kovarske kladivo (cross_pein_hammer, katalog kladivo) v prave ruce; 10. 11. snimky fmix3/fmix4: Mixamo Bash = vodorovny bekhend (ne kovani), Heavy_Weapon_Swing = mach shora dolu jednou rukou - vybran (Kovar_Swing_Loop); vhodny klip kovani na kovadline (Mixamo Hammering) NEOVERENO / chybi",
+   "_p": "Misa 0.99996 r. 95 a 10. 11. (Hammering na Mixamo neni): kovarske kladivo (cross_pein_hammer) v prave ruce, buseni = vyrez Heavy_Weapon_Swing (zvednout k rameni -> uder dolu, prolnuto do zvedani; anim_cmu.py Prace_Kovar_Buseni_Loop); mezi udery otocit zelezo (UAL PickUp_Table), pohled do vyhne (Rozhlizi2), oddech, napiti",
    "sceny": [
     [
-     "Kovar_Swing_Loop",
-     "Kovar_Swing_Loop",
+     "Prace_Kovar_Buseni_Loop",
+     "Prace_Kovar_Buseni_Loop",
+     "PickUp_Table",
+     "Prace_Kovar_Buseni_Loop"
+    ],
+    [
+     "Prace_Kovar_Buseni_Loop",
+     "Rozhlizi2",
+     "Prace_Kovar_Buseni_Loop",
      "Gesto_relieved_sigh"
     ],
     [
-     "Interact",
-     "Kovar_Swing_Loop"
-    ],
-    [
-     "Kovar_Swing_Loop",
+     "Prace_Kovar_Buseni_Loop",
+     "Prace_Kovar_Buseni_Loop",
      "Napiti"
-    ],
-    [
-     "Kovar_Swing_Loop",
-     "Kovar_Swing_Loop",
-     "Protazeni"
     ]
    ]
   },
@@ -1693,7 +1684,7 @@
     {
      "od": 12.0,
      "cinnost": "svacina",
-     "kde": "prace"
+     "kde": "lom_spalek"
     },
     {
      "od": 13.0,
@@ -4180,11 +4171,48 @@
    "uklid_hostinec",
    "obsluha_krcma"
   ],
-  "volno_min_sedi": 0,
-  "_volno": "test: kolik bloku/moznosti volno mimo hostince najde sedak (vypis LIDE volno). 10. 11.: 0 - venku (nadvori, naves, u domu) zadne lavice ve vybaveni sveta, sedaky jsou jen v interierech (nabytek.json) a v lomu -> venkovni lavice = tabulka r. 101; po pridani zvednout volno_min_sedi na 3"
+  "volno_min_sedi": 3,
+  "_volno": "test: aspon volno_min_sedi bloku/moznosti s cinnosti volno mimo hostince najde sedak (venkovni lavice nabytek.json u_domu a venku, svet.gd _nabytek_venku)"
  },
  "_mikro": "Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): klipy cinnosti bez pripony _Loop jsou mikro-animace (gesta Mixamo Gestures Pack, rozhlednuti, napiti, zvednuti, otevreni truhly) - hraji se jednou (obmena = delka klipu), pak dalsi klip cinnosti; smycky (_Loop) po obmena_s",
  "_sceny": "Misa 10. 11. (KCD; pohyb s duvodem a navaznosti): klipy = hlavni smycky cinnosti (obmena_s 10-35 s); mikro-animace jen ve scenach (sceny = rady klipu po sobe) na miste, kde maji duvod: oddech (relieved_sigh) az po praci, napiti az po kovani, zvednuti po sekani, truhla otevrit -> hledat -> zavrit; pri obmene scena nebo jedna smycka (stejna vaha). Prechody prolinanim (prolinani_s), Sitting_Enter/Exit pri sedu. NEOVERENO: zivani vecer (klip chybi), odchod s vysledkem (kos, pytel) - dalsi krok",
  "_sceny_10_11_vecer": "Misa 10. 11.: protazeni (Arm/Neck_Stretching) rano a po usilne praci, mavani (Waving) na zacatku hovoru (pozdrav), kyvnuti pojd sem (Beckoning) obsluhy z mista u steny, piti vsedě 2. varianta; probuzeni na luzku (Waking, klip Probouzi) zatim nezapojeno - vyska luzka NEOVERENA (spanek vleze dalsi krok)",
- "_vstava": "10. 11. snimek fmix3/vstava: Mixamo Standing_Up je vstavani ze zeme (z lehu/sedu na zemi) - po kleku Vstava_Z_Kleku (Kneeling_Down pozpatku); Standing_Up (Vstava) pro vstavani z luzka/zeme = dalsi krok"
+ "_vstava": "10. 11. snimek fmix3/vstava: Mixamo Standing_Up je vstavani ze zeme (z lehu/sedu na zemi) - po kleku Vstava_Z_Kleku (Kneeling_Down pozpatku); Standing_Up (Vstava) pro vstavani z luzka/zeme = dalsi krok",
+ "kostky": {
+  "_popis": "Misa 10. 11. (hra v kostky po tazich jako skutecna hra): lide.gd kostky_krok - 2-3 sedici hoste (cinnost) v jedne sini (kde) v hodinach se sejdou (sance_s za sekundu); na tahu: tah (zatrese, hodi, odkryje), ostatni ceka; po odkryti vitez (nahodne) vyhra, ostatni prohra, vsichni po_kole (napiti, nejvys piti_s), dalsi na tahu; po kol kolech konec. Mixamo Dice_Idle, Shaking/Throwing/Revealing_Dice, Pointing, gesta - horni pulka + sed (anim_cmu.py SLEP)",
+  "kde": [
+   "hostinec_sin",
+   "krcma_senk"
+  ],
+  "cinnost": "hospoda",
+  "hodiny": [
+   16.0,
+   23.0
+  ],
+  "hraci": [
+   2,
+   3
+  ],
+  "sance_s": 0.05,
+  "kol": [
+   2,
+   4
+  ],
+  "tah": [
+   "Sed_Kostky_Trese",
+   "Sed_Kostky_Hodi",
+   "Sed_Kostky_Odkryje"
+  ],
+  "ceka": "Sed_Kostky_Ceka_Loop",
+  "vyhra": [
+   "Sed_Raduje",
+   "Sed_Ukazuje"
+  ],
+  "prohra": [
+   "Sed_Zlobi",
+   "Sed_Vrti"
+  ],
+  "po_kole": "Sed_Piti_Loop",
+  "piti_s": 4.0
+ }
 }

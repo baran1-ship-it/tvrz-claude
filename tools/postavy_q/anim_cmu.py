@@ -51,9 +51,9 @@ CLIPS = [
     # r. 95 kovar: jednorucni uder kladivem (prava ruka drzi kladivo - uchop prstu z UAL Sword_Idle)
     ("Kovar_Bash_Loop", "Bash.fbx", 0.0, None, "r"),
     ("Kovar_Swing_Loop", "Heavy_Weapon_Swing.fbx", 0.0, None, "r"),
-    # Misa 10. 11. (Hammering na Mixamo neni): buseni z Heavy_Weapon_Swing - jen oblouk zvednout k rameni -> uder dolu
-    # (ruka 0,95 m v 2,1 s, nad hlavou 2,43 s, dole 0,62 m v 2,83 s; tools: ruka.py), smycka prolnuta do zvedani
-    ("Prace_Kovar_Buseni_Loop", "Heavy_Weapon_Swing.fbx", 2.1, 0.9, "r"),
+    # Misa 10. 11. (Hammering na Mixamo neni): buseni = vyrez Mixamo Bash_1 (prava ruka od pasu sn. ~22 k hlave ~46 a
+    # dolu k pasu ~58, leva niz - jednorucni uder shora), snimky 25-64, smycka prolnuta do zvedani
+    ("Prace_Kovar_Buseni_Loop", "Bash_1.fbx", 0.8, 1.3, "r"),
     # r. 96/99 hostinec: piti vsedě a sed (panev srovnana na UAL Sitting_Idle_Loop - SED_VZOR, data sedani.vyska_klipu_m)
     # 10. 11. snimek fmix4/piti_bok: prevod Sitting_Drinking stoji nad sedakem (neni sed) - piti vsedě je slepene (SLEP)
     ("Sed_Loop", "Male_Sitting_Pose.fbx", 0.0, None, ""),

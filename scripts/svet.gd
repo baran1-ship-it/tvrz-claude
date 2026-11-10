@@ -5818,9 +5818,75 @@ func _nabytek_budov() -> void:
 	for r: Dictionary in Pravidla.cti("nabytek", "zapecene"):
 		_postel_zapis(String(r["id"]), String(r["budova"]), Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2])),
 				deg_to_rad(float(r["natoceni_st"])), int(r.get("mist", 1)))
+	_nabytek_venku()
 	print("nabytek budov: %d luzek" % (data.get("postele", []) as Array).size())
 	for e: String in luzka_bez_luzek():
 		push_error("nabytek: " + e)
+
+
+## Venkovni lavice (Misa 10. 11.: „lide kolem stolu jen chodi“ - venku zadny sedak, vse bylo v jizbach): nabytek.json
+## u_domu = kus u steny kazdeho domu vsi (jako drevo DUM_DREVO: [id, strana +1 vstup / -1 dvur, poloha 0..1 podel steny,
+## odstup od zdi m, pootoceni]) a venku = volne lavice ve svete (p [x, z] nebo ulice + bok_m na navsi; hledat_m: prvni
+## bod v kruzich po krok_m, kde se smi stavet - mimo pudorys staveb, pruchody, zahony (uzivani_smi) a dal nez od_cesty_m
+## od kraje cesty, svah pod lavici do sklon_m). Vyska z terenu, podel_zdi -> krok 9 (_vybaveni_mimo_cest) je posune z pesin.
+func _nabytek_venku() -> void:
+	if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
+		_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
+	var pr: Dictionary = Pravidla.cti("nabytek", "venku_pravidla")
+	var n := 0
+	for d: Dictionary in _domy:
+		if int(d["k"]) >= 20:
+			continue                                  # jen domy vsi (chyse u lomu a uhliru, samota vetraku ne)
+		var m: Dictionary = d["m"]
+		var xf: Transform3D = d["xf"]
+		for v: Array in Pravidla.cti("nabytek", "u_domu"):
+			var rz: Array = (_kat_p.get(String(v[0]), {}) as Dictionary).get("rozmer", [1.5, 0.45, 0.4])
+			var hl := float(rz[2]) * 0.5 + float(v[3])
+			for pokus in int(pr["pokusu"]):
+				var pol := float(v[2]) + float(pokus) * float(pr["posun_podel"])
+				var lp := Vector3(float(v[1]) * (float(m["hw"]) + hl), 0.0, lerpf(float(m["b"]) + 0.8, float(m["f"]) - 0.8, pol))
+				var wq := xf * lp
+				if v_pruchodu(wq.x, wq.z):
+					continue
+				var podel := (xf.basis * Vector3.BACK).normalized()
+				var yaw := atan2(xf.basis.z.x, xf.basis.z.z)
+				data["vybaveni"].append({"id": v[0], "p": [wq.x, _vyska_min(wq.x, wq.z, 0.6) - 0.02, wq.z], "yaw": yaw + PI / 2.0 + float(v[4]),
+						"podel_zdi": [podel.x, podel.z], "pul": [float(rz[0]) * 0.5, float(rz[2]) * 0.5]})
+				n += 1
+				break
+	for r: Dictionary in Pravidla.cti("nabytek", "venku"):
+		var q := Vector2.INF
+		if r.has("p"):
+			q = Vector2(float(r["p"][0]), float(r["p"][1]))
+		elif r.has("ulice") and vo != null:
+			var osa: PackedVector2Array = vo.call("osa_ulice")
+			var i := clampi(int(float(r["ulice"]) * (osa.size() - 1)), 0, osa.size() - 2)
+			var sm := (osa[i + 1] - osa[i]).normalized()
+			q = osa[i] + sm.orthogonal() * float(r["bok_m"])
+		if q == Vector2.INF:
+			continue
+		var rz2: Array = (_kat_p.get(String(r["id"]), {}) as Dictionary).get("rozmer", [1.5, 0.45, 0.4])
+		var yw := deg_to_rad(float(r.get("natoceni_st", 0.0)))
+		var nasel := false
+		var rr := 0.0
+		while rr <= float(r.get("hledat_m", pr["hledat_m"])) and not nasel:
+			var kroku := maxi(1, int(TAU * rr / float(pr["krok_m"])))
+			for kk in kroku:
+				var c := q + Vector2.from_angle(TAU * float(kk) / float(kroku)) * rr
+				var ck := cesta_kraj_osa(c.x, c.y)
+				if not uzivani_smi("", c.x, c.y) or (ck.y >= 0.0 and ck.x < float(pr["od_cesty_m"])):
+					continue
+				var ax := Vector2(cos(yw), -sin(yw)) * float(rz2[0]) * 0.5
+				if absf(_vyska(c.x + ax.x, c.y + ax.y) - _vyska(c.x - ax.x, c.y - ax.y)) > float(pr["sklon_m"]):
+					continue
+				data["vybaveni"].append({"id": r["id"], "p": [c.x, _vyska_min(c.x, c.y, 0.6) - 0.02, c.y], "yaw": yw})
+				nasel = true
+				n += 1
+				break
+			rr += float(pr["krok_m"])
+		if not nasel:
+			push_warning("nabytek venku: %s u %s - zadne volne misto do %s m" % [r["id"], q, str(r.get("hledat_m", pr["hledat_m"]))])
+	print("nabytek venku: %d lavic" % n)
 
 
 ## Luzka v mistnostech, kde zadne byt nesmi (nabytek.json bez_luzek - Misa 6. 11.: „neni mozne dat postele do hodovni

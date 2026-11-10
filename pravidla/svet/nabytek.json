@@ -740,5 +740,76 @@
  "bez_luzek_budovy": [
   "tvrz_kovarna",
   "tvrz_kuchyne"
- ]
+ ],
+ "u_domu": [
+  [
+   "lavice_selska",
+   1,
+   0.22,
+   0.12,
+   0.0
+  ]
+ ],
+ "_u_domu": "Misa 10. 11. (venku zadne sedaky - lide v poledni a volnu nemaji kde sednout): lavice u steny na strane vstupu kazdeho domu vsi (svet.gd _nabytek_venku: [id, strana +1 vstup / -1 dvur, poloha 0..1 podel steny od zadu k navsi, odstup od zdi, pootoceni]); v pruchodu dveri se posune o posun_podel",
+ "venku": [
+  {
+   "id": "lavice_selska",
+   "p": [
+    -4.0,
+    8.5
+   ],
+   "natoceni_st": 0.0,
+   "popis": "nadvori tvrze u studny"
+  },
+  {
+   "id": "lavice_selska",
+   "p": [
+    8.0,
+    7.0
+   ],
+   "natoceni_st": 90.0,
+   "popis": "nadvori tvrze u palace"
+  },
+  {
+   "id": "lavice_selska",
+   "ulice": 0.45,
+   "bok_m": 5.0,
+   "natoceni_st": 0.0,
+   "popis": "naves"
+  },
+  {
+   "id": "lavice_selska",
+   "ulice": 0.65,
+   "bok_m": -5.0,
+   "natoceni_st": 0.0,
+   "popis": "naves"
+  },
+  {
+   "id": "lavice_selska",
+   "p": [
+    374.5,
+    768.5
+   ],
+   "natoceni_st": 0.0,
+   "popis": "pred krcmou U Kohouta"
+  },
+  {
+   "id": "lavice_selska",
+   "p": [
+    129.0,
+    933.5
+   ],
+   "natoceni_st": 0.0,
+   "popis": "lom u spalku - poledni svacina lamacu"
+  }
+ ],
+ "_venku": "Misa 10. 11.: venkovni lavice (nadvori tvrze, naves, pred krcmou, lom; pred hostincem uz jsou ve svet.json): p [x, z] nebo ulice (0..1 po ose navsi) + bok_m; misto se hleda podle venku_pravidla (svet.gd _nabytek_venku), vyska z terenu",
+ "venku_pravidla": {
+  "hledat_m": 6.0,
+  "krok_m": 0.5,
+  "od_cesty_m": 0.4,
+  "sklon_m": 0.15,
+  "pokusu": 5,
+  "posun_podel": 0.12
+ }
 }
