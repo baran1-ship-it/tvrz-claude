@@ -6,3 +6,4 @@ mapa kostí Mixamo → UAL), pak glb do modely/postavy/anim/.
 - Drinking.fbx, Sitting_Drinking.fbx (10. 11.)
 - Talking.fbx, Talking_1.fbx, Yelling.fbx (10. 11.)
 - Carrying.fbx, Carrying_Turn.fbx, Running.fbx (10. 11.)
+- Looking.fbx, Looking_Around.fbx, Look_Around.fbx, Looking_Through_Files_Low.fbx, Male_Sitting_Pose.fbx (10. 11.)
