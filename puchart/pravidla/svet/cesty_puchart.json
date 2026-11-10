@@ -7288,7 +7288,7 @@
    "delka_m": 83,
    "max_rez_m": 2.8,
    "max_nasyp_m": 0.1,
-   "max_pricny": 5.388
+   "max_pricny": 4.857
   },
   {
    "id": "osm_path_12",
@@ -21412,7 +21412,7 @@
    "delka_m": 83,
    "max_rez_m": 2.8,
    "max_nasyp_m": 0.1,
-   "max_pricny": 5.388
+   "max_pricny": 4.857
   },
   "osm_path_12": {
    "delka_m": 60,
