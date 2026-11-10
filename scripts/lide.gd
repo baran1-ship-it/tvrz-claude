@@ -97,7 +97,10 @@ func setup(p_main: Node) -> void:
 		(c["uzel"] as Node3D).visible = false
 		_lide.append(c)
 	for cn: Dictionary in P["cinnosti"].values():
-		for jm: String in cn.get("klipy", []) + cn.get("klipy_bez_sedu", []) + ([cn["chuze"]] if cn.has("chuze") else []):
+		var sc_kl: Array = []
+		for sc: Array in cn.get("sceny", []):
+			sc_kl.append_array(sc)
+		for jm: String in cn.get("klipy", []) + cn.get("klipy_bez_sedu", []) + ([cn["chuze"]] if cn.has("chuze") else []) + sc_kl:
 			if not _lide.is_empty() and not (_lide[0]["ap"] as AnimationPlayer).has_animation(jm):
 				push_error("lide: klip %s v knihovne UAL neni" % jm)
 
@@ -905,6 +908,7 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	var b: Dictionary = _volba(c, c["role"]["rozvrh"][bi], c.get("volba_nova", {}))
 	c.erase("volba_nova")
 	c["cinnost_ted"] = String(b["cinnost"])
+	c["scena"] = []
 	c["kde_ted"] = String(b["kde"])
 	c["nese"] = {}
 	c["obch_hraje"] = false
@@ -2007,6 +2011,14 @@ func _process_vlastni(dt: float) -> void:
 					var bez := bool(cn.get("sed", false)) and (c["sedak"] as Dictionary).is_empty()
 					var kl: Array = cn.get("klipy_bez_sedu" if bez else "klipy", ["Idle_Loop"])
 					var jm_k := String(kl[_rng.randi() % kl.size()])
+					# sceny (Misa 10. 11., KCD): rozehrana scena pokracuje dalsim klipem; jinak scena nebo jeden klip
+					var sc: Array = c.get("scena", [])
+					if not bez and not sc.is_empty():
+						jm_k = String(sc.pop_front())
+					elif not bez and cn.has("sceny") and _rng.randi() % (kl.size() + (cn["sceny"] as Array).size()) >= kl.size():
+						sc = ((cn["sceny"] as Array)[_rng.randi() % (cn["sceny"] as Array).size()] as Array).duplicate()
+						jm_k = String(sc.pop_front())
+					c["scena"] = sc
 					if jm_k == String(P["stani"]["nahrazuje"]):
 						c["stani"] = _vazeny(P["stani"]["klipy"])      # stani se stridaji (r. 100)
 					_klip(c, jm_k, 1.0)
