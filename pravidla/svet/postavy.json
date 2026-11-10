@@ -543,7 +543,8 @@
      "Farma_Klece_Loop",
      "Farma_Vytrhava",
      "Farma_Vytrhava2",
-     "Farma_Klece_Loop"
+     "Farma_Klece_Loop",
+     "Vstava"
     ],
     [
      "Seje",
@@ -624,7 +625,8 @@
     ],
     [
      "Fixing_Kneeling",
-     "Fixing_Kneeling"
+     "Fixing_Kneeling",
+     "Vstava"
     ]
    ]
   },
@@ -3946,7 +3948,10 @@
   "k_ohni_m": 4.0,
   "ke_stolu_m": 0.8,
   "_ke_stolu_m": "Misa 9. 11. r. 82 (hostinec: hoste u stolu bokem): sedak do ke_stolu_m od pudorysu stolu = sedi se celem ke stolu (lavice kolmo, stolicka k nejblizsimu bodu stolu); ohen (k_ohni_m) az kdyz u sedaku stul neni. Test lide_chovani: sedici u stolu celem ke stolu (sed_ke_stolu_st).",
-  "sed_ke_stolu_st": 30.0
+  "sed_ke_stolu_st": 30.0,
+  "vstup_klip": "Sed_Vstup",
+  "vystup_klip": "Sed_Vystup",
+  "_prechody": "Misa 10. 11.: usedani Mixamo Stand_To_Sit (Sed_Vstup), vstavani Sit_To_Stand (Sed_Vystup) - panev konce/zacatku srovnana na UAL Sitting_Idle_Loop (tools/postavy_q/anim_cmu.py SED_VZOR), takze plati vyska_klipu_m; drive UAL Sitting_Enter/Exit"
  },
  "rozvrh_rozptyl": {
   "rozptyl_min": 15.0,

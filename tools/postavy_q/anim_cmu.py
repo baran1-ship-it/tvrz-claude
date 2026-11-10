@@ -60,6 +60,15 @@ CLIPS = [
     ("Hovor_Mix1_Loop", "Talking_1.fbx", 0.0, None, ""),
     # Misa 10. 11. (hostinsky jako v KCD: mezi obsluhou opreny o zed, pozoruje lokal)
     ("Opreny_Loop", "Leaning.fbx", 0.0, None, ""),
+    # Misa 10. 11.: prechody sedu (vstup/vystup na sedak - panev konce / zacatku srovnana na SED_VZOR) a vstavani z kleku
+    ("Sed_Vstup", "Stand_To_Sit.fbx", 0.0, None, ""),
+    ("Sed_Vystup", "Sit_To_Stand.fbx", 0.0, None, ""),
+    ("Vstava", "Standing_Up.fbx", 0.0, None, ""),
+    # Misa 10. 11. zahon: kleknuti -> pleti vkleče -> vstavani
+    ("Klekne", "Kneeling_Down.fbx", 0.0, None, ""),
+    ("Kleci_Loop", "Kneeling.fbx", 0.0, None, ""),
+    ("Pleti_Loop", "Pull_Plant.fbx", 0.0, None, ""),
+    ("Seje2", "Dig_And_Plant_Seeds_1.fbx", 0.0, None, ""),
     # Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): mikro-animace uvnitr cinnosti (jednorazove)
     ("Rozhlizi", "Look_Around.fbx", 0.0, None, ""),
     ("Rozhlizi2", "Looking_Around.fbx", 0.0, None, ""),
@@ -233,6 +242,8 @@ def prenes(name, cid, t0, dl, uchop):
     if name.startswith("Sed_") and sed_d is not None:
         ds_ = [Cy @ Vector(((P[i, 0] - sm[i, 0]) * k, (P[i, 1] - sm[i, 1]) * k, (P[i, 2] - zst) * k)) for i in range(len(P))]
         sed_posun = sed_d - sum(ds_, Vector()) / len(ds_)
+        if name == "Sed_Vstup": sed_posun = sed_d - ds_[-1]      # prechod: sedi az na konci
+        if name == "Sed_Vystup": sed_posun = sed_d - ds_[0]      # prechod: sedi na zacatku
         print("SED", name, "posun panve", tuple(round(x, 3) for x in sed_posun))
     # mistni rotace vsech kosti cile
     L = []

@@ -961,8 +961,8 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	var p := Vector2(u.position.x, u.position.z)
 	# vstavani ze sedu (Sitting_Exit), nez postava vykroci
 	if bool(c.get("sedi", false)) and viditelna:
-		_klip(c, "Sitting_Exit", 1.0)
-		c["vstava"] = _delka(c, "Sitting_Exit")
+		_klip(c, String(P["sedani"]["vystup_klip"]), 1.0)
+		c["vstava"] = _delka(c, String(P["sedani"]["vystup_klip"]))
 	c["sedi"] = false
 	if not viditelna or u.position == Vector3.ZERO:
 		# LOD AI: mimo dosah rovnou na misto
@@ -1958,8 +1958,8 @@ func _process_vlastni(dt: float) -> void:
 						# usedani: natocit k mistu, Sitting_Enter, pak klipy sedu
 						u.rotation.y = float(c["yaw_mista"])
 						c["sedi"] = true
-						_klip(c, "Sitting_Enter", 1.0)
-						c["obmena"] = _delka(c, "Sitting_Enter")
+						_klip(c, String(P["sedani"]["vstup_klip"]), 1.0)
+						c["obmena"] = _delka(c, String(P["sedani"]["vstup_klip"]))
 			# rozjezd a brzdeni (RDR2: plynule zrychleni misto prechodovych klipu), otoceni nejvys otaceni_max_st_s
 			var v_cil := 0.0 if ceka else float(c["rych"])
 			var dv := v_cil - float(c["v"])
