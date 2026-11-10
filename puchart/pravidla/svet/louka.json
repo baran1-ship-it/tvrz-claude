@@ -24,7 +24,9 @@
   "les_dubohabrina": 0.5,
   "les_doubrava": 0.5,
   "luh": 0.5,
-  "koryto_kamenite": 0.0
+  "koryto_kamenite": 0.0,
+  "pole": 0.75,
+  "zemedelstvi": 0.75
  },
  "druhy": {
   "pozn": "druh = buňka atlasu + výška (stebla.gdshader): 0 nízká 0,36 m, 1 nízká 0,5, 2 střední 0,6, 3 vysoká 0,82, 4 suchá 0,6; podíly na sečené louce (pastva nižší)",
@@ -47,6 +49,20 @@
    0.25,
    0.2,
    0.1,
+   0.05
+  ],
+  "pole": [
+   0.45,
+   0.3,
+   0.17,
+   0.03,
+   0.05
+  ],
+  "zemedelstvi": [
+   0.45,
+   0.3,
+   0.17,
+   0.03,
    0.05
   ]
  },
@@ -89,5 +105,6 @@
  "pozn_les_4_11": "Míša 4. 11.: „v lese má být řídká ale ne jak ji máš ty, svahy plné jako v realitě, podívej se jak to dělá Havran“",
  "pozn_vykon_4_11": "měření tabletu 4. 11. (5096468): les p95 55,6 ms při 100 % (dřív 27,2 bez trávy v lese) → tráva v lese jen do 18 m a hustota světlin 0,55",
  "pozn_breh_4_11": "Míša 4. 11.: „břehy jsou v reálném světě plné zeleně“ – tráva na břehu plně, na kamenitém prahu koryta 0,6",
- "pozn_5_11": "Míša 5. 11.: „tráva se třepotá při pohybu, i dál, podívej se jak to dělá Havran“ – zpět Havranovy buňky pevné ve světě (mřížka s kamerou se posouvala), dosah 82 m jako Havran tablet (hust_do 80), les podle krytí korun na CPU – dosah zpět 66/60 m (hlídač scén B 2,12 M > 2,1 M)"
+ "pozn_5_11": "Míša 5. 11.: „tráva se třepotá při pohybu, i dál, podívej se jak to dělá Havran“ – zpět Havranovy buňky pevné ve světě (mřížka s kamerou se posouvala), dosah 82 m jako Havran tablet (hust_do 80), les podle krytí korun na CPU – dosah zpět 66/60 m (hlídač scén B 2,12 M > 2,1 M)",
+ "pozn_pole_10_11": "Míša 10. 11.: „louka bez trávy“ – údolní niva je ve stanovištích pole (2,4 %), třída chyběla v tabulce = 0 trávy. Trojpolní hospodaření 14. st.: třetina polí úhor, zarostlý trávou a plevelem → pole/zemědělství 0,75 (druhy jako louka)."
 }
