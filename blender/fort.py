@@ -1074,7 +1074,10 @@ def stairs(P: Part, start, d, run, rise, width, n, mat, pod=True):
         P.beam(Vector(start) + o - up_ * 0.12, Vector(start) + o + d * run + up_ * (rise - 0.12), 0.08, 0.24, "dub", j=0.5)
     ang = math.atan2(rise, run)
     c = Vector(start) + d * (run / 2) + Vector((0, rise / 2, 0))
-    P.cols.append((M(c, basis=Matrix((side, Vector((0, 1, 0)), d)).transposed() @ Matrix.Rotation(-ang, 3, "X")), (width, 0.1, math.hypot(run, rise))))
+    # deska rampy 0,10 m hra zesili 0,6 m dolu (svet.gd _collisions: kapsle nepropadne); pod=False (pod ramenem vedou
+    # schody do sklepa) deska 0,12 m = hra ji nezesiluje, jinak by zabrala svetlou vysku nad schody dolu (test sklep 10. 11.)
+    P.cols.append((M(c, basis=Matrix((side, Vector((0, 1, 0)), d)).transposed() @ Matrix.Rotation(-ang, 3, "X")),
+                   (width, 0.1 if pod else 0.12, math.hypot(run, rise))))
     # pod nizkou casti schodu plna kolize: hrac by pod ne vlezl a zasekl se mezi schodnici a podlahou
     m = 10 if pod else 0
     for i in range(1, m):

@@ -2482,8 +2482,8 @@
   },
   "zed_t": 0.5,
   "klenba": {
-   "patka": 1.6,
-   "vzepeti": 0.45,
+   "patka": 1.95,
+   "vzepeti": 0.35,
    "tl": 0.15
   },
   "louce": [
@@ -2540,6 +2540,7 @@
     ],
     "title": "Kobky"
    }
-  ]
+  ],
+  "_klenba": "klenba chodby a kobek: patka nad dvermi kobek (dvere 1,9 m) - drive 1,6 m a hlava ve dverich narazila do klenby chodby (test sklep 10. 11.); vrchol y + patka + vzepeti = -0,45 (pod terenem nadvori)"
  }
 }

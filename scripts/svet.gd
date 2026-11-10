@@ -2813,7 +2813,8 @@ func _collisions(parent: Node3D) -> void:
 		# = na podeste hrana 7 cm a k tomu 45 st. -> kapsle se o ni zastavila; a deska 0,1 m je tenka - kapsle opreta o
 		# jeji spodni hranu se vytlacila DOLU pod ni a propadla na zem (Misa 0.63 "propadl podestou", test "schody na
 		# ochoz": z podesty y 3,2 na zem y 0 u z 6,7). Deska 0,6 m dolu, horni plocha po hranach stupnu.
-		if absf(box.size.y - 0.1) < 0.02 and box.size.z > 2.0 and box.size.x > 0.8 and absf((Basis(rot) * Vector3.BACK).y) > 0.3:
+		# deska 0,12 m = rampa nad prostorem (schody do sklepa pod ramenem, fort.stairs pod=False) - nezesilovat
+		if absf(box.size.y - 0.1) < 0.015 and box.size.z > 2.0 and box.size.x > 0.8 and absf((Basis(rot) * Vector3.BACK).y) > 0.3:
 			box.size.y = 0.6
 			cs.position -= Basis(rot) * Vector3.UP * 0.3
 		# podesty schodu (deska 0,2 m vodorovne): z rampy na podestu hrana -> kapsle se vytlacila pod tenkou podestu a
