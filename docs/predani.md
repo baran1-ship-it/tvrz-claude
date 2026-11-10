@@ -1127,3 +1127,9 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   tmavý MATERIÁL: `stodola/kolna_prkna_ven_diff_2k.jpg` průměr 80,67,59 × baseColorFactor prkna 0,78/0,72/0,66
   (lineárně ~4,5 % albeda), vrata `prkna_vrata` × 0,60/0,55/0,50 (~2,7 %) → ve stínu černá (ř. 29 „černá vrata“).
   Návrh: baseColorFactor prken 1,0, vrat ~0,85 (blender/predmety.py stodola, kolna), ověřit snímkem na slunci i ve stínu.
+- 10. 11. Míša: „strašně mě udivuje, že si na všechno musíš přijít sám, na internetu to určitě je (animace, postavy)“.
+  **Pravidlo animací:** nejdřív hotové – Mixamo (Míša stáhne: FBX for Unity, Without Skin, In Place → Disk Modely/Animace;
+  agent se nepřihlásí, API 403), Quaternius UAL1/UAL2; přenos na kostru postav vestavěným retargetingem Godotu
+  (BoneMap + SkeletonProfileHumanoid při importu), ne vlastním převodníkem. CMU BVH + `anim_cmu.py` jen když hotové nic
+  nesedí. Seznam k stažení: Walking/Fast Walk, Hammering, Pick Axe Mining, Chopping Wood, Sweeping, Carrying, Sleeping
+  Idle/Lying Down, Sitting Eating, Drinking, Talking, Standing Idle/Look Around, Horse Riding.
