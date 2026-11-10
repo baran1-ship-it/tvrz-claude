@@ -31,7 +31,9 @@ static var P: Dictionary = {
 	"dvere": Pravidla.cti("postavy", "dvere"), "lom": Pravidla.cti("postavy", "lom"),
 	"u_predmetu": Pravidla.cti("postavy", "u_predmetu"), "rozestup": Pravidla.cti("postavy", "rozestup"),
 	"spani": Pravidla.cti("postavy", "spani"), "rezim": Pravidla.cti("postavy", "denni_rezim"),
-	"nohy_ik": Pravidla.cti("postavy", "nohy_ik")}
+	"nohy_ik": Pravidla.cti("postavy", "nohy_ik"), "stani": Pravidla.cti("postavy", "stani"),
+	"chuze_postav": Pravidla.cti("postavy", "chuze_postav"), "podminky": Pravidla.cti("postavy", "podminky"),
+	"u_steny": Pravidla.cti("postavy", "u_steny")}
 ## stin postav jen zblizka: trida postava v pravidla_modelu.json (stin_m) - jeden zdroj s testem modelu
 static var STIN_M: float = _stin_m()
 const PREDMETY_DIR := "res://modely/predmety/"
@@ -121,6 +123,12 @@ func nova_postava(o: Dictionary) -> Dictionary:
 			"tempo": _rng.randf_range(float(P["pr"]["tempo_klipu"][0]), float(P["pr"]["tempo_klipu"][1])),
 			"geo": mt[2], "stin": true, "ruce": {}, "posun_h": 0.0, "cn": {}, "sedak": {}, "na_miste_t": 0.0, "vstava": 0.0}
 	uzel.scale = Vector3.ONE * _rng.randf_range(0.94, 1.04)
+	# Misa 10. 11. r. 100: kazda postava svou chuzi (Mixamo, chuze_postav) a stridave stani (stani); rychlost = zmerena
+	# rychlost klipu (chuze_klip_m_s) x tempo postavy - nohy neklouzou
+	var chp: Array = P["chuze_postav"]["klipy"]
+	c["chuze"] = String(chp[_rng.randi() % chp.size()])
+	c["rych"] = float(P["klip_m_s"][c["chuze"]]) * float(c["tempo"])
+	c["stani"] = _vazeny(P["stani"]["klipy"])
 	_hlava(c)
 	# chodidla na zemi (svah, schod, prah): scripts/nohy_ik.gd, jen zblizka (LOD v _process)
 	if bool(P["nohy_ik"].get("zapnuto", false)):
@@ -133,6 +141,31 @@ func nova_postava(o: Dictionary) -> Dictionary:
 	_klip(c, "Idle_Loop", 1.0)
 	ap.seek(_rng.randf(), true)
 	return c
+
+
+## Nahodny klip podle vah {klip: vaha}.
+func _vazeny(v: Dictionary) -> String:
+	var s := 0.0
+	for k: String in v:
+		s += float(v[k])
+	var r := _rng.randf() * s
+	for k: String in v:
+		r -= float(v[k])
+		if r <= 0.0:
+			return k
+	return String(v.keys()[0])
+
+
+## Klip UAL v datech cinnosti -> klip postavy (Misa 10. 11. r. 100): Idle_Loop = stani postavy (stani.klipy; ne s predmetem
+## v ruce po celou cinnost - rot_st kopi a lucerny ladene v Idle_Loop), Walk_Loop / Walk_Formal_Loop = chuze postavy.
+func _nahrada(c: Dictionary, jm: String) -> String:
+	if jm == String(P["stani"]["nahrazuje"]) and c.has("stani"):
+		if bool(P["stani"].get("ne_s_predmetem", true)) and ((c.get("cn", {}) as Dictionary).get("v_rukou", {}) as Dictionary).has("*"):
+			return jm
+		return String(c["stani"])
+	if (P["chuze_postav"]["nahrazuje"] as Array).has(jm) and c.has("chuze"):
+		return String(c["chuze"])
+	return jm
 
 
 ## Hlava a krk (Misa: „ohyba se i hlava“): LookAtModifier3D na krku (mensi uhel) a hlave, cil = bod cil_hlavy.
@@ -1564,6 +1597,9 @@ func _klip(c: Dictionary, jm: String, tempo: float) -> void:
 	# _novy_blok (v_posteli = false, pak teprve klip)
 	if bool(c.get("v_posteli", false)) and jm != String(P["spani"]["klip"]):
 		return
+	jm = _nahrada(c, jm)
+	if not ap.has_animation(jm):
+		jm = "Idle_Loop"
 	if String(c["klip"]) != jm:
 		# tempo 0 = stojici poza (lezeni v posteli): bez prolinani - prolinani v AnimationPlayer ubyva s casem
 		# x speed_scale, pri 0 se nikdy nedokonci a postava zustala v predchozi poze (Misa 0.99993 r. 59: stoji na luzku)
@@ -1733,6 +1769,10 @@ func _process_vlastni(dt: float) -> void:
 					c["na_miste"] = true
 					c["obmena"] = 0.0
 					c["uvnitr"] = c.get("uvnitr_cil", {})
+					c["obch_hraje"] = false
+					if not (c.get("nese", {}) as Dictionary).is_empty():
+						c["nese"] = {}                 # doneseno (pivo, misa na stul)
+						ruce(c, (cn.get("v_rukou", {}) as Dictionary).get("*", {}))
 					if not (c["sedak"] as Dictionary).is_empty() and not cn.has("obchuzka"):
 						# usedani: natocit k mistu, Sitting_Enter, pak klipy sedu
 						u.rotation.y = float(c["yaw_mista"])
@@ -1748,11 +1788,17 @@ func _process_vlastni(dt: float) -> void:
 				var dy := wrapf(atan2(k.x, k.y) - u.rotation.y, -PI, PI)
 				var om := deg_to_rad(float(pr["otaceni_max_st_s"])) * dt
 				u.rotation.y += clampf(dy * minf(1.0, dt * 6.0), -om, om)
-			var ch := String(cn.get("chuze", "Walk_Loop"))
+			var ch := _nahrada(c, String(cn.get("chuze", "Walk_Loop")))
+			var nese: Dictionary = c.get("nese", {})
+			if not nese.is_empty():
+				ch = String(cn["obchuzka_nese"]["chuze"])
 			if float(c["v"]) < 0.15:
 				_klip(c, "Idle_Loop", 1.0)
 			else:
-				_klip(c, ch, float(c["v"]) / float(P["klip_m_s"].get(ch, P["klip_m_s"]["Walk_Loop"])))
+				# tempo prehravani = rychlost / rychlost klipu; _klip ho jeste nasobi tempem postavy - proto deleno
+				_klip(c, ch, float(c["v"]) / (float(P["klip_m_s"].get(ch, P["klip_m_s"]["Walk_Loop"])) * float(c.get("tempo", 1.0))))
+			if not nese.is_empty():
+				ruce(c, nese)
 		else:
 			# na miste: cinnost (stridani klipu), natoceni podle mista; obchuzka = dalsi misto po obmene
 			if float(c["yaw_mista"]) != INF:
@@ -1761,20 +1807,30 @@ func _process_vlastni(dt: float) -> void:
 			if float(c["obmena"]) <= 0.0:
 				var ob: Array = cn.get("obmena_s", [5.0, 10.0])
 				c["obmena"] = _rng.randf_range(float(ob[0]), float(ob[1]))
-				if cn.has("obchuzka") and String(c["klip"]) != "":
-					var ok: Array = cn["obchuzka"]
-					c["obch"] = (int(c["obch"]) + 1) % ok.size()
-					var m: Array = _misto(c, String(ok[int(c["obch"])]))
-					m = [_rozestup(c, m[0]), m[1]]
-					c["misto"] = m[0]
-					c["yaw_mista"] = m[1]
-					_pozadej(c, [p, m[0], u.position.y, {}, false])
-					c["na_miste"] = false
+				var ok0: Array = cn.get("obchuzka", [])
+				if not ok0.is_empty() and not bool(c.get("obch_hraje", false)):
+					# Misa 0.99996 r. 93 (obsluha chodila porad stejne kolecko): na kazdem miste obchuzky nejdriv cinnost
+					# mista (obchuzka_klipy, jinak klipy cinnosti) po obmena_s, teprve pak dal - drive po prichodu hned dalsi
+					var kde_o := String(ok0[int(c["obch"])])
+					var okl: Array = (cn.get("obchuzka_klipy", {}) as Dictionary).get(kde_o, cn.get("klipy", ["Idle_Loop"]))
+					var jm_o := String(okl[_rng.randi() % okl.size()])
+					if jm_o == String(P["stani"]["nahrazuje"]):
+						c["stani"] = _vazeny(P["stani"]["klipy"])
+					_klip(c, jm_o, 1.0)
+					c["obch_hraje"] = true
+					var obm: Array = (cn.get("obchuzka_obmena_s", {}) as Dictionary).get(kde_o, ob)
+					c["obmena"] = _rng.randf_range(float(obm[0]), float(obm[1]))
+					c["pozor_cil"] = _pozor_cil(c, cn, kde_o)
+				elif not ok0.is_empty():
+					_obchuzka_dalsi(c, cn, p)
 				else:
 					# sed jen na sedaku; bez nej stoji (klipy_bez_sedu)
 					var bez := bool(cn.get("sed", false)) and (c["sedak"] as Dictionary).is_empty()
 					var kl: Array = cn.get("klipy_bez_sedu" if bez else "klipy", ["Idle_Loop"])
-					_klip(c, String(kl[_rng.randi() % kl.size()]), 1.0)
+					var jm_k := String(kl[_rng.randi() % kl.size()])
+					if jm_k == String(P["stani"]["nahrazuje"]):
+						c["stani"] = _vazeny(P["stani"]["klipy"])      # stani se stridaji (r. 100)
+					_klip(c, jm_k, 1.0)
 					if not bez and bool(cn.get("sed", false)):
 						c["sedi"] = true
 		# vyska terenu po 0,25 s (paprsek), plynule
@@ -1822,6 +1878,9 @@ func _process_vlastni(dt: float) -> void:
 			c["na_hrace"] = false                    # dost se podival - zpatky k praci
 		if bool(c["na_hrace"]) and d < dohled:
 			ch2.global_position = main.player.global_position + Vector3(0, 1.6, 0)
+		elif c.get("pozor_cil") is Node3D and bool(c["na_miste"]) and is_instance_valid(c["pozor_cil"]):
+			# opreny u steny pozoruje lokal (Misa 10. 11., KCD): hlava k hostovi
+			ch2.global_position = (c["pozor_cil"] as Node3D).global_position + Vector3(0, 1.2, 0)
 		else:
 			ch2.global_position = u.global_position + u.global_transform.basis.z.normalized() * float(hl["pohled_vpred_m"]) + Vector3(0, 1.55, 0)
 		_bublina_cas(c, dt)

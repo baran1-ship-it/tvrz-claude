@@ -58,6 +58,8 @@ CLIPS = [
     ("Chuze_Nese_Loop", "Carrying.fbx", 0.0, None, "r"),
     ("Hovor_Mix_Loop", "Talking.fbx", 0.0, None, ""),
     ("Hovor_Mix1_Loop", "Talking_1.fbx", 0.0, None, ""),
+    # Misa 10. 11. (hostinsky jako v KCD: mezi obsluhou opreny o zed, pozoruje lokal)
+    ("Opreny_Loop", "Leaning.fbx", 0.0, None, ""),
 ]
 # slepene klipy: horni pulka tela (pater, ruce, hlava) z prvniho klipu, panev a nohy z druheho (sed) - vykladani vsedě
 SLEP = [("Sed_Hovor_Loop", "Hovor_Mix_Loop", "Sed_Loop"), ("Sed_Hovor1_Loop", "Hovor_Mix1_Loop", "Sed_Loop"),
