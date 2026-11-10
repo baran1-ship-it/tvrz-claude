@@ -6687,6 +6687,16 @@ func _hostinec_prochod() -> void:
 			var p0 := q2 + Vector2.from_angle(TAU * i / 8.0 + 0.3) * 0.8
 			if p0.distance_to(misto) > 4.5:
 				continue
+			# start jen na volnem miste (kapsle hrace se nesmi protinat s nabytkem ani zdi)
+			var sq := PhysicsShapeQueryParameters3D.new()
+			var cap := CapsuleShape3D.new()
+			cap.radius = 0.28
+			cap.height = 1.7
+			sq.shape = cap
+			sq.exclude = [player.get_rid()]
+			sq.transform = Transform3D(Basis(), Vector3(p0.x, float(k[2]) + 0.95, p0.y))
+			if not player.get_world_3d().direct_space_state.intersect_shape(sq, 1).is_empty():
+				continue
 			mezery += 1
 			var ok4 := 0
 			for sm in 4:
@@ -6734,15 +6744,13 @@ func _jdi_poschodi(body: Array, podlaha: float, vyska_nad: float) -> Array:
 	return [true, "ok"]
 
 
-## Trava pod strechou hostince (Misa 0.99996 r. 92, snimek 15 (-63, 930): tra v hostinci u dveri). Mrizka 0,5 m
-## kolem hostince: kde je nad hlavou (od podlahy do 8 m) strecha, strop ci pavlac, nesmi louka (_vzorek) mit hustotu a
-## rozsev smi (svet.uzivani_smi) nic sadit. Vypis prvnich bodu v souradnicich pudorysu stavby (_uvnitr) a obrysu.
+## Trava v hostinci (Misa 0.99996 r. 92, snimek 15 (-63, 930): trava u dveri uvnitr). Skutecne instance MultiMeshu
+## (Louka, Rostliny, TravaGPU) po dostaveni okoli hostince: zadna s pocatkem v pudorysu stavby (sv._uvnitr, cely obrys
+## bez zmenseni) ani do pasma budova pruchod_m + dvur_m od stredu dveri (Pohyb_dvere*, pohyb.kind dvere) - tam se rostlina
+## nesmi objevit (v_pruchodu). Mimo to rostlina uvnitr nesmi stat ani pod strechou (paprsek nahoru, 4 m).
 func _hostinec_trava() -> void:
-	var louka: Node = main.get_node_or_null("Louka")
 	var stred := Vector2(-67.3, 926.6)
-	var space := player.get_world_3d().direct_space_state
-	var spatne: Array = []
-	var kryto := 0
+	var louka: Node = main.get_node_or_null("Louka")
 	var inv := Transform3D()
 	var bb := AABB()
 	for st: Array in sv._uvnitr:
@@ -6750,26 +6758,80 @@ func _hostinec_trava() -> void:
 			continue
 		var q: Vector3 = (st[0] as Transform3D) * Vector3(stred.x, 0.0, stred.y)
 		var b2: AABB = st[1]
-		if q.x > b2.position.x - 2.0 and q.x < b2.end.x + 2.0 and q.z > b2.position.z - 2.0 and q.z < b2.end.z + 2.0:
+		if q.x > b2.position.x and q.x < b2.end.x and q.z > b2.position.z and q.z < b2.end.z:
 			inv = st[0]
 			bb = b2
+	bb = bb.grow(0.1)                                # cely obrys (uvnitr ho svet smenuje o 0,1 m)
 	print("HOSTINEC_TRAVA obrys stavby (misto): x %.1f..%.1f, z %.1f..%.1f" % [bb.position.x, bb.end.x, bb.position.z, bb.end.z])
-	for i in 52:
-		for j in 52:
-			var x := stred.x - 13.0 + i * 0.5
-			var z := stred.y - 13.0 + j * 0.5
-			var q := PhysicsRayQueryParameters3D.create(Vector3(x, 36.1, z), Vector3(x, 44.0, z))
-			if space.intersect_ray(q).is_empty():
+	var dvere: Array = []
+	for e: Dictionary in sv.data.get("pohyb", []):
+		var p3: Array = e.get("use", e["pos"])
+		if String(e.get("kind", "")) == "dvere" and Vector2(float(p3[0]), float(p3[2])).distance_to(stred) < 14.0:
+			dvere.append(Vector2(float(p3[0]), float(p3[2])))
+	var r_dv := float(sv.pasma()["budova"]["pruchod_m"]) + float(sv.pasma()["budova"]["dvur_m"])     # jako svet.v_pruchodu
+	await main.fast_travel(Vector3(-63.0, 0.0, 930.0), Vector3(-66.0, 1.6, 932.0), 0.0, "test")
+	for f in 1800:
+		await get_tree().process_frame
+		if louka == null or louka.okoli_hotove(40.0):
+			break
+	var oblast := AABB(Vector3(stred.x - 20.0, -50.0, stred.y - 20.0), Vector3(40.0, 200.0, 40.0))
+	var inst := 0
+	var spatne: Array = []
+	for kor: String in ["Louka", "Rostliny", "TravaGPU"]:
+		var uz := get_tree().root.find_child(kor, true, false)
+		if uz == null:
+			continue
+		for g: Node in uz.find_children("*", "MultiMeshInstance3D", true, false):
+			var mmi := g as MultiMeshInstance3D
+			if not mmi.is_visible_in_tree() or mmi.multimesh == null or not (mmi.global_transform * mmi.get_aabb()).intersects(oblast):
 				continue
-			kryto += 1
-			var hust := (louka._vzorek(x, z) as Vector3).x
-			var smi: bool = sv.uzivani_smi("", x, z)
-			if hust > 0.02 or smi:
-				var l: Vector3 = inv * Vector3(x, 0.0, z)
-				spatne.append("(%.1f, %.1f) misto (%.1f, %.1f) hustota %.2f smi %s" % [x, z, l.x, l.z, hust, str(smi)])
-	for e: String in spatne.slice(0, 12):
-		print("HOSTINEC_TRAVA pod strechou ", e)
-	_vysledek("hostinec_trava", kryto > 100 and spatne.is_empty(), "bodu pod strechou %d, s travou nebo rozsevem %d" % [kryto, spatne.size()])
+			var mm := mmi.multimesh
+			var n := mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
+			for i in n:
+				var p := mmi.global_transform * mm.get_instance_transform(i).origin
+				if not oblast.has_point(p):
+					continue
+				inst += 1
+				var l: Vector3 = inv * p
+				var v_obrysu: bool = l.x > bb.position.x and l.x < bb.end.x and l.z > bb.position.z and l.z < bb.end.z and p.y < 37.5
+				var u_dveri := false
+				for dv: Vector2 in dvere:
+					u_dveri = u_dveri or dv.distance_to(Vector2(p.x, p.z)) < r_dv
+				if v_obrysu or u_dveri:
+					if spatne.size() < 40:
+						print("HOSTINEC_TRAVA %s (%.2f, %.2f, %.2f) misto (%.1f, %.1f) %s uzel %s" % [mm.mesh.resource_name if mm.mesh else "?", p.x, p.y, p.z, l.x, l.z,
+								"v obrysu" if v_obrysu else "u dveri", str(mmi.get_path()).right(50)])
+					spatne.append(p)
+	_vysledek("hostinec_trava", inst > 0 and spatne.is_empty(), "instanci v okoli %d, v obrysu stavby nebo u dveri %d, dveri %d" % [inst, spatne.size(), dvere.size()])
+
+
+## Zlab odtoku mlyna (Misa 0.99996 r. 91, snimky 04-05: zlab prazdny, voda tece siroky pas vedle): hladina lednice
+## (mlyn_voda.json lednice.body, svet) musi byt nad nejblizsim pevnym povrchem pod osou zlabu (kolize hry: dno
+## modelu Mlyn_Lednice, teren dilu) a nejvyse mlyn_zlab hloubka_max nad nim. Paprsek jen 1,2 m nad hladinou (nad ni je
+## vantrok a kolo). Vypis kazdeho 3. bodu.
+func _mlyn_zlab() -> void:
+	var P = preload("res://scripts/pravidla.gd")
+	var d: Dictionary = P.cti("voda", "mlyn")["dil"]
+	var f := FileAccess.open("res://tools/krok_b/mlyn_voda.json", FileAccess.READ)
+	var body: Array = (JSON.parse_string(f.get_as_text()) as Dictionary)["lednice"]["body"]
+	var xf := Transform3D(Basis(Vector3.UP, float(d["natoceni"])), Vector3(float(d["stred"][0]), float(d["y_dvora"]), float(d["stred"][1])))
+	var space := player.get_world_3d().direct_space_state
+	var chyby: Array = []
+	for i in body.size():
+		var w: Vector3 = xf * Vector3(float(body[i][0]), float(body[i][1]), float(body[i][2]))
+		var q := PhysicsRayQueryParameters3D.create(w + Vector3(0, 1.2, 0), w - Vector3(0, 6.0, 0))
+		var h := space.intersect_ray(q)
+		var nm := "nic"
+		var y := -999.0
+		if not h.is_empty():
+			y = float(h["position"].y)
+			nm = str((h["collider"] as Node).get_parent().name)
+		var nad := w.y - y
+		if i % 3 == 0 or nad < 0.05:
+			print("MLYN_ZLAB bod %d (%.1f, %.1f) hladina %.2f, povrch %.2f (%s), hloubka vody %.2f" % [i, w.x, w.z, w.y, y, nm, nad])
+		if nad < 0.05 or nad > 0.8:
+			chyby.append("bod %d (%.1f, %.1f): voda %.2f m nad povrchem %s" % [i, w.x, w.z, nad, nm])
+	_vysledek("mlyn_zlab", chyby.is_empty(), "%d chyb %s" % [chyby.size(), str(chyby.slice(0, 5))])
 
 
 ## V interieru zadna trava (Misa 0.99993 r. 57, snimky misa_6_11/30-31: trsy v sini hostince u sudu a dveri). Test

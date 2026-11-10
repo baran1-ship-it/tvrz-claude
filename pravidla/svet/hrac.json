@@ -127,6 +127,11 @@
   0.15
  ],
  "_schod_m": "vyska zvednuti pri prekroceni schodu, zkousi se v poradi (plny schod, pod nizkym stropem nizsi - prah, nizky schod). Warhorse KM-A-52: schod 0,20 m - nase 0,45 je nejvyssi prekonatelny, ne norma schodu (warhorse_do_dat.md)",
+ "predmet_prejit": {
+  "do_vysky_m": 0.45,
+  "do_pudorysu_m": 0.9,
+  "popis": "Misa 0.99996 r. 98 (snimek 16, hostinec -68, 933): predmet nizsi nez schod hrace (schod_m, nejvyssi 0,45) a maly (pudorys do do_pudorysu_m) - stolicka, taburet, sud na bok - nema kolizi pro hrace (vrstva 2 jako drobnosti: jen pokladani a vyber), hrac ho prejde misto aby uvazl mezi stolickou, lavici a stolem. Vyssi a delsi (lavice 0,475, truhla, stul) kolizi maji."
+ },
  "schod_kolize_m": 0.2,
  "schody_zebrik_nad_st": 50.0,
  "schody_zebrik": {
