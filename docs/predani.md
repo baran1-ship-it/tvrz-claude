@@ -1160,3 +1160,7 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   načte všechny najednou (`data.gd`), pořadí nehraje roli. Číslo: 83 GLB 310 MB → 28 MB, 310 vložených obrázků → 149 souborů
   v `tex/` 144 MB, smazáno 274 rozbalených kopií (106 MB) + jejich cache v `.godot/imported`. Pozor: `limity_textur.py`
   přepíše datové textury (reka) → vždy po něm `datove_textury_import.py`. Zásek na tabletu NEOVĚŘENO (měřit trasou po vydání).
+- 10. 11. stromy (jádro korun + stínové těleso + listí bez depth_prepass_alpha): PC xvfb lesA kreslení 436 → 391,
+  lesB 688 → 626; stín slunce v lese po změně jen −9 / −64 kreslení (dřív stín z listí). Snímky build/fstrom prohlédnuty:
+  koruny plné, stín stromů zůstal (elipsoid); uvnitř korun místy tmavší skvrny (jádro bez alfy ukazuje barvu průhledných
+  míst textury) – sledovat na tabletu. Výkon na tabletu NEOVĚŘENO.
