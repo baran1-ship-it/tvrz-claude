@@ -494,7 +494,7 @@ void fragment() {
 			// jen cast puklin otevrena; jemne pukliny ze sumu
 			float bw2 = mix(3.0, 10.0, lh);
 			float bx = (hor + lh2 * 17.0 + (texture(sum, vec2(wp.y * 0.05, li * 0.29)).r - 0.5) * 1.6) / bw2;
-			float bh = fract(sin(floor(bx) * 39.17 + li * 7.31) * 15731.743);
+			float bh = hash12(vec2(floor(bx), li * 7.31));          // bez sinu (Adreno mediump ctverce, kontrola 10. 11.)
 			float bf = abs(fract(bx) - 0.5) * 2.0;
 			float puk = smoothstep(1.0 - 0.06 / bw2 * 3.0, 1.0, bf) * step(0.35, bh);
 			float pk = texture(sum, vec2(hor * 0.09, wp.y * 0.011) + 0.13).r;
