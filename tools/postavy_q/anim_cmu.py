@@ -39,7 +39,35 @@ CLIPS = [
     ("Chuze_Mix_Loop", "Walking.fbx", 0.0, None, ""),           # chuze hrace (svizna)
     ("Chuze_Mix1_Loop", "Walking_1.fbx", 0.0, None, ""),
     ("Spanek_Lezmo_Loop", "Laying_Sleeping.fbx", 0.0, None, ""), # spanek vleze (r. 59/85)
+    # Misa 10. 11. r. 100 (stojici rozkroceni - UAL Idle_Loop; chuze jako pochod - UAL Walk_Loop): stani a chuze postav
+    ("Stani_Loop", "Idle.fbx", 0.0, None, ""),
+    ("Stani_Dech_Loop", "Breathing_Idle.fbx", 0.0, None, ""),
+    ("Stani_Stary_Loop", "Old_Man_Idle.fbx", 0.0, None, ""),
+    ("Stani_Presun_Loop", "gesta/weight_shift.fbx", 0.0, None, ""),
+    ("Chuze_Std_Loop", "Standard_Walk.fbx", 0.0, None, ""),
+    ("Chuze_Mix3_Loop", "Walking_3.fbx", 0.0, None, ""),
+    ("Chuze_Mix4_Loop", "Walking_4.fbx", 0.0, None, ""),
+    ("Chuze_Mix5_Loop", "Walking_5.fbx", 0.0, None, ""),
+    # r. 95 kovar: jednorucni uder kladivem (prava ruka drzi kladivo - uchop prstu z UAL Sword_Idle)
+    ("Kovar_Bash_Loop", "Bash.fbx", 0.0, None, "r"),
+    ("Kovar_Swing_Loop", "Heavy_Weapon_Swing.fbx", 0.0, None, "r"),
+    # r. 96/99 hostinec: piti vsedě a sed (panev srovnana na UAL Sitting_Idle_Loop - SED_VZOR, data sedani.vyska_klipu_m)
+    ("Sed_Piti_Loop", "Sitting_Drinking.fbx", 0.0, None, "r"),
+    ("Sed_Loop", "Male_Sitting_Pose.fbx", 0.0, None, ""),
+    # Misa 10. 11. (hostinec: obsluha nosi hostum, hoste vykladaji): chuze s nosenim, hovor vestoje (Mixamo)
+    ("Chuze_Nese_Loop", "Carrying.fbx", 0.0, None, "r"),
+    ("Hovor_Mix_Loop", "Talking.fbx", 0.0, None, ""),
+    ("Hovor_Mix1_Loop", "Talking_1.fbx", 0.0, None, ""),
 ]
+# slepene klipy: horni pulka tela (pater, ruce, hlava) z prvniho klipu, panev a nohy z druheho (sed) - vykladani vsedě
+SLEP = [("Sed_Hovor_Loop", "Hovor_Mix_Loop", "Sed_Loop"), ("Sed_Hovor1_Loop", "Hovor_Mix1_Loop", "Sed_Loop"),
+        ("Sed_Jidlo_Loop", "Ual_Consume", "Sed_Loop")]          # jidlo vsedě: UAL2 Consume (ji vestoje) + sed
+# klipy UAL ponechane jen jako zdroj slepeni (UAL1.glb nese i klipy UAL2? ne - Consume je v UAL2.glb, nacte se zvlast)
+UAL_ZDROJ = {"Consume": "Ual_Consume"}
+DOLNI = {"root", "pelvis"} | {f"{b}_{t}" for b in ("thigh", "calf", "foot", "ball") for t in ("l", "r")}
+# klipy vsedě (jmeno Sed_*): stredni poloha panve = jako v UAL Sitting_Idle_Loop, aby platila jedna vyska sedaku
+# (postavy.json sedani.vyska_klipu_m) - Mixamo sed je nahrany na jine zidli (vyska panve z klidove pozy nesedi)
+SED_VZOR = "Sitting_Idle_Loop"
 MAP = {"Hips": "pelvis", "LowerBack": "spine_01", "Spine": "spine_02", "Spine1": "spine_03", "Neck": "neck_01", "Head": "Head"}
 for s, t in (("Left", "l"), ("Right", "r")):
     MAP.update({f"{s}Shoulder": f"clavicle_{t}", f"{s}Arm": f"upperarm_{t}", f"{s}ForeArm": f"lowerarm_{t}", f"{s}Hand": f"hand_{t}",
@@ -73,10 +101,29 @@ if ga:
             if bn.endswith("_r") and bn.startswith(PRSTY):
                 grip.setdefault(bn, [1, 0, 0, 0])[fc.array_index] = fc.evaluate(ga.frame_range[0])
 print("UCHOP kosti", len(grip))
+# vzor sedu: stredni poloha panve (svet) v UAL klipu SED_VZOR minus klidova poloha
+sed_d = None
+sa = bpy.data.actions.get(SED_VZOR + "_Armature") or bpy.data.actions.get(SED_VZOR)
+if sa:
+    T.animation_data_create(); T.animation_data.use_nla = False; T.animation_data.action = sa
+    pz = []
+    for f in range(int(sa.frame_range[0]), int(sa.frame_range[1]) + 1):
+        bpy.context.scene.frame_set(f); pz.append((T.matrix_world @ T.pose.bones["pelvis"].head) - (T.matrix_world @ T.data.bones["pelvis"].head_local))
+    sed_d = sum(pz, Vector()) / len(pz)
+    T.animation_data.action = None; T.animation_data.use_nla = True
+print("SED_VZOR", SED_VZOR, sed_d)
 if T.animation_data:
     T.animation_data.action = None
     for tr in list(T.animation_data.nla_tracks): T.animation_data.nla_tracks.remove(tr)
 for a in list(bpy.data.actions): bpy.data.actions.remove(a)
+# zdroje slepeni z UAL2 (stejna kostra): akce nacist, prejmenovat, objekty pryc
+_pred = set(bpy.data.objects)
+bpy.ops.import_scene.gltf(filepath=os.path.join(REPO, "modely/postavy/anim/UAL2.glb"))
+for a in list(bpy.data.actions):
+    zk = a.name.replace("_Armature", "")
+    if zk in UAL_ZDROJ: a.name = UAL_ZDROJ[zk]; a.use_fake_user = True
+    else: bpy.data.actions.remove(a)
+for o in [o for o in bpy.data.objects if o not in _pred]: bpy.data.objects.remove(o)
 TB = [b for b in T.data.bones]
 order = []
 def walk(b):
@@ -155,6 +202,12 @@ def prenes(name, cid, t0, dl, uchop):
         v = D["pelvis"] @ FWD; yaws.append(math.atan2(v.y, v.x))
     my = math.atan2(np.mean(np.sin(yaws)), np.mean(np.cos(yaws)))
     Cy = Quaternion((0, 0, 1), math.atan2(FWD.y, FWD.x) - my)
+    # sed: posun panve tak, aby stredni poloha byla jako u SED_VZOR (svet, po natoceni Cy)
+    sed_posun = Vector()
+    if name.startswith("Sed_") and sed_d is not None:
+        ds_ = [Cy @ Vector(((P[i, 0] - sm[i, 0]) * k, (P[i, 1] - sm[i, 1]) * k, (P[i, 2] - zst) * k)) for i in range(len(P))]
+        sed_posun = sed_d - sum(ds_, Vector()) / len(ds_)
+        print("SED", name, "posun panve", tuple(round(x, 3) for x in sed_posun))
     # mistni rotace vsech kosti cile
     L = []
     for i, D in enumerate(Ds):
@@ -168,7 +221,7 @@ def prenes(name, cid, t0, dl, uchop):
             Dp = Dall[par[bn]] if par[bn] else Quaternion()
             fr[bn] = Qr[bn].inverted() @ Dp.inverted() @ Dall[bn] @ Qr[bn]
         d = Vector(((P[i, 0] - sm[i, 0]) * k, (P[i, 1] - sm[i, 1]) * k, (P[i, 2] - zst) * k))
-        d = Cy @ d
+        d = Cy @ d + sed_posun
         fr["_loc"] = Qr["pelvis"].inverted() @ d
         if uchop:
             for bn, q in grip.items():
@@ -220,6 +273,39 @@ def prenes(name, cid, t0, dl, uchop):
 for c in CLIPS:
     try: prenes(*c)
     except Exception as e: print("CHYBA", c[0], e); sys.stdout.flush()
+for jm, ah, ad in SLEP:
+    A_h, A_d = bpy.data.actions.get(ah), bpy.data.actions.get(ad)
+    if not (A_h and A_d):
+        print("CHYBA slep", jm); continue
+    act = bpy.data.actions.new(jm)
+    h0, h1 = int(A_h.frame_range[0]), int(A_h.frame_range[1])
+    d0, d1 = int(A_d.frame_range[0]), int(A_d.frame_range[1])
+    n = h1 - h0 + 1
+    for fc in A_h.fcurves:
+        bn = fc.data_path.split('"')[1]
+        src, dolni = fc, False
+        if bn in DOLNI:
+            s2 = A_d.fcurves.find(fc.data_path, index=fc.array_index)
+            if s2 is not None: src, dolni = s2, True
+        nf = act.fcurves.new(fc.data_path, index=fc.array_index, action_group=bn)
+        nf.keyframe_points.add(n)
+        co = np.zeros(n * 2, np.float32); co[0::2] = np.arange(n)
+        co[1::2] = [src.evaluate(d0 + (i % (d1 - d0 + 1)) if dolni else h0 + i) for i in range(n)]
+        nf.keyframe_points.foreach_set("co", co); nf.update()
+    # panev (poloha) jen ze sedu, i kdyz ji horni klip nema
+    for c in range(3):
+        dp = 'pose.bones["pelvis"].location'
+        if act.fcurves.find(dp, index=c) is None and A_d.fcurves.find(dp, index=c) is not None:
+            s2 = A_d.fcurves.find(dp, index=c)
+            nf = act.fcurves.new(dp, index=c, action_group="pelvis"); nf.keyframe_points.add(n)
+            co = np.zeros(n * 2, np.float32); co[0::2] = np.arange(n); co[1::2] = [s2.evaluate(d0) for i in range(n)]
+            nf.keyframe_points.foreach_set("co", co); nf.update()
+    act.use_fake_user = True
+    tr = T.animation_data.nla_tracks.new(); tr.name = jm
+    tr.strips.new(jm, 0, act)
+    print("KLIP", jm, "slepeno", ah, "+", ad)
+for zd in UAL_ZDROJ.values():
+    if bpy.data.actions.get(zd): bpy.data.actions.remove(bpy.data.actions[zd])
 for o in [o for o in bpy.data.objects if o is not T]: bpy.data.objects.remove(o)
 bpy.context.scene.render.fps = FPS
 T.animation_data.action = None

@@ -80,7 +80,8 @@ KATALOG = {
     "estok": ("antique_estoc", "Estok", "zbrane", "zbrojnice", 1.6, 520, {}),
     "tesak": ("wooden_handle_saber", "Tesák", "zbrane", "zbrojnice", 1.3, 160, {}),
     "sekerka": ("hatchet", "Sekerka", "naradi", "zbrojnice", 1.0, 40, {}),
-    "kladivo": ("cross_pein_hammer", "Kladivo", "naradi", "remeslo", 1.0, 25, {}),
+    # Misa 10. 11. r. 95: kovarske kladivo (kovar misto moderniho perliku), 1k staci (0,30 m v ruce)
+    "kladivo": ("cross_pein_hammer", "Kladivo", "naradi", "remeslo", 1.0, 25, {"res": "1k"}),
     "krumpac": ("picke_dirty_01", "Krumpáč", "naradi", "remeslo", 3.0, 35, {}),
     "ryc": ("rusted_spade_01", "Rýč", "naradi", "remeslo", 2.0, 20, {}),
     "hoblik": ("hand_plane_no4", "Hoblík", "naradi", "remeslo", 1.5, 30, {}),
@@ -451,9 +452,11 @@ def fetch(res="2k"):
         with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=300) as r, open(path, "wb") as f:
             f.write(r.read())
     jen = sys.argv[sys.argv.index("fetch") + 1:] if "fetch" in sys.argv else []
+    res0 = res
     for key, (pid, *_rest) in KATALOG.items():
         if pid == "@" or (jen and key not in jen):
             continue
+        res = _rest[-1].get("res", res0)
         d = os.path.join(ROOT, pid + "_" + res)
         main = os.path.join(d, pid + ".gltf")
         if os.path.exists(main):
@@ -559,7 +562,7 @@ def build():
                 continue
         else:
             try:
-                bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, pid + "_2k", pid + ".gltf"))
+                bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, pid + "_" + props.get("res", "2k"), pid + ".gltf"))
             except Exception as e:      # poskozeny model: preskocit, at stavba pokracuje
                 print("PRESKOCENO", key, e)
                 continue
@@ -813,7 +816,7 @@ def build():
                              for d_, (ds, piv, udaje) in dily.items()}
         cat[key] = {"nazev": name, "kat": kat, "stav": stav, "vaha": wt, "cena": price,
                     "rozmer": [round(size.x, 3), round(size.z, 3), round(size.y, 3)],
-                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex", "zem0", "uprava", "vyprazdnit", "bez_barvy_vrcholu", "oboustranne", "barva")}}
+                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex", "zem0", "uprava", "vyprazdnit", "bez_barvy_vrcholu", "oboustranne", "barva", "res")}}
         print("predmet", key, "%d troj." % tris, [round(v, 2) for v in size])
     p = os.path.join(OUT, "..", "predmety.json")
     old = json.load(open(p)) if os.path.exists(p) and only else {}
@@ -884,7 +887,7 @@ def meta():
         size = [mx[i] - mn[i] for i in range(3)]
         cat[key] = {"nazev": name, "kat": kat, "stav": stav, "vaha": wt, "cena": price,
                     "rozmer": [round(size[0], 3), round(size[2], 3), round(size[1], 3)],
-                    **{a: b for a, b in props.items() if a not in ("meritko", "dil")}}
+                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "res")}}
         print("meta", key, cat[key]["rozmer"])
     json.dump(cat, open(p, "w"), ensure_ascii=False, indent=1)
 

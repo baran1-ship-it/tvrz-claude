@@ -2725,7 +2725,12 @@
    "Jog_Fwd_Loop",
    "Sprint_Loop",
    "Chuze_Mix_Loop",
-   "Chuze_Mix1_Loop"
+   "Chuze_Mix1_Loop",
+   "Chuze_Std_Loop",
+   "Chuze_Mix3_Loop",
+   "Chuze_Mix4_Loop",
+   "Chuze_Mix5_Loop",
+   "Chuze_Nese_Loop"
   ],
   "dotyk_m": 0.03,
   "klouzani_podil": 0.1

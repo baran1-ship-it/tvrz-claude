@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -6640,6 +6640,112 @@ func _lide_chovani() -> void:
 	# v patre jen vypis - schody mrizka nepozna)
 	var n8 := _nabytek_kontrola(lide, ll, kat, P, ch)
 	_vysledek("lide_chovani", chyby.is_empty(), "%d chyb %s; predmetu %d, sed %d / stoji %d, hovor %d (sami %d), postele %d, diry spanku %d, nabytek %s" % [chyby.size(), str(chyby.slice(0, 6)), predmetu, sedi, stoji, hovori.size(), sami, postele, diry.size(), n8])
+
+
+## Hostinec: hrac projde mezi stoly a stolickami (Misa 0.99996 r. 98, snimek 16 (-68, 933): zasekl se, pod nohama
+## stolicky). Model hostince -> svet z ctyr stolu (blender/hostinec.py VYBAVENI, model x, y) metodou nejmensich ctvercu
+## (otoceni + posun, i se zrcadlenim); trasy v souradnicich modelu: sin u krbu mezi stoly a stolickami, senk mezi
+## stoly. Vypis kolizniho tela stolicek a lavic (vrstva) a kde hrac uvazl.
+func _hostinec_prochod() -> void:
+	var stul: Array = []
+	var model := [Vector2(-2.75, -0.5), Vector2(-2.75, 2.3), Vector2(2.5, 3.0), Vector2(7.9, 2.0)]
+	var stred := Vector2(-67.3, 926.6)
+	var podlaha := 0.0
+	for r: Dictionary in sv.data["vybaveni"]:
+		var q := Vector2(float(r["p"][0]), float(r["p"][2]))
+		if String(r["id"]) == "stul_hospoda" and q.distance_to(stred) < 14.0:
+			stul.append(q)
+			podlaha = maxf(podlaha, float(r["p"][1]))
+	if stul.size() < 4:
+		_vysledek("hostinec_prochod", false, "stolu hostince %d (cekam 4)" % stul.size())
+		return
+	# priradit stoly modelu: zkusit vsechna poradi a oba smysly otoceni, vzit nejmensi zbytek
+	var nej := INF
+	var T: Array = []
+	var perm: Array = []
+	for a in 4:
+		for b in 4:
+			for c in 4:
+				for d in 4:
+					if a != b and a != c and a != d and b != c and b != d and c != d:
+						perm.append([a, b, c, d])
+	for pm: Array in perm:
+		for zrc in [1.0, -1.0]:
+			var mc := Vector2.ZERO
+			var sc := Vector2.ZERO
+			for i in 4:
+				mc += Vector2(model[i].x, model[i].y * zrc) / 4.0
+				sc += (stul[pm[i]] as Vector2) / 4.0
+			var dot := 0.0
+			var cr := 0.0
+			for i in 4:
+				var m := Vector2(model[i].x, model[i].y * zrc) - mc
+				var w: Vector2 = (stul[pm[i]] as Vector2) - sc
+				dot += m.dot(w)
+				cr += m.x * w.y - m.y * w.x
+			var ang := atan2(cr, dot)
+			var rez := 0.0
+			for i in 4:
+				var m := Vector2(model[i].x, model[i].y * zrc) - mc
+				rez += (m.rotated(ang) + sc - (stul[pm[i]] as Vector2)).length_squared()
+			if rez < nej:
+				nej = rez
+				T = [mc, sc, ang, zrc]
+	var f := func(m: Vector2) -> Vector2:
+		var mm := Vector2(m.x, m.y * float(T[3])) - (T[0] as Vector2)
+		return mm.rotated(float(T[2])) + (T[1] as Vector2)
+	print("HOSTINEC_PROCHOD model -> svet: zbytek %.3f m2, otoceni %.2f, zrcadlo %s, podlaha y %.2f" % [nej, float(T[2]), str(T[3] < 0.0), podlaha])
+	var chyby: Array = []
+	if nej > 0.5:
+		chyby.append("stoly modelu nesedi na stoly sveta (zbytek %.2f m2)" % nej)
+	var trasy := {
+		"sin mezi stoly a stolickami": [Vector2(-0.4, 1.0), Vector2(-3.0, 1.0), Vector2(-4.5, 1.0), Vector2(-4.7, 1.0), Vector2(-3.0, 1.0), Vector2(-0.4, 1.0)],
+		"sin kolem stolicek": [Vector2(-0.4, 1.0), Vector2(-4.7, 1.0), Vector2(-4.7, 3.4), Vector2(-4.7, -1.6), Vector2(-4.7, 1.0)],
+		"senk mezi stoly": [Vector2(1.5, -0.8), Vector2(5.4, 1.5), Vector2(5.4, 4.2), Vector2(5.4, 1.5), Vector2(1.5, -0.8)],
+		"senk u konce stolu": [Vector2(5.4, 1.5), Vector2(5.4, 3.5), Vector2(6.4, 3.8), Vector2(6.4, 0.3), Vector2(5.4, 1.5)],
+	}
+	player.set_flying(false)
+	var s := ""
+	for nm: String in trasy:
+		var r: Array = await _jdi_poschodi(trasy[nm], f, podlaha)
+		if not bool(r[0]):
+			chyby.append("%s: %s" % [nm, r[1]])
+		s += " | %s: %s" % [nm, r[1]]
+	_vysledek("hostinec_prochod", chyby.is_empty(), "%d chyb %s%s" % [chyby.size(), str(chyby), s])
+
+
+## Chuze hrace po bodech modelu hostince f(model) -> svet, ve vysce podlahy (ne _ground_hi: nad mistnosti je strecha).
+## Vraci [ok, text]; ok = vsechny body do 0,5 m, hrac se nezasekl (stuck 3 s), nepropadl.
+func _jdi_poschodi(body: Array, f: Callable, podlaha: float) -> Array:
+	var a: Vector2 = f.call(body[0])
+	player.place(Vector3(a.x, podlaha + 0.15, a.y), Vector3(a.x, podlaha + 1.6, a.y + 1.0))
+	for i in 20:
+		await get_tree().physics_frame
+	for j in range(1, body.size()):
+		var wp: Vector2 = f.call(body[j])
+		var stuck := 0.0
+		var t := 0.0
+		var last := player.global_position
+		while Vector2(wp.x - player.global_position.x, wp.y - player.global_position.z).length() > 0.5:
+			var to := Vector2(wp.x - player.global_position.x, wp.y - player.global_position.z)
+			player.yaw = atan2(-to.x, -to.y)
+			player.move_input = Vector2(0.0, 1.0)
+			await get_tree().physics_frame
+			t += 1.0 / 60.0
+			if player.global_position.distance_to(last) > 0.15:
+				last = player.global_position
+				stuck = 0.0
+			else:
+				stuck += 1.0 / 60.0
+			if stuck > 3.0 or t > 30.0 or player.global_position.y < podlaha - 2.0:
+				player.move_input = Vector2.ZERO
+				var kdo := ""
+				for si in player.get_slide_collision_count():
+					var ow := player.get_slide_collision(si).get_collider() as Node
+					kdo += " %s" % (str(ow.get_parent().name) if ow else "?")
+				return [false, "uvazl u bodu %d (%.1f, %.1f) y %.2f, cil (%.1f, %.1f), narazil na%s" % [j, player.global_position.x, player.global_position.z, player.global_position.y, wp.x, wp.y, kdo]]
+	player.move_input = Vector2.ZERO
+	return [true, "ok"]
 
 
 ## V interieru zadna trava (Misa 0.99993 r. 57, snimky misa_6_11/30-31: trsy v sini hostince u sudu a dveri). Test
