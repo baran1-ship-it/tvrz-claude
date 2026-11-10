@@ -171,9 +171,13 @@ for nx_, nz_, ny_, od_, *ven_ in NASTUPY_:
     ZZ, XX = np.mgrid[r0:r1, c0:c1]; dd_ = np.hypot(XX + xh0 - nx_, ZZ + zh0 - nz_)
     # jen za koncem mostu (na stranu cesty): pod mostovkou žádná hlína (Míša 10. 11.: „není hlína na mostě?“)
     za_ = ((XX + xh0 - nx_) * ven_[0] + (ZZ + zh0 - nz_) * ven_[1]) if ven_ else dd_
+    pod_ = (za_ < -0.2) & (za_ > -3.0) & (np.abs(((XX + xh0 - nx_) * ven_[1] - (ZZ + zh0 - nz_) * ven_[0]) if ven_ else dd_) < R0_)   # pod začátkem mostovky
     dd_ = np.where(za_ >= -0.2, dd_, 1e9)
     cil_ = (ny_ - od_) - np.clip(dd_ - R0_, 0, None) / 3.0
     H[r0:r1, c0:c1] = np.maximum(H[r0:r1, c0:c1], np.where(dd_ < R1_, cil_, -1e9))
+    # pod prvními 3 m mostovky terén klesá od 0,12 m pod mostovkou (opěra) – síť 2 m u konce mostu neudělá schod
+    # (lavka_most_440_5 10. 11.: hrana 0,16 m zastavila postavu), hlína ale nad prkna nevyleze (test most_bez_hliny)
+    if ven_: H[r0:r1, c0:c1] = np.where(pod_, np.maximum(H[r0:r1, c0:c1], (ny_ - od_ - 0.12) + 0.5 * np.minimum(za_ + 0.2, 0)), H[r0:r1, c0:c1])
     na_ceste[r0:r1, c0:c1] |= dd_ < R0_
 # příčný sklon jízdního pásu na výsledném terénu (Míša 6. 11.: „hrb na straně cesty, vozy by se převrátily do rokle“)
 for c in C["cesty"]:

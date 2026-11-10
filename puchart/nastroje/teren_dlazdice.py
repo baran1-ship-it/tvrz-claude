@@ -84,7 +84,7 @@ if os.path.exists(vys_pre + "_koryta.npz"):
         for _q in json.load(open(_fp))["nastupy"]:
             _c = int(round(_q[0] - x_hra0)); _r = int(round(_q[1] - z_hra0)); _R = 11   # celé těleso násypu (plošina 4,5 m + svah 6 m, cesty.py)
             _rr, _cc = np.ogrid[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1]
-            _m = ((_rr - _r) ** 2 + (_cc - _c) ** 2 <= _R * _R) & ((_cc - _c) * _q[3] + (_rr - _r) * _q[4] >= -0.5)   # jen za koncem mostu, ne pod mostovkou
+            _m = ((_rr - _r) ** 2 + (_cc - _c) ** 2 <= _R * _R) & ((_cc - _c) * _q[3] + (_rr - _r) * _q[4] >= -3.0)   # jen za koncem mostu, ne pod mostovkou
             _sl = (slice(max(0, _r - _R), _r + _R + 1), slice(max(0, _c - _R), _c + _R + 1))
             NAST_M[_sl] |= _m   # násyp nástupu: kolize (r16) v nevyhlazené výšce všude – BREH (voda.py) dosedne na r16
             # viditelná síť i v pásu břehů v nevyhlazené výšce, bez snížení pod pás (BREH = r16 + 0,03 leží nad ní): jinak se

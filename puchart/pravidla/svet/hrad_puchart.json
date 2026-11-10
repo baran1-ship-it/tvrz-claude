@@ -738,11 +738,11 @@
   ],
   "pricna_zed": {
    "od": [
-    52.0,
+    50.3,
     136.5
    ],
    "do": [
-    52.0,
+    50.3,
     143.15
    ],
    "koruna_y": 17.0,
@@ -755,7 +755,7 @@
    "jistota": "KRESBA (zeď), NAVRH (poloha brány – z předního nádvoří od schodů terasy)",
    "pozn_do": "končí v S zdi paláce (dřív 144,1 – trčela 0,4 m do paláce, hlídač 5. 11.)",
    "pozn_od": "začíná ve zdi štítu (dřív 137,2 – mezera 1,7 m)",
-   "pozn_9_11": "Míša 9. 11.: „zeď spojující věže dolního hradu s bránou přesně nelícovala“ – po posunu věže stála 1,7 m západně od ní (mezera ~1 m); teď líc se Z stěnou věže, konce ve středu zdí věže a paláce"
+   "pozn_9_11": "Míša 9. 11.: „zeď s bránou přesně nelícovala“ – líc zdi v líci Z stěny věže (věž je dlouhá 11 m podél x – delka, ne rozmer; 10. 11. oprava: x=52 stálo uvnitř věže a zatarasilo lávku z ochozu)"
   },
   "terasa": false,
   "parkan_body": [
