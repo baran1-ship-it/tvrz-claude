@@ -141,5 +141,33 @@
    "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)"
   }
  ],
- "pozn_lavky_5_11": "lávka brod_velicka zrušena – stála 15 m od mostu údolní cesty (Míša 5. 11.: „dva mosty vedle sebe“)"
+ "pozn_lavky_5_11": "lávka brod_velicka zrušena – stála 15 m od mostu údolní cesty (Míša 5. 11.: „dva mosty vedle sebe“)",
+ "kameny_koryta": {
+  "krok_m": 0.5,
+  "valouny_na_m2": 1.2,
+  "balvany_na_m": 0.25,
+  "breh_na_m2": 0.35,
+  "valoun_m": [
+   0.15,
+   0.4
+  ],
+  "balvan_m": [
+   0.6,
+   1.3
+  ],
+  "breh_kamen_m": [
+   0.15,
+   0.5
+  ],
+  "balvan_nad_hladinou": [
+   0.05,
+   0.35
+  ],
+  "breh_pas_m": 1.2,
+  "brod_volno_m": 2.0,
+  "most_volno_m": 1.5,
+  "dosah_m": 70,
+  "bunka_m": 25,
+  "zdroj": "AOPK (voda_hra.json: kamenité koryto Veličky), geologie droba/břidlice (ČGS, skaly.json), Míša 10. 11.: „kamenný potok – brod a potok nemají jediný kámen“; podhorský tok: valouny po celém dně, balvany vyčnívají nad hladinu, kamení na březích (štěrkové lavice). Hustoty NEOVERENO (odhad z fotek podhorských potoků), na brodu volný pruh cesty."
+ }
 }

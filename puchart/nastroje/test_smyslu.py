@@ -405,6 +405,19 @@ def _zed_nad_strechou(f):
     return sorted(set(out))
 _zs = _zed_nad_strechou(K + "/hra/modely/hrady/puchart.glb")
 TEST("zed_nad_strechou", len(_zs) <= KC.get("zed_nad_strechou_max", 20), "vrcholů zdi nad střechou: %d %s" % (len(_zs), _zs[:4]))
+# kamenný potok (Míša 10. 11.): kameny v korytě na každých 10 m toku, pata na dně (ne pod ním, ne ve vzduchu)
+_kk = json.load(open(D + "koryto_kameny.json"))["kameny"] if os.path.exists(D + "koryto_kameny.json") else []
+_ka = np.array([r[1:4] for r in _kk]) if _kk else np.zeros((0, 3))
+_th = json.load(open(D + "toky_hladina.json"))["toky"]; _bez = 0; _vse = 0
+from scipy.spatial import cKDTree as _KD2
+_kt = _KD2(_ka[:, [0, 2]]) if len(_ka) else None
+for _t in _th.values():
+    for _p in np.array(_t["osa"])[::10]:
+        _vse += 1
+        if _kt is None or not _kt.query_ball_point([_p[0], _p[1]], 6.0): _bez += 1
+_dz = (_ka[:, 1] - ter(_ka[:, 0], _ka[:, 2])) if len(_ka) else np.zeros(1)
+TEST("koryto_kameny_hustota", _bez <= 0.1 * max(_vse, 1) and float(np.percentile(_dz, 95)) < 0.1 and float(np.percentile(_dz, 5)) > -0.5,
+     "úseků toku bez kamene %d/%d, pata nad dnem p5/p95 %.2f/%.2f m" % (_bez, _vse, float(np.percentile(_dz, 5)), float(np.percentile(_dz, 95))))
 TEST("portaly", len(POR_) >= KC.get("portaly_min", 8), "portálů z portaly.py: %d" % len(POR_))
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]

@@ -83,7 +83,8 @@ func _start() -> void:
 				sm_.set_shader_parameter("meritko", 1.0 / 2.6); sm_.set_shader_parameter("mech", 1.0 if mt_.resource_name.begins_with("skala_mech") else 0.0)
 				sm_.set_shader_parameter("jas", 0.85)
 				ms_.surface_set_material(i_, sm_)
-	if FileAccess.file_exists("res://data/skaly_rostliny.json"): _rostliny_skal()   # kapradí, tráva, mech, semenáčky na římsách skal
+	if FileAccess.file_exists("res://data/skaly_rostliny.json"): _rostliny_skal()
+	if FileAccess.file_exists("res://data/koryto_kameny.json"): _kameny_koryta()   # valouny a balvany v korytech (Míša 10. 11.)   # kapradí, tráva, mech, semenáčky na římsách skal
 	var _jp_dosah := 220.0
 	if FileAccess.file_exists("res://data/voda_hra.json"):
 		_jp_dosah = float(JSON.parse_string(FileAccess.get_file_as_string("res://data/voda_hra.json"))["koryto"]["jemny_pas"]["dosah_kresleni_m"])
@@ -502,4 +503,40 @@ func _rostliny_skal() -> void:
 		for i in skup[k].size(): mm.set_instance_transform(i, skup[k][i])
 		var mmi := MultiMeshInstance3D.new(); mmi.multimesh = mm; mmi.visibility_range_end = float(d["dosah_m"])
 		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		uzel.add_child(mmi)
+
+
+## Kameny v korytech (nastroje/koryto_kameny.py → hra/data/koryto_kameny.json, tvary blender/kameny_koryta.py): MultiMesh
+## po buňkách a tvarech, materiál skála (skala.gdshader – droba, mech jen nahoře), do dosah_m, bez stínu (drobné).
+func _kameny_koryta() -> void:
+	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/koryto_kameny.json"))
+	if not ResourceLoader.exists(String(d["glb"])): return
+	var n: Node = load(String(d["glb"])).instantiate()
+	var tvary := {}
+	for mi in n.find_children("valoun_*", "MeshInstance3D", true, false): tvary[int(String(mi.name).split("_")[1])] = (mi as MeshInstance3D).mesh
+	n.free()
+	var sm: ShaderMaterial = null
+	for t in tvary.values():
+		var mt := (t as Mesh).surface_get_material(0) as StandardMaterial3D
+		if mt:
+			sm = ShaderMaterial.new(); sm.shader = load("res://shaders/skala.gdshader")
+			sm.set_shader_parameter("tex_a", mt.albedo_texture); sm.set_shader_parameter("tex_n", mt.normal_texture)
+			sm.set_shader_parameter("meritko", 1.0 / 1.2); sm.set_shader_parameter("mech", 0.0); sm.set_shader_parameter("jas", 1.15)   # omleté valouny světlejší (droba za sucha šedá)
+			break
+	var bm := float(d["bunka_m"]); var skup := {}
+	for r in d["kameny"]:
+		var tv := int(r[0])
+		if not tvary.has(tv): continue
+		var p := Vector3(float(r[1]), float(r[2]), float(r[3]))
+		var k := Vector3i(int(floor(p.x / bm)), int(floor(p.z / bm)), tv)
+		if not skup.has(k): skup[k] = []
+		skup[k].append(Transform3D(Basis(Vector3.UP, float(r[4])).scaled(Vector3.ONE * float(r[5])), p))
+	var uzel := Node3D.new(); uzel.name = "KamenyKoryta"; add_child(uzel)
+	for k in skup:
+		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = tvary[k.z]
+		mm.instance_count = skup[k].size()
+		for i in skup[k].size(): mm.set_instance_transform(i, skup[k][i])
+		var mmi := MultiMeshInstance3D.new(); mmi.multimesh = mm; mmi.visibility_range_end = float(d["dosah_m"])
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if sm: mmi.material_override = sm
 		uzel.add_child(mmi)

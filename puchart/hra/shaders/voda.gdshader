@@ -11,6 +11,7 @@ uniform vec3 hluboka : source_color = vec3(0.118, 0.165, 0.11);  // Havran #1E2A
 uniform float hloubka = 0.3;          // m uprostřed proudu
 uniform float hloubka_barvy = 0.35;   // m: od této hloubky plně tmavá
 uniform float cirost = 0.25;           // m: do této hloubky průhledná (Havran reka cirost 0.35)
+uniform float kryti_max = 0.55;       // nejvyšší krytí hladiny (Míša 10. 11.: kamenný potok – dno s valouny musí být vidět; mělký podhorský tok je čirý)
 uniform float rychlost = 0.45;        // m/s
 uniform float meritko = 2.2;          // m na dlaždici vln
 uniform float pena_sklon = 0.03;      // sklon hladiny, od kterého je peřej
@@ -45,5 +46,5 @@ void fragment() {
 	vec3 col = mix(melka, hluboka, smoothstep(0.0, hloubka_barvy, h));
 	ALBEDO = mix(col, vec3(0.86, 0.88, 0.84), pena);
 	ROUGHNESS = mix(0.22, 0.5, pena); METALLIC = 0.0; SPECULAR = 0.3;   // ne zrcadlo oblohy (potok v lese, zakalený)
-	ALPHA = smoothstep(0.0, cirost, h) * 0.85 + pena * 0.25 * smoothstep(0.0, 0.05, h);   // k břehu plynule do ztracena (Havran)
+	ALPHA = smoothstep(0.0, cirost, h) * kryti_max + pena * 0.25 * smoothstep(0.0, 0.05, h);   // k břehu plynule do ztracena (Havran)
 }
