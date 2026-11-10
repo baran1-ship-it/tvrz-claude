@@ -11,3 +11,4 @@ mapa kostí Mixamo → UAL), pak glb do modely/postavy/anim/.
 - Digging.fbx, Dig_And_Plant_Seeds.fbx (10. 11.)
 - Opening_A_Lid.fbx, Closing_A_Lid.fbx, Picking_Up.fbx (10. 11.)
 - Bash.fbx, Heavy_Weapon_Swing.fbx (10. 11., kovar/krumpac)
+- Throw_Object.fbx (10. 11.)
