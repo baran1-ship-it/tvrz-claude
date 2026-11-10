@@ -23,3 +23,4 @@ mapa kostí Mixamo → UAL), pak glb do modely/postavy/anim/.
 - Sitting, Sitting_1/2/3, Sitting_Idle, Sitting_Idle_1, Type_To_Sit (10. 11., sed – varianty)
 - Sitting_Drinking_1, Neck_Stretching, Arm_Stretching, Beckoning, Waving, Waking (10. 11.; poslano s kuzi, kuze odstranena)
 - Sleeping_Idle_2.fbx (kuze odstranena), Checking_Dice.fbx (kostky v krcme) (10. 11.)
+- Dice_Idle, Shaking_Dice, Throwing_Dice, Revealing_Dice, Pointing (10. 11., hra v kostky celá)
