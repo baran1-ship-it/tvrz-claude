@@ -33,31 +33,50 @@ func setup(kun: Node3D, data: Dictionary) -> bool:
 	if uzd == null or uzd.mesh == null:
 		push_error("otezi: sit uzdecky %s nenalezena" % D["uzdecka_sit"])
 		return false
-	# Vse v soustave kosti hlavy v okamziku vazby (bind): vrchol * vazba hlavy (Skin.get_bind_pose). 10. 11. (test_otezi):
-	# drive klid kosti * vazba - u kun_henry klidova poza kostry neni poza vazby (hlava v klidu 0,9 m jinde), krouzky
-	# vysly 3,3 m od hlavy u ocasu. Vazba je presna pro kazdy vrchol site, klid kostry ne.
+	# Vrcholy presne jako je kresli skinovani (soustava kostry, aktualni poza): sum vaha * poza(kost) * vazba * vrchol.
+	# 10. 11. (test_otezi): klid kostry * vazba kosti 0 -> krouzky 3,3 m od hlavy (klid kun_henry neni poza vazby);
+	# vazba kosti hlavy -> 26 m (vrcholy huby jsou vazane na jine kosti). Pak do soustavy kosti hlavy (aktualni poza).
 	var sk_uzd: Skin = uzd.skin
-	var vz_hl: Variant = _vazba(sk_uzd, _hlava)
-	var vz_0: Variant = _vazba(sk_uzd, hl0)
-	if vz_hl == null or vz_0 == null:
-		push_error("otezi: skin uzdecky nema vazbu kosti hlavy")
+	if sk_uzd == null:
+		push_error("otezi: sit uzdecky bez skinu")
 		return false
-	var a1 := Vector3.ZERO                                             # pocatek kosti hlavy
-	var a0 := (vz_hl as Transform3D) * (vz_0 as Transform3D).affine_inverse().origin
-	var osa := (a1 - a0).normalized()
-	var hl_klid := kostra.global_basis * kostra.get_bone_global_rest(_hlava).basis
-	var nahoru := (hl_klid.inverse() * Vector3.UP).normalized()
-	var bok := osa.cross(nahoru).normalized()
+	var kosti_vazby := PackedInt32Array()
+	for i in sk_uzd.get_bind_count():
+		var b := sk_uzd.get_bind_bone(i)
+		if b < 0:
+			b = kostra.find_bone(String(sk_uzd.get_bind_name(i)))
+		kosti_vazby.append(b)
+	var hl_poza := kostra.get_bone_global_pose(_hlava)
+	var do_hlavy := hl_poza.affine_inverse()
 	var v: PackedVector3Array = PackedVector3Array()
 	for si in uzd.mesh.get_surface_count():
-		v.append_array(uzd.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX])
-	for i in v.size():
-		v[i] = (vz_hl as Transform3D) * v[i]
+		var ar: Array = uzd.mesh.surface_get_arrays(si)
+		var vv: PackedVector3Array = ar[Mesh.ARRAY_VERTEX]
+		var bb: PackedInt32Array = ar[Mesh.ARRAY_BONES]
+		var ww: PackedFloat32Array = ar[Mesh.ARRAY_WEIGHTS]
+		var nv := bb.size() / maxi(vv.size(), 1)
+		for i in vv.size():
+			var p := Vector3.ZERO
+			var ws := 0.0
+			for k in nv:
+				var w := ww[i * nv + k]
+				var bi := bb[i * nv + k]
+				if w <= 0.0 or bi < 0 or bi >= kosti_vazby.size() or kosti_vazby[bi] < 0:
+					continue
+				p += (kostra.get_bone_global_pose(kosti_vazby[bi]) * sk_uzd.get_bind_pose(bi) * vv[i]) * w
+				ws += w
+			if ws > 0.0:
+				v.append(do_hlavy * (p / ws))
+	var a1 := Vector3.ZERO                                             # pocatek kosti hlavy
+	var a0 := do_hlavy * kostra.get_bone_global_pose(hl0).origin
+	var osa := (a1 - a0).normalized()
+	var nahoru := ((kostra.global_basis * hl_poza.basis).inverse() * Vector3.UP).normalized()
+	var bok := osa.cross(nahoru).normalized()
 	var smax := -INF
 	for p in v:
 		smax = maxf(smax, (p - a0).dot(osa))
-	var od := float(D["udidlo_od_nosu_m"]) / maxf(kostra.global_basis.get_scale().y, 1e-4)
-	var pas := float(D["udidlo_pas_m"]) / maxf(kostra.global_basis.get_scale().y, 1e-4)
+	var od := float(D["udidlo_od_nosu_m"]) / maxf((kostra.global_basis * hl_poza.basis).get_scale().y, 1e-4)
+	var pas := float(D["udidlo_pas_m"]) / maxf((kostra.global_basis * hl_poza.basis).get_scale().y, 1e-4)
 	# stred hlavy napric = prumer bodu pasu (kost hlavy nemusi lezet v ose huby - test_otezi 9. 11.: na jedne strane
 	# kosti nebyl v pasu zadny vrchol); strany se deli podle nej, ne podle kosti
 	var stred := 0.0
