@@ -192,5 +192,11 @@
   }
  ],
  "_kroky": "setri: co krok ubira - gpu (kresleni, pixely, stinovy pruchod) / cpu (skripty, fyzika). uroven: jemna (prednost, geometrie stejna) / nouzova. povoleno false = krok se nepouzije.",
- "_dolu_oken": "0.99993: se 3 okny (7,5 s) na krok trvalo 200 s, nez se ubraly 4 kroky - prvni 3 useky trasy zustaly sekane (p95 98-123). 2 okna = 5 s na krok."
+ "_dolu_oken": "0.99993: se 3 okny (7,5 s) na krok trvalo 200 s, nez se ubraly 4 kroky - prvni 3 useky trasy zustaly sekane (p95 98-123). 2 okna = 5 s na krok.",
+ "textury_predmetu": {
+  "slozka": "modely/predmety/tex",
+  "mez_px": 2048,
+  "size_limit_importu": 1024,
+  "popis": "Sdilene textury predmetu (tools/textury_predmetu.py, Misa 10. 11. zasek 0,5-1,9 s pri prvnim zobrazeni noveho predmetu): obrazky vlozene v modely/predmety/*.glb se vyjmou, ulozi JEDNOU podle md5 (a role: normalova mapa zvlast) do slozky a v glb zustane jen uri. Stejna cesta res:// = jeden zdroj, jeden import, jedna textura v graficke pameti pro vsechny modely (drive 268 MB vlozenych obrazku, z toho jen 139 MB unikatnich; Godot rozbalil kazdou kopii zvlast jako <id>_Image_N). mez_px = nejvetsi strana ulozene textury (vetsi se zmensi); size_limit_importu = strop textury v graficke pameti (shodne s tools/limity_textur.py). Balik: vydani.py skupina tex_predmety, v p_<id> baliku vyloucena."
+ }
 }
