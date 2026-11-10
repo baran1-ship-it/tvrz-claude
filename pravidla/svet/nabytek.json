@@ -359,12 +359,12 @@
    "id": "lozko_uzke",
    "p": [
     363.68,
-    5.01,
+    4.83,
     764.053
    ],
    "natoceni_st": 43.89,
    "budova": "krcma",
-   "popis": "krcma U Kohouta (stara usedlost 0), komora u zapadni zdi mezi pytli a bednou (krcmar Kubat); ves_0_komora lokalne (-0,77; -1,72), vnitrni lic zdi x -1,28..1,28, vstup ze sine x 1,28 z 1,6..2,5 (kolize svet.json)"
+   "popis": "krcma U Kohouta (stara usedlost 0), komora u zapadni zdi mezi pytli a bednou (krcmar Kubat); ves_0_komora lokalne (-0,77; -1,72), vnitrni lic zdi x -1,28..1,28, vstup ze sine x 1,28 z 1,6..2,5 (kolize svet.json); 10. 11. y 5,01 -> 4,83 = podlaha po exportu 10. 11. (test lide_chovani). NEOVERENO: zaznam je v absolutnich souradnicich - pri dalsim posunu usedlosti 0 se rozejde znovu, prevest na mistni (domy)"
   },
   {
    "id": "stul_selsky",
