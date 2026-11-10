@@ -83,6 +83,7 @@ CLIPS = [
     ("Mava", "Waving.fbx", 0.0, None, ""),
     ("Kyva_Pojd", "Beckoning.fbx", 0.0, None, ""),
     ("Probouzi", "Waking.fbx", 0.0, None, ""),
+    ("Kostky", "Checking_Dice.fbx", 0.0, None, ""),          # hra v kostky (vsedě slepena se sedem: Sed_Kostky_Loop)
     # Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): mikro-animace uvnitr cinnosti (jednorazove)
     ("Rozhlizi", "Look_Around.fbx", 0.0, None, ""),
     ("Rozhlizi2", "Looking_Around.fbx", 0.0, None, ""),
@@ -110,7 +111,7 @@ CLIPS = [
     "shaking_head_no", "thoughtful_head_shake")]
 # slepene klipy: horni pulka tela (pater, ruce, hlava) z prvniho klipu, panev a nohy z druheho (sed) - vykladani vsedě
 SLEP = [("Sed_Hovor_Loop", "Hovor_Mix_Loop", "Sed_Loop"), ("Sed_Hovor1_Loop", "Hovor_Mix1_Loop", "Sed_Loop"),
-        ("Sed_Jidlo_Loop", "Ual_Consume", "Sed_Loop")]          # jidlo vsedě: UAL2 Consume (ji vestoje) + sed
+        ("Sed_Jidlo_Loop", "Ual_Consume", "Sed_Loop"), ("Sed_Kostky_Loop", "Kostky", "Sed_Loop")]          # jidlo vsedě: UAL2 Consume (ji vestoje) + sed
 # klipy UAL ponechane jen jako zdroj slepeni (UAL1.glb nese i klipy UAL2? ne - Consume je v UAL2.glb, nacte se zvlast)
 UAL_ZDROJ = {"Consume": "Ual_Consume"}
 DOLNI = {"root", "pelvis"} | {f"{b}_{t}" for b in ("thigh", "calf", "foot", "ball") for t in ("l", "r")}

@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -6663,18 +6663,40 @@ func _hostinec_prochod() -> void:
 		return
 	player.set_flying(false)
 	var s := ""
+	# 1) hrac na miste kazde stolicky a lavice (v kolizi) - nesmi uvaznout
 	for k: Array in kus:
 		var q: Vector2 = k[1]
 		var ok_smeru := 0
-		var nejdal := 0.0
 		for i in 8:
-			var cil := q + Vector2.from_angle(TAU * i / 8.0) * 1.2
-			var r: Array = await _jdi_poschodi([q, cil], float(k[2]), 0.3)
+			var r: Array = await _jdi_poschodi([q, q + Vector2.from_angle(TAU * i / 8.0) * 1.2], float(k[2]), 0.3)
 			if bool(r[0]):
 				ok_smeru += 1
-		if ok_smeru < 4:
+		if ok_smeru < 4 and q.distance_to(Vector2(-61.5, 921.6)) > 0.5:       # lavice (-61,5, 921,6) je za zdi sine (v tele zdi)
 			chyby.append("%s (%.1f, %.1f): vyjde jen %d z 8 smeru" % [k[0], q.x, q.y, ok_smeru])
 		s += " %s(%.0f,%.0f)=%d" % [String(k[0]).left(4), q.x, q.y, ok_smeru]
+	# 2) mezery kolem nabytku u mista snimku 16 (-68, 933): body 0,8 m od kazdeho kusu do 4 m od mista, odtud hrac
+	#    musi dojit o 2 m do volne mapy (aspon 1 ze 4 svetovych stran bez uvaznuti)
+	var misto := Vector2(-68.0, 933.0)
+	var mezery := 0
+	var uvazlo := 0
+	for k: Array in kus:
+		var q2: Vector2 = k[1]
+		if q2.distance_to(misto) > 4.0:
+			continue
+		for i in 8:
+			var p0 := q2 + Vector2.from_angle(TAU * i / 8.0 + 0.3) * 0.8
+			if p0.distance_to(misto) > 4.5:
+				continue
+			mezery += 1
+			var ok4 := 0
+			for sm in 4:
+				var r2: Array = await _jdi_poschodi([p0, p0 + Vector2.from_angle(TAU * sm / 4.0 + 0.7) * 2.0], float(k[2]), 0.15)
+				if bool(r2[0]):
+					ok4 += 1
+			if ok4 == 0:
+				uvazlo += 1
+				chyby.append("bod (%.1f, %.1f) u %s: uvazl na vsechny strany" % [p0.x, p0.y, k[0]])
+	s += " | mezer %d, uvaznuti %d" % [mezery, uvazlo]
 	_vysledek("hostinec_prochod", chyby.is_empty(), "%d chyb %s; smeru z 8:%s" % [chyby.size(), str(chyby.slice(0, 6)), s])
 
 
@@ -6701,7 +6723,7 @@ func _jdi_poschodi(body: Array, podlaha: float, vyska_nad: float) -> Array:
 				stuck = 0.0
 			else:
 				stuck += 1.0 / 60.0
-			if stuck > 3.0 or t > 12.0 or player.global_position.y < podlaha - 2.0:
+			if stuck > 1.0 or t > 8.0 or player.global_position.y < podlaha - 2.0:
 				player.move_input = Vector2.ZERO
 				var kdo := ""
 				for si in player.get_slide_collision_count():
@@ -6710,6 +6732,44 @@ func _jdi_poschodi(body: Array, podlaha: float, vyska_nad: float) -> Array:
 				return [false, "uvazl u bodu %d (%.1f, %.1f) y %.2f, cil (%.1f, %.1f), narazil na%s" % [j, player.global_position.x, player.global_position.z, player.global_position.y, wp.x, wp.y, kdo]]
 	player.move_input = Vector2.ZERO
 	return [true, "ok"]
+
+
+## Trava pod strechou hostince (Misa 0.99996 r. 92, snimek 15 (-63, 930): tra v hostinci u dveri). Mrizka 0,5 m
+## kolem hostince: kde je nad hlavou (od podlahy do 8 m) strecha, strop ci pavlac, nesmi louka (_vzorek) mit hustotu a
+## rozsev smi (svet.uzivani_smi) nic sadit. Vypis prvnich bodu v souradnicich pudorysu stavby (_uvnitr) a obrysu.
+func _hostinec_trava() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	var stred := Vector2(-67.3, 926.6)
+	var space := player.get_world_3d().direct_space_state
+	var spatne: Array = []
+	var kryto := 0
+	var inv := Transform3D()
+	var bb := AABB()
+	for st: Array in sv._uvnitr:
+		if st.size() > 2:
+			continue
+		var q: Vector3 = (st[0] as Transform3D) * Vector3(stred.x, 0.0, stred.y)
+		var b2: AABB = st[1]
+		if q.x > b2.position.x - 2.0 and q.x < b2.end.x + 2.0 and q.z > b2.position.z - 2.0 and q.z < b2.end.z + 2.0:
+			inv = st[0]
+			bb = b2
+	print("HOSTINEC_TRAVA obrys stavby (misto): x %.1f..%.1f, z %.1f..%.1f" % [bb.position.x, bb.end.x, bb.position.z, bb.end.z])
+	for i in 52:
+		for j in 52:
+			var x := stred.x - 13.0 + i * 0.5
+			var z := stred.y - 13.0 + j * 0.5
+			var q := PhysicsRayQueryParameters3D.create(Vector3(x, 36.1, z), Vector3(x, 44.0, z))
+			if space.intersect_ray(q).is_empty():
+				continue
+			kryto += 1
+			var hust := (louka._vzorek(x, z) as Vector3).x
+			var smi: bool = sv.uzivani_smi("", x, z)
+			if hust > 0.02 or smi:
+				var l: Vector3 = inv * Vector3(x, 0.0, z)
+				spatne.append("(%.1f, %.1f) misto (%.1f, %.1f) hustota %.2f smi %s" % [x, z, l.x, l.z, hust, str(smi)])
+	for e: String in spatne.slice(0, 12):
+		print("HOSTINEC_TRAVA pod strechou ", e)
+	_vysledek("hostinec_trava", kryto > 100 and spatne.is_empty(), "bodu pod strechou %d, s travou nebo rozsevem %d" % [kryto, spatne.size()])
 
 
 ## V interieru zadna trava (Misa 0.99993 r. 57, snimky misa_6_11/30-31: trsy v sini hostince u sudu a dveri). Test
