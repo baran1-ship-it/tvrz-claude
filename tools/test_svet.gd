@@ -5658,9 +5658,10 @@ func _dil_kryti() -> void:
 		var r: Rect2 = dily[jm]
 		if r.size == Vector2.ZERO:
 			continue
-		var x := r.position.x
+		# stred bunky kryti 0,5 m (louka.KRYTI_K) - tam peceni vrha paprsek (driv roh bunky: na brehu jiny bod nez peceni)
+		var x := floorf(r.position.x / 0.5) * 0.5 + 0.25
 		while x < r.end.x:
-			var z := r.position.y
+			var z := floorf(r.position.y / 0.5) * 0.5 + 0.25
 			while z < r.end.y:
 				var y := INF
 				if jm == "mlyn":
