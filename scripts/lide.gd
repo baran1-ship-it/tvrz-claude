@@ -1994,6 +1994,8 @@ func _process_vlastni(dt: float) -> void:
 					c["obch_hraje"] = true
 					var obm: Array = (cn.get("obchuzka_obmena_s", {}) as Dictionary).get(kde_o, ob)
 					c["obmena"] = _rng.randf_range(float(obm[0]), float(obm[1]))
+					if not jm_o.ends_with("_Loop"):
+						c["obmena"] = minf(float(c["obmena"]), _delka(c, String(c["klip"])))   # jednorazovy klip: jednou
 					c["pozor_podm"] = String((cn.get("obchuzka_pozoruje", {}) as Dictionary).get(kde_o, ""))
 				elif not ok0.is_empty():
 					_obchuzka_dalsi(c, cn, p)
@@ -2005,6 +2007,9 @@ func _process_vlastni(dt: float) -> void:
 					if jm_k == String(P["stani"]["nahrazuje"]):
 						c["stani"] = _vazeny(P["stani"]["klipy"])      # stani se stridaji (r. 100)
 					_klip(c, jm_k, 1.0)
+					if not jm_k.ends_with("_Loop"):
+						# mikro-animace (gesto, napiti, rozhlednuti - KCD): jednou, pak dalsi klip cinnosti
+						c["obmena"] = minf(float(c["obmena"]), _delka(c, String(c["klip"])))
 					if not bez and bool(cn.get("sed", false)):
 						c["sedi"] = true
 		# vyska terenu po 0,25 s (paprsek), plynule

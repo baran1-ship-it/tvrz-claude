@@ -458,7 +458,9 @@
   "rano": {
    "klipy": [
     "Idle_Loop",
-    "Idle_FoldArms_Loop"
+    "Idle_FoldArms_Loop",
+    "Rozhlizi",
+    "Gesto_relieved_sigh"
    ],
    "obmena_s": [
     6.0,
@@ -470,7 +472,14 @@
    "klipy": [
     "Farm_Harvest",
     "Farm_PlantSeed",
-    "Farm_Watering"
+    "Farm_Watering",
+    "Farma_Zalevani",
+    "Farma_Vytrhava",
+    "Farma_Vytrhava2",
+    "Farma_Sadi",
+    "Farma_Klece_Loop",
+    "Seje",
+    "Rozhlizi"
    ],
    "obmena_s": [
     8.0,
@@ -486,14 +495,25 @@
     },
     "Farm_PlantSeed": {
      "l": "kosik"
+    },
+    "Farma_Zalevani": {
+     "r": "vedro_drevene"
     }
    }
   },
   "hovor": {
    "klipy": [
+    "Hovor_Mix_Loop",
+    "Hovor_Mix1_Loop",
     "Idle_Talking_Loop",
     "Idle_Loop",
-    "Idle_FoldArms_Loop"
+    "Gesto_head_nod_yes",
+    "Gesto_shaking_head_no",
+    "Gesto_happy_hand_gesture",
+    "Gesto_thoughtful_head_shake",
+    "Gesto_lengthy_head_nod",
+    "Gesto_acknowledging",
+    "Gesto_sarcastic_head_nod"
    ],
    "obmena_s": [
     5.0,
@@ -505,7 +525,10 @@
   "prace_lom": {
    "klipy": [
     "Prace_Uder_Loop",
-    "Fixing_Kneeling"
+    "Prace_Uder_Loop",
+    "Fixing_Kneeling",
+    "Zvedne",
+    "Rozhlizi"
    ],
    "obmena_s": [
     10.0,
@@ -523,7 +546,9 @@
   },
   "odpocinek": {
    "klipy": [
-    "Sitting_Idle_Loop"
+    "Sitting_Idle_Loop",
+    "Sed_Hovor_Loop",
+    "Sed_Piti_Loop"
    ],
    "obmena_s": [
     20.0,
@@ -533,8 +558,15 @@
    "soustredeni": 0.2,
    "klipy_bez_sedu": [
     "Idle_FoldArms_Loop",
-    "Idle_Loop"
-   ]
+    "Idle_Loop",
+    "Rozhlizi",
+    "Gesto_relieved_sigh"
+   ],
+   "v_rukou": {
+    "Sed_Piti_Loop": {
+     "r": "korbel"
+    }
+   }
   },
   "nosi": {
    "klipy": [
@@ -575,7 +607,10 @@
   "dohled": {
    "klipy": [
     "Idle_FoldArms_Loop",
-    "Idle_Loop"
+    "Idle_Loop",
+    "Rozhlizi",
+    "Gesto_hard_head_nod",
+    "Gesto_dismissing_gesture"
    ],
    "obmena_s": [
     8.0,
@@ -626,18 +661,29 @@
   "vareni": {
    "klipy": [
     "Interact",
-    "Idle_Loop"
+    "Idle_Loop",
+    "Hleda_Loop",
+    "Truhla_Otevri",
+    "Napiti"
    ],
    "obmena_s": [
     6.0,
     14.0
    ],
-   "soustredeni": 0.7
+   "soustredeni": 0.7,
+   "v_rukou": {
+    "Napiti": {
+     "r": "korbel"
+    }
+   }
   },
   "kovani": {
    "klipy": [
     "Kovar_Bash_Loop",
-    "Interact"
+    "Kovar_Bash_Loop",
+    "Interact",
+    "Rozhlizi",
+    "Napiti"
    ],
    "obmena_s": [
     10.0,
@@ -647,6 +693,9 @@
    "v_rukou": {
     "Kovar_Bash_Loop": {
      "r": "kladivo"
+    },
+    "Napiti": {
+     "r": "korbel"
     }
    },
    "_p": "Misa 0.99996 r. 95 (moderni perlik se zlutou nasadou): kovarske kladivo (Poly Haven cross_pein_hammer, katalog kladivo) v prave ruce, jednorucni uder shora (Mixamo Bash)"
@@ -800,8 +849,8 @@
     ],
     "hostinec_krb": [
      "Interact",
-     "Interact",
-     "Idle_Loop"
+     "Hleda_Loop",
+     "Truhla_Otevri"
     ],
     "hostinec_stul_1": [
      "Interact",
@@ -848,6 +897,7 @@
   "uklid_hostinec": {
    "klipy": [
     "Prace_Uklid_Loop",
+    "Zvedne",
     "Interact",
     "Idle_Loop"
    ],
@@ -874,7 +924,8 @@
    "klipy_bez_sedu": [
     "Consume",
     "Hovor_Mix_Loop",
-    "Idle_Loop"
+    "Idle_Loop",
+    "Napiti"
    ],
    "v_rukou": {
     "Sed_Piti_Loop": {
@@ -885,6 +936,9 @@
     },
     "Consume": {
      "r": "lzice"
+    },
+    "Napiti": {
+     "r": "korbel"
     }
    },
    "_p": "Misa 10. 11. (chlapi v lomu maji pauzu na jidlo: sednou, jedi, piji, vykladaji): poledni prestavka pracujicich u mista prace"
@@ -3559,5 +3613,6 @@
    "vareni",
    "uklid_hostinec"
   ]
- }
+ },
+ "_mikro": "Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): klipy cinnosti bez pripony _Loop jsou mikro-animace (gesta Mixamo Gestures Pack, rozhlednuti, napiti, zvednuti, otevreni truhly) - hraji se jednou (obmena = delka klipu), pak dalsi klip cinnosti; smycky (_Loop) po obmena_s"
 }

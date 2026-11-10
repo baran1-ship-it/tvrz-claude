@@ -60,7 +60,31 @@ CLIPS = [
     ("Hovor_Mix1_Loop", "Talking_1.fbx", 0.0, None, ""),
     # Misa 10. 11. (hostinsky jako v KCD: mezi obsluhou opreny o zed, pozoruje lokal)
     ("Opreny_Loop", "Leaning.fbx", 0.0, None, ""),
-]
+    # Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): mikro-animace uvnitr cinnosti (jednorazove)
+    ("Rozhlizi", "Look_Around.fbx", 0.0, None, ""),
+    ("Rozhlizi2", "Looking_Around.fbx", 0.0, None, ""),
+    ("Napiti", "Drinking.fbx", 0.0, None, "r"),
+    ("Zvedne", "Picking_Up.fbx", 0.0, None, ""),
+    ("Truhla_Otevri", "Opening_A_Lid.fbx", 0.0, None, ""),
+    ("Truhla_Zavri", "Closing_A_Lid.fbx", 0.0, None, ""),
+    ("Hodi", "Throw_Object.fbx", 0.0, None, ""),
+    ("Krici", "Yelling.fbx", 0.0, None, ""),
+    ("Hleda_Loop", "Looking_Through_Files_Low.fbx", 0.0, None, ""),
+    ("Kope_Loop", "Digging.fbx", 0.0, None, "lr"),
+    ("Seje", "Dig_And_Plant_Seeds.fbx", 0.0, None, ""),
+    ("Trha_Ovoce", "Pick_Fruit.fbx", 0.0, None, ""),
+    ("Trha_Ovoce2", "Pick_Fruit_1.fbx", 0.0, None, ""),
+    ("Farma_Zalevani", "farma/watering.fbx", 0.0, None, "r"),
+    ("Farma_Vytrhava", "farma/pull_plant.fbx", 0.0, None, ""),
+    ("Farma_Vytrhava2", "farma/pull_plant_2.fbx", 0.0, None, ""),
+    ("Farma_Sadi", "farma/plant_a_plant.fbx", 0.0, None, ""),
+    ("Farma_Klece_Loop", "farma/kneeling_idle.fbx", 0.0, None, ""),
+    ("Farma_Trha", "farma/pick_fruit_2.fbx", 0.0, None, ""),
+    ("Nese_Stoji_Loop", "farma/holding_idle.fbx", 0.0, None, "r"),
+] + [("Gesto_" + g, "gesta/" + g + ".fbx", 0.0, None, "") for g in (
+    "acknowledging", "angry_gesture", "annoyed_head_shake", "being_cocky", "dismissing_gesture", "happy_hand_gesture",
+    "hard_head_nod", "head_nod_yes", "lengthy_head_nod", "look_away_gesture", "relieved_sigh", "sarcastic_head_nod",
+    "shaking_head_no", "thoughtful_head_shake")]
 # slepene klipy: horni pulka tela (pater, ruce, hlava) z prvniho klipu, panev a nohy z druheho (sed) - vykladani vsedě
 SLEP = [("Sed_Hovor_Loop", "Hovor_Mix_Loop", "Sed_Loop"), ("Sed_Hovor1_Loop", "Hovor_Mix1_Loop", "Sed_Loop"),
         ("Sed_Jidlo_Loop", "Ual_Consume", "Sed_Loop")]          # jidlo vsedě: UAL2 Consume (ji vestoje) + sed
