@@ -1914,8 +1914,24 @@ func _voda_v_korytu() -> void:
 
 
 ## Site natazene (pasma.test _hrana_max_m): trojuhelnik siti vsi s hranou delsi nez hrana_max_m.
+func _v_pudorysu_domu(body: Array, okap: float) -> bool:
+	for d: Dictionary in sv._domy:
+		if float(d["L"]) <= 0.0:
+			continue
+		var ok := true
+		for p: Vector3 in body:
+			var q := Vector2(p.x, p.z) - (d["c"] as Vector2)
+			if absf(q.dot(d["au"])) > float(d["L"]) * 0.5 + okap or absf(q.dot(d["av"])) > float(d["W"]) * 0.5 + okap:
+				ok = false
+				break
+		if ok:
+			return true
+	return false
+
+
 func _site_natazene() -> void:
 	var lim := float(sv.pasma()["test"]["hrana_max_m"])
+	var okap := float(sv.pasma()["budova"]["okap_m"])
 	var n := 0
 	for nd in main.find_children("Vesnice*", "MeshInstance3D", true, false):
 		var mi := nd as MeshInstance3D
@@ -1928,7 +1944,9 @@ func _site_natazene() -> void:
 			var b := xf * f[i + 1]
 			var c := xf * f[i + 2]
 			var m := maxf(a.distance_to(b), maxf(b.distance_to(c), c.distance_to(a)))
-			if m > lim:
+			# dlouha plocha cela v pudorysu jednoho domu vcetne okapu (strecha 16,8 m dlouhe usedlosti, rozbor 10. 11. r. 28)
+			# neni natazeni - natazeny dil vede ze stareho mista na nove, tedy mimo pudorys
+			if m > lim and not _v_pudorysu_domu([a, b, c], okap):
 				n += 1
 				if n <= 30:
 					var s := (a + b + c) / 3.0
