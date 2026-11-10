@@ -1069,3 +1069,12 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   `TVRZ_MERENI_AB=louka,rostliny tools/beh.sh les_foto_po foto "lesA;205,2.8,250,213,1.8,300;build/les88/po_lesA.png|lesB;175,-2.0,893,200,-4.3,880;build/les88/po_lesB.png|lesC;-3,-1.7,490,-20,-2.6,520;build/les88/po_lesC.png"`
   (prohlédnout: holá zem louky pod stromy 6b?), test `les_trava` s prahem louky (běh 10. 11. 02:00: hustota 0,019 OK,
   podíl 37,9 % ještě s pevným prahem 0,02 – body s hustotou 0,03 pod prahem rozsevu).
+
+## Disk pod 800 MB (10. 11. ráno) – příčina a úklid
+- Stav: 741 MB volno, `beh.sh` nic nespustil, tři pomocníci stáli. Příčina: `.git` 11 GB, z toho **7 GB volných (loose)
+  objektů** z častých commitů snímků a binárek; `git gc` nejde (potřebuje místo na nový pack).
+- Úklid stavitel: `git prune-packed && git prune` (jen nedosažitelné objekty starší 2 týdnů), smazány staré pomocné složky
+  snímků `build/f*` (vč. `build/ftelo2` – snímky hospody a louče od těla jsou pryč, pořídit znovu `telo_v3.sh`) a logy
+  `build/beh` starší 1 dne > 200 kB → 928 MB.
+- Aby se neopakovalo: snímky do repa jen JPG (ne PNG), pomocné snímky do `build/` a po prohlédnutí smazat;
+  větší rezervu dá jen `git gc` – navrhnout Míšovi novou session (čerstvý klon má pack bez loose objektů).
