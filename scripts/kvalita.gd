@@ -55,7 +55,7 @@ func _init() -> void:
 	cfg = {}
 	for k: String in ["vychozi", "rozpocet_ms", "dolu_p95_podil", "dolu_prumer_podil", "nahoru_p95_podil", "cpu_podil",
 			"nouzova_s", "okno_s", "percentil", "min_snimku", "dolu_oken", "nahoru_s", "nahoru_s_max", "navrat_s",
-			"po_zmene_s", "ignoruj_ms", "omezeno_dolu_x", "omezeno_klid_x", "kamera_klid_st_s", "odklad_dolu_s",
+			"po_zmene_s", "po_zmene_snimku", "ignoruj_ms", "omezeno_dolu_x", "omezeno_klid_x", "kamera_klid_st_s", "odklad_dolu_s",
 			"odklad_nahoru_s", "teplo", "pamet", "kroky"]:
 		cfg[k] = Pravidla.cti("kvalita", k)
 	for k: Dictionary in cfg["kroky"]:
@@ -85,7 +85,7 @@ func nastav(on: bool) -> void:
 		akt.clear()
 		tisen_pameti = false
 		_zaznam("vypnuto (rucni kvalita)")
-		_uplatni()
+		_uplatni_mereno("vypnuto")
 
 
 var stupen: int:
@@ -184,6 +184,7 @@ func _process(dt: float) -> void:
 ## Jeden snimek: ms = skutecna delka, dt = cas hry, klid = kamera se neotaci, cpu_ms = skripty + fyzika.
 ## Volano z _process i z testu.
 func snimek(ms: float, dt: float, klid: bool, cpu_ms := 0.0) -> void:
+	_po_zmene(ms)
 	_od_zmeny += dt
 	_teplo_dolu_t += dt
 	if _od_zvyseni >= 0.0:
@@ -285,7 +286,40 @@ func _proved() -> void:
 	_reset_okna()
 	if akt.size() != z:
 		_zaznam("%s %s (%s)" % ["+" if akt.size() > z else "-", id, _chce_duvod])
-		_uplatni()
+		_uplatni_mereno(id)
+
+
+# 10. 11. (tablet 0.99995 + Game Turbo): vsech 5 zmen automatiky v miste spicky 2,3-3,8 s (naměřený vliv = shoda
+# poloh, priciny NEOVERENO). Izolovany test: cas _uplatni (procesor) a nejdelsi snimek po zmene (kresleni, kompilace
+# shaderu) zvlast u kazdeho kroku -> radek „↳ krok“ v historii a diag.log.
+var _po_id := ""
+var _po_n := 0
+var _po_max := 0.0
+var _po_upl := 0.0
+
+
+func _uplatni_mereno(id: String) -> void:
+	var t0 := Time.get_ticks_usec()
+	_uplatni()
+	_po_upl = (Time.get_ticks_usec() - t0) / 1000.0
+	_po_id = id
+	_po_n = int(cfg["po_zmene_snimku"])
+	_po_max = 0.0
+
+
+func _po_zmene(ms: float) -> void:
+	if _po_n <= 0:
+		return
+	_po_max = maxf(_po_max, ms)
+	_po_n -= 1
+	if _po_n == 0:
+		var r := "  ↳ krok %s: uplatnění %.0f ms, nejdelší snímek po změně %.0f ms" % [_po_id, _po_upl, _po_max]
+		historie.append(r)
+		if historie.size() > 12:
+			historie.pop_front()
+		print(r)
+		if main and main.diag:
+			main.diag.faze(r)
 
 
 func _reset_okna() -> void:
@@ -299,7 +333,7 @@ func _zaznam(t: String) -> void:
 	var r := "KVALITA %s; zapnuto %d/%d [%s]%s, teplo %s, nahoru za %.0f s" % [t, akt.size(), max_stupen(), popis_stupne(),
 			" + tisen pameti" if tisen_pameti else "", ("%.2f" % teplo) if teplo >= 0.0 else "N/A", _nahoru_s]
 	historie.append(r)
-	if historie.size() > 8:
+	if historie.size() > 12:
 		historie.pop_front()
 	print(r)
 	if main and main.diag:

@@ -229,3 +229,15 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
 - **PODEZŘENÍ:** špičky 0,5–1,7 s jsou kreslení (ne skripty, ne nové uzly) – první vykreslení / kompilace na Adrenu
   při vjezdu do nové oblasti (kun-les −2,461, tvrz-cesta). Ověřit: zda se opakují ve 2. průchodu stejného místa.
 - Teplo 0,89 hned na začátku auto varianty (po 15 min trasy) – automatika správně sáhla nejdřív po 30 FPS.
+
+### 0.99995 (3a58318) + Game Turbo – měřicí trasa 10. 11. 09:17 (Míša, tablet), 3D 100 %, varianty vše / bez postav / vše znovu / auto
+- Game Turbo nalezen: **Zabezpečení → Nástroje zabezpečení → Game Turbo → Přidat hru** (Odkaz Havrana zapnut). Baterie
+  „Vyvážený“. Srovnání s 9. 11. (bez Game Turbo, stejná verze): les p50/p95 57/122 → **49/94**, skály 49/– → 44/61,
+  louka 35/58, ves 27/36, mlýn 26/31, hostinec 19/25. Rozdíl Game Turbo × teplota tabletu NEROZLIŠEN (jeden běh).
+- „vše znovu“ (tablet teplejší) tvrz-cesta 22/32, louka 23/35 – lepší než první „vše“ (37/76, 35/58): první průchod
+  = načítání/kompilace (srov. rešerše krok 2a).
+- VRAM 949 MB (textury 687, buffery 262), uzlů 18 360. Kreslení 259–717 (ves-vjezd 717).
+- **Špičky 2,3–3,8 s: všech 5 změn automatické kvality leží v místě špičky** (FAZE KVALITA u (5,31) fps_30 → 2273 ms
+  u (5,32); (205,250) stiny_predmetu → 3829 ms; (−78,896) efekty → 3331 ms; vypnutí u (4,4) → 3283 ms u (2,2)).
+  = naměřený vliv (shoda poloh), příčina NEOVĚŘENO (krok sám, nebo načítání na začátku úseku). Izolovaný test zaveden
+  10. 11.: `kvalita.gd` zapíše u každého kroku čas uplatnění a nejdelší snímek po změně („↳ krok …“).

@@ -52,6 +52,8 @@
  "navrat_s": 60.0,
  "po_zmene_s": 4.0,
  "ignoruj_ms": 1000.0,
+ "po_zmene_snimku": 5,
+ "_po_zmene_snimku": "10. 11.: kolik snímků po každé změně automatiky sledovat (nejdelší se zapíše jako „↳ krok … nejdelší snímek po změně“) – izolovaný test, zda záseky 2–4 s dělá sama změna kvality",
  "omezeno_dolu_x": 1.15,
  "omezeno_klid_x": 1.07,
  "_omezeno": "Pri omezeni snimku (krok max_fps) ceka hra na dalsi snimek, delka snimku je aspon 1000/limit ms - rezerva se neda zmerit. Dolu: p95 > 33,3 x 1,15 = 38 ms nebo prumer > 33,3 x 1,07. Klid: p95 <= 33,3 x 1,07 = 35,7 ms (drzi 30 rovnomerne) - zvyseni je zkouska; nevydrzi-li, hystereze zdvojnasobi cekani.",
