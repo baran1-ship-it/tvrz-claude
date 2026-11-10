@@ -451,6 +451,29 @@
     931.28
    ],
    "_p": "Misa 10. 11. (KCD): hostinsky / senkyrka oprena o stenu u mista obsluhy, pozoruje sin"
+  },
+  "krcma_opreni": {
+   "u_steny": [
+    373.23,
+    760.31
+   ],
+   "hledat_m": 3.0,
+   "dvere": "Pohyb_ves_dvere_1",
+   "venku": [
+    371.21,
+    765.72
+   ],
+   "vnitrek": [
+    369.59,
+    763.6
+   ],
+   "uvnitr": [
+    [
+     371.32,
+     761.94
+    ]
+   ],
+   "_p": "Misa 10. 11.: krcmar oprety u steny u pultu"
   }
  },
  "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny; vnitrni misto: dvere (jmeno pohybu dveri), venku a vnitrek (body pred a za dvermi, z modelu blender/hostinec.py: dvere1 v lokalnich (0,01; -0,87), sin x -5,4..0) - postava jde dvermi (lide.gd _cesta_pruchod), mistnost = sedaky jen v teto mistnosti (svet mistnosti); dum + lok + k_lok: bod v ramci domu svet._domy (kosar za rychtou, zvirata.json ohrady); uvnitr = dalsi body cesty za vnitrkem (pruchod mezi mistnostmi: krcma sin -> senkovna otvorem v pricce lokalne x -3,5, z 1,6..2,5; kolize svet.json); p vnitrniho mista na volne podlaze (ne na stole - hostinec_sin a krcma_senk drive ve stredu mistnosti na stole); tvrz (Misa 6. 11.): tvrz_ubytovna = bod pred dvermi ubytovny sluzebnictva (lokace.json ubytovna_tvrz, nejblizsi dvere = dvere ubytovny), tvrz_kuchyne_dvor = pred dvermi kuchyne ze dvora (palace.py DOOR_PANTRY), tvrz_kuchyne = kucharka u kotliku nad ohnistem (vnitrni misto, dvere kuchyne ze dvora)",
@@ -1015,6 +1038,72 @@
    ],
    "soustredeni": 0.8,
    "_p": "Misa 10. 11. (prace na poli/zahrade: Mixamo Digging, Dig_And_Plant_Seeds, pull_plant) - kopani bez ryce v ruce (drzeni ryc chybi, NEOVERENO)"
+  },
+  "obsluha_krcma": {
+   "klipy": [
+    "Interact",
+    "Idle_Talking_Loop",
+    "Idle_Loop"
+   ],
+   "obmena_s": [
+    4.0,
+    9.0
+   ],
+   "soustredeni": 0.5,
+   "chuze": "Walk_Loop",
+   "obchuzka": [
+    "krcma_opreni",
+    "krcma_obsluha",
+    "krcma_senk",
+    "krcma_opreni",
+    "krcma_obsluha",
+    "krcma_senk"
+   ],
+   "obchuzka_klipy": {
+    "krcma_opreni": [
+     "Opreny_Loop"
+    ],
+    "krcma_obsluha": [
+     "Interact",
+     "Hleda_Loop",
+     "Truhla_Otevri"
+    ],
+    "krcma_senk": [
+     "Interact",
+     "Hovor_Mix_Loop"
+    ]
+   },
+   "obchuzka_obmena_s": {
+    "krcma_opreni": [
+     12.0,
+     35.0
+    ],
+    "krcma_obsluha": [
+     6.0,
+     14.0
+    ]
+   },
+   "obchuzka_pozoruje": {
+    "krcma_opreni": "hoste_krcma"
+   },
+   "obchuzka_nese": {
+    "k": [
+     "krcma_senk"
+    ],
+    "chuze": "Chuze_Nese_Loop",
+    "predmety": [
+     {
+      "r": "korbel"
+     },
+     {
+      "r": "miska"
+     },
+     {
+      "r": "dzban"
+     }
+    ]
+   },
+   "_p": "Misa 10. 11.: krcmar Kubat jako hostinsky - opreny u steny (trámu) pozoruje, u pultu (krcma_obsluha), nese k hostum do jizby (krcma_senk); stoly krcmy jako mista = dalsi krok"
   }
  },
  "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.)",
@@ -2342,8 +2431,8 @@
      "kde": "krcma_senk",
      "moznosti": [
       {
-       "cinnost": "obsluha",
-       "kde": "krcma_obsluha",
+       "cinnost": "obsluha_krcma",
+       "kde": "krcma_opreni",
        "vaha": 4.0,
        "jen_kdyz": "hoste_krcma"
       },
@@ -2376,8 +2465,8 @@
        "jen_kdyz_ne": "hoste_krcma"
       },
       {
-       "cinnost": "obsluha",
-       "kde": "krcma_obsluha",
+       "cinnost": "obsluha_krcma",
+       "kde": "krcma_opreni",
        "vaha": 4.0,
        "jen_kdyz": "hoste_krcma"
       }
@@ -2393,8 +2482,8 @@
      "kde": "krcma_senk",
      "moznosti": [
       {
-       "cinnost": "obsluha",
-       "kde": "krcma_obsluha",
+       "cinnost": "obsluha_krcma",
+       "kde": "krcma_opreni",
        "vaha": 4.0,
        "jen_kdyz": "hoste_krcma"
       },
@@ -2704,7 +2793,8 @@
    "spanek": {
     "budova": "dum_5",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Rychtář dohlíží na náves, vykládá se sousedy, občas zajde do hostince; poledne doma."
   },
   {
    "id": "sedlak_2",
@@ -2717,7 +2807,8 @@
    "spanek": {
     "budova": "dum_2",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Sedlák ráno na pole a na dvůr štípat dříví, v poledne doma, odpoledne pole, štípání, krmení; večer krčma U Kohouta nebo hovor na návsi."
   },
   {
    "id": "selka_2",
@@ -2730,7 +2821,8 @@
    "spanek": {
     "budova": "dum_2",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Selka ráno nakrmí drůbež na dvoře, pak záhon, sad, krmení a hovor se sousedkou; vaří doma oběd a večeři."
   },
   {
    "id": "sedlak_4",
@@ -2743,7 +2835,8 @@
    "spanek": {
     "budova": "dum_4",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Jako ostatní sedláci – pole, dříví, krčma."
   },
   {
    "id": "selka_3",
@@ -2756,7 +2849,8 @@
    "spanek": {
     "budova": "dum_3",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Jako ostatní selky – drůbež, záhon, sad, vaření doma."
   },
   {
    "id": "chalupnik_1",
@@ -2769,7 +2863,8 @@
    "spanek": {
     "budova": "dum_1",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Chalupník pracuje na zahrádce a štípe dříví, večer zajde do krčmy."
   },
   {
    "id": "selka_6",
@@ -2782,7 +2877,8 @@
    "spanek": {
     "budova": "dum_6",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Jako ostatní selky."
   },
   {
    "id": "lamac_1",
@@ -2797,7 +2893,8 @@
    "spanek": {
     "budova": "chyse_20",
     "postel": "slamnik"
-   }
+   },
+   "pribeh": "Lamač ráno přijde do lomu, kutá ve stěně s krátkými oddechy, v poledne si sedne s ostatními, jí, pije a vykládá, odpoledne zas kutá; večer jde domů a do hospody."
   },
   {
    "id": "lamac_2",
@@ -2812,7 +2909,8 @@
    "spanek": {
     "budova": "chyse_21",
     "postel": "slamnik"
-   }
+   },
+   "pribeh": "Jako první lamač, u druhé stěny lomu."
   },
   {
    "id": "kamenik",
@@ -2827,7 +2925,8 @@
    "spanek": {
     "budova": "chyse_20",
     "postel": "slamnik"
-   }
+   },
+   "pribeh": "Kameník tesá u špalku v lomu, v poledne svačí s lamači, večer hostinec."
   },
   {
    "id": "celedin",
@@ -2948,7 +3047,8 @@
    "spanek": {
     "budova": "tvrz_ubytovna",
     "postel": "lozko_uzke"
-   }
+   },
+   "pribeh": "Kovář buší kladivem na kovadlině, občas se napije a rozhlédne, prohodí slovo u studny; v poledne svačí u studny, odpoledne kove, večer hovor u studny."
   },
   {
    "id": "straz",
@@ -2989,7 +3089,8 @@
    "spanek": {
     "budova": "hostinec",
     "postel": "luzko_hostinec"
-   }
+   },
+   "pribeh": "Ondřej Šafránek vstává před šestou, roztopí krb a vaří. Když jsou v síni hosté, stojí opřený u stěny, jen občas se po nich ohlédne, nosí pivo a jídlo od krbu ke stolům a zase se opře. Bez hostů uklízí nebo postává před hostincem; obědvá, jen když je prázdno. Večer obsluhuje do noci."
   },
   {
    "id": "senkyrka",
@@ -3002,7 +3103,8 @@
    "spanek": {
     "budova": "hostinec",
     "postel": "luzko_hostinec"
-   }
+   },
+   "pribeh": "Eliška ráno uklízí síň, pomáhá u krbu a s hosty obsluhuje. Odpočine si jen bez hostů, jinak nosí korbely; večer do jedenácti v síni."
   },
   {
    "id": "pocestny_1",
@@ -3015,7 +3117,8 @@
    "spanek": {
     "budova": "hostinec",
     "postel": "luzko_hostinec"
-   }
+   },
+   "pribeh": "Pešek je na cestě: snídá v hostinci nebo sedí před ním, přes den se toulá po návsi, k obědu a večeři sedí v síni, pije a vykládá."
   },
   {
    "id": "pocestny_2",
@@ -3028,7 +3131,8 @@
    "spanek": {
     "budova": "hostinec",
     "postel": "luzko_hostinec"
-   }
+   },
+   "pribeh": "Hron jako Pešek – snídaně, den na návsi a před hostincem, večer v síni u piva."
   },
   {
    "id": "ponocny",
@@ -3098,7 +3202,8 @@
    "spanek": {
     "budova": "krcma",
     "postel": "lozko_uzke"
-   }
+   },
+   "pribeh": "Krčmář Kubát v krčmě U Kohouta: s hosty obsluhuje (opřený u trámu pozoruje, nese ke stolům, zpět k pultu), bez hostů uklízí a vaří; odpočine si jen bez hostů."
   },
   {
    "id": "bylinkarka",
@@ -3111,7 +3216,8 @@
    "spanek": {
     "budova": "dum_7",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Bylinkářka pečuje o záhon a sad, krmí drůbež, k polednímu a večer doma, odpoledne na návsi."
   },
   {
    "id": "mlynar_syn",
@@ -3774,7 +3880,8 @@
    "obsluha_hostinec",
    "obsluha",
    "vareni",
-   "uklid_hostinec"
+   "uklid_hostinec",
+   "obsluha_krcma"
   ]
  },
  "_mikro": "Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): klipy cinnosti bez pripony _Loop jsou mikro-animace (gesta Mixamo Gestures Pack, rozhlednuti, napiti, zvednuti, otevreni truhly) - hraji se jednou (obmena = delka klipu), pak dalsi klip cinnosti; smycky (_Loop) po obmena_s"

@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -6747,6 +6747,34 @@ func _jdi_poschodi(body: Array, f: Callable, podlaha: float) -> Array:
 				return [false, "uvazl u bodu %d (%.1f, %.1f) y %.2f, cil (%.1f, %.1f), narazil na%s" % [j, player.global_position.x, player.global_position.z, player.global_position.y, wp.x, wp.y, kdo]]
 	player.move_input = Vector2.ZERO
 	return [true, "ok"]
+
+
+## Zlab odtoku mlyna (Misa 0.99996 r. 91, snimky 04-05: zlab prazdny, voda tece siroky pas vedle): hladina lednice
+## (mlyn_voda.json lednice.body, svet) musi byt nad nejvyssim pevnym povrchem svisle pod osou zlabu (kolize hry:
+## dno modelu, teren dilu) a nejvyse hloubka zlabu nad nim. Vypis kazdeho 3. bodu.
+func _mlyn_zlab() -> void:
+	var P = preload("res://scripts/pravidla.gd")
+	var d: Dictionary = P.cti("voda", "mlyn")["dil"]
+	var f := FileAccess.open("res://tools/krok_b/mlyn_voda.json", FileAccess.READ)
+	var body: Array = (JSON.parse_string(f.get_as_text()) as Dictionary)["lednice"]["body"]
+	var xf := Transform3D(Basis(Vector3.UP, float(d["natoceni"])), Vector3(float(d["stred"][0]), float(d["y_dvora"]), float(d["stred"][1])))
+	var space := player.get_world_3d().direct_space_state
+	var chyby: Array = []
+	for i in body.size():
+		var w: Vector3 = xf * Vector3(float(body[i][0]), float(body[i][1]), float(body[i][2]))
+		var q := PhysicsRayQueryParameters3D.create(w + Vector3(0, 6.0, 0), w - Vector3(0, 6.0, 0))
+		var h := space.intersect_ray(q)
+		var nm := "nic"
+		var y := -999.0
+		if not h.is_empty():
+			y = float(h["position"].y)
+			nm = str((h["collider"] as Node).get_parent().name)
+		var nad := w.y - y
+		if i % 3 == 0 or nad < 0.05:
+			print("MLYN_ZLAB bod %d (%.1f, %.1f) hladina %.2f, povrch %.2f (%s), hloubka vody %.2f" % [i, w.x, w.z, w.y, y, nm, nad])
+		if nad < 0.05 or nad > 0.8:
+			chyby.append("bod %d (%.1f, %.1f): voda %.2f m nad povrchem %s" % [i, w.x, w.z, nad, nm])
+	_vysledek("mlyn_zlab", chyby.is_empty(), "%d chyb %s" % [chyby.size(), str(chyby.slice(0, 5))])
 
 
 ## V interieru zadna trava (Misa 0.99993 r. 57, snimky misa_6_11/30-31: trsy v sini hostince u sudu a dveri). Test
