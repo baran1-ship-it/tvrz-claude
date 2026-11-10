@@ -87,6 +87,19 @@ CLIPS = [
     ("Kyva_Pojd", "Beckoning.fbx", 0.0, None, ""),
     ("Probouzi", "Waking.fbx", 0.0, None, ""),
     ("Kostky", "Checking_Dice.fbx", 0.0, None, ""),          # hra v kostky (vsedě slepena se sedem: Sed_Kostky_Loop)
+    # 10. 11. hra v kostky po tazich (Misa): ceka, trese, hodi, odkryje, ukazuje - vsechny vsedě slepene se sedem
+    ("Kostky_Ceka", "Dice_Idle.fbx", 0.0, None, ""),
+    ("Kostky_Trese", "Shaking_Dice.fbx", 0.0, None, ""),
+    ("Kostky_Hodi", "Throwing_Dice.fbx", 0.0, None, ""),
+    ("Kostky_Odkryje", "Revealing_Dice.fbx", 0.0, None, ""),
+    ("Ukazuje", "Pointing.fbx", 0.0, None, ""),
+    # mlynari: nosi pytel (holding_walk = chuze s nakladem, box_idle = stoji s nakladem)
+    ("Chuze_Pytel_Loop", "farma/holding_walk.fbx", 0.0, None, "lr"),
+    ("Pytel_Stoji_Loop", "farma/box_idle.fbx", 0.0, None, "lr"),
+    # spanek vleze (varianty) - vyska na luzku viz postavy.json spani
+    ("Spanek_Lezmo1_Loop", "Sleeping_Idle.fbx", 0.0, None, ""),
+    ("Spanek_Lezmo2_Loop", "Sleeping_Idle_1.fbx", 0.0, None, ""),
+    ("Spanek_Lezmo3_Loop", "Sleeping_Idle_2.fbx", 0.0, None, ""),
     # Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): mikro-animace uvnitr cinnosti (jednorazove)
     ("Rozhlizi", "Look_Around.fbx", 0.0, None, ""),
     ("Rozhlizi2", "Looking_Around.fbx", 0.0, None, ""),
@@ -116,7 +129,11 @@ CLIPS = [
 # 10. 11. snimek fmix4: Male_Sitting_Pose (Sed_Loop) je rozvaleny zaklon -> spodek ze Sitting_Idle (Sed_Klid_Loop, vzpřímeny)
 SLEP = [("Sed_Hovor_Loop", "Hovor_Mix_Loop", "Sed_Klid_Loop"), ("Sed_Hovor1_Loop", "Hovor_Mix1_Loop", "Sed_Klid_Loop"),
         ("Sed_Jidlo_Loop", "Ual_Consume", "Sed_Klid_Loop"), ("Sed_Kostky_Loop", "Kostky", "Sed_Klid_Loop"),
-        ("Sed_Piti_Loop", "Napiti", "Sed_Klid_Loop")]          # jidlo vsedě: UAL2 Consume (ji vestoje) + sed
+        ("Sed_Piti_Loop", "Napiti", "Sed_Klid_Loop"),
+        ("Sed_Kostky_Ceka_Loop", "Kostky_Ceka", "Sed_Klid_Loop"), ("Sed_Kostky_Trese", "Kostky_Trese", "Sed_Klid_Loop"),
+        ("Sed_Kostky_Hodi", "Kostky_Hodi", "Sed_Klid_Loop"), ("Sed_Kostky_Odkryje", "Kostky_Odkryje", "Sed_Klid_Loop"),
+        ("Sed_Ukazuje", "Ukazuje", "Sed_Klid_Loop"), ("Sed_Raduje", "Gesto_happy_hand_gesture", "Sed_Klid_Loop"),
+        ("Sed_Zlobi", "Gesto_angry_gesture", "Sed_Klid_Loop"), ("Sed_Vrti", "Gesto_annoyed_head_shake", "Sed_Klid_Loop")]          # jidlo vsedě: UAL2 Consume (ji vestoje) + sed
 # klipy UAL ponechane jen jako zdroj slepeni (UAL1.glb nese i klipy UAL2? ne - Consume je v UAL2.glb, nacte se zvlast)
 UAL_ZDROJ = {"Consume": "Ual_Consume"}
 # 10. 11. snimek fmix3/hovor_sed: s panvi sedu a patri horniho klipu (stani) byl trup zakloneny ~30 st - spodni pater

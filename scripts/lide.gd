@@ -34,7 +34,7 @@ static var P: Dictionary = {
 	"nohy_ik": Pravidla.cti("postavy", "nohy_ik"), "stani": Pravidla.cti("postavy", "stani"),
 	"chuze_postav": Pravidla.cti("postavy", "chuze_postav"), "podminky": Pravidla.cti("postavy", "podminky"),
 	"u_steny": Pravidla.cti("postavy", "u_steny"),
-	"pohledy": Pravidla.cti("postavy", "pohledy")}
+	"pohledy": Pravidla.cti("postavy", "pohledy"), "kostky": Pravidla.cti("postavy", "kostky")}
 ## stin postav jen zblizka: trida postava v pravidla_modelu.json (stin_m) - jeden zdroj s testem modelu
 static var STIN_M: float = _stin_m()
 const PREDMETY_DIR := "res://modely/predmety/"
@@ -131,7 +131,10 @@ func nova_postava(o: Dictionary) -> Dictionary:
 	# rychlost klipu (chuze_klip_m_s) x tempo postavy - nohy neklouzou
 	var chp: Array = P["chuze_postav"]["klipy"]
 	c["chuze"] = String(chp[_rng.randi() % chp.size()])
-	c["rych"] = float(P["klip_m_s"].get(c["chuze"], P["klip_m_s"]["Walk_Loop"])) * float(c["tempo"])
+	# tempo chuze (chuze_postav.tempo, v mezich prirozenost.tempo_klipu): rychlost = klip x tempo chuze, prehravani
+	# chuze pak jde tempem chuze (v / klip) - nohy neklouzou
+	var tch: Array = P["chuze_postav"].get("tempo", P["pr"]["tempo_klipu"])
+	c["rych"] = float(P["klip_m_s"].get(c["chuze"], P["klip_m_s"]["Walk_Loop"])) * _rng.randf_range(float(tch[0]), float(tch[1]))
 	c["stani"] = _vazeny(P["stani"]["klipy"])
 	c["sed_poza"] = _vazeny(P["sedani"]["pozy"]["klipy"])
 	_hlava(c)
@@ -1863,6 +1866,91 @@ func ruce(c: Dictionary, spec: Dictionary) -> void:
 		(drzi["mod"] as Node).call("nastav", ruka, id, d, drz)
 
 
+## Hra v kostky po tazich (Misa 10. 11.: „ma smysl a logiku jako skutecna hra“; postavy.json kostky): 2-3 sedici hoste
+## ve stejne sini (kostky.kde, v hodinach hodiny) se sejdou ke hre. Kdo je na tahu, zatrese, hodi a odkryje (tah), ostatni
+## cekaji (ceka). Po odkryti reakce: vitez (nahodne) se raduje (vyhra), ostatni naštvane mavnou (prohra), pak se vsichni
+## napiji (po_kole) a hraje dalsi. Po kol kolech nebo kdyz nekdo odejde (vstane, jiny blok) hra konci. Bez hrace
+## nablizku se hra nevede (stav se jen drzi). Verejne pro test lide_chovani (kostky_krok).
+var _hry := {}                          # kde -> {hraci: [c], na_tahu, faze, t, kolo, kol}
+
+
+func kostky_krok(dt: float, h: float) -> void:
+	var K: Dictionary = P["kostky"]
+	var hod := float(h)
+	var v_case := hod >= float(K["hodiny"][0]) and hod < float(K["hodiny"][1])
+	for kde: String in K["kde"]:
+		var g: Dictionary = _hry.get(kde, {})
+		if g.is_empty():
+			if not v_case:
+				continue
+			var volni: Array = []
+			for c: Dictionary in _lide:
+				if String(c.get("kde_ted", "")) == kde and String(c.get("cinnost_ted", "")) == String(K["cinnost"]) \
+						and bool(c.get("sedi", false)) and bool(c.get("na_miste", false)) and not c.has("hra"):
+					volni.append(c)
+			if volni.size() < int(K["hraci"][0]) or _rng.randf() > float(K["sance_s"]) * dt:
+				continue
+			volni.shuffle()
+			var hr: Array = volni.slice(0, mini(volni.size(), int(K["hraci"][1])))
+			for c: Dictionary in hr:
+				c["hra"] = kde
+				c["scena"] = []
+			g = {"hraci": hr, "na_tahu": 0, "faze": -1, "t": 0.0, "kolo": 0, "kol": _rng.randi_range(int(K["kol"][0]), int(K["kol"][1]))}
+			_hry[kde] = g
+			for c: Dictionary in hr:
+				_klip(c, String(K["ceka"]), 1.0)
+		# hra bezi: odesel nekdo?
+		var konec := not v_case or int(g["kolo"]) >= int(g["kol"])
+		for c: Dictionary in g["hraci"]:
+			if not bool(c.get("sedi", false)) or String(c.get("kde_ted", "")) != kde:
+				konec = true
+		if konec:
+			for c: Dictionary in g["hraci"]:
+				c.erase("hra")
+				c["obmena"] = 0.0
+			_hry.erase(kde)
+			continue
+		g["t"] = float(g["t"]) - dt
+		if float(g["t"]) > 0.0:
+			continue
+		var hraci: Array = g["hraci"]
+		var na_tahu: Dictionary = hraci[int(g["na_tahu"])]
+		var tah: Array = K["tah"]
+		var faze := int(g["faze"]) + 1
+		g["faze"] = faze
+		if faze < tah.size():
+			# tah: hrac na tahu zatrese, hodi, odkryje; ostatni cekaji a divaji se
+			_klip(na_tahu, String(tah[faze]), 1.0)
+			g["t"] = _delka(na_tahu, String(tah[faze]))
+			for c: Dictionary in hraci:
+				if c != na_tahu:
+					_klip(c, String(K["ceka"]), 1.0)
+		elif faze == tah.size():
+			# reakce na vysledek
+			var vitez: Dictionary = hraci[_rng.randi() % hraci.size()]
+			g["vitez"] = vitez["id"]
+			var nej := 0.0
+			for c: Dictionary in hraci:
+				var rk: Array = K["vyhra"] if c == vitez else K["prohra"]
+				var jm := String(rk[_rng.randi() % rk.size()])
+				_klip(c, jm, 1.0)
+				nej = maxf(nej, _delka(c, jm))
+			g["t"] = nej
+		elif faze == tah.size() + 1:
+			# vsichni se napiji (korbel v ruce - v_rukou cinnosti), pak dalsi na tahu
+			var nej2 := 0.0
+			for c: Dictionary in hraci:
+				_klip(c, String(K["po_kole"]), 1.0)
+				nej2 = maxf(nej2, minf(_delka(c, String(K["po_kole"])), float(K["piti_s"])))
+			g["t"] = nej2
+		else:
+			g["faze"] = -1
+			g["na_tahu"] = (int(g["na_tahu"]) + 1) % hraci.size()
+			if int(g["na_tahu"]) == 0:
+				g["kolo"] = int(g["kolo"]) + 1
+			g["t"] = 0.0
+
+
 ## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(dt: float) -> void:
 	var t_us := Time.get_ticks_usec()
@@ -1882,6 +1970,7 @@ func _process_vlastni(dt: float) -> void:
 	var h: float = main.day.hour if main.day != null else 12.0
 	var hl: Dictionary = P["hlava"]
 	var pr: Dictionary = P["pr"]
+	kostky_krok(dt, h)
 	# rozpocet: plnou animaci ma jen plne_max nejblizsich (AC Unity: tvrdy pocet), ostatni po krocich
 	# rozpocet mrizky chuze na snimek (dluh z mekkeho prekroceni se prenasi, strop = jeden snimek)
 	var mz: Dictionary = P["graf"]["mrizka"]
@@ -1991,6 +2080,8 @@ func _process_vlastni(dt: float) -> void:
 			if float(c["yaw_mista"]) != INF:
 				u.rotation.y = lerp_angle(u.rotation.y, float(c["yaw_mista"]), minf(1.0, dt * 3.0))
 			c["obmena"] = float(c["obmena"]) - dt
+			if c.has("hra"):
+				c["obmena"] = 1.0                    # klipy ridi hra v kostky (kostky_krok)
 			if float(c["obmena"]) <= 0.0:
 				var ob: Array = cn.get("obmena_s", [5.0, 10.0])
 				c["obmena"] = _rng.randf_range(float(ob[0]), float(ob[1]))

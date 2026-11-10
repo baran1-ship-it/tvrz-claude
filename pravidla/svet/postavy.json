@@ -28,13 +28,18 @@
   "_popis": "Misa 10. 11. r. 100 (chuze postav jako pochod - UAL Walk_Loop/Walk_Formal_Loop zvedaji kolena): kazda postava pri vzniku dostane jednu chuzi z klipy (Mixamo, tools/postavy_q/anim_cmu.py); klipy v nahrazuje (data cinnosti) se nahradi chuzi postavy; rychlost postavy = chuze_klip_m_s klipu x tempo postavy (prirozenost.tempo_klipu) - nohy neklouzou (test_klipy_chuze)",
   "klipy": [
    "Chuze_Std_Loop",
-   "Chuze_Mix3_Loop",
+   "Chuze_Std_Loop",
    "Chuze_Mix5_Loop"
   ],
   "nahrazuje": [
    "Walk_Loop",
    "Walk_Formal_Loop"
-  ]
+  ],
+  "tempo": [
+   0.9,
+   0.95
+  ],
+  "_tempo": "Misa 10. 11. (1,55-1,72 m/s je na vesnici rychle): chuze postav tempem 0,90-0,95 (spodni mez prirozenost.tempo_klipu -10 %) a pomalejsi Standard_Walk 2x castejsi -> 1,40-1,63 m/s; Walking_3 (1,69) vyrazen"
  },
  "stani": {
   "_popis": "Misa 10. 11. r. 100 (vsichni stojici rozkroceni - UAL Idle_Loop): Idle_Loop v datech cinnosti = stani postavy, vybrane podle vah z klipy pri vzniku a znovu pri kazde obmene (postavy se stridaji, rozkroceny Idle_Loop jen obcas); ne_s_predmetem: cinnost s predmetem v ruce po celou dobu (v_rukou \"*\": kopi, lucerna) zustava Idle_Loop - drzeni (rot_st) je ladene v nem",

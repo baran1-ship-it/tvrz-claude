@@ -6699,13 +6699,16 @@ func _hostinec_prochod() -> void:
 				continue
 			mezery += 1
 			var ok4 := 0
+			var kde := ""
 			for sm in 4:
 				var r2: Array = await _jdi_poschodi([p0, p0 + Vector2.from_angle(TAU * sm / 4.0 + 0.7) * 2.0], float(k[2]), 0.15)
 				if bool(r2[0]):
 					ok4 += 1
+				else:
+					kde += " [%s]" % String(r2[1]).get_slice("narazil na", 1)
 			if ok4 == 0:
 				uvazlo += 1
-				chyby.append("bod (%.1f, %.1f) u %s: uvazl na vsechny strany" % [p0.x, p0.y, k[0]])
+				chyby.append("bod (%.1f, %.1f) u %s: uvazl na vsechny strany, narazil na%s" % [p0.x, p0.y, k[0], kde])
 	s += " | mezer %d, uvaznuti %d" % [mezery, uvazlo]
 	_vysledek("hostinec_prochod", chyby.is_empty(), "%d chyb %s; smeru z 8:%s" % [chyby.size(), str(chyby.slice(0, 6)), s])
 
@@ -7472,6 +7475,19 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 				lide.call("_misto_cinnosti", c, String(m["kde"]), P["cinnosti"]["volno"])
 				var sk: Dictionary = c["sedak"]
 				print("LIDE volno %s %s: %s" % [c["id"], m["kde"], "sedi %s" % str((sk.get("sedak", Vector2.ZERO) as Vector2).round()) if not sk.is_empty() else "stoji (bez sedaku)"])
+				if sk.is_empty():
+					# diagnostika: nejblizsi sedak z katalogu a proc nevyhovel (mistnost, vyska, obsazeno)
+					var mq: Vector2 = c["misto"] if c.has("misto") else (lide.call("_misto", c, String(m["kde"])) as Array)[0]
+					var nej_d := INF
+					var nej_t := ""
+					for r: Dictionary in sv.data.get("vybaveni", []):
+						if bool((lide.call("katalog") as Dictionary).get(String(r["id"]), {}).get("sed", false)):
+							var q3 := Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))
+							var dd := Vector2(q3.x, q3.z).distance_to(mq)
+							if dd < nej_d:
+								nej_d = dd
+								nej_t = "%s %s mistnost '%s'" % [r["id"], Vector2(q3.x, q3.z).round(), lide.call("_mistnost_u", q3)]
+					print("LIDE volno %s: misto %s, nejblizsi sedak %.1f m: %s" % [c["id"], mq.round(), nej_d, nej_t])
 				if not sk.is_empty():
 					sedi_v += 1
 				break
