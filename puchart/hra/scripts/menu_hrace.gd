@@ -66,6 +66,7 @@ func otevri() -> void:
 func zavri() -> void:
 	open = false; visible = false
 	get_tree().paused = false
+	if proch: proch._fps_menu(false)
 	var f := get_viewport().gui_get_focus_owner()
 	if f: f.release_focus()
 

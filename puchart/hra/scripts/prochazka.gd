@@ -21,18 +21,28 @@ func _svitek(b: Button, fs := 24, i := 0) -> void:
 	if _pismo == null: _pismo = load("res://fonty/GrenzeGotisch-Medium.ttf")
 	Styl.tlacitko_pruh(b, _pismo, fs, i)
 
+var _fps_hra := 0
+func _fps_menu(ano: bool) -> void:   # statická obrazovka (nabídka, menu hráče) na 10 snímků – méně tepla (rešerše Havrana 10. 11.)
+	if ano:
+		if Engine.max_fps != 10: _fps_hra = Engine.max_fps
+		Engine.max_fps = 10
+	else: Engine.max_fps = _fps_hra
+
 func otevri_nabidku() -> void:   # Start: pauza (Havran)
 	if menu_hrace.open: menu_hrace.zavri()
+	_fps_menu(true)
 	get_tree().paused = true
 	menu.show_menu(true)
 
 func zavri_nabidku() -> void:
 	menu.hide_menu()
+	_fps_menu(false)
 	get_tree().paused = false
 
 func otevri_menu_hrace() -> void:
 	if menu.visible: return
 	menu_hrace.otevri()
+	_fps_menu(true)
 
 func pouzij() -> void:   # A: vrata a dveře na dosah
 	if dvere and dvere._blizko != "": dvere.prepni(dvere._blizko)
@@ -72,6 +82,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	_nastaveni()
 	_presun(mista[0])
 	get_tree().paused = true
+	_fps_menu(true)
 	menu.play_intro()   # úvod: erb Bočka z Kunštátu, název hry, hudba (Havran)
 	if OS.get_environment("PUCHART_MENU_FOTO") != "":   # snímek úvodní nabídky (kontrola vzhledu bez tabletu)
 		await get_tree().create_timer(9.0).timeout

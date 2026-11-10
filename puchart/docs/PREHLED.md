@@ -63,3 +63,18 @@ a optimalizovat podle všech podkladů?“). Aktualizovat při každém větší
 | stavba světa | `nastroje/postav_vse.sh` |
 | hlídači | `nastroje/hlidaci.sh` |
 | APK | `nastroje/export_apk.sh` |
+
+## 6. Poznatky z rešerší Havrana 10. 11. (Optimalizace pro tablet, GitHub a asijské zdroje)
+Platí i pro Puchart; co už máme, co přebíráme, co je jen hypotéza.
+- **Máme:** strop 30 FPS na tabletu od spuštění (rozpocty.json snimky_max), světla bez stínu (každé bodové světlo se
+  stínem přidá další průchod všem objektům v dosahu – zdroják gles3), filtr stínu slunce 1, mipmapy + ETC2, předehřívání
+  shaderů, LOD 10 px.
+- **Převzato teď:** nabídka a menu hráče na 10 FPS (statická obrazovka, méně tepla).
+- **Do měření (krok 1 plánu):** varianty trasy – slunce bez stínu / tráva shadows_disabled / tráva unshaded / 50 % 3D;
+  ke každému úseku teplo, volná paměť a snímky nad 50 ms; studený a zahřátý běh zvlášť; druhý průchod a druhé spuštění
+  (kompilace vs. paměť u špiček); herní prostor Xiaomi zapnutý/vypnutý.
+- **Vzhled jako KCD (podle Warhorse):** nese ho velkoplošné měkké zastínění a světlo podle denní doby → zapečené AO
+  a „kolik je vidět oblohy“ do vrcholů a terénu, dvoubarevné okolní světlo (obloha/země) – posunout výš v plánu.
+- **Hypotézy (A/B až po měření):** stínové proxy stromů (stín vrhá hrubý neprůhledný tvar), neprůhledný střed korun,
+  depth prepass na Adrenu, méně čtení textur u skal a zdiva (zdivo má 7 vzorkovačů + parallax).
+- **Úklid:** jeden dokument rozpočtů (rozpočty se v projektech rozcházejí – agent pak optimalizuje ke špatnému cíli).
