@@ -1212,3 +1212,7 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   výřezu se konec prolne do začátku) + Standing_Melee_Attack_Downward. Chůze postav tempem 0,90–0,95 (`chuze_postav.tempo`).
   Hovor: 4. místo ve skupině (`hovor_skupina.uhly_st`). Testy: lide_chovani OK (beh lide7: kostky, dvojice, volno 3+,
   spánek), test_klipy_chuze + test_drzeni OK (234). NEOVĚŘENO: tablet; snímky ve hře – viz zpráva pomocníka.
+- 10. 11. pozdě večer: `predmety.gd` po úpravě z kontroly (`var prejit := … and not info.get(…)`) se nezkompiloval – typ
+  z `Dictionary.get` je Variant, `:=` ho neodvodí („Cannot infer the type“). Chytil to až rychlý test, `--check-only` na
+  jednom skriptu (hud) prošel za 1 s a nic neříká. Poučení: po úpravě skriptu vždy rychlý test (`tools/beh.sh … testy`),
+  ne `--check-only`; u výrazů s `.get()` psát typ (`var x: bool = …`).
