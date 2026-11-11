@@ -49,7 +49,8 @@
    "Stani_Dech_Loop": 3.0,
    "Stani_Presun_Loop": 2.0,
    "Stani_Stary_Loop": 1.0,
-   "Idle_Loop": 1.0
+   "Idle_Loop": 1.0,
+   "Stani_A2_Loop": 2.0
   },
   "nahrazuje": "Idle_Loop",
   "ne_s_predmetem": true
@@ -826,7 +827,8 @@
     "Sitting_Idle_Loop",
     "Sed_Hovor_Loop",
     "Sed_Piti_Loop",
-    "Sitting_Idle_Loop"
+    "Sitting_Idle_Loop",
+    "Sed_Vyklada_Loop"
    ],
    "obmena_s": [
     8.0,
@@ -870,6 +872,11 @@
      "Sitting_Idle_Loop",
      "Sed_Piti1_Loop",
      "Sed_Hovor1_Loop"
+    ],
+    [
+     "Sed_Vyklada_Loop",
+     "Sed_Piti_Loop",
+     "Sed_Vyklada_Loop"
     ]
    ]
   },
@@ -886,7 +893,7 @@
   },
   "vareni": {
    "klipy": [
-    "Interact",
+    "Polozi",
     "Hleda_Loop"
    ],
    "obmena_s": [
@@ -904,11 +911,11 @@
      "Truhla_Otevri",
      "Hleda_Loop",
      "Truhla_Zavri",
-     "Interact"
+     "Polozi"
     ],
     [
-     "Interact",
-     "Interact",
+     "Polozi",
+     "Polozi",
      "Napiti"
     ]
    ]
@@ -1089,7 +1096,7 @@
   },
   "obsluha_hostinec": {
    "klipy": [
-    "Interact",
+    "Polozi",
     "Idle_Talking_Loop",
     "Idle_Loop"
    ],
@@ -1112,16 +1119,16 @@
      "Opreny_Loop"
     ],
     "hostinec_krb": [
-     "Interact",
+     "Polozi",
      "Hleda_Loop",
      "Truhla_Otevri"
     ],
     "hostinec_stul_1": [
-     "Interact",
+     "Polozi",
      "Hovor_Mix_Loop"
     ],
     "hostinec_stul_2": [
-     "Interact",
+     "Polozi",
      "Hovor_Mix1_Loop"
     ]
    },
@@ -1161,7 +1168,7 @@
   },
   "uklid_hostinec": {
    "klipy": [
-    "Interact"
+    "Polozi"
    ],
    "obmena_s": [
     5.0,
@@ -1177,13 +1184,13 @@
    ],
    "obchuzka_klipy": {
     "hostinec_stul_1": [
-     "Interact"
+     "Polozi"
     ],
     "hostinec_stul_2": [
-     "Interact"
+     "Polozi"
     ],
     "hostinec_krb": [
-     "Interact",
+     "Polozi",
      "Hleda_Loop"
     ]
    },
@@ -1343,7 +1350,7 @@
   },
   "obsluha_krcma": {
    "klipy": [
-    "Interact",
+    "Polozi",
     "Idle_Talking_Loop",
     "Idle_Loop"
    ],
@@ -1366,12 +1373,12 @@
      "Opreny_Loop"
     ],
     "krcma_obsluha": [
-     "Interact",
+     "Polozi",
      "Hleda_Loop",
      "Truhla_Otevri"
     ],
     "krcma_senk": [
-     "Interact",
+     "Polozi",
      "Hovor_Mix_Loop"
     ]
    },
@@ -1411,7 +1418,8 @@
    "klipy": [
     "Sitting_Idle_Loop",
     "Sitting_Idle_Loop",
-    "Sed_Hovor_Loop"
+    "Sed_Hovor_Loop",
+    "Sed_Vyklada_Loop"
    ],
    "obmena_s": [
     10.0,
@@ -1439,6 +1447,11 @@
     [
      "Sitting_Idle_Loop",
      "Sed_Piti_Loop"
+    ],
+    [
+     "Sed_Vyklada_Loop",
+     "Sed_Piti_Loop",
+     "Sed_Vyklada_Loop"
     ]
    ],
    "dvojice_stoji": 0.5,
@@ -1550,7 +1563,7 @@
   },
   "obsluha_senkyrka": {
    "klipy": [
-    "Interact",
+    "Polozi",
     "Idle_Talking_Loop",
     "Idle_Loop"
    ],
@@ -1570,19 +1583,19 @@
    ],
    "obchuzka_klipy": {
     "hostinec_krb": [
-     "Interact",
+     "Polozi",
      "Hleda_Loop"
     ],
     "hostinec_stul_1": [
-     "Interact",
+     "Polozi",
      "Idle_Talking_Loop"
     ],
     "hostinec_stul_2": [
-     "Interact",
+     "Polozi",
      "Idle_Talking_Loop"
     ],
     "hostinec_obsluha_2": [
-     "Interact",
+     "Polozi",
      "Truhla_Otevri"
     ]
    },
@@ -1618,7 +1631,7 @@
   },
   "uklid_krcma": {
    "klipy": [
-    "Interact"
+    "Polozi"
    ],
    "obmena_s": [
     5.0,
@@ -1632,10 +1645,10 @@
    ],
    "obchuzka_klipy": {
     "krcma_senk": [
-     "Interact"
+     "Polozi"
     ],
     "krcma_obsluha": [
-     "Interact",
+     "Polozi",
      "Hleda_Loop"
     ]
    },
@@ -1796,7 +1809,7 @@
   "prodava": {
    "klipy": [
     "Idle_Loop",
-    "Interact"
+    "Polozi"
    ],
    "obmena_s": [
     8.0,
@@ -1808,10 +1821,10 @@
      "Truhla_Otevri",
      "Hleda_Loop",
      "Truhla_Zavri",
-     "Interact"
+     "Polozi"
     ],
     [
-     "Interact",
+     "Polozi",
      "Idle_Loop",
      "Rozhlizi"
     ]
@@ -2048,7 +2061,7 @@
     "stan_pult": [
      "Truhla_Otevri",
      "Hleda_Loop",
-     "Interact"
+     "Polozi"
     ],
     "stan_pred_1": [
      "Idle_FoldArms_Loop",
@@ -2078,7 +2091,7 @@
    "_p": "Misa 11. 11. (kupec neni prodavac za pultem - prechazi pred stanem, pozoruje, sedi; kolemjdouci si u nej sednou): prechazi pred stanem: u pultu prerovna zbozi, u cesty pozoruje, kdo jde"
   }
  },
- "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.) | Misa 11. 11. (postava ukazuje do prazdna): UAL Interact = natazena ruka vpred v urovni hrudi - jen u stolu a krbu (polozi/vezme); u studny, mlyna, vetraku a ve volnem prostoru Zvedne / Nese_Stoji_Loop / rozhlizeni",
+ "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.) | Misa 11. 11. (postava ukazuje do prazdna): UAL Interact = natazena ruka vpred v urovni hrudi - jen u stolu a krbu (polozi/vezme); u studny, mlyna, vetraku a ve volnem prostoru Zvedne / Nese_Stoji_Loop / rozhlizeni | Misa 11. 11. (nove klipy): Interact u stolu, krbu a pultu nahrazen Mixamo Putting_Down (Polozi - ruka do vysky pasu, polozi/vezme ze stolu); Picking_Up_1 (Vezme) je zvednuti ze zeme - jen u zeme; hoste vsedě vykladaji (Sitting_Talking); stani i Action Adventure idle 2.",
  "role": {
   "sedlak": {
    "nazev": "sedlák",
