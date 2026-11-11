@@ -5970,7 +5970,9 @@
    "misto": "hostinec_venku"
   },
   "spanek": "poutník nespí - putuje dál (bez lůžka)",
-  "_jmena": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): kazdy poutnik vlastni roli a trasu (3. pole)"
+  "_jmena": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): kazdy poutnik vlastni roli a trasu (3. pole)",
+  "od_sebe_m": 40.0,
+  "_od_sebe_m": "Misa 11. 11. (snimek: tri poutnici spolu u rozcesti): start poutnika na jeho trase aspon tolik od ostatnich poutniku (8 pokusu)"
  },
  "klipy_rucni": [
   "Farm_Harvest"

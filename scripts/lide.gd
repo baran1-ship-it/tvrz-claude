@@ -947,8 +947,18 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	var kde_b := String(b["kde"])
 	if bool(cn.get("nahodny_start", false)) and not (cn.get("obchuzka", []) as Array).is_empty():
 		# Misa 11. 11. (tri poutnici sli spolu): poutnik zacina nahodnym bodem sve trasy, ne mistem bloku
-		c["obch_start"] = _rng.randi() % (cn["obchuzka"] as Array).size()
-		kde_b = String(cn["obchuzka"][c["obch_start"]])
+		var ob_n := (cn["obchuzka"] as Array).size()
+		for pokus in 8:
+			c["obch_start"] = _rng.randi() % ob_n
+			kde_b = String(cn["obchuzka"][c["obch_start"]])
+			var q0: Vector2 = _misto(c, kde_b)[0]
+			var blizko := false
+			for c2: Dictionary in _lide:
+				if c2 != c and bool((c2["o"] as Dictionary).get("poutnik", false)) and c2.has("misto") \
+						and (c2["misto"] as Vector2).distance_to(q0) < float(P["poutnici"]["od_sebe_m"]):
+					blizko = true
+			if not blizko:
+				break
 	var m: Array = _misto_cinnosti(c, kde_b, cn)
 	# Misa 11. 11. (spravce stal u lavicky): sed bez volneho sedaku = jina moznost bloku bez sedu (ne stat u mista)
 	if bool(cn.get("sed", false)) and (c["sedak"] as Dictionary).is_empty() and not c.has("stoji_u") \
