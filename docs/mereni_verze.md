@@ -289,4 +289,13 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
   venku s odstupem a ne v místnostech, nové Mixamo klipy (položení, výklad vsedě), sedlo se smíchem kostí krku (NEOVĚŘENO),
   diag: fáze ve hře nečekají na zápis (oprava podezření na 2–3 s záseky po krocích kvality – ověří trasa: řádek
   „cekani na predchozi zapis“), volná paměť z /proc/meminfo, export: UV klenby sklepa.
-- Matice vztahů testovací: pokrytí 44/114, úspěšnost 32/44. Čekám na trasu (3D 75 %).
+- Matice vztahů testovací: pokrytí 44/114, úspěšnost 32/44.
+- **Měřeno 11. 11. 19:59 (Míša, tablet, 3D 80 %).** „vše“ p50/p95: tvrz-cesta 28/34, louka 27/31, les 35/41, skály 23/30,
+  kůň-les 22/27, ves 20/26, mlýn 20/24, **ves-vjezd 34/44 (0.99997: 26/35)**, ves-dvory 30/37, hostinec 19/23, věž 25/30.
+- **OVĚŘENÁ OPRAVA (1 běh):** kroky automatiky fps_30 33 ms, stiny_kratsi 35, stiny_predmetu 138+172, efekty 67+104
+  (0.99997: 3506 / 3086 / 2744 ms) – příčina byla čekání `diag.faze` na zápis ve vlákně (5e04eda).
+- **REGRESE (naměřený vliv, příčina NEOVĚŘENO):** ves-vjezd +8 ms p50 (kreslení 706, 2,3 M troj.); podezření nové
+  postavy a lavice na návsi (choreografie) – izolovaný test: varianta trasy bez postav.
+- Špičky 2,5–3,6 s (3× za 30 min: (-24,331), (172,894), (439,802)) mimo skripty (proces max 28 ms při snímku 3588 ms),
+  bez vztahu ke krokům kvality – kreslení/ovladač/systém, NEOVĚŘENO. Paměť u špiček „-0/0“: trasa četla
+  OS.get_memory_info – opraveno (bere diag: /proc/meminfo, halda).

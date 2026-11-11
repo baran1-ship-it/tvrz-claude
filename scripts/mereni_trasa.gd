@@ -248,11 +248,17 @@ func _process(d: float) -> void:
 	# spicky v cele trase (i pri zahrati - tam byva kompilace shaderu a nacitani)
 	if ms > float(cfg.get("spicka_ms", 200.0)) and spicky.size() < 12:
 		# rešerše 10. 11. krok 2b (Android: málo volné paměti = snímky přes 1 s): paměť u každé špičky
-		var mi := OS.get_memory_info()
+		# 11. 11. (trasa 0.99998: „volna -0, halda 0“): OS.get_memory_info a get_static_memory_usage na tabletu vraci 0 -
+		# hodnoty z diag (volna z /proc/meminfo, halda Debug.getNativeHeapAllocatedSize)
+		var dg: Node = main.diag
+		if dg:
+			dg.ram_mb()
+		var vol_mb := float(dg.get("_volna")) if dg else -1.0
+		var hal_mb := float(dg.get("_ram")) if dg else -1.0
 		spicky.append("%.0f ms %s %s/%s u (%.0f, %.0f): skripty %.0f fyzika %.0f gpu %.0f kresleni %d, uzly %d, volna %.0f MB, halda %.0f MB, vram %.0f MB" % [ms,
 				"zahrati" if t <= zah else "mereni", String(varianty[i_var]), u["jmeno"], (pc[0] as Vector3).x, (pc[0] as Vector3).z,
 				pr, fy, gp, kr, int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
-				float(mi.get("available", -1048576)) / 1048576.0, OS.get_static_memory_usage() / 1048576.0,
+				vol_mb, hal_mb,
 				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0])
 	if t > zah:
 		casy.append(ms)
@@ -285,7 +291,7 @@ func _process(d: float) -> void:
 			"zas": zas, "n": s.size(), "kres": kres / maxf(vz, 1), "troj": troj / maxf(vz, 1) / 1e6,
 			"vram": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0,
 			"proc": proc / maxf(vz, 1), "fyz": fyz / maxf(vz, 1), "gpu": gpu / maxf(vz, 1), "cpur": cpu_r / maxf(vz, 1),
-			"n100": nad100, "nej": nej, "halda": OS.get_static_memory_usage() / 1048576.0,
+			"n100": nad100, "nej": nej, "halda": float(main.diag.get("_ram")) if main.diag else -1.0,
 			"tex": Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
 			"buf": Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
 			"uzly": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))})
