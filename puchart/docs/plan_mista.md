@@ -38,3 +38,7 @@ Pořadí (Míša): nejdřív dodělat seznam chyb a vydat, pak místa v pořadí
 - Pole: Havran docs/rozpracovane/reserse_pole_kcd2.md + pravidla/svet/plochy.json pole („kousky přímo za vsí, pár úzkých
   lánů mezi mezemi a remízky“), model blender/zdroje/psenice.glb; lány za humny podél mezí z DMR (relief SSZ od hradu A).
 - Chýše (kůra, prkna): k lomu a uhlířům v lese – poloha až podle dokladu.
+- Míša 11. 11.: „ať není každý dům nebo zahrada stejná“ – každá usedlost z vlastního semínka (Havran vesnice.py: pevné
+  semeno, usedlosti se liší náhodou): typ domu, zrcadlení, natočení ±, odstín/varianta dřeva (Havran materiály mech,
+  lišejník, vybledlé), stodola / malá stodola / kůlna, kurník jen někde, plot laťový / proutěný, vrata kryté / branka,
+  zahrada jiný tvar a skladba (zelí, květiny, ovocný strom), lány různé šířky a plodiny (obilí, úhor, pastvina).
