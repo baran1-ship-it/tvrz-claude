@@ -235,6 +235,7 @@ func show_page(page: String) -> void:
 		"play":
 			first = _btn("Příběh", "story")
 			_btn("Pískoviště", "sandbox")
+			_btn("Měřicí trasa (asi 15 min, tablet nech ležet)", "story_trasa", true)
 			_btn("Zpět", "page:main", true)
 		"load":
 			for sv: Dictionary in saves.slice(0, 7):

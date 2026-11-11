@@ -893,7 +893,7 @@
   },
   "vareni": {
    "klipy": [
-    "Polozi",
+    "Hleda_Loop",
     "Hleda_Loop"
    ],
    "obmena_s": [
@@ -911,11 +911,11 @@
      "Truhla_Otevri",
      "Hleda_Loop",
      "Truhla_Zavri",
-     "Polozi"
+     "Hleda_Loop"
     ],
     [
-     "Polozi",
-     "Polozi",
+     "Hleda_Loop",
+     "Hleda_Loop",
      "Napiti"
     ]
    ]
@@ -1096,7 +1096,7 @@
   },
   "obsluha_hostinec": {
    "klipy": [
-    "Polozi",
+    "Hleda_Loop",
     "Idle_Talking_Loop",
     "Idle_Loop"
    ],
@@ -1119,16 +1119,16 @@
      "Opreny_Loop"
     ],
     "hostinec_krb": [
-     "Polozi",
+     "Hleda_Loop",
      "Hleda_Loop",
      "Truhla_Otevri"
     ],
     "hostinec_stul_1": [
-     "Polozi",
+     "Hleda_Loop",
      "Hovor_Mix_Loop"
     ],
     "hostinec_stul_2": [
-     "Polozi",
+     "Hleda_Loop",
      "Hovor_Mix1_Loop"
     ]
    },
@@ -1150,7 +1150,6 @@
      "hostinec_stul_1",
      "hostinec_stul_2"
     ],
-    "chuze": "Walk_Carry_Loop",
     "predmety": [
      {
       "r": "korbel"
@@ -1168,7 +1167,7 @@
   },
   "uklid_hostinec": {
    "klipy": [
-    "Polozi"
+    "Hleda_Loop"
    ],
    "obmena_s": [
     5.0,
@@ -1184,13 +1183,13 @@
    ],
    "obchuzka_klipy": {
     "hostinec_stul_1": [
-     "Polozi"
+     "Hleda_Loop"
     ],
     "hostinec_stul_2": [
-     "Polozi"
+     "Hleda_Loop"
     ],
     "hostinec_krb": [
-     "Polozi",
+     "Hleda_Loop",
      "Hleda_Loop"
     ]
    },
@@ -1198,7 +1197,6 @@
     "k": [
      "hostinec_krb"
     ],
-    "chuze": "Walk_Carry_Loop",
     "predmety": [
      {
       "r": "miska"
@@ -1350,7 +1348,7 @@
   },
   "obsluha_krcma": {
    "klipy": [
-    "Polozi",
+    "Hleda_Loop",
     "Idle_Talking_Loop",
     "Idle_Loop"
    ],
@@ -1373,12 +1371,12 @@
      "Opreny_Loop"
     ],
     "krcma_obsluha": [
-     "Polozi",
+     "Hleda_Loop",
      "Hleda_Loop",
      "Truhla_Otevri"
     ],
     "krcma_senk": [
-     "Polozi",
+     "Hleda_Loop",
      "Hovor_Mix_Loop"
     ]
    },
@@ -1399,7 +1397,6 @@
     "k": [
      "krcma_senk"
     ],
-    "chuze": "Walk_Carry_Loop",
     "predmety": [
      {
       "r": "korbel"
@@ -1563,7 +1560,7 @@
   },
   "obsluha_senkyrka": {
    "klipy": [
-    "Polozi",
+    "Hleda_Loop",
     "Idle_Talking_Loop",
     "Idle_Loop"
    ],
@@ -1583,19 +1580,19 @@
    ],
    "obchuzka_klipy": {
     "hostinec_krb": [
-     "Polozi",
+     "Hleda_Loop",
      "Hleda_Loop"
     ],
     "hostinec_stul_1": [
-     "Polozi",
+     "Hleda_Loop",
      "Idle_Talking_Loop"
     ],
     "hostinec_stul_2": [
-     "Polozi",
+     "Hleda_Loop",
      "Idle_Talking_Loop"
     ],
     "hostinec_obsluha_2": [
-     "Polozi",
+     "Hleda_Loop",
      "Truhla_Otevri"
     ]
    },
@@ -1614,7 +1611,6 @@
      "hostinec_stul_1",
      "hostinec_stul_2"
     ],
-    "chuze": "Walk_Carry_Loop",
     "predmety": [
      {
       "r": "korbel"
@@ -1631,7 +1627,7 @@
   },
   "uklid_krcma": {
    "klipy": [
-    "Polozi"
+    "Hleda_Loop"
    ],
    "obmena_s": [
     5.0,
@@ -1645,10 +1641,10 @@
    ],
    "obchuzka_klipy": {
     "krcma_senk": [
-     "Polozi"
+     "Hleda_Loop"
     ],
     "krcma_obsluha": [
-     "Polozi",
+     "Hleda_Loop",
      "Hleda_Loop"
     ]
    },
@@ -1656,7 +1652,6 @@
     "k": [
      "krcma_obsluha"
     ],
-    "chuze": "Walk_Carry_Loop",
     "predmety": [
      {
       "r": "miska"
@@ -1742,11 +1737,9 @@
    ],
    "obchuzka_klipy": {
     "nadvori_studna": [
-     "Zvedne",
      "Nese_Stoji_Loop"
     ],
     "nadvori_staje": [
-     "Zvedne",
      "Nese_Stoji_Loop"
     ]
    },
@@ -1755,7 +1748,7 @@
      "r": "vedro"
     }
    },
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): celedin nosi vodu jen studna <-> staje"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): celedin nosi vodu jen studna <-> staje | Misa 11. 11. vecer (cledin nabira kyblem z podlahy, krcmar zveda ze zeme a nese naruc dreva): bez Zvedne (zvednuti ze zeme) - u studny a u cile stoji s vedrem; nabirani vody chybi klip (resersi)"
   },
   "voda_kuchyne": {
    "klipy": [
@@ -1773,11 +1766,9 @@
    ],
    "obchuzka_klipy": {
     "nadvori_studna": [
-     "Zvedne",
      "Nese_Stoji_Loop"
     ],
     "tvrz_kuchyne_dvor": [
-     "Zvedne",
      "Nese_Stoji_Loop"
     ]
    },
@@ -1786,7 +1777,7 @@
      "r": "vedro"
     }
    },
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): dvorka/kucharka nosi vodu jen studna <-> kuchyne"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): dvorka/kucharka nosi vodu jen studna <-> kuchyne | Misa 11. 11. vecer (cledin nabira kyblem z podlahy, krcmar zveda ze zeme a nese naruc dreva): bez Zvedne (zvednuti ze zeme) - u studny a u cile stoji s vedrem; nabirani vody chybi klip (resersi)"
   },
   "vzkazy": {
    "klipy": [
@@ -1809,7 +1800,7 @@
   "prodava": {
    "klipy": [
     "Idle_Loop",
-    "Polozi"
+    "Hleda_Loop"
    ],
    "obmena_s": [
     8.0,
@@ -1821,10 +1812,10 @@
      "Truhla_Otevri",
      "Hleda_Loop",
      "Truhla_Zavri",
-     "Polozi"
+     "Hleda_Loop"
     ],
     [
-     "Polozi",
+     "Hleda_Loop",
      "Idle_Loop",
      "Rozhlizi"
     ]
@@ -2061,7 +2052,7 @@
     "stan_pult": [
      "Truhla_Otevri",
      "Hleda_Loop",
-     "Polozi"
+     "Hleda_Loop"
     ],
     "stan_pred_1": [
      "Idle_FoldArms_Loop",
@@ -2091,7 +2082,7 @@
    "_p": "Misa 11. 11. (kupec neni prodavac za pultem - prechazi pred stanem, pozoruje, sedi; kolemjdouci si u nej sednou): prechazi pred stanem: u pultu prerovna zbozi, u cesty pozoruje, kdo jde"
   }
  },
- "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.) | Misa 11. 11. (postava ukazuje do prazdna): UAL Interact = natazena ruka vpred v urovni hrudi - jen u stolu a krbu (polozi/vezme); u studny, mlyna, vetraku a ve volnem prostoru Zvedne / Nese_Stoji_Loop / rozhlizeni | Misa 11. 11. (nove klipy): Interact u stolu, krbu a pultu nahrazen Mixamo Putting_Down (Polozi - ruka do vysky pasu, polozi/vezme ze stolu); Picking_Up_1 (Vezme) je zvednuti ze zeme - jen u zeme; hoste vsedě vykladaji (Sitting_Talking); stani i Action Adventure idle 2.",
+ "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.) | Misa 11. 11. (postava ukazuje do prazdna): UAL Interact = natazena ruka vpred v urovni hrudi - jen u stolu a krbu (polozi/vezme); u studny, mlyna, vetraku a ve volnem prostoru Zvedne / Nese_Stoji_Loop / rozhlizeni | Misa 11. 11. (nove klipy): Interact u stolu, krbu a pultu nahrazen Mixamo Putting_Down (Polozi - ruka do vysky pasu, polozi/vezme ze stolu); Picking_Up_1 (Vezme) je zvednuti ze zeme - jen u zeme; hoste vsedě vykladaji (Sitting_Talking); stani i Action Adventure idle 2. | Misa 11. 11. vecer (cledin nabira kyblem z podlahy, krcmar zveda ze zeme a nese naruc dreva): Polozi/Vezme (Mixamo Putting_Down/Picking_Up = krabice na zem / ze zeme) vyrazeny ze stolu, krbu a pultu -> Hleda_Loop (prace rukama ve vysce pasu); obchuzka_nese bez Walk_Carry_Loop (naruc) - korbel/miska v jedne ruce pri chuzi postavy",
  "role": {
   "sedlak": {
    "nazev": "sedlák",
@@ -2568,7 +2559,7 @@
     {
      "od": 4.5,
      "cinnost": "rano",
-     "kde": "dvere"
+     "kde": "mlyn_dvur"
     },
     {
      "od": 5.0,
@@ -2604,11 +2595,11 @@
     {
      "od": 12.0,
      "cinnost": "volno",
-     "kde": "mlyn",
+     "kde": "mlyn_dvur",
      "moznosti": [
       {
        "cinnost": "volno",
-       "kde": "mlyn",
+       "kde": "mlyn_dvur",
        "vaha": 2.0
       },
       {
@@ -2635,7 +2626,7 @@
       },
       {
        "cinnost": "hovor",
-       "kde": "dvere",
+       "kde": "mlyn_dvur",
        "vaha": 1.0
       }
      ],
@@ -2647,7 +2638,7 @@
     {
      "od": 18.0,
      "cinnost": "volno",
-     "kde": "mlyn"
+     "kde": "mlyn_dvur"
     },
     {
      "od": 19.0,
@@ -2662,7 +2653,8 @@
    "mluvnost": 0.5,
    "zrak_m": 15.0,
    "trida": "nizka",
-   "_rozvrh": "Misa 10. 11.: rano mele, pak stridave mleti, noseni pytlu, u mlyna; poledne na lavici nebo doma; vecer posedi pred mlynem"
+   "_rozvrh": "Misa 10. 11.: rano mele, pak stridave mleti, noseni pytlu, u mlyna; poledne na lavici nebo doma; vecer posedi pred mlynem",
+   "_rozvrh11": "Misa 11. 11. (mlynar se synem namackani ve dverich): rano, hovor a volno na dvore mlyna (mlyn_dvur), ne v bode dveri"
   },
   "kovar": {
    "nazev": "kovář",
@@ -3820,7 +3812,7 @@
     {
      "od": 6.5,
      "cinnost": "rano",
-     "kde": "dvere"
+     "kde": "mlyn_dvur"
     },
     {
      "od": 7.0,
@@ -5120,7 +5112,7 @@
    "domov": {
     "misto": "mlyn"
    },
-   "prace": "mlyn",
+   "prace": "mlyn_dvur",
    "spanek": {
     "budova": "mlyn",
     "postel": "lozko"

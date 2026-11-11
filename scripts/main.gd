@@ -189,6 +189,9 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 	match what:
 		"story":
 			_start("pribeh", {})
+		"story_trasa":
+			_trasa_zvolena = true           # Misa 11. 11.: trasa jen na vyber pri startu, ne sama
+			_start("pribeh", {})
 		"sandbox":
 			_start("piskoviste", {})
 		"continue":
@@ -3032,13 +3035,20 @@ func _ground_hi(x: float, z: float) -> float:
 ## Misa 3. 11.: „nechci na nic klikat“ - na tabletu se merici trasa spusti sama jednou po kazde nove verzi (15 s po
 ## nacteni), na konci je tabulka ve schrance (staci vlozit do chatu) a v Nastaveni -> Zkopirovat zaznam mereni.
 ## pravidla/svet/mereni_trasa.json samo_na_tabletu false = vypnout.
+var _trasa_zvolena := false
+
+
+## Misa 11. 11.: „chci mit na zacatku hry na vyber a ne ze se vzdy pousti“ - trasa jen z volby Hrat -> Merici trasa
+## (nebo samo_na_tabletu true / TVRZ_TRASA_SAMA pro ladeni: jednou po kazde nove verzi).
 func _trasa_sama() -> void:
 	var v := String(ProjectSettings.get_setting("application/config/version", ""))
 	var zn := "user://trasa_hotova_%s" % v
-	if not (OS.has_feature("mobile") or OS.has_environment("TVRZ_TRASA_SAMA")) or FileAccess.file_exists(zn):
-		return
-	if not bool(Pravidla.cti("mereni_trasa", "samo_na_tabletu")):
-		return
+	if not _trasa_zvolena:
+		if not (OS.has_feature("mobile") or OS.has_environment("TVRZ_TRASA_SAMA")) or FileAccess.file_exists(zn):
+			return
+		if not bool(Pravidla.cti("mereni_trasa", "samo_na_tabletu")):
+			return
+	_trasa_zvolena = false
 	hud.toast("Za 15 s se spustí měřicí trasa (asi 15 min) – nech tablet ležet", 6.0)
 	await get_tree().create_timer(15.0).timeout
 	var f := FileAccess.open(zn, FileAccess.WRITE)
