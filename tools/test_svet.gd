@@ -7572,6 +7572,7 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 		if c != a_c and c != b_c:
 			zal_ost_d[c["id"]] = c.get("cinnost_ted", "")
 			c["cinnost_ted"] = "spi"
+			lide.call("_uvolni", c)               # i rezervace sedaku (lavice u studny obsazena celedinem)
 	a_c["cinnost_ted"] = "volno"
 	b_c["cinnost_ted"] = "volno"
 	lide.call("_uvolni", a_c)
