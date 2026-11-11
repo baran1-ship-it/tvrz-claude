@@ -31,19 +31,20 @@
    "modely": [
     "Dum2",
     "Dum1",
-    "ChyseKura",
+    "Dum2",
     "Rychta",
     "Dum2",
     "Dum1",
-    "ChysePrkna",
-    "Dum2"
+    "Dum2",
+    "Dum1"
    ],
    "pocet_usedlosti": "6–8 (NAVRH podle rozsahu mezí)",
    "doklad": "GC80T08 (docs/hrady_podle_kreseb.md): kamenné hrázky políček ~250 m SZ a SV, ves 1547 pustá; DMR 5G lokální reliéf: pravoúhlé linie (meze) na plošině SSZ od hradu A (rozbor 11. 11., scratchpad teren/relief.png)",
    "jistota": "DOLOZENO existence a přibližná poloha; uspořádání usedlostí NAVRH (podle mezí, ulicová ves)",
    "cesta": "z hřebenové / hlavní cesty k hradu A (ne úvozem do údolí – Míša 10. 11.)",
    "typ": "ves",
-   "dosah_m": 110
+   "dosah_m": 110,
+   "pozn_modely": "Míša 11. 11.: chýše (kůra, prkna) „spíš v lese u hávíru nebo v lomu, ne ve vsi“ (jako Havran: u lomu a uhlířů) – ve vsi jen usedlosti"
   },
   {
    "id": "mlyn_velicka",
@@ -140,5 +141,16 @@
   "prechod_m": 4.0,
   "pozn": "usedlost středověké vsi ~25–30 m podél cesty (Havran ves Lhota: domy po ~27 m), dům štítem do ulice; převýšení pod půdorysem do 2 m vyrovná podezdívka a plošina (bez kopání do svahu)",
   "pozn_toky": "15 m od osy toku – krčma vyšla na ostrůvek mezi potoky u soutoku (zátopa); stavby na terase nad nivou"
- }
+ },
+ "planovane": [
+  {
+   "id": "chyse_les",
+   "modely": [
+    "ChyseKura",
+    "ChysePrkna"
+   ],
+   "stav": "REŠERŠE",
+   "pozn": "Míša 11. 11.: chýše u lomu (kámen na hrad – droba) a v lese u uhlířů/havíře; poloha až podle dokladu (nic z hlavy)"
+  }
+ ]
 }
