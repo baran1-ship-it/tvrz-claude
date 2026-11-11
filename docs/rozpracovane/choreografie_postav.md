@@ -86,3 +86,23 @@ Každý obchodník má jiné zboží, přirážku, výkup a měšec: kupec u sta
 dráž 1,4×), krčmář (levnější pivo 1,15×, malý měšec), kovář (nářadí a zbraně, vykupuje železo), mlynář (mouka a chléb
 skoro za výrobní cenu 1,05×), bylinkářka (byliny, zelenina). Obchodník vykupuje jen své druhy zboží a jen do výše měšce;
 ráno doplní zboží i měšec; v noci zavřeno. Další krok: smlouvání a pověst (KCD).
+
+## Společné scény (Míša 11. 11.: „když bude potřeba, i víc postav, pokud spolu mají mít kontakt“)
+Dvojice mají ve stejný čas stejnou činnost na stejném místě (`postavy.json spolecne_sceny`, kontrola v testu
+`lide_chovani`): hovor = sloty proti sobě, volno/hospoda = jeden sedí a druhý stojí, nebo oba sedí.
+
+| čas | kdo | kde a co |
+|---|---|---|
+| 6:30 | hostinský + šenkýřka | u krbu: ranní porada, co se dnes vaří |
+| 9:00 | purkrabí + stráž | u brány: hlášení, kdo přišel |
+| 9:30 | kupec + poutník Bartoloměj | lavice před stanem: kupec nabízí, poutník odpočívá s džbánkem |
+| 12:00 | lamači + kameník | lavice u špalku: společná svačina |
+| 13:30 | kuchařka + dvorka | před kuchyní: posezení po obědě |
+| 15:00 | selka (dům 2) + selka (dům 3) | náves: sousedský hovor |
+| 15:00 | selka (dům 6) + bylinkářka | náves: hovor o bylinách |
+| 15:00 | kovář + čeledín | u stájí: prohlídka koní a podkov |
+| 16:00 | rychtář + sedlák (dům 4) | náves: obecní věci |
+| 17:00 | purkrabí + písař | u paláce: večerní rozprava |
+| 17:30 | Havel + chalupník | krčma U Kohouta: pivo, kostky |
+| 18:30 | stráž + noční stráž | u brány: předání stráže |
+| 19:00 | ponocný + rychtář | náves: domluva na noc |
