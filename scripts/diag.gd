@@ -82,7 +82,10 @@ func zkopiruj_log() -> int:
 ## Faze nacitani: zapise se hned (pri padu behem nacitani je videt, kde hra skoncila).
 func faze(t: String) -> void:
 	print("FAZE %.1f s %s" % [(Time.get_ticks_msec() - _start) / 1000.0, t])   # Misa 0.89: delka nacitani po fazich
-	_zapis("FAZE " + t)
+	# 11. 11. (trasa 0.99997: kazdy krok kvality = zasek 2,7-3,5 s v neměřeném _process; PODEZRENI = cekani hlavniho
+	# vlakna na predchozi zapis ve fronte vlaken plne stavby louky): ve hre faze necekaji, zapis jde vlaknem (pri padu
+	# chybi nejvys posledni 2 s); hned jen pri nacitani (pad pri nacitani musi byt v logu)
+	_zapis("FAZE " + t, not (main and bool(main.get("ready_done"))))
 
 
 func _oznac(bezi: bool) -> void:
@@ -489,6 +492,18 @@ var _pss_t := -100000
 var _pss_ms := 0.0
 
 
+## Volna pamet systemu z /proc/meminfo (MemAvailable, kB -> B); -1 = nelze precist. Android OS.get_memory_info vraci 0.
+static func _meminfo_dostupna() -> int:
+	var f := FileAccess.open("/proc/meminfo", FileAccess.READ)
+	if f == null:
+		return -1
+	while not f.eof_reached():
+		var l := f.get_line()
+		if l.begins_with("MemAvailable:"):
+			return int(l.split(":")[1].strip_edges().split(" ")[0]) * 1024
+	return -1
+
+
 func ram_mb() -> int:
 	if OS.get_name() == "Android":
 		if _dbg == null:
@@ -497,6 +512,8 @@ func ram_mb() -> int:
 			_ram = int(_dbg.getNativeHeapAllocatedSize()) / 1048576
 		var mi := OS.get_memory_info()
 		var vol := int(mi.get("available", -1))
+		if vol <= 0:
+			vol = _meminfo_dostupna()              # tablet 0.99996/7: available i free = 0 ("volna -0 MB")
 		if vol <= 0:
 			vol = int(mi.get("free", -1))          # tablet 0.59b: available chybi (panel "volna 0")
 		_volna = vol / 1048576 if vol > 0 else -1  # -1 = nezname (N/A), ne 0
@@ -595,8 +612,13 @@ func _zapis(pozn: String, hned := true) -> void:
 		_zapis_uloha = -1
 	if pozn != "" and hned:
 		if _zapis_uloha >= 0:
+			var u0 := Time.get_ticks_usec()
 			WorkerThreadPool.wait_for_task_completion(_zapis_uloha)
 			_zapis_uloha = -1
+			var cek := (Time.get_ticks_usec() - u0) / 1000.0
+			if cek > 20.0:                # overeni podezreni: kolik hlavni vlakno cekalo na zapis ve vlakne
+				_radky.append("cekani na predchozi zapis %.0f ms (%s)" % [cek, pozn])
+				text += _radky[-1] + "\n"
 		_zapis_soubor(text)           # faze nacitani, konec/pauza: hned (pad pri nacitani, Android zavre aplikaci)
 	elif _zapis_uloha < 0:
 		_zapis_uloha = WorkerThreadPool.add_task(_zapis_soubor.bind(text))

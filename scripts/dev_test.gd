@@ -232,6 +232,10 @@ func _ready() -> void:
 		var ts3: Node = load("res://tools/test_voda.gd").new()
 		add_child(ts3)
 		await ts3.run(main)
+		# ctvrta sada (vykon, Misa 11. 11. trasa 0.99997): jen testy vyjmenovane v TVRZ_TEST_JEN
+		var ts4: Node = load("res://tools/test_vykon.gd").new()
+		add_child(ts4)
+		await ts4.run(main)
 	else:
 		await _walk_test()
 	get_tree().quit()

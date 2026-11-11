@@ -266,4 +266,15 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
 
 ### 0.99997 (aa03c89) – vydáno 10. 11. 22:31 – NEOVĚŘENO NA ZAŘÍZENÍ
 - Změny proti 0.99996: sdílené textury předmětů (glb 310 → 28 MB, 161 kopií pryč), jádro korun + stínové těleso stromů,
-  listí bez depth_prepass_alpha, živé postavy (rozvrhy, scénky, Mixamo), tlačítko Běh. Čekám na trasu (3D 75 %).
+  listí bez depth_prepass_alpha, živé postavy (rozvrhy, scénky, Mixamo), tlačítko Běh.
+- **Měřeno 11. 11. 05:12 (Míša, tablet, 3D 80 % „střední“, Game Turbo).** Varianta „vše“ p50/p95 ms:
+  tvrz-cesta 28/34, louka 27/31, **les 35/40**, skály 24/31, kůň-les 20/28, ves 25/32, mlýn 20/26, ves-vjezd 26/35,
+  hostinec 17/20, věž 26/29.
+- **NAMĚŘENO (proti 0.99996, stejných 80 %):** les p95 85 → 40, louka 57 → 31, skály 55 → 31 – jádro korun + stínové
+  těleso stromů (Puchart) srazilo špičky lesa na polovinu. VRAM 948 → 786 MB (textury 676 → 508; sdílené textury
+  předmětů). Uzlů 18,7 k → 26,9 k (postavy, lavice, stínová tělesa).
+- **REGRESE (naměřený vliv, příčina NEOVĚŘENO):** v auto variantě každý krok automatiky = zásek 2,7–3,5 s v neměřeném
+  `_process` (stiny_kratsi uplatnění 0 ms → snímek 3506 ms; stiny_predmetu 101 → 3086; efekty 52 → 2744). 0.99996:
+  37 / 332 / 77 ms. Měřič PSS u záseků NEBYL (značka chybí). Izolovaný test: `tools/test_vykon.gd` kroky_kvality
+  (každý krok zvlášť ve světě, headless = jen skripty).
+- Začátky variant 946 / 265 / 319 / 414 ms (0.99996: 1,2–2,2 s). „volna -0 MB“: opraveno čtením /proc/meminfo.
