@@ -257,33 +257,36 @@ func _blizko(k: String, ts: Array, bl: float, pr: float, B: float, l0: float) ->
 	if cfg.get("listi_shader", true): m0 = _listi(m0, 0.0, 0.0, true, Vector3(l0, lp, 1.0))
 	if cfg.get("jadro_koruny", 0.0) > 0.0: m0 = _jadro(m0, float(cfg["jadro_koruny"]))   # vnitřek koruny bez alfy (early-Z)
 	var stin := _stin_proxy(m0) if cfg.get("stin_proxy", true) else null   # stín z hrubé koruny, ne z listí (2. průchod listí)
-	var bunky := {}
-	for t in ts:
-		var c := Vector2i(floori(t.origin.x / B), floori(t.origin.z / B))
-		if not bunky.has(c): bunky[c] = []
-		bunky[c].append(t)
-	for c in bunky:
-		var a: Array = bunky[c]
-		# LOD0: buňky se středem do l0 (tvrdě, s hysterezí); LOD1: od l0 do bl + půl úhlopříčky, na konci dithering
-		for lod in 2:
-			var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = m0 if lod == 0 else m1
-			mm.instance_count = a.size()
-			for i in a.size(): mm.set_instance_transform(i, a[i])
-			var mi := MultiMeshInstance3D.new(); mi.multimesh = mm
-			# buňka se kreslí, dokud v ní může být strom své úrovně (střed ± půl úhlopříčky); o úroveň rozhoduje shader po stromech
-			mi.visibility_range_begin = 0.0 if lod == 0 else maxf(0.0, l0 - lp - B * 0.75)
-			mi.visibility_range_end = (l0 + lp + B * 0.75) if lod == 0 else bl + B * 0.75
-			mi.visibility_range_begin_margin = 0.0
-			mi.visibility_range_end_margin = 0.0
-			mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
-			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if stin else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-			add_child(mi)
-		if stin:   # stínové těleso: koule koruny + válec kmene, jen do stínu (40 m), listí stín nekreslí
-			var ms := MultiMesh.new(); ms.transform_format = MultiMesh.TRANSFORM_3D; ms.mesh = stin; ms.instance_count = a.size()
-			for i in a.size(): ms.set_instance_transform(i, a[i])
-			var si := MultiMeshInstance3D.new(); si.multimesh = ms; si.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
-			si.visibility_range_end = float(cfg.get("stin_dosah_m", 45.0)); si.visibility_range_end_margin = 4.0
-			add_child(si)
+	# blízké stromy jen v buňkách kolem hráče (bunky_kolem.gd – pád na tabletu 11. 11.: buňky na celou mapu = došla paměť)
+	if _blizke == null:
+		_blizke = BunkyKolem.new(); _blizke.name = "Blizko"; _blizke.B = B; _blizke.R = bl + B * 0.75 + 4.0
+		_blizke.vyrob = _vyrob_blizko; add_child(_blizke)
+	var sada := _bl_sady.size()
+	_bl_sady.append({"m0": m0, "m1": m1, "stin": stin,
+		"v0": Vector2(0.0, l0 + lp + B * 0.75), "v1": Vector2(maxf(0.0, l0 - lp - B * 0.75), bl + B * 0.75)})
+	for t in ts: _blizke.pridej(t, sada)
+
+const BunkyKolem := preload("res://scripts/bunky_kolem.gd")
+var _blizke: Node3D
+var _bl_sady := []      # [{m0, m1, stin, v0, v1}] – sítě a dosahy viditelnosti jedné varianty
+
+## Uzly jedné varianty v jedné buňce: LOD0 do l0, LOD1 od l0 do bl (dosahy na střed buňky ± půl úhlopříčky);
+## o úroveň rozhoduje shader po stromech (lod_mez), stínové těleso jen do stin_dosah_m
+func _vyrob_blizko(sada: int, buf: PackedFloat32Array, n: int) -> Array:
+	var sd: Dictionary = _bl_sady[sada]; var out := []
+	for lod in 2:
+		var mi := BunkyKolem.mmi(sd["m0"] if lod == 0 else sd["m1"], buf, n)
+		var v: Vector2 = sd["v0"] if lod == 0 else sd["v1"]
+		mi.visibility_range_begin = v.x; mi.visibility_range_end = v.y
+		mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if sd["stin"] else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		out.append(mi)
+	if sd["stin"]:
+		var si := BunkyKolem.mmi(sd["stin"], buf, n); si.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+		si.visibility_range_end = float(cfg.get("stin_dosah_m", 45.0)); si.visibility_range_end_margin = 4.0
+		out.append(si)
+	return out
+
 
 ## Pata kmene (stromy_modely.json zapusteni): na svahu zapustit o pokles terénu na obvodu kořenového náběhu, ať kmen nevisí
 func _pata(x: float, z: float, h: float, sc: float) -> float:

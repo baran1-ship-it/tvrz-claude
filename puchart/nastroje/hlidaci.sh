@@ -41,6 +41,12 @@ if [ "$1" != "--rychle" ]; then
 fi
 # chyby skriptů za běhu v testech (2. 11.: chyba mlha_od prošla kontrolou načtení, objevila se až v testu)
 if grep -hE "SCRIPT ERROR" $K/build/hlidaci_beh_godot.log 2>/dev/null | head -3 | tee -a $S | grep -q .; then rc=1; echo "SKRIPTY ZA BEHU CHYBA" | tee -a $S; fi
+# rozpočet uzlů scény (pád na tabletu 11. 11. – vrstvy stavěné na celou mapu, došla paměť): výpis UZLY z každého startu hry v testech
+UMAX=$(python3 -c "import json;print(json.load(open('$K/pravidla/svet/rozpocty.json'))['pamet']['uzlu_max'])")
+UN=$(grep -ohE "^UZLY celkem [0-9]+" $K/build/hlidaci_beh_godot.log 2>/dev/null | awk '{print $3}' | sort -n | tail -1)
+if [ -z "$UN" ]; then [ "$1" != "--rychle" ] && { rc=1; echo "UZLY CHYBA: hra nevypsala počet uzlů" | tee -a $S; }
+elif [ "$UN" -gt "$UMAX" ]; then rc=1; echo "UZLY CHYBA: $UN uzlů po startu > rozpočet $UMAX (rozpocty.json pamet.uzlu_max)" | tee -a $S
+else echo "UZLY OK: $UN (rozpočet $UMAX)" | tee -a $S; fi
 krok "matice vztahů"; python3 $K/nastroje/kontrola_vztahu.py $K $1 | tee -a $S || rc=1
 krok "tabulka chyb"; python3 $K/nastroje/kontrola_tabulek.py $K $1 | tee -a $S || rc=1
 # poslední dobrá verze (GPT studio bod 7): při úspěchu uložit výsledky s commitem; při chybě vypsat rozdíl proti ní

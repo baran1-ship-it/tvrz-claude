@@ -7,6 +7,7 @@ const Svet := preload("res://scripts/svet.gd")
 const Hrac := preload("res://scripts/hrac.gd")
 const Diag := preload("res://scripts/diag.gd")
 const Les := preload("res://scripts/les.gd")
+const BunkyKolem := preload("res://scripts/bunky_kolem.gd")
 
 var svet: Node3D
 var hrac: CharacterBody3D
@@ -155,7 +156,11 @@ func _start() -> void:
 	ker.postav(svet, cam, "res://data/kere.json")
 	if _foto == "" and OS.get_environment("PUCHART_TEST") == "" and _pr.get("predehrati", {}).get("zapojeno", false):   # shadery všech materiálů sestavit hned, ne až za chůze (záseky při 1. průchodu – Havran 0.62)
 		await get_tree().process_frame
-		await load("res://scripts/predehrati.gd").predehrej(self, cam, byl.vsechny_site() + ker.vsechny_site(), int(_pr.get("predehrati", {}).get("snimku", 4)))
+		await load("res://scripts/predehrati.gd").predehrej(self, cam, byl.vsechny_site() + ker.vsechny_site() + _vzory_bunek(), int(_pr.get("predehrati", {}).get("snimku", 4)))
+	# rozpočet uzlů (pád na tabletu 11. 11.: 115 tis. buněk lesu = nedostatek paměti) – výpis po vrstvách
+	var uz := []
+	for ch in get_children(): uz.append("%s %d" % [ch.name, ch.find_children("*", "", true, false).size()])
+	print("UZLY celkem %d, halda %d MB: %s" % [Performance.get_monitor(Performance.OBJECT_NODE_COUNT), OS.get_static_memory_usage() / 1048576, ", ".join(uz)])
 	if _mereni.size() > 0: _mereni[0].zacni(svet, _mereni[1])
 	var meri := FileAccess.file_exists("res://data/mereni.json") and (OS.get_environment("PUCHART_MERENI") == "1" or not OS.has_feature("pc"))
 	if OS.get_environment("PUCHART_TEST") == "pruchod":
@@ -522,6 +527,14 @@ func _zdivo_bez_rastru(h: Node) -> void:
 			m.set_surface_override_material(i, _zdivo_mat[klic_])
 
 
+## Vzorky všech vrstev po buňkách kolem hráče (bunky_kolem.gd) pro předehřátí shaderů
+func _vzory_bunek() -> Array:
+	var a := []
+	for n in find_children("*", "Node3D", true, false):
+		if n.get_script() == BunkyKolem: a.append_array(n.vzory())
+	return a
+
+
 ## Rostliny na skalách (blender/skaly.py → hra/data/skaly_rostliny.json; Míša 10. 11.: „vegetaci sem tam, ne jen mech“, fotky
 ## docs/reference/puchart_skaly): každý druh = modely z modely/rostliny, MultiMesh po buňkách bunka_m, kreslí se do dosah_m.
 func _rostliny_skal() -> void:
@@ -544,14 +557,16 @@ func _rostliny_skal() -> void:
 		var k := [int(floor(p.x / bm)), int(floor(p.z / bm)), v[0]]
 		if not skup.has(k): skup[k] = []
 		skup[k].append(t)
-	var uzel := Node3D.new(); uzel.name = "RostlinySkal"; add_child(uzel)
-	for k in skup:
-		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = k[2]
-		mm.instance_count = skup[k].size()
-		for i in skup[k].size(): mm.set_instance_transform(i, skup[k][i])
-		var mmi := MultiMeshInstance3D.new(); mmi.multimesh = mm; mmi.visibility_range_end = float(d["dosah_m"])
+	# jen buňky kolem hráče (bunky_kolem.gd – pád na tabletu 11. 11.: vrstvy na celou mapu = došla paměť)
+	var bk: Node3D = BunkyKolem.new(); bk.name = "RostlinySkal"; bk.B = bm; bk.R = float(d["dosah_m"]) + bm * 0.75 + 4.0
+	var dosah := float(d["dosah_m"])
+	bk.vyrob = func(mesh: Mesh, buf: PackedFloat32Array, n: int) -> Array:
+		var mmi := BunkyKolem.mmi(mesh, buf, n); mmi.visibility_range_end = dosah
 		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		uzel.add_child(mmi)
+		return [mmi]
+	for k in skup:
+		for t in skup[k]: bk.pridej(t, k[2])
+	add_child(bk)
 
 
 ## Kameny v korytech (nastroje/koryto_kameny.py → hra/data/koryto_kameny.json, tvary blender/kameny_koryta.py): MultiMesh
@@ -580,16 +595,19 @@ func _kameny_koryta() -> void:
 		var k := Vector3i(int(floor(p.x / bm)), int(floor(p.z / bm)), tv)
 		if not skup.has(k): skup[k] = []
 		skup[k].append(Transform3D(Basis(Vector3.UP, raw[i + 4]).scaled(Vector3(sc, sc * raw[i + 6], sc * 0.85)), p))
-	var uzel := Node3D.new(); uzel.name = "KamenyKoryta"; add_child(uzel)
-	for k in skup:
-		var vel: bool = int(k.z) >= 6
-		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = tvary[k.z % 6]
-		mm.instance_count = skup[k].size()
-		for i in skup[k].size(): mm.set_instance_transform(i, skup[k][i])
-		var mmi := MultiMeshInstance3D.new(); mmi.multimesh = mm; mmi.visibility_range_end = float(d.get("velky_dosah_m", 160)) if vel else float(d["dosah_m"])
-		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if vel else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mmi.material_override = mats[1 if vel else 0]
-		uzel.add_child(mmi)
+	# jen buňky kolem hráče (bunky_kolem.gd – pád na tabletu 11. 11.): drobné kameny do dosah_m, velké balvany do velky_dosah_m
+	for vel in [false, true]:
+		var dosah := float(d.get("velky_dosah_m", 160)) if vel else float(d["dosah_m"])
+		var bk: Node3D = BunkyKolem.new(); bk.name = "KamenyKorytaVelke" if vel else "KamenyKoryta"; bk.B = bm; bk.R = dosah + bm * 0.75 + 4.0
+		var mat: Material = mats[1 if vel else 0]
+		bk.vyrob = func(tv: int, buf: PackedFloat32Array, n: int) -> Array:
+			var mmi := BunkyKolem.mmi(tvary[tv % 6], buf, n); mmi.visibility_range_end = dosah; mmi.material_override = mat
+			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if vel else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			return [mmi]
+		for k in skup:
+			if (int(k.z) >= 6) != vel: continue
+			for t in skup[k]: bk.pridej(t, int(k.z))
+		add_child(bk)
 
 
 ## Plamen louče (Havran life.gd _flames(pos, 0.38, 10, 0.45) – „torch“): CPUParticles jazyků ohně, aditivní, bez stínu;

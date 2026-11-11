@@ -5,7 +5,7 @@ extends RefCounted
 ## kopii před kamerou, i podrost, který vzniká až za chůze (byliny.gd), a varianty s bodovým světlem (pochodně).
 ## Tablet 2. 11.: les max 964 ms a 130 záseků jen v prvním průchodu. PUCHART_BEZ_PREDEHRATI=1 vypne (měření).
 
-static func kopie(g: GeometryInstance3D, koren: Node3D, videno: Dictionary) -> int:
+static func kopie(g: GeometryInstance3D, koren: Node3D, videno: Dictionary, mimo_strom := false) -> int:
 	var mesh: Mesh = null; var mm: MultiMesh = null
 	if g is MultiMeshInstance3D:
 		mm = (g as MultiMeshInstance3D).multimesh
@@ -13,7 +13,7 @@ static func kopie(g: GeometryInstance3D, koren: Node3D, videno: Dictionary) -> i
 		mesh = mm.mesh
 	elif g is MeshInstance3D:
 		mesh = (g as MeshInstance3D).mesh
-	if mesh == null or not g.is_visible_in_tree(): return 0
+	if mesh == null or not (mimo_strom or g.is_visible_in_tree()): return 0
 	var klic := [mm != null, mm.use_colors if mm else false, mm.use_custom_data if mm else false,
 		g.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, g.transparency > 0.0,
 		g.material_override.get_rid() if g.material_override else RID()]
@@ -49,7 +49,12 @@ static func predehrej(koren_sveta: Node3D, cam: Camera3D, navic: Array, snimku :
 	var videno := {}; var n := 0
 	for gi in koren_sveta.find_children("*", "GeometryInstance3D", true, false):
 		if gi.get_parent() != koren: n += kopie(gi as GeometryInstance3D, koren, videno)
-	for mesh: Mesh in navic:
+	var site := []
+	for v in navic:   # vzorky vrstev po buňkách kolem hráče (bunky_kolem.gd vzory) – mimo strom scény
+		if v is GeometryInstance3D:
+			n += kopie(v as GeometryInstance3D, koren, videno, true); (v as Node).free()   # nikdy nebyl ve stromu scény
+		else: site.append(v)
+	for mesh: Mesh in site:
 		var m3 := MultiMesh.new(); m3.transform_format = MultiMesh.TRANSFORM_3D; m3.mesh = mesh; m3.instance_count = 1
 		var mmi := MultiMeshInstance3D.new(); mmi.multimesh = m3
 		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; mmi.extra_cull_margin = 16384.0
