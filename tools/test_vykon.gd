@@ -9,7 +9,7 @@ const Pravidla := preload("res://scripts/pravidla.gd")
 
 var main: Node
 var vysledky: Array = []
-const TESTY := ["kroky_kvality", "obchod", "postavy_mimo_zaber"]
+const TESTY := ["kroky_kvality", "obchod", "postavy_mimo_zaber", "poutnik_daleko"]
 
 
 func run(p_main: Node) -> void:
@@ -169,3 +169,40 @@ func _postavy_mimo_zaber() -> void:
 	if vzaberu == 0:
 		chyby.append("v zaberu zadna animace")
 	vysledky.append(["postavy_mimo_zaber", chyby.is_empty(), "mimo zaber %d posunu (blizko %d), v zaberu %d, rozvrh zmenil %d postav%s" % [mimo, bliz, vzaberu, zmena, "" if chyby.is_empty() else " " + str(chyby)]])
+
+
+
+## Misa 11. 11. (poutnik nema zustat stat ani preskocit): postava za dosahem jde po ceste rychlosti chuze - za 30 s
+## urazi rych x 30 (nebo dojde do cile a pokracuje dalsim bodem trasy), ne 0 a ne skok.
+func _poutnik_daleko() -> void:
+	var li: Node = main.world.get_node_or_null("Lide")
+	var chyby: Array = []
+	var c: Dictionary = {}
+	for c2: Dictionary in li.get("_lide"):
+		if bool((c2["o"] as Dictionary).get("poutnik", false)):
+			c = c2
+			break
+	if c.is_empty():
+		vysledky.append(["poutnik_daleko", false, "poutnik nenalezen"])
+		return
+	var u: Node3D = c["uzel"]
+	var cil: Vector2 = c["misto"]
+	var p0 := Vector2(u.position.x, u.position.z)
+	if p0.distance_to(cil) < 40.0:
+		# poutnik je u cile - poslat ho na dalsi bod trasy
+		c["na_miste"] = true
+		c["obmena"] = 0.0
+		li.call("_daleko_krok", c, 0.01)
+		cil = c["misto"]
+	c["na_miste"] = false
+	c["cesta"] = PackedVector2Array([cil])
+	c["i"] = 0
+	var start := Vector2(u.position.x, u.position.z)
+	for i in 30:
+		li.call("_daleko_krok", c, 1.0)
+	var konec := Vector2(u.position.x, u.position.z)
+	var usel := start.distance_to(konec)
+	var cekano := minf(float(c["rych"]) * 30.0, start.distance_to(cil))
+	if absf(usel - cekano) > 1.0:
+		chyby.append("usel %.1f m, cekano %.1f m (rych %.2f m/s)" % [usel, cekano, float(c["rych"])])
+	vysledky.append(["poutnik_daleko", chyby.is_empty(), "za 30 s %.1f m (rych %.2f), cil %.0f m" % [usel, float(c["rych"]), start.distance_to(cil)] + ("" if chyby.is_empty() else " " + str(chyby))])

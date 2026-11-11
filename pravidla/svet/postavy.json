@@ -5984,5 +5984,7 @@
  ],
  "_klipy_rucni": "Misa 11. 11.: klipy farmy, ktere jsou prace rukama bez naradi (Farm_Harvest = trhani rukama; srp v nem drzen za cepel) - test lide_chovani je nevyzaduje s predmetem",
  "anim_mimo_zaber_okraj_m": 3.0,
- "_anim_mimo_zaber": "Misa 11. 11. (jako trava a stromy): postava mimo zaber kamery a dal nez anim_mimo_zaber_okraj_m (za zady hrace by se pri otoceni ukazala ztuhla) nema animaci ani modifikatory kostry (hlava, nohy IK, ruce); rozvrh, chuze a poloha bezi dal. Vzdalene postavy maji pri vzniku nahodny posun anim_t (0-0,25 s) - netrhaji se ve stejnem snimku."
+ "_anim_mimo_zaber": "Misa 11. 11. (jako trava a stromy): postava mimo zaber kamery a dal nez anim_mimo_zaber_okraj_m (za zady hrace by se pri otoceni ukazala ztuhla) nema animaci ani modifikatory kostry (hlava, nohy IK, ruce); rozvrh, chuze a poloha bezi dal. Vzdalene postavy maji pri vzniku nahodny posun anim_t (0-0,25 s) - netrhaji se ve stejnem snimku.",
+ "daleko_cekani_nasobek": 2.0,
+ "_daleko": "Misa 11. 11.: postava za dosahem (dosah_m + 20) jde po sve ceste rychlosti chuze rovne k dalsimu bodu (lide.gd _daleko_krok), na bode obchuzky ceka obmena_s x daleko_cekani_nasobek (zblizka tam prehraje vic klipu), novy blok rozvrhu = chuze k cili, ne skok (krome skryte cinnosti - domu); po navratu do dosahu presna cesta od dosazeneho mista"
 }

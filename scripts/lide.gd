@@ -40,6 +40,7 @@ static var P: Dictionary = {
 static var STIN_M: float = _stin_m()
 const PREDMETY_DIR := "res://modely/predmety/"
 static var ANIM_OKRAJ := float(Pravidla.cti("postavy", "anim_mimo_zaber_okraj_m"))
+static var DALEKO_CEKANI := float(Pravidla.cti("postavy", "daleko_cekani_nasobek"))
 static var _kat: Dictionary = {}
 static var _predmet_sc: Dictionary = {}
 var _ves_replika := -1000.0            # cas posledni repliky ve vsi (odstup ves_odstup_s)
@@ -1023,6 +1024,17 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 		_klip(c, String(P["sedani"]["vystup_klip"]), 1.0)
 		c["vstava"] = _delka(c, String(P["sedani"]["vystup_klip"]))
 	c["sedi"] = false
+	if not viditelna and u.position != Vector3.ZERO and bool(c.get("daleko", false)) and not bool(cn.get("skryty", false)):
+		# Misa 11. 11. (poutnik ma pokracovat, ne preskocit): daleko od hrace jde k novemu cili rychlosti chuze
+		# (_daleko_krok), ne skok na misto
+		c["cesta"] = PackedVector2Array([m[0]])
+		c["i"] = 0
+		c["na_miste"] = false
+		c["uvnitr"] = pr_cil
+		c["uvnitr_cil"] = pr_cil
+		if not (c["trasa"] as Array).has(m[0]):
+			(c["trasa"] as Array).append(m[0])
+		return
 	if not viditelna or u.position == Vector3.ZERO:
 		# LOD AI: mimo dosah rovnou na misto
 		u.position = Vector3((m[0] as Vector2).x, 0.0, (m[0] as Vector2).y)
@@ -2101,8 +2113,16 @@ func _process_vlastni(dt: float) -> void:
 		_dvere_zavri_za(c)
 		if not blizko or skryty:
 			u.visible = false
+			if not blizko and not skryty:
+				_daleko_krok(c, dt)
 			continue
 		u.visible = true
+		if bool(c.get("daleko", false)):
+			# Misa 11. 11.: vratil se do dosahu - od mista, kam dosel, presna cesta (mrizka, dvere) k cili
+			c["daleko"] = false
+			if not bool(c["na_miste"]) and not c.has("ceka"):
+				_pozadej(c, [Vector2(u.position.x, u.position.z), c["misto"], INF, c.get("uvnitr_cil", {}), true])
+			c["y_t"] = 0.0
 		var p := Vector2(u.position.x, u.position.z)
 		var kh := Vector2(pp.x, pp.z) - p
 		var cesta: PackedVector2Array = c["cesta"]
@@ -2351,3 +2371,55 @@ func obchodnik_u(p: Vector3) -> Dictionary:
 			nej = {"kind": "obchod", "kupec": cid, "nazev": String(k["nazev"]), "zavreno": String(k["zavreno"]),
 					"otevreno": (k["obchoduje_pri"] as Array).has(String(c.get("cinnost_ted", ""))), "pos": u.global_position + Vector3(0, 1.8, 0)}
 	return nej
+
+
+
+## Misa 11. 11. („potkam poutnika a odjedu - ne ze zustane na miste, podle rychlosti chuze pokracuje ve svem dennim
+## programu; kdyz se vratim, bude na ceste tam, kam by normalne dosel“): postava za dosahem jde po sve ceste rychlosti
+## chuze (bez animace, kolizi a hledani cesty - rovne k dalsimu bodu); na miste obchuzky ceka jako zblizka a pak dalsi
+## bod. Po navratu do dosahu si od dosazeneho mista spocita presnou cestu (_process).
+func _daleko_krok(c: Dictionary, dt: float) -> void:
+	c["daleko"] = true
+	var u: Node3D = c["uzel"]
+	if u.position == Vector3.ZERO:
+		return
+	if c.has("ceka"):
+		# cesta se nepocita (rozpocet je pro postavy u hrace) - rovne k cili
+		c.erase("ceka")
+		c["cesta"] = PackedVector2Array([c["misto"]])
+		c["i"] = 0
+	var cn: Dictionary = c["cn"]
+	if bool(c["na_miste"]):
+		var ob: Array = cn.get("obchuzka", [])
+		if ob.is_empty():
+			return
+		c["obmena"] = float(c.get("obmena", 0.0)) - dt
+		if float(c["obmena"]) > 0.0:
+			return
+		c["obch"] = (int(c["obch"]) + 1) % ob.size()
+		var m: Array = _misto(c, String(ob[int(c["obch"])]))
+		c["misto"] = m[0]
+		c["yaw_mista"] = m[1]
+		c["cesta"] = PackedVector2Array([m[0]])
+		c["i"] = 0
+		c["na_miste"] = false
+		return
+	var cesta: PackedVector2Array = c["cesta"]
+	var krok := float(c["rych"]) * dt
+	var p := Vector2(u.position.x, u.position.z)
+	while krok > 0.0 and int(c["i"]) < cesta.size():
+		var cil := cesta[int(c["i"])]
+		var k := cil - p
+		if k.length() <= krok:
+			p = cil
+			krok -= k.length()
+			c["i"] = int(c["i"]) + 1
+		else:
+			p += k.normalized() * krok
+			krok = 0.0
+	u.position = Vector3(p.x, u.position.y, p.y)
+	if int(c["i"]) >= cesta.size():
+		c["na_miste"] = true
+		c["na_miste_t"] = 1000.0                 # jako LOD skok: u dveri rovnou uvnitr
+		var obm: Array = (cn.get("obchuzka_obmena_s", {}) as Dictionary).get(String((cn.get("obchuzka", [""]) as Array)[int(c.get("obch", 0)) % maxi(1, (cn.get("obchuzka", [""]) as Array).size())]), cn.get("obmena_s", [5.0, 10.0]))
+		c["obmena"] = _rng.randf_range(float(obm[0]), float(obm[1])) * DALEKO_CEKANI
