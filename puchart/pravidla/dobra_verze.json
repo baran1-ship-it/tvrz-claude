@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "4e5b006",
+ "commit": "6cb5aa7",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -63,6 +63,9 @@
    "nabeh_vyska": true,
    "textury_3d_mipmapy": true,
    "skaly_hrany": true,
+   "zed_nad_strechou": true,
+   "koryto_kameny_hustota": true,
+   "zabradli_spojite": true,
    "portaly": true
   },
   "pruchod": {
@@ -76,6 +79,8 @@
    "A_sklep_kobky": true,
    "A_sklep_ven": true,
    "A_vezicka": true,
+   "A_vezicka_ochoz_palac": true,
+   "A_vezicka_prizemi": true,
    "A_vstup": true,
    "A_vstup_ven": true,
    "B_ochoz_vez": true,
@@ -99,26 +104,26 @@
   "sceny": {
    "A": {
     "snimku": 5,
-    "troj_p95": 1630690,
-    "troj_max": 1766300,
-    "kresleni_p95": 602,
-    "kresleni_m_median": 1299.0
+    "troj_p95": 1727828,
+    "troj_max": 1774341,
+    "kresleni_p95": 803,
+    "kresleni_m_median": 981.0
    },
    "B": {
-    "snimku": 76,
-    "troj_p95": 1328325,
-    "troj_max": 1644393,
-    "kresleni_p95": 594,
-    "kresleni_m_median": 1115.0
+    "snimku": 81,
+    "troj_p95": 1905148,
+    "troj_max": 2221286,
+    "kresleni_p95": 818,
+    "kresleni_m_median": 963.0
    },
    "C": {
-    "snimku": 34,
-    "troj_p95": 1596765,
-    "troj_max": 1734310,
-    "kresleni_p95": 623,
-    "kresleni_m_median": 1309.0
+    "snimku": 29,
+    "troj_p95": 1733006,
+    "troj_max": 1757464,
+    "kresleni_p95": 804,
+    "kresleni_m_median": 1090.0
    },
-   "zmena_median": 35.59,
+   "zmena_median": 34.79,
    "doskoky": [],
    "ve_zdi": 2
   },
