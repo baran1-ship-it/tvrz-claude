@@ -5897,14 +5897,21 @@ func _nabytek_venku() -> void:
 			rr += float(pr["krok_m"])
 		if not nasel:
 			push_warning("nabytek venku: %s u %s - zadne volne misto do %s m" % [r["id"], q, str(r.get("hledat_m", pr["hledat_m"]))])
-	print("nabytek venku: %d lavic (mistnosti ke kontrole %d)" % [n, (info.get("rooms", []) as Array).size()])
+	print("nabytek venku: %d lavic (mistnosti ke kontrole %d)" % [n, (data.get("mistnosti", []) as Array).size()])
 
 
 ## Bod v mistnosti stavby (info rooms jako lide._mistnost_u) - venkovni nabytek ne do pruchodu a sini.
 func _v_mistnosti(p: Vector3) -> bool:
-	for m: Dictionary in info.get("rooms", []):
-		var ab: AABB = m["aabb"]
-		var q: Vector3 = (m["inv"] as Transform3D) * p if m.has("inv") else p
+	# info rooms vznika az v _info (po nabytku) - tady primo ze zaznamu mistnosti stejnym pravidlem jako _info
+	for r: Dictionary in data.get("mistnosti", []):
+		var ab: AABB
+		var q := p
+		if r.has("yaw"):
+			var sz: Vector3 = _v3(r["size"])
+			q = Transform3D(Basis(Vector3.UP, float(r["yaw"])), _v3(r["pos"])).affine_inverse() * p
+			ab = AABB(Vector3(-sz.x / 2, 0, -sz.z / 2), sz)
+		else:
+			ab = AABB(_v3(r["pos"]), _v3(r["size"]))
 		if q.x >= ab.position.x and q.x <= ab.end.x and q.z >= ab.position.z and q.z <= ab.end.z \
 				and q.y > ab.position.y - 0.5 and q.y < ab.end.y:
 			return true
