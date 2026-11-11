@@ -282,3 +282,11 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
   snímky po kroku 7–8 ms (jednou 170 ms po fps_30). **Kroky samy (skripty) 2–3 s nedělají** → zbývá zápis deníku
   `diag.faze` s čekáním na vlákno (opraveno 5e04eda, ověří trasa: řádek „cekani na predchozi zapis“) nebo ovladač.
 - Začátky variant 946 / 265 / 319 / 414 ms (0.99996: 1,2–2,2 s). „volna -0 MB“: opraveno čtením /proc/meminfo.
+
+### 0.99998 – vydáno 11. 11. 19:00 (testovací, export 7d492cc068) – NEOVĚŘENO NA ZAŘÍZENÍ
+- Změny proti 0.99997: choreografie dne každé postavy (`docs/rozpracovane/choreografie_postav.md`), kupec u stanu +
+  obchod jako v KCD (6 obchodníků, `pravidla/svet/obchod.json`), poutníci po celé mapě, hosté po celé síni, lavice
+  venku s odstupem a ne v místnostech, nové Mixamo klipy (položení, výklad vsedě), sedlo se smíchem kostí krku (NEOVĚŘENO),
+  diag: fáze ve hře nečekají na zápis (oprava podezření na 2–3 s záseky po krocích kvality – ověří trasa: řádek
+  „cekani na predchozi zapis“), volná paměť z /proc/meminfo, export: UV klenby sklepa.
+- Matice vztahů testovací: pokrytí 44/114, úspěšnost 32/44. Čekám na trasu (3D 75 %).

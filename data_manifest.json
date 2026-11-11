@@ -1,5 +1,5 @@
 {
- "verze": "0.99997",
+ "verze": "0.99998",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -29,14 +29,14 @@
    ]
   },
   "louka": {
-   "src": "75643ae592cef8b77833fd5f771f607f",
-   "md5": "3d3afa4919139093d39ca2ed5cdff7ad",
-   "size": 348128,
+   "src": "136b57e0a1a1816ca2a95d2ce273b025",
+   "md5": "383c4ae0c62039c00dfb592577438922",
+   "size": 349312,
    "parts": [
     {
-     "file": "louka-3d3afa4919.pck.000",
-     "size": 348128,
-     "md5": "3d3afa4919139093d39ca2ed5cdff7ad"
+     "file": "louka-383c4ae0c6.pck.000",
+     "size": 349312,
+     "md5": "383c4ae0c62039c00dfb592577438922"
     }
    ]
   },
@@ -4174,19 +4174,19 @@
    ]
   },
   "z_postavy": {
-   "src": "87c5f641d9eeebe56018a7b97757bab1",
-   "md5": "a9e25359a6961eed87072eec2393294a",
-   "size": 99490944,
+   "src": "4f9d2c55b955add0c072c6897d265c06",
+   "md5": "0aa13fb94c14beec36b1baca16003225",
+   "size": 100300864,
    "parts": [
     {
-     "file": "z_postavy-a9e25359a6.pck.000",
+     "file": "z_postavy-0aa13fb94c.pck.000",
      "size": 94371840,
-     "md5": "78d0508fd02eafe527db1f86ed19384e"
+     "md5": "f095901e39f2d9c856f5cb23b8625dc0"
     },
     {
-     "file": "z_postavy-a9e25359a6.pck.001",
-     "size": 5119104,
-     "md5": "75f31b2d60338ceab9ab9d618c188508"
+     "file": "z_postavy-0aa13fb94c.pck.001",
+     "size": 5929024,
+     "md5": "7f2966013449cd96a1df7b54d57007b5"
     }
    ]
   },
@@ -4220,26 +4220,26 @@
    ]
   },
   "z_svet": {
-   "src": "a231de0bcceb71465c9e17cae4490920",
-   "md5": "6a638c2469fcb548aa4f6aa3b30cb772",
-   "size": 60877824,
+   "src": "0fd597051b89308158ee91ae7d2be84a",
+   "md5": "ad097b677776bee840a68945ec6b0a04",
+   "size": 60880640,
    "parts": [
     {
-     "file": "z_svet-6a638c2469.pck.000",
-     "size": 60877824,
-     "md5": "6a638c2469fcb548aa4f6aa3b30cb772"
+     "file": "z_svet-ad097b6777.pck.000",
+     "size": 60880640,
+     "md5": "ad097b677776bee840a68945ec6b0a04"
     }
    ]
   },
   "z_reka": {
-   "src": "22f669ccaf3334b4766939c65e3849e6",
-   "md5": "552ba9eb2b1b8f5845064e25f1fd8509",
-   "size": 1231904,
+   "src": "323cbfc47f8c882dc112055a1c717466",
+   "md5": "f1c89f29ad6b610d5fd0012907a150bf",
+   "size": 2159648,
    "parts": [
     {
-     "file": "z_reka-552ba9eb2b.pck.000",
-     "size": 1231904,
-     "md5": "552ba9eb2b1b8f5845064e25f1fd8509"
+     "file": "z_reka-f1c89f29ad.pck.000",
+     "size": 2159648,
+     "md5": "f1c89f29ad6b610d5fd0012907a150bf"
     }
    ]
   },
@@ -4345,11 +4345,11 @@
    ]
   }
  },
- "otisk_exportu": "b4de1ff56dce34a0c44410125704f71f",
- "otisk_vstupu": "0acda991fefff0d72c6447e0bd0eb1a7",
- "otisk_sady": "de247e6bd25e804c471f9e184f733789",
+ "otisk_exportu": "7d492cc068ef5c61f8a54072c2e675d5",
+ "otisk_vstupu": "22399a3066c208855bf6033c8ee85f38",
+ "otisk_sady": "9f7d3888b478bf777ff4bfc768bcfc86",
  "testovaci": [
-  "POKRYTI_MATICE 0/114 (0 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, teren|predmet, voda|voda, voda|cesta",
-  "USPESNOST_MATICE 0/0 (0 %)"
+  "POKRYTI_MATICE 44/114 (39 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, voda|voda, voda|cesta, voda|strom",
+  "USPESNOST_MATICE 32/44 (73 %); s chybou: teren|predmet, budova|predmet, plot|predmet, predmet|predmet, cesta|kun, cesta|postava, budova|postava, kamen|lod, predmet|postava, predmet|lod, posun|lod, postava|postava"
  ]
 }
