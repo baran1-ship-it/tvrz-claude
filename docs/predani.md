@@ -1226,3 +1226,5 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - **postavy.json `cinnosti`, `role`, `mista`: jen slovníky** (11. 11.): poznámka `_xxx` jako text uvnitř `cinnosti`
   shodila `lide.setup` („Invalid cast … Dictionary“) a test lide_chovani padl na prázdném `_lide`. Poznámky k celé
   sekci patří do `_cinnosti` / `_role` na nejvyšší úrovni, k jedné činnosti do jejího `_p`.
+- **Blender v kontejneru = modul bpy v `/opt/bl/bin/python`** (11. 11.): `/opt/bl/blender` neexistuje. Skripty Blenderu
+  (`bezkuze.py`, `anim_cmu.py`) pouštět `/opt/bl/bin/python -I skript.py -- args` (přes `tools/beh.sh … cmd`).
