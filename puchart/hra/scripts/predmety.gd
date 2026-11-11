@@ -165,7 +165,7 @@ func spawn(rec: Dictionary) -> void:
 			kb.position = Vector3(float(dily["kolize"]["pivot"][0]), float(dily["kolize"]["pivot"][1]), float(dily["kolize"]["pivot"][2]))
 			m.add_child(kb)
 		if ki:
-			ki.free()
+			ki.queue_free()
 		# zebriky jako herni prvek (radce 18:00): pata, vrchol, smer ke stene, body nastupu - lezeni v 0.76
 		for zb: Dictionary in dily["kolize"].get("zebriky", []):
 			var g := func(k: String) -> Vector3:
@@ -222,7 +222,7 @@ func spawn(rec: Dictionary) -> void:
 				st.visibility_range_end = dosah
 				st.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if k == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 				m.add_child(st)
-		si0.free()
+		si0.queue_free()
 	if (info.get("louc", false) or SVETLA.has(id)) and not rec.has("auto") and not NE_DO_RUKY.has(id):
 		rec["auto"] = true                 # sviti samo vecer a v noci, dokud ho hrac neovlada rucne
 	if info.get("louc", false):

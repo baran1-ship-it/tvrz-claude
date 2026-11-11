@@ -532,10 +532,8 @@ func _rostliny_skal() -> void:
 		for jm in d["modely"][druh]:
 			var f := "res://modely/rostliny/%s.glb" % jm
 			if not ResourceLoader.exists(f): continue
-			var n: Node3D = load(f).instantiate()
-			for mi in n.find_children("*", "MeshInstance3D", true, false):
-				var_[druh].append([(mi as MeshInstance3D).mesh, Transform3D(Basis(), Vector3.ZERO) if jm == "trava_sada" else (mi as MeshInstance3D).transform])
-			n.free()
+			for sm in site_ze_sceny(load(f)):   # sítě bez vytvoření 3D uzlů (pád na tabletu 11. 11. při uvolňování instancí)
+				var_[druh].append([sm[1], Transform3D(Basis(), Vector3.ZERO) if jm == "trava_sada" else sm[2]])
 	var bm := float(d["bunka_m"]); var skup := {}
 	for r in d["rostliny"]:
 		var vs: Array = var_.get(r[0], [])
@@ -561,10 +559,9 @@ func _rostliny_skal() -> void:
 func _kameny_koryta() -> void:
 	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/koryto_kameny.json"))
 	if not ResourceLoader.exists(String(d["glb"])): return
-	var n: Node = load(String(d["glb"])).instantiate()
 	var tvary := {}
-	for mi in n.find_children("valoun_*", "MeshInstance3D", true, false): tvary[int(String(mi.name).split("_")[1])] = (mi as MeshInstance3D).mesh
-	n.free()
+	for sm in site_ze_sceny(load(String(d["glb"]))):   # bez instancí (pád na tabletu 11. 11.)
+		if String(sm[0]).begins_with("valoun_"): tvary[int(String(sm[0]).split("_")[1])] = sm[1]
 	# droba jako skály (skala.gdshader, triplanár): drobné šedé bez mechu, velké balvany s mechem nahoře (fotky docs/reference/potok)
 	var tex: Texture2D = load("res://modely/hrady/skaly_droba_Diffuse.jpg") if ResourceLoader.exists("res://modely/hrady/skaly_droba_Diffuse.jpg") else null
 	var tn: Texture2D = load("res://modely/hrady/skaly_droba_nor_gl.jpg") if ResourceLoader.exists("res://modely/hrady/skaly_droba_nor_gl.jpg") else null
@@ -623,3 +620,17 @@ func _plamen_castice(size: float, amount: int, life_s: float) -> CPUParticles3D:
 	var q := QuadMesh.new(); q.size = Vector2(0.32, 0.42); q.material = _plamen_mat; p.mesh = q
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return p
+
+
+## Sítě ze scény .glb bez vytvoření uzlů (PackedScene.get_state): [[jméno, Mesh, Transform3D]] – Míša 11. 11.: hra padala na
+## tabletu při okamžitém uvolnění instancovaných 3D uzlů (Node.free → ~VisualInstance3D → renderer_scene_cull).
+static func site_ze_sceny(ps: PackedScene) -> Array:
+	var out := []; var st := ps.get_state()
+	for i in st.get_node_count():
+		var m: Mesh = null; var t := Transform3D.IDENTITY
+		for k in st.get_node_property_count(i):
+			var pn := st.get_node_property_name(i, k)
+			if pn == "mesh": m = st.get_node_property_value(i, k)
+			elif pn == "transform": t = st.get_node_property_value(i, k)
+		if m != null: out.append([String(st.get_node_name(i)), m, t])
+	return out

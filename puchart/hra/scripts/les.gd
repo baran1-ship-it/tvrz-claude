@@ -180,7 +180,7 @@ func _mesh(cesta: String) -> Mesh:
 	var sc: Node = load(cesta).instantiate()
 	var mi: MeshInstance3D = sc.find_children("*", "MeshInstance3D", true, false)[0]
 	var m: Mesh = mi.mesh
-	sc.free()
+	sc.queue_free()   # ne free() – pád na tabletu (11. 11.)
 	return m
 
 ## Listí (převzato z Havrana svet.gd _listi_shader + shaders/listi.gdshader, Míša 3. 11.: „střapáče zblízka“):

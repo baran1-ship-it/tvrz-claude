@@ -39,7 +39,7 @@ func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json") -> v
 				var m: Mesh = (mi as MeshInstance3D).mesh
 				if zanik.size() == 2: m = _fade(m, float(zanik[0]), float(zanik[1]))
 				meshe[k].append(m)
-			n.free()
+			n.queue_free()   # ne free(): okamžité uvolnění 3D uzlu během načítání shodilo hru na tabletu (renderer_scene_cull, 11. 11.)
 	aktualizuj(1000)
 
 var _listi_sh: Shader
