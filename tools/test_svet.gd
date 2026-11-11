@@ -7566,6 +7566,12 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 	var a_c: Dictionary = ll[0]
 	var b_c: Dictionary = ll[1]
 	var zal_ab := [a_c.get("cinnost_ted", ""), b_c.get("cinnost_ted", "")]
+	# ostatni postavy mimo (11. 11.: s novymi rozvrhy ma volno u studny i celedin/dvorka - druhy se postavil k nim)
+	var zal_ost_d := {}
+	for c: Dictionary in ll:
+		if c != a_c and c != b_c:
+			zal_ost_d[c["id"]] = c.get("cinnost_ted", "")
+			c["cinnost_ted"] = "spi"
 	a_c["cinnost_ted"] = "volno"
 	b_c["cinnost_ted"] = "volno"
 	lide.call("_uvolni", a_c)
@@ -7578,7 +7584,7 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 	if (a_c["sedak"] as Dictionary).is_empty():
 		ch.call("dvojice: prvni u studny nesedi (zadna lavice)")
 	elif String(b_c.get("stoji_u", "")) != String(a_c["id"]):
-		ch.call("dvojice: druhy nestoji u sediciho")
+		ch.call("dvojice: druhy nestoji u sediciho (stoji_u %s, sedak %s, misto %s)" % [b_c.get("stoji_u", ""), str((a_c["sedak"] as Dictionary).get("stani", "")), str(ma[0])])
 	else:
 		var kb := (ma[0] as Vector2) - (mb[0] as Vector2)
 		var fwb := Vector2(sin(float(mb[1])), cos(float(mb[1])))
@@ -7589,6 +7595,9 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 	lide.call("_uvolni", b_c)
 	a_c["cinnost_ted"] = zal_ab[0]
 	b_c["cinnost_ted"] = zal_ab[1]
+	for c: Dictionary in ll:
+		if zal_ost_d.has(c["id"]):
+			c["cinnost_ted"] = zal_ost_d[c["id"]]
 	# obchuzka obsluhy: krb <-> stoly s predmetem
 	var cn: Dictionary = P["cinnosti"]["obsluha_hostinec"]
 	var hs: Dictionary = {}
