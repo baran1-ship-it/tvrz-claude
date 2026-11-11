@@ -93,11 +93,17 @@ def _klenba(P: Part, osa, a0, a1, s0, s1, y_patka, vzepeti, mat="zdivo", n=10, o
     da = a1 - a0
     ca = (a0 + a1) / 2
     tl = 0.12
+    # UV po oblouku (r. 89, 10. 11.: planar_uv po ploskach preskakoval mezi (x, z) a (t, y) -> pruhy a strepy textury):
+    # u = delka po oblouku od paty, v = souradnice podel osy klenby, oboje v metrech jako planar_uv
+    oblouk = [0.0]
+    for i in range(n):
+        oblouk.append(oblouk[-1] + math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]))
     for i in range(n):
         (sa, ya), (sb, yb) = pts[i], pts[i + 1]
         q = [V(sa, ya, a0), V(sb, yb, a0), V(sb, yb, a1), V(sa, ya, a1)]
-        P.face(q, mat)
-        P.face(list(reversed(q)), mat)
+        uv = [(oblouk[i], a0), (oblouk[i + 1], a0), (oblouk[i + 1], a1), (oblouk[i], a1)]
+        P.face(q, mat, uvs=uv)
+        P.face(list(reversed(q)), mat, uvs=list(reversed(uv)))
         th = math.atan2(yb - ya, sb - sa)
         L = math.hypot(sb - sa, yb - ya)
         sm, ym = (sa + sb) / 2 - math.sin(th) * tl / 2, (ya + yb) / 2 + math.cos(th) * tl / 2
