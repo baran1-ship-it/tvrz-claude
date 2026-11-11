@@ -7561,6 +7561,12 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 		c["cinnost_ted"] = zal_k[i][1]
 		c["sedi"] = zal_k[i][2]
 		c["na_miste"] = zal_k[i][3]
+	# Misa 11. 11. (lavice od studny skoncila v pruchodu brany): venkovni nabytek ne v mistnosti stavby
+	for r: Dictionary in sv.data.get("vybaveni", []):
+		if bool(r.get("venku", false)):
+			var mn := String(lide.call("_mistnost_u", Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))))
+			if mn != "":
+				ch.call("lavice venku %s v mistnosti %s" % [str(r["p"]), mn])
 	# dvojice (Misa 10. 11.): jeden sedi na lavici, druhy stoji u nej celem k nemu (sance 1 pro test), nebo sedi vedle
 	var cv: Dictionary = P["cinnosti"]["volno"]
 	var a_c: Dictionary = ll[0]

@@ -5886,18 +5886,29 @@ func _nabytek_venku() -> void:
 				for mp: Vector2 in mista_p:
 					if Geometry2D.get_closest_point_to_segment(mp, c - ax, c + ax).distance_to(mp) < float(pr["od_mist_m"]):
 						u_mista = true
-				if u_mista:
-					continue
+				if u_mista or _v_mistnosti(Vector3(c.x, _vyska(c.x, c.y) + 0.3, c.y)):
+					continue                          # 11. 11.: lavice od studny odsunuta do pruchodu brany
 				if absf(_vyska(c.x + ax.x, c.y + ax.y) - _vyska(c.x - ax.x, c.y - ax.y)) > float(pr["sklon_m"]):
 					continue
-				data["vybaveni"].append({"id": r["id"], "p": [c.x, _vyska_min(c.x, c.y, 0.6) - 0.02, c.y], "yaw": yw})
+				data["vybaveni"].append({"id": r["id"], "p": [c.x, _vyska_min(c.x, c.y, 0.6) - 0.02, c.y], "yaw": yw, "venku": true})
 				nasel = true
 				n += 1
 				break
 			rr += float(pr["krok_m"])
 		if not nasel:
 			push_warning("nabytek venku: %s u %s - zadne volne misto do %s m" % [r["id"], q, str(r.get("hledat_m", pr["hledat_m"]))])
-	print("nabytek venku: %d lavic" % n)
+	print("nabytek venku: %d lavic (mistnosti ke kontrole %d)" % [n, (info.get("rooms", []) as Array).size()])
+
+
+## Bod v mistnosti stavby (info rooms jako lide._mistnost_u) - venkovni nabytek ne do pruchodu a sini.
+func _v_mistnosti(p: Vector3) -> bool:
+	for m: Dictionary in info.get("rooms", []):
+		var ab: AABB = m["aabb"]
+		var q: Vector3 = (m["inv"] as Transform3D) * p if m.has("inv") else p
+		if q.x >= ab.position.x and q.x <= ab.end.x and q.z >= ab.position.z and q.z <= ab.end.z \
+				and q.y > ab.position.y - 0.5 and q.y < ab.end.y:
+			return true
+	return false
 
 
 ## Luzka v mistnostech, kde zadne byt nesmi (nabytek.json bez_luzek - Misa 6. 11.: „neni mozne dat postele do hodovni
