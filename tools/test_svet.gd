@@ -6344,7 +6344,7 @@ func _lide_chovani() -> void:
 				if not (P["drzeni"] as Dictionary).has(id):
 					ch.call("%s: predmet %s nema drzeni" % [cid, id])
 		for kl: String in cn.get("klipy", []):
-			if (kl.begins_with("Farm_") or kl.begins_with("TreeChopping") or kl.begins_with("Fixing") or kl.begins_with("Prace_Uder") or kl.begins_with("Prace_Kovar")) and not vr.has(kl) and not vr.has("*") and not (P.get("klipy_rucni", []) as Array).has(kl):
+			if (kl.begins_with("Farm_") or kl.begins_with("TreeChopping") or kl.begins_with("Fixing") or kl.begins_with("Prace_Uder") or kl.begins_with("Prace_Kovar")) and not vr.has(kl) and not vr.has("*") and not (Pravidla.cti("postavy", "klipy_rucni") as Array).has(kl):
 				ch.call("%s: klip %s s naradim bez predmetu v ruce" % [cid, kl])
 	# predmet opravdu v ruce: postava s klipem prace ma pod kosti ruky model
 	var lamac: Dictionary = {}
