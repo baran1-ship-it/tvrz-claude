@@ -160,7 +160,8 @@ static func poutnici() -> Array:
 	var out: Array = []
 	for i in int(pt["pocet"]):
 		var j: Array = pt["jmena"][i % (pt["jmena"] as Array).size()]
-		out.append({"id": "poutnik_%d" % (i + 1), "jmeno": j[0], "role": pt["role"], "muz": bool(j[1]),
+		# Misa 11. 11. (poutnici vsichni ve vsi): 3. pole jmena = vlastni role s vlastni trasou po cele mape
+		out.append({"id": "poutnik_%d" % (i + 1), "jmeno": j[0], "role": String(j[2]) if j.size() > 2 else String(pt["role"]), "muz": bool(j[1]),
 				"domov": pt["domov"], "spanek": {"dira": pt["spanek"]}, "poutnik": true})
 	return out
 
@@ -944,6 +945,17 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	var cn: Dictionary = P["cinnosti"][b["cinnost"]]
 	_uvolni(c)
 	var m: Array = _misto_cinnosti(c, String(b["kde"]), cn)
+	# Misa 11. 11. (spravce stal u lavicky): sed bez volneho sedaku = jina moznost bloku bez sedu (ne stat u mista)
+	if bool(cn.get("sed", false)) and (c["sedak"] as Dictionary).is_empty() and not c.has("stoji_u") \
+			and not bool(c.get("bez_sedu_znovu", false)):
+		var bb: Dictionary = c["role"]["rozvrh"][bi]
+		for mo: Dictionary in bb.get("moznosti", []):
+			if not bool((P["cinnosti"][mo["cinnost"]] as Dictionary).get("sed", false)) and podminka_moznosti(c, mo):
+				c["volba_nova"] = mo
+				c["bez_sedu_znovu"] = true
+				_novy_blok(c, bi, viditelna)
+				c.erase("bez_sedu_znovu")
+				return
 	if (c["sedak"] as Dictionary).is_empty() and not bool(cn.get("skupina", false)) and not bool(cn.get("skryty", false)):
 		m = [_rozestup(c, m[0]), m[1]]
 	c["misto"] = m[0]
@@ -1328,7 +1340,7 @@ func _u_predmetu(c: Dictionary, ri: int, strana: String, rezervovat: bool) -> Ar
 	var p0 := Vector2(float(r["p"][0]), float(r["p"][2]))
 	var hx := float(rz[0]) * 0.5
 	var hz := float(rz[2]) * 0.5
-	var od := float(P["u_predmetu"]["od_m"])
+	var od := float((P["u_predmetu"].get("od_m_predmet", {}) as Dictionary).get(String(r["id"]), P["u_predmetu"]["od_m"]))
 	var strany: Array = [[oz, hz, hx], [-oz, hz, hx], [ox, hx, hz], [-ox, hx, hz]]   # [normala, pul hloubky, pul delky strany]
 	strany.sort_custom(func(a: Array, b: Array) -> bool: return float(a[2]) > float(b[2]) if strana == "dlouha" else float(a[2]) < float(b[2]))
 	for s: Array in strany:
@@ -2163,6 +2175,9 @@ func _process_vlastni(dt: float) -> void:
 					# sed jen na sedaku; bez nej stoji (klipy_bez_sedu)
 					var bez := bool(cn.get("sed", false)) and (c["sedak"] as Dictionary).is_empty()
 					var kl: Array = cn.get("klipy_bez_sedu" if bez else "klipy", ["Idle_Loop"])
+					if bez and not c.has("stoji_u"):
+						kl = P["sedani"]["stoji_sam"]     # Misa 11. 11.: sam bez partnera nemluvi do prazdna
+
 					var jm_k := String(kl[_rng.randi() % kl.size()])
 					# sceny (Misa 10. 11., KCD): rozehrana scena pokracuje dalsim klipem; jinak scena nebo jeden klip
 					var sc: Array = c.get("scena", [])
