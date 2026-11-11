@@ -231,6 +231,11 @@ pr_mez = KC["cesty"].get("pricny_max", 0.08)   # vůz se nepřevrátí (Míša 6
 zle_p = {k: v.get("max_pricny") for k, v in CP["vysledek"].items() if CP_TYP.get(k) in ("vozova", "hrebenova")
          and v.get("max_pricny", 0) > (KC["cesty"].get("pricny_max_hrebenova", pr_mez) if CP_TYP.get(k) == "hrebenova" else pr_mez)}
 TEST("cesta_pricny_sklon", not zle_p, "příčný sklon jízdního pásu nad %s: %s" % (pr_mez, zle_p))
+# Míša 11. 11.: cesty podle terénu („nevykopat půl kopce“) – změna terénu cestou nejvýš podle typu (cesty_puchart.json typy
+# max_uprava_m podélně / max_uprava_napric_m napříč), mimo doložené nájezdy k mostům
+zle_u = {k: v.get("max_uprava_m") for k, v in CP["vysledek"].items() if k in CP_TYP
+         and v.get("max_uprava_m", 99) > max(CP["typy"][CP_TYP[k]].get("max_uprava_m", 0.5), CP["typy"][CP_TYP[k]].get("max_uprava_napric_m", 0.5)) + 0.05}
+TEST("cesta_uprava_terenu", not zle_u, "cesta mění terén víc, než dovoluje její typ: %s" % zle_u)
 from scipy.spatial import cKDTree
 AA = np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5)
 rohy_zdi = np.vstack([np.array(q["rohy"]) for q in CL])
