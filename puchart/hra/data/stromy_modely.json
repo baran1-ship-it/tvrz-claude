@@ -6,7 +6,7 @@
  ],
  "blizko_m": 32,
  "prechod_m": 6,
- "bunka_m": 24,
+ "bunka_m": 6,
  "dreviny": {
   "BK": {
    "model": "buk"
@@ -152,5 +152,6 @@
  "stin_proxy": false,
  "stin_dosah_m": 45.0,
  "pozn_jadro_stin": "Míša 10. 11. („aplikuj, co víš“): overdraw listí = hlavní brzda lesa (70 % rozlišení ≈ poloviční čas, tráva pod korunami −90 % → les p95 48,9 → 27,2). jadro_koruny: listy s těžištěm uvnitř elipsoidu koruny × 0,6 bez alfy/discard (early-Z, les.gd _jadro, LOD0); stin_proxy: stín slunce z elipsoidu koruny + kmene místo z listí (listí se nekreslí podruhé ve stínovém průchodu).",
- "pozn_pad_10_11": "Míša 10. 11.: verze s jádrem korun a stínovým tělesem padala na tabletu hned při startu (PC běží) – vypnuto; úpravy modelů za běhu (surface_get_arrays/ArrayMesh) přesunout do stavby světa (offline), ne na tablet."
+ "pozn_pad_10_11": "Míša 10. 11.: verze s jádrem korun a stínovým tělesem padala na tabletu hned při startu (PC běží) – vypnuto; úpravy modelů za běhu (surface_get_arrays/ArrayMesh) přesunout do stavby světa (offline), ne na tablet.",
+ "pozn_bunka_11_11": "LOD po stromech (blikání, 10. 11.) kreslí v pásu přechodu obě podoby celé buňky – buňka 24 m dávala v lese 3,5–4,6 M troj. (hlídač scén); 6 m = 1,94 M, kreslení beze změny"
 }
