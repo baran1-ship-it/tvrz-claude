@@ -959,6 +959,7 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 					blizko = true
 			if not blizko:
 				break
+	c["kde_ted"] = kde_b
 	var m: Array = _misto_cinnosti(c, kde_b, cn)
 	# Misa 11. 11. (spravce stal u lavicky): sed bez volneho sedaku = jina moznost bloku bez sedu (ne stat u mista)
 	if bool(cn.get("sed", false)) and (c["sedak"] as Dictionary).is_empty() and not c.has("stoji_u") \
@@ -998,7 +999,7 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 			_do_postele(c, cn)
 		return
 	# vnitrni misto (mista.dvere): kam se jde dvermi; misto cinnosti uvnitr hostince apod.
-	var kde_k := String(b["kde"])
+	var kde_k := String(c["kde_ted"])
 	if kde_k == "prace":
 		kde_k = String(c["o"].get("prace", "dvere"))
 	var pr_cil := _pruchod(kde_k)
@@ -2330,7 +2331,8 @@ func obchodnik_u(p: Vector3) -> Dictionary:
 		if not u.visible:
 			continue
 		var d := u.global_position.distance_to(p)
-		if d < nd:
+		# kontrola 11. 11.: ne pres zed - hrac a obchodnik ve stejne mistnosti (nebo oba venku)
+		if d < nd and _mistnost_u(p) == _mistnost_u(u.global_position):
 			nd = d
 			var k: Dictionary = kupci[cid]
 			nej = {"kind": "obchod", "kupec": cid, "nazev": String(k["nazev"]), "zavreno": String(k["zavreno"]),

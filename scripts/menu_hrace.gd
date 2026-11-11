@@ -398,8 +398,8 @@ func _take_all() -> void:
 	if _polozene():
 		_remove_sel()
 		return
-	if page != "vymena":
-		return
+	if page != "vymena" or box.has("obchod"):
+		return                         # obchod: kus po kusu (kontrola 11. 11.: X by nakoupilo vse za grose)
 	for id: String in box["obsah"].keys():
 		_move(id, 1, int(box["obsah"][id]))
 	_c.queue_redraw()
@@ -711,7 +711,7 @@ func _list(r: Rect2, s: int, title: String, u: float) -> void:
 	# spodni radek: nosnost / misto
 	var by := r.end.y - 38 * u
 	var w: float = P.weight(P.inv if s == 0 else box.get("obsah", {}))
-	if page != "staveni" and not _dv_stranka():
+	if page != "staveni" and not _dv_stranka() and not (s == 1 and box.has("obchod")):
 		var cap := _nosnost() if s == 0 else float(P.kat[box["id"]].get("kont", 0))
 		_txt(_fm, ("Nosnost %.1f / %d" if s == 0 else "Místo %.1f / %d") % [w, int(cap)], Vector2(x0, by), 26 * u, INK)
 		var br := Rect2(x0 + 230 * u, by - 18 * u, r.size.x * 0.32, 14 * u)
@@ -808,7 +808,10 @@ func _detail_line(r: Rect2, u: float) -> void:
 				Vector2(r.position.x + 420 * u, r.position.y + 54 * u), 26 * u, Styl.INK_SOFT)
 	var bx := r.end.x - 3 * 175 * u - 20 * u
 	var by := r.position.y + 54 * u
-	for a: Array in [["A", "Přesunout" if side == 0 else "Vzít", "act"], ["X", "Vzít vše", "all"], ["B", "Zavřít", "close"]]:
+	var tl: Array = [["A", "Přesunout" if side == 0 else "Vzít", "act"], ["X", "Vzít vše", "all"], ["B", "Zavřít", "close"]]
+	if box.has("obchod"):
+		tl = [["A", "Prodat" if side == 0 else "Koupit", "act"], ["B", "Zavřít", "close"]]
+	for a: Array in tl:
 		_badge(Vector2(bx + 16 * u, by - 9 * u), a[0], u)
 		_txt(_fm, a[1], Vector2(bx + 38 * u, by), 26 * u, INK)
 		_rects.append([Rect2(bx - 6 * u, by - 34 * u, 170 * u, 48 * u), a[2], 0])
