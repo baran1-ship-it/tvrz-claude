@@ -721,7 +721,7 @@
      "r": "krumpac"
     },
     "Napiti": {
-     "r": "korbel"
+     "l": "korbel"
     }
    },
    "sceny": [
@@ -761,7 +761,7 @@
    ],
    "v_rukou": {
     "Sed_Piti_Loop": {
-     "r": "korbel"
+     "l": "korbel"
     }
    },
    "vysky": [
@@ -861,13 +861,13 @@
    ],
    "v_rukou": {
     "Sed_Piti_Loop": {
-     "r": "korbel"
+     "l": "korbel"
     },
     "Sed_Jidlo_Loop": {
      "r": "lzice"
     },
     "Sed_Piti1_Loop": {
-     "r": "korbel"
+     "l": "korbel"
     }
    },
    "_p": "Misa 0.99996 r. 96/99 (host nahnuty nad stolem, nic nedela) a 10. 11. (hoste vykladaji, piji a jedi, stridave): vsedě vykladani (Mixamo Talking / Talking_1 horni pulka + sed Male_Sitting_Pose), piti (Mixamo Sitting_Drinking s korbelem), jidlo (UAL2 Consume + sed, lzice) - tools/postavy_q/anim_cmu.py SLEP",
@@ -926,7 +926,7 @@
    "soustredeni": 0.7,
    "v_rukou": {
     "Napiti": {
-     "r": "korbel"
+     "l": "korbel"
     }
    },
    "sceny": [
@@ -960,7 +960,7 @@
      "r": "kladivo"
     },
     "Napiti": {
-     "r": "korbel"
+     "l": "korbel"
     },
     "Kovar_Silny": {
      "r": "kladivo"
@@ -1278,7 +1278,7 @@
    ],
    "v_rukou": {
     "Sed_Piti_Loop": {
-     "r": "korbel"
+     "l": "korbel"
     },
     "Sed_Jidlo_Loop": {
      "r": "lzice"
@@ -1287,10 +1287,10 @@
      "r": "lzice"
     },
     "Napiti": {
-     "r": "korbel"
+     "l": "korbel"
     },
     "Sed_Piti1_Loop": {
-     "r": "korbel"
+     "l": "korbel"
     }
    },
    "_p": "Misa 10. 11. (chlapi v lomu maji pauzu na jidlo: sednou, jedi, piji, vykladaji): poledni prestavka pracujicich u mista prace",
@@ -1496,7 +1496,7 @@
    ],
    "v_rukou": {
     "Sed_Piti_Loop": {
-     "r": "korbel"
+     "l": "korbel"
     }
    },
    "_p": "Misa 10. 11. (lavice a stoly po celem svete, lide kolem nich jen chodi): volny cas na nejblizsim volnem sedaku (sedani, rezervace _obsazeno); dva u jedne lavice sedi vedle sebe (sirka_mista) a vykladaji (Sed_Hovor); bez sedaku stoji a povida. Dvojice sedici + stojici = dalsi krok",
@@ -1598,7 +1598,7 @@
    "nahodny_start": true,
    "v_rukou": {
     "Napiti": {
-     "r": "korbel"
+     "l": "korbel"
     }
    },
    "soustredeni": 0.3,
@@ -1757,7 +1757,7 @@
      "r": "kladivo"
     },
     "Napiti": {
-     "r": "korbel"
+     "l": "korbel"
     }
    },
    "sceny": [
@@ -1942,7 +1942,7 @@
    "nahodny_start": true,
    "v_rukou": {
     "Napiti": {
-     "r": "korbel"
+     "l": "korbel"
     }
    },
    "soustredeni": 0.3,
@@ -2006,7 +2006,7 @@
    "nahodny_start": true,
    "v_rukou": {
     "Napiti": {
-     "r": "korbel"
+     "l": "korbel"
     }
    },
    "soustredeni": 0.3,
@@ -2068,7 +2068,7 @@
    "nahodny_start": true,
    "v_rukou": {
     "Napiti": {
-     "r": "korbel"
+     "l": "korbel"
     }
    },
    "soustredeni": 0.3,
@@ -5668,7 +5668,8 @@
     "Piti",
     "Piti_Unavene"
    ],
-   "_p11": "11. 11. (rešerše: korbel se pri chuzi naklani): svisle = nadoba rovne (osa y nahoru) v kazdem klipu, pri piti (klipy_bez_rezimu) naklon z klipu k ustum"
+   "_p11": "11. 11. (rešerše: korbel se pri chuzi naklani): svisle = nadoba rovne (osa y nahoru) v kazdem klipu, pri piti (klipy_bez_rezimu) naklon z klipu k ustum",
+   "_ruka11": "11. 11. (snimek uchop4/piti: Mixamo Drinking pije LEVOU rukou, korbel visel v prave u boku) - v_rukou pri piti l"
   },
   "miska": {
    "_popis": "obsluha nese misu (Mixamo Carrying) - dlan pod miskou, NEOVERENO snimkem",
