@@ -223,7 +223,7 @@ TEST("teren_skoky", dz < KC["teren"]["skok_max_m"], "největší skok mezi souse
 DL = json.load(open(K + "/hra/dlazdice/dlazdice.json"))
 TEST("dlazdice", len(DL["dlazdice"]) == DL["pocet"][0] * DL["pocet"][1] and all(os.path.exists(K + "/hra/dlazdice/" + os.path.basename(str(d.get("soubor", d) if isinstance(d, dict) else d))) or True for d in DL["dlazdice"]),
      "%d dlaždic, LOD %s" % (len(DL["dlazdice"]), DL["lod"]))
-CP = json.load(open(K + "/pravidla/svet/cesty_puchart.json")); CP_TYP = {c_["id"]: c_["typ"] for c_ in CP["cesty"]}
+CP = json.load(open(K + "/pravidla/svet/cesty_puchart.json")); CP_TYP = {c_["id"]: c_["typ"] for c_ in CP["cesty"] if not c_.get("jen_maska")}   # brod: terén (koryto) beze změny
 mez = KC["cesty"]["rez_max_m"]
 zle = {k: v for k, v in CP["vysledek"].items() if max(v["max_rez_m"], v["max_nasyp_m"]) > mez}
 TEST("cesta_zarez", not zle, "zářez/násyp nad %s m: %s" % (mez, zle))

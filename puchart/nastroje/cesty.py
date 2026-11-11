@@ -135,6 +135,16 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
             if math.hypot(px[kon_] - nx_, pz[kon_] - nz_) < 4.0: yp = np.maximum(yp, ny_ - od_ - min(T["max_sklon"], 0.1) * np.maximum(sv_ - 2.0, 0.0))   # 2 m vodorovně u mostu (vyhlazení sítě terénu ubere ~0,15 m)   # nájezd k mostu nejvýš 10 % (i u pěšiny)
     if "max_rez_nasyp_m" in T: yp = np.clip(yp, y - T["max_rez_nasyp_m"], y + T["max_rez_nasyp_m"])   # nájezd k mostu nejvýš (Havran ±3 m)
     u_mostu = yp > y_bez_mostu + 0.01      # body osy na doloženém nájezdu k mostu (výjimka z max_uprava_m)
+    if u_mostu.any():   # nájezd plynule do terénu: od nájezdu dál jen násyp, nejvýš 10 %, dokud ho terén nedožene (11. 11.: v oblouku byl schod = příčný sklon 15 %)
+        g = float(T["max_sklon"]); zv = u_mostu.copy(); LM = float(T.get("max_uprava_u_mostu_m", 1.5)); y0p = yp.copy()
+        # k vodě sjíždí cesta i mělkým zářezem v břehu (úvoz u brodu/mostu) – nejvýš LM pod terén, jen navazující na nájezd
+        for i in range(1, len(yp)):
+            if zv[i - 1] and abs(yp[i] - yp[i - 1]) > g:
+                yp[i] = float(np.clip(np.clip(yp[i], yp[i - 1] - g, yp[i - 1] + g), y[i] - LM, max(y0p[i], y[i] + LM))); zv[i] = True
+        for i in range(len(yp) - 2, -1, -1):
+            if zv[i + 1] and abs(yp[i] - yp[i + 1]) > g:
+                yp[i] = float(np.clip(np.clip(yp[i], yp[i + 1] - g, yp[i + 1] + g), y[i] - LM, max(y0p[i], y[i] + LM))); zv[i] = True
+        u_mostu = zv
     c["delka_m"] = round(float(s[-1])); c["max_rez_m"] = round(float((y - yp).max()), 1); c["max_nasyp_m"] = round(float((yp - y).max()), 1)
     # rasterizace: každá buňka v dosahu dostane výšku nejbližšího bodu osy
     hw = T["sirka_m"] / 2; okraj = T["okraj_m"]

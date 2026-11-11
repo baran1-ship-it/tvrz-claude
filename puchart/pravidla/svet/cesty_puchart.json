@@ -17,7 +17,9 @@
    "max_uprava_m": 0.5,
    "max_uprava_napric_m": 2.0,
    "pozn_11_11": "Míša 11. 11.: „nemůžeme vykopat půl kopce, abychom měli dálnici, jsme ve středověku, chodilo se podle terénu“; „nahoru dolů je to v pořádku, ale velký sklon do boku by nedával smysl… samozřejmě lehce“ – podélně podle terénu (max_uprava_m), napříč jen lehce srovnat (max_uprava_napric_m; vozová ve svahu = polovina zářez, polovina násyp). Výjimka: doložené nájezdy k mostům.",
-   "pozn_napric": "2,0 m: tři krátká místa ve strmém bočním svahu (u mostu pod B 6,5/194, údolní 156/530, hájovna −69/778) – s 1,2 m zůstal příčný sklon 9–29 % (vůz by se převrátil); lavice ve svahu, ne zářez podél cesty"
+   "pozn_napric": "2,0 m: tři krátká místa ve strmém bočním svahu (u mostu pod B 6,5/194, údolní 156/530, hájovna −69/778) – s 1,2 m zůstal příčný sklon 9–29 % (vůz by se převrátil); lavice ve svahu, ne zářez podél cesty",
+   "max_uprava_u_mostu_m": 1.5,
+   "pozn_u_mostu": "nájezd k mostu: od mostovky plynule nejvýš 10 %, násypem nebo mělkým zářezem v břehu (nejvýš 1,5 m) – úvoz k vodě u brodu/mostu; jinde cesta podle terénu (11. 11.)"
   },
   "stezka": {
    "sirka_m": 1.6,
@@ -42,7 +44,7 @@
    "skala_od_rezu_m": 0.5,
    "pozn": "úzký hřbet na drobě, nejprudší místa schody ze skály",
    "max_uprava_m": 0.5,
-   "max_uprava_napric_m": 1.2,
+   "max_uprava_napric_m": 2.0,
    "pozn_11_11": "Míša 11. 11.: „nemůžeme vykopat půl kopce, abychom měli dálnici, jsme ve středověku, chodilo se podle terénu“; „nahoru dolů je to v pořádku, ale velký sklon do boku by nedával smysl… samozřejmě lehce“ – podélně podle terénu (max_uprava_m), napříč jen lehce srovnat (max_uprava_napric_m; vozová ve svahu = polovina zářez, polovina násyp). Výjimka: doložené nájezdy k mostům."
   },
   "pesina": {
@@ -607,9 +609,9 @@
    "max_rez_m": 0.5,
    "max_nasyp_m": 1.1,
    "pozn_5_11": "Míša 5. 11. (vlnovka na kresbě misa_04): cesta po V úbočí pod jádrem – osa na plošinkách DMR (x 18–23, sklon 0,02–0,37 proti okolí 0,7); GC80T08: „hradní cesta vinoucí se po východní straně hřebene končící u valu“",
-   "max_pricny": 0.159,
+   "max_pricny": 0.119,
    "pozn_9_11": "Míša 6. a 9. 11.: „zapomněl jsi na cestu pod horním hradem, která vede ke spodnímu hradu“ – hřebenová cesta začínala 27 m od hlavní cesty (nikam nenavazovala); teď odbočuje z hlavní cesty před mostem vnější branky a vede pod V stranou jádra A k mostu B Odbočka před začátkem násypu k mostu (z boku násypu příčný sklon 0,45 – test cesta_pricny_sklon).",
-   "max_uprava_m": 1.2
+   "max_uprava_m": 1.73
   },
   {
    "id": "udoli_440_0",
@@ -1352,9 +1354,9 @@
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 325,
-   "max_rez_m": 0.5,
-   "max_nasyp_m": 1.4,
-   "max_pricny": 0.092,
+   "max_rez_m": 1.5,
+   "max_nasyp_m": 1.5,
+   "max_pricny": 0.048,
    "max_uprava_m": 2.0
   },
   {
@@ -2058,9 +2060,9 @@
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 145,
-   "max_rez_m": 0.5,
+   "max_rez_m": 1.5,
    "max_nasyp_m": 2.1,
-   "max_pricny": 0.151,
+   "max_pricny": 0.061,
    "pozn_most_9_11": "prodlouženo k mostu most_440_3 (most stál uprostřed 57m mezery – test most_navazuje_na_cestu 9. 11.)",
    "max_uprava_m": 2.0
   },
@@ -5349,7 +5351,7 @@
   },
   {
    "id": "osm_track_0",
-   "typ": "pesina",
+   "typ": "vozova",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -5538,14 +5540,15 @@
     ]
    ],
    "delka_m": 179,
-   "max_rez_m": 0.1,
+   "max_rez_m": 0.3,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.101,
-   "max_uprava_m": 0.22
+   "max_pricny": 0.023,
+   "max_uprava_m": 0.67,
+   "pozn_11_11": "údolní cesta Kouteckého potoka – Míša 11. 11. (vojenská mapa 1:25 000: hlavní cesta údolím od S); OSM track grade2 176022562/1447652676/1447652679"
   },
   {
    "id": "osm_track_1",
-   "typ": "pesina",
+   "typ": "vozova",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -5706,14 +5709,15 @@
     ]
    ],
    "delka_m": 151,
-   "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1,
-   "max_pricny": 0.235,
-   "max_uprava_m": 0.3
+   "max_rez_m": 0.3,
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.02,
+   "max_uprava_m": 1.34,
+   "pozn_11_11": "údolní cesta Kouteckého potoka – Míša 11. 11. (vojenská mapa 1:25 000: hlavní cesta údolím od S); OSM track grade2 176022562/1447652676/1447652679"
   },
   {
    "id": "osm_track_2",
-   "typ": "pesina",
+   "typ": "vozova",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -6154,10 +6158,11 @@
     ]
    ],
    "delka_m": 431,
-   "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1,
-   "max_pricny": 0.281,
-   "max_uprava_m": 0.26
+   "max_rez_m": 0.4,
+   "max_nasyp_m": 0.3,
+   "max_pricny": 0.029,
+   "max_uprava_m": 1.37,
+   "pozn_11_11": "údolní cesta Kouteckého potoka – Míša 11. 11. (vojenská mapa 1:25 000: hlavní cesta údolím od S); OSM track grade2 176022562/1447652676/1447652679"
   },
   {
    "id": "osm_track_3",
@@ -15417,7 +15422,7 @@
    "delka_m": 147,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.168,
+   "max_pricny": 0.169,
    "max_uprava_m": 0.29
   },
   {
@@ -17630,7 +17635,7 @@
   },
   {
    "id": "osm_track_33",
-   "typ": "pesina",
+   "typ": "vozova",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -18223,14 +18228,15 @@
     ]
    ],
    "delka_m": 583,
-   "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2,
-   "max_pricny": 0.627,
-   "max_uprava_m": 0.3
+   "max_rez_m": 0.3,
+   "max_nasyp_m": 0.5,
+   "max_pricny": 0.037,
+   "max_uprava_m": 1.57,
+   "pozn_11_11": "údolní cesta Kouteckého potoka – Míša 11. 11. (vojenská mapa 1:25 000: hlavní cesta údolím od S); OSM track grade2 176022562/1447652676/1447652679"
   },
   {
    "id": "osm_track_34",
-   "typ": "pesina",
+   "typ": "vozova",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -18347,10 +18353,11 @@
     ]
    ],
    "delka_m": 107,
-   "max_rez_m": 0.1,
-   "max_nasyp_m": 0.0,
-   "max_pricny": 0.281,
-   "max_uprava_m": 0.2
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.038,
+   "max_uprava_m": 0.86,
+   "pozn_11_11": "údolní cesta Kouteckého potoka – Míša 11. 11. (vojenská mapa 1:25 000: hlavní cesta údolím od S); OSM track grade2 176022562/1447652676/1447652679"
   },
   {
    "id": "zluta_0",
@@ -21514,8 +21521,8 @@
    "delka_m": 240,
    "max_rez_m": 0.5,
    "max_nasyp_m": 1.1,
-   "max_pricny": 0.159,
-   "max_uprava_m": 1.2
+   "max_pricny": 0.119,
+   "max_uprava_m": 1.73
   },
   "udoli_440_0": {
    "delka_m": 58,
@@ -21526,9 +21533,9 @@
   },
   "udoli_440_1": {
    "delka_m": 325,
-   "max_rez_m": 0.5,
-   "max_nasyp_m": 1.4,
-   "max_pricny": 0.092,
+   "max_rez_m": 1.5,
+   "max_nasyp_m": 1.5,
+   "max_pricny": 0.048,
    "max_uprava_m": 2.0
   },
   "udoli_440_2": {
@@ -21540,9 +21547,9 @@
   },
   "udoli_440_3": {
    "delka_m": 145,
-   "max_rez_m": 0.5,
+   "max_rez_m": 1.5,
    "max_nasyp_m": 2.1,
-   "max_pricny": 0.151,
+   "max_pricny": 0.061,
    "max_uprava_m": 2.0
   },
   "udoli_440_4": {
@@ -21589,24 +21596,24 @@
   },
   "osm_track_0": {
    "delka_m": 179,
-   "max_rez_m": 0.1,
+   "max_rez_m": 0.3,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.101,
-   "max_uprava_m": 0.22
+   "max_pricny": 0.023,
+   "max_uprava_m": 0.67
   },
   "osm_track_1": {
    "delka_m": 151,
-   "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1,
-   "max_pricny": 0.235,
-   "max_uprava_m": 0.3
+   "max_rez_m": 0.3,
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.02,
+   "max_uprava_m": 1.34
   },
   "osm_track_2": {
    "delka_m": 431,
-   "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1,
-   "max_pricny": 0.281,
-   "max_uprava_m": 0.26
+   "max_rez_m": 0.4,
+   "max_nasyp_m": 0.3,
+   "max_pricny": 0.029,
+   "max_uprava_m": 1.37
   },
   "osm_track_3": {
    "delka_m": 386,
@@ -21801,7 +21808,7 @@
    "delka_m": 147,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.168,
+   "max_pricny": 0.169,
    "max_uprava_m": 0.29
   },
   "osm_track_31": {
@@ -21820,17 +21827,17 @@
   },
   "osm_track_33": {
    "delka_m": 583,
-   "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2,
-   "max_pricny": 0.627,
-   "max_uprava_m": 0.3
+   "max_rez_m": 0.3,
+   "max_nasyp_m": 0.5,
+   "max_pricny": 0.037,
+   "max_uprava_m": 1.57
   },
   "osm_track_34": {
    "delka_m": 107,
-   "max_rez_m": 0.1,
-   "max_nasyp_m": 0.0,
-   "max_pricny": 0.281,
-   "max_uprava_m": 0.2
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.038,
+   "max_uprava_m": 0.86
   },
   "zluta_0": {
    "delka_m": 56,
