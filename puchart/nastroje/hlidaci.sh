@@ -47,6 +47,10 @@ UN=$(grep -ohE "^UZLY celkem [0-9]+" $K/build/hlidaci_beh_godot.log 2>/dev/null 
 if [ -z "$UN" ]; then [ "$1" != "--rychle" ] && { rc=1; echo "UZLY CHYBA: hra nevypsala počet uzlů" | tee -a $S; }
 elif [ "$UN" -gt "$UMAX" ]; then rc=1; echo "UZLY CHYBA: $UN uzlů po startu > rozpočet $UMAX (rozpocty.json pamet.uzlu_max)" | tee -a $S
 else echo "UZLY OK: $UN (rozpočet $UMAX)" | tee -a $S; fi
+# louče a svícny v tmavých místnostech (11. 11.: při běžném startu 0/20 – hledaly zeď dřív, než vznikly kolize hradu)
+for sv in $(grep -ohE "^SVICNY [0-9]+/[0-9]+" $K/build/hlidaci_beh_godot.log 2>/dev/null | awk '{print $2}' | sort -u); do
+  [ "${sv%/*}" != "${sv#*/}" ] && { rc=1; echo "SVICNY CHYBA: postaveno $sv (každé světlo bez dne potřebuje louč/svícen)" | tee -a $S; }
+done
 krok "matice vztahů"; python3 $K/nastroje/kontrola_vztahu.py $K $1 | tee -a $S || rc=1
 krok "tabulka chyb"; python3 $K/nastroje/kontrola_tabulek.py $K $1 | tee -a $S || rc=1
 # poslední dobrá verze (GPT studio bod 7): při úspěchu uložit výsledky s commitem; při chybě vypsat rozdíl proti ní

@@ -176,11 +176,11 @@ func _start() -> void:
 
 ## Kolize hradu pro procházku: trojúhelníková kolize ze sítí modelu (zdi, mosty, schody) – jedno statické těleso.
 func _kolize_hradu() -> void:
-	if _foto != "":
-		return
-	for jm in ["Hrad", "Skaly", "Voda"]:
+	for jm in (["Hrad"] if _foto != "" else ["Hrad", "Skaly", "Voda"]):   # snímek: jen hrad (louče hledají zeď)
 		var h := get_node_or_null(jm)
 		if h != null: _kolize_uzlu(h)
+	# louče a svícny až po kolizích (hledají podlahu a zeď paprskem; 11. 11.: voláno dřív = 0/20 při běžném startu)
+	if not _k_svicnum.is_empty(): _svicny()
 
 func _kolize_uzlu(h: Node) -> void:
 	# Havran: kolize z kvádrů uzlu KOLIZE (zdi, podlahy, mostovky, schody jako rampy); starší návrhy bez něj ze sítí
@@ -203,7 +203,6 @@ func _svetla(h: Node3D) -> void:
 		l.distance_fade_enabled = true; l.distance_fade_begin = 35.0; l.distance_fade_length = 10.0
 		h.add_child(l)
 		if not s.get("den", false) and s.get("svit", "louc") != "ohen": _k_svicnum.append(l); l.set_meta("svit", s.get("svit", "louc"))
-	if not _k_svicnum.is_empty(): _svicny.call_deferred()
 
 ## Světlo místnosti s předmětem Havrana (Míša 10. 11.: „když je místnost tmavá, dej tam louč nebo svícen, vezmi předměty z Havrana“;
 ## „do sklepa určitě nepatří svícen, ale louč“): svit=louc (sklep, kobky, věže, chodby) = louč v železném držáku na zdi ve 1,9 m,
@@ -213,7 +212,6 @@ func _svetla(h: Node3D) -> void:
 var _k_svicnum: Array = []
 var _svicnu := 0
 func _svicny() -> void:
-	if _foto != "" and get_node_or_null("Hrad"): _kolize_uzlu(get_node("Hrad"))   # snímek: kolize jinak nestaví
 	for i in 4: await get_tree().physics_frame   # kolize hradu (_kolize_hradu deferred)
 	var md := {"svicen": "res://modely/predmety/svicen_stojaci.glb", "louc": "res://modely/predmety/louc.glb", "drzak": "res://modely/predmety/drzak_louce.glb"}
 	var sc := {}
