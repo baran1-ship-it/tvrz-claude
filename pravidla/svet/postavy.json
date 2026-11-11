@@ -545,6 +545,29 @@
     195.5
    ],
    "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): bod na vozove ceste (pravidla/svet/cesty.json) - trasy poutniku po cele mape"
+  },
+  "stan_pred_1": {
+   "p": [
+    -7.9,
+    198.6
+   ],
+   "yaw_st": 115.0,
+   "_p": "Misa 11. 11. (kupec neni prodavac za pultem - prechazi pred stanem, pozoruje, sedi; kolemjdouci si u nej sednou): pred stanem k ceste"
+  },
+  "stan_pred_2": {
+   "p": [
+    -7.4,
+    202.0
+   ],
+   "yaw_st": 80.0,
+   "_p": "Misa 11. 11. (kupec neni prodavac za pultem - prechazi pred stanem, pozoruje, sedi; kolemjdouci si u nej sednou): pred stanem u lavice"
+  },
+  "stan_posezeni": {
+   "p": [
+    -7.0,
+    204.6
+   ],
+   "_p": "Misa 11. 11. (kupec neni prodavac za pultem - prechazi pred stanem, pozoruje, sedi; kolemjdouci si u nej sednou): lavice pred stanem (nabytek.json venku) - kupec a kolemjdouci"
   }
  },
  "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny; vnitrni misto: dvere (jmeno pohybu dveri), venku a vnitrek (body pred a za dvermi, z modelu blender/hostinec.py: dvere1 v lokalnich (0,01; -0,87), sin x -5,4..0) - postava jde dvermi (lide.gd _cesta_pruchod), mistnost = sedaky jen v teto mistnosti (svet mistnosti); dum + lok + k_lok: bod v ramci domu svet._domy (kosar za rychtou, zvirata.json ohrady); uvnitr = dalsi body cesty za vnitrkem (pruchod mezi mistnostmi: krcma sin -> senkovna otvorem v pricce lokalne x -3,5, z 1,6..2,5; kolize svet.json); p vnitrniho mista na volne podlaze (ne na stole - hostinec_sin a krcma_senk drive ve stredu mistnosti na stole); tvrz (Misa 6. 11.): tvrz_ubytovna = bod pred dvermi ubytovny sluzebnictva (lokace.json ubytovna_tvrz, nejblizsi dvere = dvere ubytovny), tvrz_kuchyne_dvor = pred dvermi kuchyne ze dvora (palace.py DOOR_PANTRY), tvrz_kuchyne = kucharka u kotliku nad ohnistem (vnitrni misto, dvere kuchyne ze dvora)",
@@ -2004,6 +2027,55 @@
     }
    },
    "_p": "Misa 11. 11. choreografie: kupec v noci hlida zbozi u stanu s lucernou (stan nema dvere ani luzko)"
+  },
+  "obchazi_stan": {
+   "klipy": [
+    "Idle_FoldArms_Loop",
+    "Idle_Loop"
+   ],
+   "obmena_s": [
+    8.0,
+    20.0
+   ],
+   "soustredeni": 0.3,
+   "obchuzka": [
+    "stan_pult",
+    "stan_pred_1",
+    "stan_pred_2",
+    "stan_pred_1"
+   ],
+   "obchuzka_klipy": {
+    "stan_pult": [
+     "Truhla_Otevri",
+     "Hleda_Loop",
+     "Interact"
+    ],
+    "stan_pred_1": [
+     "Idle_FoldArms_Loop",
+     "Rozhlizi",
+     "Rozhlizi2"
+    ],
+    "stan_pred_2": [
+     "Idle_Loop",
+     "Idle_FoldArms_Loop",
+     "Rozhlizi"
+    ]
+   },
+   "obchuzka_obmena_s": {
+    "stan_pult": [
+     6.0,
+     14.0
+    ],
+    "stan_pred_1": [
+     10.0,
+     25.0
+    ],
+    "stan_pred_2": [
+     8.0,
+     20.0
+    ]
+   },
+   "_p": "Misa 11. 11. (kupec neni prodavac za pultem - prechazi pred stanem, pozoruje, sedi; kolemjdouci si u nej sednou): prechazi pred stanem: u pultu prerovna zbozi, u cesty pozoruje, kdo jde"
   }
  },
  "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.) | Misa 11. 11. (postava ukazuje do prazdna): UAL Interact = natazena ruka vpred v urovni hrudi - jen u stolu a krbu (polozi/vezme); u studny, mlyna, vetraku a ve volnem prostoru Zvedne / Nese_Stoji_Loop / rozhlizeni",
@@ -4325,6 +4397,16 @@
      "kde": "cesta_jih"
     },
     {
+     "od": 10.0,
+     "cinnost": "odpocinek",
+     "kde": "stan_posezeni"
+    },
+    {
+     "od": 11.0,
+     "cinnost": "putuje_a",
+     "kde": "cesta_jih"
+    },
+    {
      "od": 12.0,
      "cinnost": "hospoda",
      "kde": "hostinec_sin"
@@ -4411,6 +4493,16 @@
      "kde": "cesta_rozcesti"
     },
     {
+     "od": 9.5,
+     "cinnost": "odpocinek",
+     "kde": "stan_posezeni"
+    },
+    {
+     "od": 10.5,
+     "cinnost": "putuje_a",
+     "kde": "cesta_rozcesti"
+    },
+    {
      "od": 20.0,
      "cinnost": "putuje_a_noc",
      "kde": "cesta_rozcesti"
@@ -4430,6 +4522,16 @@
    "rozvrh": [
     {
      "od": 6.0,
+     "cinnost": "putuje_b",
+     "kde": "cesta_rozcesti"
+    },
+    {
+     "od": 14.0,
+     "cinnost": "odpocinek",
+     "kde": "stan_posezeni"
+    },
+    {
+     "od": 15.0,
      "cinnost": "putuje_b",
      "kde": "cesta_rozcesti"
     },
@@ -4475,29 +4577,63 @@
    "nazev": "kupec",
    "rozvrh": [
     {
-     "od": 6.0,
+     "od": 5.5,
      "cinnost": "rano",
-     "kde": "stan_pult"
+     "kde": "stan_pred_1"
     },
     {
-     "od": 7.0,
-     "cinnost": "prodava",
-     "kde": "stan_pult"
+     "od": 6.5,
+     "cinnost": "obchazi_stan",
+     "kde": "stan_pult",
+     "moznosti": [
+      {
+       "cinnost": "obchazi_stan",
+       "kde": "stan_pult",
+       "vaha": 3.0
+      },
+      {
+       "cinnost": "prodava",
+       "kde": "stan_pult",
+       "vaha": 1.5
+      },
+      {
+       "cinnost": "volno",
+       "kde": "stan_posezeni",
+       "vaha": 1.5
+      }
+     ]
     },
     {
      "od": 12.0,
      "cinnost": "svacina",
-     "kde": "stan_pult"
+     "kde": "stan_posezeni"
     },
     {
      "od": 13.0,
-     "cinnost": "prodava",
-     "kde": "stan_pult"
+     "cinnost": "obchazi_stan",
+     "kde": "stan_pult",
+     "moznosti": [
+      {
+       "cinnost": "obchazi_stan",
+       "kde": "stan_pult",
+       "vaha": 3.0
+      },
+      {
+       "cinnost": "prodava",
+       "kde": "stan_pult",
+       "vaha": 1.0
+      },
+      {
+       "cinnost": "volno",
+       "kde": "stan_posezeni",
+       "vaha": 2.0
+      }
+     ]
     },
     {
      "od": 19.0,
      "cinnost": "hlida_stan",
-     "kde": "stan_pult"
+     "kde": "stan_pred_1"
     }
    ],
    "zvedavost": 0.6,
@@ -5543,7 +5679,9 @@
    "Idle_FoldArms_Loop",
    "Rozhlizi"
   ],
-  "_stoji_sam": "Misa 11. 11.: sedaci cinnost bez sedaku a bez moznosti jine cinnosti v bloku - postava stoji sama: jen stani a rozhlizeni (klipy_bez_sedu s hovorem jen pro partnera u sediciho, stoji_u)"
+  "_stoji_sam": "Misa 11. 11.: sedaci cinnost bez sedaku a bez moznosti jine cinnosti v bloku - postava stoji sama: jen stani a rozhlizeni (klipy_bez_sedu s hovorem jen pro partnera u sediciho, stoji_u)",
+  "v_mistnosti_nahodne": true,
+  "_v_mistnosti_nahodne": "Misa 11. 11. (hostinec je velky, vsichni sedeli u dveri - nejblizsi sedak k bodu sine): uvnitr mistnosti (mista.mistnost) nahodny volny sedak v mistnosti, venku nejblizsi"
  },
  "rozvrh_rozptyl": {
   "rozptyl_min": 15.0,

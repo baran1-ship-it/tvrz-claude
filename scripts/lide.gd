@@ -1290,6 +1290,8 @@ func _sedak(c: Dictionary, kde: Vector2, mistnost := "") -> Dictionary:
 				continue
 			var q := Vector2(p0.x, p0.z) + osa_x * (float(k) - (n - 1) * 0.5) * float(sd["sirka_mista_m"])
 			var d := q.distance_to(kde)
+			if mistnost != "" and bool(sd.get("v_mistnosti_nahodne", false)):
+				d = _rng.randf() * float(sd["hledat_m"])     # Misa 11. 11.: v sini kamkoli, ne vsichni u dveri
 			if d < nd:
 				nd = d
 				nej = {"klic": klic, "yaw": yaw, "y": p0.y + float(rz[1]) - float(sd["vyska_klipu_m"]), "sedak": q, "lavice": n > 1}
@@ -2295,3 +2297,27 @@ func _process_vlastni(dt: float) -> void:
 	if ceka_n == 0 and not (_nav_hotove.is_empty() and _nav_rozpr.is_empty()):
 		_nav_hotove.clear()
 		_nav_rozpr.clear()
+
+
+
+## Obchodnik na dosah hrace (Misa 11. 11., KCD obchod - pravidla/svet/obchod.json kupci podle id obyvatele): nejblizsi
+## obchodnik do dosah_m; {} = nikdo. otevreno = jeho prave probihajici cinnost je v obchoduje_pri (v noci zavreno).
+func obchodnik_u(p: Vector3) -> Dictionary:
+	var ob: Dictionary = Pravidla.soubor("obchod")
+	var kupci: Dictionary = ob["kupci"]
+	var nej := {}
+	var nd := float(ob["dosah_m"])
+	for c: Dictionary in _lide:
+		var cid := String(c["id"])
+		if not kupci.has(cid):
+			continue
+		var u: Node3D = c["uzel"]
+		if not u.visible:
+			continue
+		var d := u.global_position.distance_to(p)
+		if d < nd:
+			nd = d
+			var k: Dictionary = kupci[cid]
+			nej = {"kind": "obchod", "kupec": cid, "nazev": String(k["nazev"]), "zavreno": String(k["zavreno"]),
+					"otevreno": (k["obchoduje_pri"] as Array).has(String(c.get("cinnost_ted", ""))), "pos": u.global_position + Vector3(0, 1.8, 0)}
+	return nej

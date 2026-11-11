@@ -10,6 +10,9 @@ var main: Node
 var zebriky: Array = []             # herni zebriky ve svete: {pata, vrchol, smer, nastup, sestup} (lezeni 0.76)
 var kat: Dictionary = {}            # id -> {nazev, kat, stav, vaha, cena, rozmer, kont?, sed?, lehat?}
 var inv: Dictionary = {}            # id -> pocet (brasna hrace)
+# Obchod (Misa 11. 11., KCD): grose hrace a stav kupcu (pravidla/svet/obchod.json) - mesec, zbozi, posledni obnova
+var grose := 0
+var obchody: Dictionary = {}         # kupec id -> {"mesec": int, "zbozi": {id: n}, "den": int}
 var vybava: Dictionary = {}         # slot -> id oblecene / vzate veci (zustava v brasne; pravidla/svet/hrac.json vybava)
 var placed: Array = []              # [{id, p: Vector3, yaw: float, obsah: {id: pocet}, node: Node3D}]
 var _scenes: Dictionary = {}
@@ -1234,7 +1237,7 @@ func to_save() -> Dictionary:
 			if rec.has(k):
 				d[k] = rec[k]
 		arr.append(d)
-	return {"inv": inv, "polozene": arr, "v_ruce": held_id, "v_ruce_hori": held_lit, "vybava": vybava}
+	return {"inv": inv, "polozene": arr, "v_ruce": held_id, "v_ruce_hori": held_lit, "vybava": vybava, "grose": grose, "obchody": obchody}
 
 
 func from_save(j: Dictionary) -> void:
@@ -1243,6 +1246,8 @@ func from_save(j: Dictionary) -> void:
 			remove(rec)
 	_spawn_fixed()
 	inv = {}
+	grose = int(j.get("grose", Pravidla.cti("obchod", "hrac_grose_start")))
+	obchody = (j.get("obchody", {}) as Dictionary).duplicate(true)
 	for id: String in j.get("inv", {}):
 		if kat.has(id):
 			inv[id] = int(j["inv"][id])
@@ -1501,3 +1506,32 @@ func toggle_tilt_placed(rec: Dictionary) -> void:
 	keep.erase("_hung")
 	spawn(keep)
 	main.life.sfx("presun", -10.0, 1.1)
+
+
+
+# ------------------------------------------------------------------ obchod (Misa 11. 11., KCD)
+
+## Stav kupce: rano (obnova_h) noveho dne doplni zbozi do zakladu a mesec (KCD: obchodnik ma omezene grose).
+func kupec_stav(kid: String, den: int, h: float) -> Dictionary:
+	var k: Dictionary = Pravidla.cti("obchod", "kupci")[kid]
+	var st: Dictionary = obchody.get(kid, {})
+	var den_obnovy := den if h >= float(k["obnova_h"]) else den - 1
+	if st.is_empty() or int(st.get("den", -999)) < den_obnovy:
+		var zb: Dictionary = st.get("zbozi", {})
+		for id: String in k["zbozi"]:
+			zb[id] = maxi(int(zb.get(id, 0)), int(k["zbozi"][id]))
+		st = {"mesec": maxi(int(st.get("mesec", 0)), int(k["mesec"])), "zbozi": zb, "den": den_obnovy}
+		obchody[kid] = st
+	return st
+
+
+## Cena, za kterou kupec prodava (nakup = true) nebo vykupuje; 0 = nevykupuje (jiny druh zbozi).
+func cena_obchod(kid: String, id: String, nakup: bool) -> int:
+	var k: Dictionary = Pravidla.cti("obchod", "kupci")[kid]
+	var c := float(kat.get(id, {}).get("cena", 0))
+	if nakup:
+		return maxi(1, ceili(c * float(k["marze"])))
+	var kk = kat.get(id, {}).get("kat", null)
+	if kk == null or not (k["vykupuje_kat"] as Array).has(String(kk)):
+		return 0
+	return maxi(1, floori(c * float(k["vykup"]))) if c > 0.0 else 0

@@ -69,10 +69,20 @@
 | **Šenkýřka** | 6 ráno · 7–23 **roznáší**: od krbu nese mísu/džbán ke stolu, postaví (stojí *vedle* stolu, ne v něm), sbírá nádobí, vaří u druhého výčepu; nikdy se neopírá o trám (ten je hostinského) · 13:30 krátce sedí · 23 spát |
 | **Pocestný 1** | ráno snídaně v hostinci · 8–12 jde ke stanu kupce a zpět · odpoledne sedí venku u hostince · večer v hostinci |
 | **Pocestný 2** | ráno snídaně · dopoledne venku u hostince · 13–17 jde do vsi do krčmy · večer zpět v hostinci |
-| **Kupec (nový)** | 6 otevře stan · 7–19 u stánku: přerovnává zboží, hledá v truhle, nabízí; poledne jí · 19 – ráno hlídá zboží u stanu s lucernou (stan nemá lůžko) |
+| **Kupec Jakub (nový)** | 5:30 ráno před stanem · 6:30–19 **přechází před stanem**: u pultu přerovná zboží a hledá v truhle, u cesty stojí se založenýma rukama a pozoruje, kdo jde; občas **sedí na lavici před stanem**; 12 svačina na lavici · 19 – ráno hlídá zboží s lucernou · **obchod** přes den (pravidla/svet/obchod.json) |
 | **Poutník Bartoloměj** | tvrz (brána) → stan kupce → rozcestí → hostinec → severní kraj mapy a zpět |
 | **Poutník Ondráček** | náves → odbočka → rozcestí → stan kupce → brána tvrze a zpět |
 | **Poutnice Mařena** | hostinec → les na hlavní cestě → rozcestí → odbočka → krčma ve vsi a zpět |
 
 Zdroje: KCD (rozvrhy postav – Nexus mods 726, wiki „Innkeeper“ pracovní doba 8–23), dobové práce (historyhit, thecollector
 „Daily life in a medieval village“: práce od svítání do soumraku, ženy dům/zahrada/drůbež, muži pole/dříví).
+
+## Posezení u stanu (Míša 11. 11.)
+Lavice před stanem: kolemjdoucí si sednou na džbánek (odpočinek, napití) – poutník Bartoloměj 9:30–10:30,
+poutník Ondráček 14–15, pocestný 1 10–11.
+
+## Obchod jako v KCD (Míša 11. 11., `pravidla/svet/obchod.json`)
+Každý obchodník má jiné zboží, přirážku, výkup a měšec: kupec u stanu (všehochuť, 1,2× / 0,5×), hostinský (jídlo a pití
+dráž 1,4×), krčmář (levnější pivo 1,15×, malý měšec), kovář (nářadí a zbraně, vykupuje železo), mlynář (mouka a chléb
+skoro za výrobní cenu 1,05×), bylinkářka (byliny, zelenina). Obchodník vykupuje jen své druhy zboží a jen do výše měšce;
+ráno doplní zboží i měšec; v noci zavřeno. Další krok: smlouvání a pověst (KCD).

@@ -1,0 +1,212 @@
+{
+ "popis": "Obchod (Misa 11. 11.: 'pokud zvladnes vymyslet system prodeje, hrac by mohl u kupce neco nakoupit nebo prodat - dle KCD'). Jako v KCD: kupec ma omezeny mesec grosu (vic nevykoupi), prodava dráž, nez vykupuje (prodej = cena x marze, vykup = cena x vykup), vykupuje jen sve druhy zbozi (kat z katalogu modely/predmety.json), kazde rano (obnova_h) doplni zbozi do zakladu a mesec; obchoduje jen pri cinnostech z obchoduje_pri (v noci hlida stan - zavreno). Hrac: grose (scripts/predmety.gd grose, ulozene v save), start hrac_grose_start. Okno = vymena s truhlou (scripts/menu_hrace.gd), vlevo brasna s vykupni cenou, vpravo zbozi s prodejni cenou. Smlouvani, povest a stav zbozi zatim ne (KCD: smlouvani rec, povest u kupce) - dalsi krok. Kazdy obchodnik (klic = id obyvatele z postavy.json) ma vlastni zbozi, marzi, vykup, mesec a druhy, ktere vykupuje (Misa 11. 11.: 'kazdy ma trochu jine ceny a zbozi').",
+ "mena": "grošů",
+ "hrac_grose_start": 120,
+ "dosah_m": 2.6,
+ "kupci": {
+  "kupec": {
+   "nazev": "Kupec Jakub Haltýř",
+   "obchoduje_pri": [
+    "prodava",
+    "obchazi_stan",
+    "volno",
+    "svacina",
+    "rano"
+   ],
+   "zavreno": "Kupec hlídá zboží, obchod je zavřený do rána.",
+   "mesec": 350,
+   "obnova_h": 6.0,
+   "marze": 1.2,
+   "vykup": 0.5,
+   "vykupuje_kat": [
+    "jidlo",
+    "piti",
+    "nadoby",
+    "naradi",
+    "byliny",
+    "ostatni"
+   ],
+   "zbozi": {
+    "bochnik": 6,
+    "syr": 3,
+    "slanina": 2,
+    "susene_maso": 4,
+    "uzena_ryba": 3,
+    "med": 2,
+    "jablko": 10,
+    "orechy": 4,
+    "pivo": 6,
+    "vino_dzban": 2,
+    "medovina": 1,
+    "korbel": 3,
+    "miska": 4,
+    "dzban_kamenny": 2,
+    "hrnec_hlineny": 2,
+    "kosik": 2,
+    "vedro_drevene": 2,
+    "srp": 1,
+    "sekerka": 1,
+    "lopata": 1,
+    "hrabe": 1,
+    "noze_lzice": 2,
+    "louc": 10,
+    "svicen": 2,
+    "lucerna": 1,
+    "ovci_kuze": 2,
+    "polstar": 1
+   },
+   "_p": "kramar na ceste: vsehochut (trvanlive jidlo, nadobi, drobne naradi, svetla, kuze) - prodava s mirnou prirazkou, vykupuje skoro vse levne"
+  },
+  "hostinsky": {
+   "nazev": "Hostinský Linhart",
+   "_p": "hostinec U Cerneho kance: jidlo a piti dráž (hostinec u cesty), vykupuje jen potraviny a piti",
+   "obchoduje_pri": [
+    "obsluha_hostinec",
+    "vareni",
+    "uklid_hostinec",
+    "rano",
+    "hovor"
+   ],
+   "zavreno": "Hostinský už spí.",
+   "mesec": 220,
+   "obnova_h": 6.0,
+   "marze": 1.4,
+   "vykup": 0.45,
+   "vykupuje_kat": [
+    "jidlo",
+    "piti"
+   ],
+   "zbozi": {
+    "pivo": 20,
+    "vino_dzban": 4,
+    "medovina": 3,
+    "polevka": 6,
+    "kase": 6,
+    "pecen": 6,
+    "pecene_kure": 2,
+    "klobasy": 4,
+    "bochnik": 6,
+    "syr": 2
+   }
+  },
+  "krcmar": {
+   "nazev": "Krčmář Kubát",
+   "_p": "vesnicka krcma U Kohouta: levnejsi pivo a domaci jidlo, maly mesec",
+   "obchoduje_pri": [
+    "obsluha_krcma",
+    "uklid_krcma",
+    "vareni",
+    "rano",
+    "odpocinek"
+   ],
+   "zavreno": "Krčmář už spí.",
+   "mesec": 120,
+   "obnova_h": 6.0,
+   "marze": 1.15,
+   "vykup": 0.5,
+   "vykupuje_kat": [
+    "jidlo",
+    "piti",
+    "byliny"
+   ],
+   "zbozi": {
+    "pivo": 15,
+    "polevka": 4,
+    "kase": 4,
+    "bochnik": 4,
+    "vejce_kosik": 2,
+    "zeli": 3,
+    "slanina": 2
+   }
+  },
+  "kovar": {
+   "nazev": "Kovář tvrze",
+   "_p": "kovarna na tvrzi: naradi a zbrane, kvalitni (prirazka), vykupuje zelezo - naradi, zbrane, zbroj",
+   "obchoduje_pri": [
+    "kovani",
+    "svacina",
+    "rano",
+    "hovor"
+   ],
+   "zavreno": "Kovář odpočívá, přijď zítra.",
+   "mesec": 600,
+   "obnova_h": 6.0,
+   "marze": 1.3,
+   "vykup": 0.55,
+   "vykupuje_kat": [
+    "naradi",
+    "zbrane",
+    "zbroj"
+   ],
+   "zbozi": {
+    "sekera": 1,
+    "sekerka": 2,
+    "kladivo": 1,
+    "krumpac": 1,
+    "kosa": 1,
+    "srp": 2,
+    "vidle_kovane": 1,
+    "kleste": 1,
+    "noze_lzice": 3,
+    "dyka": 1,
+    "tesak": 1,
+    "kopi": 1
+   }
+  },
+  "mlynar": {
+   "nazev": "Mlynář Bartoš",
+   "_p": "mlyn: mouka, chleba a obili levne (u zdroje), vykupuje obili a potraviny",
+   "obchoduje_pri": [
+    "nosi_pytle",
+    "volno",
+    "rano",
+    "hovor"
+   ],
+   "zavreno": "Mlynář už spí.",
+   "mesec": 180,
+   "obnova_h": 5.0,
+   "marze": 1.05,
+   "vykup": 0.6,
+   "vykupuje_kat": [
+    "jidlo"
+   ],
+   "zbozi": {
+    "pytel_mouky": 4,
+    "pytel_obili": 3,
+    "bochnik": 8,
+    "veka": 4,
+    "houska": 10
+   }
+  },
+  "bylinkarka": {
+   "nazev": "Bylinkářka Bára",
+   "_p": "bylinkarka ve vsi: byliny, med, zelenina ze zahrady - levne; vykupuje byliny a houby (jidlo)",
+   "obchoduje_pri": [
+    "zahon",
+    "sad",
+    "volno",
+    "rano",
+    "hovor"
+   ],
+   "zavreno": "Bylinkářka je doma.",
+   "mesec": 90,
+   "obnova_h": 6.0,
+   "marze": 1.1,
+   "vykup": 0.55,
+   "vykupuje_kat": [
+    "byliny",
+    "jidlo"
+   ],
+   "zbozi": {
+    "kopriva": 6,
+    "vlastovicnik": 4,
+    "barvinek": 4,
+    "med": 2,
+    "mrkev": 5,
+    "cibule": 5,
+    "kren": 2,
+    "hriby": 3
+   }
+  }
+ }
+}

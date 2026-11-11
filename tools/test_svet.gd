@@ -7585,6 +7585,15 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 	if (a_c["sedak"] as Dictionary).is_empty():
 		ch.call("dvojice: prvni u studny nesedi (zadna lavice)")
 	elif String(b_c.get("stoji_u", "")) != String(a_c["id"]):
+		for ri in (sv.data.get("vybaveni", []) as Array).size():
+			var r: Dictionary = sv.data["vybaveni"][ri]
+			var rp := Vector2(float(r["p"][0]), float(r["p"][2]))
+			if String(r["id"]).begins_with("lavice") and rp.distance_to(Vector2(-2, 6)) < 14.0:
+				var obs := []
+				for k: String in (lide.get("_obsazeno") as Dictionary):
+					if k.begins_with("sed:%d:" % ri):
+						obs.append("%s=%s" % [k, lide.get("_obsazeno")[k]])
+				print("LIDE lavice u studny %s %s mistnost '%s' obsazeno %s" % [r["id"], rp, lide.call("_mistnost_u", Vector3(rp.x, float(r["p"][1]), rp.y)), obs])
 		ch.call("dvojice: druhy nestoji u sediciho (stoji_u %s, sedak %s, misto %s)" % [b_c.get("stoji_u", ""), str((a_c["sedak"] as Dictionary).get("stani", "")), str(ma[0])])
 	else:
 		var kb := (ma[0] as Vector2) - (mb[0] as Vector2)

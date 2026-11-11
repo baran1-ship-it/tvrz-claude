@@ -1392,6 +1392,9 @@ func _process_vlastni(_delta: float) -> void:
 		_use = life.usable(player.cam)
 		if _use.is_empty() and sber != null and predmety.held_id == "":
 			_use = sber.usable(player.cam)
+		var lide_u: Node = world.get_node_or_null("Lide") if world else null
+		if _use.is_empty() and lide_u and lide_u.has_method("obchodnik_u"):
+			_use = lide_u.obchodnik_u(player.global_position)      # Misa 11. 11.: obchod u kupce (KCD)
 	hud.build_mode = build_mode
 	_build_acts()
 
@@ -1435,6 +1438,9 @@ func _build_acts() -> void:
 		elif kind == "zebrik":
 			t1 = "Slézt dolů" if bool(_use["nahore"]) else "Lézt nahoru"
 			title = "Žebřík"
+		elif kind == "obchod":
+			t1 = "Obchodovat" if bool(_use["otevreno"]) else "Zavřeno"
+			title = String(_use["nazev"])
 		else:
 			t1 = life.use_label(_use, false)
 			title = String(_use.get("nazev", NAZVY.get(kind, "")))
@@ -1685,6 +1691,13 @@ func _on_use() -> void:
 		return
 	if String(_use["kind"]) == "zebrik":
 		player.climb(_use["zb"], bool(_use["nahore"]))
+		return
+	if String(_use["kind"]) == "obchod":
+		if not bool(_use["otevreno"]):
+			hud.toast(String(_use["zavreno"]), 2.5)
+			return
+		var st: Dictionary = predmety.kupec_stav(String(_use["kupec"]), int(day.day_n), float(day.hour))
+		menu_hrace.show_page("vymena", {"id": "bedna_kupecka", "obsah": st["zbozi"], "obchod": String(_use["kupec"]), "nazev": String(_use["nazev"])})
 		return
 	life.sfx("click", -8.0)
 	match _use["kind"]:

@@ -92,7 +92,7 @@ func _hint(t: String) -> void:
 func close() -> void:
 	if not open:
 		return
-	if page == "vymena" and not box.is_empty():
+	if page == "vymena" and not box.is_empty() and not box.has("obchod"):
 		P.show_hung(box)
 	if page == "spanek" and main.player.seated and not _sleeping:
 		main.player.stand_up()
@@ -121,7 +121,7 @@ func _tabs() -> Array:
 
 func _pages() -> Array:
 	if page == "vymena":
-		return [["vymena", P.name_of(box["id"])]]
+		return [["vymena", String(box.get("nazev", P.name_of(box["id"])))]]
 	var pages := [["brasna", "Brašna"], ["postava", "Postava"], ["dovednosti", "Dovednosti"], ["denik", "Deník"]]
 	if main.mode == "piskoviste":
 		pages.append(["staveni", "Stavění"])
@@ -345,7 +345,28 @@ func _move(id: String, from: int, n: int) -> void:
 	n = mini(n, int(src.get(id, 0)))
 	if n <= 0:
 		return
-	if from == 0 and P.kat[box["id"]].has("jen"):
+	if box.has("obchod"):
+		# Misa 11. 11. (obchod jako v KCD): kus po kusu za groše, kupec ma omezeny mesec a vykupuje jen sve zbozi
+		var kid := String(box["obchod"])
+		var st: Dictionary = P.obchody[kid]
+		var cena: int = P.cena_obchod(kid, id, from == 1)
+		if from == 0:
+			if cena <= 0:
+				_hint("Tohle %s nevykupuje" % String(box["nazev"]).get_slice(" ", 0).to_lower())
+				return
+			if int(st["mesec"]) < cena:
+				_hint("Obchodník už nemá dost grošů")
+				return
+			P.grose += cena
+			st["mesec"] = int(st["mesec"]) - cena
+		else:
+			if P.grose < cena:
+				_hint("Nemáš dost grošů (%d)" % cena)
+				return
+			P.grose -= cena
+			st["mesec"] = int(st["mesec"]) + cena
+		n = 1
+	elif from == 0 and P.kat[box["id"]].has("jen"):
 		# hak a stojan: jen zbrane, nastroje a stity, kazda ma sve misto
 		var jen: Array = P.kat[box["id"]]["jen"]
 		var kk = P.kat.get(id, {}).get("kat", null)
@@ -592,8 +613,10 @@ func _draw_all() -> void:
 	_txt(_fm, "RB", Vector2(ex + tabs.size() * 124 * u + 10 * u, O.y + 70 * u), 22 * u, GOLD_D)
 	# --- obsah
 	if page == "vymena":
-		_list(Rect2(O + Vector2(40, 180) * u, Vector2(745, 690) * u), 0, "Brašna", u)
-		_list(Rect2(O + Vector2(815, 180) * u, Vector2(745, 690) * u), 1, P.name_of(box["id"]), u)
+		var ob := box.has("obchod")
+		_list(Rect2(O + Vector2(40, 180) * u, Vector2(745, 690) * u), 0, ("Brašna · %d grošů" % P.grose) if ob else "Brašna", u)
+		_list(Rect2(O + Vector2(815, 180) * u, Vector2(745, 690) * u), 1,
+				("%s · měšec %d" % [String(box["nazev"]), int(P.obchody[String(box["obchod"])]["mesec"])]) if ob else P.name_of(box["id"]), u)
 		_detail_line(Rect2(O + Vector2(40, 890) * u, Vector2(1520, 90) * u), u)
 	else:
 		if _dv_stranka():
@@ -676,7 +699,10 @@ func _list(r: Rect2, s: int, title: String, u: float) -> void:
 		if page != "staveni":
 			var info: Dictionary = P.kat.get(id, {})
 			_txt(_fm, "%.1f" % float(info.get("vaha", 0)), Vector2(colw, row.position.y + rh * 0.62), 28 * u, INK)
-			_txt(_fm, str(int(info.get("cena", 0))), Vector2(colw + 100 * u, row.position.y + rh * 0.62), 28 * u, INK)
+			var cn := int(info.get("cena", 0))
+			if page == "vymena" and box.has("obchod"):
+				cn = P.cena_obchod(String(box["obchod"]), id, s == 1)       # vlevo vykup, vpravo prodej kupce
+			_txt(_fm, str(cn) if cn > 0 else "–", Vector2(colw + 100 * u, row.position.y + rh * 0.62), 28 * u, INK)
 		_rects.append([row, "row", [s, i]])
 		y += rh
 	if items.size() > ROWS:

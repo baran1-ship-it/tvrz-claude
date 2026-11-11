@@ -1,4 +1,5 @@
 extends Node
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Ctvrta sada (Misa 11. 11., trasa 0.99997): izolovany test kroku automaticke kvality ve svete.
 ## Na tabletu po krocich stiny_kratsi / stiny_predmetu / efekty snimek 2,7-3,5 s v neměřeném _process (0.99996: 37-332 ms).
 ##   kroky_kvality  ve svete (tvrz) zapne a zase vypne kazdy krok kvality.json zvlast a zmeri nejdelsi snimek a nejdelsi
@@ -8,7 +9,7 @@ extends Node
 
 var main: Node
 var vysledky: Array = []
-const TESTY := ["kroky_kvality"]
+const TESTY := ["kroky_kvality", "obchod"]
 
 
 func run(p_main: Node) -> void:
@@ -73,3 +74,56 @@ func _kroky_kvality() -> void:
 			if upl + po[0] > mez:
 				ok = false
 	vysledky.append(["kroky_kvality", ok, "mez %.0f ms; %s" % [mez, ", ".join(txt)]])
+
+
+
+## Obchod (Misa 11. 11., KCD, pravidla/svet/obchod.json): nakup ubere grose hraci a prida kupci, prodej naopak; kupec
+## nevykoupi cizi druh zbozi a nad svuj mesec; kazdy obchodnik ma jine zbozi a ceny; v noci zavreno; ulozeni grosu.
+func _obchod() -> void:
+	var P: Node = main.predmety
+	var mh: Node = main.menu_hrace
+	var ob: Dictionary = Pravidla.soubor("obchod")
+	var chyby: Array = []
+	P.grose = 100
+	P.inv = {"jablko": 2, "mec_dlouhy": 1}
+	P.obchody = {}
+	var st: Dictionary = P.kupec_stav("kupec", 1, 8.0)
+	mh.box = {"id": "bedna_kupecka", "obsah": st["zbozi"], "obchod": "kupec", "nazev": "Kupec"}
+	var c_b: int = P.cena_obchod("kupec", "bochnik", true)
+	var m0 := int(st["mesec"])
+	mh._move("bochnik", 1, 1)
+	if P.grose != 100 - c_b or int(st["mesec"]) != m0 + c_b or int(P.inv.get("bochnik", 0)) != 1:
+		chyby.append("nakup bochniku: grose %d, mesec %d, brasna %s" % [P.grose, int(st["mesec"]), str(P.inv)])
+	var c_j: int = P.cena_obchod("kupec", "jablko", false)
+	var g1: int = P.grose
+	mh._move("jablko", 0, 1)
+	if c_j <= 0 or P.grose != g1 + c_j:
+		chyby.append("prodej jablka: cena %d, grose %d -> %d" % [c_j, g1, P.grose])
+	mh._move("mec_dlouhy", 0, 1)
+	if int(P.inv.get("mec_dlouhy", 0)) != 1:
+		chyby.append("kupec vykoupil mec (zbrane nevykupuje)")
+	st["mesec"] = 0
+	mh._move("jablko", 0, 1)
+	if int(P.inv.get("jablko", 0)) != 1:
+		chyby.append("kupec vykoupil bez grosu v mesci")
+	P.grose = 0
+	mh._move("syr", 1, 1)
+	if int(P.inv.get("syr", 0)) != 0:
+		chyby.append("nakup bez grosu")
+	# kazdy jinak: aspon dva obchodnici s ruznou marzi a ruznym zbozim
+	var marze := {}
+	var zbozi := {}
+	for k: String in ob["kupci"]:
+		marze[float(ob["kupci"][k]["marze"])] = true
+		zbozi[str((ob["kupci"][k]["zbozi"] as Dictionary).keys())] = true
+	if marze.size() < 3 or zbozi.size() < ob["kupci"].size():
+		chyby.append("obchodnici maji stejne ceny nebo zbozi")
+	# obnova rano: novy den doplni mesec
+	var st2: Dictionary = P.kupec_stav("kupec", 2, 7.0)
+	if int(st2["mesec"]) < int(ob["kupci"]["kupec"]["mesec"]):
+		chyby.append("rano se mesec neobnovil")
+	var sv: Dictionary = P.to_save()
+	if int(sv.get("grose", -1)) != P.grose or not sv.has("obchody"):
+		chyby.append("ulozeni bez grosu/obchodu")
+	mh.box = {}
+	vysledky.append(["obchod", chyby.is_empty(), "OK nakup/prodej/mesec/obnova/ulozeni" if chyby.is_empty() else str(chyby)])
