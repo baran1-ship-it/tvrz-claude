@@ -85,6 +85,7 @@ func _start() -> void:
 				sm_.set_shader_parameter("jas", 0.85)
 				ms_.surface_set_material(i_, sm_)
 	if FileAccess.file_exists("res://data/skaly_rostliny.json"): _rostliny_skal()
+	if FileAccess.file_exists("res://data/mista_stavby.json"): _mista()   # Předhradí, krčma, hájovna (Míša 11. 11.; domy z Havrana)
 	if FileAccess.file_exists("res://data/koryto_kameny.json"): _kameny_koryta()   # valouny a balvany v korytech (Míša 10. 11.)   # kapradí, tráva, mech, semenáčky na římsách skal
 	var _jp_dosah := 220.0
 	if FileAccess.file_exists("res://data/voda_hra.json"):
@@ -531,6 +532,54 @@ func _vzory_bunek() -> Array:
 	for n in find_children("*", "Node3D", true, false):
 		if n.get_script() == BunkyKolem: a.append_array(n.vzory())
 	return a
+
+
+## Stavby nových míst (hra/data/mista_stavby.json z nastroje/mista_rozmisteni.py, pravidla/svet/mista.json): domy vsi z Havrana
+## (modely/stavby_h/domy.glb – nastroje/stavby_z_havrana.sh) osazené jako v Havranovi svet.gd _ves_domy: počátek modelu = terén
+## plošiny (podezdívka jde pod zem), kolize z modelu (Kol_*), podrobný vnějšek do podrobny_do_m, střední stupeň (1 materiál,
+## barva vrcholu) do stredni_do_m (tablet stredni_do_m_mobil), dál hrubý obal _Daleko; vnitřek jen zblízka; stín jen z _Daleko.
+func _mista() -> void:
+	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mista_stavby.json"))
+	var md: Dictionary = d["modely"]["domy"]
+	if (d["stavby"] as Array).is_empty() or not ResourceLoader.exists(String(md["soubor"])): return
+	var lod: Dictionary = d.get("lod", {"podrobny_do_m": 30.0, "stredni_do_m": 130.0, "stredni_do_m_mobil": 75.0, "vnitrek_do_m": 35.0, "lod_bias": 50.0})
+	var blizko := float(lod["podrobny_do_m"]); var st_do := float(lod["stredni_do_m_mobil" if OS.has_feature("mobile") else "stredni_do_m"])
+	var sc: Node = (load(String(md["soubor"])) as PackedScene).instantiate()
+	var ssc: Node = (load(String(md["stredni"])) as PackedScene).instantiate() if ResourceLoader.exists(String(md["stredni"])) else null
+	var st_mat := StandardMaterial3D.new(); st_mat.vertex_color_use_as_albedo = true; st_mat.roughness = 0.9
+	var uzel := Node3D.new(); uzel.name = "Mista"; add_child(uzel)
+	for s: Dictionary in d["stavby"]:
+		var vzor := sc.get_node_or_null(String(s["model"])) as Node3D
+		if vzor == null: continue
+		var dum := vzor.duplicate() as Node3D
+		dum.name = "%s_%s" % [s["misto"], s["model"]]
+		dum.transform = Transform3D(Basis(Vector3.UP, float(s["yaw"])), Vector3(float(s["x"]), float(s["teren_y"]), float(s["z"])))
+		uzel.add_child(dum)
+		var st_vzor: MeshInstance3D = ssc.find_child(String(s["model"]) + "_Stredni", true, false) as MeshInstance3D if ssc else null
+		var se_st := st_vzor != null and blizko < st_do
+		if se_st:
+			var st := MeshInstance3D.new(); st.name = String(s["model"]) + "_Stredni"; st.mesh = st_vzor.mesh; st.transform = st_vzor.transform
+			st.material_override = st_mat; st.lod_bias = float(lod["lod_bias"])   # bez automatického LOD (rozpustil šindele – Havran)
+			st.visibility_range_begin = blizko; st.visibility_range_end = st_do; st.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			dum.add_child(st)
+		var dal := st_do if se_st else (75.0 if OS.has_feature("mobile") else 130.0)
+		for ch in dum.get_children():
+			if not ch is MeshInstance3D or String(ch.name).ends_with("_Stredni"): continue
+			var mi := ch as MeshInstance3D; var cn := String(ch.name)
+			if cn.ends_with("_Daleko"):
+				mi.visibility_range_begin = dal
+				var sd := MeshInstance3D.new(); sd.name = cn + "_Stin"; sd.mesh = mi.mesh; sd.transform = mi.transform
+				sd.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY; sd.visibility_range_end = dal
+				dum.add_child.call_deferred(sd)
+			elif cn.ends_with("Interier") or cn.ends_with("Drobne"):
+				mi.visibility_range_end = float(lod["vnitrek_do_m"]) if cn.ends_with("Interier") else blizko
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			else:
+				mi.visibility_range_end = blizko if se_st else dal
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	sc.queue_free()
+	if ssc: ssc.queue_free()
+	print("MISTA staveb %d" % uzel.get_child_count())
 
 
 ## Rostliny na skalách (blender/skaly.py → hra/data/skaly_rostliny.json; Míša 10. 11.: „vegetaci sem tam, ne jen mech“, fotky

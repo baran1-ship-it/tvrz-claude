@@ -23,6 +23,8 @@ for q in json.load(open(D + "stavby_clony.json"))["kvadry"]:
     dr.polygon([pix(r) for r in q["rohy"]], fill=1)
 if os.path.exists(D + "stavby_pudorysy.json"):   # celé půdorysy budov (tráva prorůstala podlahou – Míša 4. 11.)
     for q in json.load(open(D + "stavby_pudorysy.json"))["budovy"]: dr.polygon([pix(r) for r in q], fill=1)
+if os.path.exists(D + "mista_stavby.json"):   # domy nových míst (mista_rozmisteni.py: Předhradí, krčma, hájovna)
+    for q in json.load(open(D + "mista_stavby.json"))["pudorysy"]: dr.polygon([pix(r) for r in q], fill=1)
 mn = Image.new("L", ms.size, 0); dn = ImageDraw.Draw(mn)
 HP = json.load(open(K + "/pravidla/svet/hrad_puchart.json"))
 for poly in (HP["A"]["jadro"], HP["B"]["hradba"]):
