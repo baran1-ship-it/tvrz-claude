@@ -39,12 +39,14 @@ static var P: Dictionary = {
 ## stin postav jen zblizka: trida postava v pravidla_modelu.json (stin_m) - jeden zdroj s testem modelu
 static var STIN_M: float = _stin_m()
 const PREDMETY_DIR := "res://modely/predmety/"
+static var ANIM_OKRAJ := float(Pravidla.cti("postavy", "anim_mimo_zaber_okraj_m"))
 static var _kat: Dictionary = {}
 static var _predmet_sc: Dictionary = {}
 var _ves_replika := -1000.0            # cas posledni repliky ve vsi (odstup ves_odstup_s)
 var DOSAH: float = P["dosah"]
 
 var main: Node
+var anim_kroku := 0                   # pocet advance() animaci (test_vykon postavy_mimo_zaber)
 var _lide: Array = []                  # obyvatel: {id, uzel, kostra, ap, cil_hlavy, role, blok, cesta, i, misto...}
 var _t := 0.0
 var _sh_hlava: Shader = preload("res://shaders/postava_hlava.gdshader")
@@ -123,7 +125,7 @@ func nova_postava(o: Dictionary) -> Dictionary:
 	ap.add_animation_library("", AnimUal.knihovna(String(uzel.get_path_to(kostra))))
 	var rr: Array = P["rych"]
 	var c := {"id": o["id"], "o": o, "uzel": uzel, "kostra": kostra, "ap": ap, "role": P["role"][o["role"]],
-			"rych": _rng.randf_range(float(rr[0]), float(rr[1])), "y": INF, "y_t": 0.0, "klip": "", "anim_t": 0.0,
+			"rych": _rng.randf_range(float(rr[0]), float(rr[1])), "y": INF, "y_t": 0.0, "klip": "", "anim_t": _rng.randf_range(0.0, 0.25),
 			"blok": -1, "cesta": PackedVector2Array(), "i": 0, "na_miste": false, "obmena": 0.0, "obch": 0,
 			"misto": Vector2.ZERO, "yaw_mista": INF, "trasa": [], "v": 0.0, "pohled": 0.0, "na_hrace": false,
 			"tempo": _rng.randf_range(float(P["pr"]["tempo_klipu"][0]), float(P["pr"]["tempo_klipu"][1])),
@@ -2275,25 +2277,36 @@ func _process_vlastni(dt: float) -> void:
 			c["stin"] = se_stinem
 			for g: GeometryInstance3D in c["geo"]:
 				g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if se_stinem else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# Misa 11. 11. („jako trava a stromy: postavy, ktere hrac nevidi, zadna animace, ale posunuji se v dennim programu“):
+		# mimo zaber kamery (a dal nez anim_mimo_zaber_okraj_m) se animace neposouva a modifikatory kostry stoji -
+		# kostra se neprepocitava ani neposila na GPU (Godot #88954, OpenGL na Androidu); rozvrh, chuze a poloha bezi dal
+		var cam: Camera3D = main.player.cam if main.player else null
+		var v_zaberu := cam == null or d < ANIM_OKRAJ or cam.is_position_in_frustum(u.global_position + Vector3(0, 1.0, 0))
 		# hlava a krk sleduji jen do hlava_do_m (dal pohyb hlavy neni videt, LookAt stoji cas)
-		var hl_on := d < float(P["hlava_do"])
+		var hl_on := d < float(P["hlava_do"]) and v_zaberu
 		for la: SkeletonModifier3D in c.get("hlava_mod", []):
 			if la.active != hl_on:
 				la.active = hl_on
 		if c.has("nohy_ik"):
-			var nik_on := d < float(P["nohy_ik"]["do_m"]) and not bool(c.get("v_posteli", false)) and not bool(c.get("sedi", false))
+			var nik_on := v_zaberu and d < float(P["nohy_ik"]["do_m"]) and not bool(c.get("v_posteli", false)) and not bool(c.get("sedi", false))
 			if (c["nohy_ik"] as SkeletonModifier3D).active != nik_on:
 				(c["nohy_ik"] as SkeletonModifier3D).active = nik_on
 		if (c["ruce"] as Dictionary).has("mod"):
-			(c["ruce"]["mod"] as Node).call("zapni", d < float(P["do"]))
+			(c["ruce"]["mod"] as Node).call("zapni", v_zaberu and d < float(P["do"]))
 		# LOD animaci: zblizka kazdy snimek (plne_max nejblizsich), do anim_do_m anim_daleko_fps, dal do dosahu
 		# anim_dalka_fps - nikdy ztuhla klouzajici poza (plan krok 3.2)
-		if d < float(P["plna"]) and d <= mez_plne:
-			(c["ap"] as AnimationPlayer).advance(dt)
+		if not v_zaberu:
+			c["anim_t"] = minf(float(c["anim_t"]) + dt, 1.0)     # po navratu do zaberu jeden krok (faze dobehne)
+		elif d < float(P["plna"]) and d <= mez_plne:
+			anim_kroku += 1
+			(c["ap"] as AnimationPlayer).advance(dt + float(c["anim_t"]) if float(c["anim_t"]) > 0.3 else dt)
+			if float(c["anim_t"]) > 0.3:
+				c["anim_t"] = 0.0
 		else:
 			var fps: float = float(P["fps"]) if d < float(P["do"]) else float(P["dalka_fps"])
 			c["anim_t"] = float(c["anim_t"]) + dt
 			if float(c["anim_t"]) >= 1.0 / fps:
+				anim_kroku += 1
 				(c["ap"] as AnimationPlayer).advance(float(c["anim_t"]))
 				c["anim_t"] = 0.0
 	# fronta cekajicich: kazdy snimek zacina dalsi v poradi, pocita se, dokud staci rozpocet (_nav_prer)

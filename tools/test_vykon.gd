@@ -9,7 +9,7 @@ const Pravidla := preload("res://scripts/pravidla.gd")
 
 var main: Node
 var vysledky: Array = []
-const TESTY := ["kroky_kvality", "obchod"]
+const TESTY := ["kroky_kvality", "obchod", "postavy_mimo_zaber"]
 
 
 func run(p_main: Node) -> void:
@@ -127,3 +127,45 @@ func _obchod() -> void:
 		chyby.append("ulozeni bez grosu/obchodu")
 	mh.box = {}
 	vysledky.append(["obchod", chyby.is_empty(), "OK nakup/prodej/mesec/obnova/ulozeni" if chyby.is_empty() else str(chyby)])
+
+
+
+## Misa 11. 11. (postavy jako trava a stromy): kamera do nebe -> zadna postava (mimo okraj) nema animaci, rozvrh bezi
+## (cil nebo poloha nekoho se za 1 h hry zmeni); kamera zpet -> animace bezi.
+func _postavy_mimo_zaber() -> void:
+	var li: Node = main.world.get_node_or_null("Lide")
+	var pl: Node3D = main.player
+	var chyby: Array = []
+	if li == null:
+		vysledky.append(["postavy_mimo_zaber", false, "Lide nenalezen"])
+		return
+	pl.place(Vector3(-2.0, 1.0, 6.0), Vector3(-2.0, 60.0, 6.2))   # pohled nahoru (do nebe) na nadvori
+	await _snimky(10)
+	var bliz := 0
+	for c: Dictionary in li.get("_lide"):
+		if (c["uzel"] as Node3D).global_position.distance_to(pl.global_position) < 3.0:
+			bliz += 1
+	var poz0 := {}
+	for c: Dictionary in li.get("_lide"):
+		poz0[c["id"]] = [(c["uzel"] as Node3D).global_position, String(c.get("cinnost_ted", ""))]
+	li.set("anim_kroku", 0)
+	await _snimky(30)
+	var mimo := int(li.get("anim_kroku"))
+	if mimo > bliz * 30:
+		chyby.append("mimo zaber %d posunu animace (blizko do 3 m %d postav)" % [mimo, bliz])
+	main.day.set_hour(fposmod(float(main.day.hour) + 1.0, 24.0), 0.01)
+	await _snimky(30)
+	var zmena := 0
+	for c: Dictionary in li.get("_lide"):
+		var a: Array = poz0[c["id"]]
+		if (c["uzel"] as Node3D).global_position.distance_to(a[0]) > 0.5 or String(c.get("cinnost_ted", "")) != String(a[1]):
+			zmena += 1
+	if zmena == 0:
+		chyby.append("rozvrh mimo zaber stoji (nikdo se za 1 h nepohnul ani nezmenil cinnost)")
+	pl.place(Vector3(-2.0, 1.0, 14.0), Vector3(-2.0, 1.0, 0.0))     # pohled na nadvori
+	li.set("anim_kroku", 0)
+	await _snimky(30)
+	var vzaberu := int(li.get("anim_kroku"))
+	if vzaberu == 0:
+		chyby.append("v zaberu zadna animace")
+	vysledky.append(["postavy_mimo_zaber", chyby.is_empty(), "mimo zaber %d posunu (blizko %d), v zaberu %d, rozvrh zmenil %d postav%s" % [mimo, bliz, vzaberu, zmena, "" if chyby.is_empty() else " " + str(chyby)]])
