@@ -7590,6 +7590,17 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 					ch.call("vyznam: %s sed klip %s v cinnosti bez sedu" % [ck, kl])
 			elif not povol.has(v):
 				ch.call("vyznam: %s klip %s (%s) nepatri k cinnosti (vysky %s)" % [ck, kl, v, str(povol)])
+	# Misa 11. 11. spolecne sceny: ucastnici maji v cas sceny blok se stejnou cinnosti na stejnem miste
+	for sc: Dictionary in Pravidla.cti("postavy", "spolecne_sceny"):
+		var cinn := {}
+		for c: Dictionary in ll:
+			if (sc["kdo"] as Array).has(String(c["o"]["role"])) or (sc["kdo"] as Array).has(String(c["id"])):
+				var bl: Dictionary = c["role"]["rozvrh"][int(lide.call("_blok", c, float(sc["od"]) + 0.05 + float(c.get("posun_h", 0.0))))]
+				cinn[c["id"]] = "%s@%s" % [bl["cinnost"], bl["kde"]]
+				if String(bl["kde"]) != String(sc["kde"]):
+					ch.call("scena %s v %.1f: %s je %s" % [sc["kde"], float(sc["od"]), c["id"], cinn[c["id"]]])
+		if cinn.size() < 2:
+			ch.call("scena %s v %.1f: ucastniku %d (%s)" % [sc["kde"], float(sc["od"]), cinn.size(), str(sc["kdo"])])
 	# Misa 11. 11. (tri poutnici sli spolu): cile poutniku (c.misto) od sebe aspon poutnici_od_m
 	var pt_m: Array = []
 	for c: Dictionary in ll:

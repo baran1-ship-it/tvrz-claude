@@ -2471,7 +2471,29 @@
      "kde": "krcma_senk"
     },
     {
+     "od": 16.0,
+     "cinnost": "hovor",
+     "kde": "naves_1",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 16.5,
+     "cinnost": "hospoda",
+     "kde": "krcma_senk"
+    },
+    {
      "od": 18.0,
+     "cinnost": "dohled",
+     "kde": "dvere"
+    },
+    {
+     "od": 19.0,
+     "cinnost": "hovor",
+     "kde": "naves_4",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 19.5,
      "cinnost": "dohled",
      "kde": "dvere"
     },
@@ -2584,6 +2606,17 @@
      "kde": "nadvori_staje"
     },
     {
+     "od": 15.0,
+     "cinnost": "hovor",
+     "kde": "nadvori_staje",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 15.5,
+     "cinnost": "staje",
+     "kde": "nadvori_staje"
+    },
+    {
      "od": 17.0,
      "cinnost": "volno",
      "kde": "nadvori_studna"
@@ -2625,6 +2658,17 @@
     },
     {
      "od": 13.0,
+     "cinnost": "vareni",
+     "kde": "tvrz_kuchyne"
+    },
+    {
+     "od": 13.5,
+     "cinnost": "volno",
+     "kde": "tvrz_kuchyne_dvor",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 14.5,
      "cinnost": "vareni",
      "kde": "tvrz_kuchyne"
     },
@@ -2782,6 +2826,17 @@
      "kde": "prace"
     },
     {
+     "od": 15.0,
+     "cinnost": "hovor",
+     "kde": "nadvori_staje",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 15.5,
+     "cinnost": "kovani",
+     "kde": "prace"
+    },
+    {
      "od": 18.5,
      "cinnost": "hovor",
      "kde": "nadvori_studna"
@@ -2815,6 +2870,17 @@
      "kde": "brana_straz"
     },
     {
+     "od": 9.0,
+     "cinnost": "hovor",
+     "kde": "brana_straz",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 9.5,
+     "cinnost": "strazi",
+     "kde": "brana_straz"
+    },
+    {
      "od": 12.0,
      "cinnost": "jidlo",
      "kde": "domov"
@@ -2823,6 +2889,12 @@
      "od": 13.0,
      "cinnost": "strazi",
      "kde": "brana_straz"
+    },
+    {
+     "od": 18.5,
+     "cinnost": "hovor",
+     "kde": "brana_straz",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
     },
     {
      "od": 19.0,
@@ -2880,6 +2952,12 @@
     },
     {
      "od": 18.5,
+     "cinnost": "hovor",
+     "kde": "brana_straz",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 19.0,
      "cinnost": "strazi",
      "kde": "brana_straz"
     },
@@ -2934,6 +3012,12 @@
     },
     {
      "od": 19.0,
+     "cinnost": "hovor",
+     "kde": "naves_4",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 19.5,
      "cinnost": "dohled",
      "kde": "naves"
     },
@@ -3131,6 +3215,17 @@
     },
     {
      "od": 6.0,
+     "cinnost": "vareni",
+     "kde": "hostinec_krb"
+    },
+    {
+     "od": 6.5,
+     "cinnost": "hovor",
+     "kde": "hostinec_krb",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 7.0,
      "cinnost": "vareni",
      "kde": "hostinec_krb"
     },
@@ -3453,6 +3548,12 @@
     },
     {
      "od": 9.0,
+     "cinnost": "hovor",
+     "kde": "brana_straz",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 9.5,
      "cinnost": "pise",
      "kde": "domov"
     },
@@ -3485,6 +3586,12 @@
     },
     {
      "od": 17.0,
+     "cinnost": "hovor",
+     "kde": "nadvori_palac",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 18.0,
      "cinnost": "hovor",
      "kde": "nadvori_studna"
     },
@@ -3532,6 +3639,12 @@
     },
     {
      "od": 13.5,
+     "cinnost": "volno",
+     "kde": "tvrz_kuchyne_dvor",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 14.5,
      "cinnost": "volno",
      "kde": "tvrz_kuchyne_dvor"
     },
@@ -3631,6 +3744,12 @@
     },
     {
      "od": 17.0,
+     "cinnost": "hovor",
+     "kde": "nadvori_palac",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 18.0,
      "cinnost": "hovor",
      "kde": "nadvori_palac"
     },
@@ -3785,6 +3904,12 @@
     },
     {
      "od": 15.0,
+     "cinnost": "hovor",
+     "kde": "naves_3",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 16.0,
      "cinnost": "volno",
      "kde": "dvere"
     },
@@ -3819,6 +3944,12 @@
      "od": 6.0,
      "cinnost": "rano",
      "kde": "dvere"
+    },
+    {
+     "od": 6.5,
+     "cinnost": "hovor",
+     "kde": "hostinec_krb",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
     },
     {
      "od": 7.0,
@@ -4162,6 +4293,12 @@
      "od": 17.5,
      "cinnost": "hospoda",
      "kde": "krcma_senk",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 19.5,
+     "cinnost": "hospoda",
+     "kde": "krcma_senk",
      "moznosti": [
       {
        "cinnost": "hospoda",
@@ -4220,6 +4357,12 @@
     },
     {
      "od": 16.0,
+     "cinnost": "hovor",
+     "kde": "naves_1",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 16.5,
      "cinnost": "hovor",
      "kde": "naves"
     },
@@ -4287,6 +4430,17 @@
      "kde": "krcma_senk"
     },
     {
+     "od": 17.5,
+     "cinnost": "hospoda",
+     "kde": "krcma_senk",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 19.5,
+     "cinnost": "hospoda",
+     "kde": "krcma_senk"
+    },
+    {
      "od": 20.5,
      "cinnost": "spi",
      "kde": "domov"
@@ -4336,6 +4490,12 @@
     },
     {
      "od": 15.0,
+     "cinnost": "hovor",
+     "kde": "naves_2",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 16.0,
      "cinnost": "volno",
      "kde": "dvere"
     },
@@ -4403,9 +4563,15 @@
      "kde": "zahrada"
     },
     {
-     "od": 15.5,
+     "od": 15.0,
      "cinnost": "hovor",
-     "kde": "naves"
+     "kde": "naves_2",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 16.0,
+     "cinnost": "sad",
+     "kde": "zahrada"
     },
     {
      "od": 18.5,
@@ -4462,6 +4628,12 @@
     },
     {
      "od": 15.0,
+     "cinnost": "hovor",
+     "kde": "naves_3",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 16.0,
      "cinnost": "hovor",
      "kde": "naves"
     },
@@ -4690,6 +4862,34 @@
     },
     {
      "od": 6.5,
+     "cinnost": "obchazi_stan",
+     "kde": "stan_pult",
+     "moznosti": [
+      {
+       "cinnost": "obchazi_stan",
+       "kde": "stan_pult",
+       "vaha": 3.0
+      },
+      {
+       "cinnost": "prodava",
+       "kde": "stan_pult",
+       "vaha": 1.5
+      },
+      {
+       "cinnost": "volno",
+       "kde": "stan_posezeni",
+       "vaha": 1.5
+      }
+     ]
+    },
+    {
+     "od": 9.5,
+     "cinnost": "volno",
+     "kde": "stan_posezeni",
+     "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
+    },
+    {
+     "od": 10.5,
      "cinnost": "obchazi_stan",
      "kde": "stan_pult",
      "moznosti": [
@@ -6202,5 +6402,104 @@
   "Yes": "stoji",
   "Zvedne": "zem"
  },
- "_klipy_vyznam": "Misa 11. 11. (rešerše reports/Živé postavy jako v KCD.md bod 1: klipy nemely v datech vyznam -> nabirani kyblem z podlahy, polozeni krabice na zem u stolu): kde se klip hraje - zem (u zeme/predklon/klek), pas (prace rukama ve vysce stolu, kovadliny, pultu), nad (nad hlavou, strom), uder (rozmach shora k zemi/spalku), opreni (zada o zed), sed, stoji (bez predmetu prace: stani, gesta, piti). Cinnost ma vysky = ktere smi; test lide_chovani: kazdy klip cinnosti ma vyznam a je v jejich vyskach (stoji vzdy), opreni jen na miste u_steny, sed jen v cinnosti se sedem."
+ "_klipy_vyznam": "Misa 11. 11. (rešerše reports/Živé postavy jako v KCD.md bod 1: klipy nemely v datech vyznam -> nabirani kyblem z podlahy, polozeni krabice na zem u stolu): kde se klip hraje - zem (u zeme/predklon/klek), pas (prace rukama ve vysce stolu, kovadliny, pultu), nad (nad hlavou, strom), uder (rozmach shora k zemi/spalku), opreni (zada o zed), sed, stoji (bez predmetu prace: stani, gesta, piti). Cinnost ma vysky = ktere smi; test lide_chovani: kazdy klip cinnosti ma vyznam a je v jejich vyskach (stoji vzdy), opreni jen na miste u_steny, sed jen v cinnosti se sedem.",
+ "_spolecne_sceny": "Misa 11. 11. („scenar pro kazdou postavu, kdyz bude potreba i vice, pokud spolu maji mit kontakt“): dvojice maji ve stejny cas stejnou cinnost na stejnem miste (hovor = skupina, sloty proti sobe; volno/hospoda = jeden sedi, druhy stoji nebo oba sedi) - seznam v choreografie_postav.md; test lide_chovani spolecne_sceny",
+ "spolecne_sceny": [
+  {
+   "kdo": [
+    "hostinsky",
+    "senkyrka"
+   ],
+   "od": 6.5,
+   "kde": "hostinec_krb"
+  },
+  {
+   "kdo": [
+    "purkrabi",
+    "straz"
+   ],
+   "od": 9.0,
+   "kde": "brana_straz"
+  },
+  {
+   "kdo": [
+    "kupec",
+    "poutnik_a"
+   ],
+   "od": 9.5,
+   "kde": "stan_posezeni"
+  },
+  {
+   "kdo": [
+    "kucharka",
+    "dvorka"
+   ],
+   "od": 13.5,
+   "kde": "tvrz_kuchyne_dvor"
+  },
+  {
+   "kdo": [
+    "selka_2",
+    "selka_3"
+   ],
+   "od": 15.0,
+   "kde": "naves_2"
+  },
+  {
+   "kdo": [
+    "selka_6",
+    "bylinkarka"
+   ],
+   "od": 15.0,
+   "kde": "naves_3"
+  },
+  {
+   "kdo": [
+    "kovar",
+    "celedin"
+   ],
+   "od": 15.0,
+   "kde": "nadvori_staje"
+  },
+  {
+   "kdo": [
+    "rychtar",
+    "sedlak_4"
+   ],
+   "od": 16.0,
+   "kde": "naves_1"
+  },
+  {
+   "kdo": [
+    "purkrabi",
+    "pisar"
+   ],
+   "od": 17.0,
+   "kde": "nadvori_palac"
+  },
+  {
+   "kdo": [
+    "sedlak_havel",
+    "chalupnik"
+   ],
+   "od": 17.5,
+   "kde": "krcma_senk"
+  },
+  {
+   "kdo": [
+    "straz",
+    "straz_noc"
+   ],
+   "od": 18.5,
+   "kde": "brana_straz"
+  },
+  {
+   "kdo": [
+    "ponocny",
+    "rychtar"
+   ],
+   "od": 19.0,
+   "kde": "naves_4"
+  }
+ ]
 }
