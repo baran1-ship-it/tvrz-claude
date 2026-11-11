@@ -30,3 +30,11 @@ Pořadí (Míša): nejdřív dodělat seznam chyb a vydat, pak místa v pořadí
   mapy vyžádat; spád pro kolo ověřit v DMR (Havran tools/krok_b/mlyn_misto.py).
 - Krčma: křížení cesty Veličkou s cestou údolím Kouteckého potoka pod hrady (most a brod).
 - Hájovna: konec cesty k hájovně u Boňkova (Míša: hájenka je i na vojenské mapě).
+
+## Usedlosti a pole Předhradí (Míša 11. 11.: „nemají tam být i hospodářské budovy, ploty a pole?“)
+- Převzít z Havrana blender/vesnice.py: barn (stodola/chlév), picket_fence a rail_fence (laťový a proutěný plot),
+  roofed_gate a wicket (krytá vrata, branka), garden (zelí, květiny), well (studna), dvůr (yard_dirt); z předmětů Havrana
+  stodola, stodola_mala, kolna, kurnik, zebrinak, drevo_hromada.
+- Pole: Havran docs/rozpracovane/reserse_pole_kcd2.md + pravidla/svet/plochy.json pole („kousky přímo za vsí, pár úzkých
+  lánů mezi mezemi a remízky“), model blender/zdroje/psenice.glb; lány za humny podél mezí z DMR (relief SSZ od hradu A).
+- Chýše (kůra, prkna): k lomu a uhlířům v lese – poloha až podle dokladu.
