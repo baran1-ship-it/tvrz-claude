@@ -1216,3 +1216,10 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   z `Dictionary.get` je Variant, `:=` ho neodvodí („Cannot infer the type“). Chytil to až rychlý test, `--check-only` na
   jednom skriptu (hud) prošel za 1 s a nic neříká. Poučení: po úpravě skriptu vždy rychlý test (`tools/beh.sh … testy`),
   ne `--check-only`; u výrazů s `.get()` psát typ (`var x: bool = …`).
+
+### 11. 11. – headless chyby MultiMesh a limit testu ve světě
+- `ERROR: Cannot set a buffer on a Multimesh that is a different size` (12 968× v každém headless logu) = artefakt
+  prázdného rendereru: v `--headless` vrací `MultiMesh.buffer` po `set_instance_*` prázdné pole (ověřeno malým skriptem),
+  `svet.rostliny_rozdel` pak dělí prázdný buffer. Na tabletu (skutečný renderer) se neděje. Nehledat znovu.
+- Testy ve světě, které čekají na načtení okolí (např. `kroky_kvality`), pouštět s `TVRZ_TEST_LIMIT=1500`
+  (výchozí 300 s = WATCHDOG dřív, než se svět načte).
