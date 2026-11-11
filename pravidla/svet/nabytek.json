@@ -810,6 +810,8 @@
   "od_cesty_m": 0.4,
   "sklon_m": 0.15,
   "pokusu": 5,
-  "posun_podel": 0.12
+  "posun_podel": 0.12,
+  "od_mist_m": 2.0,
+  "_od_mist_m": "Misa 11. 11. (spravce/dvorka stali s lavickou pod nohama): sedaci plocha lavice (usecka delky) nejmene tolik od kazdeho mista postav s p (postavy.json mista: dvere ubytoven, studna, brana, palac) - lavice se odsune v hledat_m"
  }
 }

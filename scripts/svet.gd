@@ -5854,6 +5854,11 @@ func _nabytek_venku() -> void:
 						"podel_zdi": [podel.x, podel.z], "pul": [float(rz[0]) * 0.5, float(rz[2]) * 0.5]})
 				n += 1
 				break
+	# Misa 11. 11. (lavicka pod nohama stojicich): lavice ne do od_mist_m od mist, kde postavy stoji (postavy.json mista p)
+	var mista_p: Array = []
+	for mk: Variant in (Pravidla.cti("postavy", "mista") as Dictionary).values():
+		if mk is Dictionary and (mk as Dictionary).has("p"):
+			mista_p.append(Vector2(float(mk["p"][0]), float(mk["p"][1])))
 	for r: Dictionary in Pravidla.cti("nabytek", "venku"):
 		var q := Vector2.INF
 		if r.has("p"):
@@ -5877,6 +5882,12 @@ func _nabytek_venku() -> void:
 				if not uzivani_smi("", c.x, c.y) or (ck.y >= 0.0 and ck.x < float(pr["od_cesty_m"])):
 					continue
 				var ax := Vector2(cos(yw), -sin(yw)) * float(rz2[0]) * 0.5
+				var u_mista := false
+				for mp: Vector2 in mista_p:
+					if Geometry2D.get_closest_point_to_segment(mp, c - ax, c + ax).distance_to(mp) < float(pr["od_mist_m"]):
+						u_mista = true
+				if u_mista:
+					continue
 				if absf(_vyska(c.x + ax.x, c.y + ax.y) - _vyska(c.x - ax.x, c.y - ax.y)) > float(pr["sklon_m"]):
 					continue
 				data["vybaveni"].append({"id": r["id"], "p": [c.x, _vyska_min(c.x, c.y, 0.6) - 0.02, c.y], "yaw": yw})
