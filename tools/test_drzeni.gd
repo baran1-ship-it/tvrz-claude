@@ -108,6 +108,22 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 			if uhel > mez:
 				chyb += 1
 				print("DRZENI CHYBA %s %s: osa %.1f st (mez %.0f)" % [co, id, uhel, mez])
+		# 11. 11. (Misa: kladivo svira jen v prstech): vzdalenost osy nasady (y predmetu pres jeho pocatek) od dutiny
+		# pesti = stred prostrednich clanku prstu (index/middle/ring/pinky _02) - z BoneAttachment (poza po modifikatorech)
+		if bool(d.get("nasada", false)) or id == "korbel":
+			var st := Vector3.ZERO
+			for pn: String in ["index_02", "middle_02", "ring_02", "pinky_02"]:
+				var bx: BoneAttachment3D = kostra.get_node_or_null("test_" + pn + "_" + ruka)
+				if bx == null:
+					bx = BoneAttachment3D.new()
+					bx.name = "test_" + pn + "_" + ruka
+					bx.bone_name = pn + "_" + ruka
+					kostra.add_child(bx)
+				st += bx.global_position
+			st /= 4.0
+			var ax := g.basis.y.normalized()
+			var od_osy := ((st - g.origin) - ax * (st - g.origin).dot(ax)).length()
+			print("DRZENI %-40s %s pest od osy nasady %.3f m" % [co, id, od_osy])
 		# 11. 11. (Misa: uchopy porad spatne; kost ruky v Godotu: osa y podel kosti = k prstum, ne x): osa nasady
 		# (y predmetu) proti osam ruky - nasada ma vest napric dlani (kolmo na prsty, |uhel k y ruky - 90| <= nasada_st)
 		var ba0: BoneAttachment3D = kostra.get_node_or_null("test_ruka_" + ruka)

@@ -3,6 +3,7 @@ extends SceneTree
 ## 15 min stavby sveta). Postava se sklada jako ve hre (scripts/lide.gd nova_postava, ruce), klip cinnosti v case,
 ## kamera kolem postavy. Spousti se jen pres tools/beh.sh:
 ##   TVRZ_FOTO_POSTAVA="soubor.png;cinnost;klip;cas_s;uhel_st;vzdalenost_m;vyska_cile_m[;sedak]|..." \
+##   (vyska_cile_m -1 = kamera na pravou ruku, -2 na levou - detail uchopu)
 ##   tools/beh.sh fp cmd xvfb-run -a -s "-screen 0 900x900x24" godot --path . --rendering-driver opengl3 \
 ##       --rendering-method gl_compatibility --resolution 900x900 -s res://tools/foto_postava.gd
 ## sedak = id predmetu z katalogu: postava sedi na nem podle postavy.json sedani (vyska_klipu_m, pred_m); postel (lehat)
@@ -117,6 +118,9 @@ func _beh() -> void:
 		var uh := deg_to_rad(float(a[4]))
 		var dist := float(a[5])
 		var cil := Vector3(0, float(a[6]), 0)
+		if float(a[6]) < 0.0:
+			# 11. 11.: zaporna vyska cile = kamera na ruku (-1 prava, -2 leva) - detail uchopu
+			cil = gp.call(hr if float(a[6]) > -1.5 else hl)
 		kam.position = cil + Vector3(sin(uh), 0.15, cos(uh)) * dist
 		kam.look_at(cil)
 		for i in 4:

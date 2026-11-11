@@ -5846,7 +5846,7 @@
   "korbel": {
    "_popis": "Misa 10. 11. (hoste piji, obsluha nosi pivo): korbel za telo v dlani, NEOVERENO snimkem",
    "uchop": [
-    0.0,
+    0.08,
     0.07,
     0.0
    ],
@@ -5869,7 +5869,14 @@
     "Piti_Unavene"
    ],
    "_p11": "11. 11. (rešerše: korbel se pri chuzi naklani): svisle = nadoba rovne (osa y nahoru) v kazdem klipu, pri piti (klipy_bez_rezimu) naklon z klipu k ustum",
-   "_ruka11": "11. 11. (snimek uchop4/piti: Mixamo Drinking pije LEVOU rukou, korbel visel v prave u boku) - v_rukou pri piti l"
+   "_ruka11": "11. 11. (snimek uchop4/piti: Mixamo Drinking pije LEVOU rukou, korbel visel v prave u boku) - v_rukou pri piti l",
+   "_uchop11": "11. 11.: za ucho (mereni modelu: ucho x +0,08, y 0,04-0,10), drive stred korbelu",
+   "dlan_m": [
+    0.0,
+    0.095,
+    0.0
+   ],
+   "_dlan11": "ucho drzi prsty v pesti (y 0,095), bez posunu k dlani - nadoba mimo ruku"
   },
   "miska": {
    "_popis": "obsluha nese misu (Mixamo Carrying) - dlan pod miskou, NEOVERENO snimkem",
@@ -5985,7 +5992,13 @@
     "dosah_m": 7.0
    }
   },
-  "_nasada": "11. 11.: kost ruky v Godotu ma osu y podel kosti (k prstum), z napric dlani k palci (drive v _popis chybne x podel prstu). nasada true = test_drzeni hlida, ze osa nasady (y predmetu) je kolmo na prsty (90 +- _test.nasada_st); obourucni nastroj: uchop.gd natoci obe dlane tak, aby nasada vedla napric nimi"
+  "_nasada": "11. 11.: kost ruky v Godotu ma osu y podel kosti (k prstum), z napric dlani k palci (drive v _popis chybne x podel prstu). nasada true = test_drzeni hlida, ze osa nasady (y predmetu) je kolmo na prsty (90 +- _test.nasada_st); obourucni nastroj: uchop.gd natoci obe dlane tak, aby nasada vedla napric nimi",
+  "_dlan_m": [
+   -0.02,
+   0.095,
+   0.02
+  ],
+  "__dlan_m": "11. 11. (Misa: kladivo svira jen v prstech; mereni kosti UAL: klouby prstu index_01 y 0,115 m od zapesti, sevrene konecky (-0,03; 0,085; 0,04) - prsty se ohybaji k -x = dlan): bod uchopu v dutine pesti [x k dlani, y k prstum, z k palci], leva ruka x zrcadlene"
  },
  "sedani": {
   "_popis": "sezeni postav (plan krok 3.1, sed ve vzduchu): cinnost se sed hleda nejblizsi volny sedak ze sedaky (zaznam vybaveni sveta, ne naklopeny) do hledat_m od mista; vyska sedaku = rozmer[1] z katalogu (jen sedaky bez operadla), pouzije se jen v tolerance_m od vyska_klipu_m (Sitting_Idle_Loop: sedaci plocha nad korenem postavy, NEOVERENO - ladi se snimkem); lavice ma mist po sirka_mista_m; koren postavy pred_m pred stredem sedaku smerem, kam se diva (k ohnisti/stolu do k_ohni_m, jinak k mistu cinnosti). Prechod Sitting_Enter / Sitting_Exit.",

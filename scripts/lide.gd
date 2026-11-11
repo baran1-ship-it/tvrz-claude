@@ -1944,6 +1944,10 @@ func ruce(c: Dictionary, spec: Dictionary) -> void:
 		# kostra kitu muze mit vlastni meritko (glTF): predmet v metrech jako v katalogu
 		var sk := kostra.global_transform.basis.get_scale().x / maxf((c["uzel"] as Node3D).scale.x, 1e-3) if kostra.is_inside_tree() else 1.0
 		drz.scale = Vector3.ONE / maxf(sk, 1e-4)
+		# 11. 11. (Misa: „jak svira v prstech to kladivo“ - kost ruky zacina v zapesti, nasada lezela u zapesti a sevrene
+		# prsty ji minuly): bod uchopu do stredu dlane (drzeni._dlan_m v soustave kosti ruky: y k prstum, x k dlani)
+		var dl: Array = d.get("dlan_m", dr.get("_dlan_m", [0.0, 0.0, 0.0]))
+		drz.position = Vector3(float(dl[0]) * (1.0 if ruka == "r" else -1.0), float(dl[1]), float(dl[2])) / maxf(sk, 1e-4)
 		ba.add_child(drz)
 		var t: Node3D = ps.instantiate()
 		var uc: Array = d.get("uchop", [0.0, 0.0, 0.0])

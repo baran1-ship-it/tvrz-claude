@@ -13,6 +13,7 @@ extends SkeletonModifier3D
 var polozky := {}          # "r"/"l" -> {"id", "d": data drzeni, "uzel": Node3D drzi_<id>}
 var postava: Node3D        # koren postavy (smer postavy pro svet_rot_st)
 var blizko := true
+static var PRST_OSA := Vector3(1, 0, 0)   # osa ohybu clanku prstu (11. 11. diag: klipy ohybaji prsty kolem x)
 var prsty_st := 50.0       # vychozi sevreni prstu (postavy.json drzeni._prsty_st)
 const PRSTY := ["index_01", "index_02", "index_03", "middle_01", "middle_02", "middle_03", "ring_01", "ring_02", "ring_03",
 		"pinky_01", "pinky_02", "pinky_03"]
@@ -78,7 +79,7 @@ func _process_modification() -> void:
 			for pn: String in PRSTY:
 				var ip := sk.find_bone(pn + "_" + ruka)
 				if ip >= 0:
-					sk.set_bone_pose_rotation(ip, sk.get_bone_pose_rotation(ip) * Quaternion(Vector3.RIGHT, ps))
+					sk.set_bone_pose_rotation(ip, sk.get_bone_pose_rotation(ip) * Quaternion(PRST_OSA, ps))
 		var dr: Array = d.get("druha_ruka", [])
 		if dr.size() == 3:
 			var uc: Array = d.get("uchop", [0.0, 0.0, 0.0])
