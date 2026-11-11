@@ -597,9 +597,6 @@
     "Farm_Watering": {
      "r": "vedro_drevene"
     },
-    "Farm_Harvest": {
-     "r": "srp"
-    },
     "Farm_PlantSeed": {
      "l": "kosik"
     },
@@ -637,7 +634,8 @@
      "Zvedne"
     ]
    ],
-   "_sceny": "Misa 10. 11. scenka zahonu: kleknuti (Kneeling_Down) -> pleti/sazeni vkleče (Pull_Plant, Kneeling, pull_plant, plant_a_plant) -> vstavani (Standing_Up) -> narovnani (relieved_sigh) -> kopani/zalevani vestoje; odchod s kosem = dalsi krok (predmet pri odchodu)"
+   "_sceny": "Misa 10. 11. scenka zahonu: kleknuti (Kneeling_Down) -> pleti/sazeni vkleče (Pull_Plant, Kneeling, pull_plant, plant_a_plant) -> vstavani (Standing_Up) -> narovnani (relieved_sigh) -> kopani/zalevani vestoje; odchod s kosem = dalsi krok (predmet pri odchodu)",
+   "_srp": "Misa 11. 11. (srp drzen za cepel, klip Farm_Harvest je trhani rukama - sekani srpem animaci nemame): Farm_Harvest bez srpu"
   },
   "hovor": {
    "klipy": [
@@ -734,9 +732,8 @@
   },
   "nosi": {
    "klipy": [
-    "Interact",
-    "Idle_Loop",
-    "Nese_Stoji_Loop"
+    "Nese_Stoji_Loop",
+    "Idle_Loop"
    ],
    "obmena_s": [
     3.0,
@@ -759,15 +756,22 @@
   },
   "mleti": {
    "klipy": [
-    "Interact",
+    "Idle_FoldArms_Loop",
     "Idle_Loop",
-    "Idle_FoldArms_Loop"
+    "Rozhlizi"
    ],
    "obmena_s": [
     6.0,
     15.0
    ],
-   "soustredeni": 0.7
+   "soustredeni": 0.7,
+   "sceny": [
+    [
+     "Zvedne",
+     "Idle_Loop",
+     "Rozhlizi"
+    ]
+   ]
   },
   "dohled": {
    "klipy": [
@@ -849,7 +853,6 @@
   "obsluha": {
    "klipy": [
     "Idle_Loop",
-    "Interact",
     "Idle_Talking_Loop"
    ],
    "obmena_s": [
@@ -1428,7 +1431,7 @@
   "nosi_pytle": {
    "klipy": [
     "Pytel_Stoji_Loop",
-    "Interact"
+    "Zvedne"
    ],
    "obmena_s": [
     3.0,
@@ -1443,7 +1446,7 @@
    ],
    "obchuzka_klipy": {
     "mlyn": [
-     "Interact"
+     "Zvedne"
     ],
     "mlyn_dvur": [
      "Zvedne",
@@ -1689,7 +1692,7 @@
   },
   "voda_staje": {
    "klipy": [
-    "Interact"
+    "Nese_Stoji_Loop"
    ],
    "obmena_s": [
     3.0,
@@ -1703,10 +1706,12 @@
    ],
    "obchuzka_klipy": {
     "nadvori_studna": [
-     "Interact"
+     "Zvedne",
+     "Nese_Stoji_Loop"
     ],
     "nadvori_staje": [
-     "Interact"
+     "Zvedne",
+     "Nese_Stoji_Loop"
     ]
    },
    "v_rukou": {
@@ -1718,7 +1723,7 @@
   },
   "voda_kuchyne": {
    "klipy": [
-    "Interact"
+    "Nese_Stoji_Loop"
    ],
    "obmena_s": [
     3.0,
@@ -1732,10 +1737,12 @@
    ],
    "obchuzka_klipy": {
     "nadvori_studna": [
-     "Interact"
+     "Zvedne",
+     "Nese_Stoji_Loop"
     ],
     "tvrz_kuchyne_dvor": [
-     "Interact"
+     "Zvedne",
+     "Nese_Stoji_Loop"
     ]
    },
    "v_rukou": {
@@ -1973,7 +1980,32 @@
    },
    "soustredeni": 0.3,
    "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape"
-  }
+  },
+  "hlida_stan": {
+   "klipy": [
+    "Idle_Loop",
+    "Idle_FoldArms_Loop"
+   ],
+   "obmena_s": [
+    10.0,
+    25.0
+   ],
+   "soustredeni": 0.2,
+   "sceny": [
+    [
+     "Idle_Loop",
+     "Rozhlizi2",
+     "Idle_FoldArms_Loop"
+    ]
+   ],
+   "v_rukou": {
+    "*": {
+     "l": "lucerna"
+    }
+   },
+   "_p": "Misa 11. 11. choreografie: kupec v noci hlida zbozi u stanu s lucernou (stan nema dvere ani luzko)"
+  },
+  "_interact": "Misa 11. 11. (postava ukazuje do prazdna): UAL Interact = natazena ruka vpred v urovni hrudi - jen u stolu a krbu (polozi/vezme); u studny, mlyna, vetraku a ve volnem prostoru Zvedne / Nese_Stoji_Loop / rozhlizeni"
  },
  "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.)",
  "role": {
@@ -4465,13 +4497,8 @@
     },
     {
      "od": 19.0,
-     "cinnost": "doma",
-     "kde": "stan_vnitr"
-    },
-    {
-     "od": 21.0,
-     "cinnost": "spi",
-     "kde": "stan_vnitr"
+     "cinnost": "hlida_stan",
+     "kde": "stan_pult"
     }
    ],
    "zvedavost": 0.6,
@@ -4958,12 +4985,12 @@
    "role": "kupec",
    "muz": true,
    "domov": {
-    "misto": "stan_vnitr"
+    "misto": "stan_pult"
    },
    "spanek": {
-    "dira": "kupec spí ve stanu"
+    "dira": "kupec v noci hlida zbozi u stanu"
    },
-   "pribeh": "Kupec z Kutné Hory u stanu na hlavní cestě: od rána nabízí zboží, v poledne jí u stanu, večer zavře a spí ve stanu."
+   "pribeh": "Kupec u stanu na hlavní cestě: od rána nabízí zboží, v poledne jí u stanu, v noci hlídá zboží s lucernou."
   }
  ],
  "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu (ChysePrkna) a uhliru (ChyseKura), 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ.; spanek: misto spanku jako zaznam (budova, postel = id predmetu s lehat; prazdne = dira s popisem); vzhled: sada postavy_vzhled.json (jinak podle id / role); Misa 5. 11. „vytvor i ty ostatni osoby“ a koordinator 5. 11. (jmena a ulohy podle pribeh/postavy.md - pan tvrze je hrac Jan z Havrani, palac patri hraci): tvrz purkrabi Ota Hruska, kucharka a klicnice Ludmila, paze Vitek (zatim na nadvori, za hracem pozdeji), pisar Martin, strazny Vojtech, nocni strazny (bezejmenny), kovar Hroch; Lhota rychtar Matous Bilek, krcmar Kubat (krcma U Kohouta = stara usedlost 0), bylinkarka Bara (dum 7), mlynar Kunes s malym synem; hostinec U Zlateho kola hostinsky Ondrej Safranek a dcera Eliska (senkyrka), pocestni v najemnich luzkach; u miliru uhlir Pivonka (milir ve svete neni - seka drevo u chyse); bezejmenni (sedlaci, selky, ponocny, pastyr, pasacka, pocestni) maji jmena, ktera s pribehem nekoliduji; spanek.sdili = id obyvatele, se kterym postava sdili luzko na smeny (nocni strazny spi ve dne v luzku strazneho); tvrz spanek (Misa 6. 11. „postele ne v sini“): muzi sluzebnictva (purkrabi, pisar, paze, strazni, celedin) v ubytovne (tvrz_ubytovna), kucharka a devecka v kuchyni u ohne (tvrz_kuchyne - kuchyne tvrze byvala i nocistem kuchynske celedi), kovar u vyhne (tvrz_kovarna); kucharka vari v kuchyni (prace tvrz_kuchyne); 9. 11. (Misa r. 84): vsichni sluzebnici tvrze vcetne kovare, kucharky a devecky spi v ubytovne (rozsirene dopredu), kuchyne a kovarna bez luzek; 9. 11. 16:10 (oprava r. 84): ubytovna rozsirena doprava (na zapad) - zeny (kucharka, devecka) v komore celedi (tvrz_ubytovna_zeny, vlastni dvere), muzi vcetne kovare v cheledníku (tvrz_ubytovna)",

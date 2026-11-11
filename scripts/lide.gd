@@ -1677,6 +1677,8 @@ func _postel_prirad(c: Dictionary) -> Dictionary:
 					c["postel_z"] = z2
 				return z2
 		return {}
+	if not sp.has("budova"):
+		return {}                      # bez luzka (poutnik, kupec hlida stan)
 	var pst: Array = main.svet.data.get("postele", [])
 	for i in pst.size():
 		var r: Dictionary = pst[i]

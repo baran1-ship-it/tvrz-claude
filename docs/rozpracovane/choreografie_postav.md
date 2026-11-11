@@ -69,7 +69,7 @@
 | **Šenkýřka** | 6 ráno · 7–23 **roznáší**: od krbu nese mísu/džbán ke stolu, postaví (stojí *vedle* stolu, ne v něm), sbírá nádobí, vaří u druhého výčepu; nikdy se neopírá o trám (ten je hostinského) · 13:30 krátce sedí · 23 spát |
 | **Pocestný 1** | ráno snídaně v hostinci · 8–12 jde ke stanu kupce a zpět · odpoledne sedí venku u hostince · večer v hostinci |
 | **Pocestný 2** | ráno snídaně · dopoledne venku u hostince · 13–17 jde do vsi do krčmy · večer zpět v hostinci |
-| **Kupec (nový)** | 6 otevře stan · 7–19 u stánku: přerovnává zboží, hledá v truhle, nabízí; poledne jí vsedě · 19 zavře · spí ve stanu |
+| **Kupec (nový)** | 6 otevře stan · 7–19 u stánku: přerovnává zboží, hledá v truhle, nabízí; poledne jí · 19 – ráno hlídá zboží u stanu s lucernou (stan nemá lůžko) |
 | **Poutník Bartoloměj** | tvrz (brána) → stan kupce → rozcestí → hostinec → severní kraj mapy a zpět |
 | **Poutník Ondráček** | náves → odbočka → rozcestí → stan kupce → brána tvrze a zpět |
 | **Poutnice Mařena** | hostinec → les na hlavní cestě → rozcestí → odbočka → krčma ve vsi a zpět |

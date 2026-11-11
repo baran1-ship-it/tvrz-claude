@@ -46,6 +46,8 @@ static var KOLIZE_Y := float(Pravidla.cti("jizda", "kun", "kolize_vyska_m"))
 static var KOHOUTEK_KOSTI: Array = Pravidla.cti("jizda", "kun", "kohoutek_kosti")
 static var SEDLO_KOST := String(Pravidla.cti("jizda", "kun", "sedlo_kost"))
 static var SEDLO_NAD := float(Pravidla.cti("jizda", "kun", "sedlo_nad_hrbetem_m"))
+static var SEDLO_PREDNI := String(Pravidla.cti("jizda", "kun").get("sedlo_kost_predni", ""))
+static var SEDLO_PREDNI_PODIL := float(Pravidla.cti("jizda", "kun").get("sedlo_predni_podil", 0.0))
 static var SEDLO_NAPRIC: Dictionary = Pravidla.cti("jizda", "kun").get("sedlo_napric", {})
 static var NOHY_R := float(Pravidla.cti("jizda", "kun", "nohy_polomer_m"))
 static var KROK_PRES := float(Pravidla.cti("jizda", "kun", "krok_pres_m"))
@@ -123,6 +125,8 @@ var _vizual: Array = []           # [uzel, vychozi y] - model a sedlo (posun o _
 var _xk := Transform3D()           # kostra vuci modelu
 var _kost_sedla := -1
 var _kost_klid := Transform3D()    # klidova globalni poza kosti sedla (soustava kostry)
+var _kost_predni := -1             # kost pod predni hranou sedla (jizda.json kun.sedlo_kost_predni)
+var _kost_predni_klid := Transform3D()
 var _sedlo_kus: Node3D = null
 var _sedlo_kus_xf := Transform3D()
 var _sedlo_pohyb := Transform3D()  # posun kosti sedla proti klidu v soustave kone
@@ -204,6 +208,9 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 		for kk: String in KOHOUTEK_KOSTI:
 			if n.begins_with(kk + "_"):
 				a_k.append(p.dot(vpred))
+		if SEDLO_PREDNI != "" and n.begins_with(SEDLO_PREDNI + "_"):
+			_kost_predni = i
+			_kost_predni_klid = _kostra.get_bone_global_rest(i)
 		if n.begins_with(SEDLO_KOST + "_"):
 			p_sedlo = p
 			_kost_sedla = i
@@ -671,7 +678,13 @@ func _sedlo_s_kosti() -> void:
 	if _kost_sedla < 0 or _kostra == null:
 		return
 	var n := Transform3D(_model.transform.basis, Vector3(_model.transform.origin.x, _model.transform.origin.y - _vyr_y, _model.transform.origin.z)) * _xk
-	_sedlo_pohyb = n * (_kostra.get_bone_global_pose(_kost_sedla) * _kost_klid.affine_inverse()) * n.affine_inverse()
+	var dx := _kostra.get_bone_global_pose(_kost_sedla) * _kost_klid.affine_inverse()
+	if _kost_predni >= 0 and SEDLO_PREDNI_PODIL > 0.0:
+		# Misa 11. 11. (kun pohne krkem, sedlo se zasune do tela): predni hrana sedla lezi na kohoutku, ktery tahne
+		# kost krku - pohyb sedla = smes zadni (sedlo_kost) a predni kosti (sedlo_kost_predni) v podilu z jizda.json
+		var dp := _kostra.get_bone_global_pose(_kost_predni) * _kost_predni_klid.affine_inverse()
+		dx = dx.interpolate_with(dp, SEDLO_PREDNI_PODIL)
+	_sedlo_pohyb = n * dx * n.affine_inverse()
 	if _sedlo_kus:
 		_sedlo_kus.transform = Transform3D(Basis(), Vector3(0, _vyr_y, 0)) * _sedlo_pohyb * _sedlo_kus_xf
 
