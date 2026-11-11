@@ -6537,7 +6537,11 @@ func _lide_chovani() -> void:
 		if d6 >= dosah:
 			ch.call("LOD: zkusebni vzdalenost %.0f za dosahem" % d6)
 			continue
-		u6.position = Vector3(pp.x + d6, pp.y, pp.z)
+		# pred kamerou (11. 11.: mimo zaber se neanimuje - postava na vychod od hrace mohla byt za zady)
+		var fw6 := -(player.cam as Camera3D).global_basis.z
+		fw6.y = 0.0
+		fw6 = fw6.normalized() if fw6.length() > 0.01 else Vector3.FORWARD
+		u6.position = Vector3(pp.x, pp.y, pp.z) + fw6 * d6
 		c6["cesta"] = PackedVector2Array()
 		c6["na_miste"] = true
 		var ap6: AnimationPlayer = c6["ap"]

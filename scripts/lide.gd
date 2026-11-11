@@ -40,6 +40,8 @@ static var P: Dictionary = {
 static var STIN_M: float = _stin_m()
 const PREDMETY_DIR := "res://modely/predmety/"
 static var ANIM_OKRAJ := float(Pravidla.cti("postavy", "anim_mimo_zaber_okraj_m"))
+static var ANIM_POMER := float(Pravidla.cti("postavy", "anim_zaber_pomer_stran"))
+static var ANIM_REZERVA_ST := float(Pravidla.cti("postavy", "anim_zaber_rezerva_st"))
 static var DALEKO_CEKANI := float(Pravidla.cti("postavy", "daleko_cekani_nasobek"))
 static var _kat: Dictionary = {}
 static var _predmet_sc: Dictionary = {}
@@ -2301,7 +2303,7 @@ func _process_vlastni(dt: float) -> void:
 		# mimo zaber kamery (a dal nez anim_mimo_zaber_okraj_m) se animace neposouva a modifikatory kostry stoji -
 		# kostra se neprepocitava ani neposila na GPU (Godot #88954, OpenGL na Androidu); rozvrh, chuze a poloha bezi dal
 		var cam: Camera3D = main.player.cam if main.player else null
-		var v_zaberu := cam == null or d < ANIM_OKRAJ or cam.is_position_in_frustum(u.global_position + Vector3(0, 1.0, 0))
+		var v_zaberu := cam == null or d < ANIM_OKRAJ or _v_kuzelu(cam, u.global_position + Vector3(0, 1.0, 0))
 		# hlava a krk sleduji jen do hlava_do_m (dal pohyb hlavy neni videt, LookAt stoji cas)
 		var hl_on := d < float(P["hlava_do"]) and v_zaberu
 		for la: SkeletonModifier3D in c.get("hlava_mod", []):
@@ -2423,3 +2425,14 @@ func _daleko_krok(c: Dictionary, dt: float) -> void:
 		c["na_miste_t"] = 1000.0                 # jako LOD skok: u dveri rovnou uvnitr
 		var obm: Array = (cn.get("obchuzka_obmena_s", {}) as Dictionary).get(String((cn.get("obchuzka", [""]) as Array)[int(c.get("obch", 0)) % maxi(1, (cn.get("obchuzka", [""]) as Array).size())]), cn.get("obmena_s", [5.0, 10.0]))
 		c["obmena"] = _rng.randf_range(float(obm[0]), float(obm[1])) * DALEKO_CEKANI
+
+
+
+## V zaberu kamery: uhel od osy pohledu do poloviny uhlopricky zorneho pole (fov svisle, pomer stran z dat) + rezerva.
+## Vlastni vypocet (ne Camera3D.is_position_in_frustum - headless bez obrazovky vraci vzdy false, test nesel overit).
+func _v_kuzelu(cam: Camera3D, q: Vector3) -> bool:
+	var k := q - cam.global_position
+	if k.length_squared() < 0.01:
+		return true
+	var pul := atan(tan(deg_to_rad(cam.fov) * 0.5) * sqrt(1.0 + ANIM_POMER * ANIM_POMER)) + deg_to_rad(ANIM_REZERVA_ST)
+	return (-cam.global_basis.z).angle_to(k) < pul
