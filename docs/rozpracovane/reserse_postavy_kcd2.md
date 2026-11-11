@@ -284,7 +284,7 @@ po animaci [Z52][Z53].
 ### 5.6 Nohy na svahu, ruce k předmětu, sekundární pohyb
 - **Godot 4.4:** `SkeletonIK3D` existuje, ale je označený jako zastaralý (FABRIK, `root_bone` → `tip_bone`,
   `magnet`, `max_iterations` 10, `influence`) [Z60]. Nové IK uzly (`TwoBoneIK3D`, `FABRIK3D`, `CCDIK3D`) jsou
-  **až v 4.6** a `SpringBoneSimulator3D` (vlasy, oděv) **až v 4.5** [Z61].
+  **až v 4.6**; `SpringBoneSimulator3D` (vlasy, oděv) **je už v 4.4** (oprava 11. 11.: dokumentace 4.4, poznámky k vydání 4.4 „Jiggle physics“, třída v binárce 4.4.1 – research_notes/Živé postavy jako v KCD/zdroje_animaci_obleceni.md).
 - **Nohy na svahu (návrh):** 2 paprsky dolů z `foot_l/r` (od výšky boků) → posun `pelvis` dolů o rozdíl nižší nohy
   (max. 0,15 m) → `SkeletonIK3D` thigh→foot na každou nohu s `max_iterations` 4. Zarovnání chodidla podle normály
   terénu max. 20°, *odhad*.
@@ -294,7 +294,7 @@ po animaci [Z52][Z53].
 - **Ruce k předmětu:** pro uchopení (vědro, kliky rumpálu) `SkeletonIK3D` upperarm→hand jen ve chvíli `vstup`,
   *odhad*. Na tablet raději ne. Místo toho předmět připnout na `hand_r` přes `BoneAttachment3D` (Zaklínač 3 to dělá
   „Left/Right Item“ v job tree [Z27]).
-- **Sekundární pohyb (oděv, vlasy):** ve 4.4 bez `SpringBoneSimulator3D` (je až v 4.5) [Z61]. Na tablet ✗.
+- **Sekundární pohyb (oděv, vlasy):** `SpringBoneSimulator3D` je ve 4.4 (oprava 11. 11.) – sukně, zástěra, plášť jen u blízkých postav; cena na tabletu NEOVĚŘENO.
   Náhrada je vertex shader lehkého vlnění sukně podle rychlosti, *odhad*.
 
 ### 5.7 Jak to dělají velké hry (shrnutí)
