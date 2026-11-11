@@ -1223,3 +1223,6 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   `svet.rostliny_rozdel` pak dělí prázdný buffer. Na tabletu (skutečný renderer) se neděje. Nehledat znovu.
 - Testy ve světě, které čekají na načtení okolí (např. `kroky_kvality`), pouštět s `TVRZ_TEST_LIMIT=1500`
   (výchozí 300 s = WATCHDOG dřív, než se svět načte).
+- **postavy.json `cinnosti`, `role`, `mista`: jen slovníky** (11. 11.): poznámka `_xxx` jako text uvnitř `cinnosti`
+  shodila `lide.setup` („Invalid cast … Dictionary“) a test lide_chovani padl na prázdném `_lide`. Poznámky k celé
+  sekci patří do `_cinnosti` / `_role` na nejvyšší úrovni, k jedné činnosti do jejího `_p`.
