@@ -1228,3 +1228,6 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   sekci patří do `_cinnosti` / `_role` na nejvyšší úrovni, k jedné činnosti do jejího `_p`.
 - **Blender v kontejneru = modul bpy v `/opt/bl/bin/python`** (11. 11.): `/opt/bl/blender` neexistuje. Skripty Blenderu
   (`bezkuze.py`, `anim_cmu.py`) pouštět `/opt/bl/bin/python -I skript.py -- args` (přes `tools/beh.sh … cmd`).
+- **Mixamo FBX ve veřejném repu** (11. 11.): podmínky Mixama zakazují šířit zdrojové FBX (použití ve hře je volné).
+  Repo `baran1-ship-it/tvrz-claude` je veřejné; Míša 11. 11.: „repo je veřejné, ale nemyslím si, že by do toho někdo šel“
+  → FBX zůstávají v `tools/postavy_q/mixamo/` (jeho rozhodnutí). Kdyby se měnilo: repo soukromé, nebo FBX mimo repo.
