@@ -277,4 +277,8 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
   `_process` (stiny_kratsi uplatnění 0 ms → snímek 3506 ms; stiny_predmetu 101 → 3086; efekty 52 → 2744). 0.99996:
   37 / 332 / 77 ms. Měřič PSS u záseků NEBYL (značka chybí). Izolovaný test: `tools/test_vykon.gd` kroky_kvality
   (každý krok zvlášť ve světě, headless = jen skripty).
+- **Izolovaný test 11. 11. (PC headless, `kroky_kvality`, krok zapnout/vypnout bez zápisu deníku):** uplatnění
+  fps_30 / stiny_kratsi / efekty / trava_dosah 0 ms, stiny_predmetu 136–154 ms (`find_children` přes celý strom);
+  snímky po kroku 7–8 ms (jednou 170 ms po fps_30). **Kroky samy (skripty) 2–3 s nedělají** → zbývá zápis deníku
+  `diag.faze` s čekáním na vlákno (opraveno 5e04eda, ověří trasa: řádek „cekani na predchozi zapis“) nebo ovladač.
 - Začátky variant 946 / 265 / 319 / 414 ms (0.99996: 1,2–2,2 s). „volna -0 MB“: opraveno čtením /proc/meminfo.
