@@ -139,6 +139,8 @@ func _postavy_mimo_zaber() -> void:
 	if li == null:
 		vysledky.append(["postavy_mimo_zaber", false, "Lide nenalezen"])
 		return
+	main.day.set_hour(10.0, 0.01)                                  # den - postavy venku (v noci spi za dvermi)
+	await _snimky(10)
 	pl.place(Vector3(-2.0, 1.0, 6.0), Vector3(-2.0, 60.0, 6.2))   # pohled nahoru (do nebe) na nadvori
 	await _snimky(10)
 	var bliz := 0

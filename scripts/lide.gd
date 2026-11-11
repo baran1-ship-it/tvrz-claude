@@ -1809,7 +1809,9 @@ func _reakce(c: Dictionary, cn: Dictionary, d: float) -> void:
 			# smysl (test_drzeni 9. 11.: druha ruka 0,6-1,1 m od nasady); postava se jen podiva a promluvi
 			var obouruc := false
 			for rk: String in ["r", "l"]:
-				if ((P["drzeni"] as Dictionary).get(String((c["ruce"] as Dictionary).get(rk + "_id", "")), {}) as Dictionary).has("druha_ruka"):
+				# 11. 11. (test_drzeni: kladivo/korbel ve slozenych rukou Idle_FoldArms a Yes): s jakymkoli predmetem v ruce
+				# jen pohled a slovo, bez klipu reakce
+				if String((c["ruce"] as Dictionary).get(rk + "_id", "")) != "":
 					obouruc = true
 			if String(r["klip"]) != "" and bool(c["na_miste"]) and not bool(c.get("sedi", false)) and not bool(c.get("v_posteli", false)) and not obouruc:
 				_klip(c, String(r["klip"]), 1.0)
@@ -1872,6 +1874,8 @@ func _zem(p: Vector2, y0: float) -> float:
 
 ## Klip postavy: prolinani P.blend, rychlost prehravani (chuze podle rychlosti postavy).
 func _klip(c: Dictionary, jm: String, tempo: float) -> void:
+	if (c["ruce"] as Dictionary).has("mod"):
+		(c["ruce"]["mod"] as Node).set("klip_ted", jm)
 	var ap: AnimationPlayer = c["ap"]
 	# v posteli jen poza spanku (r. 59, 85): jiny klip by postavu postavil ve vysce luzka - vstava se jen pres
 	# _novy_blok (v_posteli = false, pak teprve klip)

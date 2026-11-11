@@ -7565,6 +7565,31 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 		c["cinnost_ted"] = zal_k[i][1]
 		c["sedi"] = zal_k[i][2]
 		c["na_miste"] = zal_k[i][3]
+	# Misa 11. 11. (rešerše: vyznam klipu) - klip cinnosti ma vyznam (klipy_vyznam) a je ve vyskach cinnosti (stoji
+	# vzdy smi); opreni jen na miste u_steny; sed jen v cinnosti se sedem (sed nebo klipy vsedě v kostkach)
+	var vyz: Dictionary = Pravidla.cti("postavy", "klipy_vyznam")
+	for ck: String in P["cinnosti"]:
+		var cnx: Variant = P["cinnosti"][ck]
+		if not (cnx is Dictionary):
+			continue
+		var povol: Array = (cnx as Dictionary).get("vysky", []) + ["stoji"]
+		var vsech: Array = []
+		for lst: Variant in [cnx.get("klipy", []), cnx.get("klipy_bez_sedu", [])] + (cnx.get("sceny", []) as Array):
+			vsech.append_array(lst)
+		for mk: String in (cnx.get("obchuzka_klipy", {}) as Dictionary):
+			for kl: String in cnx["obchuzka_klipy"][mk]:
+				if String(vyz.get(kl, "")) == "opreni" and not (P["mista"].get(mk, {}) as Dictionary).has("u_steny"):
+					ch.call("vyznam: %s opreni na %s bez steny" % [ck, mk])
+			vsech.append_array(cnx["obchuzka_klipy"][mk])
+		for kl: String in vsech:
+			var v := String(vyz.get(kl, ""))
+			if v == "":
+				ch.call("vyznam: klip %s (cinnost %s) nema vyznam v klipy_vyznam" % [kl, ck])
+			elif v == "sed":
+				if not bool(cnx.get("sed", false)) and not povol.has("sed"):
+					ch.call("vyznam: %s sed klip %s v cinnosti bez sedu" % [ck, kl])
+			elif not povol.has(v):
+				ch.call("vyznam: %s klip %s (%s) nepatri k cinnosti (vysky %s)" % [ck, kl, v, str(povol)])
 	# Misa 11. 11. (tri poutnici sli spolu): cile poutniku (c.misto) od sebe aspon poutnici_od_m
 	var pt_m: Array = []
 	for c: Dictionary in ll:

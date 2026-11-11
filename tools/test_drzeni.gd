@@ -59,9 +59,7 @@ func _beh() -> void:
 			for rr: String in spec:
 				if (P["drzeni"].get(String(spec[rr]), {}) as Dictionary).has("druha_ruka"):
 					obouruc = true
-			for rk: String in reakce:                 # reakce nechava predmet v ruce
-				if ap.has_animation(rk) and not obouruc:
-					seznam.append(rk)
+			# 11. 11.: s predmetem v ruce se reakce nehraje (lide._reakce) - netestuje se
 			for kl: String in seznam:
 				var dl := ap.get_animation(kl).length
 				for f: float in [0.2, 0.55, 0.9]:
@@ -95,6 +93,8 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 		zkous += 1
 		var g := uz.global_transform
 		var rez := String(d.get("rezim", ""))
+		if (d.get("klipy_bez_rezimu", []) as Array).has(co.split(" ")[1]):
+			rez = ""                                  # pri piti naklon z klipu (uchop.gd klip_ted)
 		var zp := kostra.global_transform * kostra.get_bone_global_pose(kostra.find_bone("hand_" + ruka)).origin
 		if rez != "":
 			var sr: Array = d.get("svet_rot_st", [0.0, 0.0, 0.0])
@@ -108,6 +108,17 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 			if uhel > mez:
 				chyb += 1
 				print("DRZENI CHYBA %s %s: osa %.1f st (mez %.0f)" % [co, id, uhel, mez])
+		# 11. 11. (Misa: uchopy porad spatne; kost ruky v Godotu: osa y podel kosti = k prstum, ne x): osa nasady
+		# (y predmetu) proti osam ruky - nasada ma vest napric dlani (kolmo na prsty, |uhel k y ruky - 90| <= nasada_st)
+		var ba0: BoneAttachment3D = kostra.get_node_or_null("test_ruka_" + ruka)
+		if ba0 != null and rez == "":
+			var hb := ba0.global_basis.orthonormalized()
+			var ny := g.basis.y.normalized()
+			var u_y := rad_to_deg(ny.angle_to(hb.y))
+			print("DRZENI %-40s %s nasada k prstum %.0f st, k x %.0f st, k z %.0f st" % [co, id, u_y, rad_to_deg(ny.angle_to(hb.x)), rad_to_deg(ny.angle_to(hb.z))])
+			if bool(d.get("nasada", false)) and absf(u_y - 90.0) > float(T.get("nasada_st", 25.0)):
+				chyb += 1
+				print("DRZENI CHYBA %s %s: nasada %.0f st k prstum (ma byt 90 +-%s)" % [co, id, u_y, str(T.get("nasada_st", 25.0))])
 		var dr: Array = d.get("druha_ruka", [])
 		if dr.size() == 3:
 			var uc: Array = d.get("uchop", [0.0, 0.0, 0.0])

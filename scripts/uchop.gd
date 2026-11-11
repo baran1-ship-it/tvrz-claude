@@ -38,6 +38,9 @@ func zapni(b: bool) -> void:
 		active = a
 
 
+var klip_ted := ""                    # prave hrany klip postavy (lide._klip) - drzeni.<id>.klipy_bez_rezimu
+
+
 func _process_modification() -> void:
 	var sk := get_skeleton()
 	if sk == null or postava == null:
@@ -55,6 +58,8 @@ func _process_modification() -> void:
 		if ih < 0:
 			continue
 		var rez := String(d.get("rezim", ""))
+		if (d.get("klipy_bez_rezimu", []) as Array).has(klip_ted):
+			rez = ""                          # 11. 11.: korbel svisle pri chuzi, pri piti naklon z klipu
 		var sc := uz.basis.get_scale()
 		if rez == "svisle":
 			# ruka = chtene natoceni predmetu * uchop^-1 (v soustave kostry), poloha zapesti z klipu
@@ -108,7 +113,16 @@ func _process_modification() -> void:
 						chteno_sk = Basis(-bok, osa_y, ostri)
 					else:
 						chteno_sk = Basis(ostri, osa_y, bok)
+					# 11. 11. (test_drzeni: nasada 38-69 st k prstum, ma byt 90): dlan natocit, aby nasada vedla napric
+					# dlani (osa z kosti ruky = napric dlani k palci, y = k prstum) - jako kladivo v jedne ruce
+					_otoc(sk, ih, hg.basis.z, osa_y if hg.basis.z.dot(osa_y) >= 0.0 else -osa_y)
+					hg = sk.get_bone_global_pose(ih)
 					uz.basis = (hg.basis.orthonormalized().inverse() * chteno_sk).orthonormalized().scaled(sc)
+					var cil0 := hg * (Basis(uz.basis.get_rotation_quaternion()) * bod * sc.x * 1.0)
+					_ik(sk, druha, cil0)
+					var hg2 := sk.get_bone_global_pose(ih2)
+					_otoc(sk, ih2, hg2.basis.z, osa_y if hg2.basis.z.dot(osa_y) >= 0.0 else -osa_y)
+					continue
 			var cil := hg * (Basis(uz.basis.get_rotation_quaternion()) * bod * sc.x * 1.0)
 			_ik(sk, druha, cil)
 

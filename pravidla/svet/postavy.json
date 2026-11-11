@@ -575,13 +575,16 @@
  "cinnosti": {
   "spi": {
    "skryty": true,
-   "spanek": true
+   "spanek": true,
+   "vysky": []
   },
   "doma": {
-   "skryty": true
+   "skryty": true,
+   "vysky": []
   },
   "jidlo": {
-   "skryty": true
+   "skryty": true,
+   "vysky": []
   },
   "rano": {
    "klipy": [
@@ -604,7 +607,8 @@
      "Gesto_relieved_sigh",
      "Idle_Loop"
     ]
-   ]
+   ],
+   "vysky": []
   },
   "zahon": {
    "klipy": [
@@ -659,7 +663,10 @@
     ]
    ],
    "_sceny": "Misa 10. 11. scenka zahonu: kleknuti (Kneeling_Down) -> pleti/sazeni vkleče (Pull_Plant, Kneeling, pull_plant, plant_a_plant) -> vstavani (Standing_Up) -> narovnani (relieved_sigh) -> kopani/zalevani vestoje; odchod s kosem = dalsi krok (predmet pri odchodu)",
-   "_srp": "Misa 11. 11. (srp drzen za cepel, klip Farm_Harvest je trhani rukama - sekani srpem animaci nemame): Farm_Harvest bez srpu"
+   "_srp": "Misa 11. 11. (srp drzen za cepel, klip Farm_Harvest je trhani rukama - sekani srpem animaci nemame): Farm_Harvest bez srpu",
+   "vysky": [
+    "zem"
+   ]
   },
   "hovor": {
    "klipy": [
@@ -697,7 +704,8 @@
      "Hovor_Mix_Loop",
      "Gesto_head_nod_yes"
     ]
-   ]
+   ],
+   "vysky": []
   },
   "prace_lom": {
    "klipy": [
@@ -730,7 +738,10 @@
      "Rozhlizi"
     ]
    ],
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): lamac jen krumpac u steny (Fixing_Kneeling vyrazen - klecici vypadal jako pleti)"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): lamac jen krumpac u steny (Fixing_Kneeling vyrazen - klecici vypadal jako pleti)",
+   "vysky": [
+    "uder"
+   ]
   },
   "odpocinek": {
    "klipy": [
@@ -752,7 +763,10 @@
     "Sed_Piti_Loop": {
      "r": "korbel"
     }
-   }
+   },
+   "vysky": [
+    "sed"
+   ]
   },
   "nosi": {
    "klipy": [
@@ -776,7 +790,8 @@
     "*": {
      "r": "vedro"
     }
-   }
+   },
+   "vysky": []
   },
   "mleti": {
    "klipy": [
@@ -795,6 +810,9 @@
      "Idle_Loop",
      "Rozhlizi"
     ]
+   ],
+   "vysky": [
+    "zem"
    ]
   },
   "dohled": {
@@ -820,7 +838,8 @@
      "Gesto_angry_gesture",
      "Idle_FoldArms_Loop"
     ]
-   ]
+   ],
+   "vysky": []
   },
   "hospoda": {
    "klipy": [
@@ -878,6 +897,9 @@
      "Sed_Piti_Loop",
      "Sed_Vyklada_Loop"
     ]
+   ],
+   "vysky": [
+    "sed"
    ]
   },
   "obsluha": {
@@ -889,7 +911,8 @@
     5.0,
     12.0
    ],
-   "soustredeni": 0.5
+   "soustredeni": 0.5,
+   "vysky": []
   },
   "vareni": {
    "klipy": [
@@ -918,6 +941,9 @@
      "Hleda_Loop",
      "Napiti"
     ]
+   ],
+   "vysky": [
+    "pas"
    ]
   },
   "kovani": {
@@ -967,6 +993,9 @@
      "Rozhlizi2",
      "Prace_Kovar_Buseni_Loop"
     ]
+   ],
+   "vysky": [
+    "pas"
    ]
   },
   "strazi": {
@@ -983,7 +1012,8 @@
     "*": {
      "r": "kopi"
     }
-   }
+   },
+   "vysky": []
   },
   "obchuzka_ves": {
    "klipy": [
@@ -1005,7 +1035,8 @@
     "*": {
      "l": "lucerna"
     }
-   }
+   },
+   "vysky": []
   },
   "obchuzka_tvrz": {
    "klipy": [
@@ -1028,7 +1059,8 @@
     "*": {
      "l": "lucerna"
     }
-   }
+   },
+   "vysky": []
   },
   "prochazka": {
    "klipy": [
@@ -1047,7 +1079,8 @@
     "nadvori_brana",
     "nadvori_staje"
    ],
-   "soustredeni": 0.2
+   "soustredeni": 0.2,
+   "vysky": []
   },
   "pase": {
    "klipy": [
@@ -1058,7 +1091,8 @@
     10.0,
     25.0
    ],
-   "soustredeni": 0.4
+   "soustredeni": 0.4,
+   "vysky": []
   },
   "prace_drevo": {
    "klipy": [
@@ -1074,7 +1108,10 @@
     "Prace_Uder_Loop": {
      "r": "sekera"
     }
-   }
+   },
+   "vysky": [
+    "uder"
+   ]
   },
   "hra": {
    "klipy": [
@@ -1089,10 +1126,12 @@
     9.0
    ],
    "soustredeni": 0.5,
-   "skupina": true
+   "skupina": true,
+   "vysky": []
   },
   "pise": {
-   "skryty": true
+   "skryty": true,
+   "vysky": []
   },
   "obsluha_hostinec": {
    "klipy": [
@@ -1163,7 +1202,11 @@
     ]
    },
    "_p": "Misa r. 57, 0.99996 r. 93 a 10. 11. (KCD): obsluha ceka opreny u steny (Mixamo Leaning) a pozoruje hosty, jde ke krbu (kuchyne), nese pivo/jidlo ke stolu (Mixamo Carrying), zpet; na kazdem miste chvili cinnost mista (obchuzka_klipy po obchuzka_obmena_s / obmena_s); jen pri hostech (rozvrh jen_kdyz hoste_hostinec)",
-   "_p11": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): opreny o tram je jen hostinsky (senkyrka ma obsluha_senkyrka bez opreni); kyvani 'pojd' do prazdna vyrazeno"
+   "_p11": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): opreny o tram je jen hostinsky (senkyrka ma obsluha_senkyrka bez opreni); kyvani 'pojd' do prazdna vyrazeno",
+   "vysky": [
+    "pas",
+    "opreni"
+   ]
   },
   "uklid_hostinec": {
    "klipy": [
@@ -1209,7 +1252,10 @@
      }
     ]
    },
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): uklid = sbirani nadobi ze stolu a odnos ke krbu (drive CMU 62_11 predklon k zemi = vypadalo jako pleti zahonu)"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): uklid = sbirani nadobi ze stolu a odnos ke krbu (drive CMU 62_11 predklon k zemi = vypadalo jako pleti zahonu)",
+   "vysky": [
+    "pas"
+   ]
   },
   "svacina": {
    "klipy": [
@@ -1260,6 +1306,9 @@
      "Sed_Piti1_Loop",
      "Sitting_Idle_Loop"
     ]
+   ],
+   "vysky": [
+    "sed"
    ]
   },
   "stipani": {
@@ -1289,6 +1338,10 @@
      "Prace_Uder_Loop",
      "Protazeni"
     ]
+   ],
+   "vysky": [
+    "uder",
+    "zem"
    ]
   },
   "krmeni": {
@@ -1308,7 +1361,8 @@
      "Hodi",
      "Rozhlizi"
     ]
-   ]
+   ],
+   "vysky": []
   },
   "sad": {
    "klipy": [
@@ -1321,7 +1375,11 @@
     14.0
    ],
    "soustredeni": 0.7,
-   "_p": "Misa 10. 11. (trhani ovoce - Mixamo Pick_Fruit); zatim u zahrady domu, sad jako misto = dalsi krok"
+   "_p": "Misa 10. 11. (trhani ovoce - Mixamo Pick_Fruit); zatim u zahrady domu, sad jako misto = dalsi krok",
+   "vysky": [
+    "nad",
+    "zem"
+   ]
   },
   "pole": {
    "klipy": [
@@ -1344,6 +1402,9 @@
      "Farma_Sadi",
      "Farma_Vytrhava"
     ]
+   ],
+   "vysky": [
+    "zem"
    ]
   },
   "obsluha_krcma": {
@@ -1409,7 +1470,11 @@
      }
     ]
    },
-   "_p": "Misa 10. 11.: krcmar Kubat jako hostinsky - opreny u steny (trámu) pozoruje, u pultu (krcma_obsluha), nese k hostum do jizby (krcma_senk); stoly krcmy jako mista = dalsi krok"
+   "_p": "Misa 10. 11.: krcmar Kubat jako hostinsky - opreny u steny (trámu) pozoruje, u pultu (krcma_obsluha), nese k hostum do jizby (krcma_senk); stoly krcmy jako mista = dalsi krok",
+   "vysky": [
+    "pas",
+    "opreni"
+   ]
   },
   "volno": {
    "klipy": [
@@ -1455,11 +1520,15 @@
    "dvojice_m": 6.0,
    "stoji_pred_m": 0.9,
    "stoji_bok_m": 0.35,
-   "_dvojice": "Misa 10. 11.: druhy u sediciho (do dvojice_m od mista) se sanci dvojice_stoji stoji stoji_pred_m pred nim a stoji_bok_m bokem, celem k nemu a povida (klipy_bez_sedu); jinak si sedne vedle na lavici (sirka_mista)"
+   "_dvojice": "Misa 10. 11.: druhy u sediciho (do dvojice_m od mista) se sanci dvojice_stoji stoji stoji_pred_m pred nim a stoji_bok_m bokem, celem k nemu a povida (klipy_bez_sedu); jinak si sedne vedle na lavici (sirka_mista)",
+   "vysky": [
+    "sed"
+   ]
   },
   "mleti_uvnitr": {
    "skryty": true,
-   "_p": "Misa 10. 11.: mlynar mele u kamene ve mlynici (uvnitr, nekresli se - mlynice zatim bez mist uvnitr; mleti u kamene viditelne = dalsi krok)"
+   "_p": "Misa 10. 11.: mlynar mele u kamene ve mlynici (uvnitr, nekresli se - mlynice zatim bez mist uvnitr; mleti u kamene viditelne = dalsi krok)",
+   "vysky": []
   },
   "nosi_pytle": {
    "klipy": [
@@ -1502,7 +1571,10 @@
     ]
    },
    "soustredeni": 0.8,
-   "_p": "Misa 10. 11.: mlynar nosi pytle mezi dvorem a mlynem (obili dovnitr, mouka ven; Mixamo holding_walk, box_idle); predmet nahodne (smer obili/mouka podle cile = dalsi krok)"
+   "_p": "Misa 10. 11.: mlynar nosi pytle mezi dvorem a mlynem (obili dovnitr, mouka ven; Mixamo holding_walk, box_idle); predmet nahodne (smer obili/mouka podle cile = dalsi krok)",
+   "vysky": [
+    "zem"
+   ]
   },
   "putuje": {
    "klipy": [
@@ -1530,7 +1602,8 @@
     }
    },
    "soustredeni": 0.3,
-   "_p": "Misa 10. 11.: poutnik jde po cestach od mista k mistu (ves, krcma, hostinec, lom, tvrz), na miste se rozhledne, napije"
+   "_p": "Misa 10. 11.: poutnik jde po cestach od mista k mistu (ves, krcma, hostinec, lom, tvrz), na miste se rozhledne, napije",
+   "vysky": []
   },
   "putuje_noc": {
    "klipy": [
@@ -1556,7 +1629,8 @@
     }
    },
    "soustredeni": 0.3,
-   "_p": "v noci s louci v leve ruce (svetlo bez stinu, drzeni louc)"
+   "_p": "v noci s louci v leve ruce (svetlo bez stinu, drzeni louc)",
+   "vysky": []
   },
   "obsluha_senkyrka": {
    "klipy": [
@@ -1623,7 +1697,10 @@
      }
     ]
    },
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): senkyrka roznasi: od krbu nese misu/dzban ke stolu (stoji vedle stolu), u druheho vycepu nalije, zpet; nikdy se neopira"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): senkyrka roznasi: od krbu nese misu/dzban ke stolu (stoji vedle stolu), u druheho vycepu nalije, zpet; nikdy se neopira",
+   "vysky": [
+    "pas"
+   ]
   },
   "uklid_krcma": {
    "klipy": [
@@ -1661,7 +1738,10 @@
      }
     ]
    },
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): krcmar sbira nadobi (jen v krcme)"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): krcmar sbira nadobi (jen v krcme)",
+   "vysky": [
+    "pas"
+   ]
   },
   "tesani": {
    "klipy": [
@@ -1693,7 +1773,10 @@
      "Rozhlizi2"
     ]
    ],
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): kamenik tesa kamen u spalku kladivem jednoruc"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): kamenik tesa kamen u spalku kladivem jednoruc",
+   "vysky": [
+    "pas"
+   ]
   },
   "staje": {
    "klipy": [
@@ -1719,7 +1802,10 @@
      "Gesto_relieved_sigh"
     ]
    ],
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): celedin ve stajich: zvedne seno a hodi do zlabu, uklizi stelivo"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): celedin ve stajich: zvedne seno a hodi do zlabu, uklizi stelivo",
+   "vysky": [
+    "zem"
+   ]
   },
   "voda_staje": {
    "klipy": [
@@ -1748,7 +1834,8 @@
      "r": "vedro"
     }
    },
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): celedin nosi vodu jen studna <-> staje | Misa 11. 11. vecer (cledin nabira kyblem z podlahy, krcmar zveda ze zeme a nese naruc dreva): bez Zvedne (zvednuti ze zeme) - u studny a u cile stoji s vedrem; nabirani vody chybi klip (resersi)"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): celedin nosi vodu jen studna <-> staje | Misa 11. 11. vecer (cledin nabira kyblem z podlahy, krcmar zveda ze zeme a nese naruc dreva): bez Zvedne (zvednuti ze zeme) - u studny a u cile stoji s vedrem; nabirani vody chybi klip (resersi)",
+   "vysky": []
   },
   "voda_kuchyne": {
    "klipy": [
@@ -1777,7 +1864,8 @@
      "r": "vedro"
     }
    },
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): dvorka/kucharka nosi vodu jen studna <-> kuchyne | Misa 11. 11. vecer (cledin nabira kyblem z podlahy, krcmar zveda ze zeme a nese naruc dreva): bez Zvedne (zvednuti ze zeme) - u studny a u cile stoji s vedrem; nabirani vody chybi klip (resersi)"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): dvorka/kucharka nosi vodu jen studna <-> kuchyne | Misa 11. 11. vecer (cledin nabira kyblem z podlahy, krcmar zveda ze zeme a nese naruc dreva): bez Zvedne (zvednuti ze zeme) - u studny a u cile stoji s vedrem; nabirani vody chybi klip (resersi)",
+   "vysky": []
   },
   "vzkazy": {
    "klipy": [
@@ -1795,7 +1883,8 @@
     "kovarna_kovadlina",
     "nadvori_staje"
    ],
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): paze nosi vzkazy mezi palacem, branou (straz), kovarnou a stajemi - bez vedra"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): paze nosi vzkazy mezi palacem, branou (straz), kovarnou a stajemi - bez vedra",
+   "vysky": []
   },
   "prodava": {
    "klipy": [
@@ -1820,7 +1909,10 @@
      "Rozhlizi"
     ]
    ],
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): kupec u stanku: prerovnava zbozi, hleda v truhle"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): kupec u stanku: prerovnava zbozi, hleda v truhle",
+   "vysky": [
+    "pas"
+   ]
   },
   "putuje_a": {
    "klipy": [
@@ -1854,7 +1946,8 @@
     }
    },
    "soustredeni": 0.3,
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape",
+   "vysky": []
   },
   "putuje_a_noc": {
    "klipy": [
@@ -1886,7 +1979,8 @@
     }
    },
    "soustredeni": 0.3,
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape",
+   "vysky": []
   },
   "putuje_b": {
    "klipy": [
@@ -1916,7 +2010,8 @@
     }
    },
    "soustredeni": 0.3,
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape",
+   "vysky": []
   },
   "putuje_b_noc": {
    "klipy": [
@@ -1944,7 +2039,8 @@
     }
    },
    "soustredeni": 0.3,
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape",
+   "vysky": []
   },
   "putuje_c": {
    "klipy": [
@@ -1976,7 +2072,8 @@
     }
    },
    "soustredeni": 0.3,
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape",
+   "vysky": []
   },
   "putuje_c_noc": {
    "klipy": [
@@ -2006,7 +2103,8 @@
     }
    },
    "soustredeni": 0.3,
-   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape"
+   "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): vlastni trasa poutnika po cele mape",
+   "vysky": []
   },
   "hlida_stan": {
    "klipy": [
@@ -2030,7 +2128,8 @@
      "l": "lucerna"
     }
    },
-   "_p": "Misa 11. 11. choreografie: kupec v noci hlida zbozi u stanu s lucernou (stan nema dvere ani luzko)"
+   "_p": "Misa 11. 11. choreografie: kupec v noci hlida zbozi u stanu s lucernou (stan nema dvere ani luzko)",
+   "vysky": []
   },
   "obchazi_stan": {
    "klipy": [
@@ -2079,7 +2178,10 @@
      20.0
     ]
    },
-   "_p": "Misa 11. 11. (kupec neni prodavac za pultem - prechazi pred stanem, pozoruje, sedi; kolemjdouci si u nej sednou): prechazi pred stanem: u pultu prerovna zbozi, u cesty pozoruje, kdo jde"
+   "_p": "Misa 11. 11. (kupec neni prodavac za pultem - prechazi pred stanem, pozoruje, sedi; kolemjdouci si u nej sednou): prechazi pred stanem: u pultu prerovna zbozi, u cesty pozoruje, kdo jde",
+   "vysky": [
+    "pas"
+   ]
   }
  },
  "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.) | Misa 11. 11. (postava ukazuje do prazdna): UAL Interact = natazena ruka vpred v urovni hrudi - jen u stolu a krbu (polozi/vezme); u studny, mlyna, vetraku a ve volnem prostoru Zvedne / Nese_Stoji_Loop / rozhlizeni | Misa 11. 11. (nove klipy): Interact u stolu, krbu a pultu nahrazen Mixamo Putting_Down (Polozi - ruka do vysky pasu, polozi/vezme ze stolu); Picking_Up_1 (Vezme) je zvednuti ze zeme - jen u zeme; hoste vsedě vykladaji (Sitting_Talking); stani i Action Adventure idle 2. | Misa 11. 11. vecer (cledin nabira kyblem z podlahy, krcmar zveda ze zeme a nese naruc dreva): Polozi/Vezme (Mixamo Putting_Down/Picking_Up = krabice na zem / ze zeme) vyrazeny ze stolu, krbu a pultu -> Hleda_Loop (prace rukama ve vysce pasu); obchuzka_nese bez Walk_Carry_Loop (naruc) - korbel/miska v jedne ruce pri chuzi postavy",
@@ -5367,7 +5469,8 @@
     0.0,
     0.1,
     0.0
-   ]
+   ],
+   "nasada": true
   },
   "_popis": "predmet v ruce postavy (lide.gd ruce): BoneAttachment3D na hand_r / hand_l, uchop = bod predmetu v jeho souradnicich (m), kam patri dlan; rot_st = natoceni predmetu v soustave kosti ruky (kost UAL: osa x podel prstu, y dlani dolu, z k palci). Overeno snimky tools/foto_postava.gd 5. 11. (docs/screens/postavy_po/): krumpac nad hlavou za konec topurka, palice v rukou pri klecenim, vedro za ucho pri chuzi a pri zalevani naklonene; srp a kosik viz snimky. Kopi (5. 11. vecer): rot_st spocitano z os kosti hand_r v Idle_Loop t 1,0 (DIAG foto_postava: x (-0,99; 0,16; -0,02), y (-0,15; -0,83; 0,54), z (0,07; 0,53; 0,84)) tak, aby hrot (+x predmetu, snimek ruka_kopi3: -x byla patka) mieril svisle nahoru; uchop 0,26 m od stredu k patce (-x) = patka u zeme pri ruce ve vysce 0,94 m.",
   "krumpac": {
@@ -5385,7 +5488,8 @@
     0.0,
     0.06,
     0.0
-   ]
+   ],
+   "nasada": true
   },
   "kladivo_kamenicke": {
    "uchop": [
@@ -5397,7 +5501,8 @@
     90.0,
     0.0,
     0.0
-   ]
+   ],
+   "nasada": true
   },
   "vedro_drevene": {
    "uchop": [
@@ -5505,7 +5610,8 @@
     90.0,
     0.0,
     0.0
-   ]
+   ],
+   "nasada": true
   },
   "sekera": {
    "uchop": [
@@ -5523,14 +5629,16 @@
     0.08,
     0.0
    ],
-   "ostri_osa": "z"
+   "ostri_osa": "z",
+   "nasada": true
   },
   "_rezim": "Misa 0.99993 r. 47 (9. 11.): rot_st plati jen v klipu, ve kterem se ladilo - v jinych klipech (chuze, reakce slozene ruce, kleceni) byl predmet nakrivo. rezim (scripts/uchop.gd, SkeletonModifier3D po animaci): visi = predmet visi z uchopu svisle (tize; vedro, lucerna, kosik), svisle = ruka se natoci, aby predmet mel v soustave postavy svet_rot_st (kopi hrotem nahoru: +x predmetu -> nahoru = [0,0,90]); druha_ruka = bod predmetu (jeho souradnice), kam jde druha ruka IK (obourucni krumpac a sekera). Bez rezimu predmet jde s klipem (srp, kladivo, vedro_drevene pri zalevani - naklon je zadouci).",
   "_test": {
    "popis": "tools/test_drzeni.gd: meze pro predmety s rezimem ve vsech klipech cinnosti, chuzi a reakcich",
    "visi_st": 5.0,
    "svisle_st": 5.0,
-   "druha_ruka_m": 0.04
+   "druha_ruka_m": 0.04,
+   "nasada_st": 25.0
   },
   "_uchop_osa": "Misa 9. 11. r. 83 (kovar, snimek 13: kladivo projizdi zapestim, prsty otevrene): nastroje s nasadou (krumpac, sekera, kladivo, palice; nasada = osa y modelu) mely rot_st [0,0,90] = nasada podel prstu (osa x kosti) - z pesti trcela dopredu skrz zapesti. Nasada patri napric dlani podel osy palce (z kosti): rot_st [90,0,0] (y predmetu -> z kosti, hlava nastroje na strane palce). prsty_st: prsty se sevrou kolem predmetu (uchop.gd, kazdy predmet v ruce), vychozi _prsty_st.",
   "_prsty_st": 50.0,
@@ -5546,7 +5654,21 @@
     0.0,
     0.0,
     90.0
-   ]
+   ],
+   "rezim": "svisle",
+   "svet_rot_st": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "klipy_bez_rezimu": [
+    "Napiti",
+    "Sed_Piti_Loop",
+    "Sed_Piti1_Loop",
+    "Piti",
+    "Piti_Unavene"
+   ],
+   "_p11": "11. 11. (rešerše: korbel se pri chuzi naklani): svisle = nadoba rovne (osa y nahoru) v kazdem klipu, pri piti (klipy_bez_rezimu) naklon z klipu k ustum"
   },
   "miska": {
    "_popis": "obsluha nese misu (Mixamo Carrying) - dlan pod miskou, NEOVERENO snimkem",
@@ -5556,6 +5678,12 @@
     0.0
    ],
    "rot_st": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rezim": "svisle",
+   "svet_rot_st": [
     0.0,
     0.0,
     0.0
@@ -5572,7 +5700,21 @@
     0.0,
     0.0,
     90.0
-   ]
+   ],
+   "rezim": "svisle",
+   "svet_rot_st": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "klipy_bez_rezimu": [
+    "Napiti",
+    "Sed_Piti_Loop",
+    "Sed_Piti1_Loop",
+    "Piti",
+    "Piti_Unavene"
+   ],
+   "_p11": "11. 11. (rešerše: korbel se pri chuzi naklani): svisle = nadoba rovne (osa y nahoru) v kazdem klipu, pri piti (klipy_bez_rezimu) naklon z klipu k ustum"
   },
   "lzice": {
    "_popis": "jidlo vsedě (Sed_Jidlo_Loop / Consume) - lzice v prstech, NEOVERENO snimkem",
@@ -5641,7 +5783,8 @@
     "energie": 1.4,
     "dosah_m": 7.0
    }
-  }
+  },
+  "_nasada": "11. 11.: kost ruky v Godotu ma osu y podel kosti (k prstum), z napric dlani k palci (drive v _popis chybne x podel prstu). nasada true = test_drzeni hlida, ze osa nasady (y predmetu) je kolmo na prsty (90 +- _test.nasada_st); obourucni nastroj: uchop.gd natoci obe dlane tak, aby nasada vedla napric nimi"
  },
  "sedani": {
   "_popis": "sezeni postav (plan krok 3.1, sed ve vzduchu): cinnost se sed hleda nejblizsi volny sedak ze sedaky (zaznam vybaveni sveta, ne naklopeny) do hledat_m od mista; vyska sedaku = rozmer[1] z katalogu (jen sedaky bez operadla), pouzije se jen v tolerance_m od vyska_klipu_m (Sitting_Idle_Loop: sedaci plocha nad korenem postavy, NEOVERENO - ladi se snimkem); lavice ma mist po sirka_mista_m; koren postavy pred_m pred stredem sedaku smerem, kam se diva (k ohnisti/stolu do k_ohni_m, jinak k mistu cinnosti). Prechod Sitting_Enter / Sitting_Exit.",
@@ -5989,5 +6132,74 @@
  "_daleko": "Misa 11. 11.: postava za dosahem (dosah_m + 20) jde po sve ceste rychlosti chuze rovne k dalsimu bodu (lide.gd _daleko_krok), na bode obchuzky ceka obmena_s x daleko_cekani_nasobek (zblizka tam prehraje vic klipu), novy blok rozvrhu = chuze k cili, ne skok (krome skryte cinnosti - domu); po navratu do dosahu presna cesta od dosazeneho mista",
  "anim_zaber_pomer_stran": 1.6,
  "anim_zaber_rezerva_st": 12.0,
- "_anim_zaber": "zaber kamery pro LOD animaci: kuzel kolem osy pohledu s polouhlem pres uhlopricku obrazu (fov kamery svisle, pomer stran tabletu 1280x800 = 1,6) + rezerva_st (postava na kraji obrazu i pri rychlem otoceni uz animuje)"
+ "_anim_zaber": "zaber kamery pro LOD animaci: kuzel kolem osy pohledu s polouhlem pres uhlopricku obrazu (fov kamery svisle, pomer stran tabletu 1280x800 = 1,6) + rezerva_st (postava na kraji obrazu i pri rychlem otoceni uz animuje)",
+ "klipy_vyznam": {
+  "Consume": "stoji",
+  "Farm_Harvest": "zem",
+  "Farm_PlantSeed": "zem",
+  "Farm_Watering": "zem",
+  "Farma_Sadi": "zem",
+  "Farma_Trha": "nad",
+  "Farma_Vytrhava": "zem",
+  "Farma_Zalevani": "zem",
+  "Fixing_Kneeling": "zem",
+  "Gesto_acknowledging": "stoji",
+  "Gesto_angry_gesture": "stoji",
+  "Gesto_being_cocky": "stoji",
+  "Gesto_happy_hand_gesture": "stoji",
+  "Gesto_hard_head_nod": "stoji",
+  "Gesto_head_nod_yes": "stoji",
+  "Gesto_lengthy_head_nod": "stoji",
+  "Gesto_relieved_sigh": "stoji",
+  "Gesto_shaking_head_no": "stoji",
+  "Gesto_thoughtful_head_shake": "stoji",
+  "Hleda_Loop": "pas",
+  "Hodi": "stoji",
+  "Hovor_Mix1_Loop": "stoji",
+  "Hovor_Mix_Loop": "stoji",
+  "Idle_FoldArms_Loop": "stoji",
+  "Idle_Loop": "stoji",
+  "Idle_Talking_Loop": "stoji",
+  "Interact": "pas",
+  "Kleci_Loop": "zem",
+  "Klekne": "zem",
+  "Kope_Loop": "zem",
+  "Kovar_Silny": "pas",
+  "Krici": "stoji",
+  "Kyva_Pojd": "stoji",
+  "Mava": "stoji",
+  "Napiti": "stoji",
+  "Nese_Stoji_Loop": "stoji",
+  "Opreny_Loop": "opreni",
+  "PickUp_Table": "pas",
+  "Pleti_Loop": "zem",
+  "Polozi": "zem",
+  "Prace_Kovar_Buseni_Loop": "pas",
+  "Prace_Sbirani_Loop": "zem",
+  "Prace_Uder_Loop": "uder",
+  "Prace_Uklid_Loop": "zem",
+  "Protazeni": "stoji",
+  "Protazeni_Krk": "stoji",
+  "Pytel_Stoji_Loop": "stoji",
+  "Rozhlizi": "stoji",
+  "Rozhlizi2": "stoji",
+  "Sed_Hovor1_Loop": "sed",
+  "Sed_Hovor_Loop": "sed",
+  "Sed_Jidlo_Loop": "sed",
+  "Sed_Piti1_Loop": "sed",
+  "Sed_Piti_Loop": "sed",
+  "Sed_Vyklada_Loop": "sed",
+  "Seje": "zem",
+  "Seje2": "zem",
+  "Sitting_Idle_Loop": "sed",
+  "Trha_Ovoce": "nad",
+  "Trha_Ovoce2": "nad",
+  "Truhla_Otevri": "pas",
+  "Truhla_Zavri": "pas",
+  "Vezme": "zem",
+  "Vstava_Z_Kleku": "zem",
+  "Yes": "stoji",
+  "Zvedne": "zem"
+ },
+ "_klipy_vyznam": "Misa 11. 11. (rešerše reports/Živé postavy jako v KCD.md bod 1: klipy nemely v datech vyznam -> nabirani kyblem z podlahy, polozeni krabice na zem u stolu): kde se klip hraje - zem (u zeme/predklon/klek), pas (prace rukama ve vysce stolu, kovadliny, pultu), nad (nad hlavou, strom), uder (rozmach shora k zemi/spalku), opreni (zada o zed), sed, stoji (bez predmetu prace: stani, gesta, piti). Cinnost ma vysky = ktere smi; test lide_chovani: kazdy klip cinnosti ma vyznam a je v jejich vyskach (stoji vzdy), opreni jen na miste u_steny, sed jen v cinnosti se sedem."
 }
