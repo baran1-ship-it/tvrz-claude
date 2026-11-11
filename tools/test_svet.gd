@@ -6577,7 +6577,7 @@ func _lide_chovani() -> void:
 				postele += 1
 				print("LIDE postel %s v %s: %s" % [c["id"], sp["budova"], (pst["p"] as Vector3).snapped(Vector3.ONE * 0.1)])
 		else:
-			diry.append("%s (%s)" % [c["id"], sp["budova"]])
+			diry.append("%s (%s)" % [c["id"], sp.get("budova", sp.get("dira", ""))])
 		var bi7 := 0
 		for i7 in (c["role"]["rozvrh"] as Array).size():
 			if String(c["role"]["rozvrh"][i7]["cinnost"]) == "spi":
