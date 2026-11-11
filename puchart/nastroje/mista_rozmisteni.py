@@ -103,6 +103,10 @@ for s in stavby:
     d = distance_transform_edt(~msk[sl]); a = np.clip(1 - d / R["prechod_m"], 0, 1); a = a * a * (3 - 2 * a)
     Y[sl] = Y[sl] * (1 - a) + s["teren_y"] * a
 np.save(out + ".npy", (Y + P["H"]).astype(np.float32)); json.dump(M, open(out + ".json", "w"), ensure_ascii=False, indent=1)
+# doprovodné soubory předchozího kroku (jámy sklepa a šachty, koryta, skály) pod novou předponou – teren_dlazdice.py je
+# čte podle předpony (11. 11.: bez nich chyběla díra sklepa, pás koryt a nájezdy k mostům – hlídači)
+import glob, shutil
+for f in glob.glob(pre + "_*.npz"): shutil.copy(f, out + f[len(pre):])
 json.dump({"popis": "stavby nových míst (nastroje/mista_rozmisteni.py z pravidla/svet/mista.json) – čte hra (hlavni.gd _mista) a stavby_vegetace.py",
            "modely": MI["modely"], "stavby": stavby,
            "pudorysy": [rohy(s["x"], s["z"], s["yaw"], s["model"], 0.3) for s in stavby]},
