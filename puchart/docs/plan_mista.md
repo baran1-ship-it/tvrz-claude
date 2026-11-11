@@ -42,3 +42,6 @@ Pořadí (Míša): nejdřív dodělat seznam chyb a vydat, pak místa v pořadí
   semeno, usedlosti se liší náhodou): typ domu, zrcadlení, natočení ±, odstín/varianta dřeva (Havran materiály mech,
   lišejník, vybledlé), stodola / malá stodola / kůlna, kurník jen někde, plot laťový / proutěný, vrata kryté / branka,
   zahrada jiný tvar a skladba (zelí, květiny, ovocný strom), lány různé šířky a plodiny (obilí, úhor, pastvina).
+- Míša 11. 11.: „i nějaké stromy by ve vsi měly být“ – Havran vesnice.py village_trees / _homestead_green / dvorec_stromy:
+  ovocné stromy v zahradách a u dvorů (jabloň, hrušeň, švestka), lípa/dub u studny nebo na návsi, keře (bez, líska) u plotů
+  a na mezích, vrby u vody; jednotlivě a ve skupinkách, ne les.
