@@ -223,8 +223,10 @@ func _umisti(lods: Array) -> void:
 		am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, lods[li])
 		var mi := MeshInstance3D.new(); mi.mesh = am
 		mi.material_override = mat_zem
-		mi.visibility_range_begin = 0.0 if li == 0 else float(_lod[li - 1]["do_m"])
-		mi.visibility_range_end = float(_lod[li]["do_m"])
+		# rozsahy stupňů se o hysterezi překrývají (11. 11.: dlaždice bez předchozího stavu – start, teleport – nebyla v pásmu
+		# do ± hystereze vidět v žádném stupni: bližší čekal na d < do − h, vzdálenější na d > do + h → díra v terénu u krčmy)
+		mi.visibility_range_begin = 0.0 if li == 0 else maxf(0.0, float(_lod[li - 1]["do_m"]) - _hy)
+		mi.visibility_range_end = float(_lod[li]["do_m"]) + _hy
 		mi.visibility_range_begin_margin = _hy
 		mi.visibility_range_end_margin = _hy
 		mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED

@@ -1,6 +1,19 @@
 extends SceneTree
 const OUT := "/home/user/tvrz-claude/puchart/hra/modely/predmety_h/"
 var _alfa := false
+
+## Normálová mapa z importu Godotu má jen R a G (komprese normál) – modrý kanál dopočítat (z = √(1 − x² − y²)),
+## jinak normály v glb míří do strany a povrch je černý (11. 11.: domy z Havrana tmavé i na slunci).
+static func _normala(im: Image) -> Image:
+	im.convert(Image.FORMAT_RGB8)
+	var s := 0.0
+	for i in 64: s += im.get_pixel(i * 7 % im.get_width(), i * 13 % im.get_height()).b
+	if s / 64.0 > 0.3: return im
+	for y in im.get_height():
+		for x in im.get_width():
+			var c := im.get_pixel(x, y); var nx := c.r * 2.0 - 1.0; var ny := c.g * 2.0 - 1.0
+			im.set_pixel(x, y, Color(c.r, c.g, sqrt(maxf(0.0, 1.0 - nx * nx - ny * ny)) * 0.5 + 0.5))
+	return im
 func _zmensi(n: Node) -> void:
 	_alfa = false
 	for mi in n.find_children("*", "MeshInstance3D", true, false):
@@ -15,12 +28,14 @@ func _zmensi(n: Node) -> void:
 				var im := t.get_image()
 				if im == null: continue
 				if im.is_compressed(): im.decompress()
+				if p == "normal_texture": im = _normala(im)
 				var mx := 512 if p == "albedo_texture" else 256
 				if max(im.get_width(), im.get_height()) > mx: im.resize(mx, mx * im.get_height() / im.get_width(), Image.INTERPOLATE_LANCZOS)
 				if p == "albedo_texture" and im.detect_alpha() != Image.ALPHA_NONE: _alfa = true
 				mt.set(p, ImageTexture.create_from_image(im))
 			if mt.roughness_texture: mt.roughness_texture = null
 			if mt.metallic_texture: mt.metallic_texture = null
+			if mt.metallic_texture == null: mt.metallic = 0.0   # bez textury kovovosti zůstal faktor 1,0 = černý kov (11. 11.)
 func _init():
 	var args := OS.get_cmdline_user_args()
 	for pk in args:
@@ -33,7 +48,7 @@ func _init():
 			if not f.begins_with(id): continue
 			var base := f.trim_suffix(".import").trim_suffix(".remap")
 			if not (base == id + ".glb" or base == id + "_kolize.glb" or base == id + "_stredni.glb" or base == id + ".png"): continue
-			if FileAccess.file_exists(OUT + base): continue
+			if FileAccess.file_exists(OUT + base) and not OS.has_environment("PREPSAT"): continue   # PREPSAT=1: znovu (oprava převodu)
 			var r = load("res://modely/predmety/" + base)
 			if r is PackedScene:
 				var n: Node = (r as PackedScene).instantiate(); _zmensi(n)
