@@ -45,3 +45,8 @@ Pořadí (Míša): nejdřív dodělat seznam chyb a vydat, pak místa v pořadí
 - Míša 11. 11.: „i nějaké stromy by ve vsi měly být“ – Havran vesnice.py village_trees / _homestead_green / dvorec_stromy:
   ovocné stromy v zahradách a u dvorů (jabloň, hrušeň, švestka), lípa/dub u studny nebo na návsi, keře (bez, líska) u plotů
   a na mezích, vrby u vody; jednotlivě a ve skupinkách, ne les.
+- KCD reference (Havran docs/screens/kcd1/ves_1–6, Míša 11. 11. „mrkni na KCD“): ves hustá – usedlosti 15–20 m podél
+  široké hliněné návsi s kolejemi, kameny a kládami (ne úzká cesta); na usedlost dům + 1–2 hospodářské stavby (otevřená
+  kůlna se sedlovou střechou, stodola, chlév), dvůr; ploty laťové do ulice, proutěné kolem zahrad, žerďové kolem pastvin,
+  krytá vrata; stromy jednotlivě mezi domy (lípy, ovocné), les až za poli; střechy doškové světle šedohnědé a šindel
+  stříbřitý, zdi bílé omítky nebo ohlazené roubení; v ulici vozy, sudy, hranice dřeva, lavice u domů.
