@@ -43,6 +43,7 @@ sum_ = np.repeat(np.repeat(sum_, 2, 0), 2, 1)[:ny, :nx]; sum_ /= np.abs(sum_).ma
 _NP = os.path.join(K, "hra/data/nastupy_mostu.json")
 _PH = json.load(open(os.path.join(K, "hra/data/vysek.json")))["pocatek_H"]   # herní y → m n. m. (y cest je nadmořská výška)
 NASTUPY_ = [q[:2] + [q[2] + _PH, 0.04] + q[3:5] for q in json.load(open(_NP))["nastupy"]] if os.path.exists(_NP) else []
+NASTUPY_HRAD_ = [tuple(q[:2]) for q in NASTUPY_]   # nástupy hradních mostů (cesty k nim = přístup do hradu, ne cesta krajinou)
 _NU = os.path.join(K, "hra/data/nastupy_udoli.json")   # údolní mosty: přesně na výšku mostovky (voda.py ji bere z terénu u konce – bez plížení)
 NASTUPY_ += [q[:2] + [q[2] + _PH, 0.02] + q[3:5] for q in json.load(open(_NU))["nastupy"]] if os.path.exists(_NU) else []   # voda.py drží výšku konce z minulé stavby; +0,1 m na vyhlazení sítě terénu (teren_dlazdice ubere ~0,13)
 PORADI_ = {"pesina": 0, "stezka": 1, "hrebenova": 2, "vozova": 3}
@@ -126,7 +127,15 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     # podélně cesta kopíruje terén (jen uhlazené hrboly, nejvýš T.max_uprava_m od terénu), žádné vyrovnávání sklonu
     # zářezy a násypy (dřív max_sklon 12,5 %: násyp 4,2 m na cestě od Kyžlířova, úvoz 5,4 m k hájovně – docs/reserse_teren_11_11.md)
     LIM = float(T.get("max_uprava_m", 0.5))
-    yp = np.clip(yp, y - LIM, y + LIM)
+    # přístup do hradu (hřebenová mezi hrady, cesty končící na nástupu hradního mostu) má profil ladený s Míšou 6.–9. 11. –
+    # beze změny; „podle terénu“ (11. 11.) platí pro cesty krajinou (u nástupu B jinak +2 m terénu a nesedly kolize hradu a skal)
+    PT = T.get("podle_terenu", True) and not any(float(np.hypot(px - hx_, pz - hz_).min()) < 15.0 for hx_, hz_ in NASTUPY_HRAD_)   # vede do 15 m od nástupu hradního mostu (u mostu, v bráně, kolem brány)
+    c["_podle_terenu"] = PT
+    if PT: yp = np.clip(yp, y - LIM, y + LIM)
+    else:
+        for _ in range(4):
+            for i in range(1, len(yp)): yp[i] = np.clip(yp[i], yp[i - 1] - T["max_sklon"], yp[i - 1] + T["max_sklon"])
+            for i in range(len(yp) - 2, -1, -1): yp[i] = np.clip(yp[i], yp[i + 1] - T["max_sklon"], yp[i + 1] + T["max_sklon"])
     y_bez_mostu = yp.copy()
     # konec u nástupu mostu: cesta vystoupá na výšku mostovky násypem v terénu, nejvýš max_sklon (Míša 9. 11.: „co je to za
     # nájezd“ – samostatný hranol hlíny pod mostem); obálka ny − sklon·vzdálenost od konce
@@ -135,7 +144,7 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
             if math.hypot(px[kon_] - nx_, pz[kon_] - nz_) < 4.0: yp = np.maximum(yp, ny_ - od_ - min(T["max_sklon"], 0.1) * np.maximum(sv_ - 2.0, 0.0))   # 2 m vodorovně u mostu (vyhlazení sítě terénu ubere ~0,15 m)   # nájezd k mostu nejvýš 10 % (i u pěšiny)
     if "max_rez_nasyp_m" in T: yp = np.clip(yp, y - T["max_rez_nasyp_m"], y + T["max_rez_nasyp_m"])   # nájezd k mostu nejvýš (Havran ±3 m)
     u_mostu = yp > y_bez_mostu + 0.01      # body osy na doloženém nájezdu k mostu (výjimka z max_uprava_m)
-    if u_mostu.any():   # nájezd plynule do terénu: od nájezdu dál jen násyp, nejvýš 10 %, dokud ho terén nedožene (11. 11.: v oblouku byl schod = příčný sklon 15 %)
+    if PT and u_mostu.any():   # nájezd plynule do terénu: od nájezdu dál jen násyp, nejvýš 10 %, dokud ho terén nedožene (11. 11.: v oblouku byl schod = příčný sklon 15 %)
         g = float(T["max_sklon"]); zv = u_mostu.copy(); LM = float(T.get("max_uprava_u_mostu_m", 1.5)); y0p = yp.copy()
         # k vodě sjíždí cesta i mělkým zářezem v břehu (úvoz u brodu/mostu) – nejvýš LM pod terén, jen navazující na nájezd
         for i in range(1, len(yp)):
@@ -166,7 +175,7 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     # napříč jen lehce srovnat (Míša 11. 11.): terén se nikde nemění o víc než max_uprava_m – kromě nájezdu k mostu
     vyj = u_mostu[idx] if len(u_mostu) == len(px) else np.zeros(idx.shape, bool)
     LIMN = float(T.get("max_uprava_napric_m", LIM))
-    novy = np.where(vyj, novy, np.clip(novy, orig - LIMN, orig + LIMN))
+    if PT: novy = np.where(vyj, novy, np.clip(novy, orig - LIMN, orig + LIMN))
     if c.get("jen_maska"): novy = orig   # brod: terén (koryto) beze změny, jen povrch cesty
     H[z0i:z1i, x0i:x1i] = np.where(wpas > 0, novy, orig)
     # maska povrchu: měkký okraj s šumem (cesta není pravítko)
@@ -177,7 +186,7 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
         maskG[z0i:z1i, x0i:x1i] = np.maximum(maskG[z0i:z1i, x0i:x1i], m)
     # skála: kde se cesta zařízla (úvoz) – boky a dno; na drobách stačí ~0,6 m
     hloubka = np.clip(orig - novy, 0, None)
-    zm_ = np.abs(novy - orig) * (wpas > 0) * (~vyj) * (not c.get("jen_maska", False))
+    zm_ = np.abs(novy - orig) * (wpas > 0) * (~vyj) * (not c.get("jen_maska", False)) * PT
     c["max_uprava_m"] = round(max(float(c.get("max_uprava_m", 0.0)), float(zm_.max()) if zm_.size else 0.0), 2)
     rez[z0i:z1i, x0i:x1i] = np.maximum(rez[z0i:z1i, x0i:x1i], np.clip(hloubka / T["skala_od_rezu_m"], 0, 1) * (wpas > 0.05))
     na_ceste[z0i:z1i, x0i:x1i] |= dist < T.get("bez_porostu_m", hw + 1.5)   # Havran pasma.cesta: keře 3 m od okraje hlíny
@@ -277,8 +286,8 @@ A = np.fromfile(sb, np.float32).reshape(-1, 5)
 c2 = np.clip(((A[:, 0] - sj["x0_hra"]) / sj["krok_m"]).astype(int), 0, st.shape[1] - 1); r2 = np.clip(((A[:, 1] - sj["z0_hra"]) / sj["krok_m"]).astype(int), 0, st.shape[0] - 1)
 keep = st[r2, c2] != ic; A[keep].tofile(sb); print("stromů z buněk cesty", int((~keep).sum()))
 C["cesty"] = [c for c in C["cesty"] if not c.get("spojka")]   # spojky se počítají při každé stavbě znovu
-C["vysledek"] = {c["id"]: {k2: c.get(k2, 0.0) for k2 in ("delka_m", "max_rez_m", "max_nasyp_m", "max_pricny", "max_uprava_m")} for c in C["cesty"]}
+C["vysledek"] = {c["id"]: dict({k2: c.get(k2, 0.0) for k2 in ("delka_m", "max_rez_m", "max_nasyp_m", "max_pricny", "max_uprava_m")}, podle_terenu=bool(c.get("_podle_terenu", True))) for c in C["cesty"]}
 for c in C["cesty"]:
-    for k_ in ("_osa_px", "_osa_pz", "_hw", "_pricny_kde"): c.pop(k_, None)
+    for k_ in ("_osa_px", "_osa_pz", "_hw", "_pricny_kde", "_podle_terenu"): c.pop(k_, None)
     if "_osa_puvodni" in c: c["osa"] = c.pop("_osa_puvodni")
 json.dump(C, open(os.path.join(K, "pravidla/svet/cesty_puchart.json"), "w"), ensure_ascii=False, indent=1)

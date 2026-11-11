@@ -43,9 +43,9 @@
    "povrch": "pesina",
    "skala_od_rezu_m": 0.5,
    "pozn": "úzký hřbet na drobě, nejprudší místa schody ze skály",
-   "max_uprava_m": 0.5,
-   "max_uprava_napric_m": 2.0,
-   "pozn_11_11": "Míša 11. 11.: „nemůžeme vykopat půl kopce, abychom měli dálnici, jsme ve středověku, chodilo se podle terénu“; „nahoru dolů je to v pořádku, ale velký sklon do boku by nedával smysl… samozřejmě lehce“ – podélně podle terénu (max_uprava_m), napříč jen lehce srovnat (max_uprava_napric_m; vozová ve svahu = polovina zářez, polovina násyp). Výjimka: doložené nájezdy k mostům."
+   "pozn_11_11": "Míša 11. 11.: „nemůžeme vykopat půl kopce, abychom měli dálnici, jsme ve středověku, chodilo se podle terénu“; „nahoru dolů je to v pořádku, ale velký sklon do boku by nedával smysl… samozřejmě lehce“ – podélně podle terénu (max_uprava_m), napříč jen lehce srovnat (max_uprava_napric_m; vozová ve svahu = polovina zářez, polovina násyp). Výjimka: doložené nájezdy k mostům.",
+   "podle_terenu": false,
+   "pozn_podle_terenu": "přístupová cesta mezi hrady (úzký hřbet, nástupy mostů a bran) – profil laděný s Míšou 6.–9. 11. zůstává; pravidlo „cesta podle terénu“ (11. 11.) platí pro cesty krajinou. Při podle terénu se změnil terén u nástupu B o 2 m a nesedly kolize hradu B a skal (hlídači 11. 11.)"
   },
   "pesina": {
    "sirka_m": 1.0,
@@ -455,10 +455,10 @@
    ],
    "delka_m": 1197,
    "max_rez_m": 0.3,
-   "max_nasyp_m": 1.9,
+   "max_nasyp_m": 3.8,
    "pozn_konec": "konec u vnější branky na východním valu (hrad_puchart.json A.vnejsi_brana; GC80T08 nástup mostu ve V části valu)",
    "pozn_konec_5_11": "konec na nástupu vnějšího mostu před vnější brankou (náčrt Míši 5. 11.)",
-   "max_pricny": 0.044,
+   "max_pricny": 0.036,
    "pozn_konec_9_11": "Míša 6. a 9. 11.: „nechápu napojení cesty na most u vstupu, to snad má jít rovně“ – posledních ~7 m v ose mostu vnější branky (x = 7, od jihu), dřív přijížděla z boku po z = −60",
    "max_uprava_m": 1.56
   },
@@ -606,8 +606,8 @@
     ]
    ],
    "delka_m": 240,
-   "max_rez_m": 0.5,
-   "max_nasyp_m": 1.1,
+   "max_rez_m": 0.6,
+   "max_nasyp_m": 1.8,
    "pozn_5_11": "Míša 5. 11. (vlnovka na kresbě misa_04): cesta po V úbočí pod jádrem – osa na plošinkách DMR (x 18–23, sklon 0,02–0,37 proti okolí 0,7); GC80T08: „hradní cesta vinoucí se po východní straně hřebene končící u valu“",
    "max_pricny": 0.119,
    "pozn_9_11": "Míša 6. a 9. 11.: „zapomněl jsi na cestu pod horním hradem, která vede ke spodnímu hradu“ – hřebenová cesta začínala 27 m od hlavní cesty (nikam nenavazovala); teď odbočuje z hlavní cesty před mostem vnější branky a vede pod V stranou jádra A k mostu B Odbočka před začátkem násypu k mostu (z boku násypu příčný sklon 0,45 – test cesta_pricny_sklon).",
@@ -6563,9 +6563,9 @@
     ]
    ],
    "delka_m": 386,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.3,
-   "max_pricny": 1.935,
+   "max_rez_m": 0.7,
+   "max_nasyp_m": 0.5,
+   "max_pricny": 1.19,
    "max_uprava_m": 0.3
   },
   {
@@ -7327,9 +7327,9 @@
     ]
    ],
    "delka_m": 83,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.2,
-   "max_pricny": 2.4,
+   "max_rez_m": 2.8,
+   "max_nasyp_m": 0.1,
+   "max_pricny": 4.857,
    "max_uprava_m": 0.3
   },
   {
@@ -10389,7 +10389,7 @@
    "delka_m": 769,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.616,
+   "max_pricny": 0.896,
    "max_uprava_m": 0.3
   },
   {
@@ -20584,7 +20584,7 @@
    "delka_m": 769,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.616,
+   "max_pricny": 0.896,
    "max_uprava_m": 0.3
   },
   {
@@ -21513,394 +21513,450 @@
   "hlavni_kyzlirov": {
    "delka_m": 1197,
    "max_rez_m": 0.3,
-   "max_nasyp_m": 1.9,
-   "max_pricny": 0.044,
-   "max_uprava_m": 1.56
+   "max_nasyp_m": 3.8,
+   "max_pricny": 0.036,
+   "max_uprava_m": 1.56,
+   "podle_terenu": false
   },
   "hrebenova": {
    "delka_m": 240,
-   "max_rez_m": 0.5,
-   "max_nasyp_m": 1.1,
+   "max_rez_m": 0.6,
+   "max_nasyp_m": 1.8,
    "max_pricny": 0.119,
-   "max_uprava_m": 1.73
+   "max_uprava_m": 1.73,
+   "podle_terenu": false
   },
   "udoli_440_0": {
    "delka_m": 58,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.013,
-   "max_uprava_m": 0.18
+   "max_uprava_m": 0.18,
+   "podle_terenu": true
   },
   "udoli_440_1": {
    "delka_m": 325,
    "max_rez_m": 1.5,
    "max_nasyp_m": 1.5,
    "max_pricny": 0.048,
-   "max_uprava_m": 2.0
+   "max_uprava_m": 2.0,
+   "podle_terenu": true
   },
   "udoli_440_2": {
    "delka_m": 235,
    "max_rez_m": 0.1,
    "max_nasyp_m": 2.5,
    "max_pricny": 0.032,
-   "max_uprava_m": 0.31
+   "max_uprava_m": 0.31,
+   "podle_terenu": true
   },
   "udoli_440_3": {
    "delka_m": 145,
    "max_rez_m": 1.5,
    "max_nasyp_m": 2.1,
    "max_pricny": 0.061,
-   "max_uprava_m": 2.0
+   "max_uprava_m": 2.0,
+   "podle_terenu": true
   },
   "udoli_440_4": {
    "delka_m": 80,
    "max_rez_m": 0.2,
    "max_nasyp_m": 1.3,
    "max_pricny": 0.011,
-   "max_uprava_m": 0.44
+   "max_uprava_m": 0.44,
+   "podle_terenu": true
   },
   "udoli_440_5": {
    "delka_m": 218,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.4,
    "max_pricny": 0.01,
-   "max_uprava_m": 0.32
+   "max_uprava_m": 0.32,
+   "podle_terenu": true
   },
   "udoli_440_6": {
    "delka_m": 450,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.012,
-   "max_uprava_m": 0.28
+   "max_uprava_m": 0.28,
+   "podle_terenu": true
   },
   "udoli_440_7": {
    "delka_m": 38,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.013,
-   "max_uprava_m": 0.4
+   "max_uprava_m": 0.4,
+   "podle_terenu": true
   },
   "udoli_440_8": {
    "delka_m": 515,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.5,
    "max_pricny": 0.024,
-   "max_uprava_m": 0.7
+   "max_uprava_m": 0.7,
+   "podle_terenu": true
   },
   "udoli_440_9": {
    "delka_m": 356,
    "max_rez_m": 0.5,
    "max_nasyp_m": 1.0,
    "max_pricny": 0.015,
-   "max_uprava_m": 1.23
+   "max_uprava_m": 1.23,
+   "podle_terenu": true
   },
   "osm_track_0": {
    "delka_m": 179,
    "max_rez_m": 0.3,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.023,
-   "max_uprava_m": 0.67
+   "max_uprava_m": 0.67,
+   "podle_terenu": true
   },
   "osm_track_1": {
    "delka_m": 151,
    "max_rez_m": 0.3,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.02,
-   "max_uprava_m": 1.34
+   "max_uprava_m": 1.34,
+   "podle_terenu": true
   },
   "osm_track_2": {
    "delka_m": 431,
    "max_rez_m": 0.4,
    "max_nasyp_m": 0.3,
    "max_pricny": 0.029,
-   "max_uprava_m": 1.37
+   "max_uprava_m": 1.37,
+   "podle_terenu": true
   },
   "osm_track_3": {
    "delka_m": 386,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.3,
-   "max_pricny": 1.935,
-   "max_uprava_m": 0.3
+   "max_rez_m": 0.7,
+   "max_nasyp_m": 0.5,
+   "max_pricny": 1.19,
+   "max_uprava_m": 0.3,
+   "podle_terenu": false
   },
   "osm_track_4": {
    "delka_m": 152,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.251,
-   "max_uprava_m": 0.19
+   "max_uprava_m": 0.19,
+   "podle_terenu": true
   },
   "osm_track_5": {
    "delka_m": 47,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
    "max_pricny": 0.078,
-   "max_uprava_m": 0.1
+   "max_uprava_m": 0.1,
+   "podle_terenu": true
   },
   "osm_track_6": {
    "delka_m": 86,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.0,
    "max_pricny": 0.076,
-   "max_uprava_m": 0.14
+   "max_uprava_m": 0.14,
+   "podle_terenu": true
   },
   "osm_track_7": {
    "delka_m": 60,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
    "max_pricny": 0.151,
-   "max_uprava_m": 0.11
+   "max_uprava_m": 0.11,
+   "podle_terenu": true
   },
   "osm_track_8": {
    "delka_m": 39,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.22,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_9": {
    "delka_m": 63,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.072,
-   "max_uprava_m": 0.24
+   "max_uprava_m": 0.24,
+   "podle_terenu": true
   },
   "osm_path_10": {
    "delka_m": 95,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.541,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_path_11": {
    "delka_m": 83,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.2,
-   "max_pricny": 2.4,
-   "max_uprava_m": 0.3
+   "max_rez_m": 2.8,
+   "max_nasyp_m": 0.1,
+   "max_pricny": 4.857,
+   "max_uprava_m": 0.3,
+   "podle_terenu": false
   },
   "osm_path_12": {
    "delka_m": 60,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.364,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_path_13": {
    "delka_m": 735,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.292,
-   "max_uprava_m": 0.28
+   "max_uprava_m": 0.28,
+   "podle_terenu": true
   },
   "osm_track_14": {
    "delka_m": 446,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.291,
-   "max_uprava_m": 0.28
+   "max_uprava_m": 0.28,
+   "podle_terenu": true
   },
   "osm_path_15": {
    "delka_m": 476,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.498,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_16": {
    "delka_m": 459,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.485,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_17": {
    "delka_m": 769,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.616,
-   "max_uprava_m": 0.3
+   "max_pricny": 0.896,
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_18": {
    "delka_m": 419,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.589,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_19": {
    "delka_m": 467,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
    "max_pricny": 1.141,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_20": {
    "delka_m": 407,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.451,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_21": {
    "delka_m": 120,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.561,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_22": {
    "delka_m": 103,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
    "max_pricny": 0.101,
-   "max_uprava_m": 0.09
+   "max_uprava_m": 0.09,
+   "podle_terenu": true
   },
   "osm_track_23": {
    "delka_m": 323,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.21,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_24": {
    "delka_m": 65,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.5,
    "max_pricny": 0.496,
-   "max_uprava_m": 0.27
+   "max_uprava_m": 0.27,
+   "podle_terenu": true
   },
   "osm_track_25": {
    "delka_m": 1455,
    "max_rez_m": 0.3,
    "max_nasyp_m": 0.3,
    "max_pricny": 0.749,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_26": {
    "delka_m": 1057,
    "max_rez_m": 0.3,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.441,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_27": {
    "delka_m": 175,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.143,
-   "max_uprava_m": 0.14
+   "max_uprava_m": 0.14,
+   "podle_terenu": true
   },
   "osm_track_28": {
    "delka_m": 28,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.306,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_29": {
    "delka_m": 51,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.247,
-   "max_uprava_m": 0.19
+   "max_uprava_m": 0.19,
+   "podle_terenu": true
   },
   "osm_track_30": {
    "delka_m": 147,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.169,
-   "max_uprava_m": 0.29
+   "max_uprava_m": 0.29,
+   "podle_terenu": true
   },
   "osm_track_31": {
    "delka_m": 1564,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.3,
    "max_pricny": 0.912,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_path_32": {
    "delka_m": 601,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.703,
-   "max_uprava_m": 0.3
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "osm_track_33": {
    "delka_m": 583,
    "max_rez_m": 0.3,
    "max_nasyp_m": 0.5,
    "max_pricny": 0.037,
-   "max_uprava_m": 1.57
+   "max_uprava_m": 1.57,
+   "podle_terenu": true
   },
   "osm_track_34": {
    "delka_m": 107,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.038,
-   "max_uprava_m": 0.86
+   "max_uprava_m": 0.86,
+   "podle_terenu": true
   },
   "zluta_0": {
    "delka_m": 56,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
    "max_pricny": 0.035,
-   "max_uprava_m": 0.07
+   "max_uprava_m": 0.07,
+   "podle_terenu": true
   },
   "zluta_1": {
    "delka_m": 125,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
    "max_pricny": 0.035,
-   "max_uprava_m": 0.03
+   "max_uprava_m": 0.03,
+   "podle_terenu": true
   },
   "zluta_12": {
    "delka_m": 63,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.072,
-   "max_uprava_m": 0.09
+   "max_uprava_m": 0.09,
+   "podle_terenu": true
   },
   "zluta_13": {
    "delka_m": 60,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.364,
-   "max_uprava_m": 0.09
+   "max_uprava_m": 0.09,
+   "podle_terenu": true
   },
   "zluta_14": {
    "delka_m": 735,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.292,
-   "max_uprava_m": 0.14
+   "max_uprava_m": 0.14,
+   "podle_terenu": true
   },
   "zluta_15": {
    "delka_m": 769,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.616,
-   "max_uprava_m": 0.3
+   "max_pricny": 0.896,
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
   },
   "zluta_16": {
    "delka_m": 323,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.21,
-   "max_uprava_m": 0.11
+   "max_uprava_m": 0.11,
+   "podle_terenu": true
   },
   "zluta_18": {
    "delka_m": 64,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
    "max_pricny": 0.038,
-   "max_uprava_m": 0.07
+   "max_uprava_m": 0.07,
+   "podle_terenu": true
   },
   "hajovna": {
    "delka_m": 726,
    "max_rez_m": 0.5,
    "max_nasyp_m": 0.5,
    "max_pricny": 0.039,
-   "max_uprava_m": 2.0
+   "max_uprava_m": 2.0,
+   "podle_terenu": true
   }
  }
 }

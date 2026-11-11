@@ -233,7 +233,7 @@ zle_p = {k: v.get("max_pricny") for k, v in CP["vysledek"].items() if CP_TYP.get
 TEST("cesta_pricny_sklon", not zle_p, "příčný sklon jízdního pásu nad %s: %s" % (pr_mez, zle_p))
 # Míša 11. 11.: cesty podle terénu („nevykopat půl kopce“) – změna terénu cestou nejvýš podle typu (cesty_puchart.json typy
 # max_uprava_m podélně / max_uprava_napric_m napříč), mimo doložené nájezdy k mostům
-zle_u = {k: v.get("max_uprava_m") for k, v in CP["vysledek"].items() if k in CP_TYP
+zle_u = {k: v.get("max_uprava_m") for k, v in CP["vysledek"].items() if k in CP_TYP and v.get("podle_terenu", True)
          and v.get("max_uprava_m", 99) > max(CP["typy"][CP_TYP[k]].get("max_uprava_m", 0.5), CP["typy"][CP_TYP[k]].get("max_uprava_napric_m", 0.5)) + 0.05}
 TEST("cesta_uprava_terenu", not zle_u, "cesta mění terén víc, než dovoluje její typ: %s" % zle_u)
 from scipy.spatial import cKDTree
