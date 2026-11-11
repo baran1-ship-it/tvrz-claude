@@ -6344,7 +6344,7 @@ func _lide_chovani() -> void:
 				if not (P["drzeni"] as Dictionary).has(id):
 					ch.call("%s: predmet %s nema drzeni" % [cid, id])
 		for kl: String in cn.get("klipy", []):
-			if (kl.begins_with("Farm_") or kl.begins_with("TreeChopping") or kl.begins_with("Fixing") or kl.begins_with("Prace_Uder") or kl.begins_with("Prace_Kovar")) and not vr.has(kl) and not vr.has("*"):
+			if (kl.begins_with("Farm_") or kl.begins_with("TreeChopping") or kl.begins_with("Fixing") or kl.begins_with("Prace_Uder") or kl.begins_with("Prace_Kovar")) and not vr.has(kl) and not vr.has("*") and not (P.get("klipy_rucni", []) as Array).has(kl):
 				ch.call("%s: klip %s s naradim bez predmetu v ruce" % [cid, kl])
 	# predmet opravdu v ruce: postava s klipem prace ma pod kosti ruky model
 	var lamac: Dictionary = {}
@@ -7429,7 +7429,7 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 	# obsluha a hoste: host v sini (podminka), pak bez hostu
 	var host: Dictionary = {}
 	for c: Dictionary in ll:
-		if String(c["o"]["role"]) == "pocestny":
+		if String(c["o"]["role"]).begins_with("pocestny"):
 			host = c
 	var zal := [host.get("cinnost_ted", ""), host.get("kde_ted", ""), host.get("na_miste", false)]
 	var zal_ost := {}

@@ -5833,5 +5833,9 @@
   },
   "spanek": "poutník nespí - putuje dál (bez lůžka)",
   "_jmena": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): kazdy poutnik vlastni roli a trasu (3. pole)"
- }
+ },
+ "klipy_rucni": [
+  "Farm_Harvest"
+ ],
+ "_klipy_rucni": "Misa 11. 11.: klipy farmy, ktere jsou prace rukama bez naradi (Farm_Harvest = trhani rukama; srp v nem drzen za cepel) - test lide_chovani je nevyzaduje s predmetem"
 }
