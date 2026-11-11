@@ -7561,6 +7561,15 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 		c["cinnost_ted"] = zal_k[i][1]
 		c["sedi"] = zal_k[i][2]
 		c["na_miste"] = zal_k[i][3]
+	# Misa 11. 11. (tri poutnici sli spolu): cile poutniku (c.misto) od sebe aspon poutnici_od_m
+	var pt_m: Array = []
+	for c: Dictionary in ll:
+		if bool((c["o"] as Dictionary).get("poutnik", false)) and c.has("misto"):
+			pt_m.append([c["id"], c["misto"]])
+	for i in pt_m.size():
+		for j in range(i + 1, pt_m.size()):
+			if (pt_m[i][1] as Vector2).distance_to(pt_m[j][1]) < 20.0:
+				ch.call("poutnici %s a %s spolu (%s, %s)" % [pt_m[i][0], pt_m[j][0], pt_m[i][1], pt_m[j][1]])
 	# Misa 11. 11. (lavice od studny skoncila v pruchodu brany): venkovni nabytek ne v mistnosti stavby
 	for r: Dictionary in sv.data.get("vybaveni", []):
 		if bool(r.get("venku", false)):

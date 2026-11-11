@@ -944,7 +944,12 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	c["pozor_podm"] = ""
 	var cn: Dictionary = P["cinnosti"][b["cinnost"]]
 	_uvolni(c)
-	var m: Array = _misto_cinnosti(c, String(b["kde"]), cn)
+	var kde_b := String(b["kde"])
+	if bool(cn.get("nahodny_start", false)) and not (cn.get("obchuzka", []) as Array).is_empty():
+		# Misa 11. 11. (tri poutnici sli spolu): poutnik zacina nahodnym bodem sve trasy, ne mistem bloku
+		c["obch_start"] = _rng.randi() % (cn["obchuzka"] as Array).size()
+		kde_b = String(cn["obchuzka"][c["obch_start"]])
+	var m: Array = _misto_cinnosti(c, kde_b, cn)
 	# Misa 11. 11. (spravce stal u lavicky): sed bez volneho sedaku = jina moznost bloku bez sedu (ne stat u mista)
 	if bool(cn.get("sed", false)) and (c["sedak"] as Dictionary).is_empty() and not c.has("stoji_u") \
 			and not bool(c.get("bez_sedu_znovu", false)):
@@ -964,7 +969,7 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	# obchuzka zacina mistem bloku (Misa r. 63: tri s kbeliky sly stejne kolo za sebou a v sobe); poutnici nahodne
 	c["obch"] = maxi(0, (cn.get("obchuzka", []) as Array).find(String(b["kde"])))
 	if bool(cn.get("nahodny_start", false)) and not (cn.get("obchuzka", []) as Array).is_empty():
-		c["obch"] = _rng.randi() % (cn["obchuzka"] as Array).size()
+		c["obch"] = int(c.get("obch_start", 0))
 	c["obmena"] = 0.0
 	c["na_miste_t"] = 0.0
 	var u: Node3D = c["uzel"]
