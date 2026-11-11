@@ -21,3 +21,12 @@ Pořadí (Míša): nejdřív dodělat seznam chyb a vydat, pak místa v pořadí
 - Chyběl jen spoj cesty k hájovně s údolní cestou (50 m přes Veličku; dnes most s červeným zábradlím, Street View hajovna_01) – doplněn.
 - Úvoz z vsi přímo do údolí v DMR nevidím (les = triangulační artefakty, starý úvoz nerozpoznatelný); boční údolíčko SZ (630 m, 15,6 %) – Míša 10. 11.: NESTAVĚT.
 - Na plošině JZ za Veličkou (u cesty k hájovně) jsou v reliéfu jasné úzké souběžné pásy polí (plužina) – patří spíš k Olšovci/Boňkovu, ne k Předhradí (NEOVERENO).
+
+## Příprava staveb 11. 11. (Míša: „připrav import staveb – vesnice dle pozůstatků, mlýn vodní, hospoda, hájovna“)
+- Modely z Havrana: `nastroje/stavby_z_havrana.sh` → `hra/modely/stavby_h/` (domy.glb: Dum1, Dum2, Rychta, ChyseKura,
+  ChysePrkna + domy_stredni.glb; mlyn.glb + mlyn_lod1.glb). Textury albedo 1024 / normála 512.
+- Kandidátní místa a doklady: `pravidla/svet/mista.json` (stav KANDIDAT – stavět až po snímku a schválení).
+- Mlýn: kandidát u tečkovaných obrysů na vojenské mapě 1:25 000 (~500 m SZ od hradu u silnice podél Veličky) – legendu
+  mapy vyžádat; spád pro kolo ověřit v DMR (Havran tools/krok_b/mlyn_misto.py).
+- Krčma: křížení cesty Veličkou s cestou údolím Kouteckého potoka pod hrady (most a brod).
+- Hájovna: konec cesty k hájovně u Boňkova (Míša: hájenka je i na vojenské mapě).

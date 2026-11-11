@@ -1,0 +1,48 @@
+{
+ "popis": "Nová místa světa – stavby převzaté z Havrana (nastroje/stavby_z_havrana.sh → hra/modely/stavby_h/). Míša 11. 11.: „připrav import staveb do hry, vesnice dle pozůstatků v krajině (logicky), mlýn vodní, hospoda, hájovna“. Poloha je v souřadnicích hry (x východ, z jih). Stav KANDIDAT = čeká na snímek a schválení Míšou, teprve pak se staví (CLAUDE.md: nejdřív fotky). Plán a doklady: docs/plan_mista.md.",
+ "modely": {
+  "domy": {"soubor": "res://modely/stavby_h/domy.glb", "stredni": "res://modely/stavby_h/domy_stredni.glb", "koreny": ["Dum1", "Dum2", "Rychta", "ChyseKura", "ChysePrkna"], "zdroj": "Havran blender/ves_domy.py (modelář 25. 10., Disk „budovy“): Dum1 roubený se šindelem a hrázděným štítem, Dum2 omítnutý s doškovou valbou, Rychta s kamennou patrovou komorou, chýše s kůrou / prkny"},
+  "mlyn": {"soubor": "res://modely/stavby_h/mlyn.glb", "daleko": "res://modely/stavby_h/mlyn_lod1.glb", "zdroj": "Havran docs/krok_b/zadani_mlyn.md: vesnický mlýn na vrchní vodu (kolo ~3,2 m, náhon ve žlabu na kozách, roubená mlýnice ~8×6 m), scripts/mlyn_kolo.gd (otáčení kola)"}
+ },
+ "mista": [
+  {
+   "id": "predhradi",
+   "nazev": "Předhradí (zaniklá ves)",
+   "stav": "KANDIDAT",
+   "stred": [-90, -290],
+   "modely": ["Dum1", "Dum2", "ChyseKura", "ChysePrkna"],
+   "pocet_usedlosti": "6–8 (NAVRH podle rozsahu mezí)",
+   "doklad": "GC80T08 (docs/hrady_podle_kreseb.md): kamenné hrázky políček ~250 m SZ a SV, ves 1547 pustá; DMR 5G lokální reliéf: pravoúhlé linie (meze) na plošině SSZ od hradu A (rozbor 11. 11., scratchpad teren/relief.png)",
+   "jistota": "DOLOZENO existence a přibližná poloha; uspořádání usedlostí NAVRH (podle mezí, ulicová ves)",
+   "cesta": "z hřebenové / hlavní cesty k hradu A (ne úvozem do údolí – Míša 10. 11.)"
+  },
+  {
+   "id": "mlyn_velicka",
+   "nazev": "Vodní mlýn na Veličce",
+   "stav": "KANDIDAT",
+   "stred": [-495, -400],
+   "modely": ["mlyn"],
+   "doklad": "vojenská mapa 1:25 000 (Míša 11. 11.): tečkované obrysy (zřícenina / snosy) u silnice podél Veličky ~500 m SZ od hradu; docs/reference/reserse_tlusty_jan.md: 11 mlýnů Boňkov–Potštát na Veličce",
+   "jistota": "NAVRH – doložení mlýna pro rok 1393 NEOVERENO; značku na mapě ověřit legendou (vyžádáno od Míši)",
+   "pozn": "náhon z Veličky, kolo na vrchní vodu – spád ověřit v DMR před stavbou (Havran tools/krok_b/mlyn_misto.py)"
+  },
+  {
+   "id": "krcma",
+   "nazev": "Krčma u cesty",
+   "stav": "KANDIDAT",
+   "stred": [60, 345],
+   "modely": ["Dum2"],
+   "doklad": "docs/reference/reserse_mosty_krcma.md (Richterová 1999): krčmy na křižovatkách obchodních cest a u brodů; zde křížení údolní cesty Veličkou (II/440) s cestou údolím Kouteckého potoka, most a brod pod hrady",
+   "jistota": "NAVRH (poloha podle pravidla, ne podle nálezu)"
+  },
+  {
+   "id": "hajovna",
+   "nazev": "Hájovna",
+   "stav": "KANDIDAT",
+   "stred": [-133, 545],
+   "modely": ["Dum1"],
+   "doklad": "konec cesty k hájovně (OSM way 223186959, dnes asfaltka k chatě / bývalé hájovně, Street View docs/reference/udoli_440/hajovna_01–03); Míša 11. 11.: hájenka je i na vojenské mapě 1:25 000",
+   "jistota": "NAVRH pro 1393 (hájovna jako budova doložena až novověk); poloha DOLOZENO dnešní"
+  }
+ ]
+}
