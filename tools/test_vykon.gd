@@ -168,6 +168,18 @@ func _postavy_mimo_zaber() -> void:
 	li.set("anim_kroku", 0)
 	await _snimky(30)
 	var vzaberu := int(li.get("anim_kroku"))
+	var cam: Camera3D = pl.get("cam")
+	var vid := 0
+	var vk := 0
+	var nej := INF
+	for c: Dictionary in li.get("_lide"):
+		var u2: Node3D = c["uzel"]
+		nej = minf(nej, u2.global_position.distance_to(pl.global_position))
+		if u2.visible:
+			vid += 1
+			if li.call("_v_kuzelu", cam, u2.global_position + Vector3(0, 1, 0)):
+				vk += 1
+	print("POSTAVY_ZABER viditelnych %d, v kuzelu %d, nejblizsi %.1f m, kamera %s smer %s, hrac %s" % [vid, vk, nej, cam.global_position if cam else Vector3.ZERO, -cam.global_basis.z if cam else Vector3.ZERO, pl.global_position])
 	if vzaberu == 0:
 		chyby.append("v zaberu zadna animace")
 	vysledky.append(["postavy_mimo_zaber", chyby.is_empty(), "mimo zaber %d posunu (blizko %d), v zaberu %d, rozvrh zmenil %d postav%s" % [mimo, bliz, vzaberu, zmena, "" if chyby.is_empty() else " " + str(chyby)]])
