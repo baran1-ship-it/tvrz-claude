@@ -1253,3 +1253,11 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - **Disk 12. 11. (689 MB, beh.sh odmítl):** 12 GB zabírá `.git` (7,5 GB volných objektů, `git count-objects -vH`),
   `git gc` se nevejde. Uklizeno: vlastní snímky `build/uchop*`, `build/lednice*`, logy `build/beh` starší 2 h,
   `shader_cache` hry (vytvoří se znovu) → 846 MB. `git fsck --unreachable` na tomto repu přes 10 min – nepoužívat.
+- **12. 11. noc – POTVRZENÁ PŘÍČINA špatných rukou v klipech Mixamo:** `tools/postavy_q/anim_cmu.py` přenášel kosti
+  nejkratším obloukem (jen směr kosti) – natočení ruky kolem předloktí (roll) se ztrácelo, u Mixamo ruka pootočená o
+  **90–91°** (`RUKA_ROLL` v logu převodu). Oprava: ruka = celá soustava ze dvou směrů v klidu obou koster (zápěstí → kloub
+  prostředníčku, kloub malíčku → kloub ukazováku). Ověření `tools/mereni_uchopu_klipu.gd`: v Great Sword Slash palce
+  obou rukou podél spojnice dlaní (−0,77…−1,00), dlaně kolmo = pevná násada, pravá ruka nahoře. Týká se všech klipů
+  Mixamo (pití, položení, sezení…) – po převodu zkontrolovat. Moje předchozí pokusy (směr z ramen, zalomení zápěstí,
+  prohození rukou) stavěly na chybných datech ruky. Poučení: **nejdřív ověřit vstupní data (osy kostí po převodu) měřením
+  surového klipu**, teprve pak úchop.

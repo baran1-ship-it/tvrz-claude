@@ -131,6 +131,8 @@ func _process_modification() -> void:
 				var z_rukou := (R.get("klipy_nasada_z_rukou", []) as Array).has(klip_ted)
 				if z_rukou:
 					# 12. 11. klip nahrany s obourucni zbrani (mereni_nasady.gd): nasada = primka pres dlane obou rukou z klipu
+					# 12. 11. (tools/mereni_uchopu_klipu.gd po oprave natoceni ruky v anim_cmu.py: palce obou rukou podel
+					# spojnice dlani k prave ruce) - prava ruka nahore u hlavy, leva na konci; nasada = spojnice dlani klipu
 					var dl_b := Vector3(-uz.position.x, uz.position.y, uz.position.z)
 					var g2c := sk.get_bone_global_pose(ih2)
 					osa_y = (hg.origin + hg.basis * uz.position) - (g2c.origin + g2c.basis * dl_b)
@@ -158,8 +160,35 @@ func _process_modification() -> void:
 					var ud := float(d.get("uchop_uder_y", uu))
 					var posun := (lerpf(ud, uu, faze) - uu)                        # m po nasade od bodu uchopu dat
 					if z_rukou:
-						posun = float(d.get("uchop_z_rukou_y", uu)) - uu                # ruce v klipu drzi nasadu samy
+						posun = float(d.get("uchop_z_rukou_y", uu)) - uu                # prava ruka nahore (od konce o rozestup rukou)
 					p["posun"] = posun
+					# 12. 11. (Misa: „pohlidej zapusteni“, „na zem dopadne spickou a sekera ostrim“): v okamziku rany (faze 0 =
+					# ruce nejniz) se nastroj sklopi kolem horni ruky, az spicka/ostri (drzeni.<id>.hrot, bod v predmetu)
+					# dojde zapust_m pod zem u nohou postavy; ostri zustava v rovine svihu (kolmo k nasade a k ose vpravo)
+					var hrot: Array = d.get("hrot", [])
+					if z_rukou and hrot.size() == 3:
+						var w := 1.0 - smoothstep(0.0, float(R.get("zapust_faze", 0.3)), faze)
+						if w > 0.0:
+							var mer := maxf(skg.basis.get_scale().x, 1e-4)
+							var zem_h := (skg.affine_inverse() * postava.global_position).dot(nahoru) - float(R.get("zapust_m", 0.05)) / mer
+							var p1 := hg.origin + hg.basis * uz.position
+							var ly := (float(hrot[1]) - (uu + posun)) * sc.x
+							var ls := Vector2(float(hrot[0]), float(hrot[2])).length() * sc.x
+							var rot_os := osa_y.cross(nahoru)
+							if rot_os.length_squared() > 1e-6:
+								rot_os = rot_os.normalized()
+								var a := 0.0
+								var amax := deg_to_rad(float(R.get("zapust_max_st", 60.0)))
+								while a <= amax:
+									var o := osa_y.rotated(rot_os, -a)
+									var e := o.cross(vpravo)
+									if e.length_squared() > 1e-6:
+										e = e.normalized()
+									var spicka := p1 + o * ly - e * ls * signf(e.dot(nahoru) + 1e-6)
+									if spicka.dot(nahoru) <= zem_h:
+										break
+									a += deg_to_rad(2.0)
+								osa_y = osa_y.rotated(rot_os, -minf(a, amax) * w)
 					var ostri := osa_y.cross(vpravo)
 					if ostri.length_squared() < 1e-6:
 						ostri = osa_y.cross(skb.inverse() * smer.z)
@@ -173,7 +202,7 @@ func _process_modification() -> void:
 					# 11. 11. (test_drzeni: nasada 38-69 st k prstum, ma byt 90): dlan natocit, aby nasada vedla napric
 					# dlani (osa z kosti ruky = napric dlani k palci, y = k prstum) - jako kladivo v jedne ruce
 					var od_h := hg.basis * osa_dlane()
-					_otoc(sk, ih, od_h, osa_y if od_h.dot(osa_y) >= 0.0 else -osa_y)
+					_otoc(sk, ih, od_h, osa_y)   # palec k hlave nastroje (Misa 12. 11.: jedna ruka zleva, druha zprava)
 					hg = sk.get_bone_global_pose(ih)
 					uz.basis = (hg.basis.orthonormalized().inverse() * chteno_sk).orthonormalized().scaled(sc)
 					# klouzani horni ruky: predmet se v ruce posune podel nasady (bod uchopu dat -> uchop_uder_y)
@@ -214,7 +243,7 @@ func _process_modification() -> void:
 						_ik(sk, druha, cil0 - hg2.basis.orthonormalized() * dl2)   # kost ruky ma v soustave kostry meritko
 						hg2 = sk.get_bone_global_pose(ih2)
 						var od2 := hg2.basis * osa_dlane()
-						_otoc(sk, ih2, od2, osa_y if od2.dot(osa_y) >= 0.0 else -osa_y)
+						_otoc(sk, ih2, od2, osa_y)   # i druha ruka palcem k hlave - leva kost ruky je zrcadlena, dlan tak obejme nasadu z druhe strany
 					hg2 = sk.get_bone_global_pose(ih2)
 					if diag:
 						var gp := hg2.origin + hg2.basis * dl2

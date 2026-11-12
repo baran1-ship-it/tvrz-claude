@@ -280,6 +280,24 @@ def prenes(name, cid, t0, dl, uchop):
     for sb, tb in MP.items():
         b = S.data.bones[sb]; ds = (b.tail_local - b.head_local).normalized()
         A[tb] = ds.rotation_difference(dirT[tb])
+        # 12. 11. (Misa: ruce na nastroji spatne; tools/mereni_uchopu_klipu.gd: v Mixamo klipu palce kolmo na spojnici
+        # rukou, dlane podel ni = ruka pootocena kolem predlokti): nejkratsi oblouk srovna jen smer kosti, natoceni dlane
+        # (roll) neprenese. Ruka: cela soustava ze dvou smeru v klidu obou koster - zapesti -> kloub prostrednicku a
+        # kloub malicku -> kloub ukazovaku (rešerše: Godot forum, Mixamo roll ruky az 130 st)
+        if mix and tb in ("hand_r", "hand_l"):
+            s_ = "Right" if tb.endswith("_r") else "Left"
+            t_ = tb[-1]
+            bs = S.data.bones
+            sv1 = (bs[f"mixamorig:{s_}HandMiddle1"].head_local - b.head_local).normalized()
+            sv2 = (bs[f"mixamorig:{s_}HandIndex1"].head_local - bs[f"mixamorig:{s_}HandPinky1"].head_local).normalized()
+            tbn = T.data.bones
+            tv1 = (tbn[f"middle_01_{t_}"].head_local - tbn[tb].head_local).normalized()
+            tv2 = (tbn[f"index_01_{t_}"].head_local - tbn[f"pinky_01_{t_}"].head_local).normalized()
+            def ram(a, c):
+                z = a.cross(c).normalized(); y = z.cross(a).normalized()
+                return Matrix((a, y, z)).transposed()
+            A[tb] = (ram(tv1, tv2) @ ram(sv1, sv2).inverted()).to_quaternion()
+            print("RUKA_ROLL", name, tb, "uhel proti smeru kosti %.0f st" % math.degrees(A[tb].rotation_difference(ds.rotation_difference(dirT[tb])).angle))
     step = src_fps // FPS
     loop = name.endswith("_Loop") and (not mix or t0 > 0)   # Mixamo cely klip: smycka hotova; vyrez (t0 > 0) prolnout
     K = int(0.4 * FPS) if loop else 0

@@ -108,7 +108,7 @@ func _beh() -> void:
 							ap.seek(dl * i / 24.0, true)
 							ap.advance(0.0)
 							await process_frame
-					for f: float in [0.2, 0.55, 0.9]:
+					for f: float in ([0.1, 0.25, 0.4, 0.55, 0.7, 0.85, 0.95] if obouruc else [0.2, 0.55, 0.9]):
 						ap.stop()
 						ap.play(kl, 0.0)
 						ap.seek(dl * f, true)
@@ -230,6 +230,13 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 			var dd := (vv - ax2 * vv.dot(ax2)).length()
 			var zw := _kost(kostra, "hand_" + druha).global_position - g.origin
 			print("TEST_ZAPESTI %s %s osa %s, zapesti od osy %.3f, g %s" % [Engine.get_process_frames(), _kost(kostra, "hand_" + druha).global_position.snapped(Vector3.ONE * 0.001), ax2.snapped(Vector3.ONE * 0.01), (zw - ax2 * zw.dot(ax2)).length(), g.origin.snapped(Vector3.ONE * 0.001)])
+			# Misa 12. 11. („jedna ruka zleva, druha zprava“): obe ruce palcem k hlave nastroje (osa z kosti ruky = k palci,
+			# leva zrcadlena) - dlane z opacnych stran nasady
+			for rk2: String in [ruka, druha]:
+				var palec := _kost(kostra, "hand_" + rk2).global_basis.orthonormalized().z
+				if palec.dot(ax2) < 0.0:
+					chyb += 1
+					print("DRZENI CHYBA %s %s: ruka %s palcem ke konci nasady (%.0f st od smeru k hlave)" % [co, id, rk2, rad_to_deg(palec.angle_to(ax2))])
 			print("DRZENI %-40s %s druha ruka od osy nasady %.3f m" % [co, id, dd])
 			# pest druhe ruky: stredy prostrednich clanku od osy nejvys polomer + 2 tloustky prstu + druha_ruka_m
 			var r2 := float(((drzi["mod"].get("polozky") as Dictionary)[ruka] as Dictionary).get("r_m", 0.0)) + 2.0 * float(P["drzeni"]["_reseni"]["prst_pul_m"])

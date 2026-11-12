@@ -5709,7 +5709,12 @@
     0.02
    ],
    "_dlan12": "12. 11. test_drzeni UCHOP_NAVRH (nejmensi nejvetsi mezera/prunik prstu, obe ruce - leva zrcadlene): posun od _dlan_m",
-   "uchop_z_rukou_y": 0.33
+   "uchop_z_rukou_y": 0.33,
+   "hrot": [
+    0.275,
+    1.056,
+    0.0
+   ]
   },
   "kladivo_kamenicke": {
    "uchop": [
@@ -5873,7 +5878,12 @@
     0.02
    ],
    "_dlan12": "12. 11. test_drzeni UCHOP_NAVRH (nejmensi nejvetsi mezera/prunik prstu, obe ruce - leva zrcadlene): posun od _dlan_m",
-   "uchop_z_rukou_y": 0.35
+   "uchop_z_rukou_y": 0.35,
+   "hrot": [
+    0.0,
+    0.585,
+    0.107
+   ]
   },
   "_rezim": "Misa 0.99993 r. 47 (9. 11.): rot_st plati jen v klipu, ve kterem se ladilo - v jinych klipech (chuze, reakce slozene ruce, kleceni) byl predmet nakrivo. rezim (scripts/uchop.gd, SkeletonModifier3D po animaci): visi = predmet visi z uchopu svisle (tize; vedro, lucerna, kosik), svisle = ruka se natoci, aby predmet mel v soustave postavy svet_rot_st (kopi hrotem nahoru: +x predmetu -> nahoru = [0,0,90]); druha_ruka = bod predmetu (jeho souradnice), kam jde druha ruka IK (obourucni krumpac a sekera). Bez rezimu predmet jde s klipem (srp, kladivo, vedro_drevene pri zalevani - naklon je zadouci).",
   "_test": {
@@ -6096,10 +6106,15 @@
    "klipy_nasada_z_rukou": [
     "Uder_Mec_Mx"
    ],
-   "_klipy_nasada_z_rukou": "12. 11.: klipy nahrane s obourucni zbrani (mereni_nasady.gd: ruce drzi jednu rukojet) - osa nasady = primka pres body dlani obou rukou (od leve/dolni k prave/horni, dal k hlave nastroje), bez dopocitaneho zalomeni zapesti a klouzani"
+   "_klipy_nasada_z_rukou": "12. 11.: klipy nahrane s obourucni zbrani (mereni_nasady.gd: ruce drzi jednu rukojet) - osa nasady = primka pres body dlani obou rukou (od leve/dolni k prave/horni, dal k hlave nastroje), bez dopocitaneho zalomeni zapesti a klouzani",
+   "zapust_m": 0.05,
+   "zapust_faze": 0.3,
+   "zapust_max_st": 60.0,
+   "_zapust": "12. 11. (Misa: pohlidej zapusteni): spicka/ostri pri rane zapust_m pod zem (odhad 5 cm pro tvrdou zem - NEOVERENO zdrojem), sklopeni nastroje do zapust_max_st, plne v okamziku rany, do faze zapust_faze odezni"
   },
   "_druha_ruka_rozsah": "12. 11.: druha ruka na nasade v rozsahu [od, do] m od bodu druha_ruka (od = k samemu konci nasady 2 cm, do = 10 cm pod horni rukou); misto v rozsahu nejblize dlani z klipu (USDA Ax Manual: jedna ruka na konci, druha klouze)",
-  "_uchop_z_rukou_y": "12. 11.: bod uchopu prave ruky po nasade v klipech s nasadou z rukou = druha_ruka + 0,27 m (ruce v Great Sword Slash 23-30 cm od sebe)"
+  "_uchop_z_rukou_y": "12. 11.: bod uchopu prave ruky po nasade v klipech s nasadou z rukou = druha_ruka + 0,27 m (ruce v Great Sword Slash 23-30 cm od sebe)",
+  "_hrot": "12. 11. zmereno tools/mereni_hlavy.gd (vrchol hlavy nejdal od osy nasady): krumpac spicka x +-0,275 m ve vysce 1,056; sekera ostri z +-0,107 ve vysce 0,585. Pri rane se tento bod zapusti do zeme (_reseni.zapust_m)"
  },
  "sedani": {
   "_popis": "sezeni postav (plan krok 3.1, sed ve vzduchu): cinnost se sed hleda nejblizsi volny sedak ze sedaky (zaznam vybaveni sveta, ne naklopeny) do hledat_m od mista; vyska sedaku = rozmer[1] z katalogu (jen sedaky bez operadla), pouzije se jen v tolerance_m od vyska_klipu_m (Sitting_Idle_Loop: sedaci plocha nad korenem postavy, NEOVERENO - ladi se snimkem); lavice ma mist po sirka_mista_m; koren postavy pred_m pred stredem sedaku smerem, kam se diva (k ohnisti/stolu do k_ohni_m, jinak k mistu cinnosti). Prechod Sitting_Enter / Sitting_Exit.",
