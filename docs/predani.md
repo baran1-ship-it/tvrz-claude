@@ -1265,3 +1265,10 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   na které neodkazuje žádný `*.import` (zbytky smazaných/přejmenovaných modelů) – seznam: `grep -rhoE
   'res://\.godot/imported/[^"]+' --include=*.import .` proti `ls .godot/imported`; chybějící Godot při `--import` vytvoří.
   Tím 945 MB → 1,3 GB.
+- **Rybník Lhota 12. 11. noc – stav po exportu (hráz napříč odtoku, odtok od paty):** snímky shora `build/ryb5/shora.jpg`:
+  přítok voda nad osou je (test `ryb_napojeni` 0 m bez vody), ale posledních ~15 m světle zelenkavá (splývá s trávou),
+  u rybníka useknutá do světlého obdélníku, přes ni vysoké růžové rostliny; odtok začíná useknutým koncem ~10 m od vody,
+  hráz shora nerozeznatelná. Podezření (NEOVĚŘENO): barva vody z hloubky zapečené Blenderem do vrcholů hladiny
+  (COLOR.r) – v dílu hra mění terén (`_ryb_hraz_toky`), zapečená hloubka nesedí; useknutí = `svet._toky_voda_v_dilu`.
+  Další krok: změřit COLOR.r hladiny přítoku proti skutečné hloubce nad terénem dílu (rozpor Blender × Godot → zapsat do
+  `rozpory_blender_godot.md`), test `ryb_napojeni` rozšířit o hloubku pro barvu a rostliny přes korytem (výška trsu).
