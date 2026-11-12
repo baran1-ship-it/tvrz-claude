@@ -5738,15 +5738,22 @@
   },
   "srp": {
    "uchop": [
-    0.0,
-    0.0,
+    0.065,
+    0.015,
     0.0
    ],
    "rot_st": [
-    0.0,
+    90.0,
+    -180.0,
+    -90.0
+   ],
+   "osa_nasady": [
+    1.0,
     0.0,
     0.0
-   ]
+   ],
+   "nasada": true,
+   "_uchop12": "12. 11. (blender/vlastni.py sickle: rukojet z (0,0) do (0,13; 0) podel osy x predmetu, r 16 mm, cepel za ni v rovine xz): drive uchop na konci rukojeti [0,0,0] a rot 0 = rukojet osou skrz dlan. Ted stred rukojeti, osa x predmetu napric dlani (z ruky), cepel nad palcem dopredu (-z predmetu -> y ruky)"
   },
   "kosik": {
    "uchop": [
@@ -5855,8 +5862,8 @@
     0.0
    ],
    "rot_st": [
-    0.0,
-    0.0,
+    -180.0,
+    90.0,
     90.0
    ],
    "rezim": "svisle",
@@ -5875,14 +5882,9 @@
    "_p11": "11. 11. (rešerše: korbel se pri chuzi naklani): svisle = nadoba rovne (osa y nahoru) v kazdem klipu, pri piti (klipy_bez_rezimu) naklon z klipu k ustum",
    "_ruka11": "11. 11. (snimek uchop4/piti: Mixamo Drinking pije LEVOU rukou, korbel visel v prave u boku) - v_rukou pri piti l",
    "_uchop11": "11. 11.: za ucho (mereni modelu: ucho x +0,08, y 0,04-0,10), drive stred korbelu",
-   "dlan_m": [
-    0.0,
-    0.095,
-    0.0
-   ],
-   "_dlan11": "ucho drzi prsty v pesti (y 0,095), bez posunu k dlani - nadoba mimo ruku",
    "uchop_r_m": 0.008,
-   "_uchop_r": "12. 11.: ucho korbelu svisle (osa y) v pesti - NEOVERENO z modelu"
+   "_uchop_r": "12. 11.: ucho korbelu svisle (osa y) v pesti - NEOVERENO z modelu",
+   "_rot12": "12. 11. (test_drzeni dotyk: ucho vedlo skrz dlan - osa y predmetu na -x ruky, prsty nemely kolem ceho sevrit): ucho (y predmetu) napric dlani (z ruky), telo korbelu za prsty (od ucha -x predmetu -> +y ruky k prstum); dlan_m zrusen (dutina pesti _dlan_m jako ostatni)"
   },
   "miska": {
    "_popis": "obsluha nese misu (Mixamo Carrying) - dlan pod miskou, NEOVERENO snimkem",
@@ -6015,13 +6017,14 @@
     80.0
    ],
    "krok_st": 2.0,
-   "okno_m": 0.03,
+   "okno_m": 0.12,
    "max_polomer_m": 0.04,
    "polomer_vychozi_m": 0.015,
    "palec_mrizka_st": 60.0,
    "palec_krok_st": 15.0,
    "test_dovnitr_m": 0.002,
-   "test_mezera_m": 0.005
+   "test_mezera_m": 0.005,
+   "_okno": "polomer nasady = median vzdalenosti vrcholu od osy y predmetu v okne +-okno_m od bodu uchopu (do max_polomer_m) - drive maximum v okne 3 cm: krumpac 40 mm (hlava), sekera bez vrcholu (vychozi)"
   }
  },
  "sedani": {
@@ -6538,5 +6541,7 @@
    "od": 19.0,
    "kde": "naves_4"
   }
- ]
+ ],
+ "faze_smycky_podil": 1.0,
+ "_faze_smycky_podil": "12. 11. (rešerše Živé postavy jako v KCD - animation twinning, Dawe GAP2 kap. 6): smycka cinnosti zacina v nahodne fazi (podil delky klipu), chuze ne"
 }

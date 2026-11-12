@@ -1888,6 +1888,10 @@ func _klip(c: Dictionary, jm: String, tempo: float) -> void:
 		# tempo 0 = stojici poza (lezeni v posteli): bez prolinani - prolinani v AnimationPlayer ubyva s casem
 		# x speed_scale, pri 0 se nikdy nedokonci a postava zustala v predchozi poze (Misa 0.99993 r. 59: stoji na luzku)
 		ap.play(jm, float(P["blend"]) if tempo > 0.0 else 0.0)
+		# proti dvojcatum (rešerše reports/Živé postavy jako v KCD.md, Dawe GAP2 kap. 6): smycka cinnosti zacina v nahodne
+		# fazi - dve postavy u stejne prace nebusi do taktu. Chuze ne (navazuje na krok).
+		if jm.ends_with("_Loop") and not jm.begins_with("Walk") and not jm.begins_with("Chuze") and tempo > 0.0:
+			ap.seek(randf() * ap.get_animation(jm).length * float(P.get("faze_smycky_podil", 1.0)), false)
 		c["klip"] = jm
 		# predmety v rukou podle klipu cinnosti (postavy.json cinnosti.v_rukou: klip nebo "*" = ostatni klipy
 		# cinnosti i chuze); reakce (kyvnuti) predmet v ruce nechava

@@ -124,7 +124,8 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 			var r_m := float(((mod.get("polozky") as Dictionary)[ruka] as Dictionary).get("r_m", -1.0))
 			var gs := g.basis.get_scale().x * (1.0 / maxf(uz.scale.x, 1e-6))   # metry predmetu -> svet
 			var hb0: BoneAttachment3D = _kost(kostra, "hand_" + ruka)
-			var ax := g.basis.y.normalized() if String(d.get("rezim", "")) != "visi" else hb0.global_basis.z.normalized()
+			var on: Array = d.get("osa_nasady", [0.0, 1.0, 0.0])
+			var ax := (g.basis * Vector3(float(on[0]), float(on[1]), float(on[2]))).normalized() if String(d.get("rezim", "")) != "visi" else hb0.global_basis.z.normalized()
 			var ruky: Array = [ruka]
 			if (d.get("druha_ruka", []) as Array).size() == 3:
 				ruky.append("l" if ruka == "r" else "r")
@@ -133,16 +134,18 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 				var nej_in := 0.0
 				var nej_gap := 0.0
 				for f: String in ["index", "middle", "ring", "pinky", "thumb"]:
+					var f_min := INF                        # nejblizsi bod prstu k povrchu (prst se ma nasady dotykat)
 					for j: String in ["02", "03", "04_leaf"]:
 						var bx: BoneAttachment3D = _kost(kostra, "%s_%s_%s" % [f, j, rk])
 						var v := bx.global_position - g.origin
 						var od := (v - ax * v.dot(ax)).length() - (r_m + float(R["prst_pul_m"])) * gs
+						f_min = minf(f_min, od)
 						if od < -float(R["test_dovnitr_m"]):
 							nej_in = minf(nej_in, od)
 							horsi += " %s_%s v predmetu %.0f mm" % [f, j, od * 1000.0]
-						if f in ["index", "middle", "ring"] and j != "02" and od > float(R["test_mezera_m"]):
-							nej_gap = maxf(nej_gap, od)
-							horsi += " %s_%s mezera %.0f mm" % [f, j, od * 1000.0]
+					if f in ["index", "middle", "ring"] and f_min > float(R["test_mezera_m"]):
+						nej_gap = maxf(nej_gap, f_min)
+						horsi += " %s nedosahne (%.0f mm)" % [f, f_min * 1000.0]
 				print("DRZENI %-40s %s ruka %s polomer %.1f mm: nejhlubsi %.0f mm, nejvetsi mezera %.0f mm" % [co, id, rk, r_m * 1000.0, nej_in * 1000.0, nej_gap * 1000.0])
 				if horsi != "":
 					chyb += 1
@@ -152,7 +155,8 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 		var ba0: BoneAttachment3D = kostra.get_node_or_null("test_ruka_" + ruka)
 		if ba0 != null and rez == "":
 			var hb := ba0.global_basis.orthonormalized()
-			var ny := g.basis.y.normalized()
+			var on3: Array = d.get("osa_nasady", [0.0, 1.0, 0.0])
+			var ny := (g.basis * Vector3(float(on3[0]), float(on3[1]), float(on3[2]))).normalized()
 			var u_y := rad_to_deg(ny.angle_to(hb.y))
 			print("DRZENI %-40s %s nasada k prstum %.0f st, k x %.0f st, k z %.0f st" % [co, id, u_y, rad_to_deg(ny.angle_to(hb.x)), rad_to_deg(ny.angle_to(hb.z))])
 			if bool(d.get("nasada", false)) and absf(u_y - 90.0) > float(T.get("nasada_st", 25.0)):
@@ -172,7 +176,8 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 				ba2.name = "test_ruka_" + druha
 				ba2.bone_name = "hand_" + druha
 				kostra.add_child(ba2)
-			var z2 := ba2.global_position
+			var u0: Node3D = drzi.get(ruka + "_uzel")
+			var z2 := ba2.global_transform * Vector3(-u0.position.x, u0.position.y, u0.position.z)   # bod dlane (uchop.gd dl2)
 			var dd := z2.distance_to(bod)
 			print("DRZENI %-40s %s druha ruka od topurka %.3f m" % [co, id, dd])
 			if dd > float(T["druha_ruka_m"]):

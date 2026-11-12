@@ -121,11 +121,13 @@ func _process_modification() -> void:
 					_otoc(sk, ih2, hg2.basis.z, osa_y if hg2.basis.z.dot(osa_y) >= 0.0 else -osa_y)
 					# 12. 11. (rešerše: druha ruka IK na uchop, ne zapesti): na nasade ma byt dutina pesti druhe ruky
 					# (bod uchopu zrcadlene), ne zapesti - IK znovu s cilem posunutym o bod dlane
+					# IK hybe pazi a tim i natocenim ruky, natoceni zas posune bod dlane - 3 kola (sbiha se)
 					var dl2 := Vector3(-uz.position.x, uz.position.y, uz.position.z)
-					hg2 = sk.get_bone_global_pose(ih2)
-					_ik(sk, druha, cil0 - hg2.basis * dl2)
-					hg2 = sk.get_bone_global_pose(ih2)
-					_otoc(sk, ih2, hg2.basis.z, osa_y if hg2.basis.z.dot(osa_y) >= 0.0 else -osa_y)
+					for _k in 3:
+						hg2 = sk.get_bone_global_pose(ih2)
+						_ik(sk, druha, cil0 - hg2.basis * dl2)
+						hg2 = sk.get_bone_global_pose(ih2)
+						_otoc(sk, ih2, hg2.basis.z, osa_y if hg2.basis.z.dot(osa_y) >= 0.0 else -osa_y)
 					hg2 = sk.get_bone_global_pose(ih2)
 					_prsty(sk, ruka, p, d)
 					var a2 := (hg2.basis.orthonormalized().inverse() * osa_y).normalized()
@@ -203,29 +205,34 @@ func _poza(sk: Skeleton3D, ruka: String, p: Dictionary, d: Dictionary, bod := Ve
 	var uz: Node3D = p["uzel"]
 	var visi := String(d.get("rezim", "")) == "visi"
 	if osa == Vector3.ZERO:
-		osa = Vector3(0, 0, 1) if visi else (uz.basis * Vector3.UP).normalized()
+		var on: Array = d.get("osa_nasady", [0.0, 1.0, 0.0])            # osa drzadla v predmetu (srp: x)
+		osa = Vector3(0, 0, 1) if visi else (uz.basis * Vector3(float(on[0]), float(on[1]), float(on[2]))).normalized()
 	if bod == Vector3.INF:
 		bod = uz.position
 	var klic := "%s|%s|%s|%s" % [String(p["id"]), ruka, str(sk.get_bone_rest(sk.find_bone("index_01_" + ruka)).origin.snapped(Vector3.ONE * 0.001)), str(osa.snapped(Vector3.ONE * 0.25))]
 	if _pozy.has(klic):
+		p["r_m"] = _pozy[klic + "|r"]
 		return _pozy[klic]
 	if R.is_empty():
 		R = (preload("res://scripts/pravidla.gd").soubor("postavy")["drzeni"] as Dictionary).get("_reseni", {})
-	var r_m := float(d["uchop_r_m"]) if d.has("uchop_r_m") else _polomer(uz)
+	var on2: Array = d.get("osa_nasady", [0.0, 1.0, 0.0])
+	var r_m := float(d["uchop_r_m"]) if d.has("uchop_r_m") else _polomer(uz, Vector3(float(on2[0]), float(on2[1]), float(on2[2])))
 	var t0 := Time.get_ticks_usec()
 	var pz := _res(sk, ruka, bod, osa, (r_m + float(R.get("prst_pul_m", 0.009))) * uz.scale.x)
 	if diag:
 		print("UCHOP_RESENI %s %s polomer %.4f m, osa %s, %d us" % [String(p["id"]), ruka, r_m, osa, Time.get_ticks_usec() - t0])
 	_pozy[klic] = pz
+	_pozy[klic + "|r"] = r_m
 	p["r_m"] = r_m
 	return pz
 
 
-## Polomer nasady z modelu: vrcholy do okna podel osy y kolem bodu uchopu, do max vzdalenosti od osy (bez hlavy).
-static func _polomer(uz: Node3D) -> float:
-	var okno := float(R.get("okno_m", 0.03))
+## Polomer nasady z modelu: median vzdalenosti vrcholu od osy y predmetu v okne +-okno_m kolem bodu uchopu, jen do
+## max_polomer_m (bez hlavy nastroje). Valec ma vsechny vrcholy na polomeru -> median = polomer.
+static func _polomer(uz: Node3D, osa := Vector3.UP) -> float:
+	var okno := float(R.get("okno_m", 0.12))
 	var mx := float(R.get("max_polomer_m", 0.04))
-	var nej := 0.0
+	var rr: Array = []
 	var inv := uz.global_transform.affine_inverse()
 	for mi: Node in uz.find_children("*", "MeshInstance3D", true, false):
 		var m := (mi as MeshInstance3D).mesh
@@ -235,11 +242,15 @@ static func _polomer(uz: Node3D) -> float:
 		for si in m.get_surface_count():
 			for v: Vector3 in m.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
 				var w := tr * v
-				if absf(w.y) <= okno:
-					var rr := Vector2(w.x, w.z).length()
-					if rr <= mx:
-						nej = maxf(nej, rr)
-	return nej if nej > 0.0 else float(R.get("polomer_vychozi_m", 0.015))
+				var podel := w.dot(osa)
+				if absf(podel) <= okno:
+					var r := (w - osa * podel).length()
+					if r <= mx:
+						rr.append(r)
+	if rr.size() < 4:
+		return float(R.get("polomer_vychozi_m", 0.015))
+	rr.sort()
+	return float(rr[rr.size() / 2])
 
 
 ## Reseni (soustava kosti ruky): prsty od kloubu 01 -> 02 -> 03 ohnout po kroku, dokud bod clanku (klouby, stredy
