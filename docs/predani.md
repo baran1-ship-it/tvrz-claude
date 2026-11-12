@@ -1231,3 +1231,15 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - **Mixamo FBX ve veřejném repu** (11. 11.): podmínky Mixama zakazují šířit zdrojové FBX (použití ve hře je volné).
   Repo `baran1-ship-it/tvrz-claude` je veřejné; Míša 11. 11.: „repo je veřejné, ale nemyslím si, že by do toho někdo šel“
   → FBX zůstávají v `tools/postavy_q/mixamo/` (jeho rozhodnutí). Kdyby se měnilo: repo soukromé, nebo FBX mimo repo.
+
+## 12. 11. – Úchopy z hlavy (Míša: „ani jeden úchop ještě není správně… nedělej to z hlavy, načti si to na internetu… máš to v pravidlech“)
+- **Chyba procesu:** úchopy 9.–12. 11. ladeny pokusem (pevný úhel prstů 50°, posun dlaně, palec dodatečně) bez rešerše –
+  porušení CLAUDE.md „nejdřív se podívat do světa“. Test měřil průměr středů článků od osy (1,5 cm „OK“), i když prsty
+  ležely vedle násady – špatná metrika prošla.
+- **Teď podle rešerše** (`docs/rozpracovane/uchop_reserse.md`): póza prstů řešená do dotyku s násadou (poloměr z modelu
+  + půl prstu), palec přes ukazovák, druhá ruka IK bodem dlaně; test kůže ≤ 2 mm v předmětu, mezera ≤ 5 mm (deadnight #507).
+- **Pravidlo:** u každé nové mechaniky (úchop, oblečení, voda…) nejdřív hledat hotový postup (GitHub, GDC, dokumentace
+  enginu) a zapsat zdroje do `docs/rozpracovane/*_reserse.md`; teprve pak kód. Test měří to, co vidí člověk (dotyk, průnik),
+  ne průměr.
+- Lednice mlýna (ohnutý papír): model má u stěn jen vnitřní líc + římsu 0,4 m; `tools/krok_b/lednice_blok.py` staví plné
+  hranoly (`voda.json mlyn.dil.lednice_blok`), test `lednice_blok` (paprsek zvenku musí narazit na stěnu).
