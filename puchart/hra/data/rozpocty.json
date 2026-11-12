@@ -7,7 +7,9 @@
  },
  "pamet": {
   "proces_gb": 1.25,
-  "gpu_mb": 700
+  "gpu_mb": 700,
+  "uzlu_max": 8000,
+  "uzlu_popis": "Uzly scény po startu (výpis UZLY v hlavni.gd, hlídač v hlidaci.sh). Míša 11. 11.: hra padala na tabletu při startu – les v buňkách 4 m stavěl MultiMesh pro celou mapu (přes 115 tis. uzlů, výpis pádu „mem_new is null“ = došla paměť); Havran 0.67 stejná chyba (47 000 MultiMeshInstance3D). Vrstvy s krátkým dosahem jen kolem hráče (hra/scripts/bunky_kolem.gd). Po opravě 3,3 tis."
  },
  "kresleni": {
   "cil": 700,

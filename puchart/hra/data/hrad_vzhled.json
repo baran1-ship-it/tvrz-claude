@@ -17,10 +17,10 @@
   "spara_m": 0.05,
   "hloubka_spary_m": 0.0,
   "vypoukleni_m": 0.0,
-  "pozn": "líc zdi zvlněný (lomové zdivo není rovné, ±4,5 cm na ~0,9 m) + jednotlivé vystupující kameny se sraženými hranami (0,55/m², 4–10 cm) – vidět v bočním světle a na obrysu; spáry v textuře",
+  "pozn": "líc zdi zvlněný (lomové zdivo není rovné, ±4,5 cm na ~0,9 m); spáry v textuře. Vystupující kameny vypnuté (Míša 4. 11.: „všude něco trčí ze zdí“ – kvádry sázené po mřížce dělaly řady jako poličky; KCD reference je nemá)",
   "vlna_m": 0.9,
   "vlna_ampl_m": 0.045,
-  "kameny_na_m2": 0.55,
+  "kameny_na_m2": 0.0,
   "kamen_rozmer_m": [
    [
     0.28,
@@ -48,7 +48,17 @@
   "krok_m": 0.45,
   "amplituda_m": 0.014,
   "min_delka_m": 0.8,
-  "pozn": "trámy a prkna hrubě sekané: hrany po 45 cm, nepravidelné plochy ±1,4 cm (stopy sekery)"
+  "pozn": "trámy a prkna hrubě sekané: hrany po 45 cm, nepravidelné plochy ±1,4 cm (stopy sekery)",
+  "deska": {
+   "_proc": "Jedno prkno = jeden kus dřeva s vlákny (Havran prkna_ven: UV v metrech po prkně). Textura podlahy z prken (wood_planks_grey) na jednom prkně dělala mřížku drobných prkének – vypadalo jako kámen/šindel (tablet 3. 11.: vrata „průsvitná“, mostovka).",
+   "max_tloustka_m": 0.1,
+   "max_sirka_m": 0.5,
+   "material": {
+    "prkna_ven": "prkno",
+    "dvere": "prkno_dvere",
+    "okenice": "prkno_dvere"
+   }
+  }
  },
  "rozpocet_troj_hrad": 900000,
  "lod": {
@@ -56,5 +66,26 @@
   "prolinani_m": 10.0,
   "pozn": "3. 11. (hlídač scén): plný hrad s reliéfem do 110 m, dál puchart_daleko.glb (bez detailu, ~35 k troj.); reliéf (±5 cm, kameny do 10 cm) za 100 m na tabletu nerozeznáš; přepnutí bez průhledného prolínání (FADE_DISABLED, okraj 10 m proti blikání) – průhledný průchod na Adrenu drahý",
   "pozn2": "3. 11. hlídač scén: s 110 m byl snímek typu A 68 m od hradu nad rozpočtem (2,19 M) – reliéf za 60 m nerozeznáš"
+ },
+ "cimburi": {
+  "popis": "Cimbuří hradeb po svahu (Míša 4. 11.: „přijde ti takové stavění hradeb v pohodě?“ – stupně koruny a stínky bez rytmu). Stínky v pravidelném rytmu po celé délce hradby, stupeň koruny jen v proluce (nikdy pod stínkou), nejvýš jeden stupeň na rytmus.",
+  "zdroj": "docs/reference/detaily_hradu_1393.md §5 (stínka 1,2–2,2 m, proluka 0,5–0,9 m, na svahu stupňovitě, stupeň na stínku nejvýš 0,4–1,0 m) – NEOVERENO rozměrově, princip z kastelologie (Durdík)",
+  "rytmus_m": 2.2,
+  "stinka_m": 1.5,
+  "vyska_m": 1.2,
+  "stupen_po_m": 0.5
+ },
+ "strecha": {
+  "presah_okap_m": 0.75,
+  "presah_stit_m": 0.35,
+  "tloustka_m": 0.16,
+  "krokve_po_m": 0.9,
+  "krokev_prurez_m": [
+   0.12,
+   0.15
+  ],
+  "zdroj": "Míša 5. 11.: „přesahy střech, mrkni na net“. Tesařské zdroje: štítový přesah nesený latěmi do ~30 cm, větší jen se žebříkem (ceskestavby.cz/clanky/jak-resit-stitovy-presah-strechy-pomoci-vazniku-26717); okapový přesah prodloužením krokví/pozednice, historicky námětky (pamatky.npu.cz 2022/03); KCD reference docs/reference/kcd_vzhled/misa_kcd_01,02,13,14: okap ~0,7–1 m, viditelná tloušťka krytiny a čela krokví pod okapem. Konkrétní cm pro středověký šindel NEOVERENO (odhad z referencí).",
+  "stity": "drevo",
+  "stity_zdroj": "Míša 9. 11.: „určitě není kamení až do štítu“ – KCD fotky misa_kcd_15/16 (palác: kamenné zdi do okapu, štít z prken), misa_kcd_02 (věž: kámen pod střechou, výš dřevo); štít = bedněný ze svislých prken"
  }
 }
