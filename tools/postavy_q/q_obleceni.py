@@ -41,6 +41,82 @@ def _smooth_ring_weights(ob, N, it=8):
 def _ss(t):
     t = np.clip(t, 0, 1); return t * t * (3 - 2 * t)
 
+SUK_N = 8          # retezu kosti sukne po obvodu (rešerše docs/rozpracovane/obleceni_reserse.md: sukne na panev + pruzne kosti)
+SUK_K = 3          # kosti v retezu (shora dolu)
+
+
+def _skirt_bones(ob, arm, z_top, z_bot):
+    """12. 11. (Misa: zastera/sukne trci s nohou, pri sedu tuhy plat pres kolena): kosti sukne sukne_<i>_<j> - SUK_N
+    retezu po obvodu, SUK_K kosti od boku k lemu, rodic panev. Vahy sukne: smer kolem tela -> dva nejblizsi retezy,
+    vyska -> sousedni kosti retezu, nahore panev; stehna sukni netahaji (vise a dobiha SpringBoneSimulator3D ve hre,
+    kolize kapslemi stehen). Kosti vznikaji jednou na postavu (kotle i cotte stejne)."""
+    mw = arm.matrix_world
+    pel = mw @ arm.data.bones["pelvis"].head_local
+    P = np.array([(mw.inverted() @ (ob.matrix_world @ v.co))[:] for v in ob.data.vertices])
+    Pw = np.array([(ob.matrix_world @ v.co)[:] for v in ob.data.vertices])
+    cx, cy = pel.x, pel.y
+    ang = np.arctan2(Pw[:, 1] - cy, Pw[:, 0] - cx)
+    rad = np.hypot(Pw[:, 0] - cx, Pw[:, 1] - cy)
+    hs = [z_top - (z_top - z_bot) * k / SUK_K for k in range(SUK_K + 1)]
+    bpy.context.view_layer.objects.active = arm
+    for o in bpy.context.selected_objects:
+        o.select_set(False)
+    arm.select_set(True)
+    bpy.ops.object.mode_set(mode='EDIT')
+    eb = arm.data.edit_bones
+    inv = mw.inverted()
+    for i in range(SUK_N):
+        a = -math.pi + 2 * math.pi * (i + 0.5) / SUK_N
+        rodic = eb["pelvis"]
+        for j in range(SUK_K):
+            jm = f"sukne_{i}_{j}"
+            if jm in eb:
+                rodic = eb[jm]
+                continue
+            pts = []
+            for zz in (hs[j], hs[j + 1]):
+                m = (np.abs(Pw[:, 2] - zz) < 0.04) & (np.abs(np.angle(np.exp(1j * (ang - a)))) < math.pi / SUK_N)
+                r = float(np.median(rad[m])) if m.any() else 0.14
+                pts.append(inv @ Vector((cx + math.cos(a) * r, cy + math.sin(a) * r, zz)))
+            b = eb.new(jm)
+            b.head, b.tail = pts[0], pts[1]
+            b.parent = rodic
+            b.use_connect = False
+            rodic = b
+    bpy.ops.object.mode_set(mode='OBJECT')
+    # vahy
+    for g in list(ob.vertex_groups):
+        if g.name.startswith(("thigh_", "calf_", "sukne_")):
+            ob.vertex_groups.remove(g)
+    gp = ob.vertex_groups.get("pelvis") or ob.vertex_groups.new(name="pelvis")
+    gs = {}
+    for i in range(SUK_N):
+        for j in range(SUK_K):
+            gs[(i, j)] = ob.vertex_groups.new(name=f"sukne_{i}_{j}")
+    t = np.clip((z_top - Pw[:, 2]) / max(z_top - z_bot, 1e-3), 0.0, 1.0)
+    fa = ((ang + math.pi) / (2 * math.pi) * SUK_N - 0.5) % SUK_N
+    for vi in range(len(Pw)):
+        w_pel = 1.0 - _ss(t[vi] / 0.25)                      # horni ctvrtina z panve do kosti
+        i0 = int(math.floor(fa[vi])) % SUK_N
+        i1 = (i0 + 1) % SUK_N
+        u = fa[vi] - math.floor(fa[vi])
+        fj = min(t[vi] * SUK_K, SUK_K - 1e-3)
+        j0 = int(fj)
+        j1 = min(j0 + 1, SUK_K - 1)
+        v = fj - j0 if j1 != j0 else 0.0
+        zbytek = 1.0 - w_pel
+        for (ii, wi) in ((i0, 1 - u), (i1, u)):
+            for (jj, wj) in ((j0, 1 - v), (j1, v)):
+                w = zbytek * wi * wj
+                if w > 0.005:
+                    gs[(ii, jj)].add([vi], w, 'ADD')
+        if w_pel > 0.005:
+            gp.add([vi], w_pel, 'REPLACE')
+        else:
+            gp.remove([vi])
+    print("SUKNE kosti %dx%d, vrcholu %d, vyska %.2f..%.2f" % (SUK_N, SUK_K, len(Pw), z_bot, z_top))
+
+
 def _skirt_leg_weights(ob, arm, z_top, z_bot, female):
     """Sukně kotle/cotte se hýbe s nohama (17. 10.: tuhý zvon, nohy procházely látkou při chůzi a sedu).
     Shora váhy z těla (pánev, boky), dolů roste podíl stehen: levá polovina levé stehno, pravá pravé, vpředu
@@ -130,7 +206,7 @@ def build(body, kroj, NAME):
     sk, c_, R_, zs_ = cl.tube(body, co, sel, z_hip + 0.03, z_bot, f"{NAME}_svrchni_d", N=40, ease=0.026 if not female else 0.02,
                               flare=kroj.get("flare", 0.07 if not female else 0.14), hem_noise=0.006, seed=3)
     cl.transfer_weights(sk, body, co, k=10)
-    _skirt_leg_weights(sk, arm, z_hip + 0.03, z_bot, female)
+    _skirt_bones(sk, arm, z_hip + 0.03, z_bot)     # 12. 11.: misto vah stehen kosti sukne (pruzne ve hre)
     cl._link(sk, body)
     # košile pod svrchním šatem: jen viditelné části (výstřih, u krátkého rukávu předloktí) - zbytek pod látkou
     # prosvítal po decimaci (černé skvrny: zapečená AO uzavřené košile, 17. 10.) a stál trojúhelníky

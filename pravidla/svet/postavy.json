@@ -6633,5 +6633,16 @@
   }
  ],
  "faze_smycky_podil": 1.0,
- "_faze_smycky_podil": "12. 11. (rešerše Živé postavy jako v KCD - animation twinning, Dawe GAP2 kap. 6): smycka cinnosti zacina v nahodne fazi (podil delky klipu), chuze ne"
+ "_faze_smycky_podil": "12. 11. (rešerše Živé postavy jako v KCD - animation twinning, Dawe GAP2 kap. 6): smycka cinnosti zacina v nahodne fazi (podil delky klipu), chuze ne",
+ "sukne": {
+  "tuhost": 0.6,
+  "odpor": 0.5,
+  "tize": 1.0,
+  "polomer_m": 0.03,
+  "konec_m": 0.06,
+  "kapsle_polomer_m": 0.085,
+  "kapsle_delka_m": 0.42,
+  "do_m": 15.0,
+  "_popis": "12. 11.: pruzne kosti sukne (scripts/lide.gd _sukne, SpringBoneSimulator3D Godot 4.4): tuhost/odpor/tize retezu sukne_<i>_*, kolize kapslemi stehen a lytek (polomer, delka). Jen do do_m (rešerše: simulator jen zblizka). Hodnoty NEOVERENO - ladi se snimky chuze a sedu"
+ }
 }

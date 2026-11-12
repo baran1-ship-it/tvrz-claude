@@ -153,9 +153,51 @@ func nova_postava(o: Dictionary) -> Dictionary:
 		nik.set("D", P["nohy_ik"])
 		(c["kostra"] as Skeleton3D).add_child(nik)
 		c["nohy_ik"] = nik
+	_sukne(c)
 	_klip(c, "Idle_Loop", 1.0)
 	ap.seek(_rng.randf(), true)
 	return c
+
+
+## 12. 11. (Misa: sukne a zastera trci s nohou, pri sedu tuhy plat pres kolena; rešerše
+## docs/rozpracovane/obleceni_reserse.md - sukne na panev + pruzne kosti, Godot 4.4 SpringBoneSimulator3D): ma-li model
+## kosti sukne (tools/postavy_q/q_obleceni.py _skirt_bones: sukne_<i>_<j>), pruzna simulace retezu s kolizi o stehna.
+## Data postavy.json sukne (tuhost, odpor, tize, polomer kapsli). Jen zblizka (LOD: c["sukne"].active jako nohy_ik).
+func _sukne(c: Dictionary) -> void:
+	var sk: Skeleton3D = c["kostra"]
+	if sk.find_bone("sukne_0_0") < 0 or not P.has("sukne"):
+		return
+	var D: Dictionary = P["sukne"]
+	var sim := SpringBoneSimulator3D.new()
+	sim.name = "sukne"
+	var n := 0
+	while sk.find_bone("sukne_%d_0" % n) >= 0:
+		n += 1
+	var k := 0
+	while sk.find_bone("sukne_0_%d" % k) >= 0:
+		k += 1
+	sim.setting_count = n
+	for i in n:
+		sim.set_root_bone_name(i, "sukne_%d_0" % i)
+		sim.set_end_bone_name(i, "sukne_%d_%d" % [i, k - 1])
+		sim.set_extend_end_bone(i, true)
+		sim.set_end_bone_length(i, float(D["konec_m"]))
+		sim.set_radius(i, float(D["polomer_m"]))
+		sim.set_stiffness(i, float(D["tuhost"]))
+		sim.set_drag(i, float(D["odpor"]))
+		sim.set_gravity(i, float(D["tize"]))
+		sim.set_enable_all_child_collisions(i, true)
+	for b: String in ["thigh_l", "thigh_r", "calf_l", "calf_r"]:
+		if sk.find_bone(b) < 0:
+			continue
+		var kap := SpringBoneCollisionCapsule3D.new()
+		kap.bone_name = b
+		kap.radius = float(D["kapsle_polomer_m"])
+		kap.height = float(D["kapsle_delka_m"]) if b.begins_with("thigh") else float(D["kapsle_delka_m"]) * 0.9
+		kap.position_offset = Vector3(0.0, kap.height * 0.5, 0.0)
+		sim.add_child(kap)
+	sk.add_child(sim)
+	c["sukne"] = sim
 
 
 ## Poutnici na cestach (Misa 10. 11.): nahodni lide bez domova a spanku - obyvatele z postavy.json poutnici (pocet,
@@ -2327,6 +2369,13 @@ func _process_vlastni(dt: float) -> void:
 				(c["nohy_ik"] as SkeletonModifier3D).active = nik_on
 		if (c["ruce"] as Dictionary).has("mod"):
 			(c["ruce"]["mod"] as Node).call("zapni", v_zaberu and d < float(P["do"]))
+		if c.has("sukne"):
+			var su_on := v_zaberu and d < float(P["sukne"]["do_m"])
+			var su: SpringBoneSimulator3D = c["sukne"]
+			if su.active != su_on:
+				su.active = su_on
+				if su_on:
+					su.reset()                    # po vypnuti/skoku pozy (rešerše: bez reset() simulace „vystreli“)
 		# LOD animaci: zblizka kazdy snimek (plne_max nejblizsich), do anim_do_m anim_daleko_fps, dal do dosahu
 		# anim_dalka_fps - nikdy ztuhla klouzajici poza (plan krok 3.2)
 		if not v_zaberu:
