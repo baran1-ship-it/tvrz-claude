@@ -147,6 +147,8 @@ func _akce(co: String, arg: Variant) -> void:
 			for k in _obraz_volby.size():
 				if absf(float(_obraz_volby[k]) - get_viewport().scaling_3d_scale) < 0.01: i = k
 			get_viewport().scaling_3d_scale = float(_obraz_volby[(i + 1) % _obraz_volby.size()])
+			var cf := ConfigFile.new(); cf.load("user://nastaveni.cfg")   # volba hráče platí i po restartu (Míša 12. 11.)
+			cf.set_value("obraz", "scale_3d", get_viewport().scaling_3d_scale); cf.save("user://nastaveni.cfg")
 		"vol:hudba":
 			_hudba = float(arg); menu.music.volume_db = linear_to_db(maxf(_hudba, 0.001)) - 6.0
 	_nastaveni()

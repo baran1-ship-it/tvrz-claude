@@ -45,6 +45,8 @@ func _start() -> void:
 		var o: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json")).get("obraz_3d", {})
 		get_viewport().scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
 		get_viewport().scaling_3d_scale = float(o.get("scale", 1.0))
+		var cf := ConfigFile.new()   # rozlišení si nastavuje hráč (Nastavení → Obraz 3D, user://nastaveni.cfg); data = výchozí
+		if cf.load("user://nastaveni.cfg") == OK: get_viewport().scaling_3d_scale = float(cf.get_value("obraz", "scale_3d", get_viewport().scaling_3d_scale))
 		var sm: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json")).get("snimky_max", {})
 		if not OS.has_feature("pc") and not FileAccess.file_exists("res://data/mereni.json"):
 			Engine.max_fps = int(sm.get("tablet", 0))   # Havran 0.99991: méně tepla = žádné škrcení (sekání po 10 min hry)
