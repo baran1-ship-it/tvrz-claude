@@ -6655,11 +6655,12 @@
    1.0
   ],
   "_lytko12": "12. 11. (Misa: sukne ma kopirovat ohnuti kolen, ne trcet dopredu): kosti retezu shora dolu ridi stehno -> pul stehno/pul lytko -> lytko (ohyb v koleni); pruzina vypnuta (tahla spodek mimo tvar nohy)",
-  "polomer_stehna_m": 0.075,
-  "polomer_holene_m": 0.05,
+  "polomer_stehna_m": 0.09,
+  "polomer_holene_m": 0.055,
   "tloustka_m": 0.01,
   "ohyb_od_st": 25.0,
   "ohyb_do_st": 65.0,
-  "_aim12": "12. 11. (rešerše docs/rozpracovane/sukne_sed_reserse.md): kosti retezu miri na drahu po povrchu nohou (koren -> koleno odsunute o polomer_stehna+tloustka -> kotnik odsunuty o polomer_holene -> k zemi), vaha podle ohnuti stehen ohyb_od..do (chuze ~0, sed 1). Polomery nohou NEOVERENO z kuze (odhad, zmerit jako prsty)"
+  "_aim12": "12. 11. (rešerše docs/rozpracovane/sukne_sed_reserse.md): kosti retezu miri na drahu po povrchu nohou (koren -> koleno odsunute o polomer_stehna+tloustka -> kotnik odsunuty o polomer_holene -> k zemi), vaha podle ohnuti stehen ohyb_od..do (chuze ~0, sed 1). Polomery nohou NEOVERENO z kuze (odhad, zmerit jako prsty)",
+  "_polomery12": "12. 11. zmereno z kuze (Superhero_Female/Male, vrcholy s vahou > 0,7, median vzdalenosti od osy kosti): stehno 0,085/0,093 m, lytko 0,056/0,053 m"
  }
 }
