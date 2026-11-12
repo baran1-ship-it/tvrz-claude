@@ -2327,7 +2327,9 @@ func _process_vlastni(dt: float) -> void:
 		# anim_dalka_fps - nikdy ztuhla klouzajici poza (plan krok 3.2)
 		if not v_zaberu:
 			c["anim_t"] = minf(float(c["anim_t"]) + dt, 1.0)     # po navratu do zaberu jeden krok (faze dobehne)
-		elif d < float(P["plna"]) and d <= mez_plne:
+		elif (d < float(P["plna"]) and d <= mez_plne) or (d < float(P["do"]) and float(c.get("v", 0.0)) > 0.1):
+			# 12. 11. (The Last Eagle devlog: vzdalene postavy po nekolika snimcich = trhana chuze): kdo jde a je v zaberu
+			# do anim_do_m, ma plnou animaci; stojici a pracujici dal uspornou
 			anim_kroku += 1
 			(c["ap"] as AnimationPlayer).advance(dt + float(c["anim_t"]) if float(c["anim_t"]) > 0.3 else dt)
 			if float(c["anim_t"]) > 0.3:
