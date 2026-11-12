@@ -1250,3 +1250,6 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   (UAL) je sekání jednou rukou (ruce 0,9–1,2 m). Potvrzená příčina: **klip bez nástroje**, ne kód úchopu. Řešení: klip
   nahraný s nástrojem v obou rukou (Mixamo – názvy hledá rešerše), nástroj pevně v soketu pravé ruky, druhá ruka IK.
   Úchop prstů (řešená póza, test 0/276) a kladivo/vědro/korbel platí.
+- **Disk 12. 11. (689 MB, beh.sh odmítl):** 12 GB zabírá `.git` (7,5 GB volných objektů, `git count-objects -vH`),
+  `git gc` se nevejde. Uklizeno: vlastní snímky `build/uchop*`, `build/lednice*`, logy `build/beh` starší 2 h,
+  `shader_cache` hry (vytvoří se znovu) → 846 MB. `git fsck --unreachable` na tomto repu přes 10 min – nepoužívat.
