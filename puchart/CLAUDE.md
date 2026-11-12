@@ -47,7 +47,7 @@ a měřením; tablet měří Míša.
   blokuje APK. Každá chyba nalezená člověkem = regresní test nebo trasa. Průchod nedokazuje správnou geometrii –
   vztahy most–brána–cesta, schody–podesta, dveře–otvor, sklep–výkop–vegetace kontrolovat zvlášť.
 - **Kontrola přiměřená změně** (rozbor 1. 11.): drobná změna = jeden dotčený pohled/trasa; celá sada před vydáním.
-- **Měření:** stejná trasa, stejná sestava (commit v panelu), výsledky ve dvou rozlišeních 3D; 30 FPS = 33,3 ms,
+- **Měření:** stejná trasa, stejná sestava (commit v panelu), trasa v plném obrazu 100 % (Míša 6. 11.) + varianty vrstev lesa včetně „les 70 %“ (cena pixelů; hra/data/mereni.json varianty, od 10. 11.); 30 FPS = 33,3 ms,
   p95 40 ms je mezicíl. Halda je debug metrika, ne PSS.
 - **Modelový filtr** pro každý cizí model: licence a historická vhodnost → měřítko/orientace → materiály → LOD + kolize →
   interakce → test ve stejném světle → katalog. Jeden kvalitní model na konstrukční typ.
