@@ -68,32 +68,32 @@
    "nazev": "Krčma u cesty",
    "stav": "SCHVALENO",
    "stred": [
-    60,
-    345
+    -83,
+    97
    ],
    "modely": [
     "Dum2"
    ],
-   "doklad": "docs/reference/reserse_mosty_krcma.md (Richterová 1999): krčmy na křižovatkách obchodních cest a u brodů; zde křížení údolní cesty Veličkou (II/440) s cestou údolím Kouteckého potoka, most a brod pod hrady",
+   "doklad": "skutečná poloha hostince U Tlustého Jana (Kyžlířov 40, OSM dům 49.61062 N 17.68145 E) pod Puchartem u silnice II/440 na levém břehu Veličky (docs/reference/reserse_tlusty_jan.md); Míša 12. 11.: „podle skutečnosti“ (křížek u silnice); dřív krčma na křižovatce podle pravidla – špatně",
    "jistota": "NAVRH (poloha podle pravidla, ne podle nálezu)",
    "typ": "samota",
-   "dosah_m": 50
+   "dosah_m": 30
   },
   {
    "id": "hajovna",
    "nazev": "Hájovna",
    "stav": "SCHVALENO",
    "stred": [
-    -133,
-    545
+    161,
+    312
    ],
    "modely": [
     "Dum1"
    ],
-   "doklad": "konec cesty k hájovně (OSM way 223186959, dnes asfaltka k chatě / bývalé hájovně, Street View docs/reference/udoli_440/hajovna_01–03); Míša 11. 11.: hájenka je i na vojenské mapě 1:25 000",
+   "doklad": "skutečný dům Olšovec č. p. 44 (OSM 49.60890 N 17.68510 E) pod dolním hradem u soutoku Veličky a Kouteckého potoka a křižovatky údolních cest; budova je i na vojenské mapě 1:25 000 (Míša 11. 11.); Míša 12. 11. křížek; NE chata Olšovec u silnice 440 (Míša: „chata Olšovec není hájovna“)",
    "jistota": "NAVRH pro 1393 (hájovna jako budova doložena až novověk); poloha DOLOZENO dnešní",
    "typ": "samota",
-   "dosah_m": 50
+   "dosah_m": 30
   }
  ],
  "schvaleno": "Míša 11. 11.: „místa, která říkáš, jsou v pořádku“ (mapa docs/screens/mista_kandidati_11_11.png)",

@@ -44,14 +44,14 @@
   "dal_od_m": 45.0,
   "dal_do_m": 320.0,
   "barva_lesa_dal": [
-   0.03,
-   0.05,
-   0.018
+   0.062,
+   0.095,
+   0.015
   ],
   "barva_louky_dal": [
-   0.075,
-   0.095,
-   0.025
+   0.145,
+   0.235,
+   0.02
   ],
   "opad_barva": [
    0.62,
@@ -66,7 +66,8 @@
   "opad_zelen_podil": [
    0.15,
    0.6
-  ]
+  ],
+  "pozn_12_11": "Havran svet.gd BARVA_LOUKY/BARVA_LESA (lineárně, kalibrace testem dálky tools/test_svet.gd); naše původní 0,075/0,03 byly poloviční → terén nad 120 m a obzor černé (Míša 12. 11. snímek z výšky)"
  },
  "hlina": {
   "popis": "hlína cest a nádvoří na drobách a břidlicích (skaly.json geologie: zvětralé hnědošedé, rezavě okrové; ČGS GEOČR50). Míša 3. 11.: hlína ano, ale víc kamínků a kamenů; dřív šedočerná jako štěrk (fotka stony_dirt_path odbarvená 0,45).",
