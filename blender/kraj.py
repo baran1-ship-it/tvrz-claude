@@ -1369,7 +1369,7 @@ def toky_voda(coll, land_fn):
             continue
         # hladina: mnohouhelnik po brehu + presah pod breh (cara vody = prusecik s terenem, Misa 0.99: ctverce 1 m
         # daly zubaty kruh), stred kotouce kvuli UV po 1 m jako drive
-        Q = Part("Rybnik_tvrz_voda")
+        Q = Part("Rybnik_tvrz_voda" if ryb is _VODA_J.get("rybnik_tvrz") else "Rybnik_lhota_voda")   # 12. 11.: Lhota z Blenderu
         cx, cz = ryb["stred"]
         y = ryb["hladina_y"]
         n = RYB_OBRYS_N

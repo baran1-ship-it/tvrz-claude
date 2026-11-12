@@ -8854,6 +8854,7 @@ static var RYB_YAW := float(Pravidla.cti("voda", "rybnik_lhota", "natoceni"))
 static var RYB_POL := float(Pravidla.cti("voda", "rybnik_lhota", "pulsirka_dilu_m"))
 static var RYB_PAS := float(Pravidla.cti("voda", "rybnik_lhota", "pas_napojeni_m"))
 var _ryb_scena: Node3D
+var _ryb_predmety := false               # 12. 11.: rybnik Lhota z Blenderu, z dilu jen predmety
 var _ryb_xf := Transform3D()
 var _ryb_inv := Transform3D()
 var _ryb_y := INF                             # hladina (svet)
@@ -8978,6 +8979,18 @@ func _ryb_priprav() -> void:
 	# teren dilu pred hrazi a koryty (pro kameny dilu - rozpor #21 i pro dily: volny kus modelu na terenu dilu drzi
 	# vysku nad nim, kdyz hra teren dilu zmeni)
 	var puv := _tri_mrizka(mi.mesh.get_faces(), xf)
+	if String((Pravidla.cti("voda", "rybnik_lhota") as Dictionary).get("dil", "")) == "predmety":
+		# 12. 11. (voda.json rybnik_lhota._jeden_zdroj12): dno, breh, hraz, hladinu a toky stavi Blender (kraj.py jako
+		# rybnik tvrze); z dilu jen predmety posazene na teren sveta - teren a voda modelu pryc, hra u rybnika nic nemeni
+		_ryb_predmety = true
+		_ryb_kameny_na_teren(puv)
+		for jm: String in ["Rybnik_Teren*", "Rybnik_Voda*"]:
+			for n0 in _ryb_scena.find_children(jm, "MeshInstance3D", true, false):
+				n0.get_parent().remove_child(n0)
+				n0.free()
+		_ryb_y = INF                          # zadna uprava terenu, louky ani toku podle dilu
+		print("rybnik: Lhota z Blenderu, z dilu jen predmety")
+		return
 	_ryb_vzdal_vody(mi)
 	_ryb_hraz_toky(mi, xf)
 	var f := mi.mesh.get_faces()
@@ -9094,7 +9107,7 @@ func _ryb_kameny_na_teren(puv: Dictionary) -> void:
 				if w.y > ymin + 0.05:
 					continue
 				var h0 := _tri_vyska(puv, w.x, w.z)
-				var h1 := _tri_vyska(_ryb_tri, w.x, w.z)
+				var h1 := _vyska(w.x, w.z) if _ryb_predmety else _tri_vyska(_ryb_tri, w.x, w.z)   # predmety na teren sveta
 				if h0 != INF and h1 != INF:
 					dy = minf(dy, h1 - h0)
 			if dy == INF or absf(dy) < 0.01:

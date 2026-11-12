@@ -4931,7 +4931,7 @@ func _rybnik_dil() -> void:
 	# hladiny nad bodem: trojuhelniky Toky_voda (do 60 m od dilu) a Rybnik_Voda v mrizce 2 m
 	var hl_tok := {}
 	var hl_ryb := {}
-	for jm: String in ["Toky_voda", "Rybnik_Voda*"]:
+	for jm: String in ["Toky_voda", "Rybnik_Voda*", "Rybnik_lhota_voda*"]:
 		var hladiny: Dictionary = hl_tok if jm == "Toky_voda" else hl_ryb
 		for mi0 in main.find_children(jm, "MeshInstance3D", true, false):
 			var mi := mi0 as MeshInstance3D
@@ -7936,7 +7936,7 @@ func _lednice_blok() -> void:
 ## mezera bez vody > 1 m = chyba. Odtok musi zacinat u hraze (voda.json rybnik_lhota.hraz: do koruna/2 + svah od osy hraze).
 func _ryb_napojeni() -> void:
 	var tri := PackedVector3Array()
-	for jm: String in ["Toky_voda", "Rybnik_Voda*"]:
+	for jm: String in ["Toky_voda", "Rybnik_Voda*", "Rybnik_lhota_voda*"]:
 		for mi0 in main.find_children(jm, "MeshInstance3D", true, false):
 			var mi := mi0 as MeshInstance3D
 			if mi.mesh == null or not mi.is_visible_in_tree():

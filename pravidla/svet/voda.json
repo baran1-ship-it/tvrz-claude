@@ -1478,7 +1478,23 @@
    "prechod_m": 2.0,
    "svah": 0.25,
    "popis": "Misa 9. 11. r. 51/79 (hlineny sraz kolem rybnika, holy pas): breh dilu podle pravidla, ne pevny okraj modelu +0,30. Teren modelu plati jen do model_m od kraje vody (kameny, lavka, okraj), za prechod_m teren sveta omezeny svahem od kraje vody nahoru (svah dy/dx; 0,25 = 1:4, mirny travnaty breh - odhad, stejny jako toky_tvar.svah; NEOVERENO zdrojem) a dolu za okrajem toky_tvar.breh_nad_hladinou_min_m svahem toky_tvar.nasyp_svah (nizka strana = nasep, voda nevytece). Hrana ctverce dilu = teren sveta (bez pasu napojeni). Travu a bahno urcuje vzdalenost od vody (pasma.voda.holy_breh_m), ne barva modelu (svet._ryb_hraz_toky, louka)."
-  }
+  },
+  "polomer_m": 12.0,
+  "hloubka_m": 1.2,
+  "okraj_vlny": [
+   [
+    3,
+    0.08,
+    0.9
+   ],
+   [
+    5,
+    0.05,
+    2.3
+   ]
+  ],
+  "dil": "predmety",
+  "_jeden_zdroj12": "12. 11. (Misa: „uz po milionte se sereme s odvodem a privodem vody do rybnika“): misto prestavovaly tri vrstvy (model dilu s vlastnim terenem a vodou, Blender toky, hra _ryb_hraz_toky/_toky_voda_v_dilu/ryb_teren) - kazda oprava jedne rozbila druhou (posledne: barva vody z hloubky zapecene Blenderem, dno zmenila hra). Ted jako rybnik tvrze: dno, breh, hraz, hladinu a napojeni toku stavi jen Blender (kraj.py, polomer_m/hloubka_m/okraj_vlny), z dilu modely/rybnik/rybnik.glb jen predmety (lavka, kameny, rakos, lekniny) posazene na teren sveta; hra teren ani vodu u rybnika nemeni. polomer_m 12 = voda modelu 11,3-11,6 m (glb), hloubka 1,2 m a vlny brehu NEOVERENO zdrojem (navesni rybnicek: odhad)."
  },
  "rybnik_tvrz": {
   "popis": "Rybnik v rohu mapy na strane tvrze (Misa 17:05, ne u tvrze) na rovince v udolnici pramene (-155, -235); odtok k zapadnimu okraji, vlastni povodi (rozvodi s Bystrici). Generuje kraj.py (dno, breh, hraz, hladina).",

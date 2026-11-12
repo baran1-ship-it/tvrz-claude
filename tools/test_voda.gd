@@ -78,7 +78,7 @@ func _breh_nadrzi() -> void:
 		for q: Array in t["osa_xzy"]:
 			usti.append(Vector3(float(q[0]), float(q[1]), float(t["sirka_m"]) / 2.0 + float(tt["breh_sirka_m"])))
 	var vypis := 0
-	for jm: String in ["Rybnik_Voda*", "Rybnik_tvrz_voda*"]:
+	for jm: String in ["Rybnik_Voda*", "Rybnik_tvrz_voda*", "Rybnik_lhota_voda*"]:
 		for mi0 in main.find_children(jm, "MeshInstance3D", true, false):
 			var mi := mi0 as MeshInstance3D
 			var xf := mi.global_transform
