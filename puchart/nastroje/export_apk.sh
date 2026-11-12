@@ -28,12 +28,12 @@ open(p, "w").write(s)
 PY
 grep -m1 '^exclude_filter' export_presets.cfg
 jmeno() { sed -i "s/^package\/unique_name=.*/package\/unique_name=\"$1\"/; s/^package\/name=.*/package\/name=\"$2\"/" export_presets.cfg; }
-jmeno cz.puchart.test "Puchart TEST"
+jmeno cz.puchart.test "Moravian Battlefield TEST"   # název hry (Míša 9. a 12. 11.); balíček beze změny = aktualizace, data zůstanou
 $G --headless --export-debug "Android" $K/build/apk/puchart_test.apk > $K/build/apk/export_test.log 2>&1
 if [ -z "$PUCHART_I_PROCHAZKA" ]; then cp $K/build/apk/puchart_test.apk $K/apk/; ls -la $K/apk/puchart_test.apk; exit 0; fi   # jen jedna APK – testovací, po měření procházka (Míša 2. 11.); procházková jen s PUCHART_I_PROCHAZKA=1
 mv data/mereni.json $K/build/mereni.json.odlozeno
 trap 'mv $K/build/mereni.json.odlozeno $K/hra/data/mereni.json; cp $K/build/export_presets.zaloha $K/hra/export_presets.cfg' EXIT
-jmeno cz.puchart.prochazka "Puchart procházka"
+jmeno cz.puchart.prochazka "Moravian Battlefield"
 $G --headless --export-debug "Android" $K/build/apk/puchart_prochazka.apk > $K/build/apk/export_prochazka.log 2>&1
 cp $K/build/apk/puchart_test.apk $K/build/apk/puchart_prochazka.apk $K/apk/
 ls -la $K/apk/puchart_test.apk $K/apk/puchart_prochazka.apk

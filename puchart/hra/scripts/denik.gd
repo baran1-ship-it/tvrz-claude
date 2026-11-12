@@ -31,7 +31,7 @@ func zacni(rodic: Node) -> void:
 			if OS.get_environment("PUCHART_FOTO") == "" and OS.get_environment("PUCHART_TEST") == "": _ukaz(rodic, minule)   # snímky a testy bez překryvu
 	var g := FileAccess.open(SOUBOR, FileAccess.WRITE)
 	if g:
-		g.store_line("Puchart – deník běhu %s, %s %s, %s" % [Time.get_datetime_string_from_system(), OS.get_name(), OS.get_model_name(), RenderingServer.get_video_adapter_name()])
+		g.store_line("Moravian Battlefield – deník běhu %s, %s %s, %s" % [Time.get_datetime_string_from_system(), OS.get_name(), OS.get_model_name(), RenderingServer.get_video_adapter_name()])
 		g.close()
 
 func _ukaz(rodic: Node, text: String) -> void:
