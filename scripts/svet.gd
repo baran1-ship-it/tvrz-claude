@@ -1658,7 +1658,9 @@ func _koryto_terenu(root: Node3D) -> void:
 		# Misa 24. 10. (rybnik_lhota v3, NAVOD.md bod 1; blender/rybnik_dil.py): navesni rybnicek z vesnice.py pryc - hladina skryta, nadrz
 		# (oval, vyhloubeni, bahno) vyrazena; misto nej dil z modely/rybnik (_rybnik_dil)
 		for k3 in range(hl.size() - 1, -1, -1):
-			if (nd.nadrze[k3]["kruh"] as Array).is_empty():
+			# 12. 11.: hladiny rybniku z Blenderu (Rybnik_lhota_voda, Rybnik_tvrz_voda) nejsou stary navesni rybnicek -
+			# skryti zakrylo hladinu Lhoty (snimek build/ryb8: prazdna misa)
+			if (nd.nadrze[k3]["kruh"] as Array).is_empty() or String((hl[k3][0] as Node).name).begins_with("Rybnik_"):
 				continue
 			var skr := StandardMaterial3D.new()
 			skr.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -1671,7 +1673,7 @@ func _koryto_terenu(root: Node3D) -> void:
 	for k2 in hl.size():
 		var h: Array = hl[k2]
 		var nd2: Dictionary = nd.nadrze[k2]
-		if not (nd2["kruh"] as Array).is_empty():
+		if not (nd2["kruh"] as Array).is_empty() and not String((h[0] as Node).name).begins_with("Rybnik_"):
 			# vlastni hladina prirozeneho tvaru; puvodni ctvercova plocha z Blenderu pryc (pruhledny material)
 			var mi0 := h[0] as MeshInstance3D
 			var vm: Material = mi0.mesh.surface_get_material(h[1])

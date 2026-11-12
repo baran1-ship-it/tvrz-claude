@@ -8050,5 +8050,22 @@ func _ryb_napojeni() -> void:
 			radky.append("odtok zacina %.1f m napric od osy hraze (pata %.1f), podel za koncem hraze %.1f m" % [napric, pata, podel])
 			if napric > pata or podel > 0.0:
 				chyby.append("odtok nezacina u hraze: %.1f m od osy, %.1f m za jejim koncem" % [napric, podel])
+	# 12. 11. (snimek build/ryb8: prazdna misa - hladinu skryl kod stareho navesniho rybnicku): nad stredem rybnika
+	# viditelna voda (trojuhelnik hladiny bez skryteho materialu) nad dnem
+	var vid := false
+	for mi0 in main.find_children("Rybnik_*voda*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		if not mi.is_visible_in_tree():
+			continue
+		for si in mi.mesh.get_surface_count():
+			var mo := mi.get_surface_override_material(si)
+			if mo != null and String(mo.resource_name) == "skryta_hladina":
+				continue
+			var ab := mi.global_transform * mi.mesh.get_aabb()
+			if ab.grow(0.5).has_point(Vector3(sv.RYB_C.x, ab.get_center().y, sv.RYB_C.y)):
+				vid = true
+	radky.append("hladina rybnika viditelna: %s" % vid)
+	if not vid:
+		chyby.append("rybnik bez viditelne hladiny")
 	print("RYB_NAPOJENI " + " | ".join(radky))
 	_vysledek("ryb_napojeni", chyby.is_empty(), "; ".join(radky) + ("" if chyby.is_empty() else " CHYBY " + str(chyby)))
