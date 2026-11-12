@@ -54,7 +54,7 @@ func _beh() -> void:
 		print("MERITKO kostra %s, hand_l globalni poza %s, klid %s, uz %s" % [kostra.global_basis.get_scale(), kostra.get_bone_global_pose(hb).basis.get_scale(), kostra.get_bone_global_rest(hb).basis.get_scale(), u.scale])
 		# rozsah svihu (uchop.gd faze): vyska stredu rukou nad stredem ramen v klipu, 24 vzorku - do postavy.json
 		# drzeni._reseni.svih_rozsah (bez dat se modifikator uci za behu, cerstva postava fazi nezna)
-		for kl0: String in ["Prace_Uder_Loop", "Prace_Kovar_Loop", "Kope_Loop"]:
+		for kl0: String in ["Uder_Mec_Mx", "Prace_Kovar_Loop", "Kope_Loop"]:
 			if not ap.has_animation(kl0):
 				continue
 			var mn := INF

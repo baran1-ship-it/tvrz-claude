@@ -128,6 +128,12 @@ func _process_modification() -> void:
 				var osa_y := Vector3.ZERO
 				if iu1 >= 0 and iu2 >= 0:
 					osa_y = (hg.origin + h2) * 0.5 - (sk.get_bone_global_pose(iu1).origin + sk.get_bone_global_pose(iu2).origin) * 0.5
+				var z_rukou := (R.get("klipy_nasada_z_rukou", []) as Array).has(klip_ted)
+				if z_rukou:
+					# 12. 11. klip nahrany s obourucni zbrani (mereni_nasady.gd): nasada = primka pres dlane obou rukou z klipu
+					var dl_b := Vector3(-uz.position.x, uz.position.y, uz.position.z)
+					var g2c := sk.get_bone_global_pose(ih2)
+					osa_y = (hg.origin + hg.basis * uz.position) - (g2c.origin + g2c.basis * dl_b)
 				if osa_y.length_squared() > 1e-8:
 					osa_y = osa_y.normalized()
 					var vpravo := -(skb.inverse() * smer.x).normalized()      # postava hledi po +z, vpravo = -x
@@ -144,13 +150,15 @@ func _process_modification() -> void:
 					_rozsah[klip_ted] = rz
 					var faze := clampf((hv - rz.x) / maxf(rz.y - rz.x, 1e-4), 0.0, 1.0) if rz.y - rz.x > float(R.get("svih_min_m", 0.2)) / maxf(skg.basis.get_scale().x, 1e-4) else 0.0
 					var dopredu := (skb.inverse() * smer.z).normalized()
-					var zal := deg_to_rad(float(R.get("zalomeni_max_st", 90.0))) * faze
+					var zal := 0.0 if z_rukou else deg_to_rad(float(R.get("zalomeni_max_st", 90.0))) * faze
 					var o1 := osa_y.rotated(vpravo, zal)
 					var o2 := osa_y.rotated(vpravo, -zal)
 					osa_y = o1 if o1.dot(dopredu) < o2.dot(dopredu) else o2
 					var uu: float = float((d.get("uchop", [0.0, 0.0, 0.0]) as Array)[1])
 					var ud := float(d.get("uchop_uder_y", uu))
 					var posun := (lerpf(ud, uu, faze) - uu)                        # m po nasade od bodu uchopu dat
+					if z_rukou:
+						posun = float(d.get("uchop_z_rukou_y", uu)) - uu                # ruce v klipu drzi nasadu samy
 					p["posun"] = posun
 					var ostri := osa_y.cross(vpravo)
 					if ostri.length_squared() < 1e-6:

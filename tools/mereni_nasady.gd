@@ -44,6 +44,23 @@ func _beh() -> void:
 		var nej := 0.0
 		for s: Vector3 in smery:
 			nej = maxf(nej, rad_to_deg(s.angle_to(pr)))
+		# cas nejnizsi a nejvyssi polohy rukou (napah / uder) - pro orez klipu v anim_cmu.py
+		var tmin := 0.0
+		var tmax := 0.0
+		var ymin := INF
+		var ymax := -INF
+		for i in 64:
+			ap.play(jm, 0.0)
+			ap.seek(dl * i / 64.0, true)
+			ap.advance(0.0)
+			var yy := (sk.get_bone_global_pose(hr).origin.y + sk.get_bone_global_pose(hl).origin.y) * 0.5
+			if yy < ymin:
+				ymin = yy
+				tmin = dl * i / 64.0
+			if yy > ymax:
+				ymax = yy
+				tmax = dl * i / 64.0
+		print("NASADA_CAS %s napah (ruce nejvys) %.2f s, uder (nejniz) %.2f s" % [jm, tmax, tmin])
 		vz.sort()
 		print("NASADA %-20s delka %.2f s, smer k leve ruce v soustave prave %s, odchylka az %.0f st, vzdalenost %.3f..%.3f m" % [jm, dl, pr.snapped(Vector3.ONE * 0.01), nej, vz[0], vz[vz.size() - 1]])
 	quit(0)
