@@ -36,6 +36,7 @@ func zacni(h: Node, vrstva: CanvasLayer, jen_mosty := false) -> void:
 		for c: Array in e.get("cols", []):
 			var sh := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(c[3], c[4], c[5])
 			sh.shape = bx; sh.position = Vector3(c[0], c[1], c[2]); tel.add_child(sh)
+			if c.size() > 6: sh.rotation.x = deg_to_rad(float(c[6]))   # deska padacího mostu ve sklonu
 		u.add_child(tel)
 		if not dily.has(g): dily[g] = []; t[g] = 0.0; cil[g] = 0.0; stav[g] = true
 		dily[g].append({"uzel": u, "zaklad": u.transform, "e": e})

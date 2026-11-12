@@ -859,13 +859,14 @@ def most2(P, a, ya, b, yb, w, Lp, na_terenu=True, vyk=None, navijak=None):
     bb = a + d * L
     if H.DETAIL:   # padací most jako pohyblivý díl (Havran fort.gate_mechanisms, Míša 12. 11.): zvedá se naviják zevnitř, řetězy z
         pm = D["padaci_most"]; wb = w - 0.2   # horních rohů výklenku do zdi; ve glb spuštěný (průchozí), hra ho otočí o open° kolem pantu
-        mg = M(bb + UP * yb, basis=Matrix((s, UP, -d)).transposed()) @ Matrix.Rotation(sk, 4, "X")
+        mg = M(bb + UP * yb, basis=Matrix((s, UP, -d)).transposed())   # sklon mostu je v tvaru dílu (natočení uzlu se při exportu ztratilo – most trčel 0,2 m nad pevnou částí, 12. 11.)
         gid = "most%d" % (len([e for e in lib.MOVABLE if e["kind"] == "most"]) + 1)
         Wv, Hv = vyk if vyk else (wb + 0.3, Lp + 0.1)
         kotvy = [bb + s * (sx * (Wv / 2 - 0.08)) + UP * (yb + Hv - 0.08) for sx in (-1, 1)]
-        oka = [[sx * (wb / 2 + 0.02), 0.0, Lp - 0.25] for sx in (-1, 1)]
-        kit.movable(gid, "most", mg, lambda Q: kit.drawbridge(Q, Matrix.Identity(4), wb, Lp, 0.0),
-                    cols=[((0.0, -0.15, Lp / 2), (wb + 0.2, 0.24, Lp))], group=gid, open=-(pm["zdvih_st"] + math.degrees(sk)), dur=pm["doba_s"],
+        oka = [[sx * (wb / 2 + 0.02), -math.sin(sk) * (Lp - 0.25), math.cos(sk) * (Lp - 0.25)] for sx in (-1, 1)]   # oko na skloněném mostě
+        tg_ = math.tan(sk); n3_ = 3   # kolize po třetinách délky ve sklonu mostovky (schůdky po ≤ Lp·tg/3)
+        kit.movable(gid, "most", mg, lambda Q: kit.drawbridge(Q, Matrix.Identity(4), wb, Lp, math.degrees(sk)),
+                    cols=[((0.0, -tg_ * Lp / 2 - 0.12 / math.cos(sk), Lp / 2), (wb + 0.2, 0.24, Lp / math.cos(sk), math.degrees(sk)))],   # jedna deska ve sklonu (7. číslo = natočení kolem místní X; schůdky po třetinách postava nepřešla) group=gid, open=-(pm["zdvih_st"] + math.degrees(sk)), dur=pm["doba_s"],
                     chains=[[list(k_), o_] for k_, o_ in zip(kotvy, oka)])
         if navijak:
             c = navijak["c"]; ax = navijak["osa"]; Ld = navijak.get("delka", pm["buben_delka_m"]); vi = navijak["dovnitr"]
@@ -1744,7 +1745,7 @@ def postav_B(P):
         xk_ = xd_ + sm_ * (vn_["sirka"] / 2 + 0.2)
         plosina(P, V(((x1_ + xk_) / 2, zs_)), Vector((1, 0, 0)), abs(xk_ - x1_), 1.36, vz["dno_y"], sloupy=True)
         TR["B_vez_nadvori"] = [bod(V((x0_ + sm_ * 1.0, zs_ + sz_ * 2.2)), B["horni_y"]), bod(V((x0_ - sm_ * 0.6, zs_)), B["horni_y"]), bod(V((x0_ + sm_ * 0.3, zs_))),
-                               bod(e_n, vz["dno_y"]), bod(V((xd_, zs_)), vz["dno_y"]), bod(V((xd_, zf_ - sz_ * 1.6)), vz["dno_y"]), bod(c, vz["dno_y"])]
+                               bod(e_n, vz["dno_y"]), bod(V((xd_, zs_ + math.copysign(0.6, zs_ - zf_))), vz["dno_y"]), bod(V((xd_, zs_)), vz["dno_y"]), bod(V((xd_, zf_ - sz_ * 1.6)), vz["dno_y"]), bod(c, vz["dno_y"])]   # ke dveřím zepředu v ose (12. 11.: bod 0,6 m od předchozího se bral hned jako dosažený – postava šla šikmo do ostění)
     ram_b = vnitrek_veze(P, c, Vector((1, 0, 0)), wd - 2 * tv, w - 2 * tv, [vz["dno_y"]] + vz["patra_y"], vz["steny_ramen"], sq=1.0)   # podesty 1,0 m (Míša 4. 11.: „schody moc blízko zdi, ne pansky“; reference 1,0–1,4 m), ramena 3,2 m = 45° (při 45° postava občas uvízla na konci ramene)
     # hladomorna v přízemí věže: valená klenba (osa S–J) s otvorem nad schody, kruhy s řetězy, slabé světlo
     iv = w - 2 * tv; ivu = wd - 2 * tv; ov = c - Vector((ivu / 2, 0, iv / 2)); hl = vz.get("hladomorna")
