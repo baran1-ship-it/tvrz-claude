@@ -17,7 +17,7 @@ func _ready() -> void:
 			var mm := InputEventMouseMotion.new(); mm.position = c; mm.global_position = c; Input.parse_input_event(mm)
 			await get_tree().process_frame; await get_tree().process_frame
 			var hc := get_viewport().gui_get_hovered_control()
-			print("BEHLET_TEST pod prstem ", hc.get_path() if hc else "nic", " bod ", c, " velikost ", pr.kruhy.size)
+			print("BEHLET_TEST pod prstem ", hc.get_path() if hc else "nic", " bod ", c, " rect ", pr.kruhy.get_global_rect(), " vid ", pr.kruhy.is_visible_in_tree(), " has ", pr.kruhy._has_point(c), " mys ", Input.mouse_mode, " filtr ", pr.kruhy.mouse_filter)
 			for st in [true, false]:
 				var t := InputEventScreenTouch.new(); t.position = c; t.pressed = st; t.index = 0
 				Input.parse_input_event(t); await get_tree().process_frame
