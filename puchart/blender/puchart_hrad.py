@@ -707,8 +707,9 @@ def zabradli(P, p0, p1, y):
     if os.environ.get("PUCHART_DBGZ"):
         _q = [float(x) for x in os.environ["PUCHART_DBGZ"].split(",")]
         if min((Vector((_q[0], 0, _q[1])) - hz(p_)).length for p_ in (p0, p1, (p0 + p1) / 2)) < 1.5: print("DBGZ", [round(v, 2) for v in (p0.x, p0.z, p1.x, p1.z, y)], ZABR[-1][3], _s._getframe(2).f_code.co_name, _s._getframe(2).f_lineno, flush=True)
-    ZAB_REC.append({"P": P, "a": hz(p0), "b": hz(p1), "ya": y, "yb": y, "dolu": 0.02})   # staví se až zabradli_stavba() – spojení konců
-    kol(P, (p0 + p1) / 2 + UP * (y + 0.55), d, (0.1, 1.1, L))
+    ZAB_REC.append({"P": P, "a": hz(p0), "b": hz(p1), "ya": y, "yb": y, "dolu": 0.02, "deska": True})   # staví se až zabradli_stavba() – spojení konců
+    # kolizní deska až v zabradli_stavba() podle výsledné polohy (12. 11.: deska z původní polohy zůstala po spojení / vynechání
+    # úlomku jako neviditelná stěna v patře branky – povrch_kolize A_branka_patro)
 
 def podlaha(P, c, d, iw, idp, y, otvory=(), tl=0.24, mat="prkna_ven"):
     """Trámový strop/podlaha ve věži (lokálně u podél d, v podél s, střed c) s otvory [(u0, u1, v0, v1)] pro schody."""
@@ -770,9 +771,10 @@ def most2(P, a, ya, b, yb, w, Lp, na_terenu=True, vyk=None, navijak=None):
         pass   # žádná rampa (Míša 9. 11.): na nástup mostu vede násyp cesty v terénu (cesty.py, nastupy_mostu.json); zbytek hlídá test nastup_mostu_v_terenu
     y = lambda t: ya + tg * t
     t0 = 0.0   # kolize od začátku viditelné mostovky (terén srovnaný na ya); s −1 m vyčuhovala před mostem 0,2 m nad terén (povrch_kolize)
-    c = a + d * ((t0 + L) / 2) + UP * (y((t0 + L) / 2) - 0.15 / math.cos(sk))
-    kol(P, c, d, (w, 0.3, (L - t0) / math.cos(sk)), sk)
     Lf = L - Lp
+    Lk_ = Lf if H.DETAIL else L   # padací část má vlastní kolizi (pohyblivý díl) – pevná deska jen po pevnou část, jinak by se po zvednutí šlo vzduchem
+    c = a + d * ((t0 + Lk_) / 2) + UP * (y((t0 + Lk_) / 2) - 0.15 / math.cos(sk))
+    kol(P, c, d, (w, 0.3, (Lk_ - t0) / math.cos(sk)), sk)
     # začátek mostovky na kamenném prahu (tablet 3. 11.: prkna končila zubatě v terénu): prkna od místa, kde je mostovka
     # celou šířkou nad terénem; před tím kamenný práh s vrchem v rovině mostovky, zapuštěný do terénu
     t_op = 0.0
@@ -863,7 +865,7 @@ def most2(P, a, ya, b, yb, w, Lp, na_terenu=True, vyk=None, navijak=None):
         kotvy = [bb + s * (sx * (Wv / 2 - 0.08)) + UP * (yb + Hv - 0.08) for sx in (-1, 1)]
         oka = [[sx * (wb / 2 + 0.02), 0.0, Lp - 0.25] for sx in (-1, 1)]
         kit.movable(gid, "most", mg, lambda Q: kit.drawbridge(Q, Matrix.Identity(4), wb, Lp, 0.0),
-                    cols=[((0.0, -0.12, Lp / 2), (wb, 0.24, Lp))], group=gid, open=-(pm["zdvih_st"] + math.degrees(sk)), dur=pm["doba_s"],
+                    cols=[((0.0, -0.12, Lp / 2), (wb + 0.2, 0.24, Lp))], group=gid, open=-(pm["zdvih_st"] + math.degrees(sk)), dur=pm["doba_s"],
                     chains=[[list(k_), o_] for k_, o_ in zip(kotvy, oka)])
         if navijak:
             c = navijak["c"]; ax = navijak["osa"]; Ld = navijak.get("delka", pm["buben_delka_m"]); vi = navijak["dovnitr"]
@@ -883,7 +885,8 @@ def most2(P, a, ya, b, yb, w, Lp, na_terenu=True, vyk=None, navijak=None):
             mn = M(c, basis=Matrix((ax, UP, ax.cross(UP).normalized())).transposed())
             uz = c + vi * 0.9 + ax * (Ld / 2 + 0.3) - UP * 0.4
             kit.movable(gid + "_navijak", "navijak", mn, lambda Q: kit.windlass_drum(Q, Ld, pm["buben_r_m"], pm["kolo_r_m"]),
-                        use=list(uz), group=gid, turns=pm["otacek_bubnu"])
+                        cols=[((0.0, 0.0, 0.0), (Ld + 0.1, 0.62, 0.62)), ((Ld / 2 + 0.25, 0.0, 0.0), (0.35, 2 * pm["kolo_r_m"], 2 * pm["kolo_r_m"]))],
+                        use=list(uz), group=gid, turns=pm["otacek_bubnu"])   # kolize bubnu s čely a kola (povrch_kolize 12. 11.: buben na ochozu bez kolize)
             for k_ in kotvy:   # řetěz od bubnu otvorem ve zdi k horním rohům výklenku (uvnitř zdi neviditelný)
                 ko = c + ax * ((Ld / 2 - 0.2) * (1 if (k_ - c).dot(ax) > 0 else -1)) + UP * pm["buben_r_m"]
                 if navijak.get("patro"): vy_ = Vector((k_.x, navijak["podlaha"] + 0.01, k_.z)) + d * navijak["zed"]   # štěrbina v podlaze patra nad výklenkem
@@ -1852,21 +1855,25 @@ def zabradli_stavba():
     lomí do šikmého madla schodů). Sloupky po ≤ 1,2 m, krajní vždy; střední tyč v půli výšky; vše dub."""
     E_ = []   # konce: [rec, 'a'|'b']
     for r in ZAB_REC: E_ += [(r, "a"), (r, "b")]
-    par = list(range(len(E_)))
+    par = list(range(len(E_))); cl_ = {i: {id(E_[i][0])} for i in range(len(E_))}   # členové skupiny (kusy) – oba konce jednoho kusu nesmí do jedné skupiny
     def f(i):
         while par[i] != i: par[i] = par[par[i]]; i = par[i]
         return i
+    def spoj(i, j):   # 12. 11.: přechodným spojením se oba konce krátkého kusu (konec pavlače u schodů) slily do jednoho sloupku – kus zmizel a madlo schodů se protáhlo mimo kolizi
+        a_, b_ = f(i), f(j)
+        if a_ == b_ or (cl_[a_] & cl_[b_]): return
+        par[a_] = b_; cl_[b_] |= cl_[a_]
     for i in range(len(E_)):
         ri, ki = E_[i]
         for j in range(i + 1, len(E_)):
             rj, kj = E_[j]
             if ri is rj: continue
-            if (ri[ki] - rj[kj]).length < 0.45 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: par[f(i)] = f(j)
+            if (ri[ki] - rj[kj]).length < 0.45 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: spoj(i, j)
     for i in range(len(E_)):   # konce blíž než 0,75 m se spojí (dřív 0,45 – zbyly dva konce 0,54 m od sebe: mezera, dva krajní sloupky)
         ri, ki = E_[i]
         for j in range(i + 1, len(E_)):
             rj, kj = E_[j]
-            if ri is not rj and (ri[ki] - rj[kj]).length < 0.75 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: par[f(i)] = f(j)
+            if ri is not rj and (ri[ki] - rj[kj]).length < 0.75 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: spoj(i, j)
     sk = {}
     for i in range(len(E_)): sk.setdefault(f(i), []).append(i)
     for g in sk.values():
@@ -1887,8 +1894,19 @@ def zabradli_stavba():
             if best: r[k] = best[1].copy(); r["s" + k] = True
     # úlomky (Míša 12. 11.: „zábradlí u vstupní věžičky je furt na p…“ – kousek 0,6 m bez napojení vedle schodů branky): kus
     # kratší než ZAB_MIN_M, který se na žádném konci nenapojil na jiné zábradlí, se nestaví (krátkou hranu kryje zeď nebo schody)
-    for r in [r for r in ZAB_REC if (r["b"] - r["a"]).length < ZAB_MIN_M and not r.get("sa") and not r.get("sb")]:
+    def _blizko_jineho(r):   # konec do 0,75 m od jiného zábradlí (napojené přes T-spoj, nebo na něj navazuje) – není úlomek
+        for o in ZAB_REC:
+            if o is r: continue
+            d_ = o["b"] - o["a"]; L_ = d_.length
+            for k in ("a", "b"):
+                q = r[k]; tt = 0.0 if L_ < 1e-6 else max(0.0, min(L_, (q - o["a"]).dot(d_ / L_))); p_ = o["a"] + (d_ / L_ if L_ > 1e-6 else d_) * tt
+                if (p_ - q).length < 0.75 and abs(o["ya"] - r["y" + k]) < 0.3: return True
+        return False
+    for r in [r for r in ZAB_REC if (r["b"] - r["a"]).length < ZAB_MIN_M and not r.get("sa") and not r.get("sb") and not _blizko_jineho(r)]:
         print("ZABRADLI_ULOMEK vynechán", [round(v, 2) for v in (r["a"].x, r["a"].z, r["ya"], r["b"].x, r["b"].z)], flush=True); ZAB_REC.remove(r)
+    for r in ZAB_REC:   # deska u každého vodorovného zábradlí (i z pavlačí – jejich vlastní deska zůstala v poloze před T-spojem)
+        if abs(r["ya"] - r["yb"]) < 0.05 and (r["b"] - r["a"]).length >= 0.1:
+            kol(r["P"], (r["a"] + r["b"]) / 2 + UP * (r["ya"] + 0.55), hz(r["b"] - r["a"]), (0.1, 1.1, (r["b"] - r["a"]).length))
     ZAB_VYSTUP[:] = [{"a": [round(r["a"].x, 2), round(r["a"].z, 2), round(r["ya"], 2)], "b": [round(r["b"].x, 2), round(r["b"].z, 2), round(r["yb"], 2)],
                       "sa": bool(r.get("sa")), "sb": bool(r.get("sb"))} for r in ZAB_REC if (r["b"] - r["a"]).length >= 0.1]   # pro hlídač zabradli_spojite
     hotove = set()
@@ -2012,3 +2030,6 @@ def stavba(suf):
 for det, suf in ((True, ""), (False, "_daleko")):
     R.seed(1393); H.nastav_detail(det)
     stavba(suf)
+# Blender (bpy modul) občas spadne při úklidu po uložení (segfault) – návratový kód pak přerušil řetězec postav_vse.sh
+# (12. 11.: nepostavily se skály, voda, kameny koryt a vegetace staveb). Vše je uložené: ukončit hned s kódem 0.
+import sys as _sys; _sys.stdout.flush(); _sys.stderr.flush(); os._exit(0)

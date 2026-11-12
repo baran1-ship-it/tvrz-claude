@@ -268,6 +268,11 @@ def doorway(P, m, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None, open_deg=Non
         else:
             zaklenek(P, mi, W, sp, top, pri, -jdi, stone_mat, ring * 0.9, ch)
     kit.threshold(P, m, W, jd + 0.1)
+    # kolize ostění: otvor ve zdi je W (polodrážka), průchod je ale jen w mezi kameny ostění – pruh W/2 − w/2 po obou stranách
+    # celou hloubkou zdi až po patku oblouku (test povrch_kolize 12. 11.: dveře z pavlače paláce „projde viditelným“)
+    if W / 2 - hw > 0.01:
+        for sx in (-1, 1):
+            P.cols.append((m @ M((sx * (hw + (W / 2 - hw) / 2), sp / 2, -D / 2)), (W / 2 - hw, sp, D)))
     if not leaf:
         return
     LP = LP or P
