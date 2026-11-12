@@ -9,6 +9,8 @@ from PIL import Image, ImageDraw
 from scipy.ndimage import binary_dilation
 K = os.path.abspath(sys.argv[1]); D = K + "/hra/data/"
 SJ = json.load(open(D + "stanoviste.json")); st = np.array(Image.open(D + "stanoviste.png")); st = st[..., 0] if st.ndim == 3 else st
+for t_ in ("cesta",):   # třída pro pěšiny v nádvořích (níž) – po přestavbě stanovišť chyběla (12. 11.: pád skriptu → stromy zůstaly ve stavbách)
+    if t_ not in SJ["tridy"]: SJ["tridy"].append(t_)
 _orig = K + "/build/stanoviste_pred_stavbami.png"   # opakovaný běh: vždy z originálu stanovišť (pata zdí se nenabaluje)
 _nase = [SJ["tridy"].index(t) for t in ("stavba", "nadvori", "predhradi", "pata_zdi_vne", "pata_zdi_uvnitr", "kout_zdi", "nadvori_slap", "pata_zdi_lic") if t in SJ["tridy"]]
 if not np.isin(st, _nase).any(): os.makedirs(K + "/build", exist_ok=True); Image.fromarray(st).save(_orig)

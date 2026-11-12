@@ -14,8 +14,12 @@ O=$(python3 -c "import json;v=json.load(open('$K/pravidla/svet/svet.json'))['obz
 python3 $K/nastroje/dmr_mrizka.py dmr vysek1m $V 1
 python3 $K/nastroje/dmr_mrizka.py dmr obzor10m $O 10
 python3 $K/nastroje/dmr_mrizka.py dmr prehled5m $O 5
+# osy toků (pravidla/svet/voda.json) jsou schválená data – z terénu jen v novém projektu (12. 11.: opakované generování ztratilo
+# jména z OSM, mosty se podle jména nenašly a nepostavily); nové vygenerování: smazat voda.json
+if [ ! -s $K/pravidla/svet/voda.json ]; then
 python3 $K/nastroje/toky.py prehled5m $K/pravidla/svet/osm_toky.json toky_teren.json 0.25
 python3 $K/nastroje/voda_hra.py toky_teren.json vysek1m $K
+fi
 python3 $K/nastroje/stanoviste.py vysek1m $K/pravidla/svet/voda.json $K
 python3 $K/nastroje/teren_upravy.py vysek1m vysek1m_upr $K   # plošiny, rampa za branou, průrva (hrad_puchart.json; valy jsou v DMR)
 python3 $K/nastroje/koryta.py vysek1m_upr vysek1m_kor $K   # koryta potoků zaříznutá do terénu (voda_hra.json koryto)

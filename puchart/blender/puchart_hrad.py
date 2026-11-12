@@ -1868,12 +1868,12 @@ def zabradli_stavba():
         for j in range(i + 1, len(E_)):
             rj, kj = E_[j]
             if ri is rj: continue
-            if (ri[ki] - rj[kj]).length < 0.45 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: par[f(i)] = f(j)
+            if (ri[ki] - rj[kj]).length < 0.45 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: spoj(i, j)
     for i in range(len(E_)):   # konce blíž než 0,75 m se spojí (dřív 0,45 – zbyly dva konce 0,54 m od sebe: mezera, dva krajní sloupky)
         ri, ki = E_[i]
         for j in range(i + 1, len(E_)):
             rj, kj = E_[j]
-            if ri is not rj and (ri[ki] - rj[kj]).length < 0.75 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: par[f(i)] = f(j)
+            if ri is not rj and (ri[ki] - rj[kj]).length < 0.75 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: spoj(i, j)
     sk = {}
     for i in range(len(E_)): sk.setdefault(f(i), []).append(i)
     for g in sk.values():
@@ -1894,6 +1894,14 @@ def zabradli_stavba():
             if best: r[k] = best[1].copy(); r["s" + k] = True
     # úlomky (Míša 12. 11.: „zábradlí u vstupní věžičky je furt na p…“ – kousek 0,6 m bez napojení vedle schodů branky): kus
     # kratší než ZAB_MIN_M, který se na žádném konci nenapojil na jiné zábradlí, se nestaví (krátkou hranu kryje zeď nebo schody)
+    for i_, r in enumerate(list(ZAB_REC)):   # dvojí stejný kus (dva doplňovače na stejnou hranu) – jen jeden (zabradli_spojite 12. 11.: patro branky A)
+        if r not in ZAB_REC: continue
+        for o in ZAB_REC:
+            if o is r: continue
+            if abs(o["ya"] - r["ya"]) < 0.05 and abs(o["yb"] - r["yb"]) < 0.05 and (((o["a"] - r["a"]).length < 0.05 and (o["b"] - r["b"]).length < 0.05) or ((o["a"] - r["b"]).length < 0.05 and (o["b"] - r["a"]).length < 0.05)):
+                ZAB_REC.remove(o)
+                if "kol_i" in o: o["P"].cols[o["kol_i"]] = None
+                break
     def _blizko_jineho(r):   # konec do 0,75 m od jiného zábradlí (napojené přes T-spoj, nebo na něj navazuje) – není úlomek
         for o in ZAB_REC:
             if o is r: continue
@@ -1908,9 +1916,8 @@ def zabradli_stavba():
     for r in ZAB_REC:   # deska u každého zábradlí podle výsledné polohy (i šikmá madla schodů – po spojení konců sahala mimo kolizi schodů)
         Lh_ = (r["b"] - r["a"]).length
         if "kol_i" in r: r["P"].cols[r["kol_i"]] = None   # původní deska pryč (nahradí ji deska ve výsledné poloze)
-        if Lh_ >= 0.1:
-            sk_ = math.atan2(r["yb"] - r["ya"], Lh_)
-            kol(r["P"], (r["a"] + r["b"]) / 2 + UP * ((r["ya"] + r["yb"]) / 2 + 0.55), hz(r["b"] - r["a"]), (0.1, 1.1, Lh_ / math.cos(sk_)), sk_)
+        if Lh_ >= 0.1 and "kol_i" in r:   # jen vodorovná zábradlí z zabradli() – šikmá madla schodů mají kolizi schodů (šikmá deska u paty schodů zatarasila cestu, 12. 11.)
+            kol(r["P"], (r["a"] + r["b"]) / 2 + UP * (r["ya"] + 0.55), hz(r["b"] - r["a"]), (0.1, 1.1, Lh_))
     for P_ in {id(r["P"]): r["P"] for r in ZAB_REC}.values(): P_.cols[:] = [c for c in P_.cols if c is not None]
     ZAB_VYSTUP[:] = [{"a": [round(r["a"].x, 2), round(r["a"].z, 2), round(r["ya"], 2)], "b": [round(r["b"].x, 2), round(r["b"].z, 2), round(r["yb"], 2)],
                       "sa": bool(r.get("sa")), "sb": bool(r.get("sb"))} for r in ZAB_REC if (r["b"] - r["a"]).length >= 0.1]   # pro hlídač zabradli_spojite
