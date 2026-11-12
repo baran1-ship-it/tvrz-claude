@@ -6644,8 +6644,8 @@
   "kapsle_delka_m": 0.42,
   "do_m": 15.0,
   "_popis": "12. 11.: pruzne kosti sukne (scripts/lide.gd _sukne, SpringBoneSimulator3D Godot 4.4): tuhost/odpor/tize retezu sukne_<i>_*, kolize kapslemi stehen a lytek (polomer, delka). Jen do do_m (rešerše: simulator jen zblizka). Hodnoty NEOVERENO - ladi se snimky chuze a sedu",
-  "ridic_predek": 0.9,
-  "ridic_bok": 0.25,
+  "ridic_predek": 1.0,
+  "ridic_bok": 0.6,
   "_ridic": "12. 11. (diagnostika: vsedе konce retezu 0,40 m svisle pod panvi, kolena 0,95 m vpredu - pruzina sama sed neresi): koren retezu natoci podil otoceni stehna proti panvi - predni retezy ridic_predek (pul z kazdeho stehna), bocni ridic_bok z blizsiho stehna (scripts/sukne_ridic.gd). NEOVERENO snimkem",
   "pruzina": false,
   "_ladeni12": "12. 11. ladeno snimky (build/sukne/ridic2.jpg): ridic_predek 0,7 a ridic_bok 0,25 (pri 0,8/0,6 sukne vsede trcela jako ubrus), tuhost 0,2 a tize 2,5 (spodni kosti za koleny padaji k zemi). Chuze i sed overeny snimkem u senkyrky; vykon na tabletu NEOVERENO",
@@ -6654,6 +6654,12 @@
    0.5,
    1.0
   ],
-  "_lytko12": "12. 11. (Misa: sukne ma kopirovat ohnuti kolen, ne trcet dopredu): kosti retezu shora dolu ridi stehno -> pul stehno/pul lytko -> lytko (ohyb v koleni); pruzina vypnuta (tahla spodek mimo tvar nohy)"
+  "_lytko12": "12. 11. (Misa: sukne ma kopirovat ohnuti kolen, ne trcet dopredu): kosti retezu shora dolu ridi stehno -> pul stehno/pul lytko -> lytko (ohyb v koleni); pruzina vypnuta (tahla spodek mimo tvar nohy)",
+  "polomer_stehna_m": 0.075,
+  "polomer_holene_m": 0.05,
+  "tloustka_m": 0.01,
+  "ohyb_od_st": 25.0,
+  "ohyb_do_st": 65.0,
+  "_aim12": "12. 11. (rešerše docs/rozpracovane/sukne_sed_reserse.md): kosti retezu miri na drahu po povrchu nohou (koren -> koleno odsunute o polomer_stehna+tloustka -> kotnik odsunuty o polomer_holene -> k zemi), vaha podle ohnuti stehen ohyb_od..do (chuze ~0, sed 1). Polomery nohou NEOVERENO z kuze (odhad, zmerit jako prsty)"
  }
 }

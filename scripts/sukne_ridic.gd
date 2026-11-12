@@ -1,79 +1,126 @@
 extends SkeletonModifier3D
-## Kosti sukne rizene stehny (12. 11., Misa: sukne a zastera trci s nohou, pri sedu tuhy plat pres kolena;
-## rešerše docs/rozpracovane/obleceni_reserse.md - „knee-driven skirt bones“): kazdy retez sukne_<i>_* natoci koren
-## podilem otoceni stehen proti klidove poze - predni retezy podle obou stehen, bocni podle blizsiho, zadni volne.
-## Vsede predni cast sukne lezi na stehnech a od kolen pada dolu; pri chuzi se sukne pohne s nohou jen castecne.
-## Pruzna simulace (SpringBoneSimulator3D „sukne“) bezi az po nem a pridava jen houpani. Data postavy.json sukne.ridic_*.
+## Kosti sukne podle tvaru nohou (12. 11., Misa: sukne vsede trci dopredu, ma kopirovat ohnuti kolen; rešerše
+## docs/rozpracovane/sukne_sed_reserse.md - CRYENGINE PRow projekce na kapsle nohou, aim kosti na body z kapsli; podil
+## rotace stehna sukni trha). Pro kazdy retez sukne_<i>_*: draha od korene retezu na koleno odsunute o polomer stehna
+## (latka lezi na stehne; predni stredove retezy na stred mezi koleny - prekleni mezeru mezi nohama), od kolena podel
+## holene ke kotniku odsunutemu o polomer holene a dal k zemi. Klouby retezu se rozlozi po draze podle delek kosti,
+## kazda kost miri na dalsi kloub. Vaha retezu: predni obe nohy, bocni blizsi noha, zadni nic (visi); celek se prolne
+## s pozou z animace podle ohnuti stehen (sed naplno, chuze skoro vubec - sukne nesmi obtahovat nohy jako kalhoty).
+## Data postavy.json sukne (polomer_stehna_m, polomer_holene_m, tloustka_m, ohyb_od_st, ohyb_do_st, ridic_predek, ridic_bok).
 
 var D: Dictionary = {}
-var _retezy: Array = []          # [kost korene, vaha leve, vaha prave]
-var _tl := -1
-var _tr := -1
-var _cl := -1                    # lytka (calf) - 12. 11. Misa: sukne ma kopirovat ohnuti kolen, ne trcet dopredu
-var _cr := -1
+var _retezy: Array = []          # [kosti, vaha leve, vaha prave, delky]
+var _b := {}
 var _diag := 0
 
 
 func priprav(sk: Skeleton3D) -> void:
-	_tl = sk.find_bone("thigh_l")
-	_tr = sk.find_bone("thigh_r")
-	_cl = sk.find_bone("calf_l")
-	_cr = sk.find_bone("calf_r")
-	var pel := sk.get_bone_global_rest(sk.find_bone("pelvis")).origin
-	var lx := signf(sk.get_bone_global_rest(_tl).origin.x - pel.x)
+	for n: String in ["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r", "foot_l", "foot_r"]:
+		_b[n] = sk.find_bone(n)
+	var pel := sk.get_bone_global_rest(_b["pelvis"]).origin
+	var lx := signf(sk.get_bone_global_rest(_b["thigh_l"]).origin.x - pel.x)
 	var i := 0
 	while sk.find_bone("sukne_%d_0" % i) >= 0:
-		var b := sk.find_bone("sukne_%d_0" % i)
-		var d := sk.get_bone_global_rest(b).origin - pel
-		d.y = 0.0
-		d = d.normalized()
-		var predek := maxf(0.0, d.z) * float(D.get("ridic_predek", 0.8))       # postava hledi po +z
-		var bok_l := maxf(0.0, d.x * lx) * float(D.get("ridic_bok", 0.6))
-		var bok_r := maxf(0.0, -d.x * lx) * float(D.get("ridic_bok", 0.6))
 		var kosti: Array = []
 		var j := 0
 		while sk.find_bone("sukne_%d_%d" % [i, j]) >= 0:
 			kosti.append(sk.find_bone("sukne_%d_%d" % [i, j]))
 			j += 1
-		_retezy.append([kosti, clampf(predek * 0.5 + bok_l, 0.0, 1.0), clampf(predek * 0.5 + bok_r, 0.0, 1.0)])
+		var delky: Array = []
+		for k in kosti.size() - 1:
+			delky.append(sk.get_bone_global_rest(kosti[k]).origin.distance_to(sk.get_bone_global_rest(kosti[k + 1]).origin))
+		delky.append(delky[delky.size() - 1] if not delky.is_empty() else 0.3)
+		var d := sk.get_bone_global_rest(kosti[0]).origin - pel
+		d.y = 0.0
+		d = d.normalized()
+		var predek := maxf(0.0, d.z) * float(D.get("ridic_predek", 1.0))         # postava hledi po +z
+		var bok_l := maxf(0.0, d.x * lx) * float(D.get("ridic_bok", 0.6))
+		var bok_r := maxf(0.0, -d.x * lx) * float(D.get("ridic_bok", 0.6))
+		_retezy.append([kosti, clampf(predek * 0.5 + bok_l, 0.0, 1.0), clampf(predek * 0.5 + bok_r, 0.0, 1.0), delky])
 		i += 1
 	if OS.has_environment("TVRZ_SUKNE_DIAG"):
-		print("SUKNE_RIDIC retezu %d, stehna %d %d, vahy %s" % [_retezy.size(), _tl, _tr, str(_retezy.map(func(r: Array) -> String: return "%.2f/%.2f" % [r[1], r[2]]))])
+		print("SUKNE_RIDIC retezu %d, vahy %s" % [_retezy.size(), str(_retezy.map(func(r: Array) -> String: return "%.2f/%.2f" % [r[1], r[2]]))])
+
+
+## Bod na lomene care (pole bodu) ve vzdalenosti s od zacatku.
+static func _na_draze(dr: Array, s: float) -> Vector3:
+	for k in dr.size() - 1:
+		var a: Vector3 = dr[k]
+		var b: Vector3 = dr[k + 1]
+		var l := a.distance_to(b)
+		if s <= l or k == dr.size() - 2:
+			return a + (b - a).normalized() * s if l > 1e-5 else a
+		s -= l
+	return dr[dr.size() - 1]
+
+
+## Odsunuti bodu p od osy useku a-b o polomer r (ve smeru od osy k bodu ref).
+static func _od_osy(a: Vector3, b: Vector3, p: Vector3, ref: Vector3, r: float) -> Vector3:
+	var ax := (b - a).normalized()
+	var v := ref - a
+	var n := v - ax * v.dot(ax)
+	if n.length_squared() < 1e-8:
+		n = Vector3.UP.cross(ax)
+	return p + n.normalized() * r
 
 
 func _process_modification() -> void:
 	var sk := get_skeleton()
-	if sk == null or _tl < 0 or _tr < 0 or _retezy.is_empty():
+	if sk == null or _retezy.is_empty() or int(_b["calf_l"]) < 0:
 		return
-	# otoceni stehna proti klidu v soustave kostry
-	var ql := (sk.get_bone_global_pose(_tl).basis * sk.get_bone_global_rest(_tl).basis.inverse()).get_rotation_quaternion()
-	var qr := (sk.get_bone_global_pose(_tr).basis * sk.get_bone_global_rest(_tr).basis.inverse()).get_rotation_quaternion()
-	# podil otoceni panve se odecte (sukne visi z panve, ridi jen pohyb stehen proti panvi)
-	var ip := sk.find_bone("pelvis")
-	var qp := (sk.get_bone_global_pose(ip).basis * sk.get_bone_global_rest(ip).basis.inverse()).get_rotation_quaternion()
-	ql = qp.inverse() * ql
-	qr = qp.inverse() * qr
-	if _diag < 3 and OS.has_environment("TVRZ_SUKNE_DIAG"):
+	var r_s := float(D.get("polomer_stehna_m", 0.075))
+	var r_h := float(D.get("polomer_holene_m", 0.05))
+	var tl := float(D.get("tloustka_m", 0.01))
+	var nahoru := Vector3.UP
+	var P := {}
+	for n: String in _b:
+		P[n] = sk.get_bone_global_pose(int(_b[n])).origin
+	# ohnuti stehen (uhel stehna od svisle dolu): prolnuti s pozou animace
+	var ohyb := 0.0
+	for s: String in ["l", "r"]:
+		var t: Vector3 = (P["calf_" + s] as Vector3) - (P["thigh_" + s] as Vector3)
+		ohyb = maxf(ohyb, rad_to_deg(t.angle_to(-nahoru)))
+	var w_ohyb := smoothstep(float(D.get("ohyb_od_st", 25.0)), float(D.get("ohyb_do_st", 65.0)), ohyb)
+	if _diag < 2 and OS.has_environment("TVRZ_SUKNE_DIAG"):
 		_diag += 1
-		print("SUKNE_RIDIC bezi, stehno L %.0f st, P %.0f st" % [rad_to_deg(ql.get_angle()), rad_to_deg(qr.get_angle())])
-	# lytka proti panvi (vcetne ohnuti v koleni): kosti retezu pod kolenem jdou podle lytka
-	var cl := qp.inverse() * (sk.get_bone_global_pose(_cl).basis * sk.get_bone_global_rest(_cl).basis.inverse()).get_rotation_quaternion() if _cl >= 0 else ql
-	var cr := qp.inverse() * (sk.get_bone_global_pose(_cr).basis * sk.get_bone_global_rest(_cr).basis.inverse()).get_rotation_quaternion() if _cr >= 0 else qr
-	var pod: Array = D.get("ridic_lytko", [0.0, 0.5, 1.0])       # podil lytka po kostech retezu (shora dolu)
+		print("SUKNE_RIDIC ohyb stehen %.0f st, vaha %.2f" % [ohyb, w_ohyb])
+	if w_ohyb <= 0.001:
+		return
 	for r: Array in _retezy:
 		var kosti: Array = r[0]
 		var wl := float(r[1])
 		var wr := float(r[2])
-		var g0: Array = []
-		for b: int in kosti:
-			g0.append(sk.get_bone_global_pose(b))           # poza z animace (pred upravou)
-		for jj in kosti.size():
-			var b: int = kosti[jj]
-			var f := float(pod[mini(jj, pod.size() - 1)])
-			var dl := ql.slerp(cl, f)
-			var dr := qr.slerp(cr, f)
-			var q := Quaternion.IDENTITY.slerp(dl, wl) * Quaternion.IDENTITY.slerp(dr, wr)
-			var cil := Basis(qp) * Basis(q) * Basis(qp.inverse()) * (g0[jj] as Transform3D).basis
+		var w := clampf(wl + wr, 0.0, 1.0) * w_ohyb
+		if w <= 0.001:
+			continue
+		var koren := sk.get_bone_global_pose(kosti[0]).origin
+		var drahy: Array = []
+		for s: String in ["l", "r"]:
+			var th: Vector3 = P["thigh_" + s]
+			var kn: Vector3 = P["calf_" + s]
+			var an: Vector3 = P["foot_" + s]
+			var k_ := _od_osy(th, kn, kn, koren, r_s + tl)
+			var a_ := _od_osy(kn, an, an, k_, r_h + tl)
+			drahy.append([koren, k_, a_, a_ - nahoru * 0.3])
+		var ws := wl + wr
+		var dr: Array = []
+		for q in 4:
+			dr.append(((drahy[0][q] as Vector3) * wl + (drahy[1][q] as Vector3) * wr) / maxf(ws, 1e-5))
+		var cile: Array = [koren]
+		var s_ := 0.0
+		var delky: Array = r[3]
+		for k in kosti.size():
+			s_ += float(delky[k])
+			cile.append(_na_draze(dr, s_))
+		for k in kosti.size():
+			var b: int = kosti[k]
+			var g := sk.get_bone_global_pose(b)
+			var smer := (cile[k + 1] as Vector3) - g.origin
+			if smer.length_squared() < 1e-8:
+				continue
+			var y0 := g.basis.y.normalized()
+			var q := Quaternion(y0, y0.slerp(smer.normalized(), w).normalized())
+			var cil := Basis(q) * g.basis
 			var p := sk.get_bone_parent(b)
 			var gp := sk.get_bone_global_pose(p) if p >= 0 else Transform3D()
 			sk.set_bone_pose_rotation(b, (gp.basis.inverse() * cil).get_rotation_quaternion().normalized())
