@@ -192,7 +192,9 @@
   "strom_daleko_do_m": 900.0,
   "stin_drobne_od_m": 1.0,
   "bunka_m": 25.0,
-  "ploty_pozn": "KCD2 ref_kcd2_ves_shora: ploty jsou z výšky vidět přes celou ves (~150 m); tablet kratší"
+  "ploty_pozn": "KCD2 ref_kcd2_ves_shora: ploty jsou z výšky vidět přes celou ves (~150 m); tablet kratší",
+  "stredni_zapnuto": false,
+  "stredni_pozn": "12. 11.: střední stupeň stodol/kůlen (stavby_h *_stredni.glb, barva vrcholů) se kreslí černě (snímky docs/screens/ves_kcd_*; s jednobarevným materiálem osvětlený) – příčina NEOVERENA, stejné černé domy z dálky v _mista. Podrobný model má stejně trojúhelníků (stodola 17,8 tis.), střední šetří jen volání kreslení → vypnuto, podrobný do stredni_do_m."
  },
  "ploty_pravidla": {
   "zdroj": "Havran vesnice.py picket_fence (sloupky po 2 m, 2 žerdě, latě 5,5–10 cm, výška 1,15 m, 4 % chybí, špice/šikmo/rovně), rail_fence (kůly po 2,8 m, 2–3 žerdě s kůrou, výška 1,1 m, 5 % spadlá), roofed_gate (sloupy 24 cm, 2,7 m, stříška šindel, křídla z prken 1,75 m), wicket (branka 0,9 m, 7 latí 1,05 m); proutěný = předmět plutek (2,07 m díl). KCD1 ves_1 (laťový + krytá vrata), ves_4 (proutěný), KCD2 ref_kcd2_zahrada_plot (proutí a kůly)",
@@ -238,8 +240,8 @@
   "od_cesty_m": 2.5,
   "od_toku_m": 6.0,
   "textury": {
-   "zdroj": "textury předmětů Havrana (predmety_h): prkna stodoly = latě a vrata, kůra kůlů plůtku, šindel a kamenné patky kůlny; při načtení zesvětlené na jas_cil jako domy a stodoly (nastroje/havran/stavby_export.gd JAS_CIL, KCD1 ves_2: ohlazené dřevo ~0,5)",
-   "jas_cil": 0.5,
+   "zdroj": "textury předmětů Havrana (predmety_h): prkna stodoly = latě a vrata, kůra kůlů plůtku, šindel a kamenné patky kůlny; při načtení zesvětlené na jas_cil jako domy a stodoly (nastroje/havran/stavby_export.gd JAS_CIL, KCD1 ves_2: ohlazené dřevo 0,42–0,55; ploty a stodoly 0,42 jako stavby_export.gd JAS_PREDMETY – při 0,5 vyšla prkna růžová, snímek 12. 11.)",
+   "jas_cil": 0.42,
    "lata": {
     "albedo": "res://modely/predmety_h/kolna_prkna_stodola_albedo.jpg",
     "normal": "res://modely/predmety_h/kolna_prkna_stodola_normal.jpg",
@@ -888,6 +890,46 @@
    "usedlost": 1
   },
   {
+   "model": "panak_snopu",
+   "x": -53.582,
+   "y": 29.754,
+   "z": -253.45,
+   "yaw": 2.545,
+   "usedlost": 1
+  },
+  {
+   "model": "panak_snopu",
+   "x": -60.499,
+   "y": 30.548,
+   "z": -261.304,
+   "yaw": 2.546,
+   "usedlost": 1
+  },
+  {
+   "model": "panak_snopu",
+   "x": -61.323,
+   "y": 30.858,
+   "z": -258.164,
+   "yaw": 2.937,
+   "usedlost": 1
+  },
+  {
+   "model": "panak_snopu",
+   "x": -61.853,
+   "y": 30.477,
+   "z": -263.959,
+   "yaw": 4.094,
+   "usedlost": 1
+  },
+  {
+   "model": "panak_snopu",
+   "x": -55.148,
+   "y": 29.485,
+   "z": -247.207,
+   "yaw": 1.912,
+   "usedlost": 1
+  },
+  {
    "model": "zahon_prazdny",
    "x": -127.401,
    "y": 37.285,
@@ -1352,30 +1394,6 @@
    "usedlost": 6
   },
   {
-   "model": "panak_snopu",
-   "x": -61.607,
-   "y": 30.403,
-   "z": -249.328,
-   "yaw": 3.326,
-   "usedlost": 6
-  },
-  {
-   "model": "panak_snopu",
-   "x": -68.577,
-   "y": 31.478,
-   "z": -254.715,
-   "yaw": 3.805,
-   "usedlost": 6
-  },
-  {
-   "model": "panak_snopu",
-   "x": -68.449,
-   "y": 31.496,
-   "z": -255.559,
-   "yaw": 1.45,
-   "usedlost": 6
-  },
-  {
    "model": "zahon_zeli",
    "x": -73.9,
    "y": 32.017,
@@ -1429,46 +1447,6 @@
    "y": 29.728,
    "z": -220.695,
    "yaw": 4.96,
-   "usedlost": 7
-  },
-  {
-   "model": "panak_snopu",
-   "x": -27.82,
-   "y": 25.845,
-   "z": -238.079,
-   "yaw": 4.398,
-   "usedlost": 7
-  },
-  {
-   "model": "panak_snopu",
-   "x": -39.688,
-   "y": 27.532,
-   "z": -232.0,
-   "yaw": 2.022,
-   "usedlost": 7
-  },
-  {
-   "model": "panak_snopu",
-   "x": -43.875,
-   "y": 27.934,
-   "z": -231.232,
-   "yaw": 4.21,
-   "usedlost": 7
-  },
-  {
-   "model": "panak_snopu",
-   "x": -36.952,
-   "y": 27.191,
-   "z": -232.688,
-   "yaw": 5.944,
-   "usedlost": 7
-  },
-  {
-   "model": "panak_snopu",
-   "x": -29.656,
-   "y": 25.999,
-   "z": -238.122,
-   "yaw": 0.059,
    "usedlost": 7
   },
   {
@@ -1537,34 +1515,58 @@
   },
   {
    "model": "panak_snopu",
-   "x": -10.576,
-   "y": 25.653,
-   "z": -184.755,
+   "x": 6.641,
+   "y": 22.238,
+   "z": -197.098,
    "yaw": 0.834,
    "usedlost": 8
   },
   {
    "model": "panak_snopu",
-   "x": -12.852,
-   "y": 25.972,
-   "z": -185.349,
+   "x": -0.66,
+   "y": 23.638,
+   "z": -197.4,
    "yaw": 6.013,
    "usedlost": 8
   },
   {
    "model": "panak_snopu",
-   "x": -11.288,
-   "y": 25.755,
-   "z": -184.842,
+   "x": 4.344,
+   "y": 22.699,
+   "z": -197.093,
    "yaw": 4.805,
    "usedlost": 8
   },
   {
    "model": "panak_snopu",
-   "x": -16.248,
-   "y": 26.424,
-   "z": -183.968,
+   "x": -11.854,
+   "y": 25.543,
+   "z": -195.565,
    "yaw": 1.107,
+   "usedlost": 8
+  },
+  {
+   "model": "panak_snopu",
+   "x": 4.875,
+   "y": 22.779,
+   "z": -181.176,
+   "yaw": 1.003,
+   "usedlost": 8
+  },
+  {
+   "model": "panak_snopu",
+   "x": -17.449,
+   "y": 26.583,
+   "z": -183.841,
+   "yaw": 1.013,
+   "usedlost": 8
+  },
+  {
+   "model": "panak_snopu",
+   "x": -1.429,
+   "y": 24.195,
+   "z": -182.131,
+   "yaw": 1.867,
    "usedlost": 8
   },
   {
@@ -9734,12 +9736,138 @@
    "plodina": "uhor",
    "poly": [
     [
-     -166.665,
-     -197.312
+     -50.714,
+     -271.668
     ],
     [
-     -172.327,
-     -206.915
+     -58.061,
+     -265.206
+    ],
+    [
+     -67.307,
+     -275.718
+    ],
+    [
+     -59.961,
+     -282.18
+    ]
+   ]
+  },
+  {
+   "plodina": "strniste",
+   "poly": [
+    [
+     -41.79,
+     -244.891
+    ],
+    [
+     -49.137,
+     -238.429
+    ],
+    [
+     -75.555,
+     -268.464
+    ],
+    [
+     -68.208,
+     -274.926
+    ]
+   ]
+  },
+  {
+   "plodina": "orane",
+   "poly": [
+    [
+     -179.555,
+     -287.623
+    ],
+    [
+     -177.634,
+     -298.425
+    ],
+    [
+     -159.912,
+     -295.274
+    ],
+    [
+     -161.833,
+     -284.472
+    ]
+   ]
+  },
+  {
+   "plodina": "uhor",
+   "poly": [
+    [
+     -173.486,
+     -298.906
+    ],
+    [
+     -171.565,
+     -309.709
+    ],
+    [
+     -157.782,
+     -307.258
+    ],
+    [
+     -159.702,
+     -296.456
+    ]
+   ]
+  },
+  {
+   "plodina": "uhor",
+   "poly": [
+    [
+     -181.681,
+     -247.907
+    ],
+    [
+     -182.265,
+     -258.516
+    ],
+    [
+     -170.283,
+     -259.176
+    ],
+    [
+     -169.699,
+     -248.566
+    ]
+   ]
+  },
+  {
+   "plodina": "orane",
+   "poly": [
+    [
+     -190.319,
+     -259.275
+    ],
+    [
+     -190.903,
+     -269.884
+    ],
+    [
+     -170.933,
+     -270.984
+    ],
+    [
+     -170.349,
+     -260.374
+    ]
+   ]
+  },
+  {
+   "plodina": "uhor",
+   "poly": [
+    [
+     -173.557,
+     -193.249
+    ],
+    [
+     -179.218,
+     -202.852
     ],
     [
      -160.267,
@@ -9755,20 +9883,20 @@
    "plodina": "strniste",
    "poly": [
     [
-     -64.958,
-     -261.506
+     8.523,
+     -201.557
     ],
     [
-     -49.345,
-     -246.671
+     9.111,
+     -191.452
     ],
     [
-     -57.612,
-     -237.972
+     -20.839,
+     -189.709
     ],
     [
-     -73.224,
-     -252.807
+     -21.427,
+     -199.814
     ]
    ]
   },
@@ -9776,33 +9904,12 @@
    "plodina": "strniste",
    "poly": [
     [
-     -33.589,
-     -253.337
+     13.174,
+     -190.486
     ],
     [
-     -18.768,
-     -237.748
-    ],
-    [
-     -39.06,
-     -218.455
-    ],
-    [
-     -53.881,
-     -234.044
-    ]
-   ]
-  },
-  {
-   "plodina": "strniste",
-   "poly": [
-    [
-     -8.789,
-     -189.208
-    ],
-    [
-     -8.201,
-     -179.103
+     13.762,
+     -180.381
     ],
     [
      -20.181,

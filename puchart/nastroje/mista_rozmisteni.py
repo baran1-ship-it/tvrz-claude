@@ -355,7 +355,9 @@ for us in useds:
                 q = F.w(u0 - dl, vv); pq = Point(q)
                 if trida(*q) in PO["stanoviste_zakazana"] or sklon(*q) > PO["max_sklon"] or pq.distance(CESTY_L) < PO["od_cesty_m"] or pq.distance(TOKY_L) < PO["od_toku_m"] \
                         or (dl > 0 and zabrano.contains(pq)): ok = False; break
-            if not ok: break
+            if not ok:
+                if DBG == "pole": print("   lán", us["i"], k_, "dl", dl, trida(*q), round(sklon(*q), 2), round(pq.distance(CESTY_L), 1), round(pq.distance(TOKY_L), 1), zabrano.contains(pq))
+                break
             dl += 2.0
         if dl < 12.0: continue
         poly = F.poly(u0 - dl, u0, a, b)

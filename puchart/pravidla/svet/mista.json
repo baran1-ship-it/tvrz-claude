@@ -597,8 +597,8 @@
     "cesta",
     "les_sut"
    ],
-   "max_sklon": 0.15,
-   "max_sklon_zdroj": "pravidla/svet/plochy.json pastvina od_sklonu 0,15 (Havran: orná půda do 0,15, výš pastvina, nad 0,3 les); dnešní les na plošině u Předhradí je novověký (v roce 1393 pole – plochy.json les pozn „plošina pole a pastviny“)"
+   "max_sklon": 0.28,
+   "max_sklon_zdroj": "GC80T08 (docs/hrady_podle_kreseb.md): kamenné hrázky políček SZ od hradu = pole i na svahu, meze z kamení sbíraného z polí; plochy.json má ornou půdu do 0,15 (Havran, rovina Polabí) – na Potštátsku svahová plužina, NAVRH do 0,28 (≈ 15°; za humny je sklon 0,2–0,26 – při 0,22 vyšly jen krátké kousky, 12. 11.); dnešní les na plošině je novověký"
   },
   "lod": {
    "zdroj": "jako domy míst (hlavni.gd _mista, Havran _ves_domy): podrobný do 30 m, střední stupeň (barva vrcholů) dál, stín jen ze středního; drobnosti jen zblízka (Havran predmety.gd: < 1,5 m → 40 m, větší 80 m)",
@@ -615,7 +615,9 @@
    "strom_daleko_do_m": 900.0,
    "stin_drobne_od_m": 1.0,
    "bunka_m": 25.0,
-   "ploty_pozn": "KCD2 ref_kcd2_ves_shora: ploty jsou z výšky vidět přes celou ves (~150 m); tablet kratší"
+   "ploty_pozn": "KCD2 ref_kcd2_ves_shora: ploty jsou z výšky vidět přes celou ves (~150 m); tablet kratší",
+   "stredni_zapnuto": false,
+   "stredni_pozn": "12. 11.: střední stupeň stodol/kůlen (stavby_h *_stredni.glb, barva vrcholů) se kreslí černě (snímky docs/screens/ves_kcd_*; s jednobarevným materiálem osvětlený) – příčina NEOVERENA, stejné černé domy z dálky v _mista. Podrobný model má stejně trojúhelníků (stodola 17,8 tis.), střední šetří jen volání kreslení → vypnuto, podrobný do stredni_do_m."
   },
   "povrch": {
    "popis": "povrch usedlostí a lánů pro stanoviště a masku hlíny (nastroje/stavby_vegetace.py): třída stanoviště (byliny.json, louka.json) a síla hlíny v maska_cesty.R",

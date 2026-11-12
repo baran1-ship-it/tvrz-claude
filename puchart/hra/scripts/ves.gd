@@ -102,7 +102,10 @@ func _hospodarske() -> void:
 		n.name = "%s_%d" % [mid, int(h["usedlost"])]
 		n.transform = Transform3D(Basis(Vector3.UP, float(h["yaw"])), Vector3(float(h["x"]), float(h["y"]), float(h["z"])))
 		uzel.add_child(n)
-		var ma_st: bool = sc[1] != null
+		# střední stupeň (barva vrcholů) se ve hře kreslí černě (snímek 12. 11.: stejná stodola s jednobarevným materiálem
+		# osvětlená, s barvou vrcholů černá – příčina NEOVERENA, týká se i domů _mista); má stejně trojúhelníků jako podrobný
+		# model (17,8 tis.), šetří jen volání kreslení → zatím podrobný model až do stredni_do_m (lod.stredni_zapnuto)
+		var ma_st: bool = sc[1] != null and bool(lod.get("stredni_zapnuto", false))
 		for g in n.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_end = blizko if ma_st else st_do
 			(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if ma_st else GeometryInstance3D.SHADOW_CASTING_SETTING_ON

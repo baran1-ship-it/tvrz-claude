@@ -20,15 +20,23 @@ var _stredni_soubor := false   # předměty Havrana: střední stupeň = celý s
 const JAS_CIL := 0.5   # KCD ves_2: ohlazené dřevo ~0,5
 const JAS_PREDMETY := 0.42   # hospodářské stavby: prkna stodol tmavší než ohlazené roubení domu (KCD1 ves_1 kůlna vpravo, ves_6; 0,5 = růžová prkna, snímek 12. 11.)
 static var jas_cil := JAS_CIL
+## Začouzené (mazanice, roubení, pec, povala) jsou záměrně tmavé, ale ne černé: po převodu měly jas 0,02–0,05 (Havran sám
+## uvádí 0,13–0,3) a v dírách opadané omítky Dum2 zvenku vypadaly jako černé skvrny (Míša 12. 11. chalupa_u_cesty.jpg) →
+## nejméně JAS_ZACOUZENE.
+const JAS_ZACOUZENE := 0.16
 static func _jas(im: Image, jm: String) -> Image:
-	for k in ["Zacouz", "Vnitr", "Povala", "Interier", "Pec", "Okn"]:
-		if jm.contains(k): return im
+	var cil := jas_cil
+	for k in ["Zacouz"]:
+		if jm.contains(k): cil = JAS_ZACOUZENE
+	if cil == jas_cil:
+		for k in ["Vnitr", "Povala", "Interier", "Pec", "Okn"]:
+			if jm.contains(k): return im
 	var s := 0.0; var n := 0
 	for y in range(0, im.get_height(), 8):
 		for x in range(0, im.get_width(), 8): s += im.get_pixel(x, y).get_luminance(); n += 1
 	var j := s / maxf(n, 1)
-	if j >= jas_cil or j <= 0.01: return im
-	im.adjust_bcs(minf(jas_cil / j, 2.6), 1.0, 0.9)
+	if j >= cil or j <= 0.005: return im
+	im.adjust_bcs(minf(cil / j, 4.0 if cil == JAS_ZACOUZENE else 2.6), 1.0, 0.9)
 	return im
 
 ## Normálová mapa z importu Godotu má jen R a G (komprese normál) – modrý kanál dopočítat (z = √(1 − x² − y²)),
@@ -85,6 +93,10 @@ func _jas_lod(n: Node) -> void:
 					var nc := PackedColorArray()
 					for c in cs: nc.append(_jas_barva(c))
 					a[Mesh.ARRAY_COLOR] = nc
+				# normály střední verze přepočítat z trojúhelníků (12. 11.: z balíku Havrana vycházely vadné – průměr n.y ≈ 0 i na
+				# střechách, dům ve 30–130 m černý; bez stínování barvy vrcholů v pořádku)
+				var st := SurfaceTool.new(); st.create_from_arrays(a); st.generate_normals(); a = st.commit_to_arrays()
+				a[Mesh.ARRAY_TANGENT] = null
 				am.add_surface_from_arrays(m.surface_get_primitive_type(i), a)
 				am.surface_set_material(i, m.surface_get_material(i))
 			(mi as MeshInstance3D).mesh = am
