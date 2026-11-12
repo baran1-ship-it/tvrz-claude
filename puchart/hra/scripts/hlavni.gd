@@ -235,6 +235,7 @@ func _svetla(h: Node3D) -> void:
 		l.light_specular = 0.0 if s.get("den", false) else 0.5
 		l.light_energy = s["energie"]; l.omni_range = s["dosah"]; l.shadow_enabled = false
 		l.distance_fade_enabled = true; l.distance_fade_begin = 35.0; l.distance_fade_length = 10.0
+		if s.get("den", false): l.set_meta("den_svetlo", true)   # světlo z oken – den.gd ho v noci zhasne
 		h.add_child(l)
 		if not s.get("den", false) and s.get("svit", "louc") != "ohen": _k_svicnum.append(l); l.set_meta("svit", s.get("svit", "louc"))
 

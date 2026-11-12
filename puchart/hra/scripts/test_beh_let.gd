@@ -13,11 +13,11 @@ func _ready() -> void:
 	for kolo in 2:
 		for co in ["beh", "let"]:
 			var pred: bool = h.bezi if co == "beh" else h.leti
-			var c: Vector2 = pr.kruhy.run_c() if co == "beh" else pr.kruhy.let_c()
+			var c: Vector2 = get_viewport().get_final_transform() * (pr.kruhy.run_c() if co == "beh" else pr.kruhy.let_c())   # plátno → okno (stretch canvas_items)
 			var mm := InputEventMouseMotion.new(); mm.position = c; mm.global_position = c; Input.parse_input_event(mm)
 			await get_tree().process_frame; await get_tree().process_frame
 			var hc := get_viewport().gui_get_hovered_control()
-			print("BEHLET_TEST pod prstem ", hc.get_path() if hc else "nic", " bod ", c, " rect ", pr.kruhy.get_global_rect(), " vid ", pr.kruhy.is_visible_in_tree(), " has ", pr.kruhy._has_point(c), " mys ", Input.mouse_mode, " filtr ", pr.kruhy.mouse_filter)
+			print("BEHLET_TEST pod prstem ", hc.get_path() if hc else "nic", " bod ", c)
 			for st in [true, false]:
 				var t := InputEventScreenTouch.new(); t.position = c; t.pressed = st; t.index = 0
 				Input.parse_input_event(t); await get_tree().process_frame
