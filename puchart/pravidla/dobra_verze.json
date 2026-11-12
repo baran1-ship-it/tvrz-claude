@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "dfe67e1",
+ "commit": "5fb7998",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -66,6 +66,7 @@
    "skaly_hrany": true,
    "zed_nad_strechou": true,
    "koryto_kameny_hustota": true,
+   "zabradli_ulomky": true,
    "zabradli_spojite": true,
    "portaly": true
   },
@@ -105,26 +106,26 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1585650,
-    "troj_max": 1590560,
-    "kresleni_p95": 377,
+    "troj_p95": 1868843,
+    "troj_max": 1872652,
+    "kresleni_p95": 440,
     "kresleni_m_median": 476.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1755571,
-    "troj_max": 1849395,
-    "kresleni_p95": 708,
-    "kresleni_m_median": 717.0
+    "troj_p95": 2243859,
+    "troj_max": 2376262,
+    "kresleni_p95": 869,
+    "kresleni_m_median": 713.0
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1711324,
-    "troj_max": 1787835,
-    "kresleni_p95": 836,
-    "kresleni_m_median": 1762.0
+    "troj_p95": 2150373,
+    "troj_max": 2209180,
+    "kresleni_p95": 1031,
+    "kresleni_m_median": 1760.5
    },
-   "zmena_median": 35.12,
+   "zmena_median": 33.49,
    "doskoky": [],
    "ve_zdi": 2
   },
