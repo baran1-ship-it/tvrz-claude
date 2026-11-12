@@ -1455,18 +1455,19 @@
   "hladina_y": 3.35,
   "hraz": {
    "stred": [
-    514.2,
-    870.7
+    509.65,
+    881.78
    ],
    "smer_osy": [
-    0.627,
-    -0.779
+    -0.149,
+    -0.989
    ],
    "delka_m": 24.0,
    "koruna_nad_hladinou_m": 0.8,
    "koruna_sirka_m": 3.0,
    "sklon_svahu": 0.5,
-   "popis": "hraz na jihozapadnim (zapadnim) brehu dilu, kde je prirozeny okraj nejniz; vypust = zacatek toku lhota_odtok. Koruna 0,8 m nad hladinou (CSN 75 2410: 0,5-1,0 m, odhad), svahy 1:2."
+   "popis": "hraz na jihozapadnim (zapadnim) brehu dilu, kde je prirozeny okraj nejniz; vypust = zacatek toku lhota_odtok. Koruna 0,8 m nad hladinou (CSN 75 2410: 0,5-1,0 m, odhad), svahy 1:2.",
+   "_poloha12": "12. 11. (Misa fotky (495, 881): odtok je pas v trave bez napojeni; test ryb_napojeni: odtok zacinal 5,6 m za koncem hraze a vedl soubezne s ni): hraz napric odtoku - osa kolmo na smer od stredu rybnika k zacatku odtoku (odtok vede radialne, odchylka 4 st), stred koruny = voda_polomer + 0,5 + vnitrni svah (koruna_nad_hladinou/sklon) + koruna/2 od stredu; odtok zacina za vzdusnou patou (test ryb_napojeni, test smyslu odtok_za_hrazi). Drive [514.2, 870.7] smer [0.627, -0.779] (soubezne s odtokem)."
   },
   "popis": "Navesni rybnik Lhota (dil modely/rybnik/rybnik.glb). Hladina pevne z dat (drive z obvodu terenu ve hre).",
   "voda_polomer_m": 12.0,
