@@ -239,6 +239,43 @@ def face_mask(o, wfun, size):
         if w < 0.02: continue
         d.polygon([(uv[li].uv[0] * size, uv[li].uv[1] * size) for li in p.loop_indices], fill=int(255 * min(1, w)))
     return np.asarray(m.filter(ImageFilter.GaussianBlur(size / 300)), np.float32) / 255
+_POS = {}
+def pos_map(o, size):
+    """3D poloha (svět) každého texelu UV (řádky zdola jako Blender pixels) + platnost; 12. 11. vrásky: maska po plochách
+    (face_mask) na hrubé síti hlavy tenkou rýhu buď ztratí, nebo vyplní celou plochu skvrnou"""
+    key = (o.name, size)
+    if key in _POS: return _POS[key]
+    P = np.zeros((size, size, 3), np.float32); V = np.zeros((size, size), bool)
+    co = np.array([o.matrix_world @ v.co for v in o.data.vertices], np.float32)
+    uv = o.data.uv_layers.active.data
+    for poly in o.data.polygons:
+        li = list(poly.loop_indices); vi = list(poly.vertices)
+        for t in range(1, len(li) - 1):
+            ids = [0, t, t + 1]
+            U = np.array([uv[li[i]].uv[:] for i in ids], np.float32) * size
+            X = co[[vi[i] for i in ids]]
+            x0, y0 = np.floor(U.min(0)).astype(int); x1, y1 = np.ceil(U.max(0)).astype(int)
+            x0, y0 = max(x0, 0), max(y0, 0); x1, y1 = min(x1, size - 1), min(y1, size - 1)
+            if x1 < x0 or y1 < y0: continue
+            yy, xx = np.mgrid[y0:y1 + 1, x0:x1 + 1].astype(np.float32) + 0.5
+            (ax, ay), (bx, by), (cx, cy) = U
+            den = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy)
+            if abs(den) < 1e-9: continue
+            l0 = ((by - cy) * (xx - cx) + (cx - bx) * (yy - cy)) / den
+            l1 = ((cy - ay) * (xx - cx) + (ax - cx) * (yy - cy)) / den
+            l2 = 1 - l0 - l1
+            ins = (l0 >= -0.01) & (l1 >= -0.01) & (l2 >= -0.01)
+            if not ins.any(): continue
+            pts = l0[..., None] * X[0] + l1[..., None] * X[1] + l2[..., None] * X[2]
+            sub = P[y0:y1 + 1, x0:x1 + 1]; sub[ins] = pts[ins]; V[y0:y1 + 1, x0:x1 + 1] |= ins
+    _POS[key] = (P, V)
+    return P, V
+def px_mask(o, wfun, size):
+    """maska po texelech: wfun(3D body) v každém texelu"""
+    P, V = pos_map(o, size)
+    w = np.zeros((size, size), np.float32)
+    w[V] = wfun(P[V])
+    return np.clip(w, 0, 1)
 # --- dlouhá sukně (šaty) místo kalhot: kužel od boků ke kotníkům, váhy pánev -> stehna
 def make_skirt():
     legs = next(o for o in outfit if o.type == 'MESH' and o.name.endswith("_legs"))
@@ -397,9 +434,11 @@ if TV:
                 dd = np.linalg.norm(p - (a + np.outer(t, ab)), axis=1)
                 w = np.maximum(w, np.exp(-(dd / 0.004) ** 2) * ss((p[:, 1] - (YF - 0.02)) / 0.01 + 1) * (0.5 + 0.5 * t))
             return w
-        wm = face_mask(head, vrw, S)[..., None]
+        wm = px_mask(head, vrw, S)[..., None]
         # hrbet nad ryhou (svetlejsi): tataz maska posunuta o 3 mm nahoru v prostoru hlavy
-        hr = np.clip(face_mask(head, lambda p: vrw(p - np.array([0.0, 0.0, 0.003])), S)[..., None] - wm, 0, 1)
+        hr = np.clip(px_mask(head, lambda p: vrw(p - np.array([0.0, 0.0, 0.003])), S)[..., None] - wm, 0, 1)
+        print("VRASKY maska max %.2f px>0.2 %d, hrbet max %.2f, S %d" % (float(wm.max()), int((wm > 0.2).sum()), float(hr.max()), S))
+        Image.fromarray((wm[..., 0] * 255).astype(np.uint8)).save(f"{TEXOUT}/dbg_vrasky.png")
         A[..., :3] *= 1 - 0.6 * v * wm
         A[..., :3] *= 1 + 0.18 * v * hr
         print("VRASKY", v)

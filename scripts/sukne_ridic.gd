@@ -91,6 +91,7 @@ func _process_modification() -> void:
 		print("SUKNE_RIDIC ohyb stehen %.0f st, pokles panve %.2f m, vaha %.2f" % [ohyb, pokles, w_ohyb])
 	if w_ohyb <= 0.001:
 		return
+	var vse: Array = []
 	for r: Array in _retezy:
 		var kosti: Array = r[0]
 		var wl := float(r[1])
@@ -131,6 +132,26 @@ func _process_modification() -> void:
 		for k in kosti.size():
 			s_ += float(delky[k])
 			cile.append((anim[k + 1] as Vector3).lerp(_na_draze(dr, s_), w))
+		vse.append([kosti, cile, ref])
+	# vyhlazeni po obvodu (12. 11., snimek kucharka Sed_Poza3: u zkrizenych nohou sousedni retezy kazdy k jine noze,
+	# latka mezi nimi zkroucena - tmavy rub); retezy sukne_<i> jdou po obvodu dokola
+	var n_r := vse.size()
+	for _it in int(D.get("obvod_kol", 2)):
+		var nove: Array = []
+		for i in n_r:
+			var ci: Array = (vse[i][1] as Array).duplicate()
+			var cp: Array = vse[(i - 1 + n_r) % n_r][1]
+			var cn: Array = vse[(i + 1) % n_r][1]
+			for k in range(1, ci.size()):
+				if k < cp.size() and k < cn.size():
+					ci[k] = (ci[k] as Vector3).lerp(((cp[k] as Vector3) + (cn[k] as Vector3)) * 0.5, float(D.get("obvod_podil", 0.35)))
+			nove.append(ci)
+		for i in n_r:
+			vse[i][1] = nove[i]
+	for v: Array in vse:
+		var kosti: Array = v[0]
+		var cile: Array = v[1]
+		var ref: Vector3 = v[2]
 		# vytlaceni z kapsli obou nohou (CRYENGINE PRow; 12. 11. test_sukne: zkrizene nohy a klek - prumer drah
 		# dvou nohou padl do druhe nohy)
 		for k in range(1, cile.size()):
