@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -7925,3 +7925,78 @@ func _lednice_blok() -> void:
 			if h.is_empty() or nm.begins_with("Mlyn_Lednice"):        # teren zvenku = stena zasypana, taky dobre
 				chyby.append("bod %d strana %d: %s" % [i, int(s), nm])
 	_vysledek("lednice_blok", chyby.is_empty(), "paprsku %d, bez vnejsiho lice %d %s" % [zkous, chyby.size(), str(chyby.slice(0, 8))])
+
+
+
+## Napojeni toku na rybnik Lhota (Misa 12. 11., fotky (534, 888) a (495, 881): pritok u rybnika neni videt, odtok je
+## tmavy pas v trave bez napojeni). Po ose pritoku od 30 m pred stredem az do hladiny rybnika a po ose odtoku od
+## zacatku 30 m dal: kazdy 1 m musi byt nad osou viditelna voda (Toky_voda nebo Rybnik_Voda) nad zemi (kolize) -
+## mezera bez vody > 1 m = chyba. Odtok musi zacinat u hraze (voda.json rybnik_lhota.hraz: do koruna/2 + svah od osy hraze).
+func _ryb_napojeni() -> void:
+	var tri := PackedVector3Array()
+	for jm: String in ["Toky_voda", "Rybnik_Voda*"]:
+		for mi0 in main.find_children(jm, "MeshInstance3D", true, false):
+			var mi := mi0 as MeshInstance3D
+			if mi.mesh == null or not mi.is_visible_in_tree():
+				continue
+			var f := mi.mesh.get_faces()
+			var xf := mi.global_transform
+			for i in range(0, f.size(), 3):
+				var c := xf * f[i]
+				if Vector2(c.x, c.z).distance_to(sv.RYB_C) < 70.0:
+					tri.append(c)
+					tri.append(xf * f[i + 1])
+					tri.append(xf * f[i + 2])
+	var g: Dictionary = sv._tri_mrizka(tri, Transform3D())
+	var space := player.get_world_3d().direct_space_state
+	var chyby: Array = []
+	var radky: Array = []
+	var hz: Dictionary = Pravidla.cti("voda", "rybnik_lhota", "hraz")
+	for t: Dictionary in Pravidla.cti("voda", "toky"):
+		var id := String(t["id"])
+		if id != "lhota_potok" and id != "lhota_odtok":
+			continue
+		var o: Array = t["osa_xzy"]
+		var body: Array = []
+		for k in o.size():
+			var p := Vector2(float(o[k][0]), float(o[k][1]))
+			var d := p.distance_to(sv.RYB_C)
+			if (id == "lhota_potok" and d < 30.0) or (id == "lhota_odtok" and k < 40):
+				body.append(p)
+		if id == "lhota_potok" and not body.is_empty():
+			# az do stredu rybnika: posledni bod osy -> stred (voda rybnika ji ma prevzit)
+			var b0: Vector2 = body[body.size() - 1]
+			for j in range(1, int(b0.distance_to(sv.RYB_C))):
+				body.append(b0.move_toward(sv.RYB_C, float(j)))
+		var bez := 0.0
+		var nej := 0.0
+		var kde := Vector2.ZERO
+		var pred := Vector2.INF
+		for p: Vector2 in body:
+			var krok := 1.0 if pred == Vector2.INF else p.distance_to(pred)
+			pred = p
+			var wy: float = sv._tri_vyska(g, p.x, p.y)
+			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(p.x, 80.0, p.y), Vector3(p.x, -40.0, p.y)))
+			var zem := float((h["position"] as Vector3).y) if not h.is_empty() else -INF
+			if wy == -INF or wy == INF or wy < zem + 0.02:
+				bez += krok
+				if bez > nej:
+					nej = bez
+					kde = p
+			else:
+				bez = 0.0
+		radky.append("%s: bodu %d, nejdelsi usek bez vody %.1f m u (%.0f, %.0f)" % [id, body.size(), nej, kde.x, kde.y])
+		if nej > 1.0:
+			chyby.append("%s bez vody %.1f m u (%.0f, %.0f)" % [id, nej, kde.x, kde.y])
+		if id == "lhota_odtok" and not body.is_empty():
+			var hc := Vector2(hz["stred"][0], hz["stred"][1])
+			var hu := Vector2(hz["smer_osy"][0], hz["smer_osy"][1])
+			var dd: Vector2 = (body[0] as Vector2) - hc
+			var podel := absf(dd.dot(hu)) - float(hz["delka_m"]) / 2.0
+			var napric := absf(dd.dot(hu.orthogonal()))
+			var pata := float(hz["koruna_sirka_m"]) / 2.0 + float(hz["koruna_nad_hladinou_m"]) / float(hz["sklon_svahu"]) + 3.0
+			radky.append("odtok zacina %.1f m napric od osy hraze (pata %.1f), podel za koncem hraze %.1f m" % [napric, pata, podel])
+			if napric > pata or podel > 0.0:
+				chyby.append("odtok nezacina u hraze: %.1f m od osy, %.1f m za jejim koncem" % [napric, podel])
+	print("RYB_NAPOJENI " + " | ".join(radky))
+	_vysledek("ryb_napojeni", chyby.is_empty(), "; ".join(radky) + ("" if chyby.is_empty() else " CHYBY " + str(chyby)))
