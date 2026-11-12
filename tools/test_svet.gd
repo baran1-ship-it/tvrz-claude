@@ -8050,6 +8050,52 @@ func _ryb_napojeni() -> void:
 			radky.append("odtok zacina %.1f m napric od osy hraze (pata %.1f), podel za koncem hraze %.1f m" % [napric, pata, podel])
 			if napric > pata or podel > 0.0:
 				chyby.append("odtok nezacina u hraze: %.1f m od osy, %.1f m za jejim koncem" % [napric, podel])
+	# diagnostika usti pritoku (12. 11.: poslednich ~8 m svetlych): ktere vodni site a materialy lezi nad osou
+	for t2: Dictionary in Pravidla.cti("voda", "toky"):
+		if String(t2["id"]) != "lhota_potok":
+			continue
+		var o2: Array = t2["osa_xzy"]
+		for k in range(o2.size() - 18, o2.size(), 2):
+			var px := float(o2[k][0])
+			var pz := float(o2[k][1])
+			var co_je: Array = []
+			for mi0 in main.find_children("*", "MeshInstance3D", true, false):
+				var mi := mi0 as MeshInstance3D
+				if mi.mesh == null or not mi.is_visible_in_tree():
+					continue
+				var ab := mi.global_transform * mi.mesh.get_aabb()
+				if px < ab.position.x or px > ab.end.x or pz < ab.position.z or pz > ab.end.z:
+					continue
+				for si in mi.mesh.get_surface_count():
+					var mt := mi.get_active_material(si)
+					var jm := String(mt.resource_name) if mt else "?"
+					if jm.begins_with("voda") or jm.contains("hladina") or String(mi.name).contains("oda"):
+						co_je.append("%s/%s" % [mi.name, jm])
+			# nejblizsi vrchol terenu a jeho barva (g = trava) - zda sit koryto zachyti
+			var nej := INF
+			var nej_t := ""
+			var nej_g := -1.0
+			for mi1 in main.find_children("Teren*", "MeshInstance3D", true, false):
+				var mt1 := mi1 as MeshInstance3D
+				if mt1.mesh == null or not mt1.is_visible_in_tree():
+					continue
+				var ab1 := mt1.global_transform * mt1.mesh.get_aabb()
+				if px < ab1.position.x or px > ab1.end.x or pz < ab1.position.z or pz > ab1.end.z:
+					continue
+				var arr := mt1.mesh.surface_get_arrays(0)
+				var vv: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+				var cc: PackedColorArray = arr[Mesh.ARRAY_COLOR] if arr[Mesh.ARRAY_COLOR] != null else PackedColorArray()
+				for vi in vv.size():
+					var w := mt1.global_transform * vv[vi]
+					var dd := Vector2(w.x - px, w.z - pz).length()
+					if dd < nej:
+						nej = dd
+						nej_t = "%s vrchol %.2f m od osy, barva %s" % [mt1.name, dd, cc[vi] if vi < cc.size() else "-"]
+						nej_g = cc[vi].g if vi < cc.size() else -1.0
+			print("USTI_HRA (%.1f, %.1f): %s | %s" % [px, pz, ", ".join(co_je), nej_t])
+			# dno pod potokem bahno/sterk, ne louka (g = trava; Blender ground_attrs u toku 0,05)
+			if nej < 0.5 and nej_g > 0.3:
+				chyby.append("dno toku v (%.0f, %.0f) barvy louky g %.2f" % [px, pz, nej_g])
 	# 12. 11. (snimek build/ryb8: prazdna misa - hladinu skryl kod stareho navesniho rybnicku): nad stredem rybnika
 	# viditelna voda (trojuhelnik hladiny bez skryteho materialu) nad dnem
 	var vid := false

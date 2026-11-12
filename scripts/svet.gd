@@ -528,10 +528,12 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 				var y1 := sy / sw if sw >= 1.0 else y0 * (1.0 - sw) + sy
 				v2[vi] = inv * Vector3(w[vi].x, y1, w[vi].z)
 				if not cl.is_empty():
-					var c0: Color = louka if (vo.stara(p) >= 0 and nl > 0) else cl[vi]
+					var c0: Color = louka if (vo.stara(p) >= 0 and nl > 0 and not _u_vody(w[vi].x, w[vi].z)) else cl[vi]
 					cl2[vi] = sc / sw if sw >= 1.0 else c0 * (1.0 - sw) + sc
+					if _u_vody(w[vi].x, w[vi].z):
+						cl2[vi] = cl[vi]                   # dno a breh toku z Blenderu (bahno), ne barva stareho mista
 				n += 1
-			elif not cl.is_empty() and not VES_BLENDER and vo.stara(p) >= 0 and nl > 0:
+			elif not cl.is_empty() and not VES_BLENDER and vo.stara(p) >= 0 and nl > 0 and not _u_vody(w[vi].x, w[vi].z):
 				cl2[vi] = louka
 		# ulice napric rovna (vo.uprav_y, stejne jako mrizka trava_ves v _vo_data)
 		var g_hl := float(pasma()["cesta"]["ulice_vsi"]["barva_hliny_g"])
@@ -1615,6 +1617,12 @@ func _dno_toku(root: Node3D) -> void:
 	print("dno malych toku: %d vrcholu s oblazky" % n)
 
 
+## 12. 11. (usti pritoku rybnika Lhota svetle: _vo_teren pretrel dno toku barvou louky na miste stareho navesniho
+## rybnicku, vo.stara): u vody (do pasma voda.holy_breh_m od kraje toku) se misto stareho objektu na louku nepretira.
+func _u_vody(x: float, z: float) -> bool:
+	return _od_toku(x, z) < float(pasma()["voda"]["holy_breh_m"])
+
+
 ## Vzdalenost od kraje vody maleho toku (bez rybniku; < 0 ve vode).
 func _od_toku(x: float, z: float) -> float:
 	od_vody(x, z)                                   # postavi mrizku toku
@@ -1660,7 +1668,12 @@ func _koryto_terenu(root: Node3D) -> void:
 		for k3 in range(hl.size() - 1, -1, -1):
 			# 12. 11.: hladiny rybniku z Blenderu (Rybnik_lhota_voda, Rybnik_tvrz_voda) nejsou stary navesni rybnicek -
 			# skryti zakrylo hladinu Lhoty (snimek build/ryb8: prazdna misa)
-			if (nd.nadrze[k3]["kruh"] as Array).is_empty() or String((hl[k3][0] as Node).name).begins_with("Rybnik_"):
+			if String((hl[k3][0] as Node).name).begins_with("Rybnik_"):
+				# Blender stavi cely rybnik - ovál stareho navesniho rybnicku pryc, jinak nadrz.vyhloub pretrel teren 14 m
+				# kolem na louku (12. 11.: dno usti pritoku Lhoty barvy louky g 0,85)
+				nd.nadrze[k3]["kruh"] = []
+				continue
+			if (nd.nadrze[k3]["kruh"] as Array).is_empty():
 				continue
 			var skr := StandardMaterial3D.new()
 			skr.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
