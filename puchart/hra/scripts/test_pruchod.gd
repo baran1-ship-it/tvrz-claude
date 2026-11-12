@@ -245,6 +245,33 @@ func _test_vrata() -> void:
 	vysledek["vrata_funkce"] = "OK" if (not zavrena_prosla and otevrena_prosla) else "CHYBA: zavřená prošla=%s, otevřená prošla=%s (skupina %s, %.1f m od brány)" % [zavrena_prosla, otevrena_prosla, g, nd]
 	print("PRUCHOD vrata_funkce ", vysledek["vrata_funkce"])
 
+## mapa_cestovani (Míša 12. 11. večer: přesun do sklepa z nabídky Místa propadl pod mapu): pro každé místo mapy a start
+## stejný výpočet jako hra (mapa.gd priprav_kolize + cil_na_zemi), postava 2 s stojí – musí být na zemi (is_on_floor)
+## a do 0,5 m nad podlahou pod sebou (paprsek dolů na kolize), ne pod terénem.
+func _test_mapa() -> void:
+	var M: GDScript = load("res://scripts/mapa.gd")
+	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mapa_body.json"))
+	var body: Array = M.nacti_mista(cfg)
+	body.append({"nazev": "start", "cil": Vector2(cfg["start"]["cil"][0], cfg["start"]["cil"][1])})
+	var spatne: Array = []
+	for m: Dictionary in body:
+		var c: Vector2 = m["cil"]
+		M.priprav_kolize(hlavni, c)
+		await get_tree().physics_frame
+		var bez: Array[RID] = [hrac.get_rid()]
+		var p: Vector3 = M.cil_na_zemi(hlavni, cfg, c, bez)
+		hrac.velocity = Vector3.ZERO; hrac.position = p + Vector3(0, 0.1, 0)
+		for i in 120: await get_tree().physics_frame
+		var q := PhysicsRayQueryParameters3D.create(hrac.position + Vector3(0, 1.0, 0), hrac.position - Vector3(0, 5.0, 0)); q.exclude = bez
+		var h := hrac.get_world_3d().direct_space_state.intersect_ray(q)
+		var nad: float = hrac.position.y - (float(h["position"].y) if not h.is_empty() else -INF)
+		var teren: float = hlavni.svet.vyska(hrac.position.x, hrac.position.z)
+		var ok: bool = hrac.is_on_floor() and not h.is_empty() and absf(nad) <= 0.5 and hrac.position.y > teren - 0.5
+		print("PRUCHOD mapa %s [%.1f, %.1f] y %.2f, teren %.2f, nad podlahou %.2f, na zemi %s -> %s" % [m["nazev"], hrac.position.x, hrac.position.z, hrac.position.y, teren, nad, hrac.is_on_floor(), "OK" if ok else "CHYBA"])
+		if not ok: spatne.append("%s (y %.2f, terén %.2f, nad %.2f, na zemi %s)" % [m["nazev"], hrac.position.y, teren, nad, hrac.is_on_floor()])
+	vysledek["mapa_cestovani"] = "OK" if spatne.is_empty() and body.size() >= 6 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "málo míst (%d)" % body.size())
+	print("PRUCHOD mapa_cestovani ", vysledek["mapa_cestovani"])
+
 func _chyba(t: String) -> void:
 	for i in hrac.get_slide_collision_count():
 		var c := hrac.get_slide_collision(i)
@@ -257,6 +284,7 @@ func _konec() -> void:
 	if jen == "" or "kmene" in jen: await _test_kmene()
 	if jen == "" or "povrch" in jen: await _test_povrch()
 	if jen == "" or "vrata" in jen: await _test_vrata()
+	if jen == "" or "mapa" in jen: await _test_mapa()
 	hrac.autopilot = Vector3.INF
 	var f := FileAccess.open(OS.get_environment("PUCHART_VYSTUP") if OS.has_environment("PUCHART_VYSTUP") else "user://pruchod.json", FileAccess.WRITE); f.store_string(JSON.stringify(vysledek, " "))
 	var ok := vysledek.values().all(func(v): return v == "OK")

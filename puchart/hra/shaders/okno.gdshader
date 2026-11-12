@@ -5,6 +5,7 @@ shader_type spatial;
 render_mode cull_back;
 uniform bool sklo = false;
 uniform bool ven = false;   // vnější plocha: tmavá, stíněná (KCD fotky: okna zvenku tmavá)
+uniform float svit = 1.0;   // denní světlo zvenku 0..1 (scripts/den.gd – v noci okna dovnitř nesvítí)
 varying vec3 wp;
 varying vec3 wn;
 float h21(vec2 p) { p = mod(p, 1024.0); vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
@@ -24,5 +25,5 @@ void fragment() {
 		col = vec3(0.86, 0.72, 0.48) * (0.8 + 0.25 * v);
 	}
 	if (ven) { ALBEDO = col * (sklo ? 0.18 : 0.3); ROUGHNESS = sklo ? 0.15 : 0.8; SPECULAR = sklo ? 0.6 : 0.2; }
-	else { ALBEDO = col * 0.2; EMISSION = col * 0.85; ROUGHNESS = 0.9; }   // dovnitř: denní světlo prosvítá
+	else { ALBEDO = col * 0.2; EMISSION = col * 0.85 * svit; ROUGHNESS = 0.9; }   // dovnitř: denní světlo prosvítá
 }

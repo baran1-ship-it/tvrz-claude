@@ -19,6 +19,7 @@ var _env: Environment
 var _fog_zakl: Array = []
 var _les := 0.0       # 0..1 zápoj korun kolem hráče (mlha v lese – Havran daylight.gd _les_mlha)
 var _uvnitr := 0.0    # 0 venku, 1 pod střechou/klenbou (méně modrého světla z oblohy – Havran _amb)
+var den: Node = null  # denní doba (scripts/den.gd, Havran daylight.gd): slunce, obloha, mlha, noc
 
 func _ready() -> void:
 	var dn: Node = Denik.new(); dn.name = "Denik"; add_child(dn); dn.zacni(self)
@@ -152,6 +153,7 @@ func _start() -> void:
 		hrac.set_physics_process(false)
 		cam.top_level = true
 		mer.konec.connect(_prochazka)
+		if den: den.running = false   # měření za stejných podmínek (odpoledne); čas se rozběhne po měření
 		_mereni = [mer, cam]
 	_foto = OS.get_environment("PUCHART_FOTO")
 	var byl: Node3D = load("res://scripts/byliny.gd").new(); byl.name = "Byliny"; add_child(byl)
@@ -311,7 +313,10 @@ func _test_sceny() -> void:
 	var t: Node = load("res://scripts/test_sceny.gd").new(); add_child(t)
 	t.zacni(self, hrac.get_node("Kamera"))
 
+## Po měření (nebo hned na PC) hlavní nabídka jako v Havranovi: Nová hra (Příběh / Pískoviště), Pokračovat, Nahrát…
+## (Míša 12. 11. večer: „na procházku se vykašli – po měření naběhne menu“). Ovládání hry, mapa a nabídky: prochazka.gd.
 func _prochazka() -> void:
+	if den: den.running = true
 	var cam: Camera3D = hrac.get_node("Kamera")
 	cam.top_level = false; cam.transform = Transform3D(Basis(), Vector3(0, 1.65, 0))
 	hrac.set_physics_process(true)
@@ -333,7 +338,7 @@ func _atmosfera(d: float) -> void:
 	var hloubkova := _sceny(d, cam) > 0.0
 	if not lm.is_empty():
 		var lb: Array = lm["barva"]
-		_env.fog_light_color = (_fog_zakl[0] as Color).lerp(Color(lb[0], lb[1], lb[2]), _les * float(lm["podil_barvy"]))
+		_env.fog_light_color = ((den.mlha as Color) if den else (_fog_zakl[0] as Color)).lerp(Color(lb[0], lb[1], lb[2]), _les * float(lm["podil_barvy"]))
 		_env.fog_density = 1.0 if hloubkova else lerpf(_fog_zakl[1], float(lm["hustota_max"]), _les)
 	else:
 		_env.fog_density = 1.0 if hloubkova else _fog_zakl[1]
@@ -344,7 +349,7 @@ func _atmosfera(d: float) -> void:
 		var vb: Array = ve.get("barva", ab); var vo := float(ve.get("podil_oblohy", 1.0))
 		_env.ambient_light_energy = lerpf(float(ve.get("ambient", it["ambient"])), float(it["ambient"]), _uvnitr) * (1.0 - _uvnitr * ub)
 		_env.ambient_light_sky_contribution = lerpf(vo, 1.0, _uvnitr) * (1.0 - _uvnitr * ub)
-		_env.ambient_light_color = Color(vb[0], vb[1], vb[2]).lerp(Color(ab[0], ab[1], ab[2]), _uvnitr)
+		_env.ambient_light_color = Color(vb[0], vb[1], vb[2]).lerp(Color(ab[0], ab[1], ab[2]), _uvnitr) * (float(den.okolni) if den else 1.0)   # v noci teplá složka ubude s oblohou (den.json okolni_pozn)
 		_env.tonemap_exposure = 1.0 + _uvnitr * float(it["expozice_navic"])
 
 var _les_cil := 0.0
@@ -416,7 +421,8 @@ var _pr: Dictionary = {}
 func _prostredi() -> void:
 	if FileAccess.file_exists("res://data/prostredi.json"):
 		_pr = JSON.parse_string(FileAccess.get_file_as_string("res://data/prostredi.json"))
-	# léto 1393, odpoledne; slunce z JZ (PDF: hotová letní krajina). Stín jen blízko (rozpocty.json stiny).
+	# léto 1393 (PDF: hotová letní krajina); výchozí odpoledne, slunce z JZ – den a noc pak řídí den.gd (Havran daylight.gd).
+	# Stín jen blízko (rozpocty.json stiny); jediné slunce, žádné nové stíny ani světla.
 	var slunce := DirectionalLight3D.new()
 	slunce.rotation_degrees = Vector3(-38.0, -140.0, 0.0)
 	slunce.light_energy = 1.0
@@ -462,6 +468,8 @@ func _prostredi() -> void:
 	_env = env; _fog_zakl = [env.fog_light_color, env.fog_density]
 	var we := WorldEnvironment.new(); we.environment = env
 	add_child(we)
+	if FileAccess.file_exists("res://data/den.json"):   # plynulý den a noc (Havran daylight.gd; pravidla/svet/den.json)
+		den = load("res://scripts/den.gd").new(); den.name = "Den"; add_child(den); den.setup(slunce, sky_mat, env, self)
 
 ## Hrad blízko plný (reliéf zdiva, ~600 k troj.), dál zjednodušený *_daleko.glb (stavitel ho peče, ale hra ho nenačítala –
 ## hlídač scén 3. 11.: 7/127 snímků nad rozpočtem i 300 m od hradu). Hranice z pravidla/svet/hrad_vzhled.json lod.
@@ -550,6 +558,7 @@ func _zdivo_bez_rastru(h: Node) -> void:
 				if not _okno_mat.has(jm):
 					var om := ShaderMaterial.new(); om.shader = load("res://shaders/okno.gdshader")
 					om.set_shader_parameter("sklo", jm.begins_with("sklo")); om.set_shader_parameter("ven", jm.ends_with("_ven")); _okno_mat[jm] = om
+				if den and not den.okna.has(_okno_mat[jm]): den.okna.append(_okno_mat[jm])   # v noci okna dovnitř nesvítí
 				m.set_surface_override_material(i, _okno_mat[jm]); continue
 			if not (jm.begins_with("zdivo") or jm == "kvadr" or jm == "kvadr_sedy"):
 				var tm := _textura_mat(jm, mt)   # dřevo, šindel, omítka, ostění: Havranův shader proti rastru (shaders/textura.gdshader)

@@ -1,10 +1,10 @@
 extends CanvasLayer
-## Po měření (nebo hned, když měření není) předá ovládání hráči. Úvod a nabídka (menu.gd, Moravian Battlefield) a menu
-## hráče (menu_hrace.gd: mapa, místa, deník) podle Havrana (Míša 9. 11.); na obrazovce jen erb (menu hráče), pauza a při
-## létání nahoru/dolů. Běh, létání a obraz 3D jsou v Nastavení. Místa = hra/data/mista.json.
+## Po měření (nebo hned, když měření není) úvod a hlavní nabídka jako v Havranovi (menu.gd, Moravian Battlefield): Nová hra
+## (Příběh / Pískoviště), Pokračovat, Nahrát, Nastavení, Měření (Míša 12. 11. večer: „na procházku se vykašli“). Ve hře
+## menu hráče (menu_hrace.gd) podle Havrana, mapa s rychlým cestováním (mapa.gd, hra/data/mapa_body.json – nabídka Místa
+## zrušena: přesun do sklepa propadl pod mapu), ikony vpravo nahoře, létání nahoru/dolů. Denní doba: hlavni.den (den.gd).
 var hlavni: Node
 var hrac: CharacterBody3D
-var mista: Array
 var _nahoru: Button
 var _dolu: Button
 var nabidka: Control        # horní lišta (erb + pauza) – pad.gd
@@ -57,7 +57,6 @@ func pouzij() -> void:   # A: vrata a dveře na dosah
 func zacni(h: Node, p: CharacterBody3D) -> void:
 	hlavni = h; hrac = p
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	mista = JSON.parse_string(FileAccess.get_file_as_string("res://data/mista.json"))["mista"]
 	if FileAccess.file_exists("res://data/rozpocty.json"):
 		_obraz_volby = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json"))["obraz_3d"]["volby"]
 	var dv: Node = load("res://scripts/dvere.gd").new(); dv.name = "Dvere"; add_child(dv); dv.zacni(h, self); dvere = dv   # vrata a dveře
@@ -81,14 +80,14 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 		if i == 0: _nahoru = t
 		else: _dolu = t
 		hrac.ui.append(t)
-	mapa = load("res://scripts/mapa.gd").new(); mapa.hrac = hrac; add_child(mapa)
+	mapa = load("res://scripts/mapa.gd").new(); mapa.hrac = hrac; mapa.proch = self; add_child(mapa)
 	hv = load("res://scripts/hv_most.gd").new(); hv.name = "Havran"; add_child(hv); hv.setup(h, p)   # menu hráče, předměty, dovednosti z Havrana
 	menu_hrace = hv.menu_hrace
 	menu = load("res://scripts/menu.gd").new(); add_child(menu)
 	menu.action.connect(_akce)
 	_nastaveni()
 	menu.saves = _seznam_ulozeni()
-	_presun(mista[0])
+	_na_start()
 	get_tree().paused = true
 	_fps_menu(true)
 	menu.play_intro()   # úvod: erb Bočka z Kunštátu, název hry, hudba (Havran)
@@ -112,8 +111,10 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 		get_viewport().get_texture().get_image().save_png(OS.get_environment("PUCHART_MENU_FOTO")); get_tree().quit()
 
 func _nastaveni() -> void:
-	menu.refresh_settings({"beh": "Běh: " + ("ano" if hrac.bezi else "ne"), "let": "Létání: " + ("ano" if hrac.leti else "ne"),
-		"obraz": "Obraz 3D: %d %%" % roundi(get_viewport().scaling_3d_scale * 100), "vol:hudba": _hudba})
+	var t := {"beh": "Běh: " + ("ano" if hrac.bezi else "ne"), "let": "Létání: " + ("ano" if hrac.leti else "ne"),
+		"obraz": "Obraz 3D: %d %%" % roundi(get_viewport().scaling_3d_scale * 100), "vol:hudba": _hudba}
+	if hlavni.den: t["cas"] = "Denní doba: %s (%s)" % [hlavni.den.NAMES[hlavni.den.current], hlavni.den.clock_text()]   # Havran settings „time“
+	menu.refresh_settings(t)
 
 func _akce(co: String, arg: Variant) -> void:
 	match co:
@@ -122,12 +123,12 @@ func _akce(co: String, arg: Variant) -> void:
 		"story", "sandbox":   # výběr hry jako v Havranovi (Míša 10. 11.): pískoviště = stavění a předměty z katalogu
 			hv.mode = "piskoviste" if co == "sandbox" else "pribeh"
 			if hv.mode == "piskoviste" and hv.predmety.inv.is_empty(): hv.predmety.start_kit()
+			_na_start()   # nová hra: u vnější branky (mapa_body.json start), denní doba od začátku (den.json start)
+			if hlavni.den: hlavni.den.set_time(String(hlavni.den.cfg["start"]), 0.01)
 			menu.in_game = true; menu.can_save = true
 			zavri_nabidku()
 		"mapa":
 			zavri_nabidku(); mapa.prepni()
-		"misto":
-			zavri_nabidku(); _presun(mista[int(arg)])
 		"quit":
 			get_tree().quit()
 		"save":
@@ -150,17 +151,22 @@ func _akce(co: String, arg: Variant) -> void:
 			get_viewport().scaling_3d_scale = float(_obraz_volby[(i + 1) % _obraz_volby.size()])
 			var cf := ConfigFile.new(); cf.load("user://nastaveni.cfg")   # volba hráče platí i po restartu (Míša 12. 11.)
 			cf.set_value("obraz", "scale_3d", get_viewport().scaling_3d_scale); cf.save("user://nastaveni.cfg")
+		"set:cas":   # Havran: další denní doba (rychlý přechod)
+			if hlavni.den: hlavni.den.set_time(hlavni.den.next_key(), 2.0)
 		"vol:hudba":
 			_hudba = float(arg); menu.music.volume_db = linear_to_db(maxf(_hudba, 0.001)) - 6.0
 	_nastaveni()
 
-func _presun(m: Dictionary) -> void:
-	var p: Array = m["kde"]; var c: Array = m["kam"]
-	var y: float = float(m["y"]) if m.has("y") else hlavni.svet.vyska(p[0], p[1])
-	hlavni.svet.kolize_ihned(Vector3(p[0], y, p[1]))
+## Začátek hry (mapa_body.json start): výška paprskem dolů na kolize jako u cestování po mapě (mapa.gd cil_na_zemi).
+func _na_start() -> void:
+	var st: Dictionary = mapa.cfg["start"]
+	var c := Vector2(st["cil"][0], st["cil"][1]); var po := Vector2(st["pohled"][0], st["pohled"][1])
+	mapa.priprav_kolize(hlavni, c)
+	var bez: Array[RID] = [hrac.get_rid()]
+	var p: Vector3 = mapa.cil_na_zemi(hlavni, mapa.cfg, c, bez)
 	hrac.velocity = Vector3.ZERO
-	hrac.position = Vector3(p[0], y + 0.3, p[1])
-	hrac.nastav_pohled(atan2(-(c[0] - p[0]), -(c[1] - p[1])), -0.05)
+	hrac.position = p + Vector3(0, 0.1, 0)
+	hrac.nastav_pohled(atan2(-(po.x - p.x), -(po.y - p.z)), -0.05)
 
 
 ## Ukládání a nahrávání (Havran main.gd _save_game/_list_saves/_apply_save): user://ulozeni/hra_<čas>.json, posledních 20.
@@ -183,6 +189,7 @@ func _uloz() -> void:
 	var now := Time.get_unix_time_from_system(); var dt := Time.get_datetime_dict_from_system(); var p := hrac.global_position
 	var j := {"mode": hv.mode, "unix": int(now), "kdy": "%d. %d. %d  %02d:%02d" % [dt["day"], dt["month"], dt["year"], dt["hour"], dt["minute"]],
 		"pos": [p.x, p.y, p.z], "yaw": hrac._yaw, "pitch": hrac._pitch, "let": hrac.leti, "predmety": hv.predmety.to_save(), "dovednosti": hv.dovednosti.to_save()}
+	if hlavni.den: j["hodina"] = hlavni.den.hour; j["den"] = hlavni.den.day_n   # Havran save: denní doba
 	var fa := FileAccess.open(SAVE_DIR + "/hra_%d.json" % int(now), FileAccess.WRITE); fa.store_string(JSON.stringify(j)); fa.close()
 	var old := _seznam_ulozeni()
 	for k in range(20, old.size()): DirAccess.remove_absolute(String(old[k]["file"]))
@@ -193,6 +200,7 @@ func _nahraj(path: String) -> void:
 	hv.mode = String(j.get("mode", "pribeh"))
 	if j.has("dovednosti"): hv.dovednosti.from_save(j["dovednosti"])
 	if j.has("predmety"): hv.predmety.from_save(j["predmety"])
+	if hlavni.den and j.has("hodina"): hlavni.den.day_n = int(j.get("den", 1)); hlavni.den.set_hour(float(j["hodina"]), 0.01)
 	var a: Array = j["pos"]
 	hlavni.svet.kolize_ihned(Vector3(a[0], a[1], a[2]))
 	hrac.velocity = Vector3.ZERO; hrac.position = Vector3(a[0], a[1] + 0.05, a[2])

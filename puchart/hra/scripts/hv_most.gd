@@ -10,7 +10,7 @@ var dovednosti: Node
 var world: Node3D = null       # Havran: skrývání světa uvnitř budov (portály) – v Puchartu vypnuto
 var svet = null                # Havranův svět (voda, žebříky, vybavení vsi) – v Puchartu není
 var info := {"use": []}
-var day := {"current": "den"}
+var day: Variant = {"current": "den"}   # denní doba: hlavni.den (den.gd = Havran daylight.gd) – predmety.is_dark/on_time
 var hud: CanvasLayer
 var life: Node
 
@@ -49,11 +49,14 @@ func setup(hlavni: Node3D, hrac: CharacterBody3D) -> void:
 	dovednosti = load("res://scripts/dovednosti.gd").new(); dovednosti.name = "Dovednosti"; add_child(dovednosti)
 	dovednosti.setup(self, "mlady")
 	predmety = load("res://scripts/predmety.gd").new(); predmety.name = "PredmetyHra"; add_child(predmety)
+	if hlavni.get("den") != null: day = hlavni.den
 	predmety.setup(self, hlavni)
+	if day is Node: (day as Node).time_changed.connect(predmety.on_time)   # Havran main.gd: day.time_changed → predmety.on_time
 	menu_hrace = load("res://scripts/menu_hrace.gd").new(); menu_hrace.main = self; menu_hrace.P = predmety; add_child(menu_hrace)
 
 func udalost(id: String, data := {}) -> void:
 	if dovednosti: dovednosti.udalost(id, data)
 func open_container(rec: Dictionary) -> void: menu_hrace.show_page("vymena", rec)
 func offer_sleep() -> void: hud.toast("Spánek zatím není")
-func sleep_until(_kdy: String) -> void: pass
+func sleep_until(kdy: String) -> void:   # Havran: spánek do zvolené doby (menu hráče → spánek)
+	if day is Node and kdy != "": (day as Node).set_time(kdy, 2.0)

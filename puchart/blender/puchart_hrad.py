@@ -930,7 +930,7 @@ def nabeh(P, prah, ven, y, w, L=1.8, spad=0.7, hlina=False):
         if top - g < 0.05: continue
         P.box(M(c + UP * ((top + g) / 2), basis=frame(ven)), (w, top - g, hl + 0.02), "kvadr_sedy", collide=None)
 
-def plosina(P, c, d, delka, sirka, y, sloupy=True):
+def plosina(P, c, d, delka, sirka, y, sloupy=True, krakorce=None):
     d = hz(d).normalized(); s = d.cross(UP).normalized()
     kit.deck(P, c - d * (delka / 2) + UP * (y - 0.06), c + d * (delka / 2) + UP * (y - 0.06), sirka / 2 - 0.05, "prkna_ven", worn=0.8,
              beams=(-sirka / 2 + 0.12, sirka / 2 - 0.12), plank_w=(0.22, 0.3), t=0.06)   # Havran wall_stair.platform: prkna, ne deska
@@ -941,6 +941,14 @@ def plosina(P, c, d, delka, sirka, y, sloupy=True):
         for i, j in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
             q = c + d * (i * (delka / 2 - 0.12)) + s * (j * (sirka / 2 - 0.12))
             P.beam(q + UP * (ter(q.x, q.z) - 0.2), q + UP * (y - 0.18), 0.16, 0.16, "dub", up=d, j=0.5)   # čep do trámu podesty
+    if krakorce is not None:   # podesta nesená ze zdi (krakorce = směr ke zdi): trámy zapuštěné do zdi + šikmé vzpěry pod nimi
+        kz = hz(krakorce).normalized(); po = (c - kz * 0.0)   # líc zdi = kraj podesty na straně kz
+        lic = c + kz * (abs(kz.dot(s)) * sirka / 2 + abs(kz.dot(d)) * delka / 2)
+        for o_ in (-1, 1):
+            tt = (d if abs(kz.dot(d)) < 0.5 else s) * (o_ * ((delka if abs(kz.dot(d)) < 0.5 else sirka) / 2 - 0.15))
+            vn_ = lic + tt + kz * 0.25; ven_ = lic + tt - kz * (abs(kz.dot(s)) * sirka + abs(kz.dot(d)) * delka - 0.1)
+            P.beam(vn_ + UP * (y - 0.22), ven_ + UP * (y - 0.22), 0.16, 0.18, "dub", j=0.4)   # trám vetknutý do zdi
+            P.beam(lic + tt + UP * (y - 0.85), lic + tt - kz * ((abs(kz.dot(s)) * sirka + abs(kz.dot(d)) * delka) * 0.5) + UP * (y - 0.3), 0.12, 0.12, "dub", j=0.4)   # vzpěra ze zdi (kotvená v kapse) nad ostěním dveří pod podestou (Míša 12. 11.: „krakorce nad tím ostěním“)
 
 BUDOVY = []   # půdorysy budov (stavby_vegetace: bez trávy uvnitř – Míša 4. 11.: tráva prorůstala podlahou)
 SCHODY = []   # ramena (a, d, y0, y1, délka, šířka, kamenné) – hlídač nástupu a výstupu
@@ -1734,9 +1742,20 @@ def postav_B(P):
     dv_b = ([(vz.get("dvere_strana", "-d"), 0.0, 1.2, kor)] if VO_ else []) + ([(dvz["stena"], dvz["posun"], dvz["sirka"], kor)] if dvz else [])
     vn_ = vz.get("vstup_nadvori")
     if vn_: dv_b.append((vn_["stena"], vn_["posun"], vn_["sirka"], vz["dno_y"]))
+    pz_b = vz.get("prizemi")   # Míša 12. 11.: přízemí levé budovy (štítu) z druhého nádvoří – dveře pod podestou schodů do patra
+    dno_b = vz["dno_y"]
+    if pz_b:
+        xd0_ = c.x + pz_b["dvere"]["posun"]; zd0_ = c.z + (1 if pz_b["dvere"]["stena"] == "+s" else -1) * (w / 2 + 0.6)
+        dno_b = round(ter(xd0_, zd0_) + 0.02, 2)   # práh = terén nádvoří před dveřmi
+        dv_b.append((pz_b["dvere"]["stena"], pz_b["dvere"]["posun"], pz_b["dvere"]["sirka"], dno_b))
     ok_b = [o for o in ok_b if o[0] in vz.get("okna_strany", ("+d", "-d", "+s", "-s"))]   # štítová zeď: okna jen do nádvoří (kresba misa_01)
     wd = vz.get("delka", w)   # štít B: dlouhá budova (delka podél x, rozmer napříč)
-    vez2(P, c, Vector((1, 0, 0)), wd, w, vz["dno_y"], vz["vrch_y"], vz.get("strecha", "valba"), dvere=dv_b, tw=tv, okna=ok_b, strilny=sl_b)
+    vez2(P, c, Vector((1, 0, 0)), wd, w, dno_b, vz["vrch_y"], vz.get("strecha", "valba"), dvere=dv_b, tw=tv, okna=ok_b, strilny=sl_b)
+    if pz_b:   # strop přízemí = trámová podlaha patra (dno_y), dole dlažba; přízemí samostatná místnost bez schodů nahoru (jako věžička A)
+        podlaha(P, c, Vector((1, 0, 0)), wd - 2 * tv, w - 2 * tv, vz["dno_y"], [])
+        podlaha(P, c, Vector((1, 0, 0)), wd - 2 * tv, w - 2 * tv, dno_b, [], tl=0.12, mat="kvadr_sedy")
+        dz_p = (1 if pz_b["dvere"]["stena"] == "+s" else -1)
+        TR["B_stit_prizemi"] = [bod(V((xd0_, c.z + dz_p * (w / 2 + 2.5)))), bod(V((xd0_, c.z + dz_p * (w / 2 - tv - 0.4))), dno_b), bod(V((c.x, c.z)), dno_b)]
     if dvz:   # lávka z dveří věže (+s) podél jižní stěny věže k hornímu konci schodů dvorku a ochozu
         dvo = B["dvorek"]; xd = c.x + dvz["posun"]; zl = c.z + w / 2 + 0.6
         x0l = dvo["lavka_x0"]; x1l = xd + dvz["sirka"] / 2 + 0.3
@@ -1750,7 +1769,7 @@ def postav_B(P):
         zab_ = (1,) if sz_ * sm_ > 0 else (-1,)
         e_n, _ = schody2(P, V((x0_, zs_)), dx_, B["horni_y"], vz["dno_y"], 1.2, zabradli=zab_)
         xk_ = xd_ + sm_ * (vn_["sirka"] / 2 + 0.2)
-        plosina(P, V(((x1_ + xk_) / 2, zs_)), Vector((1, 0, 0)), abs(xk_ - x1_), 1.36, vz["dno_y"], sloupy=True)
+        plosina(P, V(((x1_ + xk_) / 2, zs_)), Vector((1, 0, 0)), abs(xk_ - x1_), 1.36, vz["dno_y"], sloupy=not pz_b, krakorce=(V((0, -sz_)) if pz_b else None))   # Míša 12. 11.: místo dlouhých sloupů podpěry ze stěny (pod podestou jsou dveře přízemí)
         TR["B_vez_nadvori"] = [bod(V((x0_ + sm_ * 1.0, zs_ + sz_ * 2.2)), B["horni_y"]), bod(V((x0_ - sm_ * 0.6, zs_)), B["horni_y"]), bod(V((x0_ + sm_ * 0.3, zs_))),
                                bod(e_n, vz["dno_y"]), bod(V((xd_, zs_ + math.copysign(0.6, zs_ - zf_))), vz["dno_y"]), bod(V((xd_, zs_)), vz["dno_y"]), bod(V((xd_, zf_ - sz_ * 1.6)), vz["dno_y"]), bod(c, vz["dno_y"])]   # ke dveřím zepředu v ose (12. 11.: bod 0,6 m od předchozího se bral hned jako dosažený – postava šla šikmo do ostění)
     ram_b = vnitrek_veze(P, c, Vector((1, 0, 0)), wd - 2 * tv, w - 2 * tv, [vz["dno_y"]] + vz["patra_y"], vz["steny_ramen"], sq=1.0)   # podesty 1,0 m (Míša 4. 11.: „schody moc blízko zdi, ne pansky“; reference 1,0–1,4 m), ramena 3,2 m = 45° (při 45° postava občas uvízla na konci ramene)

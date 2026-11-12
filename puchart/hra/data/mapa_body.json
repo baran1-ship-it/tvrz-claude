@@ -1,0 +1,24 @@
+{
+ "popis": "Místa na mapě pro rychlé cestování (Míša 12. 11. večer: „zruš menu Místa, budeme používat jen mapu jako Havran: horní hrad, spodní hrad, hospoda U Tlustého Jana, ves Předhradí apod.“). Čte hra/scripts/mapa.gd (kopie hra/data/mapa_body.json, postav_vse.sh). p = poloha erbu na mapě [x, z], cil = kam hráč dorazí [x, z], pohled = kam se dívá [x, z]; misto = poloha ze staveb nových míst (hra/data/mista_stavby.json, pravidla/svet/mista.json): erb na středu místa, příchod před dveře domu (vstup_domu) nebo na náves ke studně (naves). Výška cíle vždy paprskem dolů na kolize (podlaha, terén), nikdy z čísla.",
+ "zdroj": "Havran scripts/mapa.gd MISTA (erb, p, cil, pohled), _ask/_answer a main.gd fast_travel (zatmění, posun času o dobu chůze, volné místo pro kapsli hráče po spirále)",
+ "chuze_km_h": 4.5,
+ "oklika": 1.35,
+ "oklika_pozn": "Havran _dist_km: po cestách zhruba o třetinu dál než vzdušnou čarou",
+ "uz_tady_m": 60.0,
+ "paprsek_nad_m": 3.0,
+ "paprsek_pod_m": 8.0,
+ "paprsek_pozn": "paprsek dolů od terénu + 3 m (střechy a koruny nad cílem nechytí; nádvoří a dlažba do 3 m nad terénem ano) – Míša 12. 11.: přesun do sklepa propadl pod mapu (výška z čísla)",
+ "volne_pokusu": 40,
+ "volne_spirala_m": 0.15,
+ "pred_dvermi_m": 2.5,
+ "od_studny_m": 3.0,
+ "start": {"cil": [29.5, -45.5], "pohled": [9.3, -15.0], "pozn": "začátek nové hry: u vnější branky (dosavadní první místo procházky, hra/data/mista.json)"},
+ "mista": [
+  {"id": "horni_hrad", "nazev": "Horní hrad", "erb": "zbrojnice", "p": [3.0, 2.0], "cil": [2.0, 8.0], "pohled": [9.3, -15.0], "pozn": "přední hrad A (výš na ostrohu), nádvoří – hra/data/mista.json Nádvoří"},
+  {"id": "dolni_hrad", "nazev": "Dolní hrad", "erb": "zbrojnice", "p": [53.0, 142.0], "cil": [56.0, 127.5], "pohled": [46.3, 138.5], "pozn": "zadní hrad B (níž na suku), dolní nádvoří – hra/data/mista.json Dolní nádvoří"},
+  {"id": "krcma", "nazev": "Hospoda U Tlustého Jana", "erb": "piti", "misto": "krcma", "prichod": "vstup_domu"},
+  {"id": "predhradi", "nazev": "Ves Předhradí", "erb": "jidlo", "misto": "predhradi", "prichod": "naves"},
+  {"id": "hajovna", "nazev": "Hájovna", "erb": "naradi", "misto": "hajovna", "prichod": "vstup_domu"}
+ ],
+ "mista_pozn": "mlýn na Veličce (mista.json mlyn_velicka) zatím není postaven – na mapu až se stavbou"
+}

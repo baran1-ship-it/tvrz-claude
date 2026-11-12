@@ -583,7 +583,16 @@
     "smer_schodu": -1
    },
    "vstup_ochoz": false,
-   "pozn_vstup_10_11": "Míša 10. 11.: „vstup z ochozu zruš“ – jediný vstup z druhého nádvoří (vstup_nadvori)"
+   "pozn_vstup_10_11": "Míša 10. 11.: „vstup z ochozu zruš“ – jediný vstup z druhého nádvoří (vstup_nadvori)",
+   "prizemi": {
+    "dvere": {
+     "stena": "+s",
+     "posun": -1.9,
+     "sirka": 1.0
+    },
+    "zdroj": "Míša 12. 11.: „pořád nemám vstup do přízemí levé budovy spodního hradu, dveře udělej pod schody do patra z druhého nádvoří“; „ty dlouhé podesty toho ochozu vstupu do levé budovy dolního hradu můžeme zrušit a udělat podpěry ze stěny“ – přízemí od nádvoří (10,3) do podlahy patra (14,0), dveře pod podestou, podesta na krakorcích se vzpěrami (bez sloupů)",
+    "jistota": "NAVRH"
+   }
   },
   "palac": {
    "osa": [

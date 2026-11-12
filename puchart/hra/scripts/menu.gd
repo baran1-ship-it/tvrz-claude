@@ -202,14 +202,13 @@ func show_page(page: String) -> void:
 			# celá herní nabídka jako v Havranovi (Míša 10. 11.: „udělej celé herní menu, ať můžu ukládat“)
 			if in_game:
 				first = _btn("Pokračovat ve hře", "resume")
-			first = _maybe(first, _btn("Hrát", "page:play"))
+			first = _maybe(first, _btn("Nová hra", "page:play"))   # Havran „Hrát“ → Příběh / Pískoviště (Míša 12. 11.: bez procházky)
 			if not in_game and not saves.is_empty():
 				_btn("Pokračovat", "continue")
 			var bl := _btn("Nahrát", "page:load"); bl.disabled = saves.is_empty()
 			var bs := _btn("Uložit", "save"); bs.disabled = not can_save
 			if in_game:
-				_btn("Mapa", "mapa")
-				_btn("Místa", "page:mista")
+				_btn("Mapa", "mapa")   # rychlé cestování jen z mapy jako v Havranovi (nabídka Místa zrušena, Míša 12. 11. večer)
 			_btn("Nastavení", "page:settings")
 			if FileAccess.file_exists("user://mereni.txt"): _btn("Měření", "page:mereni")   # poslední výsledek měření (Míša 12. 11.)
 			_btn("Uložit a ukončit" if can_save else "Ukončit", "save_quit")
@@ -218,11 +217,6 @@ func show_page(page: String) -> void:
 			for sv: Dictionary in saves.slice(0, 7):
 				first = _maybe(first, _btn(String(sv["label"]), "load", false, sv["file"]))
 			first = _maybe(first, _btn("Zpět", "page:main", true))
-		"mista":   # rychlé přesuny (dřív v menu hráče Puchartu)
-			var ms: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/mista.json"))["mista"]
-			for i in ms.size():
-				first = _maybe(first, _btn(String(ms[i]["nazev"]), "misto", false, str(i)))
-			_btn("Zpět", "page:main", true)
 		"play":   # výběr hry jako v Havranovi (Míša 10. 11.)
 			first = _btn("Příběh", "story")
 			_btn("Pískoviště", "sandbox")
@@ -236,7 +230,8 @@ func show_page(page: String) -> void:
 				_note(line)
 			first = _btn("Zpět", "page:main", true)
 		"settings":
-			for key: String in ["beh", "let", "obraz"]:
+			for key: String in ["beh", "let", "obraz", "cas"]:
+				if key == "cas" and (not in_game or not settings_text.has("cas")): continue   # Havran: denní doba jen ve hře
 				var bb := _btn(String(settings_text.get(key, key)), "set:" + key, true)
 				first = _maybe(first, bb)
 			_slider("Hlasitost hudby", "vol:hudba", float(settings_text.get("vol:hudba", 1.0)))
