@@ -1243,3 +1243,10 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   ne průměr.
 - Lednice mlýna (ohnutý papír): model má u stěn jen vnitřní líc + římsu 0,4 m; `tools/krok_b/lednice_blok.py` staví plné
   hranoly (`voda.json mlyn.dil.lednice_blok`), test `lednice_blok` (paprsek zvenku musí narazit na stěnu).
+- **12. 11. pozdě – 3. rozbor příčiny úchopů (Míša „pořád špatně“ po 2 opravách):** `tools/mereni_nasady.gd` měří, zda obě
+  ruce v klipu drží jednu pevnou násadu (směr k levé ruce v soustavě pravé ruky a vzdálenost rukou). Výsledek:
+  `Prace_Uder_Loop` (CMU 79, bez nástroje) ruce 22–37 cm, směr se mění až o 59° → **žádná pevná násada nemůže spojit obě
+  ruce**; každé dopočítání směru nástroje (rameno→ruce, zalomení zápěstí) je odhad a vypadá špatně. `TreeChopping_Loop`
+  (UAL) je sekání jednou rukou (ruce 0,9–1,2 m). Potvrzená příčina: **klip bez nástroje**, ne kód úchopu. Řešení: klip
+  nahraný s nástrojem v obou rukou (Mixamo – názvy hledá rešerše), nástroj pevně v soketu pravé ruky, druhá ruka IK.
+  Úchop prstů (řešená póza, test 0/276) a kladivo/vědro/korbel platí.
