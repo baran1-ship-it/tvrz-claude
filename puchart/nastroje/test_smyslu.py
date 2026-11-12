@@ -452,6 +452,8 @@ for i, z in enumerate(_ZB):   # zdvojené: rovnoběžné, do 0,2 m od sebe, stej
         if _bod_usecka(c, a, b)[0] > 0.2 and _bod_usecka(e, a, b)[0] > 0.2: continue
         u = sorted([float((c[:2] - a[:2]) @ d) / L, float((e[:2] - a[:2]) @ d) / L]); prekryv = min(L, u[1]) - max(0.0, u[0])
         if prekryv > 0.3: _zv.append({"zdvojene": [z["a"], z["b"]], "s": [o["a"], o["b"]]})
+_ul = [z for z in _ZB if np.linalg.norm(np.array(z["b"][:2]) - np.array(z["a"][:2])) < 0.9 and not z["sa"] and not z["sb"]]   # Míša 12. 11.: úlomky u branky A
+TEST("zabradli_ulomky", not _ul, "samostatné kusy zábradlí kratší než 0,9 m: %d %s" % (len(_ul), _ul[:3]))
 TEST("zabradli_spojite", len(_ZB) > 20 and not _zv, "zábradlí %d kusů, nenavazujících/zdvojených %d %s" % (len(_ZB), len(_zv), _zv[:3]))
 TEST("portaly", len(POR_) >= KC.get("portaly_min", 8), "portálů z portaly.py: %d" % len(POR_))
 

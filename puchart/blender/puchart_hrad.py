@@ -533,6 +533,8 @@ def hrany_a_zabradli(parts, doplnit=True):
                     or any(uvnitr(b + vv_ * 0.45 + UP * hh_, i0) for vv_ in (n_, -n_, t_, -t_) for hh_ in (0.5, 1.2))   # u zdi (0,45 m): zábradlí ne (Míša 5. 11.)
                 if not (zab or navaz):
                     pad = all(not uvnitr(ven - UP * h_, i0) for h_ in (0.6, 0.85, 1.1)) and ven.y - ter(ven.x, ven.z) > 1.0
+                    if pad and os.environ.get("PUCHART_DBGZ") and abs(b.x - float(os.environ["PUCHART_DBGZ"].split(",")[0])) < 2.5 and abs(b.z - float(os.environ["PUCHART_DBGZ"].split(",")[1])) < 2.5:
+                        print("DBGHRANA", [round(b.x, 2), round(b.z, 2), round(y, 2)], druh, "plocha", [round(v_, 2) for v_ in c], [round(v_, 2) for v_ in sz], "n", [round(n_.x, 2), round(n_.z, 2)], flush=True)
                     if pad:
                         volne.append([round(b.x, 2), round(b.z, 2), round(y, 2), druh]); behy.setdefault((round(y, 2), round(n_.x, 2), round(n_.z, 2), round(b.dot(n_) * 5) / 5), (Pd, y, n_, []))[3].append(b)   # jedna hrana přes více polí podlahy = jedno zábradlí
                 k += 0.3
@@ -597,6 +599,34 @@ def portal(P, stred, nrm, w, h, yf, hloubka, kridla=True):
     m = M(stred + UP * yf, basis=Matrix((x, UP, nrm)).transposed())
     kit.doorway(P, m, kind="hlavni", w=w, h=h, depth=hloubka, top="lomeny", leaf=kridla, double=True, venec_vnitrni=True)
 
+def brana_otvor_most(br, s_stred, yf, strop, wb, Lp):
+    """Otvor ve zdi pro bránu s padacím mostem: obdélník výklenku (Míša 12. 11.: most zapadne do výklenku, řetězy z jeho
+    horních rohů) – aspoň tak velký jako otvor portálu, šířka mostu + okraje, výška délka mostu + rezerva (pod korunou)."""
+    W, H = portaly.otvor(br["sirka"], brana_vyska(br, yf, strop), "lomeny"); pm = D["padaci_most"]
+    return (s_stred, max(W, wb + 2 * pm["vyklenek_okraj_m"]), yf, max(H, min(Lp + pm["vyklenek_nad_m"], strop - yf - 0.15)))
+
+def portal_vyklenek(P, face, nrm, br, yf, strop, t, wb, Lp):
+    """Portál na dně výklenku hloubky vyklenek_hloubka_m (KCD brána Talmberg, Havran fort.gatehouse); zdivo za výklenkem mezi
+    obdélníkem výklenku a otvorem portálu. Vrací (bod prahu na dně výklenku, (šířka, výška výklenku))."""
+    pm = D["padaci_most"]; r = pm["vyklenek_hloubka_m"]; nrm = hz(nrm).normalized(); x = UP.cross(nrm)
+    h = brana_vyska(br, yf, strop); W, H = portaly.otvor(br["sirka"], h, "lomeny"); _, Wv, _, Hv = brana_otvor_most(br, 0, yf, strop, wb, Lp)
+    portal(P, face - nrm * r, nrm, br["sirka"], h, yf, t - r)
+    c0 = face - nrm * (r + (t - r) / 2)
+    if Wv > W + 0.01:
+        for sg in (-1, 1): P.box(M(c0 + x * (sg * (W + Wv) / 4) + UP * (yf + Hv / 2), basis=frame(x)), (t - r, Hv, (Wv - W) / 2), "zdivo")
+    if Hv > H + 0.01:
+        P.box(M(c0 + UP * (yf + (H + Hv) / 2), basis=frame(x)), (t - r, Hv - H, W), "zdivo")
+    return face - nrm * r, (Wv, Hv)
+
+def navijak_na_ochozu(G_osa, vn_in, dw, kor, t, Wv):
+    """Naviják padacího mostu brány v hradbě: na ochozu nad bránou u zídky (Míša 12. 11.: mechanismus zevnitř; u brány dole
+    není místo – schody, nároží), buben osou podél zdi přes šířku výklenku, úzký rám (ochoz zůstává průchozí). Řetězy z
+    horních rohů výklenku vedou svisle zdí a vychází štěrbinou v koruně u zídky pod bubnem."""
+    pm = D["padaci_most"]; vi = vn_in.normalized(); zid = t / 2 - 0.55   # vnitřní líc zídky od osy zdi (ven)
+    c = G_osa - vi * zid + vi * pm["navijak_ochoz_od_zidky_m"] + UP * (kor + pm["navijak_ochoz_vyska_m"])
+    return {"c": c, "osa": dw.normalized(), "dovnitr": vi, "patro": True, "ochoz": True, "podlaha": kor, "zed": 0.55 - pm["vyklenek_hloubka_m"] + 0.06,
+            "delka": max(pm["buben_delka_m"], Wv)}
+
 def dlazba(P, c, d, w, L, yf):
     P.box(M(c + UP * (yf - 0.04), basis=frame(d)), (w, 0.08, L), "kvadr_sedy")
 
@@ -632,7 +662,7 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(),
             if st == jm and H.DETAIL:
                 f = cc + osa * o + nrm * (tw / 2)
                 kit.doorway(P, M(f + UP * yd, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed()), kind="obycejne", w=dw, h=2.3,
-                            depth=tw, top="segment", leaf=False)
+                            depth=tw, top="segment", leaf=True)   # dveře všude jako Havran (Míša 12. 11.)
         if H.DETAIL:
             for o, ow, yo, oh in OK_:   # vnější slupka zdi s úzkým okénkem v tesaném ostění, uvnitř nika (rešerše 4. 11.)
                 f = cc + osa * o + nrm * (tw / 2); sl = NK["slupka_m"]; nw = NK["nika_sirka"]; nh = oh + NK["nika_nad"]
@@ -724,7 +754,7 @@ def vnitrek_veze(P, c, d, iw, idp, patra, steny_ramen, sq=1.0, run=None, sirka=1
     return ramena
 
 # ------------------------------------------------------------------ most, schody, plošiny
-def most2(P, a, ya, b, yb, w, Lp, na_terenu=True):
+def most2(P, a, ya, b, yb, w, Lp, na_terenu=True, vyk=None, navijak=None):
     """Dřevěný most na kozách od nástupu a (terén srovnaný na ya) na práh brány b (yb): mostovka souvislá, kolize jedna
     šikmá deska zapuštěná na začátku do terénu (žádný schod), u brány padací most na řetězech."""
     _a, _b = V(a) if not isinstance(a, Vector) else a, V(b) if not isinstance(b, Vector) else b
@@ -825,11 +855,40 @@ def most2(P, a, ya, b, yb, w, Lp, na_terenu=True):
         kol(P, a + d * (Lf / 2) + o + UP * (y(Lf / 2) + 0.6), d, (0.14, 1.2, Lf / math.cos(sk)), sk)   # jen pevná část se zábradlím (dřív celá délka – přes padací most až ke skále: neviditelná stěna, test skala_540)
     # padací most: osa otáčení na prahu, vede od brány
     bb = a + d * L
-    if H.DETAIL:
-        mb = M(bb + UP * yb, basis=Matrix((s, UP, -d)).transposed())
-        oka = kit.drawbridge(P, mb, w=w - 0.2, L=Lp, angle=math.degrees(sk))   # konec dolů k pevné části (rotace kolem X kladná = dolů)
-        for q in oka:
-            kit.chain(P, q, bb + UP * (yb + 4.0) + (q - (bb + UP * yb)).project(s) + d * 0.1, sag=0.15)
+    if H.DETAIL:   # padací most jako pohyblivý díl (Havran fort.gate_mechanisms, Míša 12. 11.): zvedá se naviják zevnitř, řetězy z
+        pm = D["padaci_most"]; wb = w - 0.2   # horních rohů výklenku do zdi; ve glb spuštěný (průchozí), hra ho otočí o open° kolem pantu
+        mg = M(bb + UP * yb, basis=Matrix((s, UP, -d)).transposed()) @ Matrix.Rotation(sk, 4, "X")
+        gid = "most%d" % (len([e for e in lib.MOVABLE if e["kind"] == "most"]) + 1)
+        Wv, Hv = vyk if vyk else (wb + 0.3, Lp + 0.1)
+        kotvy = [bb + s * (sx * (Wv / 2 - 0.08)) + UP * (yb + Hv - 0.08) for sx in (-1, 1)]
+        oka = [[sx * (wb / 2 + 0.02), 0.0, Lp - 0.25] for sx in (-1, 1)]
+        kit.movable(gid, "most", mg, lambda Q: kit.drawbridge(Q, Matrix.Identity(4), wb, Lp, 0.0),
+                    cols=[((0.0, -0.12, Lp / 2), (wb, 0.24, Lp))], group=gid, open=-(pm["zdvih_st"] + math.degrees(sk)), dur=pm["doba_s"],
+                    chains=[[list(k_), o_] for k_, o_ in zip(kotvy, oka)])
+        if navijak:
+            c = navijak["c"]; ax = navijak["osa"]; Ld = navijak.get("delka", pm["buben_delka_m"]); vi = navijak["dovnitr"]
+            if navijak.get("ochoz"):   # úzký rám na ochozu: dva sloupky s ložisky na prahu (pražci) podél zídky
+                y0_ = navijak["podlaha"]
+                for sx in (-1, 1):
+                    q_ = c + ax * (sx * (Ld / 2 + 0.08))
+                    P.beam(Vector((q_.x, y0_, q_.z)), q_ + UP * 0.14, 0.14, 0.14, "dub", j=0.6)
+                    P.beam(Vector((q_.x, y0_ + 0.06, q_.z)) - vi * 0.2, Vector((q_.x, y0_ + 0.06, q_.z)) + vi * 0.22, 0.12, 0.12, "dub", j=0.6)
+                    P.beam(q_ + UP * 0.1 - vi * 0.1, q_ + UP * 0.1 + vi * 0.1, 0.16, 0.1, "dub")
+            else: P.beam(c - ax * (Ld / 2 + 0.05) - UP * 0.77, c + ax * (Ld / 2 + 0.05) - UP * 0.77, 0.12, 0.12, "dub", j=0.6)   # kozy navijáku (Havran kit.windlass_frame)
+            for sx in ((-1, 1) if not navijak.get("ochoz") else ()):
+                top = c + ax * (sx * (Ld / 2 + 0.05))
+                for sz in (-1, 1): P.beam(top - UP * 0.87 + vi * (sz * 0.55), top + UP * 0.12, 0.12, 0.12, "dub", j=0.6)
+                P.beam(top - UP * 0.77 - vi * 0.6, top - UP * 0.77 + vi * 0.6, 0.14, 0.14, "dub", j=0.6)
+                P.beam(top + UP * 0.08 - vi * 0.12, top + UP * 0.08 + vi * 0.12, 0.16, 0.12, "dub")
+            mn = M(c, basis=Matrix((ax, UP, ax.cross(UP).normalized())).transposed())
+            uz = c + vi * 0.9 + ax * (Ld / 2 + 0.3) - UP * 0.4
+            kit.movable(gid + "_navijak", "navijak", mn, lambda Q: kit.windlass_drum(Q, Ld, pm["buben_r_m"], pm["kolo_r_m"]),
+                        use=list(uz), group=gid, turns=pm["otacek_bubnu"])
+            for k_ in kotvy:   # řetěz od bubnu otvorem ve zdi k horním rohům výklenku (uvnitř zdi neviditelný)
+                ko = c + ax * ((Ld / 2 - 0.2) * (1 if (k_ - c).dot(ax) > 0 else -1)) + UP * pm["buben_r_m"]
+                if navijak.get("patro"): vy_ = Vector((k_.x, navijak["podlaha"] + 0.01, k_.z)) + d * navijak["zed"]   # štěrbina v podlaze patra nad výklenkem
+                else: vy_ = k_ + d * (navijak["tl"] - pm["vyklenek_hloubka_m"])   # otvor na vnitřním líci zdi
+                kit.chain(P, ko, vy_, sag=0.05)
     else:
         P.box(M(bb - d * (Lp / 2) + UP * (yb - Lp / 2 * tg), basis=frame(d) @ Matrix.Rotation(-sk, 3, "X")), (w, 0.2, Lp), "prkna_ven")
 
@@ -1322,8 +1381,8 @@ def palac_A(P, p0, p1, bd, PI):
     PV = DS["pavlac"]; sv = DS["schody_ven"]; dw = DS["dvere_sirka"]
     for dp in DS["dvere_pavlac"]:
         if H.DETAIL:
-            kit.doorway(P, M(W(dp["u"], h / 2, F1), basis=Matrix((d, UP, s)).transposed()), kind="vnitrni", w=dw, h=DS["dvere_vyska"],
-                        depth=0.3, top="rovny", leaf=False, inner=False)   # v ose zdi jako dveře budov (hrady.budova); křídlo otevřené do pavlače ji zatarasilo
+            kit.doorway(P, M(W(dp["u"], h / 2, F1), basis=Matrix((d, UP, s)).transposed()), kind="obycejne", w=dw, h=DS["dvere_vyska"],
+                        depth=t, top="segment", leaf=True)   # Míša 12. 11.: ostění a dveře jako Havran – kamenný portálek na líci, křídlo za ostěním dovnitř (dřív dřevěná zárubeň bez křídla)
     mez_ = [(sv["u"] - sv["sirka"] / 2 - 0.05, sv["u"] + sv["sirka"] / 2 + 0.05)]
     ochoz2(P, W(0, h / 2), W(L, h / 2), t, F1, s, PV["u0"], PV["u1"], mezery=mez_, kryty=PV.get("kryta", False), sirka=PV["sirka"])
     ven = h / 2 + t / 2 + PV["sirka"]   # osa nádvorní zdi je h/2, líc h/2 + t/2
@@ -1361,7 +1420,7 @@ def postav_A(P):
     U = [usek(j, i) for i in range(len(j))]
     # plášť; brána v seříznutém SV nároží
     for i, (a, b, L, d, vn) in enumerate(U):
-        ot = [brana_otvor(br, L / 2, br["prah_y"], kor)] if i == br["usek"] else []
+        ot = [brana_otvor_most(br, L / 2, br["prah_y"], kor, A["most"]["sirka"] - 0.2, A["most"]["padaci_m"])] if i == br["usek"] else []
         rv = A["vezicka"]["roh"]; wv = A["vezicka"]["rozmer"] / 2
         par = (-t / 2, L - wv) if i == rv - 1 else ((wv, L + t / 2) if i == rv else None)
         if A["vezicka"].get("zarovnat"):   # zarovnaná věžička: zeď nad úrovní koruny končí u věže (vnitřek věže volný – schody věžičky)
@@ -1371,7 +1430,7 @@ def postav_A(P):
         e0_, e1_ = pokos_ext(j, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, par=par, cela=(False, False), ext0=e0_, ext1=e1_, cimburi=A.get("cimburi", True))   # čela kusů v nároží by v tupém úhlu vyčnívala z líce (Míša 5. 11.: švy) – roh kryje klín naroze()
     naroze(P, j, t, kor, vynechat=(A["vezicka"]["roh"],))
     a, b, L, d, vn = U[br["usek"]]; C = (a + b) / 2
-    portal(P, C - vn * (t / 2), -vn, br["sirka"], brana_vyska(br, br["prah_y"], kor), br["prah_y"], t)
+    dA_ = d.copy(); prah_A, vyk_A = portal_vyklenek(P, C - vn * (t / 2), -vn, br, br["prah_y"], kor, t, A["most"]["sirka"] - 0.2, A["most"]["padaci_m"])
     dlazba(P, C, -vn, br["sirka"], t + 0.2, br["prah_y"] + 0.04)
     nA = -vn
     # nárožní věžička (kresba) – komora na úrovni koruny, dveře k ochozu východní zdi
@@ -1405,7 +1464,7 @@ def postav_A(P):
         a3, b3, L3, d3, vn3 = U[ri]
         pal = [bd_ for bd_ in A["budovy"] if bd_["usek"] == ri]
         s1_3 = min([bd_["od_m"] for bd_ in pal] + [L3]) - 0.01
-        s0_3 = w / 2 - 0.02
+        s0_3 = w / 2 + zo_ - 0.02   # od líce věže (zarovnaná věž má střed posunutý o zo_ – ochoz i zábradlí začínaly uvnitř komory: Míša 12. 11. „středem nešlo projít, něco tam leželo“)
         if s1_3 - s0_3 > 1.0:
             ochoz2(P, a3, b3, t, kor, vn3, s0_3, s1_3, lehka=True)
             TR["A_vezicka_ochoz_palac"] = [bod(rc - sS * 0.3, kor), bod(rc + sS * (w / 2 - tv - 0.3) + dE * o3, kor),
@@ -1426,7 +1485,7 @@ def postav_A(P):
             budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"], podl=SK["podlaha_palace_y"],
                      otvory=[(0, sj["u_dvere"] + g["tl"] / 2, sj["dvere"][0], SK["podlaha_y"], SK["podlaha_y"] + sj["dvere"][1]),
                              (vs["strana"], vs["od_m"], vs["sirka"], SK["podlaha_palace_y"], SK["podlaha_palace_y"] + vs["vyska"])] +
-                            [(0, dp_["u"], PI["dispozice"]["dvere_sirka"], PI["patra_y"][1], PI["patra_y"][1] + PI["dispozice"]["dvere_vyska"]) for dp_ in PI["dispozice"]["dvere_pavlac"]],
+                            [(lambda WH: (0, dp_["u"], WH[0], PI["patra_y"][1], PI["patra_y"][1] + WH[1]))(portaly.otvor(PI["dispozice"]["dvere_sirka"], PI["dispozice"]["dvere_vyska"], "segment")) for dp_ in PI["dispozice"]["dvere_pavlac"]],
                      vstup=(vs["strana"], vs["od_m"], vs["sirka"], vs["vyska"]), plna_kolize=False, patra=PI["patra_y"][:2])
             H.OKAP_STRANY.clear()
             palac_A(P, p0, p1, bd, PI)
@@ -1506,8 +1565,9 @@ def postav_A(P):
                 POR.append(st_); break
             pred = (u_, v_)
         else: POR.append(None)
+    rV_ = D["padaci_most"]["vyklenek_hloubka_m"] if A.get("most_vnejsi") else 0.0
     H.vez(P, (O.x, O.z), tuple(vb["rozmer"]), vb["vyska"], "jehlan", yaw_d=(-nA.z, nA.x), brana=True, yf=vb["podlaha_y"], patro=vb.get("patro", True),
-          portalky=[q for q in POR if q])
+          portalky=[q for q in POR if q], vyklenek=rV_)
     dv0_ = Vector((-nA.z, 0, nA.x)).normalized(); sv0_ = dv0_.cross(UP).normalized()   # průjezd branky bez trávy a keřů (Míša 10. 11.)
     BUDOVY.append([[round(q.x, 2), round(q.z, 2)] for q in (O + dv0_ * (vb["rozmer"][0] / 2 + 0.3) + sv0_ * (vb["rozmer"][1] / 2 + 1.0), O - dv0_ * (vb["rozmer"][0] / 2 + 0.3) + sv0_ * (vb["rozmer"][1] / 2 + 1.0),
                    O - dv0_ * (vb["rozmer"][0] / 2 + 0.3) - sv0_ * (vb["rozmer"][1] / 2 + 1.0), O + dv0_ * (vb["rozmer"][0] / 2 + 0.3) - sv0_ * (vb["rozmer"][1] / 2 + 1.0))])
@@ -1567,9 +1627,14 @@ def postav_A(P):
     if mv_:   # most před vnější brankou přes vnější příkop (náčrt Míši 5. 11.), rovně v ose brány
         kv_ = O + nA * (vb["rozmer"][1] / 2); zv_ = kv_ + nA * mv_["delka_m"]
         pl_ = next(q for q in D["teren"]["plosiny"] if q["id"] == "A_nastup_vnejsi")
-        most2(P, zv_, pl_["y"], kv_, vb["podlaha_y"], mv_["sirka"], mv_["padaci_m"])
-    m = A["most"]; zac = C + nA * vb["predprostor_t_m"][0]; kon = C + nA * (t / 2)
-    most2(P, zac, vb["podlaha_y"], kon, br["prah_y"], m["sirka"], m["padaci_m"], na_terenu=False)
+        Wo_, Ho_ = portaly.otvor(H.BRANA_PW, H.BRANA_PH, "lomeny"); pm_ = D["padaci_most"]; tw_ = H.PATRO_TW; yp_ = H.patro_brany_y(vb["podlaha_y"])
+        dv_ = Vector((-nA.z, 0, nA.x)).normalized()   # osa bubnu podél líce (Havran: naviják v patře brány nad průjezdem)
+        nv_V = {"c": O + nA * (vb["rozmer"][1] / 2 - tw_ - 0.75) + UP * (yp_ + pm_["navijak_vyska_m"]), "osa": dv_, "dovnitr": -nA, "patro": True,
+                "podlaha": yp_, "zed": tw_ - rV_ + 0.12}
+        most2(P, zv_, pl_["y"], kv_ - nA * rV_, vb["podlaha_y"], mv_["sirka"], mv_["padaci_m"], vyk=(Wo_, Ho_), navijak=nv_V)
+    m = A["most"]; zac = C + nA * vb["predprostor_t_m"][0]; kon = prah_A
+    nv_A = navijak_na_ochozu(C, -nA, dA_, kor, t, vyk_A[0])
+    most2(P, zac, vb["podlaha_y"], kon, br["prah_y"], m["sirka"], m["padaci_m"], na_terenu=False, vyk=vyk_A, navijak=nv_A)
     yp = vb["podlaha_y"]; dvur = C - nA * 9
     if mv_:   # vnější most (vlastní trasa – A_vstup má bránu jádra na indexu 4, test vrata_funkce)
         TR["A_most_vnejsi"] = [bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"] + 2.0)), bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"])),
@@ -1600,7 +1665,7 @@ def postav_B(P):
         return (min(vn_), max(vn_)) if vn_ else None
     for i, (a, b, L, d, vn) in enumerate(U):
         if i in B.get("hradba_palac", []): continue   # zeď paláce je hranou hradu (bez hradby před ní)
-        ot = [brana_otvor(br, br["stred_m"], B["dolni_y"], kor)] if i == br["usek"] else []
+        ot = [brana_otvor_most(br, br["stred_m"], B["dolni_y"], kor, B["most"]["sirka"] - 0.2, B["most"]["padaci_m"])] if i == br["usek"] else []
         iv = usek_v_palaci(a, b)
         if iv:   # u konce úseku i přesah zdi za vrchol (t/2)
             s0_ = iv[0] - (t if iv[0] < 0.1 else 0.05); s1_ = iv[1] + (t if iv[1] > L - 0.1 else 0.05)
@@ -1608,14 +1673,15 @@ def postav_B(P):
         e0_, e1_ = pokos_ext(hp, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0, cimburi=B.get("cimburi", True), cela=(False, False), ext0=e0_, ext1=e1_)
     naroze(P, hp, t, kor, vynechat=tuple(k for k, q in enumerate(hp) if v_palaci(V(q), -t) or k in B.get("hradba_palac", []) or (k - 1) % len(hp) in B.get("hradba_palac", [])))   # rohy úseků, kde hranou je palác: klín by trčel do paláce (test 5. 11.)
     a, b, L, d, vn = U[br["usek"]]; G = a + d * br["stred_m"]; vnG = vn
-    portal(P, G - vn * (t / 2), -vn, br["sirka"], brana_vyska(br, B["dolni_y"], kor), B["dolni_y"], t)
+    prah_B, vyk_B = portal_vyklenek(P, G - vn * (t / 2), -vn, br, B["dolni_y"], kor, t, B["most"]["sirka"] - 0.2, B["most"]["padaci_m"])
     dlazba(P, G, -vn, br["sirka"], t + 0.2, B["dolni_y"] + 0.04)
     gi = min(ter(*(G + vn * (t / 2 + k)).xz) for k in (0.3, 0.9, 1.5, 2.0))   # nádvoří níž než práh: nájezd i dovnitř (Míša 4. 11.: ven branou
     if B["dolni_y"] - gi > 0.03:                                              # nešlo vyjít, u země překážka – hrana prahu 14 cm)
         nabeh(P, G + vn * (t / 2), vn, B["dolni_y"], br["sirka"], L=max(0.4, round((B["dolni_y"] - gi + 0.1) / 0.17) * 0.32), spad=B["dolni_y"] - gi + 0.1)   # stupeň nebo dva u prahu
     # most přes průrvu: vodorovně z nástupu na práh
     m = B["most"]; zac = V(m["od"])
-    most2(P, zac, m["nastup_y"], G - vn * (t / 2), B["dolni_y"], m["sirka"], m["padaci_m"])
+    nv_B = navijak_na_ochozu(G, vn, d, kor, t, vyk_B[0])
+    most2(P, zac, m["nastup_y"], prah_B, B["dolni_y"], m["sirka"], m["padaci_m"], vyk=vyk_B, navijak=nv_B)
     zt = B["terasa_z"]; xs = B["schody_terasa"]["x"]; sts = None
     if B.get("terasa", True):
         zt = B["terasa_z"]; xs = B["schody_terasa"]["x"]
@@ -1773,6 +1839,7 @@ def postav_B(P):
                          bod(sa - sdir * 0.5, y0), bod(c + Vector((0, 0, 0.5)), y0)]
     return G
 
+ZAB_MIN_M = 0.9   # nejkratší samostatné zábradlí (kratší nenapojený kus = úlomek)
 def zabradli_stavba():
     """Zábradlí jako celek (Míša 10. 11.: „podívej se, jak zábradlí v KCD a v realitě přirozeně navazuje“): všechny kusy
     (ochozy, podesty, otvory, ramena schodů) se nejdřív sesbírají; konce blíž než 0,45 m (a výškou do 0,25 m) se spojí do
@@ -1813,6 +1880,10 @@ def zabradli_stavba():
                 tt = max(0.0, min(L_, (q - o["a"]).dot(d_ / L_))); p_ = o["a"] + d_ / L_ * tt; dist = (p_ - q).length
                 if 0.02 < dist < 0.6 and (best is None or dist < best[0]): best = (dist, p_)
             if best: r[k] = best[1].copy(); r["s" + k] = True
+    # úlomky (Míša 12. 11.: „zábradlí u vstupní věžičky je furt na p…“ – kousek 0,6 m bez napojení vedle schodů branky): kus
+    # kratší než ZAB_MIN_M, který se na žádném konci nenapojil na jiné zábradlí, se nestaví (krátkou hranu kryje zeď nebo schody)
+    for r in [r for r in ZAB_REC if (r["b"] - r["a"]).length < ZAB_MIN_M and not r.get("sa") and not r.get("sb")]:
+        print("ZABRADLI_ULOMEK vynechán", [round(v, 2) for v in (r["a"].x, r["a"].z, r["ya"], r["b"].x, r["b"].z)], flush=True); ZAB_REC.remove(r)
     ZAB_VYSTUP[:] = [{"a": [round(r["a"].x, 2), round(r["a"].z, 2), round(r["ya"], 2)], "b": [round(r["b"].x, 2), round(r["b"].z, 2), round(r["yb"], 2)],
                       "sa": bool(r.get("sa")), "sb": bool(r.get("sb"))} for r in ZAB_REC if (r["b"] - r["a"]).length >= 0.1]   # pro hlídač zabradli_spojite
     hotove = set()
@@ -1890,9 +1961,9 @@ def stavba(suf):
         for k_ in ("A_vstup", "B_vstup"):   # ven branou (Míša 4. 11.: „ve vstupu do dolního hradu jsem nemohl vyjít, u země překážka“)
             if k_ in TR: TR[k_ + "_ven"] = TR[k_][::-1][:-2]   # ven po nástup na most (dál ruční body vstupu mimo pěšinu, přímka přes kraj skály)
         TR["cesta_mezi_hrady"] = [[p[0], p[1], None] for p in next(c for c in cc["cesty"] if c["id"] == "hrebenova")["osa"]] + [TR["B_vstup"][2]]
-        json.dump({"popis": "pohyblivé díly (kit.movable): uzel Pohyb_* je ve glb OTEVŘENÝ; zavřený = otočení o −open° kolem místní osy Y (pant). "
+        json.dump({"popis": "pohyblivé díly (kit.movable): uzel Pohyb_* je ve glb OTEVŘENÝ; zavřený = otočení o −open° kolem místní osy Y (pant). Padací most (kind most) je ve glb spuštěný, zvednutý = otočení o open° kolem místní X (pant na prahu), chains = [kotva ve zdi (svět), oko na mostě (místní)]; naviják (navijak) se při pohybu skupiny točí o turns otáček kolem místní X. "
                    "cols = kolize v místních souřadnicích uzlu, use = místo ovládání (svět). Čte hra/scripts/dvere.gd.",
-                   "dily": [{k: e[k] for k in ("name", "kind", "group", "cols", "use", "open", "dur") if k in e} for e in lib.MOVABLE]},
+                   "dily": [{k: e[k] for k in ("name", "kind", "group", "cols", "use", "open", "dur", "chains", "turns") if k in e} for e in lib.MOVABLE]},
                   open(os.path.join(K, "hra/data/pohyb.json"), "w"), ensure_ascii=False)
         json.dump({"popis": "trámy hradu (Part.beam) pro hlídač tesařských spojů nastroje/kontrola_spoju.py: [střed xyz, osy 3×3 (sloupce), poloviční rozměry, materiál, díl]",
                    "tramy": [[[round(x, 4) for x in c], [[round(bs[r][k], 5) for r in range(3)] for k in range(3)], [round(x, 4) for x in hs], m_, dn]

@@ -220,8 +220,9 @@ def doorway(P, m, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None, open_deg=Non
     while y < sp - 0.02:
         h_ = min(vy * RND.uniform(0.95, 1.05), sp - y)
         if sp - y - h_ < 0.14: h_ = sp - y
-        for vl in (True, False):
-            x0, x1 = (-hw - ring, -hw) if vl else (hw, hw + ring)
+        for vl in (True, False):   # střídavě dlouhý a krátký kvádr (Havran kit.stone_jambs 0,42/0,27; KCD brána Talmberg – Míša 12. 11.)
+            rw = ring * (PR["osteni_dlouhy_k"] if (k + (0 if vl else 1)) % 2 == 0 else PR["osteni_kratky_k"])
+            x0, x1 = (-hw - rw, -hw) if vl else (hw, hw + rw)
             _ostenistojka(P, m, x0, x1, y + (PR["spara_m"] if k else 0.0), y + h_, pr, -jd, stone_mat, ch, vl)
         y += h_; k += 1
     if top == "rovny":
@@ -251,6 +252,21 @@ def doorway(P, m, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None, open_deg=Non
     if venec_vnitrni and top != "rovny":   # vnitřní líc průchodu: záklenek z klenáků tvaru klenby (brány)
         mi = m @ M((0.0, 0.0, -D), 180)
         zaklenek(P, mi, W, sp, top, 0.01, -0.35, stone_mat, ring * 0.9, ch)
+    elif inner and D - jd > 0.2:   # kamenné ostění i z vnitřní strany (Havran kit.doorway inner; Míša 12. 11.: „všude chci ostění
+        mi = m @ M((0.0, 0.0, -D), 180)   # a dveře jako v Havranovi“ – zevnitř byl holý otvor): stojky kolem otvoru W a záklenek
+        jdi = min(PR["osteni_vnitrni_hloubka_m"], (D - jd) * 0.8); pri = PR["osteni_vnitrni_vystupek_m"]; y = 0.0; k = 0
+        while y < sp - 0.02:
+            h_ = min(vy * RND.uniform(0.95, 1.05), sp - y)
+            if sp - y - h_ < 0.14: h_ = sp - y
+            for vl in (True, False):
+                rw = ring * (PR["osteni_dlouhy_k"] if (k + (0 if vl else 1)) % 2 == 0 else PR["osteni_kratky_k"])
+                x0, x1 = (-W / 2 - rw, -W / 2) if vl else (W / 2, W / 2 + rw)
+                _ostenistojka(P, mi, x0, x1, y + (PR["spara_m"] if k else 0.0), y + h_, pri, -jdi, stone_mat, ch, vl)
+            y += h_; k += 1
+        if top == "rovny":
+            kit.stone(P, mi @ M((0.0, h + ring / 2, (pri - jdi) / 2)), (W + 2 * ring, ring, pri + jdi), stone_mat, cham=0.02, rough=0.0)
+        else:
+            zaklenek(P, mi, W, sp, top, pri, -jdi, stone_mat, ring * 0.9, ch)
     kit.threshold(P, m, W, jd + 0.1)
     if not leaf:
         return

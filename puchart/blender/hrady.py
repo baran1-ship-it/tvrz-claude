@@ -257,21 +257,22 @@ def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo", t_zdi
     if DETAIL:
         for (eL, eR, r1, r2, pp) in ((eL1, eR1, rB, rA, p1), (eL2, eR2, rA, rB, p2)):
             if pp > 0.05: strecha_okraje(P, eL, eR, r1, r2, math.hypot(pp, sk_ * pp))   # přesah podél spádu od okapu k líci zdi
-    for e, f, r in ((a + s * (hloubka / 2), a - s * (hloubka / 2), a), (b - s * (hloubka / 2), b + s * (hloubka / 2), b)):
-        if stity == "drevo":
-            # bedněný štít ze svislých prken
-            k = 0.0; L = (f - e).length; dd = (f - e).normalized()
-            while k < L:
-                x = e + dd * (k + 0.13); hh = vyska * (1 - abs((k + 0.13) - L / 2) / (L / 2)) + dz_
-                if hh > 0.05:
-                    kit.plank(P, x + UP * y0_, x + UP * (y0_ + hh), 0.25, 0.04, "prkna_ven", up=(r - (a + b) / 2).normalized(), wear=0.5)
-                k += 0.26
+    hs_ = hloubka / 2 + t_zdi / 2   # štít až k vnějším lícům bočních zdí (Míša 12. 11.: díry v podkroví paláce na obou stranách –
+    for e, f, r in ((a + s * hs_, a - s * hs_, a), (b - s * hs_, b + s * hs_, b)):   # štít končil v osách zdí, nad vnější polovinou koruny
+        if stity == "drevo":                                                         # zůstal trojúhelník do nebe)
+            # bedněný štít ze svislých prken, prkna se o 2 cm překrývají (dřív 1 cm mezery – světlé čáry)
+            k = 0.0; L = (f - e).length; dd = (f - e).normalized(); PK_ = 0.24
+            while k < L - 0.01:
+                u_ = abs((k + PK_ / 2) - L / 2); hh = dz_ + vyska - sk_ * u_ + min(sk_ * PK_ / 2, 0.04)   # střed prkna pod střechou + do tloušťky krytiny (štěrbiny pod šikmou střechou zakryté)
+                if hh > 0.03:
+                    x = e + dd * min(k + PK_ / 2, L - PK_ / 2)
+                    kit.plank(P, x + UP * y0_, x + UP * (y0_ + hh), PK_ + 0.02, 0.04, "prkna_ven", up=(r - (a + b) / 2).normalized(), wear=0.5)
+                k += PK_
             for k_ in range(4):   # kolize prkenného štítu: trojúhelník ze 4 zužujících se desek (povrch_kolize 9. 11.: štítem se procházelo)
                 h0_, h1_ = (vyska + dz_) * k_ / 4, (vyska + dz_) * (k_ + 1) / 4
                 P.cols.append((M((e + f) / 2 + UP * (y0_ + (h0_ + h1_) / 2), basis=frame(dd)), (0.12, h1_ - h0_, L * (1 - k_ / 4))))
-        else:
-            P.tri(e + UP * y, f + UP * y, r + UP * (y + vyska), 0.6, "zdivo")
-            if dz_ > 0.02: P.box(M((e + f) / 2 + UP * (y0_ + dz_ / 2), basis=frame(f - e)), (0.6, dz_, (f - e).length), "zdivo")   # podezdívka štítu pod zvednutou střechou
+        else:   # kamenný štít od vnějších líců bočních zdí (koruna y0_) k hřebeni – přesně v rovině střechy, bez klínu do nebe nad korunou
+            P.tri(e + UP * y0_, f + UP * y0_, r + UP * (y + vyska), 0.6, "zdivo")
 
 def strecha_valba(P, a, b, hloubka, y, vyska, presah=0.5):
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); d = (b - a).normalized(); s = d.cross(UP).normalized()
@@ -292,7 +293,7 @@ VEZ_PATRO = []   # strážnice nad průjezdem (pro schody a test průchodu ve st
 BRANA_PW, BRANA_PH, PATRO_TW, PORTAL_W = 3.2, 4.2, 0.9, 0.9   # průjezd branky (šířka, výška), zdi strážnice, portálek
 def patro_brany_y(yf): return yf + BRANA_PH + 0.6              # podlaha strážnice = ochozy hradeb ve stejné výšce (Havran WALK)
 def portal_v(dpt): return dpt / 2 - PATRO_TW - PORTAL_W / 2 - 0.05   # osa portálku v boční stěně (od osy průjezdu ke dvoru)
-def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf=None, patro=False, portalky=None):
+def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf=None, patro=False, portalky=None, vyklenek=0.0):
     cx, cz = stred; w, dpt = rozmer
     d = Vector((yaw_d[0], 0, yaw_d[1])).normalized(); s = d.cross(UP).normalized()
     c = Vector((cx, 0, cz))
@@ -346,10 +347,10 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
         # valenou lomenou klenbu průjezdu staví portál (portaly.doorway přes celou hloubku věže)
         P.box(M(c + UP * (yf - 0.05), basis=frame(d)), (dpt, 0.1, Wo), "kvadr_sedy")
         # portály na obou lících a vrata (vnitřní strana otevřená)
-        f = c - s * (dpt / 2)   # vnější líc (ven = −s): ostění, křídla v polodrážce, klenba skrz, na vnitřním líci záklenek
-        m = M(f + UP * yf, basis=Matrix((-d, UP, -s)).transposed())
-        kit.doorway(P, m, kind="hlavni", w=pw, h=ph, depth=dpt, top="lomeny", leaf=True, double=True, venec_vnitrni=True)
-        BRANY.append((c - s * (dpt / 2), yf))   # práh vnějšího líce – sem vede most
+        f = c - s * (dpt / 2 - vyklenek)   # vnější líc (ven = −s): ostění, křídla v polodrážce, klenba skrz, na vnitřním líci záklenek;
+        m = M(f + UP * yf, basis=Matrix((-d, UP, -s)).transposed())   # s padacím mostem portál na dně výklenku (otvor průjezdu Wo × Ho, Míša 12. 11.)
+        kit.doorway(P, m, kind="hlavni", w=pw, h=ph, depth=dpt - vyklenek, top="lomeny", leaf=True, double=True, venec_vnitrni=True)
+        BRANY.append((c - s * (dpt / 2 - vyklenek), yf))   # práh na dně výklenku – sem vede most
     else:
         P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (dpt, y1 - y0, w), "zdivo")
     # nároží z větších kamenů (KCD: kvádrová nároží) – střídavě

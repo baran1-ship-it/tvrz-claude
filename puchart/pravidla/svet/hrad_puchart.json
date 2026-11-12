@@ -699,11 +699,12 @@
     102.72
    ],
    "sirka": 2.6,
-   "padaci_m": 4.0,
+   "padaci_m": 3.4,
    "jistota": "DOLOZENO most přes průrvu (atlas, GC80T08: „most musel začínat mnohem níže“), KRESBA dlouhý vodorovný most na vysokých kozách",
    "nastup_y": 13.26,
    "pozn": "nástup na hřbetu nad průrvou (přirozená výška ~13,4), most klesá 14 % na práh 10,5 – hřbet je sám strmý ~30 %, vodorovný most z 10,5 by potřeboval 3 m zářez a cesta by nenavázala (test průchodu B_vstup) | 5. 11.: most kolmo do brány v S zdi",
-   "pozn_9_11": "nástup o 2 m zpět od hrany průrvy (vyhlazení a síť terénu 2 m ho na hraně stáhly o 0,8 m pod mostovku – test nastup_mostu_v_terenu)"
+   "pozn_9_11": "nástup o 2 m zpět od hrany průrvy (vyhlazení a síť terénu 2 m ho na hraně stáhly o 0,8 m pod mostovku – test nastup_mostu_v_terenu)",
+   "pozn_padaci_12_11": "3,4 m (dřív 4,0): zvednutý most musí zapadnout do výklenku pod korunou (koruna 14,0 − práh 10,3 = 3,7 m)"
   },
   "prurva": {
    "osa": [
@@ -1105,5 +1106,24 @@
  "hrubost_zdiva": {
   "amp_m": 0.06,
   "zdroj": "Míša 10. 11.: „všude na obou hradech jsem nechtěl ty hladké a přesné hrany“ (stínky, zídka) – lomové zdivo z droby má nerovné hrany; posun vrcholů ±6 cm podle polohy ve světě"
+ },
+ "padaci_most": {
+  "vyklenek_hloubka_m": 0.45,
+  "vyklenek_okraj_m": 0.15,
+  "vyklenek_nad_m": 0.1,
+  "zdvih_st": 80.0,
+  "doba_s": 7.0,
+  "otacek_bubnu": 6.0,
+  "buben_delka_m": 1.8,
+  "buben_r_m": 0.2,
+  "navijak_od_zdi_m": 1.1,
+  "navijak_vyska_m": 0.85,
+  "navijak_bokem_m": 1.5,
+  "jistota": "REKONSTRUKCE podle Havrana (blender/fort.py gate_mechanisms: most kit.movable open −78°, řetězy z rohů do zdi, navijáky v patře brány) a KCD (brána Talmberg – výklenek kolem portálu, docs/reference/kcd_vzhled/misa_kcd_13.jpg)",
+  "pozn": "Míša 12. 11.: řetězy z horních rohů výklenku, kam most zapadne, když se zvedne; oba mosty zvedat mechanismem zevnitř. Výklenek = obdélník kolem portálu hloubky 0,45 m (most tl. ~0,47 m zapadne do líce); portál je na jeho dně. Naviják: u věže branky v patře (Havran), u bran v hradbě uvnitř u zdi vedle průchodu (ochoz nad bránou je cesta – naviják by ho zatarasil).",
+  "navijak_ochoz_od_zidky_m": 0.34,
+  "navijak_ochoz_vyska_m": 0.62,
+  "kolo_r_m": 0.5,
+  "pozn_ochoz": "brány v hradbě (A jádro, B): naviják na ochozu nad bránou u zídky – dole u brány není místo (B: schody na ochoz a nároží); věž branky A: v patře strážnice (Havran)"
  }
 }

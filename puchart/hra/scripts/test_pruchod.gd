@@ -226,6 +226,7 @@ func _test_vrata() -> void:
 	var smer := Vector3(tr[4][0] - tr[3][0], 0, tr[4][1] - tr[3][1]).normalized()
 	var pred := brana - smer * 3.0; var za := brana + smer * 3.0   # 3 m před a za vraty v rovině průjezdu (ne terén pod mostem)
 	for k in dv.mista:
+		if dv.druh.get(k, "") == "most": continue   # naviják padacího mostu stojí u brány – test je pro vrata
 		var dd: float = Vector2(dv.mista[k].x - brana.x, dv.mista[k].z - brana.z).length()
 		if dd < nd: nd = dd; g = k
 	var prosla := func() -> bool:

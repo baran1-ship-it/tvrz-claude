@@ -98,6 +98,7 @@ func _start() -> void:
 	if FileAccess.file_exists("res://data/skaly_rostliny.json"): _rostliny_skal()
 	Denik.zapis("stavby míst")
 	if FileAccess.file_exists("res://data/mista_stavby.json"): _mista()   # Předhradí, krčma, hájovna (Míša 11. 11.; domy z Havrana)
+	if FileAccess.file_exists("res://data/mista_stavby.json"): add_child(preload("res://scripts/ves.gd").new())   # usedlosti: stodoly, kůlny, ploty, zahrady, studna, stromy (ves.gd)
 	Denik.zapis("kameny v korytech")
 	if FileAccess.file_exists("res://data/koryto_kameny.json"): _kameny_koryta()   # valouny a balvany v korytech (Míša 10. 11.)   # kapradí, tráva, mech, semenáčky na římsách skal
 	var _jp_dosah := 220.0
@@ -164,6 +165,10 @@ func _start() -> void:
 		hrac.position = p - Vector3(0, 1.65, 0)
 		cam.look_at_from_position(p, t, Vector3.UP)
 		cam.top_level = true
+		var dvf: Node = load("res://scripts/dvere.gd").new(); dvf.name = "DvereFoto"; add_child(dvf); dvf.zacni(self, CanvasLayer.new())   # řetězy padacích mostů i na snímku
+		if OS.get_environment("PUCHART_FOTO_MOST") != "":   # snímek se zvednutými padacími mosty (ověření výklenku a řetězů)
+			for g: String in dvf.druh:
+				if dvf.druh[g] == "most": dvf.prepni(g); dvf.doba[g] = 0.05
 		if OS.get_environment("PUCHART_ORTO") != "":   # půdorys shora: pravoúhlá projekce, velikost = výška záběru v m
 			cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 			cam.size = float(OS.get_environment("PUCHART_ORTO"))
@@ -248,31 +253,45 @@ func _svicny() -> void:
 		var dol := ss.intersect_ray(PhysicsRayQueryParameters3D.create(p, p - Vector3(0, 4.0, 0)))
 		if dol.is_empty(): continue
 		var y0: float = dol["position"].y
-		var nej := {}; var nd := 3.0
+		var nej := {}; var nd := 3.0; var kraj := {}; var nd_k := 3.0
 		for k in 8:
 			var sm := Vector3(cos(k * PI / 4), 0, sin(k * PI / 4)); var o := Vector3(p.x, y0 + 1.0, p.z)
 			var r := ss.intersect_ray(PhysicsRayQueryParameters3D.create(o, o + sm * 3.0))
-			if not r.is_empty() and o.distance_to(r["position"]) < nd and absf((r["normal"] as Vector3).y) < 0.3: nd = o.distance_to(r["position"]); nej = r
+			if r.is_empty() or absf((r["normal"] as Vector3).y) >= 0.3: continue
+			if o.distance_to(r["position"]) < nd_k: nd_k = o.distance_to(r["position"]); kraj = r
+			if o.distance_to(r["position"]) < nd and _plna_zed(ss, r, y0): nd = o.distance_to(r["position"]); nej = r
+		if nej.is_empty() and not kraj.is_empty() and sc.has("svicen") and typ in ["louc", "svicen"]: typ = "svicen"; nej = kraj   # u světla není plná zeď (dveře, okno, roh): stojací svícen ke zdi místo louče (ne doprostřed místnosti – průchod)
 		if nej.is_empty(): continue
 		var nrm: Vector3 = nej["normal"]; nrm.y = 0; nrm = nrm.normalized()
 		var uzel := Node3D.new(); l.get_parent().add_child(uzel)
 		if typ == "svicen":
-			var q: Vector3 = nej["position"] + nrm * 0.35; q.y = y0
+			var q: Vector3 = (nej["position"] as Vector3) + nrm * 0.35; q.y = y0
 			var n: Node3D = sc["svicen"].instantiate(); uzel.add_child(n); uzel.global_position = q; uzel.rotation.y = randf() * TAU
 			l.global_position = q + Vector3(0, 1.62, 0)
-		else:   # louč: držák na zdi, louč skloněná od zdi o 25°, plamen na horním konci
-			var q: Vector3 = nej["position"] + nrm * 0.06; q.y = y0 + 1.75
-			uzel.global_position = q; uzel.look_at(q + nrm, Vector3.UP)   # −z uzlu = od zdi
-			if sc.has("drzak"):
-				var dz: Node3D = sc["drzak"].instantiate(); uzel.add_child(dz); dz.rotation.y = PI / 2
+		else:   # louč: přesně jako Havran predmety.spawn_on_wall("drzak_louce") + _bracket_torch (Míša 12. 11.: držák kolmo, louč v držáku)
+			var r: Array = [0.09, 0.175, 0.191]   # predmety_h.json drzak_louce rozmer
+			var q: Vector3 = nej["position"] + nrm * (float(r[2]) * 0.5 + 0.035) - Vector3.UP * float(r[1]) * 0.5; q.y = y0 + 1.75
+			uzel.global_position = q; uzel.rotation.y = atan2(nrm.x, nrm.z)   # +z modelu = od zdi
+			if sc.has("drzak"): uzel.add_child(sc["drzak"].instantiate())
 			var lc: Node3D = sc["louc"].instantiate(); uzel.add_child(lc)
-			lc.position = Vector3(0, 0.02, -0.08); lc.rotation.x = deg_to_rad(-25.0)
-			l.global_position = uzel.to_global(Vector3(0, 0.02 + 0.6 * cos(deg_to_rad(25.0)), -0.08 - 0.6 * sin(deg_to_rad(25.0))))
+			lc.position = Vector3(0, -0.03, 0.057); lc.rotation.x = deg_to_rad(12)
+			l.global_position = lc.to_global(Vector3(0, 0.56, 0))
 			_plamen(l.global_position)
 		for mi in uzel.find_children("*", "GeometryInstance3D", true, false): (mi as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		l.light_energy = maxf(l.light_energy, 2.2); l.omni_range = maxf(l.omni_range, 8.0); l.omni_attenuation = 0.7   # místnost nesmí zůstat tmavá
 		_svicnu += 1
 	print("SVICNY %d/%d" % [_svicnu, _k_svicnum.size()])
+
+## Zeď pro držák musí být plná a rovná (Míša 12. 11.: louč visela v prostoru u dveří – paprsek trefil hranu ostění):
+## kolem bodu ±0,4 m do stran a v rozsahu výšky louče (1,4–2,3 m nad podlahou) musí být zeď ve stejné rovině (±8 cm).
+func _plna_zed(ss: PhysicsDirectSpaceState3D, r: Dictionary, y0: float) -> bool:
+	var n: Vector3 = r["normal"]; n.y = 0; n = n.normalized()
+	var t := Vector3(-n.z, 0, n.x); var b: Vector3 = r["position"]
+	for d: Vector2 in [Vector2(-0.4, 1.4), Vector2(0.4, 1.4), Vector2(-0.4, 2.3), Vector2(0.4, 2.3), Vector2(0, 1.75)]:
+		var c: Vector3 = b + t * d.x; c.y = y0 + d.y
+		var h := ss.intersect_ray(PhysicsRayQueryParameters3D.create(c + n * 0.5, c - n * 0.3))
+		if h.is_empty() or absf(((h["position"] as Vector3) - c).dot(n)) > 0.08: return false
+	return true
 
 func _test_pruchod() -> void:
 	await get_tree().create_timer(2.0).timeout   # kolize hradu (deferred) a terén kolem
