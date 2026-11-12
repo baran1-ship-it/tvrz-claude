@@ -9687,6 +9687,30 @@ func mlyn_teren(x: float, z: float) -> Vector2:
 	return best
 
 
+## Lednice jako plny kamenny blok (Misa 12. 11. „ohnuty papir“; voda.json mlyn.dil.lednice_blok, tools/krok_b/lednice_blok.py):
+## hranoly sten k vnitrnim licum modelu, material kamene z site lednice modelu (stejny lomovy kamen).
+func _lednice_blok(sc: Node3D, d: Dictionary) -> void:
+	var lb: Dictionary = d.get("lednice_blok", {})
+	if lb.is_empty() or not ResourceLoader.exists(String(lb["model"])):
+		print("mlyn: lednice_blok %s chybi" % lb.get("model", ""))
+		return
+	var blok := (load(String(lb["model"])) as PackedScene).instantiate() as Node3D
+	blok.name = "Lednice_blok"
+	sc.add_child(blok)
+	var kamen: Material = null
+	var ms := sc.find_child(String(lb["sit_modelu"]), true, false) as MeshInstance3D
+	if ms and ms.mesh:
+		for si in ms.mesh.get_surface_count():
+			var m := ms.get_active_material(si)
+			if m and String(m.resource_name) == String(lb["material"]):
+				kamen = m
+	for mi: Node in blok.find_children("*", "MeshInstance3D", true, false):
+		if kamen:
+			(mi as MeshInstance3D).material_override = kamen
+	if kamen == null:
+		push_warning("mlyn: material %s v %s nenalezen" % [lb["material"], lb["sit_modelu"]])
+
+
 func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 	var d: Dictionary = Pravidla.cti("voda", "mlyn", "dil")
 	if not ResourceLoader.exists(String(d["model"])):
@@ -9713,6 +9737,7 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 		if vn:
 			vn.get_parent().remove_child(vn)
 			vn.free()
+	_lednice_blok(sc, d)
 	_mlyn_dvere(sc, root, xf, d)
 	_schody_kolize(sc)
 	_mlyn_pytle(sc)

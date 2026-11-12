@@ -10,6 +10,7 @@ extends SceneTree
 ## Vystup: DRZENI ... radky, TEST DRZENI OK/CHYBA.
 
 const Lide := preload("res://scripts/lide.gd")
+const Uchop := preload("res://scripts/uchop.gd")
 var chyb := 0
 var zkous := 0
 
@@ -24,6 +25,7 @@ func _beh() -> void:
 	var lide: Node3D = Lide.new()
 	koren.add_child(lide)
 	var P: Dictionary = Lide.P
+	Uchop.diag = true
 	var T: Dictionary = P["drzeni"]["_test"]
 	var o: Dictionary = (P["obyvatele"] as Array)[0]
 	var c: Dictionary = lide.nova_postava(o)
@@ -31,6 +33,11 @@ func _beh() -> void:
 	u.rotation.y = 0.7                      # postava natocena (svet_rot_st je v soustave postavy)
 	var kostra: Skeleton3D = c["kostra"]
 	var ap: AnimationPlayer = c["ap"]
+	for rk: String in ["r", "l"]:                       # klouby prstu pro kontrolu dotyku (pred prvnim snimkem)
+		for f: String in ["index", "middle", "ring", "pinky", "thumb"]:
+			for j: String in ["02", "03", "04_leaf"]:
+				_kost(kostra, "%s_%s_%s" % [f, j, rk])
+		_kost(kostra, "hand_" + rk)
 	var reakce: Array = []
 	for r: Dictionary in P["reakce"]:
 		if String(r.get("klip", "")) != "" and not reakce.has(String(r["klip"])):
@@ -108,22 +115,38 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 			if uhel > mez:
 				chyb += 1
 				print("DRZENI CHYBA %s %s: osa %.1f st (mez %.0f)" % [co, id, uhel, mez])
-		# 11. 11. (Misa: kladivo svira jen v prstech): vzdalenost osy nasady (y predmetu pres jeho pocatek) od dutiny
-		# pesti = stred prostrednich clanku prstu (index/middle/ring/pinky _02) - z BoneAttachment (poza po modifikatorech)
-		if bool(d.get("nasada", false)) or id == "korbel":
-			var st := Vector3.ZERO
-			for pn: String in ["index_02", "middle_02", "ring_02", "pinky_02"]:
-				var bx: BoneAttachment3D = kostra.get_node_or_null("test_" + pn + "_" + ruka)
-				if bx == null:
-					bx = BoneAttachment3D.new()
-					bx.name = "test_" + pn + "_" + ruka
-					bx.bone_name = pn + "_" + ruka
-					kostra.add_child(bx)
-				st += bx.global_position
-			st /= 4.0
-			var ax := g.basis.y.normalized()
-			var od_osy := ((st - g.origin) - ax * (st - g.origin).dot(ax)).length()
-			print("DRZENI %-40s %s pest od osy nasady %.3f m" % [co, id, od_osy])
+		# 12. 11. (Misa: ani jeden uchop neni spravne; rešerše deadnight #507 test_hand_grips): kazdy clanek prstu (klouby
+		# 02, 03, konecek) od osy drzadla - kuze nejvys test_dovnitr_m v predmetu; stredni clanky a konecky ukazovaku az
+		# prsteniku nejvys test_mezera_m od povrchu (prsty obepinaji, ne vedle nasady). Obourucni: i druha ruka.
+		var mod: Node = drzi.get("mod")
+		if mod != null and (bool(d.get("nasada", false)) or d.has("uchop_r_m")) and (mod.get("polozky") as Dictionary).has(ruka):
+			var R: Dictionary = P["drzeni"]["_reseni"]
+			var r_m := float(((mod.get("polozky") as Dictionary)[ruka] as Dictionary).get("r_m", -1.0))
+			var gs := g.basis.get_scale().x * (1.0 / maxf(uz.scale.x, 1e-6))   # metry predmetu -> svet
+			var hb0: BoneAttachment3D = _kost(kostra, "hand_" + ruka)
+			var ax := g.basis.y.normalized() if String(d.get("rezim", "")) != "visi" else hb0.global_basis.z.normalized()
+			var ruky: Array = [ruka]
+			if (d.get("druha_ruka", []) as Array).size() == 3:
+				ruky.append("l" if ruka == "r" else "r")
+			for rk: String in ruky:
+				var horsi := ""
+				var nej_in := 0.0
+				var nej_gap := 0.0
+				for f: String in ["index", "middle", "ring", "pinky", "thumb"]:
+					for j: String in ["02", "03", "04_leaf"]:
+						var bx: BoneAttachment3D = _kost(kostra, "%s_%s_%s" % [f, j, rk])
+						var v := bx.global_position - g.origin
+						var od := (v - ax * v.dot(ax)).length() - (r_m + float(R["prst_pul_m"])) * gs
+						if od < -float(R["test_dovnitr_m"]):
+							nej_in = minf(nej_in, od)
+							horsi += " %s_%s v predmetu %.0f mm" % [f, j, od * 1000.0]
+						if f in ["index", "middle", "ring"] and j != "02" and od > float(R["test_mezera_m"]):
+							nej_gap = maxf(nej_gap, od)
+							horsi += " %s_%s mezera %.0f mm" % [f, j, od * 1000.0]
+				print("DRZENI %-40s %s ruka %s polomer %.1f mm: nejhlubsi %.0f mm, nejvetsi mezera %.0f mm" % [co, id, rk, r_m * 1000.0, nej_in * 1000.0, nej_gap * 1000.0])
+				if horsi != "":
+					chyb += 1
+					print("DRZENI CHYBA %s %s ruka %s:%s" % [co, id, rk, horsi])
 		# 11. 11. (Misa: uchopy porad spatne; kost ruky v Godotu: osa y podel kosti = k prstum, ne x): osa nasady
 		# (y predmetu) proti osam ruky - nasada ma vest napric dlani (kolmo na prsty, |uhel k y ruky - 90| <= nasada_st)
 		var ba0: BoneAttachment3D = kostra.get_node_or_null("test_ruka_" + ruka)
@@ -155,3 +178,13 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 			if dd > float(T["druha_ruka_m"]):
 				chyb += 1
 				print("DRZENI CHYBA %s %s: druha ruka %.3f m od predmetu" % [co, id, dd])
+
+
+func _kost(kostra: Skeleton3D, jm: String) -> BoneAttachment3D:
+	var bx: BoneAttachment3D = kostra.get_node_or_null("test_" + jm)
+	if bx == null:
+		bx = BoneAttachment3D.new()
+		bx.name = "test_" + jm
+		bx.bone_name = jm
+		kostra.add_child(bx)
+	return bx

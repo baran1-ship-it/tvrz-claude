@@ -5633,7 +5633,17 @@
     18.0,
     15.0
    ],
-   "_teren_obdelnik": "lokalni obdelnik terenu dilu [x0, z0, x1, z1] (tools/krok_b/mlyn_teren.json). Misa 0.9991/0.9992 „blok travniku ve vzduchu“ (6. pokus, test dil_okraj: schod az 2,2 m): dolina potoka (kraj.voda_tvar, svet.koryto_toku_y) se kopala az po hranu dilu PO napojeni terenu na dil (mlyn_pad) - v pasu pasma.dil.napojeni_m od hrany se dolina zeslabuje k nule u hrany (koryto a breh toku zustavaji, voda navaze), teren sveta u hrany = teren dilu."
+   "_teren_obdelnik": "lokalni obdelnik terenu dilu [x0, z0, x1, z1] (tools/krok_b/mlyn_teren.json). Misa 0.9991/0.9992 „blok travniku ve vzduchu“ (6. pokus, test dil_okraj: schod az 2,2 m): dolina potoka (kraj.voda_tvar, svet.koryto_toku_y) se kopala az po hranu dilu PO napojeni terenu na dil (mlyn_pad) - v pasu pasma.dil.napojeni_m od hrany se dolina zeslabuje k nule u hrany (koryto a breh toku zustavaji, voda navaze), teren sveta u hrany = teren dilu.",
+   "lednice_blok": {
+    "model": "res://modely/mlyn/lednice_blok.glb",
+    "sit_modelu": "Mlyn_Lednice-col",
+    "material": "M_Kamen",
+    "hledat_rimsu_m": 0.8,
+    "tloustka_vychozi_m": 0.4,
+    "pod_rimsou_m": 0.01,
+    "zaklad_m": 0.3,
+    "duvod": "Misa 12. 11. (lednice jako ohnuty papir): steny lednice v modelu jen vnitrni lic + rimsa; zaznam = plne hranoly sten (tools/krok_b/lednice_blok.py), tloustka = sirka rimsy modelu, zaklad 0,3 m pod dnem (rešerše: kamenem vyzděný odpadní kanál - Historic England IHA Mills; Chapelizod, rubble-faced tailrace); hra je pridava do dilu mlyna s materialem modelu"
+   }
   }
  },
  "toky_tvar": {

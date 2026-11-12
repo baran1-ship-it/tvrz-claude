@@ -5732,7 +5732,9 @@
     0.0,
     0.0,
     0.0
-   ]
+   ],
+   "uchop_r_m": 0.006,
+   "_uchop_r": "12. 11.: drzadlo (oko/provaz) lezi napric v prstech, predmet visi - NEOVERENO z modelu"
   },
   "srp": {
    "uchop": [
@@ -5762,7 +5764,8 @@
     0.0,
     0.0,
     0.0
-   ]
+   ],
+   "uchop_r_m": 0.01
   },
   "lucerna": {
    "uchop": [
@@ -5780,7 +5783,8 @@
     0.0,
     0.0,
     0.0
-   ]
+   ],
+   "uchop_r_m": 0.006
   },
   "kopi": {
    "uchop": [
@@ -5876,7 +5880,9 @@
     0.095,
     0.0
    ],
-   "_dlan11": "ucho drzi prsty v pesti (y 0,095), bez posunu k dlani - nadoba mimo ruku"
+   "_dlan11": "ucho drzi prsty v pesti (y 0,095), bez posunu k dlani - nadoba mimo ruku",
+   "uchop_r_m": 0.008,
+   "_uchop_r": "12. 11.: ucho korbelu svisle (osa y) v pesti - NEOVERENO z modelu"
   },
   "miska": {
    "_popis": "obsluha nese misu (Mixamo Carrying) - dlan pod miskou, NEOVERENO snimkem",
@@ -5998,7 +6004,25 @@
    0.095,
    0.02
   ],
-  "__dlan_m": "11. 11. (Misa: kladivo svira jen v prstech; mereni kosti UAL: klouby prstu index_01 y 0,115 m od zapesti, sevrene konecky (-0,03; 0,085; 0,04) - prsty se ohybaji k -x = dlan): bod uchopu v dutine pesti [x k dlani, y k prstum, z k palci], leva ruka x zrcadlene"
+  "__dlan_m": "11. 11. (Misa: kladivo svira jen v prstech; mereni kosti UAL: klouby prstu index_01 y 0,115 m od zapesti, sevrene konecky (-0,03; 0,085; 0,04) - prsty se ohybaji k -x = dlan): bod uchopu v dutine pesti [x k dlani, y k prstum, z k palci], leva ruka x zrcadlene",
+  "_reseni": {
+   "_popis": "12. 11. (Misa: ani jeden uchop neni spravne, nacti si to na internetu; rešerše docs/rozpracovane/uchop_reserse.md): prsty se neprikruci o pevny uhel, ale kazdy clanek od kloubu se ohne, az se dotkne nasady (polomer z modelu + prst_pul_m), nebo kloub dojde na rozsah klouby_st [MCP, PIP, DIP] (anatomicky rozsah: MCP ~90, PIP ~100-110, DIP ~80 st). Palec pres ukazovak (asset-tooling #390). Test: kazdy clanek nejvys 2 mm v nasade, konecky a stredni clanky nejvys 5 mm od ni (deadnight #507).",
+   "prst_pul_m": 0.009,
+   "_prst_pul": "NEOVERENO z kuze modelu - test_drzeni vypise sirku prstu",
+   "klouby_st": [
+    90.0,
+    105.0,
+    80.0
+   ],
+   "krok_st": 2.0,
+   "okno_m": 0.03,
+   "max_polomer_m": 0.04,
+   "polomer_vychozi_m": 0.015,
+   "palec_mrizka_st": 60.0,
+   "palec_krok_st": 15.0,
+   "test_dovnitr_m": 0.002,
+   "test_mezera_m": 0.005
+  }
  },
  "sedani": {
   "_popis": "sezeni postav (plan krok 3.1, sed ve vzduchu): cinnost se sed hleda nejblizsi volny sedak ze sedaky (zaznam vybaveni sveta, ne naklopeny) do hledat_m od mista; vyska sedaku = rozmer[1] z katalogu (jen sedaky bez operadla), pouzije se jen v tolerance_m od vyska_klipu_m (Sitting_Idle_Loop: sedaci plocha nad korenem postavy, NEOVERENO - ladi se snimkem); lavice ma mist po sirka_mista_m; koren postavy pred_m pred stredem sedaku smerem, kam se diva (k ohnisti/stolu do k_ohni_m, jinak k mistu cinnosti). Prechod Sitting_Enter / Sitting_Exit.",

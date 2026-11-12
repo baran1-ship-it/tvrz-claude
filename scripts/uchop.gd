@@ -14,9 +14,12 @@ var polozky := {}          # "r"/"l" -> {"id", "d": data drzeni, "uzel": Node3D 
 var postava: Node3D        # koren postavy (smer postavy pro svet_rot_st)
 var blizko := true
 static var PRST_OSA := Vector3(1, 0, 0)   # osa ohybu clanku prstu (11. 11. diag: klipy ohybaji prsty kolem x)
-var prsty_st := 50.0       # vychozi sevreni prstu (postavy.json drzeni._prsty_st)
+var prsty_st := 50.0
 const PRSTY := ["index_01", "index_02", "index_03", "middle_01", "middle_02", "middle_03", "ring_01", "ring_02", "ring_03",
 		"pinky_01", "pinky_02", "pinky_03"]
+static var R := {}                      # postavy.json drzeni._reseni (tloustka prstu, rozsah kloubu, kroky)
+static var _pozy := {}                  # klic (predmet, ruka, kostra, osa) -> {kost: Quaternion}
+static var diag := false               # test_drzeni: vypis reseni
 
 
 static func _eul(a: Array) -> Basis:
@@ -73,13 +76,6 @@ func _process_modification() -> void:
 			var hw := (skb * sk.get_bone_global_pose(ih).basis).orthonormalized()
 			var chteno := smer * _eul(d.get("svet_rot_st", [0.0, 0.0, 0.0]))
 			uz.basis = (hw.inverse() * chteno).orthonormalized().scaled(sc)
-		# prsty sevrene kolem predmetu (Misa r. 83: kovar drzel kladivo otevrenou dlani) - kazdy predmet v ruce
-		var ps := deg_to_rad(float(d.get("prsty_st", prsty_st)))
-		if ps != 0.0:
-			for pn: String in PRSTY:
-				var ip := sk.find_bone(pn + "_" + ruka)
-				if ip >= 0:
-					sk.set_bone_pose_rotation(ip, sk.get_bone_pose_rotation(ip) * Quaternion(PRST_OSA, ps))
 		var dr: Array = d.get("druha_ruka", [])
 		if dr.size() == 3:
 			var uc: Array = d.get("uchop", [0.0, 0.0, 0.0])
@@ -123,9 +119,39 @@ func _process_modification() -> void:
 					_ik(sk, druha, cil0)
 					var hg2 := sk.get_bone_global_pose(ih2)
 					_otoc(sk, ih2, hg2.basis.z, osa_y if hg2.basis.z.dot(osa_y) >= 0.0 else -osa_y)
+					# 12. 11. (rešerše: druha ruka IK na uchop, ne zapesti): na nasade ma byt dutina pesti druhe ruky
+					# (bod uchopu zrcadlene), ne zapesti - IK znovu s cilem posunutym o bod dlane
+					var dl2 := Vector3(-uz.position.x, uz.position.y, uz.position.z)
+					hg2 = sk.get_bone_global_pose(ih2)
+					_ik(sk, druha, cil0 - hg2.basis * dl2)
+					hg2 = sk.get_bone_global_pose(ih2)
+					_otoc(sk, ih2, hg2.basis.z, osa_y if hg2.basis.z.dot(osa_y) >= 0.0 else -osa_y)
+					hg2 = sk.get_bone_global_pose(ih2)
+					_prsty(sk, ruka, p, d)
+					var a2 := (hg2.basis.orthonormalized().inverse() * osa_y).normalized()
+					var pz2: Dictionary = _poza(sk, druha, {"id": String(p["id"]) + "_druha", "uzel": uz}, d, dl2, a2)
+					for ib: int in pz2:
+						sk.set_bone_pose_rotation(ib, pz2[ib])
 					continue
 			var cil := hg * (Basis(uz.basis.get_rotation_quaternion()) * bod * sc.x * 1.0)
 			_ik(sk, druha, cil)
+		_prsty(sk, ruka, p, d)
+
+
+func _prsty(sk: Skeleton3D, ruka: String, p: Dictionary, d: Dictionary) -> void:
+	# prsty: reseny uchop (12. 11., rešerše docs/rozpracovane/uchop_reserse.md - asset-tooling #390, deadnight #507):
+	# kazdy clanek prstu se ohne od kloubu, az se dotkne nasady (polomer + pul tloustky prstu), palec pres ukazovak;
+	# poza prstu je vrstva jen pro prsty (prepise klip), spocita se jednou na predmet a ruku a drzi se v kazdem snimku
+	if bool(d.get("nasada", false)) or d.has("uchop_r_m"):
+		var pz: Dictionary = _poza(sk, ruka, p, d)
+		for ib: int in pz:
+			sk.set_bone_pose_rotation(ib, pz[ib])
+	else:
+		var ps := deg_to_rad(float(d.get("prsty_st", prsty_st)))
+		for pn: String in PRSTY:
+			var ip := sk.find_bone(pn + "_" + ruka)
+			if ip >= 0 and ps != 0.0:
+				sk.set_bone_pose_rotation(ip, sk.get_bone_pose_rotation(ip) * Quaternion(PRST_OSA, ps))
 
 
 ## Dvoukloubova IK v soustave kostry: rameno a loket tak, aby zapesti bylo v cili; rovina lokte z klipu.
@@ -168,3 +194,176 @@ static func _otoc(sk: Skeleton3D, i: int, a: Vector3, b: Vector3) -> void:
 	var gp := sk.get_bone_global_pose(p) if p >= 0 else Transform3D()
 	# mistni rotace z globalni (jako telo.gd _otoc_kost) - deti kosti se prepocitaji
 	sk.set_bone_pose_rotation(i, (gp.basis.inverse() * (Basis(q) * g.basis)).get_rotation_quaternion().normalized())
+
+
+## Poza prstu pro predmet v ruce (z cache, jinak vyresit). Nasada v soustave kosti ruky: primka pres pocatek uzlu drzi_
+## (bod uchopu) ve smeru osy nasady predmetu (y), u visicich (vedro, kosik, lucerna) napric dlani (osa z ruky) - drzadlo
+## lezi v prstech, predmet visi. Polomer z modelu (vrcholy u bodu uchopu) nebo drzeni.<id>.uchop_r_m.
+func _poza(sk: Skeleton3D, ruka: String, p: Dictionary, d: Dictionary, bod := Vector3.INF, osa := Vector3.ZERO) -> Dictionary:
+	var uz: Node3D = p["uzel"]
+	var visi := String(d.get("rezim", "")) == "visi"
+	if osa == Vector3.ZERO:
+		osa = Vector3(0, 0, 1) if visi else (uz.basis * Vector3.UP).normalized()
+	if bod == Vector3.INF:
+		bod = uz.position
+	var klic := "%s|%s|%s|%s" % [String(p["id"]), ruka, str(sk.get_bone_rest(sk.find_bone("index_01_" + ruka)).origin.snapped(Vector3.ONE * 0.001)), str(osa.snapped(Vector3.ONE * 0.25))]
+	if _pozy.has(klic):
+		return _pozy[klic]
+	if R.is_empty():
+		R = (preload("res://scripts/pravidla.gd").soubor("postavy")["drzeni"] as Dictionary).get("_reseni", {})
+	var r_m := float(d["uchop_r_m"]) if d.has("uchop_r_m") else _polomer(uz)
+	var t0 := Time.get_ticks_usec()
+	var pz := _res(sk, ruka, bod, osa, (r_m + float(R.get("prst_pul_m", 0.009))) * uz.scale.x)
+	if diag:
+		print("UCHOP_RESENI %s %s polomer %.4f m, osa %s, %d us" % [String(p["id"]), ruka, r_m, osa, Time.get_ticks_usec() - t0])
+	_pozy[klic] = pz
+	p["r_m"] = r_m
+	return pz
+
+
+## Polomer nasady z modelu: vrcholy do okna podel osy y kolem bodu uchopu, do max vzdalenosti od osy (bez hlavy).
+static func _polomer(uz: Node3D) -> float:
+	var okno := float(R.get("okno_m", 0.03))
+	var mx := float(R.get("max_polomer_m", 0.04))
+	var nej := 0.0
+	var inv := uz.global_transform.affine_inverse()
+	for mi: Node in uz.find_children("*", "MeshInstance3D", true, false):
+		var m := (mi as MeshInstance3D).mesh
+		if m == null:
+			continue
+		var tr := inv * (mi as MeshInstance3D).global_transform
+		for si in m.get_surface_count():
+			for v: Vector3 in m.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+				var w := tr * v
+				if absf(w.y) <= okno:
+					var rr := Vector2(w.x, w.z).length()
+					if rr <= mx:
+						nej = maxf(nej, rr)
+	return nej if nej > 0.0 else float(R.get("polomer_vychozi_m", 0.015))
+
+
+## Reseni (soustava kosti ruky): prsty od kloubu 01 -> 02 -> 03 ohnout po kroku, dokud bod clanku (klouby, stredy
+## clanku, konecek _04_leaf) nedojde na rr od osy nasady nebo kloub na rozsah (drzeni._reseni.klouby_st). Smer ohybu
+## kazdeho prstu = ten, ktery konecek priblizi k nasade. Palec: kloub 01 hledani natoceni (mrizka), 02-03 ohyb do dotyku,
+## cil = konecek palce na ukazovaku z vnejsi strany (palec pres ukazovak, #390).
+func _res(sk: Skeleton3D, ruka: String, P0: Vector3, A: Vector3, rr: float) -> Dictionary:
+	var out := {}
+	var lim: Array = R.get("klouby_st", [90.0, 105.0, 80.0])
+	var krok := deg_to_rad(float(R.get("krok_st", 2.0)))
+	var ukaz := Vector3.ZERO
+	for f: String in ["index", "middle", "ring", "pinky"]:
+		var ids: Array = []
+		for j in ["01", "02", "03", "04_leaf"]:
+			ids.append(sk.find_bone("%s_%s_%s" % [f, j, ruka]))
+		if ids.has(-1):
+			continue
+		var q: Array = []
+		for j in 3:
+			q.append(sk.get_bone_rest(ids[j]).basis.get_rotation_quaternion())
+		var zn := _znamenko(sk, ids, q, PRST_OSA, P0, A)
+		for j in 3:
+			var q0: Quaternion = q[j]
+			var a := 0.0
+			var dobre := 0.0
+			while a <= deg_to_rad(float(lim[j])):
+				q[j] = q0 * Quaternion(PRST_OSA, a * zn)
+				if _min_od_osy(_fk(sk, ids, q), j + 1, P0, A) <= rr:
+					break
+				dobre = a
+				a += krok
+			q[j] = q0 * Quaternion(PRST_OSA, dobre * zn)
+		for j in 3:
+			out[ids[j]] = q[j]
+		if f == "index":
+			var b: Array = _fk(sk, ids, q)
+			ukaz = b[2]                                  # kloub 03 ukazovaku (stredni clanek)
+	# palec
+	var tid: Array = []
+	for j in ["01", "02", "03", "04_leaf"]:
+		tid.append(sk.find_bone("thumb_%s_%s" % [j, ruka]))
+	if tid.has(-1):
+		return out
+	var tq0: Array = []
+	for j in 3:
+		tq0.append(sk.get_bone_rest(tid[j]).basis.get_rotation_quaternion())
+	# cil: kloub 03 ukazovaku odsunuty od osy o tloustku prstu (palec lezi na ukazovaku)
+	var na_ose := P0 + A * (ukaz - P0).dot(A)
+	var cil := ukaz + (ukaz - na_ose).normalized() * rr * 0.5 if ukaz != Vector3.ZERO else P0
+	var nej := INF
+	var nej_q: Array = tq0.duplicate()
+	var ms := float(R.get("palec_mrizka_st", 60.0))
+	var mk := float(R.get("palec_krok_st", 15.0))
+	var ax := -ms
+	while ax <= ms:
+		var az := -ms
+		while az <= ms:
+			var q: Array = tq0.duplicate()
+			q[0] = (tq0[0] as Quaternion) * Quaternion.from_euler(Vector3(deg_to_rad(ax), 0.0, deg_to_rad(az)))
+			var zn := _znamenko(sk, tid, q, PALEC_OSA, P0, A, 1)
+			for j in [1, 2]:
+				var q0: Quaternion = q[j]
+				var a := 0.0
+				var dobre := 0.0
+				while a <= deg_to_rad(float(lim[j])):
+					q[j] = q0 * Quaternion(PALEC_OSA, a * zn)
+					if _min_od_osy(_fk(sk, tid, q), j + 1, P0, A) <= rr:
+						break
+					dobre = a
+					a += krok * 2.0
+				q[j] = q0 * Quaternion(PALEC_OSA, dobre * zn)
+			var b: Array = _fk(sk, tid, q)
+			var pen := maxf(0.0, rr * 0.8 - _min_od_osy(b, 1, P0, A))
+			var cena: float = (b[3] as Vector3).distance_to(cil) + pen * 10.0
+			if cena < nej:
+				nej = cena
+				nej_q = q
+			az += mk
+		ax += mk
+	for j in 3:
+		out[tid[j]] = nej_q[j]
+	return out
+
+
+const PALEC_OSA := Vector3(0, 0, 1)
+
+
+## Smer ohybu (+1/-1): ktery konecek (po ohybu vsech tri kloubu o 40 st) je bliz ose nasady.
+static func _znamenko(sk: Skeleton3D, ids: Array, q: Array, os: Vector3, P0: Vector3, A: Vector3, od := 0) -> float:
+	var nej := 1.0
+	var dn := INF
+	for zn: float in [1.0, -1.0]:
+		var qq: Array = q.duplicate()
+		for j in range(od, 3):
+			qq[j] = (q[j] as Quaternion) * Quaternion(os, deg_to_rad(40.0) * zn)
+		var b: Array = _fk(sk, ids, qq)
+		var dd := _od_osy(b[3], P0, A)
+		if dd < dn:
+			dn = dd
+			nej = zn
+	return nej
+
+
+## Polohy kloubu prstu (01, 02, 03, konecek) v soustave kosti ruky; rotace q pro 01-03, posuny z klidove pozy.
+static func _fk(sk: Skeleton3D, ids: Array, q: Array) -> Array:
+	var t := sk.get_bone_rest(ids[0])
+	t = Transform3D(Basis(q[0] as Quaternion), t.origin)
+	var b: Array = [t.origin]
+	for j in range(1, 4):
+		var r := sk.get_bone_rest(ids[j])
+		t = t * Transform3D(Basis(q[j] as Quaternion) if j < 3 else r.basis, r.origin)
+		b.append(t.origin)
+	return b
+
+
+static func _od_osy(x: Vector3, P0: Vector3, A: Vector3) -> float:
+	var v := x - P0
+	return (v - A * v.dot(A)).length()
+
+
+## Nejmensi vzdalenost od osy pro body od kloubu k (vcetne stredu clanku mezi k-1..3).
+static func _min_od_osy(b: Array, k: int, P0: Vector3, A: Vector3) -> float:
+	var m := INF
+	for i in range(maxi(k, 1), 4):
+		m = minf(m, _od_osy(b[i], P0, A))
+		m = minf(m, _od_osy(((b[i] as Vector3) + (b[i - 1] as Vector3)) * 0.5, P0, A))
+	return m

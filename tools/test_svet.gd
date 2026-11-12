@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -7888,3 +7888,40 @@ func _nabytek_kontrola(lide: Node, ll: Array, kat: Dictionary, P: Dictionary, ch
 			ok += 1
 	print("LIDE nabytek: %d kusu, %d dojiti overeno, %d v patre" % [kusy.size(), ok, patro])
 	return "%d kusu / %d dojiti / %d v patre" % [kusy.size(), ok, patro]
+
+
+
+## Lednice jako plny blok (Misa 12. 11.: „koryto od mlyna do potoka ma jen jednu stranu jako ohnuty papir“): v kazdem
+## 2. bodu osy lednice paprsek zvenku (bok osy sirka/2 + 1 m) vodorovne k ose 0,15 m pod rimsou musi narazit na kolizi
+## steny (Lednice_blok) drive nez na vnitrni lic (sirka/2) - z obou stran. Bez vnejsiho lice paprsek projde.
+func _lednice_blok() -> void:
+	var P = preload("res://scripts/pravidla.gd")
+	var d: Dictionary = P.cti("voda", "mlyn")["dil"]
+	var f := FileAccess.open("res://tools/krok_b/mlyn_voda.json", FileAccess.READ)
+	var u: Dictionary = (JSON.parse_string(f.get_as_text()) as Dictionary)["lednice"]
+	var body: Array = u["body"]
+	var pul := float(u["sirka"]) * 0.5
+	var xf := Transform3D(Basis(Vector3.UP, float(d["natoceni"])), Vector3(float(d["stred"][0]), float(d["y_dvora"]), float(d["stred"][1])))
+	var space := player.get_world_3d().direct_space_state
+	var blok := get_tree().root.find_child("Lednice_blok", true, false)
+	var chyby: Array = []
+	var zkous := 0
+	if blok == null:
+		_vysledek("lednice_blok", false, "Lednice_blok v dilu mlyna chybi")
+		return
+	for i in range(2, body.size() - 2, 2):
+		var a: Array = body[i - 1]
+		var b: Array = body[i + 1]
+		var sm := Vector3(float(b[0]) - float(a[0]), 0.0, float(b[2]) - float(a[2])).normalized()
+		var bok := Vector3(-sm.z, 0.0, sm.x)
+		var o := Vector3(float(body[i][0]), float(body[i][1]), float(body[i][2]))
+		for s: float in [-1.0, 1.0]:
+			zkous += 1
+			var y := o.y + 0.5                                      # stena nad hladinou (rimsa modelu 0,8-1,0 m nad hladinou)
+			var z0 := xf * Vector3(o.x + bok.x * s * (pul + 1.0), y, o.z + bok.z * s * (pul + 1.0))
+			var z1 := xf * Vector3(o.x + bok.x * s * (pul - 0.02), y, o.z + bok.z * s * (pul - 0.02))
+			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(z0, z1))
+			var nm := String((h["collider"] as Node).get_parent().name) if not h.is_empty() else "nic"
+			if h.is_empty() or nm.begins_with("Mlyn_Lednice"):        # teren zvenku = stena zasypana, taky dobre
+				chyby.append("bod %d strana %d: %s" % [i, int(s), nm])
+	_vysledek("lednice_blok", chyby.is_empty(), "paprsku %d, bez vnejsiho lice %d %s" % [zkous, chyby.size(), str(chyby.slice(0, 8))])
