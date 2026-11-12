@@ -7950,6 +7950,25 @@ func _ryb_napojeni() -> void:
 					tri.append(xf * f[i + 1])
 					tri.append(xf * f[i + 2])
 	var g: Dictionary = sv._tri_mrizka(tri, Transform3D())
+	# viditelny teren (site Teren* a Rybnik_Teren*) - kolize muze lezet jinde nez to, co je videt
+	var ter := PackedVector3Array()
+	for jm2: String in ["Teren*", "Rybnik_Teren*"]:
+		for mi0 in main.find_children(jm2, "MeshInstance3D", true, false):
+			var mi := mi0 as MeshInstance3D
+			if mi.mesh == null or not mi.is_visible_in_tree() or String(mi.name) == "Teren_obzor":
+				continue
+			var ab := mi.global_transform * mi.mesh.get_aabb()
+			if ab.position.x > sv.RYB_C.x + 70.0 or ab.end.x < sv.RYB_C.x - 70.0 or ab.position.z > sv.RYB_C.y + 70.0 or ab.end.z < sv.RYB_C.y - 70.0:
+				continue
+			var f := mi.mesh.get_faces()
+			var xf := mi.global_transform
+			for i in range(0, f.size(), 3):
+				var c := xf * f[i]
+				if Vector2(c.x, c.z).distance_to(sv.RYB_C) < 70.0:
+					ter.append(c)
+					ter.append(xf * f[i + 1])
+					ter.append(xf * f[i + 2])
+	var gt: Dictionary = sv._tri_mrizka(ter, Transform3D())
 	var space := player.get_world_3d().direct_space_state
 	var chyby: Array = []
 	var radky: Array = []
@@ -7981,6 +8000,9 @@ func _ryb_napojeni() -> void:
 			var wy: float = sv._tri_vyska(g, p.x, p.y)
 			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(p.x, 80.0, p.y), Vector3(p.x, -40.0, p.y)))
 			var zem := float((h["position"] as Vector3).y) if not h.is_empty() else -INF
+			var zv: float = sv._tri_vyska(gt, p.x, p.y)                    # viditelny teren
+			if zv != INF and zv != -INF:
+				zem = maxf(zem, zv)
 			if wy != -INF and wy != INF:
 				nad_min = minf(nad_min, wy - zem)
 			if wy == -INF or wy == INF or wy < zem + 0.02:
