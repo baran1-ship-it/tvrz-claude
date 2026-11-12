@@ -119,7 +119,7 @@ def zed_plynula(P, a, b, t, h, mat="zdivo", pata=2.0, krok=1.5, e0=0.0, e1=0.0, 
         for k in range(nr):
             sm_ = (k + 0.5) * Rl; yk = float(np.interp(sm_, ss, yt)); p = a + d * sm_ + out_n * (t * 0.3)
             sk_ = (float(np.interp(sm_ + sw / 2, ss, yt)) - float(np.interp(sm_ - sw / 2, ss, yt))) / sw   # stínka sedí na šikmé koruně celou spodní hranou
-            P.box(M((p.x, yk + CIMB["vyska_m"] / 2 - 0.04, p.z), basis=frame(d) @ Matrix.Rotation(-math.atan(sk_), 3, "X")), (t * 0.4, CIMB["vyska_m"] + 0.08, sw), mat + "_koruna" if mat == "zdivo" else mat)
+            P.box(M((p.x, yk + CIMB["vyska_m"] / 2 - 0.04, p.z), basis=frame(d) @ Matrix.Rotation(-math.atan(sk_), 3, "X")), (t * 0.4, CIMB["vyska_m"] + 0.08, sw), mat + "_koruna" if mat == "zdivo" else mat, collide=True)   # stínka má kolizi (povrch_kolize 12. 11.: „projde viditelným“)
     return out
 
 def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=None, okna=0, pilire=False):

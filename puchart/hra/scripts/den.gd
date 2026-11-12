@@ -168,7 +168,7 @@ func _apply(p: Dictionary) -> void:
 		"g_hor": _pomer(_zakl["g_hor"], hz, _ref["horizon"]), "g_bot": _pomer(_zakl["g_bot"], hz, _ref["horizon"])}
 	# obloha (a s ní odraz okolního světla) jen při znatelné změně – přepočet záře oblohy stojí i na tabletu
 	if _rozdil(obloha.get_shader_parameter("zenith"), nove["top"]) > 0.004 or _rozdil(obloha.get_shader_parameter("horizon"), nove["hor"]) > 0.004 \
-			or absf(float(obloha.get_shader_parameter("stars")) - float(p.get("stars", 0.0))) > 0.01:
+			or absf(_par_f("stars") - float(p.get("stars", 0.0))) > 0.01:
 		obloha.set_shader_parameter("zenith", nove["top"]); obloha.set_shader_parameter("horizon", nove["hor"])
 		obloha.set_shader_parameter("ground", nove["g_bot"])
 		obloha.set_shader_parameter("energy", float(p["sky_e"]))
@@ -192,3 +192,8 @@ func _apply(p: Dictionary) -> void:
 
 static func _rozdil(a: Color, b: Color) -> float:
 	return absf(a.r - b.r) + absf(a.g - b.g) + absf(a.b - b.b)
+
+
+func _par_f(jm: String) -> float:   # parametr shaderu oblohy (nenastavený = null → výchozí 0)
+	var v = obloha.get_shader_parameter(jm)
+	return 0.0 if v == null else float(v)
