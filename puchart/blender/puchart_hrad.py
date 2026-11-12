@@ -1880,9 +1880,7 @@ def zabradli_stavba():
     for g in sk.values():
         if len(g) < 2: continue
         c = sum((E_[i][0][E_[i][1]] for i in g), Vector()) / len(g); yy = max(E_[i][0]["y" + E_[i][1]] for i in g)
-        oba_ = {id(E_[i][0]) for i in g if sum(1 for j in g if E_[j][0] is E_[i][0]) > 1}   # kus s oběma konci ve skupině by se slil do bodu (12. 11.: konec pavlače paláce zmizel) – zůstane, jak je
         for i in g:
-            if id(E_[i][0]) in oba_: continue
             E_[i][0][E_[i][1]] = c.copy(); E_[i][0]["y" + E_[i][1]] = yy; E_[i][0]["s" + E_[i][1]] = True
     # T-spoj: volný konec do 0,6 m od jiného zábradlí (stejná výška) se dotáhne na jeho linii – sloupek ve spoji, žádná mezera
     for r in ZAB_REC:
