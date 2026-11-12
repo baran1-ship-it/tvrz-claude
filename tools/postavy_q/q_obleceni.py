@@ -242,7 +242,7 @@ def build(body, kroj, NAME):
         if not female or kroj.get("rouska_cip", True):
             ln = 0.16 if not female else 0.22
             cp, *_ = cl.tube(body, co, (torso + headw > 0.3) & ~hand & (z > z_neck - ln - 0.05), z_neck + 0.02, z_neck - ln,
-                             f"{NAME}_{'limec' if not female else 'rouska_cip'}", N=40, ease=0.02, flare=0.05, hang=True, hem_noise=0.004)
+                             f"{NAME}_{'limec' if not female else 'rouska_cip'}", N=40, ease=0.02, flare=0.05, hang=female, hem_noise=0.004)   # 12. 11.: limec kukle (gugel) lezi na ramenou - hang=True visel pred hrudi jako deska (snimek build/vsech)
             cl.transfer_weights(cp, body, co, k=10); cl._link(cp, body)
             if female:
                 # cíp roušky jen vzadu a po stranách

@@ -389,16 +389,16 @@
    "rukav": 0.7,
    "spina": {
     "barva": [
-     0.02,
-     0.018,
-     0.016
+     0.012,
+     0.011,
+     0.01
     ],
     "kde": [
      "predek",
      "rukavy"
     ],
-    "sila": 0.5,
-    "_co": "saze (kovar)"
+    "sila": 0.7,
+    "_co": "saze (kovar) - 12. 11. snimek: 0,5 na tmavem odevu neviditelne"
    }
   },
   "eye": [
@@ -1523,16 +1523,15 @@
    ],
    "spina": {
     "barva": [
-     0.78,
-     0.76,
-     0.7
+     0.62,
+     0.6,
+     0.55
     ],
     "kde": [
-     "predek",
-     "rukavy"
+     "predek"
     ],
-    "sila": 0.55,
-    "_co": "mouka (mlynar)"
+    "sila": 0.3,
+    "_co": "mouka (mlynar) - 12. 11. snimek: 0,55 + rukavy = cely odev bily, sila 0,3 jen predek"
    }
   },
   "eye": [
