@@ -51,6 +51,14 @@ else echo "UZLY OK: $UN (rozpočet $UMAX)" | tee -a $S; fi
 for sv in $(grep -ohE "^SVICNY [0-9]+/[0-9]+" $K/build/hlidaci_beh_godot.log 2>/dev/null | awk '{print $2}' | sort -u); do
   [ "${sv%/*}" != "${sv#*/}" ] && { rc=1; echo "SVICNY CHYBA: postaveno $sv (každé světlo bez dne potřebuje louč/svícen)" | tee -a $S; }
 done
+# měřicí APK (12. 11.: měření po konci běželo dál, chyba každý snímek a kamera se přetahovala s hráčem): zkrácené měření
+# musí doběhnout všech úseků a variant, zastavit se a předat hru procházce – bez chyby skriptu
+krok "měření (zkrácené)"
+(cd $K/hra && PUCHART_MERENI=1 PUCHART_MERENI_RYCHLE=1 PUCHART_MERENI_BEZ_CEKANI=1 timeout 420 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 > $K/build/hlidaci_mereni.log 2>&1)
+MU=$(python3 -c "import json;d=json.load(open('$K/hra/data/mereni.json'));print(len(d['useky'])*len(d.get('scale_3d',[1]))+len(d.get('varianty',[])))")
+if ! grep -q "^MERENI_KONEC úseků $MU" $K/build/hlidaci_mereni.log; then rc=1; echo "MERENI CHYBA: měření nedoběhlo všech $MU částí ($(grep -o 'MERENI_KONEC.*' $K/build/hlidaci_mereni.log))" | tee -a $S
+elif grep -q "SCRIPT ERROR" $K/build/hlidaci_mereni.log; then rc=1; echo "MERENI CHYBA: chyba skriptu" | tee -a $S; grep -m3 -A2 "SCRIPT ERROR" $K/build/hlidaci_mereni.log | tee -a $S
+else echo "MERENI OK: $MU částí, bez chyb" | tee -a $S; fi
 krok "matice vztahů"; python3 $K/nastroje/kontrola_vztahu.py $K $1 | tee -a $S || rc=1
 krok "tabulka chyb"; python3 $K/nastroje/kontrola_tabulek.py $K $1 | tee -a $S || rc=1
 # poslední dobrá verze (GPT studio bod 7): při úspěchu uložit výsledky s commitem; při chybě vypsat rozdíl proti ní

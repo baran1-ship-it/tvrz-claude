@@ -211,6 +211,7 @@ func show_page(page: String) -> void:
 				_btn("Mapa", "mapa")
 				_btn("Místa", "page:mista")
 			_btn("Nastavení", "page:settings")
+			if FileAccess.file_exists("user://mereni.txt"): _btn("Měření", "page:mereni")   # poslední výsledek měření (Míša 12. 11.)
 			_btn("Uložit a ukončit" if can_save else "Ukončit", "save_quit")
 			_btn("Autoři a licence", "page:credits", true)
 		"load":
@@ -226,6 +227,10 @@ func show_page(page: String) -> void:
 			first = _btn("Příběh", "story")
 			_btn("Pískoviště", "sandbox")
 			_btn("Zpět", "page:main", true)
+		"mereni":   # poslední výsledek testovacího měření (user://mereni.txt z mereni.gd)
+			for line: String in FileAccess.get_file_as_string("user://mereni.txt").split("\n"):
+				_note(line)
+			first = _btn("Zpět", "page:main", true)
 		"credits":
 			for line: String in CREDITS:
 				_note(line)

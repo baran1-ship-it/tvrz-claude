@@ -53,10 +53,10 @@ func _process(d: float) -> void:
 	var now := Time.get_ticks_usec(); var ms := (now - _posl) / 1000.0; _posl = now
 	var u: Dictionary = trasa[i_usek]
 	t += d
-	var celk := 5.0 + 30.0
+	var celk := 5.0 + 30.0 if OS.get_environment("PUCHART_MERENI_RYCHLE") == "" else 1.0 + 2.0   # hlídač: zkrácené úseky
 	var pc := _bod(u, clampf(t / celk, 0.0, 1.0))
 	cam.look_at_from_position(pc[0], pc[1], Vector3.UP)
-	if t > 5.0:
+	if t > celk - 30.0 * (1.0 if OS.get_environment("PUCHART_MERENI_RYCHLE") == "" else 2.0 / 30.0):
 		casy.append(ms)
 		kres += RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 		troj += RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
@@ -68,7 +68,7 @@ func _process(d: float) -> void:
 		var zas := 0
 		for x in s:
 			if x > 40.0: zas += 1
-		var v := get_viewport().get_visible_rect().size * float(skaly[i_sk])
+		var v := get_viewport().get_visible_rect().size * get_viewport().scaling_3d_scale   # skutečné 3D rozlišení (i varianta „les 70 %“)
 		useky.append({"jmeno": ("%s %d%%" % [u["jmeno"], roundi(float(skaly[i_sk]) * 100)]) if i_var < 0 else String(varianty[i_var]["jmeno"]), "px": "%dx%d" % [roundi(v.x), roundi(v.y)], "p50": s[n / 2], "p95": s[int(n * 0.95)], "max": s[n - 1], "zaseky": zas,
 			"snimku": n, "kresleni": kres / vzorku, "troj_m": troj / vzorku / 1e6,
 			"vram_mb": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0,
@@ -104,13 +104,25 @@ func _dalsi_varianta() -> void:
 	t = 0.0
 
 func _konec() -> void:
+	# měření končí: _process už nic nedělá (12. 11.: běželo dál po trase, na konci úseku „voda“ sáhlo na neexistující
+	# variantu – chyba každý snímek, čas do minusu a kamera se přetahovala s hráčem = obraz poskakoval na místě)
+	trasa = []; set_process(false)
 	var txt := "VÝSLEDEK %s\n%s\n" % [verze, Time.get_datetime_string_from_system()]
 	txt += "úsek            3D px       p50   p95   max  záseky  snímků  kreslení  troj M  VRAM MB\n"
 	for u in useky:
 		txt += "%-14s %-10s %5.1f %5.1f %5.0f %6d %7d %8.0f %7.2f %8.0f\n" % [u["jmeno"], u["px"], u["p50"], u["p95"], u["max"], u["zaseky"], u["snimku"], u["kresleni"], u["troj_m"], u["vram_mb"]]
 	get_viewport().scaling_3d_scale = float(skaly[0])
-	lbl.text = txt + "\n(ms na snímek; vyfoť obrazovku a pošli – za 20 s začne procházka)"
-	await get_tree().create_timer(20.0).timeout
+	var f0 := FileAccess.open("user://mereni.txt", FileAccess.WRITE)   # uložit hned (Míša 12. 11.: výsledek zmizel pod nabídkou)
+	if f0: f0.store_string(txt); f0.close()
+	lbl.text = txt + "\n(ms na snímek; vyfoť obrazovku a pošli – KLEPNI pro pokračování; znovu: nabídka → Měření)"
+	# výsledek zůstává, dokud se neklepne (dřív 20 s a pak ho překryla nabídka – Míša 12. 11.: „nemám data z měření“)
+	var kryt := ColorRect.new(); kryt.color = Color(0, 0, 0, 0.55); kryt.set_anchors_preset(Control.PRESET_FULL_RECT); add_child(kryt); move_child(kryt, 0)
+	var klep := [false]
+	kryt.gui_input.connect(func(e: InputEvent) -> void:
+		if (e is InputEventScreenTouch and e.pressed) or (e is InputEventMouseButton and e.pressed): klep[0] = true)
+	while not klep[0] and OS.get_environment("PUCHART_MERENI_BEZ_CEKANI") == "":
+		await get_tree().process_frame
+	kryt.queue_free()
 	lbl.text = ""
 	if not OS.has_feature("pc") and FileAccess.file_exists("res://data/rozpocty.json"):   # procházka s limitem snímků (Havran 0.99991: teplo)
 		Engine.max_fps = int(JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json")).get("snimky_max", {}).get("tablet", 0))
@@ -118,3 +130,7 @@ func _konec() -> void:
 	var f := FileAccess.open("user://mereni.txt", FileAccess.WRITE)
 	if f: f.store_string(txt); f.close()
 	print(txt)
+	print("MERENI_KONEC úseků %d" % useky.size())
+	if OS.get_environment("PUCHART_MERENI_RYCHLE") != "":   # hlídač: chvíli procházky po měření (předání kamery), pak konec
+		await get_tree().create_timer(5.0).timeout
+		get_tree().quit()
