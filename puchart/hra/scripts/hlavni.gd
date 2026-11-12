@@ -198,6 +198,7 @@ func _start() -> void:
 	elif _foto == "" and not meri:
 		_prochazka.call_deferred()
 	_kolize_hradu.call_deferred()
+	if OS.get_environment("PUCHART_SKRIPT") != "": var ts_: Node = load(OS.get_environment("PUCHART_SKRIPT")).new(); add_child(ts_)   # ladicí skript (testy funkcí)
 	for jm in OS.get_environment("PUCHART_SKRYJ").split(",", false):   # diagnostika výkonu: skrýt vrstvu (Les, Kere, Byliny, Hrad, Skaly, Voda)
 		var n := get_node_or_null(jm)
 		if n: n.visible = false
@@ -223,7 +224,9 @@ func _kolize_uzlu(h: Node) -> void:
 func _svetla(h: Node3D) -> void:
 	if not FileAccess.file_exists("res://data/svetla.json"):
 		return
+	var bez_louci := not bool(JSON.parse_string(FileAccess.get_file_as_string("res://data/svetla.json")).get("louce", true))
 	for s in JSON.parse_string(FileAccess.get_file_as_string("res://data/svetla.json"))["svetla"]:
+		if bez_louci and not s.get("den", false) and s.get("svit", "louc") != "ohen": continue   # Míša 12. 11.: louče si dá sám z pískoviště (bez držáku ani světla z ničeho)
 		var l := OmniLight3D.new(); var p: Array = s["pos"]
 		l.position = Vector3(p[0], p[1], p[2]); l.light_color = Color(0.86, 0.9, 1.0) if s.get("den", false) else Color(1.0, 0.68, 0.38)   # den = světlo z oken (Míša 9. 11.)
 		l.light_specular = 0.0 if s.get("den", false) else 0.5

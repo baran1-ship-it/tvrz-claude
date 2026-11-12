@@ -116,7 +116,7 @@ mk[..., 2] = np.maximum(mk[..., 2], gaussian_filter(vy, 1.0))
 # usedlosti nových míst (nastroje/mista_rozmisteni.py → mista_stavby.json; pravidla/svet/mista.json usedlosti): dvůr = udusaná
 # hlína (KCD1 ves_2, ves_6: dvůr a náves hliněné), zahrádka a sad tráva bez lesa, lány: orané = hlína, strniště = pole,
 # úhor = pastvina (mista.json usedlosti.pole); celá parcela a lány bez stromů lesa (stromy sadu staví ves.gd)
-bez_usedlosti = np.zeros(st.shape, bool)
+bez_usedlosti = np.zeros(st.shape, bool); slap_v = np.zeros(st.shape, bool)
 if os.path.exists(D + "mista_stavby.json"):
     MS_ = json.load(open(D + "mista_stavby.json")); UP_ = json.load(open(K + "/pravidla/svet/mista.json"))["usedlosti"]["povrch"]
     def _m(polys):
@@ -130,6 +130,19 @@ if os.path.exists(D + "mista_stavby.json"):
         m_ = _m(polys) & ~stavba; st[m_] = SJ["tridy"].index(UP_["tridy"][klic]); hl_u[m_] = UP_["hlina"].get(klic, 0.0)
     for pl_ in MS_.get("pole", []):
         m_ = _m([pl_["poly"]]) & ~stavba; st[m_] = SJ["tridy"].index(UP_["tridy"][pl_["plodina"]]); hl_u[m_] = UP_["hlina"].get(pl_["plodina"], 0.0)
+    # vyšlapáno ve vsi (mista.json usedlosti.vyslapano → mista_rozmisteni.py): ulice, náves, cestičky od vrat a dveří, okap,
+    # plochy před vstupy, dvůr – hlína bez porostu (Míša 12. 11. večer: „tam, kde se chodí, je přece cesta, ne tráva“)
+    VYS_ = MS_.get("vyslapano")
+    if VYS_:
+        if VYS_["trida"] not in SJ["tridy"]: SJ["tridy"].append(VYS_["trida"])
+        hl_v = Image.new("F", ms.size, 0.0); dv_ = ImageDraw.Draw(hl_v)
+        for e_ in sorted(VYS_["plochy"], key=lambda e: e["hlina"]):
+            dv_.polygon([pix(r) for r in e_["poly"]], fill=float(e_["hlina"]))
+        for e_ in sorted(VYS_["cary"], key=lambda e: e["hlina"]):
+            dv_.line([pix(r) for r in e_["body"]], fill=float(e_["hlina"]), width=max(1, int(round(2 * e_["polosirka"] / ks))), joint="curve")
+        hl_v = np.array(hl_v); slap_v = (hl_v > 0) & ~stavba_jadro
+        st[slap_v] = SJ["tridy"].index(VYS_["trida"]); hl_u = np.maximum(hl_u, np.where(slap_v, hl_v, 0.0))
+        print("vyšlapáno ve vsi: %d buněk" % slap_v.sum())
     mk[..., 0] = np.maximum(mk[..., 0], gaussian_filter(hl_u, UP_["mekkost_m"] / ks))
     bez_usedlosti = _m([u_["parcela"] for u_ in MS_.get("usedlosti", [])] + [p_["poly"] for p_ in MS_.get("pole", [])])
     print("usedlosti: %d buněk parcel a lánů, hlína %d" % (bez_usedlosti.sum(), (hl_u > 0).sum()))
@@ -175,5 +188,16 @@ if os.path.exists(D + "brody.json"):
         db_.line([pix((cx_ - sx_ * dl_, cz_ - sz_ * dl_)), pix((cx_ + sx_ * dl_, cz_ + sz_ * dl_))], fill=1, width=max(2, int(6.0 / ks)))
     mb = np.array(mb).astype(bool); st[mb] = SJ["tridy"].index("cesta"); Image.fromarray(st).save(D + "stanoviste.png")
     keep &= ~mb[r, c]
+# pás cest z cesty.py (build/cesty_pas.png) navrch všeho, co krok vegetace přidal (dvory, lány, odlesnění) – na cestě
+# nic neroste (Míša 12. 11. večer: „cesty jsou na hodně místech zarostlé travou a keři, hlavně u hospody a od hradu k vesnici“);
+# jen obrys budov a zdí (stavba) zůstane
+_pc = K + "/build/cesty_pas.png"
+if os.path.exists(_pc):
+    pas_c = np.array(Image.open(_pc)) > 0; pas_c = pas_c[:st.shape[0], :st.shape[1]] & ~stavba_jadro
+    st[pas_c] = SJ["tridy"].index("cesta"); Image.fromarray(st).save(D + "stanoviste.png")
+    keep &= ~pas_c[r, c]
+    print("pás cest: %d buněk třídy cesta" % pas_c.sum())
+else: print("CHYBA: chybí build/cesty_pas.png (nastroje/cesty.py) – cesty zůstanou zarostlé"); sys.exit(1)
+keep &= ~slap_v[r, c]   # ani strom lesa na ulici a cestičkách vsi
 A[keep].tofile(D + "stromy.bin")
 print("stavby: %d buněk, nádvoří %d, stromů pryč %d" % (stavba.sum(), nadvori.sum(), (~keep).sum()))

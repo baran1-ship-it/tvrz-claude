@@ -40,12 +40,16 @@
    "max_sklon": 0.36,
    "profil_okno_m": 6,
    "pricny_podil": 0.0,
-   "povrch": "pesina",
+   "povrch": "hlina",
    "skala_od_rezu_m": 0.5,
    "pozn": "úzký hřbet na drobě, nejprudší místa schody ze skály",
    "pozn_11_11": "Míša 11. 11.: „nemůžeme vykopat půl kopce, abychom měli dálnici, jsme ve středověku, chodilo se podle terénu“; „nahoru dolů je to v pořádku, ale velký sklon do boku by nedával smysl… samozřejmě lehce“ – podélně podle terénu (max_uprava_m), napříč jen lehce srovnat (max_uprava_napric_m; vozová ve svahu = polovina zářez, polovina násyp). Výjimka: doložené nájezdy k mostům.",
    "podle_terenu": false,
-   "pozn_podle_terenu": "přístupová cesta mezi hrady (úzký hřbet, nástupy mostů a bran) – profil laděný s Míšou 6.–9. 11. zůstává; pravidlo „cesta podle terénu“ (11. 11.) platí pro cesty krajinou. Při podle terénu se změnil terén u nástupu B o 2 m a nesedly kolize hradu B a skal (hlídači 11. 11.)"
+   "pozn_podle_terenu": "přístupová cesta mezi hrady (úzký hřbet, nástupy mostů a bran) – profil laděný s Míšou 6.–9. 11. zůstává; pravidlo „cesta podle terénu“ (11. 11.) platí pro cesty krajinou. Při podle terénu se změnil terén u nástupu B o 2 m a nesedly kolize hradu B a skal (hlídači 11. 11.)",
+   "povrch_sirka_m": 3.6,
+   "koleje": false,
+   "bez_porostu_m": 3.6,
+   "pozn_12_11": "Míša 12. 11. večer: „cesta ke spodnímu hradu by taky neměla být zarostlá a měla by být výraznější“ – vyšlapaná hlína (maska_cesty.R jako vozová, bez kolejí: na hřbet nejezdí vozy denně) v pásu povrch_sirka_m 3,6 m (jízdní pás terénu zůstává sirka_m 2,8 – profil laděný 6.–9. 11. beze změny), bez porostu do bez_porostu_m od osy. Zdroj: KCD1 Havran docs/screens/reference/kcd1/18_brana_zvenku_kere_kameny.jpg (k bráně vyšlapaná hlína, tráva a keře jen po stranách), misa_kcd_04.jpg (hliněná cesta, tráva po krajích)"
   },
   "pesina": {
    "sirka_m": 1.0,

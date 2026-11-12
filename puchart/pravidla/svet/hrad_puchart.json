@@ -1157,5 +1157,10 @@
   "navijak_ochoz_vyska_m": 0.62,
   "kolo_r_m": 0.5,
   "pozn_ochoz": "brány v hradbě (A jádro, B): naviják na ochozu nad bránou u zídky – dole u brány není místo (B: schody na ochoz a nároží); věž branky A: v patře strážnice (Havran)"
+ },
+ "vybaveni": {
+  "stavet": false,
+  "svetla_louci": false,
+  "pozn": "Míša 12. 11.: „vymaž všechny vlastní modely vybavení z hradu a vesnice, ani jedno není hezké a nedá se používat, vše si vybavím sám“; „na horním hradě máš v kuchyni louč přímo v místě kamenné pece, nesmysl, vymaž louče taky, si je dám sám“ – hrad bez nábytku, sudů, truhel, loží a loučí; zůstávají pevné stavební díly (pec, krb, kamna, schody, dveře)"
  }
 }

@@ -165,7 +165,7 @@ from scipy.ndimage import binary_dilation as _bd2, distance_transform_edt as _ed
 _T = SJ["tridy"]
 if "pata_zdi_vne" in _T:
     _stv = ST == _T.index("stavba"); _d = _edt2(~_stv) * SJ["krok_m"]
-    _pas = (_d > 0) & (_d <= 4.0) & ~np.isin(ST, [_T.index(t) for t in ("stavba", "nadvori", "predhradi", "nadvori_slap", "pata_zdi_uvnitr", "cesta", "koryto_kamenite", "breh", "skala") if t in _T])
+    _pas = (_d > 0) & (_d <= 4.0) & ~np.isin(ST, [_T.index(t) for t in ("stavba", "nadvori", "predhradi", "nadvori_slap", "pata_zdi_uvnitr", "cesta", "koryto_kamenite", "breh", "skala", "ves_slap") if t in _T])   # ves_slap: vyšlapáno ve vsi, ne pata hradní zdi
     _vne = np.isin(ST, [_T.index(t) for t in ("pata_zdi_vne", "pata_zdi_lic", "kout_zdi") if t in _T]); _podil = (_vne & _pas).sum() / max(1, _pas.sum())
     _uvn = np.isin(ST, [_T.index("pata_zdi_uvnitr")]).sum(); _vn = _vne.sum()
     TEST("pata_zdi_skvrny", 0.4 <= _podil <= 0.95 and _uvn < _vn, "pás 4 m kolem zdí zvenku pokryt z %.0f %% (mez 40–95 %%: skvrny, ne pruh), uvnitř %d < vně %d buněk" % (100 * _podil, _uvn, _vn))
@@ -456,6 +456,83 @@ _ul = [z for z in _ZB if np.linalg.norm(np.array(z["b"][:2]) - np.array(z["a"][:
 TEST("zabradli_ulomky", not _ul, "samostatné kusy zábradlí kratší než 0,9 m: %d %s" % (len(_ul), _ul[:3]))
 TEST("zabradli_spojite", len(_ZB) > 20 and not _zv, "zábradlí %d kusů, nenavazujících/zdvojených %d %s" % (len(_ZB), len(_zv), _zv[:3]))
 TEST("portaly", len(POR_) >= KC.get("portaly_min", 8), "portálů z portaly.py: %d" % len(POR_))
+
+# --- cesty bez porostu (Míša 12. 11. večer: „cesty jsou na hodně místech zarostlé travou a keři, hlavně u hospody a od hradu
+# k vesnici“ – stanoviste_realne.py v postav_vse.sh přepsal třídu cesta): na celé šíři každé cesty (osy cesty_puchart.json,
+# šířka podle typu) nesmí být třída s trávou (louka.json), bylinami (byliny.json) ani keři (kere.json), ani strom lesa.
+# Mimo: obrys stavby (brána) a 28 m od konce mostu (cesty.py tam osu stáčí rovně do osy mostu – ROVNE_M/OBLOUK_M).
+LO_ = json.load(open(D + "louka.json"))["tridy"]
+def _roste(t): return float(LO_.get(t, 0.0)) > 0 or any(float(v) > 0 for v in BY["tridy"].get(t, {}).values() if not isinstance(v, str)) or bool(KE["tridy"].get(t))
+_ROSTE = np.array([_roste(t) for t in TR])
+_CP = json.load(open(K + "/pravidla/svet/cesty_puchart.json")); _MO = np.array([m_["u_bodu"][:2] for m_ in json.load(open(K + "/pravidla/svet/voda_hra.json")).get("mosty", [])] or [[1e9, 1e9]])
+def _chaikin(p_, n=3):
+    for _ in range(n):
+        q_ = [p_[0]]
+        for a_, b_ in zip(p_[:-1], p_[1:]): q_ += [0.75 * a_ + 0.25 * b_, 0.25 * a_ + 0.75 * b_]
+        q_.append(p_[-1]); p_ = np.array(q_)
+    return p_
+_zar = {}; _vz = 0; _osy_body = []
+for c_ in _CP["cesty"]:
+    hw_ = _CP["typy"][c_["typ"]]["sirka_m"] / 2; o_ = _chaikin(np.array(c_["osa"], float)[:, :2])
+    d_ = np.r_[0, np.cumsum(np.hypot(*np.diff(o_, axis=0).T))]; s_ = np.arange(0, d_[-1], 0.5)
+    px_ = np.interp(s_, d_, o_[:, 0]); pz_ = np.interp(s_, d_, o_[:, 1]); tx_ = np.gradient(px_); tz_ = np.gradient(pz_); ln_ = np.hypot(tx_, tz_) + 1e-9
+    _osy_body.append(np.c_[px_, pz_, np.full(len(px_), hw_)])
+    for f_ in np.linspace(-hw_, hw_, 5):
+        X_ = px_ - tz_ / ln_ * f_; Z_ = pz_ + tx_ / ln_ * f_
+        ok_ = (np.hypot(X_[:, None] - _MO[None, :, 0], Z_[:, None] - _MO[None, :, 1]).min(1) > 28.0)
+        ok_ &= (X_ > SJ["x0_hra"]) & (Z_ > SJ["z0_hra"]) & (X_ < SJ["x0_hra"] + ST.shape[1] * SJ["krok_m"]) & (Z_ < SJ["z0_hra"] + ST.shape[0] * SJ["krok_m"])
+        t_ = trida(X_[ok_], Z_[ok_]); _vz += int(ok_.sum())
+        zl_ = _ROSTE[t_]
+        if zl_.any(): _zar[c_["id"]] = _zar.get(c_["id"], 0) + int(zl_.sum())
+TEST("cesta_bez_porostu", not _zar, "vzorků pásu cest %d, se zarostlou třídou %d: %s" % (_vz, sum(_zar.values()), dict(sorted(_zar.items(), key=lambda a: -a[1])[:6])))
+from scipy.spatial import cKDTree as _KDT
+_ob = np.vstack(_osy_body); _dd, _ii = _KDT(_ob[:, :2]).query(np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5)[:, :2])
+_sc = int(((_dd < _ob[_ii, 2] + 0.5) & (np.hypot(*(np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5)[:, None, :2] - _MO[None]).transpose(2, 0, 1)).min(1) > 28.0)).sum())
+TEST("strom_mimo_pas_cesty", _sc == 0, "stromů lesa na šířce cesty (osa ± půl šířky + 0,5 m): %d" % _sc)
+
+# --- ves (Míša 12. 11. večer): vyšlapáno, kde se chodí; volné vstupy; krčma bez plotů; žádné vybavení
+if os.path.exists(D + "mista_stavby.json"):
+    from shapely.geometry import Polygon as _Pg, Point as _Pt, LineString as _Ls
+    MS = json.load(open(D + "mista_stavby.json")); MIJ = json.load(open(K + "/pravidla/svet/mista.json"))
+    _holy = lambda x_, z_: not _ROSTE[trida(np.array([x_]), np.array([z_]))[0]]
+    # vyšlapáno: dvůr, plocha před každým vstupem, vrata a branky (1 m ven), studna, osa ulice – třída bez porostu
+    _body = [("dvur", *_Pg(q).centroid.coords[0]) for q in MS.get("dvory", [])] + [("pred_vstupem", *_Pg(v["pred"]).centroid.coords[0]) for v in MS.get("vstupy", [])]
+    _uz = {u["i"]: u for u in MS["usedlosti"]}
+    for b in MS["brany"]:
+        a_ = (np.array(b["a"])[[0, 2]] + np.array(b["b"])[[0, 2]]) / 2; d_ = np.array(b["b"])[[0, 2]] - np.array(b["a"])[[0, 2]]; n_ = np.array([-d_[1], d_[0]]) / (np.linalg.norm(d_) + 1e-9)
+        _body += [("brana", *(a_ + n_ * 1.0)), ("brana", *(a_ - n_ * 1.0))]
+    _body += [("studna", s_["x"] + 2.0, s_["z"]) for s_ in MS.get("studny", [])]
+    _body += [("ulice", *q) for c_ in MS.get("vyslapano", {}).get("cary", []) if c_["druh"] == "ulice" for q in c_["body"]]
+    _zle = [(k, round(x_), round(z_), TR[trida(np.array([x_]), np.array([z_]))[0]]) for k, x_, z_ in _body if not _holy(x_, z_)]
+    TEST("ves_vyslapano", len(_body) > 50 and not _zle, "míst, kudy se ve vsi chodí: %d, zarostlých %d %s" % (len(_body), len(_zle), _zle[:5]))
+    # volné vstupy: před dveřmi domů a vraty stodol/kůlen (pruh mista.json usedlosti.vstupy.pred_m) žádná stavba, plot, strom
+    # ani předmět; každý dům má tolik vstupů, kolik má model vnějších dveří (uzly *_Dvere_* v domy.glb)
+    _pud = [_Pg(q) for q in MS["pudorysy"]]; _zv = []
+    for v in MS.get("vstupy", []):
+        pr_ = _Pg(v["pred"]); vnitr_ = _Pt(v["c"][0] - v["n"][0] * 0.6, v["c"][1] - v["n"][1] * 0.6)
+        for q in _pud:
+            if not q.contains(vnitr_) and q.intersects(pr_): _zv.append((v["stavba"], v["c"], "stavba"))
+        for p_ in MS["ploty"]:
+            if _Ls([(b_[0], b_[2]) for b_ in p_["body"]]).intersects(pr_): _zv.append((v["stavba"], v["c"], "plot")); break
+        for s_ in MS["stromy"] + MS["drobne"]:
+            if _Pt(s_["x"], s_["z"]).buffer(0.5).intersects(pr_): _zv.append((v["stavba"], v["c"], s_.get("druh", s_.get("model")))); break
+    import struct as _st
+    _f = open(K + "/hra/" + MIJ["modely"]["domy"]["soubor"][6:], "rb").read(); _gj = json.loads(_f[20:20 + _st.unpack("<I", _f[12:16])[0]])
+    _ndv = {}
+    for nd in _gj["nodes"]:
+        m_ = nd.get("name", "").split("_Dvere")[0]
+        if "_Dvere" in nd.get("name", "") and m_ in MIJ["pudorysy"] and abs(nd.get("translation", [0])[0]) > MIJ["pudorysy"][m_][0] - 0.3: _ndv[m_] = _ndv.get(m_, 0) + 1
+    _uh = [s_ for s_ in MS["stavby"] if any(abs(s_["x"] - u_["stred"][0]) < 40 and abs(s_["z"] - u_["stred"][1]) < 40 for u_ in MS["usedlosti"])]
+    _pocty = [(s_["model"], sum(1 for v in MS.get("vstupy", []) if v["stavba"] == s_["model"] and math.hypot(v["c"][0] - s_["x"], v["c"][1] - s_["z"]) < 12)) for s_ in _uh]
+    _chybi = [p_ for p_ in _pocty if p_[1] < _ndv.get(p_[0], 0)]
+    _nh = sum(1 for h in MS["hospodarske"] if h["model"] in MIJ["usedlosti"]["vstupy"]["hospodarske"])
+    _nhv = sum(1 for v in MS.get("vstupy", []) if v["druh"] == "vrata")
+    TEST("ves_vstupy_volne", not _zv and not _chybi and _nhv == _nh, "vstupů %d (domy %s, vrat %d/%d staveb), zatarasených %d %s" % (len(MS.get("vstupy", [])), _pocty[:3], _nhv, _nh, len(_zv), _zv[:4]))
+    _kr = [u["i"] for u in MS["usedlosti"] if u["typ"] == "krcma"]
+    _kp = [p_ for p_ in MS["ploty"] if p_["usedlost"] in _kr] + [b for b in MS["brany"] if b["usedlost"] in _kr]
+    TEST("krcma_bez_plotu", _kr and not _kp, "krčma (usedlost %s): plotů a vrat %d" % (_kr, len(_kp)))
+    TEST("ves_bez_vybaveni", not MS["drobne"] and not any(h["model"] == "kurnik" for h in MS["hospodarske"]),
+         "drobností %d, kurníků %d (Míša 12. 11. večer: vybavení si udělá sama)" % (len(MS["drobne"]), sum(1 for h in MS["hospodarske"] if h["model"] == "kurnik")))
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)

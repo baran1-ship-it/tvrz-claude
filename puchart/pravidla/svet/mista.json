@@ -264,7 +264,6 @@
      "bok_dvora": 0.3,
      "zadna": 0.25
     },
-    "kurnik_p": 0.5,
     "plot_ulice": {
      "latovy": 0.75,
      "proutěny": 0.25
@@ -283,36 +282,12 @@
      "proutěny": 0.8,
      "latovy": 0.2
     },
-    "zahony": [
-     2,
-     6
-    ],
-    "zahony_druhy": {
-     "zahon_zeli": 0.35,
-     "zahon_cibule": 0.2,
-     "zahon_mrkev": 0.15,
-     "zahon_salat": 0.15,
-     "zahon_prazdny": 0.15
-    },
     "jablone": [
      1,
      4
     ],
     "strom_dvur_p": 0.35,
     "lipa_vjezd_p": 0.25,
-    "vuz_p": 0.5,
-    "kupka_p": 0.35,
-    "hranice": [
-     1,
-     2
-    ],
-    "sudy": [
-     0,
-     3
-    ],
-    "lavice_p": 0.6,
-    "trakar_p": 0.4,
-    "spalek_p": 0.6,
     "pole": true,
     "povinne": true
    },
@@ -347,60 +322,22 @@
     "kolna": {
      "misto_zahrady": 1.0
     },
-    "kurnik_p": 0.0,
-    "plot_ulice": {
-     "zerdovy": 1.0
-    },
-    "brana": {
-     "vrata": 1.0
-    },
+    "plot_ulice": {},
+    "brana": {},
     "branka_p": 0.0,
-    "plot_bok": {
-     "zerdovy": 1.0
-    },
-    "plot_zahrada": {
-     "proutěny": 1.0
-    },
-    "zahony": [
-     0,
-     0
-    ],
-    "zahony_druhy": {
-     "zahon_zeli": 0.5,
-     "zahon_cibule": 0.5
-    },
+    "plot_bok": {},
+    "plot_zahrada": {},
     "jablone": [
      0,
      0
     ],
     "strom_dvur_p": 0.0,
     "lipa_vjezd_p": 1.0,
-    "vuz_p": 1.0,
-    "vozy": [
-     1,
-     2
-    ],
-    "kupka_p": 1.0,
-    "hranice": [
-     2,
-     2
-    ],
-    "sudy": [
-     3,
-     5
-    ],
-    "lavice_p": 1.0,
-    "lavice": [
-     2,
-     2
-    ],
-    "koryto_kone": 1,
-    "trakar_p": 0.5,
-    "spalek_p": 1.0,
     "pole": false,
     "stodola_poloha": "bok_dvora",
     "povinne": false,
-    "pozn_poloha": "skutečný hostinec stojí mezi silnicí a strmým svahem (DMR 5G): za domem není místo – stáj bokem do dvora a kůlna na vozy na druhé straně domu, vše v řadě podél cesty (NAVRH)"
+    "pozn_poloha": "skutečný hostinec stojí mezi silnicí a strmým svahem (DMR 5G): za domem není místo – stáj bokem do dvora a kůlna na vozy na druhé straně domu, vše v řadě podél cesty (NAVRH)",
+    "ploty_pozn": "Míša 12. 11. večer: „u hospody dej pryč ploty, ať se dá ustájit kůň apod.“ – zájezdní dvůr otevřený k cestě (vozy a koně vjedou ke stáji a kůlně přímo z cesty, docs/reference/reserse_mosty_krcma.md), žádný plot ani vrata; vyšlapaný vjezd přes celou šíři dvora (vyslapano.vjezd_bez_vrat)"
    },
    "hajovna": {
     "zdroj": "Míša 12. 11.: „hájovna: dům s dřevníkem a kolnou na kraji lesa“; Havran předměty kolna, hranice_dreva, spalek_stipani (lom a uhlíři); KCD1 reference/kcd1/05_dosky_strecha_srub_hranice, 16_hranice_dreva_detail",
@@ -430,7 +367,6 @@
     "kolna": {
      "bok_dvora": 1.0
     },
-    "kurnik_p": 1.0,
     "plot_ulice": {
      "zerdovy": 1.0
     },
@@ -444,35 +380,12 @@
     "plot_zahrada": {
      "proutěny": 1.0
     },
-    "zahony": [
-     2,
-     3
-    ],
-    "zahony_druhy": {
-     "zahon_zeli": 0.4,
-     "zahon_cibule": 0.3,
-     "zahon_mrkev": 0.3
-    },
     "jablone": [
      1,
      1
     ],
     "strom_dvur_p": 0.0,
     "lipa_vjezd_p": 0.0,
-    "vuz_p": 0.0,
-    "kupka_p": 0.0,
-    "hranice": [
-     4,
-     5
-    ],
-    "hranice_pozn": "dřevník: hranice dřeva podél zadního štítu a kůlny (hajný = dříví)",
-    "sudy": [
-     1,
-     1
-    ],
-    "lavice_p": 1.0,
-    "trakar_p": 1.0,
-    "spalek_p": 1.0,
     "pole": false,
     "povinne": false
    }
@@ -583,10 +496,6 @@
     "strniste": 0.35,
     "uhor": 0.25
    },
-   "panaky_strniste": [
-    0,
-    5
-   ],
    "od_cesty_m": 2.0,
    "od_toku_m": 6.0,
    "stanoviste_zakazana": [
@@ -640,6 +549,49 @@
     "uhor": 0.0
    },
    "mekkost_m": 1.5
+  },
+  "vybaveni_pozn": "Míša 12. 11. večer: „vymaž všechny vlastní modely vybavení z hradu a vesnice, ani jedno není hezké a nedá se používat, vše si vybavím sám“ – usedlosti bez drobností (vozy, sudy, trakaře, špalky, hranice dřeva, lavice, záhony, kupky, panáky, koryto) a bez kurníku; zůstávají domy, stodoly, kůlny, ploty a vrata, studna, stromy, zahrady, pole a cesty. Dřív (bod 3, týž večer): „vůz nebo kurník u dveří nemá smysl, zavazí“.",
+  "vstupy": {
+   "popis": "Vstupy staveb usedlosti (Míša 12. 11. večer: „vůz nebo kurník u dveří nemá smysl, zavazí“): před každým vstupem pruh pred_m hluboký a o okraj_m širší než vstup, kam nesmí stavba, plot ani strom; od vstupu vede vyšlapaná cestička (vyslapano). Dveře domů se čtou z modelu (uzly <Dům>_Dvere_* na obvodové stěně v hra/modely/stavby_h/domy.glb), hospodářské stavby podle modelu Havrana.",
+   "zdroj": "Havran blender/vlastni.py stodola (dvoukřídlá vrata 3 m uprostřed přední stěny, vpředu = +z po exportu – mista.json modely.hospodarske „vrata k domu = +z“), kolna (vpředu otevřená pole na sloupech po celé délce); Havran vesnice.py ves_paths (od vrat 5 m rovně ven, pak oblouk k ulici)",
+   "pred_m": 3.0,
+   "okraj_m": 0.5,
+   "dvere_sirka_m": 1.0,
+   "hospodarske": {
+    "stodola": {
+     "strana": "+z",
+     "sirka_m": 3.0
+    },
+    "stodola_mala": {
+     "strana": "+z",
+     "sirka_m": 3.0
+    },
+    "kolna": {
+     "strana": "+z",
+     "sirka_m": "cela"
+    }
+   }
+  },
+  "vyslapano": {
+   "popis": "Kde se ve vsi chodí, je hlína, ne tráva (Míša 12. 11. večer: „vesnice vypadá jako opuštěná, protože všude roste tráva; tam, kde se chodí, je přece cesta“): ulice podél cesty vsí, náves u studny, cestičky od vrat a branek k ulici a od dveří domů a stodol, okap kolem stavení, plocha před každým vstupem, celý dvůr. Tráva zůstává v zahradách, sadech, na lánech a za ploty. Třída stanoviště „trida“ nemá v byliny/louka/kere žádný porost, hlína do maska_cesty.R (nastroje/stavby_vegetace.py).",
+   "zdroj": "KCD docs/reference/kcd_vzhled/misa_kcd_04.jpg (vyjetá hliněná cesta vsí, rozbíhá se ke vratům a k domu, tráva jen po krajích), misa_kcd_14.jpg (vyšlapaná cestička mezi ploty, tráva za ploty); Havran blender/vesnice.py yard_dirt (jádro dvora a pruh u zdi chalupy = udusaná hlína, kraje u plotu a zahrada tráva), ves_paths + path_width (ulice na návsi širší, odbočky k vratům pološířka 1,3 m)",
+   "trida": "ves_slap",
+   "ulice_polosirka_m": 3.5,
+   "ulice_pozn": "ulice = osa cesty vsí v dosahu místa (mista dosah_m); pološířka 3,5 m (vozová 1,8 m + kraj, kudy se chodí a vyhýbá; Havran path_width 2–5 m)",
+   "naves_polomer_m": 6.0,
+   "chodnik_polosirka_m": 1.3,
+   "vjezd_polosirka_m": 1.8,
+   "rovne_ven_m": 5.0,
+   "okap_m": 1.2,
+   "hlina": {
+    "ulice": 0.9,
+    "naves": 0.85,
+    "chodnik": 0.85,
+    "pred_vstupem": 0.9,
+    "okap": 0.7,
+    "dvur": 0.85
+   },
+   "hlina_pozn": "síla hlíny v maska_cesty.R; okap slabší (Havran yard_dirt d2 × 0,85, tráva prosvítá)"
   }
  }
 }

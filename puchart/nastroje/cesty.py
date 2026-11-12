@@ -7,7 +7,7 @@ stony_dirt_path), stezka = pěšina (Havran „pesina“ = forest_ground_05).
 
 Vstup: <vysek_upr.npy/.json> (S-JTSK 1 m, po teren_upravy.py), pravidla/svet/cesty_puchart.json (osy a typy)
 Výstup: <vystup>.npy (terén s cestami), hra/textury/maska_cesty.png (R vozová, G stezka, B skála v úvozu; 2 m),
-        hra/data/stromy.bin bez stromů na cestě, hra/data/stanoviste.png třída „cesta“.
+        hra/data/stromy.bin bez stromů na cestě, hra/data/stanoviste.png třída „cesta“, build/cesty_pas.png (pás bez porostu, 2 m).
 python3 cesty.py <vysek_upr_prefix> <vystup_prefix> <koren>
 """
 import math, sys, json, os, shutil
@@ -179,7 +179,8 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     if c.get("jen_maska"): novy = orig   # brod: terén (koryto) beze změny, jen povrch cesty
     H[z0i:z1i, x0i:x1i] = np.where(wpas > 0, novy, orig)
     # maska povrchu: měkký okraj s šumem (cesta není pravítko)
-    m = np.clip((hw + 0.6 + sum_[z0i:z1i, x0i:x1i] * 0.5 - dist) / 1.2, 0, 1)
+    hwp = T.get("povrch_sirka_m", T["sirka_m"]) / 2   # vyšlapaný pás může být širší než upravený jízdní pás (terén se nemění)
+    m = np.clip((hwp + 0.6 + sum_[z0i:z1i, x0i:x1i] * 0.5 - dist) / 1.2, 0, 1)
     if T["povrch"] == "hlina":
         maskR[z0i:z1i, x0i:x1i] = np.maximum(maskR[z0i:z1i, x0i:x1i], m)
     else:
@@ -225,7 +226,7 @@ for c in C["cesty"]:
 KR = 2; kol = np.zeros((ny * KR, nx * KR), np.float32)
 from scipy.spatial import cKDTree as _KD
 for c in C["cesty"]:
-    if C["typy"][c["typ"]]["povrch"] != "hlina": continue
+    if not C["typy"][c["typ"]].get("koleje", C["typy"][c["typ"]]["povrch"] == "hlina"): continue
     osa = chaikin(np.array(c["osa"], float), 3); d_ = np.r_[0, np.cumsum(np.hypot(*np.diff(osa, axis=0).T))]
     s_ = np.arange(0, d_[-1], 0.25); qx = np.interp(s_, d_, osa[:, 0]); qz = np.interp(s_, d_, osa[:, 1])
     x0i = int(max(0, (qx.min() - xh0 - 5) * KR)); x1i = int(min(nx * KR, (qx.max() - xh0 + 5) * KR))
@@ -255,8 +256,13 @@ sj_p = os.path.join(K, "hra/data/stanoviste.json"); sj = json.load(open(sj_p))
 if "cesta" not in sj["tridy"]: sj["tridy"].append("cesta")
 ic = sj["tridy"].index("cesta"); json.dump(sj, open(sj_p, "w"), ensure_ascii=False, indent=1)
 st = np.array(Image.open(os.path.join(K, "hra/data/stanoviste.png")))
-nc = na_ceste[:ny - 1:2, :nx - 1:2][:st.shape[0], :st.shape[1]]
+# buňka 2 m patří cestě, když na cestu padne kterýkoli z jejích čtyř metrů (dřív jen levý horní: úzké pěšiny vycházely
+# v rastru 2 m děravé, trsy rostly v polovině pásu – test smyslu cesta_bez_porostu 12. 11.)
+nc = na_ceste[:2 * st.shape[0], :2 * st.shape[1]].reshape(st.shape[0], 2, st.shape[1], 2).any((1, 3))
 st[nc] = ic
+# pás cest i pro poslední krok vegetace (stavby_vegetace.py ho položí navrch: 12. 11. večer „cesty zarostlé travou a keři“ –
+# stanoviste_realne.py v postav_vse.sh běžel až po cestách a třídu cesta přepsal; dvory a lány ji přepisovaly také)
+os.makedirs(os.path.join(K, "build"), exist_ok=True); Image.fromarray(nc.astype(np.uint8) * 255).save(os.path.join(K, "build/cesty_pas.png"))
 if os.path.exists(pre + "_koryta.npz"):   # koryta (koryta.py): dno a práh = koryto_kamenite, pás nad ním = breh
     KR_ = np.load(pre + "_koryta.npz"); rr, cc_ = KR_["r"] // 2, KR_["c"] // 2; ok = (rr < st.shape[0]) & (cc_ < st.shape[1])
     for druh, jm in ((2, "breh"), (1, "koryto_kamenite")):

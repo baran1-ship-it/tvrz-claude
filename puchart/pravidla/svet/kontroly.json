@@ -345,8 +345,10 @@
   "smi_byt_hole": [
    "cesta",
    "nic",
-   "stavba"
+   "stavba",
+   "ves_slap"
   ],
+  "smi_byt_hole_pozn": "ves_slap = vyšlapaná hlína ve vsi (mista.json usedlosti.vyslapano; Míša 12. 11. večer: „tam, kde se chodí, je přece cesta, ne tráva“)",
   "stromu_na_ceste_max": 0,
   "stromu_v_korytu_max": 0,
   "bunek_keru_ve_stavbe_max": 0,

@@ -97,7 +97,7 @@ BRANY = []   # (práh vnějšího líce průjezdu, výška podlahy) – mosty se
 
 # ------------------------------------------------------------------ zdi
 CIMB = json.load(open(os.path.join(K, "pravidla/svet/hrad_vzhled.json")))["cimburi"]
-def zed_plynula(P, a, b, t, h, mat="zdivo", pata=2.0, krok=1.5, e0=0.0, e1=0.0):
+def zed_plynula(P, a, b, t, h, mat="zdivo", pata=2.0, krok=1.5, e0=0.0, e1=0.0, cimburi=False):
     """Hradba s korunou plynule po terénu (vlnka nahoru a dolů, bez stupňů – Míša 5. 11., kresba misa_04): kusy po krok m
     se šikmou korunou, sousední kusy sdílejí čela (odstran_vnitrni_cela je smaže), pata pod nejnižším terénem úseku."""
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); L = (b - a).length; d = (b - a) / L; s = d.cross(UP).normalized()
@@ -114,6 +114,12 @@ def zed_plynula(P, a, b, t, h, mat="zdivo", pata=2.0, krok=1.5, e0=0.0, e1=0.0):
         ym = (yt[k] + yt[k + 1]) / 2; c = (q0 + q1) / 2
         P.cols.append((M((c.x, (y0 + ym) / 2, c.z), basis=frame(d)), (t, ym - y0, ss[k + 1] - ss[k])))
         out.append((float(ss[k]), float(ss[k + 1]), ym))
+    if cimburi:   # stínky po rytmu cimbuří i na plynulé koruně (Míša 5. a 12. 11.: „vracíme se k hradbičkám všude“ – vnější hradba A byla
+        out_n = d.cross(UP).normalized(); R = CIMB["rytmus_m"]; nr = max(1, round(L / R)); Rl = L / nr; sw = min(CIMB["stinka_m"], Rl - 0.5)   # hladká)
+        for k in range(nr):
+            sm_ = (k + 0.5) * Rl; yk = float(np.interp(sm_, ss, yt)); p = a + d * sm_ + out_n * (t * 0.3)
+            sk_ = (float(np.interp(sm_ + sw / 2, ss, yt)) - float(np.interp(sm_ - sw / 2, ss, yt))) / sw   # stínka sedí na šikmé koruně celou spodní hranou
+            P.box(M((p.x, yk + CIMB["vyska_m"] / 2 - 0.04, p.z), basis=frame(d) @ Matrix.Rotation(-math.atan(sk_), 3, "X")), (t * 0.4, CIMB["vyska_m"] + 0.08, sw), mat + "_koruna" if mat == "zdivo" else mat)
     return out
 
 def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=None, okna=0, pilire=False):
@@ -149,7 +155,7 @@ def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None, plynule=False
             p0 = np.array(osa[i_ - 1 if kon == 0 else i_], float); p1 = np.array(osa[i_ if kon == 0 else i_ + 1], float); p2 = np.array(osa[i_ + 1 if kon == 0 else i_ + 2], float)
             u = p1 - p0; v = p2 - p1; u /= np.linalg.norm(u); v /= np.linalg.norm(v)
             return t / 2 * math.tan(math.acos(max(-1.0, min(1.0, float(u @ v)))) / 2) + 0.02
-        return [zed_plynula(P, p, q, t, h, mat=mat, e0=_e(k, 0), e1=_e(k, 1)) for k, (p, q) in enumerate(zip(osa, osa[1:]))]
+        return [zed_plynula(P, p, q, t, h, mat=mat, e0=_e(k, 0), e1=_e(k, 1), cimburi=cimburi) for k, (p, q) in enumerate(zip(osa, osa[1:]))]
     useky = [zed(P, p, q, t, h, mat=mat, cimburi=cimburi and not (koruny and koruny[k] is not None), pilire=True, koruna=(koruny[k] if koruny else None)) for k, (p, q) in enumerate(zip(osa, osa[1:]))]   # úsek s pevnou korunou (pod ochozem u branky) bez stínek – ochoz po něm vede k portálku (povrch_kolize 10. 11.)
     for i, v in enumerate(osa):
         sous = ([useky[i - 1][-1][2]] if i > 0 else []) + ([useky[i][0][2]] if i < len(useky) else [])

@@ -5,8 +5,10 @@ Pořadí stavby světa: terén → cesty → STAVBY → voda → vegetace (krok 
   jen kde je pod budovami malý sklon (max_prevyseni_m), parcela mimo cesty a toky a nepřekrývá sousedy.
 - samota (krčma, hájovna): nejbližší vhodné místo k bodu stred, štít k nejbližší vozové cestě.
 Usedlost (mista.json usedlosti, Havran blender/vesnice.py layout/_dvorce/build + lokace.json ves.dvorec): dům, dvůr na
-straně vchodu (+x modelu), zahrádka na druhé straně, stodola napříč za dvorem, kůlna, kurník, sad (humno), ploty, vrata,
-drobnosti, ovocné stromy, lány za humny; každá usedlost z vlastního semínka (semeno + pořadí) – žádné dvě stejné.
+straně vchodu (+x modelu), zahrádka na druhé straně, stodola napříč za dvorem, kůlna, sad (humno), ploty, vrata,
+ovocné stromy, lány za humny; každá usedlost z vlastního semínka (semeno + pořadí) – žádné dvě stejné. Vybavení (vozy, sudy,
+kurník…) se nestaví (Míša 12. 11. večer). Před každým vstupem (dveře domu z modelu, vrata stodoly/kůlny) pruh bez stavby,
+plotu a stromu (usedlosti.vstupy); vyšlapané plochy a cestičky (usedlosti.vyslapano) pro stavby_vegetace.py.
 Terén: plošina pod podezdívkou domů a pod hospodářskými stavbami (výška = medián terénu pod půdorysem) s plynulým
 přechodem prechod_m (žádné schody, žádné kopání půl kopce). Výška drobností, plotů a stromů z výsledného terénu.
 Výstup: hra/data/mista_stavby.json (stavby pro hru – hlavni.gd _mista domy, ves.gd zbytek; půdorysy, dvory, zahrady,
@@ -81,6 +83,36 @@ def body_pudorysu(x, z, yaw, m, okraj=0.0, krok=1.0):
         for pz in np.r_[np.arange(zb, zf, krok), zf]: out_.append((x + px * cs + pz * sn, z - px * sn + pz * cs))
     return np.array(out_)
 
+VS = U["vstupy"]; VY = U["vyslapano"]
+def _dvere_domu():
+    """vnější dveře domů z modelu (uzly <Dům>_Dvere_* na obvodové stěně): model -> [(x, z, strana ±1)]"""
+    import struct
+    f = open(K + "/hra/" + MI["modely"]["domy"]["soubor"][len("res://"):], "rb").read()
+    j = json.loads(f[20:20 + struct.unpack("<I", f[12:16])[0]]); out_ = {}
+    for nd in j["nodes"]:
+        jm = nd.get("name", ""); m_ = jm.split("_Dvere")[0]
+        if "_Dvere" not in jm or m_ not in MI["pudorysy"] or "translation" not in nd: continue
+        tx, _, tz = nd["translation"]
+        if abs(tx) > MI["pudorysy"][m_][0] - 0.3: out_.setdefault(m_, []).append((tx, tz, 1.0 if tx > 0 else -1.0))
+    return out_
+DVERE = _dvere_domu()
+_ROT = lambda yaw, px, pz: (px * math.cos(yaw) + pz * math.sin(yaw), -px * math.sin(yaw) + pz * math.cos(yaw))   # model -> svět (jako rohy)
+def vstupy_stavby(m, x, z, yaw):
+    """vstupy stavby ve světě: [{druh, c, n (ven), w, pred_poly}] – pred_poly = pruh VS.pred_m před vstupem, o okraj_m širší"""
+    loc = []
+    if m in DVERE:
+        for tx, tz, sg in DVERE[m]: loc.append(("dvere", (sg * PUD[m][0], tz), (sg, 0.0), VS["dvere_sirka_m"]))
+    elif m in VS["hospodarske"]:
+        e = VS["hospodarske"][m]; sz = PUD[m][2] if e["strana"] == "+z" else PUD[m][1]
+        loc.append(("vrata", (0.0, sz), (0.0, 1.0 if e["strana"] == "+z" else -1.0), 2 * PUD[m][0] if e["sirka_m"] == "cela" else float(e["sirka_m"])))
+    out_ = []
+    for druh, (px, pz), (nx_, nz_), w in loc:
+        dx, dz = _ROT(yaw, px, pz); nwx, nwz = _ROT(yaw, nx_, nz_); sx, sz_ = -nwz, nwx
+        c = np.array([x + dx, z + dz]); n_ = np.array([nwx, nwz]); s_ = np.array([sx, sz_]); hw_ = w / 2 + VS["okraj_m"]
+        pred = Polygon([c + s_ * hw_ + n_ * 0.05, c - s_ * hw_ + n_ * 0.05, c - s_ * hw_ + n_ * VS["pred_m"], c + s_ * hw_ + n_ * VS["pred_m"]])
+        out_.append({"stavba": m, "druh": druh, "c": c, "n": n_, "w": w, "pred_poly": pred})
+    return out_
+
 def stavba_ok(x, z, yaw, m):
     """budova: malé převýšení pod půdorysem, odstup od os cest a toků; vrací (výška plošiny, převýšení) nebo None"""
     b = body_pudorysu(x, z, yaw, m, R["okraj_m"])
@@ -145,18 +177,22 @@ def _usedlost(x, z, yaw, m, typ, rng, zabrano):
         if dv >= kh + 4.0:
             ku = min(uf - 1.0 - kl / 2, (zb + zf) / 2); kv = vR - 0.4 - kh / 2
             hosp.append(["kolna", *F.w(ku, kv), yaw - math.pi / 2])
-    if rng.random() < T["kurnik_p"]:
-        hosp.append(["kurnik", *F.w(zb + 1.2, hw + 1.4), yaw + math.pi / 2 + rng.uniform(-0.2, 0.2)])
-    usad = zadni - 0.6                        # začátek humna / sadu
+    usad = zadni - 0.6                       # začátek humna / sadu
     ubk = usad - roz(rng, T["sad_m"])         # zadní plot
     parc = F.poly(ubk, uf, vL, vR)
     if parc.distance(CESTY_L) < 1.0: return "parcela na cestě"
     if parc.distance(TOKY_L) < PL["od_toku_m"]: return "parcela u toku"
     if parc.buffer(R["mezi_usedlostmi_m"]).intersects(zabrano): return "soused"
-    # budovy: sklon a odstupy (dům už prověřen)
+    # budovy: sklon a odstupy (dům už prověřen) a volné vstupy (žádná stavba před dveřmi domu ani před vraty jiné stavby)
+    def _hosp_ok(h_, q, yw):
+        if not stavba_ok(q[0], q[1], yw, h_[0]): return False
+        ja = Polygon(rohy(q[0], q[1], yw, h_[0], 0.3))
+        for o_ in [(m, x, z, yaw)] + [g_ for g_ in hosp if g_ is not h_]:
+            if any(ja.intersects(v_["pred_poly"]) for v_ in vstupy_stavby(*o_)): return False
+            if any(Polygon(rohy(o_[1], o_[2], o_[3], o_[0], 0.3)).intersects(v_["pred_poly"]) for v_ in vstupy_stavby(h_[0], q[0], q[1], yw)): return False
+        return True
     for h_ in list(hosp):
-        if h_[0] in ("kurnik",): continue
-        if not stavba_ok(h_[1], h_[2], h_[3], h_[0]):
+        if not _hosp_ok(h_, h_[1:3], h_[3]):
             if T.get("povinne", True): return "svah/odstup " + h_[0]
             # samota: posunout v rámci dvora (po 1 m, nejbližší první), jinak bez ní (poloha domu je doložená, má přednost)
             jine = unary_union([Polygon(rohy(o_[1], o_[2], o_[3], o_[0], 0.5)) for o_ in [(m, x, z, yaw)] + hosp if o_ is not h_])
@@ -164,7 +200,7 @@ def _usedlost(x, z, yaw, m, typ, rng, zabrano):
             kand = [(du, dv_, yw) for yw in (h_[3], yaw, yaw + math.pi / 2, yaw - math.pi / 2) for du, dv_ in kand]
             for du, dv_, yw in kand:
                 q = np.array(h_[1:3]) + F.au * du + F.av * dv_
-                if stavba_ok(q[0], q[1], yw, h_[0]) and not Polygon(rohy(q[0], q[1], yw, h_[0], 0.5)).intersects(jine) \
+                if _hosp_ok(h_, q, yw) and not Polygon(rohy(q[0], q[1], yw, h_[0], 0.5)).intersects(jine) \
                         and Polygon(rohy(q[0], q[1], yw, h_[0])).within(parc):
                     h_[1], h_[2], h_[3] = float(q[0]), float(q[1]), yw; break
             else:
@@ -191,7 +227,8 @@ def _usedlost(x, z, yaw, m, typ, rng, zabrano):
     if pz >= 0.3:
         for v0, v1 in seg_za:
             if v1 - v0 > 0.3: ploty.append([p_ul, F.w(u_ul, v0), F.w(u_ul, v1)])
-    brany.append({"druh": "kryta_vrata" if br == "krytá" else "vrata", "a": list(F.w(u_ul, v_br - bw / 2)), "b": list(F.w(u_ul, v_br + bw / 2))})
+    if br: brany.append({"druh": "kryta_vrata" if br == "krytá" else "vrata", "a": list(F.w(u_ul, v_br - bw / 2)), "b": list(F.w(u_ul, v_br + bw / 2))})
+    else: brany[:] = [b_ for b_ in brany if b_["druh"] != "branka"]   # bez plotů (krčma): ani branka
     # boky a záda: zahrada proutím (KCD2 ref_kcd2_zahrada_plot), dvůr a humno ohradou
     u_zah = zb + 0.3                            # zadní plot zahrádky u zadního štítu
     ploty.append([p_za, F.w(uf, vL), F.w(u_zah, vL)])
@@ -199,45 +236,15 @@ def _usedlost(x, z, yaw, m, typ, rng, zabrano):
     ploty.append([p_bok, F.w(u_zah, vL), F.w(ubk, vL)])
     ploty.append([p_bok, F.w(uf, vR), F.w(ubk, vR)])
     ploty.append([p_bok, F.w(ubk, vR), F.w(ubk, vL)])
+    ploty[:] = [p_ for p_ in ploty if p_[0]]   # typ plotu bez možností (mista.json {}) = plot není (krčma: Míša 12. 11. večer)
     for p_ in ploty + [[None, b_["a"], b_["b"]] for b_ in brany]:
         if not plot_ok(p_[1], p_[2]): return "plot u cesty/toku"
-    # ---- zahrádka: záhony v řadách mezi stěnou a bočním plotem (Havran garden: řady po 0,85 m; KCD2 zahrada_plot)
-    zl, zw = MI["modely"]["hospodarske"]["rozmery"]["zahon"]
-    mista_z = []
-    for r_ in range(int((za - 1.0) / (zw + 0.45))):
-        vv = -hw - 0.8 - zw / 2 - r_ * (zw + 0.45)
-        uu = uf - 0.6 - zl / 2
-        while uu - zl / 2 > u_zah + 0.4:
-            mista_z.append((uu, vv)); uu -= zl + 0.5
-    rng.shuffle(mista_z)
-    for uu, vv in mista_z[:rozi(rng, T["zahony"])]:
-        drobne.append([los(rng, T["zahony_druhy"]), *F.w(uu, vv + rng.uniform(-0.08, 0.08)), yaw - math.pi / 2 + rng.uniform(-0.04, 0.04)])
-    # ---- drobnosti: hranice dřeva u zadního štítu (Havran woodpile), sudy u stěny ve dvoře mimo dveře, lavice, vůz
-    nh = rozi(rng, T["hranice"]); hl_ = MI["modely"]["hospodarske"]["rozmery"]["hranice_dreva"][0]
-    for k_ in range(nh):
-        vv = -hw + 0.4 + hl_ / 2 + k_ * (hl_ + 0.05)
-        if vv + hl_ / 2 > hw - 0.2:   # další hranice podél kůlny / plotu dvora
-            vv = hw + 0.6 + hl_ / 2 + (k_ - int((2 * hw - 0.6) / (hl_ + 0.05))) * (hl_ + 0.05)
-        drobne.append(["hranice_dreva", *F.w(zb - 0.35, vv), yaw + rng.uniform(-0.03, 0.03)])
-    for k_ in range(rozi(rng, T["sudy"])):
-        drobne.append(["sud" if rng.random() < 0.7 else "sud_stary", *F.w(uf - pz - 0.7 - k_ * 0.8 - rng.uniform(0, 0.15), hw + 0.5 + rng.uniform(0, 0.15)), rng.uniform(0, 6.28)])
-    for k_ in range(int(T.get("lavice", [1, 1])[0]) if rng.random() < T["lavice_p"] else 0):
-        drobne.append(["lavice_selska", *F.w(zb + 1.3 + k_ * 2.2, hw + 0.35), yaw - math.pi / 2])
-    if rng.random() < T["spalek_p"]:
-        q = F.w(zb - 1.4, hw + 1.0 + rng.uniform(0, 1.0)); drobne.append(["spalek_stipani", *q, rng.uniform(0, 6.28)])
-        drobne.append(["drevo_hromada", *F.w(zb - 1.5, hw + 2.6 + rng.uniform(0, 0.8)), yaw + rng.uniform(-0.4, 0.4)])
-    if rng.random() < T["trakar_p"]:
-        drobne.append(["trakar", *F.w(rng.uniform(zb + 1, zf - 1), hw + dv - 1.2), yaw + rng.uniform(-0.5, 0.5)])
+    # vstupy staveb: před dveřmi a vraty nesmí stát plot (Míša 12. 11. večer: „vůz nebo kurník u dveří nemá smysl, zavazí“)
+    vst = [v_ for o_ in [(m, x, z, yaw)] + hosp for v_ in vstupy_stavby(*o_)]
+    for p_ in ploty:
+        if any(LineString([p_[1], p_[2]]).intersects(v_["pred_poly"]) for v_ in vst): return "plot před vstupem"
+    # vybavení (vozy, sudy, hranice, záhony…) se nestaví – Míša 12. 11. večer: „vymaž všechny vlastní modely vybavení“
     kolna_bok = any(h_[0] == "kolna" and abs(h_[3] - (yaw - math.pi / 2)) < 0.01 for h_ in hosp)
-    if rng.random() < T["vuz_p"]:
-        for k_ in range(rozi(rng, T.get("vozy", [1, 1]))):
-            vv = hw + 2.0 + 0.8 + k_ * 2.0
-            if kolna_bok and vv > vR - 0.4 - kh - 1.0: break
-            drobne.append(["zebrinak", *F.w((zb + uf) / 2 - 0.5 + rng.uniform(-0.6, 0.6), vv), yaw + rng.uniform(-0.15, 0.15)])
-    if T.get("koryto_kone"):
-        drobne.append(["koryto_kone", *F.w(ub_line + 1.2, (hw + vR) / 2 + 1.0), yaw])
-    if rng.random() < T["kupka_p"]:
-        drobne.append(["kupka_sena", *F.w(usad - 2.0, rng.uniform(vL + 2, vR - 2)), rng.uniform(0, 6.28)])
     # ---- stromy: sad v humně (lokace.json ves.dvorec.sad: jabloň 6 m, rozestup 7 m), strom na dvoře, lípa u vjezdu
     for k_ in range(rozi(rng, T["jablone"])):
         for _ in range(12):
@@ -251,9 +258,10 @@ def _usedlost(x, z, yaw, m, typ, rng, zabrano):
         stromy.append(["lipa", *F.w(uf + 2.2, vR - 1.0), rng.uniform(0, 6.28), rng.uniform(0.8, 1.0)])
     for s_ in stromy:
         if Point(s_[1], s_[2]).distance(CESTY_L) < 2.5: s_[0] = None
+        if any(Point(s_[1], s_[2]).buffer(0.5).intersects(v_["pred_poly"]) for v_ in vst): s_[0] = None   # strom před vstupem
     stromy = [s_ for s_ in stromy if s_[0]]
     return {"typ": typ, "ramec": [x, z, yaw], "parcela": parc, "hosp": hosp, "drobne": drobne, "ploty": ploty, "brany": brany,
-            "stromy": stromy, "dvur": F.poly(zadni + 0.2, uf, hw, vR), "zahrada": F.poly(u_zah, uf, vL, -hw),
+            "stromy": stromy, "vstupy": vst, "F": F, "uf": uf, "hw": hw, "vR": vR, "dvur": F.poly(zadni + 0.2, uf, hw, vR), "zahrada": F.poly(u_zah, uf, vL, -hw),
             "sad": F.poly(ubk, usad, vL, vR), "humno": (F, ubk, vL, vR), "pole_ok": T.get("pole", False)}
 
 # ---------------------------------------------------------------- rozmístění
@@ -262,7 +270,7 @@ stavby = []; useds = []; zabrano = Polygon()
 def pridej_dum(misto, m, x, z, yaw, v):
     stavby.append({"misto": misto["id"], "model": m, "x": round(float(x), 2), "z": round(float(z), 2), "yaw": round(yaw, 4),
                    "y": round(v[0] + PUD[m][3], 3), "teren_y": round(v[0], 3), "prevyseni": round(v[1], 2)})
-n_used = 0
+n_used = 0; ULICE = []
 for misto in MI["mista"]:
     if misto.get("stav") not in ("SCHVALENO",) or misto.get("typ") == "mlyn": continue
     sx, sz = misto["stred"]; typ = misto.get("usedlost")
@@ -270,7 +278,7 @@ for misto in MI["mista"]:
         # cesta, která místem vede: nejbližší vozová / hřebenová osa
         nej = min(((np.hypot(*(o - [sx, sz]).T).min(), i_, o) for i_, o, t in osy if t in ("vozova", "hrebenova")), key=lambda a: a[0])
         o = hust(nej[2]); dd = np.hypot(o[:, 0] - sx, o[:, 1] - sz); o = o[dd < misto["dosah_m"]]
-        modely = misto["modely"]; k = 0; n0 = len(stavby)
+        modely = misto["modely"]; k = 0; n0 = len(stavby); ULICE.append(o)
         for i in range(0, len(o) - 2, int(R["krok_hledani_m"])):   # hustá řada: parcely se nepřekrývají (zabrano), soused hned vedle
             t = o[min(i + 2, len(o) - 1)] - o[max(i - 2, 0)]; t = t / (np.linalg.norm(t) or 1.0); n_ = np.array([-t[1], t[0]])
             for strana in (1, -1):
@@ -364,9 +372,6 @@ for us in useds:
         if poly.intersects(zabrano.buffer(-0.01)): continue
         pl = los(rng, PO["plodiny"]); pole.append({"plodina": pl, "poly": poly, "F": F, "u": (u0 - dl, u0), "v": (a, b)})
         zabrano = zabrano.union(poly)
-        if pl == "strniste":
-            for _ in range(rozi(rng, PO["panaky_strniste"])):
-                q = F.w(rng.uniform(u0 - dl + 2, u0 - 2), rng.uniform(a + 1, b - 1)); us["drobne"].append(["panak_snopu", *q, rng.uniform(0, 6.28)])
 print("lánů", len(pole), {k: sum(1 for p in pole if p["plodina"] == k) for k in PO["plodiny"]})
 
 # ---------------------------------------------------------------- terén: plošiny pod domy a hospodářskými stavbami
@@ -394,6 +399,41 @@ np.save(out + ".npy", (Y + P["H"]).astype(np.float32)); json.dump(M, open(out + 
 # čte podle předpony (11. 11.: bez nich chyběla díra sklepa, pás koryt a nájezdy k mostům – hlídači)
 import glob, shutil
 for f in glob.glob(pre + "_*.npz"): shutil.copy(f, out + f[len(pre):])
+
+# ---------------------------------------------------------------- vyšlapáno (mista.json usedlosti.vyslapano): kde se chodí, je hlína
+# (Míša 12. 11. večer; KCD misa_kcd_04/14, Havran vesnice.py yard_dirt + ves_paths): ulice, náves, cestičky od vrat a dveří, okap, dvůr
+HL = VY["hlina"]; vy_plochy = []; vy_cary = []
+def k_ulici(a, smer, w, hl_):
+    """cestička z bodu a: rovne_ven_m ve směru smer, pak oblouk k nejbližšímu bodu vozové/hřebenové cesty (Havran ves_paths)"""
+    g1 = a + smer * VY["rovne_ven_m"]; j = HLAV[kh.query(g1)[1]]
+    body = [a * (1 - t) ** 2 + g1 * 2 * t * (1 - t) + j * t * t for t in np.linspace(0, 1, 13)]
+    vy_cary.append({"body": [[r3_(q[0]), r3_(q[1])] for q in body], "polosirka": w, "hlina": hl_, "druh": "chodnik"})
+r3_ = lambda a: round(float(a), 2)
+for o in ULICE: vy_cary.append({"body": [[r3_(q[0]), r3_(q[1])] for q in o[::2]], "polosirka": VY["ulice_polosirka_m"], "hlina": HL["ulice"], "druh": "ulice"})
+for s_ in studny:
+    vy_plochy.append({"poly": [[r3_(q[0]), r3_(q[1])] for q in Point(s_["x"], s_["z"]).buffer(VY["naves_polomer_m"], 8).exterior.coords[:-1]], "hlina": HL["naves"], "druh": "naves"})
+    k_ulici(np.array([s_["x"], s_["z"]]), np.zeros(2), VY["chodnik_polosirka_m"], HL["naves"])
+for us in useds:
+    F = us["F"]; vy_plochy.append({"poly": [[r3_(q[0]), r3_(q[1])] for q in us["dvur"].exterior.coords[:-1]], "hlina": HL["dvur"], "druh": "dvur"})
+    x_, z_, yw_ = us["ramec"]; m_ = [s for s in stavby if abs(s["x"] - x_) < 0.01 and abs(s["z"] - z_) < 0.01][0]["model"]
+    for o_ in [(m_, x_, z_, yw_)] + [tuple(h_) for h_ in us["hosp"]]:
+        vy_plochy.append({"poly": [[r3_(q[0]), r3_(q[1])] for q in Polygon(rohy(o_[1], o_[2], o_[3], o_[0], VY["okap_m"])).exterior.coords[:-1]], "hlina": HL["okap"], "druh": "okap"})
+    for v_ in us["vstupy"]:
+        vy_plochy.append({"poly": [[r3_(q[0]), r3_(q[1])] for q in v_["pred_poly"].exterior.coords[:-1]], "hlina": HL["pred_vstupem"], "druh": "pred_vstupem"})
+    if not us["ploty"]:   # otevřený dvůr (krčma): celý dvůr a plochy před vstupy volně k cestě (obal s nejbližšími body cesty)
+        from shapely.geometry import MultiPoint
+        rr = list(us["dvur"].exterior.coords) + [q for v_ in us["vstupy"] for q in v_["pred_poly"].exterior.coords]
+        rr += [tuple(HLAV[kh.query(q)[1]]) for q in rr]
+        vy_plochy.append({"poly": [[r3_(q[0]), r3_(q[1])] for q in MultiPoint(rr).convex_hull.exterior.coords[:-1]], "hlina": HL["dvur"], "druh": "vjezd_bez_vrat"})
+        continue
+    for b_ in us["brany"]:
+        a_ = (np.array(b_["a"]) + np.array(b_["b"])) / 2
+        k_ulici(a_, F.au, VY["vjezd_polosirka_m"] if b_["druh"] != "branka" else VY["chodnik_polosirka_m"], HL["chodnik"])
+        for v_ in us["vstupy"]:   # dveře mimo dvůr (do zahrádky) -> k brance
+            e_ = v_["c"] + v_["n"] * VS["pred_m"]
+            if b_["druh"] == "branka" and not us["dvur"].contains(Point(*e_)):
+                vy_cary.append({"body": [[r3_(e_[0]), r3_(e_[1])], [r3_(a_[0] - F.au[0]), r3_(a_[1] - F.au[1])], [r3_(a_[0]), r3_(a_[1])]], "polosirka": VY["chodnik_polosirka_m"] * 0.8, "hlina": HL["chodnik"], "druh": "chodnik"})
+print("vyšlapáno: ploch %d, cestiček a ulic %d" % (len(vy_plochy), len(vy_cary)))
 
 # ---------------------------------------------------------------- výstup (výšky z výsledného terénu)
 RZ = MI["modely"]["hospodarske"]["rozmery"]
@@ -428,7 +468,9 @@ used_out = [{"i": us["i"], "misto": us["misto"], "typ": us["typ"], "stred": [r3(
 json.dump({"popis": "stavby nových míst (nastroje/mista_rozmisteni.py z pravidla/svet/mista.json) – čte hra (hlavni.gd _mista domy, ves.gd hospodářské stavby, ploty, drobnosti, stromy, studna) a stavby_vegetace.py (půdorysy, dvory, zahrady, sady, pole)",
            "modely": MI["modely"], "stavby": stavby, "lod_ves": U["lod"], "ploty_pravidla": U["ploty"], "studna_pravidla": U["studna"],
            "usedlosti": used_out, "hospodarske": hosp_out, "drobne": drobne_out, "ploty": ploty_out, "brany": brany_out,
-           "stromy": stromy_out, "studny": studny,
+           "stromy": stromy_out, "studny": studny, "vyslapano": {"trida": VY["trida"], "plochy": vy_plochy, "cary": vy_cary},
+           "vstupy": [{"usedlost": us["i"], "stavba": v_["stavba"], "druh": v_["druh"], "c": [r3(v_["c"][0]), r3(v_["c"][1])], "n": [r3(v_["n"][0]), r3(v_["n"][1])], "sirka": r3(v_["w"]),
+                       "pred": pp(v_["pred_poly"])} for us in useds for v_ in us["vstupy"]],
            "pudorysy": [rohy(s["x"], s["z"], s["yaw"], s["model"], 0.3) for s in stavby] + [rohy(h["x"], h["z"], h["yaw"], h["model"], 0.3) for h in hosp_out],
            "dvory": [pp(us["dvur"]) for us in useds], "zahrady": [pp(us["zahrada"]) for us in useds], "sady": [pp(us["sad"]) for us in useds],
            "pole": [{"plodina": p["plodina"], "poly": pp(p["poly"])} for p in pole]},

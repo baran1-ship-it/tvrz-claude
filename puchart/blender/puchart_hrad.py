@@ -19,6 +19,7 @@ import hrad_geom
 
 K = H.K
 D = json.load(open(os.path.join(K, "pravidla/svet/hrad_puchart.json")))
+VYBAVENI = D.get("vybaveni", {}).get("stavet", True)   # nábytek, sudy, truhly, lože, kruhy s řetězy – pravidla hrad_puchart.json vybaveni
 A, B = D["A"], D["B"]
 
 # ------------------------------------------------------------------ kolize zdiva automaticky
@@ -1148,12 +1149,14 @@ def klenba(P, o, du, dv, u0, u1, v0, v1, osa, y_patka, vzepeti, tl=0.35, mat="kv
 
 def kruh_retez(P, p, nrm, y, delka=0.9):
     """Železný kruh ve zdi s řetězem (kobky, hladomorna)."""
+    if not VYBAVENI: return   # Míša 12. 11.: vybavení si dá sám z pískoviště
     nrm = hz(nrm).normalized(); x = UP.cross(nrm); c = p + nrm * 0.06 + UP * y
     pts = [c + x * (0.07 * math.cos(t)) + UP * (0.07 * math.sin(t)) for t in [i / 10 * 2 * math.pi for i in range(11)]]
     for q0, q1 in zip(pts, pts[1:]): P.rod(q0, q1, 0.013, 5, "zelezo")
     if H.DETAIL: kit.chain(P, c - UP * 0.07, c - UP * 0.07 - UP * delka + nrm * 0.15, sag=0.05)
 
 def sud(P, p, y):
+    if not VYBAVENI: return   # Míša 12. 11.: vybavení si dá sám z pískoviště
     P.lathe(M(p + UP * y), [(0.3, 0), (0.37, 0.25), (0.39, 0.45), (0.37, 0.65), (0.3, 0.9)], 12, "dub")
     kol(P, p + UP * (y + 0.45), Vector((1, 0, 0)), (0.52, 0.9, 0.52))   # vepsaný do dna 0,3 m (hrana kvádru 0,7 m byla mimo sud – povrch_kolize)
 
@@ -1266,10 +1269,12 @@ def _pricka(P, W, d, s, u, v0, v1, y0, y1, dvere_v=None, sirka_dv=0.9):
         for sg in (-1, 1): P.box(M(W(u, dvere_v + sg * (sirka_dv / 2 + 0.06), (y0 + y0 + 2.15) / 2), basis=frame(d)), (0.12, 2.15, 0.16), "dub")   # zárubeň
 
 def _lavice(P, q, d, delka=1.8):
+    if not VYBAVENI: return   # Míša 12. 11.: vybavení si dá sám z pískoviště
     P.box(M(q + UP * 0.45, basis=frame(d)), (0.35, 0.06, delka), "dub", collide=True)
     for k in (-delka / 2 + 0.25, delka / 2 - 0.25): P.box(M(q + d * k + UP * 0.21, basis=frame(d)), (0.25, 0.42, 0.08), "dub")
 
 def _stul(P, q, d, delka=2.4, lavice=True):
+    if not VYBAVENI: return   # Míša 12. 11.: vybavení si dá sám z pískoviště
     s_ = d.cross(UP).normalized()
     P.box(M(q + UP * 0.75, basis=frame(d)), (0.9, 0.08, delka), "dub", collide=True)
     for k in (-delka / 2 + 0.3, delka / 2 - 0.3): P.box(M(q + d * k + UP * 0.37, basis=frame(d)), (0.7, 0.74, 0.1), "dub")   # kozy stolu
@@ -1278,11 +1283,13 @@ def _stul(P, q, d, delka=2.4, lavice=True):
         for sg in (-1, 1): _lavice(P, q + s_ * sg * 0.75, d, delka - 0.2)
 
 def _truhla(P, q, d):
+    if not VYBAVENI: return   # Míša 12. 11.: vybavení si dá sám z pískoviště
     P.box(M(q + UP * 0.3, basis=frame(d)), (0.55, 0.6, 1.1), "dub", collide=True)
     for k in (-0.4, 0.4): P.box(M(q + d * k + UP * 0.3, basis=frame(d)), (0.58, 0.62, 0.05), "zelezo")   # kování
 
 def _loze(P, q, d, s_):
     """Lože: rám z fošen na nohách, slamník, houně (truhlářsky: rám čepovaný do nohou)."""
+    if not VYBAVENI: return   # Míša 12. 11.: vybavení si dá sám z pískoviště
     P.box(M(q + UP * 0.32, basis=frame(d)), (1.0, 0.24, 2.0), "dub", collide=True)
     for a_ in (-0.9, 0.9):
         for b_ in (-0.42, 0.42): P.box(M(q + d * a_ + s_ * b_ + UP * 0.2, basis=frame(d)), (0.1, 0.4, 0.1), "dub")
@@ -1378,9 +1385,9 @@ def palac_A(P, p0, p1, bd, PI):
     if PK_:   # podkroví: sklad (sudy, pytle obilí) a spaní čeledi (slamníky) u kolenních stěn
         for u_ in (1.4, 2.3): sud(P, W(u_, -1.2), F2)
         for k_, u_ in enumerate((3.4, 4.0, 4.6)):
-            P.lathe(M(W(u_, -1.3, F2)), [(0.2, 0), (0.28, 0.15), (0.26, 0.5), (0.12, 0.62)], 7, "prkna_ven")   # pytle
+            if VYBAVENI: P.lathe(M(W(u_, -1.3, F2)), [(0.2, 0), (0.28, 0.15), (0.26, 0.5), (0.12, 0.62)], 7, "prkna_ven")   # pytle
         for u_ in (10.2, 11.2):
-            P.box(M(W(u_, 1.25, F2) + UP * 0.08, basis=frame(s)), (0.8, 0.16, 1.9), "prkna_ven", collide=None)   # slamník
+            if VYBAVENI: P.box(M(W(u_, 1.25, F2) + UP * 0.08, basis=frame(s)), (0.8, 0.16, 1.9), "prkna_ven", collide=None)   # slamník
     # dveře z pavlače (portálky v nádvorní zdi; otvory dělá budova_k), pavlač, venkovní schody
     PV = DS["pavlac"]; sv = DS["schody_ven"]; dw = DS["dvere_sirka"]
     for dp in DS["dvere_pavlac"]:
@@ -2035,7 +2042,7 @@ def stavba(suf):
         print("světel z oken", len(shl_), "z oken", len(H.OKNA_SVETLA))
         json.dump({"popis": "nástupy mostů [x, z, y, směr ven x, z] – cesty.py zvedne konec cesty na y (Míša 9. 11.: nájezd jako hranol)", "nastupy": NASTUPY, "nabehy": NABEHY},
                   open(os.path.join(K, "hra/data/nastupy_mostu.json"), "w"), ensure_ascii=False)
-        json.dump({"popis": "Pochodně (OmniLight3D bez stínů) ve věžích, hladomorně a sklepě – generuje blender/puchart_hrad.py.", "svetla": SV},
+        json.dump({"popis": "Pochodně (OmniLight3D bez stínů) ve věžích, hladomorně a sklepě – generuje blender/puchart_hrad.py.", "louce": D.get("vybaveni", {}).get("svetla_louci", True), "svetla": SV},
                   open(os.path.join(K, "hra/data/svetla.json"), "w"), ensure_ascii=False, indent=1)
         json.dump({"popis": "Trasy testu průchodu (generuje blender/puchart_hrad.py ze stejné geometrie jako hrad): body [x, z, y_podlahy|null], "
                    "postava jde po přímkách, musí dojít ke každému bodu (±0,6 m) ve výšce podlahy (±0,5 m).", "trasy": TR},

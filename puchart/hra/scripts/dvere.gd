@@ -18,6 +18,9 @@ var retezy: Array = []   # {mmi, a (svět), uzel, e (místní)}
 var tlacitko: Button
 var _blizko := ""
 var _clanek: TorusMesh
+var _zvuk := {}       # zvuky Havrana (hra/zvuky/pohyb, Kenney CC0): skupina -> {hrac: přehrávač u dílu, smycka: řetěz/rachot}
+var _tik := {}
+const ZV := "res://zvuky/pohyb/"
 
 func zacni(h: Node, vrstva: CanvasLayer, jen_mosty := false) -> void:
 	hlavni = h
@@ -41,6 +44,9 @@ func zacni(h: Node, vrstva: CanvasLayer, jen_mosty := false) -> void:
 		if not dily.has(g): dily[g] = []; t[g] = 0.0; cil[g] = 0.0; stav[g] = true
 		dily[g].append({"uzel": u, "zaklad": u.transform, "e": e})
 		if k != "navijak": druh[g] = k; doba[g] = float(e.get("dur", 1.0))
+		if not _zvuk.has(g): _zvuk[g] = {}
+		var hp := AudioStreamPlayer3D.new(); hp.max_distance = 60.0; hp.unit_size = 8.0 if k != "navijak" else 3.0; u.add_child(hp)
+		_zvuk[g]["navijak" if k == "navijak" else "dil"] = hp   # Havran pohyb.gd: zvuk u dílu, rohatka u navijáku
 		if e.has("use"): mista[g] = Vector3(e["use"][0], e["use"][1], e["use"][2])
 		for ch: Array in e.get("chains", []):
 			var mmi := MultiMeshInstance3D.new(); mmi.top_level = true
@@ -59,6 +65,39 @@ func prepni(g: String) -> void:
 	if not dily.has(g): return
 	stav[g] = not stav[g]; cil[g] = 0.0 if stav[g] else 1.0
 	if tlacitko: tlacitko.text = popis(g)
+	var z: Dictionary = _zvuk.get(g, {})
+	match String(druh.get(g, "dvere")):   # Havran pohyb.toggle
+		"most":
+			for kl in ["dil", "navijak"]:
+				if z.has(kl):
+					var sm := AudioStreamPlayer3D.new(); sm.stream = _ogg("retez", true); sm.max_distance = 60.0; sm.unit_size = 12.0
+					sm.pitch_scale = 0.8 if not stav[g] else 0.95; (z[kl] as Node).get_parent().add_child(sm); sm.play()   # rachot řetězu po celou dobu pohybu
+					if z.has("smycka_" + kl): (z["smycka_" + kl] as Node).queue_free()
+					z["smycka_" + kl] = sm
+		"vrata": _hraj(z.get("dil"), "vrata_otevrit" if not stav[g] else "vrzani1", 0.5)
+		_: _hraj(z.get("dil"), "dvere_otevrit" if stav[g] else "vrzani1", randf_range(0.9, 1.05))
+	var pr := get_parent()
+	if druh.get(g, "") == "most" and pr != null and pr.get("hv") != null and pr.hv.get("hud") != null:   # z ochozu most nevidí – nápis
+		pr.hv.hud.toast("Naviják – padací most se " + ("spouští" if stav[g] else "zvedá"), 2.5)
+
+func _ogg(jm: String, smycka := false) -> AudioStreamOggVorbis:
+	var a: AudioStreamOggVorbis = load(ZV + jm + ".ogg")
+	if smycka: a = a.duplicate(); a.loop = true
+	return a
+
+func _hraj(p: Variant, jm: String, vyska := 1.0) -> void:
+	if p == null: return
+	var hp := p as AudioStreamPlayer3D; hp.stream = _ogg(jm); hp.pitch_scale = vyska; hp.play()
+
+## konec pohybu: dopad mostu / zapadka, konec rachotu (Havran pohyb._process_vlastni)
+func _dojel(g: String) -> void:
+	var z: Dictionary = _zvuk.get(g, {})
+	for kl in ["dil", "navijak"]:
+		if z.has("smycka_" + kl): (z["smycka_" + kl] as Node).queue_free(); z.erase("smycka_" + kl)
+	match String(druh.get(g, "dvere")):
+		"most": _hraj(z.get("dil"), "dopad_most" if stav[g] else "zapadka", 1.0 if stav[g] else 0.7)
+		"vrata": _hraj(z.get("dil"), "vrata_zavrit" if not stav[g] else "zapadka", 0.55)
+		_: if not stav[g]: _hraj(z.get("dil"), "dvere_zavrit")
 
 func popis(g: String) -> String:
 	if druh.get(g, "") == "most": return "Zvednout padací most" if stav[g] else "Spustit padací most"
@@ -69,6 +108,10 @@ func _process(dt: float) -> void:
 	for g: String in dily:
 		if absf(float(t[g]) - float(cil[g])) < 1e-4: continue
 		t[g] = move_toward(float(t[g]), float(cil[g]), dt / maxf(0.05, float(doba.get(g, 1.0))))
+		if absf(float(t[g]) - float(cil[g])) < 1e-4: _dojel(g)
+		elif druh.get(g, "") == "most":   # rohatka navijáku během pohybu (Havran: tik po 0,13 s)
+			_tik[g] = float(_tik.get(g, 0.0)) + dt
+			if float(_tik[g]) > 0.13: _tik[g] = 0.0; _hraj(_zvuk.get(g, {}).get("navijak"), "rohatka", randf_range(0.55, 0.7) if not stav[g] else randf_range(0.75, 0.9))
 		var k: float = t[g]; k = k * k * (3.0 - 2.0 * k)   # plynulý rozjezd a dojezd (Havran pohyb._apply)
 		for d: Dictionary in dily[g]:
 			var e: Dictionary = d["e"]; var z: Transform3D = d["zaklad"]; var u: Node3D = d["uzel"]

@@ -1,5 +1,6 @@
 {
  "popis": "Pochodně (OmniLight3D bez stínů) ve věžích, hladomorně a sklepě – generuje blender/puchart_hrad.py.",
+ "louce": false,
  "svetla": [
   {
    "pos": [

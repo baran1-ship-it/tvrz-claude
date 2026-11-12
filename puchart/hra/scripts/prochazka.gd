@@ -61,6 +61,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	if FileAccess.file_exists("res://data/rozpocty.json"):
 		_obraz_volby = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json"))["obraz_3d"]["volby"]
 	var dv: Node = load("res://scripts/dvere.gd").new(); dv.name = "Dvere"; add_child(dv); dv.zacni(h, self); dvere = dv   # vrata a dveře
+	var ak: Control = load("res://scripts/akce.gd").new(); ak.name = "Akce"; add_child(ak); ak.zacni(self)   # akce předmětů jako Havran (zapálit, otevřít…)
 	var pd: Node = load("res://scripts/pad.gd").new(); pd.name = "Pad"; pd.proch = self; pd.hrac = p; add_child(pd)
 	var vp := get_viewport().get_visible_rect().size
 	# ikony vpravo nahoře jako v Havranovi (hud.gd _btn_menu/_btn_map/_btn_bag/_btn_build; Míša 10. 11.: „mrkni, jak má ikony

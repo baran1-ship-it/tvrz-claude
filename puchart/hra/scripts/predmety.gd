@@ -1053,7 +1053,7 @@ func souhrn_interieru() -> String:
 func _process(_delta: float) -> void:
 	var t_us := Time.get_ticks_usec()
 	_process_vlastni(_delta)
-	var dg: Object = Engine.get_meta("diag", null)
+	var dg: Object = (Engine.get_meta("diag") if Engine.has_meta("diag") else null)
 	if dg:
 		dg.cas("predmety", Time.get_ticks_usec() - t_us)
 
