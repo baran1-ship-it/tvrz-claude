@@ -1272,3 +1272,8 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   (COLOR.r) – v dílu hra mění terén (`_ryb_hraz_toky`), zapečená hloubka nesedí; useknutí = `svet._toky_voda_v_dilu`.
   Další krok: změřit COLOR.r hladiny přítoku proti skutečné hloubce nad terénem dílu (rozpor Blender × Godot → zapsat do
   `rozpory_blender_godot.md`), test `ryb_napojeni` rozšířit o hloubku pro barvu a rostliny přes korytem (výška trsu).
+- **12. 11. – CHYBA úklidu importů (oprava výše):** `grep -o` na `*.import` s binárními znaky vypíše „binary file
+  matches“ místo cesty → importy jako lavice vypadaly osiřelé a jejich `.scn` jsem smazal (zdrojová `.glb` lokálně
+  nejsou, jsou jen v balících `data/*.pck.*`). Obnoveno nástrojem `tools/obnov_importy.py` (čte `.import` binárně,
+  vytáhne chybějící soubory z PCK po částech, varianty textur jen když žádná lokálně není, stop pod 900 MB).
+  **Osiřelé importy už nemazat** – úspora 300 MB nestála za riziko; čistit jen vlastní snímky, logy, scratchpad.
