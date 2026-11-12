@@ -23,7 +23,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	if OS.get_environment("PUCHART_JEN") != "": jmena = []   # ladění: jen vybrané testy (_konec), bez tras
 	if OS.get_environment("PUCHART_TRASA") != "": jmena = [OS.get_environment("PUCHART_TRASA")]   # ladění: jen jedna trasa
 	hrac.set_physics_process(true)
-	_dvere()   # pohyblivé díly s kolizí jako ve hře (padací mosty mají kolizi jen z dvere.gd – bez ní trasy přes most padaly, 12. 11.)
+	var clm := CanvasLayer.new(); add_child(clm); var dvm: Node = load("res://scripts/dvere.gd").new(); clm.add_child(dvm); dvm.zacni(hlavni, clm, true)   # padací mosty mají kolizi jen z dvere.gd (bez ní trasy přes most padaly, 12. 11.); křídla dveří zkouší test vrat
 	_start_trasy()
 
 func _y(b: Array) -> float:

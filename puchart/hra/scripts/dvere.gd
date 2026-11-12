@@ -19,7 +19,7 @@ var tlacitko: Button
 var _blizko := ""
 var _clanek: TorusMesh
 
-func zacni(h: Node, vrstva: CanvasLayer) -> void:
+func zacni(h: Node, vrstva: CanvasLayer, jen_mosty := false) -> void:
 	hlavni = h
 	if not FileAccess.file_exists("res://data/pohyb.json"): return
 	var hrad: Node = h.get_node_or_null("Hrad")
@@ -31,6 +31,7 @@ func zacni(h: Node, vrstva: CanvasLayer) -> void:
 		if u == null: continue
 		var g: String = e.get("group", e["name"])
 		var k := String(e.get("kind", "dvere"))
+		if jen_mosty and k != "most": continue   # test průchodu: trasy jsou pro otevřené dveře, kolizi potřebují jen padací mosty
 		var tel := AnimatableBody3D.new(); tel.sync_to_physics = false   # s true (Jolt) zůstala kolize v otevřené poloze – zavřená vrata pustila (pruchod:vrata_funkce)
 		for c: Array in e.get("cols", []):
 			var sh := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(c[3], c[4], c[5])

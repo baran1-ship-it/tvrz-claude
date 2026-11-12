@@ -865,7 +865,7 @@ def most2(P, a, ya, b, yb, w, Lp, na_terenu=True, vyk=None, navijak=None):
         kotvy = [bb + s * (sx * (Wv / 2 - 0.08)) + UP * (yb + Hv - 0.08) for sx in (-1, 1)]
         oka = [[sx * (wb / 2 + 0.02), 0.0, Lp - 0.25] for sx in (-1, 1)]
         kit.movable(gid, "most", mg, lambda Q: kit.drawbridge(Q, Matrix.Identity(4), wb, Lp, 0.0),
-                    cols=[((0.0, -0.12, Lp / 2), (wb + 0.2, 0.24, Lp))], group=gid, open=-(pm["zdvih_st"] + math.degrees(sk)), dur=pm["doba_s"],
+                    cols=[((0.0, -0.15, Lp / 2), (wb + 0.2, 0.24, Lp))], group=gid, open=-(pm["zdvih_st"] + math.degrees(sk)), dur=pm["doba_s"],
                     chains=[[list(k_), o_] for k_, o_ in zip(kotvy, oka)])
         if navijak:
             c = navijak["c"]; ax = navijak["osa"]; Ld = navijak.get("delka", pm["buben_delka_m"]); vi = navijak["dovnitr"]
@@ -1868,18 +1868,21 @@ def zabradli_stavba():
         for j in range(i + 1, len(E_)):
             rj, kj = E_[j]
             if ri is rj: continue
-            if (ri[ki] - rj[kj]).length < 0.45 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: spoj(i, j)
+            if (ri[ki] - rj[kj]).length < 0.45 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: par[f(i)] = f(j)
     for i in range(len(E_)):   # konce blíž než 0,75 m se spojí (dřív 0,45 – zbyly dva konce 0,54 m od sebe: mezera, dva krajní sloupky)
         ri, ki = E_[i]
         for j in range(i + 1, len(E_)):
             rj, kj = E_[j]
-            if ri is not rj and (ri[ki] - rj[kj]).length < 0.75 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: spoj(i, j)
+            if ri is not rj and (ri[ki] - rj[kj]).length < 0.75 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: par[f(i)] = f(j)
     sk = {}
     for i in range(len(E_)): sk.setdefault(f(i), []).append(i)
     for g in sk.values():
         if len(g) < 2: continue
         c = sum((E_[i][0][E_[i][1]] for i in g), Vector()) / len(g); yy = max(E_[i][0]["y" + E_[i][1]] for i in g)
-        for i in g: E_[i][0][E_[i][1]] = c.copy(); E_[i][0]["y" + E_[i][1]] = yy; E_[i][0]["s" + E_[i][1]] = True
+        oba_ = {id(E_[i][0]) for i in g if sum(1 for j in g if E_[j][0] is E_[i][0]) > 1}   # kus s oběma konci ve skupině by se slil do bodu (12. 11.: konec pavlače paláce zmizel) – zůstane, jak je
+        for i in g:
+            if id(E_[i][0]) in oba_: continue
+            E_[i][0][E_[i][1]] = c.copy(); E_[i][0]["y" + E_[i][1]] = yy; E_[i][0]["s" + E_[i][1]] = True
     # T-spoj: volný konec do 0,6 m od jiného zábradlí (stejná výška) se dotáhne na jeho linii – sloupek ve spoji, žádná mezera
     for r in ZAB_REC:
         for k in ("a", "b"):
