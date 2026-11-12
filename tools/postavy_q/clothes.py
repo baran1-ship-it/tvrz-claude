@@ -197,6 +197,54 @@ def tube(obj, co, sel_mask, z_top, z_bot, name, N=64, rows=None, ease=0.012, fla
     ob = bpy.data.objects.new(name, me)
     return ob, center, R, zs
 
+def nad_vrstvou(ob, pod, mezera, kol=3):
+    """Vrstvení oděvu (12. 11., límec kápě: vyhlazená slupka se nořila až 18 mm pod svrchnici a ta prosvítala fleky):
+    každý vrchol ob musí ležet aspoň mezera nad povrchem všech oděvů pod ním (pod = seznam objektů), jinak se posune
+    po normále nejbližší plochy spodní vrstvy. Vrací počet posunutých vrcholů (kontrola sestavení)."""
+    from mathutils.bvhtree import BVHTree
+    stromy = [BVHTree.FromPolygons([v.co.copy() for v in o.data.vertices], [p.vertices[:] for p in o.data.polygons])
+              for o in pod if o is not None and len(o.data.polygons)]
+    posun = 0
+    for _ in range(kol):
+        n = 0
+        for v in ob.data.vertices:
+            for t in stromy:
+                loc, nor, i, d = t.find_nearest(v.co)
+                if loc is None or d > 0.08: continue
+                s = (v.co - loc).dot(nor)
+                if s < mezera:
+                    v.co = v.co + nor * (mezera - s); n += 1
+        posun = max(posun, n)
+        if n == 0: break
+    ob.data.update()
+    return posun
+
+def pod_vrstvou(dolni, horni, mezera, dosah=0.03):
+    """Vrstvení po decimaci exportu (12. 11., snímek sedláka: svrchnice fleky skrz límec kápě, nohavice skrz sukni
+    kabátce - každá vrstva se decimuje zvlášť a plochy se posunou o cm): vrcholy spodních vrstev, které leží blíž než
+    mezera pod povrchem vrchních (nebo nad ním), se stáhnou po normále vrchní plochy na -mezera. Dosah = jen pod vrchní
+    vrstvou, ne kolem jejího okraje. Počítá ve světových souřadnicích. Vrací počet posunutých vrcholů."""
+    from mathutils.bvhtree import BVHTree
+    stromy = []
+    for o in horni:
+        if o is None or not len(o.data.polygons): continue
+        mw = o.matrix_world
+        stromy.append(BVHTree.FromPolygons([mw @ v.co for v in o.data.vertices], [p.vertices[:] for p in o.data.polygons]))
+    n = 0
+    for o in dolni:
+        mw = o.matrix_world; mi = mw.inverted()
+        for v in o.data.vertices:
+            w = mw @ v.co
+            for t in stromy:
+                loc, nor, i, d = t.find_nearest(w)
+                if loc is None or d > dosah: continue
+                s = (w - loc).dot(nor)
+                if s > -mezera:
+                    w = w - nor * (s + mezera); n += 1
+            v.co = mi @ w
+        o.data.update()
+    return n
+
 def hide_body_under(obj, mask, name="skryto"):
     """Plochy těla schované pod oblečením odstranit (aby nepropichovaly) – přes masku vertex group."""
     g = obj.vertex_groups.get(name) or obj.vertex_groups.new(name=name)

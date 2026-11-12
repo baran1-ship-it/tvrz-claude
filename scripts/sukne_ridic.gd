@@ -100,11 +100,21 @@ func _process_modification() -> void:
 			var kn: Vector3 = P["calf_" + s]
 			var an: Vector3 = P["foot_" + s]
 			var k_ := _od_osy(th, kn, kn, koren, r_s + tl)
+			# od kolena latka pada svisle (tize); holen ji jen odtlacuje (kapsle PRow), kdyz je kotnik pred svislici -
+			# 12. 11. kucharka vsede: nohy zastrcene pod lavici, lem po holeni sel dozadu skrz prkno lavice
 			var a_ := _od_osy(kn, an, an, k_, r_h + tl)
-			drahy.append([koren, k_, a_, a_ - nahoru * 0.3])
+			var svisle := Vector3(k_.x, a_.y, k_.z)
+			var ven := k_ - koren
+			ven.y = 0.0
+			if ven.length_squared() > 1e-8 and (a_ - svisle).dot(ven.normalized()) < 0.0:
+				a_ = svisle
+			# po stehne (12. 11. test_sukne: primka pas-koleno rizla stehno 2-5 cm od osy): body na tretinach stehna
+			var s1 := _od_osy(th, kn, th.lerp(kn, 0.33), koren, r_s + tl)
+			var s2 := _od_osy(th, kn, th.lerp(kn, 0.66), koren, r_s + tl)
+			drahy.append([koren, s1, s2, k_, a_, a_ - nahoru * 0.3])
 		var ws := wl + wr
 		var dr: Array = []
-		for q in 4:
+		for q in (drahy[0] as Array).size():
 			dr.append(((drahy[0][q] as Vector3) * wl + (drahy[1][q] as Vector3) * wr) / maxf(ws, 1e-5))
 		var cile: Array = [koren]
 		var s_ := 0.0

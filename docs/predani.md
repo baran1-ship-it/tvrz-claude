@@ -1280,3 +1280,12 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - **Disk 12. 11. – řešení:** `.git` měl 7,5 GB volných (nezabalených) objektů, všechny dosažitelné (`git prune
   --dry-run` = 0). Zabaleno po dávkách 3000 (`git pack-objects` + `git prune-packed`, žádná nová místa naráz) →
   volno 0,6 → 5,4 GB. Při nedostatku místa nejdřív tohle, ne mazat importy.
+
+## 12. 11. – oděv: vrstvy a sukně vsedě
+- **Límec kápě s fleky** (sedlák): vyhlazená slupka se nořila až 18 mm pod svrchnici (měřeno BVH v Blenderu, 29/308 vrcholů);
+  navíc každá vrstva se v exportu decimuje zvlášť → plochy se posunou o cm a spodní vrstva prosvítá (i nohavice skrz kabátec).
+  Pravidlo: `clothes.nad_vrstvou` (při stavbě) a `clothes.pod_vrstvou` po decimaci v `q_export2.py` (pořadí `VRSTVY`
+  zevnitř ven, mezera `kroj.vrstva_mezera_m` 6 mm). Nový oděv = zařadit do `VRSTVY`.
+- **Sukně vsedě skrz lavici** (kuchařka): řidič vedl lem po holeni dozadu pod lavici. Látka od kolena padá svisle,
+  holeň ji jen odtlačuje dopředu (`sukne_ridic.gd`). Test `tools/test_sukne.gd` (lem za kolenem, látka ve stehně).
+- Pozor: `sestav.sh` na konci maže `/tmp/postavy_q/src` a `qd_*.blend` – pro měření v Blenderu znovu rozbalit (viz sestav.sh).
