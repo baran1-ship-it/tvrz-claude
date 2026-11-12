@@ -238,6 +238,7 @@ func _svetla(h: Node3D) -> void:
 ## na 256 px – Havran 0.59: 2k textury předmětů = záseky a pád při vstupu do budovy), načtené jednou při startu.
 ## Paprsek dolů najde podlahu, v 8 směrech nejbližší stěnu (≤ 3 m), světlo se přesune k plameni.
 var _k_svicnum: Array = []
+var _svicnu_bez := 0
 var _svicnu := 0
 func _svicny() -> void:
 	for i in 4: await get_tree().physics_frame   # kolize hradu (_kolize_hradu deferred)
@@ -260,8 +261,9 @@ func _svicny() -> void:
 			if r.is_empty() or absf((r["normal"] as Vector3).y) >= 0.3: continue
 			if o.distance_to(r["position"]) < nd_k: nd_k = o.distance_to(r["position"]); kraj = r
 			if o.distance_to(r["position"]) < nd and _plna_zed(ss, r, y0): nd = o.distance_to(r["position"]); nej = r
-		if nej.is_empty() and not kraj.is_empty() and sc.has("svicen") and typ in ["louc", "svicen"]: typ = "svicen"; nej = kraj   # u světla není plná zeď (dveře, okno, roh): stojací svícen ke zdi místo louče (ne doprostřed místnosti – průchod)
-		if nej.is_empty(): continue
+		typ = "louc"   # Míša 12. 11.: „nechci svícny, chci louče; radši je tam nedávej, dám si je sám z pískoviště“
+		if nej.is_empty():   # bez plné rovné zdi louč nedávat a světlo vypnout (svítilo by z ničeho)
+			l.visible = false; _svicnu_bez += 1; continue
 		var nrm: Vector3 = nej["normal"]; nrm.y = 0; nrm = nrm.normalized()
 		var uzel := Node3D.new(); l.get_parent().add_child(uzel)
 		if typ == "svicen":
@@ -280,7 +282,8 @@ func _svicny() -> void:
 		for mi in uzel.find_children("*", "GeometryInstance3D", true, false): (mi as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		l.light_energy = maxf(l.light_energy, 2.2); l.omni_range = maxf(l.omni_range, 8.0); l.omni_attenuation = 0.7   # místnost nesmí zůstat tmavá
 		_svicnu += 1
-	print("SVICNY %d/%d" % [_svicnu, _k_svicnum.size()])
+	print("SVICNY %d/%d" % [_svicnu + _svicnu_bez, _k_svicnum.size()])
+	print("LOUCE %d, bez plné zdi vynecháno %d" % [_svicnu, _svicnu_bez])
 
 ## Zeď pro držák musí být plná a rovná (Míša 12. 11.: louč visela v prostoru u dveří – paprsek trefil hranu ostění):
 ## kolem bodu ±0,4 m do stran a v rozsahu výšky louče (1,4–2,3 m nad podlahou) musí být zeď ve stejné rovině (±8 cm).

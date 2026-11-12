@@ -114,9 +114,16 @@
     1,
     2,
     3,
-    4
+    4,
+    7
    ],
-   "jistota": "NAVRH (zdroje ochoz nepopisují; plášťová zeď s cimbuřím na kresbě)"
+   "jistota": "NAVRH (zdroje ochoz nepopisují; plášťová zeď s cimbuřím na kresbě)",
+   "usek5_za_budovou": {
+    "sirka": 0.6,
+    "pred_stitem_m": 0.65
+   },
+   "usek7_od_m": 13.75,
+   "pozn_12_11": "Míša 12. 11.: „ochoz a zábradlí useknuté“ u budovy A_sz a „taky na pravé části paláce“: ochoz pokračuje podél A_sz (odsazená 1,2 m od hradby → pavlač 0,6 m) až ke štítu u rohu (štít stojí na koruně hradby); na úseku 7 od severního štítu paláce (13,1 + 0,65) do rohu k ochozu úseku 0. Západní úsek 6 bez ochozu (z obou stran štíty budov – nepřístupný)."
   },
   "schody": {
    "usek": 4,
@@ -972,6 +979,31 @@
     "sirka": 5.0,
     "y": 32.6,
     "prechod_m": 3.0
+   },
+   {
+    "id": "A_vezicka_vstup",
+    "polygon": [
+     [
+      10.3,
+      15.45
+     ],
+     [
+      13.0,
+      15.45
+     ],
+     [
+      13.0,
+      11.6
+     ],
+     [
+      10.3,
+      11.6
+     ]
+    ],
+    "y": 37.9,
+    "prechod_m": 2.0,
+    "zdroj": "Míša 12. 11.: „srovnat terén u malé věže horního hradu“ – nádvoří tu klesá k V hradbě ~0,6 m/m (38,6 → 36,4 na 4 m); vyrovnaná plocha před dveřmi přízemí věžičky (práh = terén + 0,02)",
+    "jistota": "NAVRH (úprava dvora u vstupu)"
    }
   ],
   "zarezy": [

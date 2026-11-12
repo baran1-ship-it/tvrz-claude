@@ -1467,6 +1467,10 @@ def postav_A(P):
         s0_3 = w / 2 + zo_ - 0.02   # od líce věže (zarovnaná věž má střed posunutý o zo_ – ochoz i zábradlí začínaly uvnitř komory: Míša 12. 11. „středem nešlo projít, něco tam leželo“)
         if s1_3 - s0_3 > 1.0:
             ochoz2(P, a3, b3, t, kor, vn3, s0_3, s1_3, lehka=True)
+        oz3_ = A["ochoz"].get("usek%d_za_budovou" % ri)   # Míša 12. 11.: ochoz useknutý u budovy – budova odsazená od hradby, ochoz pokračuje za ní do rohu
+        if oz3_ and pal:
+            sw3_ = oz3_["sirka"]; e3_ = max(bd_["do_m"] for bd_ in pal) - oz3_["pred_stitem_m"]   # podél budovy až ke štítu u rohu (štít stojí na koruně – dál ochoz nevede)
+            if e3_ - s1_3 > 1.0: ochoz2(P, a3, b3, t, kor, vn3, s1_3, e3_, sirka=sw3_, lehka=True)
             TR["A_vezicka_ochoz_palac"] = [bod(rc - sS * 0.3, kor), bod(rc + sS * (w / 2 - tv - 0.3) + dE * o3, kor),
                                            bod(pochozi(U, ri, s0_3 + 0.6), kor), bod(pochozi(U, ri, s1_3 - 0.5), kor)]
     svetlo(rc + UP * (kor + 2.0), 0.9, 4.0); svetlo(rc + UP * (kor + vz["patro_nad_ochozem"] + 2.0), 0.9, 4.0)
@@ -1509,14 +1513,15 @@ def postav_A(P):
     plosina(P, pod, d, 1.6, sch["odsazeni"] + sch["sirka"] / 2 - t / 2 - 0.8, kor, sloupy=False)   # nese ji zeď (trámy vetknuté do zdi); sloupy procházely roubenou budovou pod ní (hlídač spojů 3. 11.)
     mez = (s_top - 1.6, s_top + 0.05)
     oz = A["ochoz"]
+    wk_ = oz["useky"]   # úseky s ochozem (pro rohy zábradlí)
     for i in oz["useky"]:
         a, b, L, d, vn = U[i]
-        s0 = oz.get("usek%d_od_m" % i, -t / 2); s1 = L + t / 2
+        s0 = oz.get("usek%d_od_m" % i, -t / 2); s1 = oz.get("usek%d_do_m" % i, L + t / 2); sw_ = oz.get("usek%d_sirka" % i, 0.9)
         if i == ri - 1: s1 = L - w / 2 - zo_       # východní zeď končí u věžičky
-        r0, r1 = zabr_konce(U, i, t, oz["useky"])
+        r0, r1 = zabr_konce(U, i, t, wk_, sw_)
         if "usek%d_od_m" % i in oz: r0 = None
-        if i == ri - 1: r1 = None
-        ochoz2(P, a, b, t, kor, vn, s0, s1, mezery=[mez] if i == sch["usek"] else (), r0=r0, r1=r1, lehka=True)   # prkna na pokos v rozích (Míša 10. 11.: křížení desek na ochozu A – kit.deck v rohu přes sebe)
+        if i == ri - 1 or "usek%d_do_m" % i in oz: r1 = None
+        ochoz2(P, a, b, t, kor, vn, s0, s1, mezery=[mez] if i == sch["usek"] else (), r0=r0, r1=r1, lehka=True, sirka=sw_)   # prkna na pokos v rozích (Míša 10. 11.: křížení desek na ochozu A – kit.deck v rohu přes sebe)
     H.studna(P, *A["studna"])
     # hradba po hřebeni valu, vnější branka, předbraní a most
     vb = A["vnejsi_brana"]; O = C + nA * vb["t_m"]
