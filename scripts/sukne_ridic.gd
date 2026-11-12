@@ -96,9 +96,14 @@ func _process_modification() -> void:
 		var wl := float(r[1])
 		var wr := float(r[2])
 		var w := clampf(wl + wr, 0.0, 1.0) * w_ohyb
-		if w <= 0.001:
-			continue
 		var koren := sk.get_bone_global_pose(kosti[0]).origin
+		var delky: Array = r[3]
+		# klouby z animace (vc. konce posledni kosti) - zadni retezy (vaha 0) se jen vytlaci z nohou
+		var anim: Array = []
+		for k in kosti.size():
+			anim.append(sk.get_bone_global_pose(kosti[k]).origin)
+		var gl := sk.get_bone_global_pose(kosti[kosti.size() - 1])
+		anim.append(gl.origin + gl.basis.y.normalized() * float(delky[delky.size() - 1]))
 		var drahy: Array = []
 		# smer odsunu od nohy: ven od panve na strane retezu a nahoru (vsede latka na stehne, pri kleku pred stehnem)
 		var ven0 := koren - (P["pelvis"] as Vector3)
@@ -111,26 +116,21 @@ func _process_modification() -> void:
 			var k_ := _od_osy(th, kn, kn, ref, r_s + tl)
 			# od kolena latka pada svisle (tize); holen ji jen odtlacuje (kapsle PRow), kdyz je kotnik pred svislici -
 			# 12. 11. kucharka vsede: nohy zastrcene pod lavici, lem po holeni sel dozadu skrz prkno lavice
-			var a_ := _od_osy(kn, an, an, k_, r_h + tl)
-			var svisle := Vector3(k_.x, a_.y, k_.z)
-			var ven := k_ - koren
-			ven.y = 0.0
-			if ven.length_squared() > 1e-8 and (a_ - svisle).dot(ven.normalized()) < 0.0:
-				a_ = svisle
+			# od kolena svisle dolu do vysky kotniku; kdyz je holen vpredu, vytlaci latku krok kapsli nize
+			var a_ := Vector3(k_.x, an.y, k_.z)
 			# po stehne (12. 11. test_sukne: primka pas-koleno rizla stehno 2-5 cm od osy): body na tretinach stehna
 			var s1 := _od_osy(th, kn, th.lerp(kn, 0.33), ref, r_s + tl)
 			var s2 := _od_osy(th, kn, th.lerp(kn, 0.66), ref, r_s + tl)
 			drahy.append([koren, s1, s2, k_, a_, a_ - nahoru * 0.3])
-		var ws := wl + wr
+		var ws := maxf(wl + wr, 1e-5)
 		var dr: Array = []
 		for q in (drahy[0] as Array).size():
-			dr.append(((drahy[0][q] as Vector3) * wl + (drahy[1][q] as Vector3) * wr) / maxf(ws, 1e-5))
+			dr.append(((drahy[0][q] as Vector3) * wl + (drahy[1][q] as Vector3) * wr) / ws)
 		var cile: Array = [koren]
 		var s_ := 0.0
-		var delky: Array = r[3]
 		for k in kosti.size():
 			s_ += float(delky[k])
-			cile.append(_na_draze(dr, s_))
+			cile.append((anim[k + 1] as Vector3).lerp(_na_draze(dr, s_), w))
 		# vytlaceni z kapsli obou nohou (CRYENGINE PRow; 12. 11. test_sukne: zkrizene nohy a klek - prumer drah
 		# dvou nohou padl do druhe nohy)
 		for k in range(1, cile.size()):
@@ -154,7 +154,7 @@ func _process_modification() -> void:
 			if smer.length_squared() < 1e-8:
 				continue
 			var y0 := g.basis.y.normalized()
-			var q := Quaternion(y0, y0.slerp(smer.normalized(), w).normalized())
+			var q := Quaternion(y0, smer.normalized())
 			var cil := Basis(q) * g.basis
 			var p := sk.get_bone_parent(b)
 			var gp := sk.get_bone_global_pose(p) if p >= 0 else Transform3D()

@@ -90,7 +90,10 @@ func _beh() -> void:
 			for i in ret.size():
 				var jm: Array = ret[i][0]
 				var k0 := _kost(kostra, jm[0])
-				var predni := (k0 - pel).dot(fw) > 0.03
+				# „za kolenem“ jen predni stred (chyba s lavici); bocni retezy u rozkrocenych nohou visi prirozene za stredem kolena
+				var hk := k0 - pel
+				hk.y = 0.0
+				var predni := hk.length() > 0.01 and rad_to_deg(hk.angle_to(fw)) < float(S.get("test_predek_st", 35.0))
 				var body: Array = []
 				for j in range(1, jm.size()):
 					body.append(_kost(kostra, jm[j]))
