@@ -8046,7 +8046,7 @@ func _ryb_napojeni() -> void:
 			var ryb_h := float(Pravidla.cti("voda", "rybnik_lhota")["hladina_y"])
 			var o0: Array = t["osa_xzy"][0]
 			# pata na urovni dna koryta (pravidlo tools/krok_b/odtok_za_hrazi.py: koryto nesmi do telesa hraze)
-			var pata := float(hz["koruna_sirka_m"]) / 2.0 + (ryb_h + float(hz["koruna_nad_hladinou_m"]) - float(o0[2]) + float(t["hloubka_m"])) / float(hz["sklon_svahu"]) + 0.5
+			var pata := float(hz["koruna_sirka_m"]) / 2.0 + (ryb_h + float(hz["koruna_nad_hladinou_m"]) - float(o0[2]) + float(t["hloubka_m"])) / float(hz["sklon_svahu"]) + 1.0   # +1 m: body osy po 1 m
 			radky.append("odtok zacina %.1f m napric od osy hraze (pata %.1f), podel za koncem hraze %.1f m" % [napric, pata, podel])
 			if napric > pata or podel > 0.0:
 				chyby.append("odtok nezacina u hraze: %.1f m od osy, %.1f m za jejim koncem" % [napric, podel])
