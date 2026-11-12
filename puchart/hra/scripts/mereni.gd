@@ -23,6 +23,7 @@ var varianty: Array = []
 var i_var := -1
 var _skryte: Array = []
 var _slunce: DirectionalLight3D
+var _hra_3d := 0.75
 signal konec
 
 func zacni(s: Node3D, kamera: Camera3D) -> void:
@@ -30,7 +31,8 @@ func zacni(s: Node3D, kamera: Camera3D) -> void:
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mereni.json"))
 	trasa = cfg["useky"]; verze = cfg.get("verze", "") + " / Godot " + Engine.get_version_info()["string"]
 	varianty = cfg.get("varianty", [])
-	skaly = cfg.get("scale_3d", [1.0]); get_viewport().scaling_3d_scale = float(skaly[0])
+	_hra_3d = get_viewport().scaling_3d_scale   # rozlišení hry (rozpocty.json obraz_3d) – po měření se vrátí (12. 11.: zůstalo 100 %)
+	skaly = cfg.get("scale_3d", [_hra_3d]); get_viewport().scaling_3d_scale = float(skaly[0])
 	if FileAccess.file_exists("res://data/sestava.json"):
 		verze += " / " + str(JSON.parse_string(FileAccess.get_file_as_string("res://data/sestava.json")).get("commit", ""))
 	cam.top_level = true
@@ -107,11 +109,11 @@ func _konec() -> void:
 	# měření končí: _process už nic nedělá (12. 11.: běželo dál po trase, na konci úseku „voda“ sáhlo na neexistující
 	# variantu – chyba každý snímek, čas do minusu a kamera se přetahovala s hráčem = obraz poskakoval na místě)
 	trasa = []; set_process(false)
+	get_viewport().scaling_3d_scale = _hra_3d
 	var txt := "VÝSLEDEK %s\n%s\n" % [verze, Time.get_datetime_string_from_system()]
 	txt += "úsek            3D px       p50   p95   max  záseky  snímků  kreslení  troj M  VRAM MB\n"
 	for u in useky:
 		txt += "%-14s %-10s %5.1f %5.1f %5.0f %6d %7d %8.0f %7.2f %8.0f\n" % [u["jmeno"], u["px"], u["p50"], u["p95"], u["max"], u["zaseky"], u["snimku"], u["kresleni"], u["troj_m"], u["vram_mb"]]
-	get_viewport().scaling_3d_scale = float(skaly[0])
 	var f0 := FileAccess.open("user://mereni.txt", FileAccess.WRITE)   # uložit hned (Míša 12. 11.: výsledek zmizel pod nabídkou)
 	if f0: f0.store_string(txt); f0.close()
 	lbl.text = txt + "\n(ms na snímek; vyfoť obrazovku a pošli – KLEPNI pro pokračování; znovu: nabídka → Měření)"
