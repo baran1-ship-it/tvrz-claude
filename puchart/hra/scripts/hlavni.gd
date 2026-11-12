@@ -8,6 +8,7 @@ const Hrac := preload("res://scripts/hrac.gd")
 const Diag := preload("res://scripts/diag.gd")
 const Les := preload("res://scripts/les.gd")
 const BunkyKolem := preload("res://scripts/bunky_kolem.gd")
+const Denik := preload("res://scripts/denik.gd")   # deník běhu: poslední krok před pádem (12. 11.)
 
 var svet: Node3D
 var hrac: CharacterBody3D
@@ -20,6 +21,8 @@ var _les := 0.0       # 0..1 zápoj korun kolem hráče (mlha v lese – Havran 
 var _uvnitr := 0.0    # 0 venku, 1 pod střechou/klenbou (méně modrého světla z oblohy – Havran _amb)
 
 func _ready() -> void:
+	var dn: Node = Denik.new(); dn.name = "Denik"; add_child(dn); dn.zacni(self)
+	Denik.zapis("start")
 	# herní data mimo APK (scripts/data.gd, Havran): první spuštění je stáhne, další jen načtou
 	if not ResourceLoader.exists("res://modely/hrady/puchart.glb"):
 		var vrstva := CanvasLayer.new(); add_child(vrstva)
@@ -28,7 +31,9 @@ func _ready() -> void:
 		txt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; txt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		txt.add_theme_font_size_override("font_size", 36); txt.text = "Připravuji herní data…"; vrstva.add_child(txt)
 		var dat: Node = load("res://scripts/data.gd").new(); add_child(dat)
-		dat.status.connect(func(t: String) -> void: txt.text = t)
+		dat.status.connect(func(t: String) -> void:
+			txt.text = t
+			if not t.begins_with("Stahuji herní data… "): Denik.zapis("data: " + t))
 		if not await dat.ensure():
 			return   # hláška zůstane na obrazovce (internet / znovu spustit)
 		vrstva.queue_free()
@@ -43,8 +48,10 @@ func _start() -> void:
 		var sm: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json")).get("snimky_max", {})
 		if not OS.has_feature("pc") and not FileAccess.file_exists("res://data/mereni.json"):
 			Engine.max_fps = int(sm.get("tablet", 0))   # Havran 0.99991: méně tepla = žádné škrcení (sekání po 10 min hry)
+	Denik.zapis("svět (terén)")
 	svet = Svet.new(); svet.name = "Svet"
 	add_child(svet)
+	Denik.zapis("hrad")
 	var hrad_id := OS.get_environment("PUCHART_HRAD")
 	if hrad_id == "":
 		hrad_id = "puchart"
@@ -58,6 +65,7 @@ func _start() -> void:
 		if OS.get_environment("PUCHART_BEZ_LOD") == "": _hrad_lod(h, hrad_id)
 		_zdivo_bez_rastru(h)
 		if get_node_or_null("HradDaleko"): _zdivo_bez_rastru(get_node("HradDaleko"))
+	Denik.zapis("skály")
 	if ResourceLoader.exists("res://modely/hrady/skaly.glb"):   # skalní výchozy (blender/skaly.py, skaly.json)
 		var sk: Node3D = load("res://modely/hrady/skaly.glb").instantiate(); sk.name = "Skaly"; add_child(sk)
 		for k in sk.find_children("KOLIZE*", "MeshInstance3D", true, false):
@@ -84,12 +92,16 @@ func _start() -> void:
 				sm_.set_shader_parameter("meritko", 1.0 / 2.6); sm_.set_shader_parameter("mech", 1.0 if mt_.resource_name.begins_with("skala_mech") else 0.0)
 				sm_.set_shader_parameter("jas", 0.85)
 				ms_.surface_set_material(i_, sm_)
+	Denik.zapis("rostliny skal")
 	if FileAccess.file_exists("res://data/skaly_rostliny.json"): _rostliny_skal()
+	Denik.zapis("stavby míst")
 	if FileAccess.file_exists("res://data/mista_stavby.json"): _mista()   # Předhradí, krčma, hájovna (Míša 11. 11.; domy z Havrana)
+	Denik.zapis("kameny v korytech")
 	if FileAccess.file_exists("res://data/koryto_kameny.json"): _kameny_koryta()   # valouny a balvany v korytech (Míša 10. 11.)   # kapradí, tráva, mech, semenáčky na římsách skal
 	var _jp_dosah := 220.0
 	if FileAccess.file_exists("res://data/voda_hra.json"):
 		_jp_dosah = float(JSON.parse_string(FileAccess.get_file_as_string("res://data/voda_hra.json"))["koryto"]["jemny_pas"]["dosah_kresleni_m"])
+	Denik.zapis("voda")
 	if ResourceLoader.exists("res://modely/voda.glb"):   # potoky a lávky (blender/voda.py, voda_hra.json)
 		var vo: Node3D = load("res://modely/voda.glb").instantiate(); vo.name = "Voda"; add_child(vo)
 		var mv := ShaderMaterial.new(); mv.shader = load("res://shaders/voda.gdshader")
@@ -112,9 +124,11 @@ func _start() -> void:
 						m.visibility_range_begin = _jp_dosah
 						var md := mv.duplicate() as ShaderMaterial; md.set_shader_parameter("zdvih_daleko", 0.006); m.set_surface_override_material(i, md)
 					else: m.visibility_range_end = _jp_dosah
+	Denik.zapis("les")
 	var les := Les.new(); les.name = "Les"
 	add_child(les)
 	les.postav(svet)
+	Denik.zapis("hráč")
 	hrac = Hrac.new(); hrac.name = "Hrac"
 	var tvar := CollisionShape3D.new(); var kap := CapsuleShape3D.new(); kap.radius = 0.3; kap.height = 1.75
 	tvar.shape = kap; tvar.position.y = 0.875; hrac.add_child(tvar)
@@ -151,17 +165,23 @@ func _start() -> void:
 		if OS.get_environment("PUCHART_ORTO") != "":   # půdorys shora: pravoúhlá projekce, velikost = výška záběru v m
 			cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 			cam.size = float(OS.get_environment("PUCHART_ORTO"))
+	Denik.zapis("byliny")
 	byl.postav(svet, cam)
+	Denik.zapis("louka")
 	var lou: Node3D = load("res://scripts/louka.gd").new(); lou.name = "Louka"; add_child(lou); lou.postav(svet, cam)   # trsy trávy (Havran louka)
+	Denik.zapis("keře")
 	var ker: Node3D = load("res://scripts/byliny.gd").new(); ker.name = "Kere"; add_child(ker)   # keře a zmlazení (data/kere.json)
 	ker.postav(svet, cam, "res://data/kere.json")
+	Denik.zapis("předehřátí shaderů")
 	if _foto == "" and OS.get_environment("PUCHART_TEST") == "" and _pr.get("predehrati", {}).get("zapojeno", false):   # shadery všech materiálů sestavit hned, ne až za chůze (záseky při 1. průchodu – Havran 0.62)
 		await get_tree().process_frame
 		await load("res://scripts/predehrati.gd").predehrej(self, cam, byl.vsechny_site() + ker.vsechny_site() + _vzory_bunek(), int(_pr.get("predehrati", {}).get("snimku", 4)))
 	# rozpočet uzlů (pád na tabletu 11. 11.: 115 tis. buněk lesu = nedostatek paměti) – výpis po vrstvách
 	var uz := []
 	for ch in get_children(): uz.append("%s %d" % [ch.name, ch.find_children("*", "", true, false).size()])
+	Denik.zapis("UZLY %d" % Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 	print("UZLY celkem %d, halda %d MB: %s" % [Performance.get_monitor(Performance.OBJECT_NODE_COUNT), OS.get_static_memory_usage() / 1048576, ", ".join(uz)])
+	Denik.zapis("měření / procházka")
 	if _mereni.size() > 0: _mereni[0].zacni(svet, _mereni[1])
 	var meri := FileAccess.file_exists("res://data/mereni.json") and (OS.get_environment("PUCHART_MERENI") == "1" or not OS.has_feature("pc"))
 	if OS.get_environment("PUCHART_TEST") == "pruchod":

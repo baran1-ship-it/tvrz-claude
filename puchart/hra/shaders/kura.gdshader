@@ -8,7 +8,7 @@ uniform vec4 tint : source_color = vec4(1.0);
 uniform vec2 zanik = vec2(0.0);
 uniform vec3 lod_mez = vec3(0.0);
 uniform vec2 lod_daleko = vec2(0.0);   // (mez, prolnutí) přechodu na impostor – doplňkový dithering s impostor.gdshader
-global uniform vec3 kamera_hrace;
+uniform vec3 kamera_hrace;   // poloha kamery hráče – nastavuje les.gd každý snímek (12. 11.: ne global uniform – pád na tabletu při startu)
 varying float v_lod;
 varying float v_far;
 float bayer4(vec2 p) {

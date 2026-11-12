@@ -92,7 +92,9 @@ func postav(s: Node3D) -> void:
 ## Kolize kmenů jen v buňkách kolem hráče (stromy_modely.json kolize_kmene): válec na kmen, tělo na buňku 16 m.
 func _process(d: float) -> void:
 	var kc := get_viewport().get_camera_3d()
-	if kc: RenderingServer.global_shader_parameter_set("kamera_hrace", kc.global_position)   # LOD po stromech (listi/kura.gdshader)
+	if kc:   # LOD po stromech: poloha kamery do materiálů listí, kůry a impostorů (ne global uniform – 12. 11.)
+		var kp := kc.global_position
+		for m: ShaderMaterial in _lod_mat: m.set_shader_parameter("kamera_hrace", kp)
 	_kol_cas -= d
 	if _kol_cas > 0.0 or _kr.is_empty(): return
 	_kol_cas = 0.1
@@ -142,7 +144,7 @@ func _impostory(imp: Dictionary, meta: Dictionary, bl: float, pr: float) -> void
 	var n := 0
 	for d: String in imp:
 		var m := ShaderMaterial.new()
-		m.shader = load("res://shaders/impostor.gdshader")
+		m.shader = load("res://shaders/impostor.gdshader"); _lod_mat.append(m)
 		m.set_shader_parameter("barva", load("res://textury/impostory/%s_a.png" % d))
 		m.set_shader_parameter("normaly", load("res://textury/impostory/%s_n.png" % d))
 		var st: Array = meta[d]["stred"]
@@ -187,6 +189,7 @@ func _mesh(cesta: String) -> Mesh:
 ## normály od středu koruny – koruna se nasvítí jako objem, ne jako jednotlivé karty; vítr; zadní strana prosvítá;
 ## alfa roste s úrovní mipmapy (řídké listí z dálky nezmizí). zanik = (od, do) rozpouštění ditheringem jako _fade.
 var _listi_sh: Shader
+var _lod_mat: Array[ShaderMaterial] = []   # materiály s kamera_hrace (listí, kůra, impostory)
 var _kura_sh: Shader
 func _listi(m: Mesh, od := 0.0, do_ := 0.0, strom := true, lod := Vector3.ZERO, daleko := Vector2.ZERO) -> Mesh:
 	if _listi_sh == null: _listi_sh = load("res://shaders/listi.gdshader")
@@ -194,7 +197,7 @@ func _listi(m: Mesh, od := 0.0, do_ := 0.0, strom := true, lod := Vector3.ZERO, 
 	for i in mm.get_surface_count():
 		var om := mm.surface_get_material(i)
 		if om is BaseMaterial3D and (om as BaseMaterial3D).transparency != BaseMaterial3D.TRANSPARENCY_DISABLED and (om as BaseMaterial3D).albedo_texture:
-			var sm := ShaderMaterial.new(); sm.shader = _listi_sh; sm.resource_name = om.resource_name
+			var sm := ShaderMaterial.new(); sm.shader = _listi_sh; sm.resource_name = om.resource_name; _lod_mat.append(sm)
 			sm.set_shader_parameter("barva", (om as BaseMaterial3D).albedo_texture)
 			sm.set_shader_parameter("tint", (om as BaseMaterial3D).albedo_color)
 			sm.set_shader_parameter("prah", maxf((om as BaseMaterial3D).alpha_scissor_threshold, 0.3))
@@ -206,7 +209,7 @@ func _listi(m: Mesh, od := 0.0, do_ := 0.0, strom := true, lod := Vector3.ZERO, 
 			mm.surface_set_material(i, sm)
 		elif om is BaseMaterial3D and lod.z > 0.5:   # kůra: LOD po stromech (kura.gdshader) + rozpouštění do dálky
 			if _kura_sh == null: _kura_sh = load("res://shaders/kura.gdshader")
-			var b := om as BaseMaterial3D; var km := ShaderMaterial.new(); km.shader = _kura_sh; km.resource_name = om.resource_name
+			var b := om as BaseMaterial3D; var km := ShaderMaterial.new(); km.shader = _kura_sh; km.resource_name = om.resource_name; _lod_mat.append(km)
 			km.set_shader_parameter("barva", b.albedo_texture); km.set_shader_parameter("tint", b.albedo_color)
 			if b.normal_enabled and b.normal_texture: km.set_shader_parameter("normala", b.normal_texture); km.set_shader_parameter("ma_normalu", true)
 			km.set_shader_parameter("zanik", Vector2(od, do_)); km.set_shader_parameter("lod_mez", lod); km.set_shader_parameter("lod_daleko", daleko)

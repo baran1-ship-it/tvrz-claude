@@ -16,11 +16,11 @@ uniform vec2 vitr_smer = vec2(0.8, 0.6);
 uniform vec2 zanik = vec2(0.0);
 // LOD po stromech (Míša 10. 11.: „blikání stromů, pořád se nějaký strom mění a mizí“ – dřív se přepínala celá buňka 24 m):
 // lod_mez = (vzdálenost přepnutí, šířka prolnutí, režim 0 vše / 1 = jen blíž než mez (LOD0) / 2 = jen dál (LOD1)).
-// Vzdálenost od kamery hráče (global kamera_hrace, i ve stínovém průchodu) k patě stromu; mimo pásmo se strom
+// Vzdálenost od kamery hráče (kamera_hrace, i ve stínovém průchodu) k patě stromu; mimo pásmo se strom
 // zdegeneruje ve vertex shaderu (žádné pixely), v pásmu prolnutí ditheringem.
 uniform vec3 lod_mez = vec3(0.0);
 uniform vec2 lod_daleko = vec2(0.0);   // (mez, prolnutí) přechodu na impostor – doplňkový dithering s impostor.gdshader
-global uniform vec3 kamera_hrace;
+uniform vec3 kamera_hrace;   // poloha kamery hráče – nastavuje les.gd každý snímek (12. 11.: ne global uniform – pád na tabletu při startu)
 varying float v_lod;
 varying float v_far;   // Puchart: jako distance_fade (min, max): průhlednost = (d − min)/(max − min); min > max = mizí s dálkou
 varying float v_ao;          // vnitrek koruny tmavsi (Misa 0.61 "placacky": koruna jako jedna plocha bez hloubky)

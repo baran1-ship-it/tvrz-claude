@@ -12,7 +12,7 @@ uniform float polomer = 8.0;
 uniform float fade_od = 50.0;                 // nabeh (plny strom konci na 60 m)
 uniform float fade_do = 900.0;
 uniform vec2 lod_daleko = vec2(0.0);   // jako les.gd LOD1 (mez, prolnutí): doplňkový dithering po pixelech, ne náhodný skok celého stromu
-global uniform vec3 kamera_hrace;
+uniform vec3 kamera_hrace;   // poloha kamery hráče – nastavuje les.gd každý snímek (12. 11.: ne global uniform – pád na tabletu při startu)
 uniform vec4 tint = vec4(1.0);      // odstin listi druhu (svet.TINT_LISTI) - jako plny strom
 
 const float N = 8.0;
