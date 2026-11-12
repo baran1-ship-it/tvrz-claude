@@ -24,7 +24,7 @@ a měřením; tablet měří Míša.
   celá stavba `bash nastroje/postav_vse.sh`. Generované soubory nejsou v gitu (.gitignore), postup ano.
 - **Tablet:** Godot 4.7.2 Compatibility (A/B test 30. 10.; Vulkan/Mobile renderer v Havranovi (Godot 4.4) vždy spadl při vstupu do hry, příčina nezjištěna – zatím Compatibility, diagnóza v docs/kcd_grafika_tablet.md); nikdy MSAA, žádná kopie obrazovky v shaderu (pády Havrana 0.58–0.59), materiál
   ≤ 13 vzorkovačů (Adreno), stíny jen 40 m, rozpočty `pravidla/svet/rozpocty.json`.
-- **Krása i plynulost, plný obraz** (Míša 6. 11.): 3D vždy 100 % rozlišení; výkon u příčiny. Automatika (snížení detailu,
+- **Krása i plynulost** (Míša 6. 11.; 12. 11.: „100 % je zbytečných, potřebujeme 75“): 3D v 75 % rozlišení (rozpocty.json obraz_3d); výkon u příčiny. Automatika (snížení detailu,
   ne rozlišení) jen v extrémních situacích (teplo, dlouhý pokles FPS), po zchladnutí zpět. Závěr: docs/ZAVER_tablet_grafika.md.
 - **Nezměřené číslo = NEOVERENO**, nikdy odhad vydávaný za měření. Snímek po každé změně scény si nejdřív prohlédnout sám.
 - **Nic z hlavy – vždy podle reference** (Míša 3. 11.: „platí jako pravidlo pro všechno“): před úpravou vzhledu najít
@@ -47,7 +47,7 @@ a měřením; tablet měří Míša.
   blokuje APK. Každá chyba nalezená člověkem = regresní test nebo trasa. Průchod nedokazuje správnou geometrii –
   vztahy most–brána–cesta, schody–podesta, dveře–otvor, sklep–výkop–vegetace kontrolovat zvlášť.
 - **Kontrola přiměřená změně** (rozbor 1. 11.): drobná změna = jeden dotčený pohled/trasa; celá sada před vydáním.
-- **Měření:** stejná trasa, stejná sestava (commit v panelu), trasa v plném obrazu 100 % (Míša 6. 11.) + varianty vrstev lesa včetně „les 70 %“ (cena pixelů; hra/data/mereni.json varianty, od 10. 11.); 30 FPS = 33,3 ms,
+- **Měření:** stejná trasa, stejná sestava (commit v panelu), trasa v 75 % (Míša 12. 11.) + varianty vrstev lesa (hra/data/mereni.json); 30 FPS = 33,3 ms,
   p95 40 ms je mezicíl. Halda je debug metrika, ne PSS.
 - **Modelový filtr** pro každý cizí model: licence a historická vhodnost → měřítko/orientace → materiály → LOD + kolize →
   interakce → test ve stejném světle → katalog. Jeden kvalitní model na konstrukční typ.

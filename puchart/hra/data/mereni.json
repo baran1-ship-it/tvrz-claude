@@ -67,7 +67,7 @@
   }
  ],
  "scale_3d": [
-  1.0
+  0.75
  ],
  "varianty": [
   {
@@ -98,14 +98,10 @@
    ]
   },
   {
-   "jmeno": "les 70%",
-   "usek": "les",
-   "scale": 0.7
-  },
-  {
    "jmeno": "les znovu",
    "usek": "les"
   }
  ],
- "pozn_varianty": "Míša 10. 11.: „jediný pokles byl u stromů“ – cena vrstev lesa na tabletu přímo (Havran: les p50 57 při 100 %, příčina neizolovaná). Plný obraz 100 %; 'les znovu' na konci = drift teplem."
+ "pozn_varianty": "Míša 10. 11.: „jediný pokles byl u stromů“ – cena vrstev lesa na tabletu přímo (Havran: les p50 57 při 100 %, příčina neizolovaná). Plný obraz 100 %; 'les znovu' na konci = drift teplem.",
+ "pozn_scale": "Míša 12. 11.: hra v 75 % – trasa i varianty lesa v 75 %"
 }

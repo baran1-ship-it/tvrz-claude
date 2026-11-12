@@ -8,7 +8,7 @@
 
 ## 0. ROZHODNUTÍ MÍŠI (6. 11.) – platí nad vším níže
 **„Chceme krásu i plynulost; v extrémních situacích povoluji automatiku (degradaci grafiky), ale plný obraz.“**
-- **3D se kreslí v plném rozlišení** (100 %) – žádné trvalé snížení rozlišení 3D jako řešení výkonu.
+- **Míša 12. 11.: 3D v 75 %** („100 % je zbytečných, potřebujeme 75“). Dříve (6. 11.): **3D se kreslí v plném rozlišení** (100 %) – žádné trvalé snížení rozlišení 3D jako řešení výkonu.
 - Výkon se získává **u příčiny**: les bez discard + impostory, zapečené světlo, atlasy, LOD, rozpočty, záseky.
 - **Automatika jen v extrému** (teplo / dlouhý pokles FPS pod cíl): ubírá **detail** (dohled podrostu, stíny, hustotu
   vzdáleného listí, dosah LOD), **ne rozlišení obrazu**; po zchladnutí se vrací. Hráč to má vidět v panelu.
