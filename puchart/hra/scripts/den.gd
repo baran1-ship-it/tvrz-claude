@@ -15,7 +15,8 @@ var day_n := 1
 var running := true
 var current := "odpoledne"
 var mlha := Color(0.68, 0.75, 0.84)   # barva mlhy pro hlavni.gd _atmosfera
-var okolni := 1.0                     # násobek neoblohové složky okolního světla
+var okolni := 1.0                     # násobek neoblohové (teplé) složky okolního světla = poměr jasu oblohy
+var okolni_e := 1.0                   # násobek síly okolního světla (Havran amb – v noci vyšší, obloha je tmavá)
 var svit_oken := 1.0                  # denní světlo prosvítající okny (okno.gdshader)
 
 var slunce: DirectionalLight3D
@@ -172,8 +173,9 @@ func _apply(p: Dictionary) -> void:
 		obloha.sky_energy_multiplier = float(p["sky_e"])
 	mlha = _pomer(_zakl["fog"], p["fog"], _ref["fog"])
 	env.fog_height_density = float(_zakl["mist"]) * float(p["mist"]) / float(_ref["mist"])
-	okolni = (float(p["amb"]) * obl_jas) / (float(_ref["amb"]) * ref_jas)
-	svit_oken = clampf(okolni, 0.0, 1.0)
+	okolni_e = float(p["amb"]) / float(_ref["amb"])
+	okolni = obl_jas / ref_jas   # síla × tato barva = amb × jas oblohy jako u Havrana (den.json okolni_pozn)
+	svit_oken = clampf(okolni * okolni_e, 0.0, 1.0)
 	for m: ShaderMaterial in okna: m.set_shader_parameter("svit", svit_oken)
 	# denní světlo z oken (svetla.json den) v noci zhasne – světla označená v hlavni.gd _svetla metou „den_svetlo“
 	if _okenni == null and hl and hl.get_node_or_null("Hrad"):

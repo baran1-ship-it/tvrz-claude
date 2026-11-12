@@ -210,7 +210,6 @@ func _draw_all() -> void:
 		var er := Rect2(c - Vector2(es * 0.5, es * 1.1), Vector2(es, es))
 		if i == sel: _c.draw_circle(er.get_center(), es * 0.7, Color(1.0, 0.85, 0.45, 0.45))
 		_c.draw_texture_rect(_erby[m["erb"]], er, false)
-		_text(c + Vector2(0, 24.0 * u), String(m["nazev"]), int(20 * u), INK, Color(1, 1, 1, 0.75))
 		_rects.append([er.grow(12), "misto", i])
 	# hráč: šipka ve směru pohledu (Havran)
 	var pp := hrac.global_position
@@ -226,6 +225,8 @@ func _draw_all() -> void:
 		_c.draw_arc(_cur, 14.0 * u, 0.0, TAU, 28, cc, 2.5)
 		for dv: Vector2 in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
 			_c.draw_line(_cur + dv * 8.0 * u, _cur + dv * 22.0 * u, cc, 2.5)
+		if _hover >= 0:   # název místa nad kurzorem (Havran; erby jsou blízko u sebe, popisky by se překrývaly)
+			_text(_cur + Vector2(0, -40.0 * u), String(mista[_hover]["nazev"]), int(28 * u), INK, Color(1, 1, 1, 1), _fb)
 	_text(Vector2(s.x * 0.5, s.y - 12), "Klepni na místo nebo najeď kurzorem (levá páčka) a potvrď A  ·  B zavřít", int(20 * u), INK, Color(1, 1, 1, 0.92))
 	var cr := Rect2(Vector2(s.x - 86, 18), Vector2(68, 60))
 	Styl.kresli_pecet(_c, cr.get_center(), 27.0)
@@ -342,9 +343,11 @@ func cestuj(cil: Vector2, pohled: Vector2, hodin: float) -> void:
 	var fade := ColorRect.new(); fade.color = Color(0, 0, 0, 0); fade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	fade.mouse_filter = Control.MOUSE_FILTER_STOP; cl.add_child(fade); add_child(cl)
 	# pojistka (Havran Míša 0.995 černá obrazovka): zatmění zmizí nejpozději po 10 s, ať se stane cokoli
+	var wcl := weakref(cl)
 	get_tree().create_timer(10.0, true).timeout.connect(func() -> void:
-		if is_instance_valid(cl):
-			get_tree().paused = false; cl.queue_free())
+		var x: Object = wcl.get_ref()
+		if x != null:
+			get_tree().paused = false; (x as Node).queue_free())
 	get_tree().paused = true
 	var tw := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tw.tween_property(fade, "color:a", 1.0, 0.7)

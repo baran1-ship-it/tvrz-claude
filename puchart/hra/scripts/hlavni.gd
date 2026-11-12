@@ -347,9 +347,11 @@ func _atmosfera(d: float) -> void:
 		var ab: Array = it["ambient_barva"]; var ub := float(it["ubytek_oblohy"])
 		var ve: Dictionary = _pr["atmosfera"].get("venku", {})   # venku: část okolního světla odraz od země a zdí (teplý), ne jen modrá obloha
 		var vb: Array = ve.get("barva", ab); var vo := float(ve.get("podil_oblohy", 1.0))
-		_env.ambient_light_energy = lerpf(float(ve.get("ambient", it["ambient"])), float(it["ambient"]), _uvnitr) * (1.0 - _uvnitr * ub)
+		_env.ambient_light_energy = lerpf(float(ve.get("ambient", it["ambient"])), float(it["ambient"]), _uvnitr) * (1.0 - _uvnitr * ub) * (float(den.okolni_e) if den else 1.0)
 		_env.ambient_light_sky_contribution = lerpf(vo, 1.0, _uvnitr) * (1.0 - _uvnitr * ub)
-		_env.ambient_light_color = Color(vb[0], vb[1], vb[2]).lerp(Color(ab[0], ab[1], ab[2]), _uvnitr) * (float(den.okolni) if den else 1.0)   # v noci teplá složka ubude s oblohou (den.json okolni_pozn)
+		var ok_ := float(den.okolni) if den else 1.0   # v noci teplá složka ubude s oblohou (den.json okolni_pozn)
+		var ac_ := Color(vb[0], vb[1], vb[2]).lerp(Color(ab[0], ab[1], ab[2]), _uvnitr)
+		_env.ambient_light_color = Color(ac_.r * ok_, ac_.g * ok_, ac_.b * ok_)
 		_env.tonemap_exposure = 1.0 + _uvnitr * float(it["expozice_navic"])
 
 var _les_cil := 0.0

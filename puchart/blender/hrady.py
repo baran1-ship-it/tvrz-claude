@@ -295,6 +295,7 @@ def strecha_valba(P, a, b, hloubka, y, vyska, presah=0.5):
     lib.shingle_roof(P, E[3], E[0], r1, r1, ridge=False)
 
 # ------------------------------------------------------------------ věž
+STENA_SIT = None   # puchart_hrad.stena_sit (zeď jednou sítí) – nastaví stavitel Puchartu; bez něj kvádry (staré návrhy)
 VEZ_PATRO = []   # strážnice nad průjezdem (pro schody a test průchodu ve stavitelích)
 BRANA_PW, BRANA_PH, PATRO_TW, PORTAL_W = 3.2, 4.2, 0.9, 0.9   # průjezd branky (šířka, výška), zdi strážnice, portálek
 def patro_brany_y(yf): return yf + BRANA_PH + 0.6              # podlaha strážnice = ochozy hradeb ve stejné výšce (Havran WALK)
@@ -581,7 +582,23 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                     ov_ = 0.0 if any(abs(s0 - (o[1] + o[2] / 2)) < 1e-6 or abs(s1 - (o[1] - o[2] / 2)) < 1e-6 for o in os_) else 0.04
                     # pruhy zdi mezi okny se o 4 cm překrývají (Míša 10. 11.: „černé a bílé čáry – švy z bloků“: pruhy na sraz s reliéfem
                     # zdiva po kusech nechávaly vlasovou škvíru odshora dolů); u ostění otvoru ne (líc ostění)
-                    P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0 + 2 * ov_), "zdivo")
+                    if STENA_SIT is not None and DETAIL:   # viditelná zeď jednou sítí níž, tady jen kolizní kvádr
+                        P.cols.append((M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0)))
+                    else: P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0 + 2 * ov_), "zdivo")
+        if STENA_SIT is not None and DETAIL:
+            # Míša 12. 11.: „černé švy jsou všude na každé zdi, podle mě po stavbě hradu, kdy to stavíš z různých bloků“ – zdi budov
+            # byly kvádry po kusech mezi okny (přesah 4 cm = dvě plochy v jedné rovině → tablet je střídavě kreslí, čáry a tmavé
+            # pruhy pod okny) a rohy dvou zdí přes sebe. Teď jako hradby (Míša 5. 11.): jedna síť se sdílenými vrcholy
+            # (puchart_hrad.stena_sit). Dlouhé strany (0, 2) přes rohy, krátké (1, 3) jen mezi jejich vnitřními líci – žádné překryvy.
+            dlouha = si in (0, 2); x0_, x1_ = (-t / 2, Ls + t / 2) if dlouha else (t / 2, Ls - t / 2)
+            nn_ = -dd.cross(UP).normalized(); vo_ = -nn_ if (c - (p0 + p1) / 2).dot(nn_) > 0 else nn_   # ven z budovy
+            xs_ = {x0_, x1_} | {min(max(x, x0_), x1_) for o in ot for x in (o[1] - o[2] / 2, o[1] + o[2] / 2)}
+            ys_ = {y0, yk} | {y for o in ot for y in (o[3], o[4]) if y0 < y < yk}
+            def hl_(xm, ym, ot=ot, t=t):
+                for o in ot:
+                    if o[1] - o[2] / 2 < xm < o[1] + o[2] / 2 and o[3] < ym < o[4]: return None
+                return t + lib.PRESAH
+            STENA_SIT(P, p0, dd, vo_, t, sorted(xs_), sorted(ys_), hl_, "zdivo", cela=(dlouha, dlouha), y_jemne=lo + 0.5)
     if typ == "palac" and not OMITKA:   # kamenný palác (B): nárožní kameny na vnějších rozích (Míša 9. 11.)
         for k_ in range(4):
             r_ = rohy[k_]; e1 = (rohy[k_ - 1] - r_).normalized(); e2 = (rohy[(k_ + 1) % 4] - r_).normalized()

@@ -259,6 +259,8 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
         return None
     stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=cela, y_jemne=min(y0 for _, _, y0 in pata) + 1.5 - 0.3, y_stinky=(koruna + parapet if (cimburi and stinky) else None), y_hrubne=(koruna + 0.1 if parapet > 0 else None))   # pata 1,5 m pod nejnižším terénem
 
+H.STENA_SIT = stena_sit   # zdi budov (hrady.budova) jednou sítí jako hradby (Míša 12. 11.: černé švy z bloků)
+
 def pokos_ext(poly, i, t):
     """Délka přesahu konců úseku i za vrcholy tak, aby se vnější líce sousedních úseků sešly přesně v pokosu (Míša 5. 11.:
     švy v nároží – s pevným přesahem t/2 vyčnívaly konce v tupém úhlu z líce souseda)."""
@@ -407,7 +409,7 @@ def ochoz_hradby(P, osa, uk, t, konce, mezery=None, sirka=0.9, odstup=3.0, otevr
         for s0, s1, y in uk[i]:
             if ps and abs(ps[-1][2] - y) < 1e-3: ps[-1] = (ps[-1][0], s1, y)
             else: ps.append((s0, s1, y))
-        pos = -t / 2 if i > 0 else 0.0; pod_ = False
+        pos = (-t / 2 if not otevreny_konec else t / 2 - 0.12) if i > 0 else 0.0; pod_ = False   # schody v ose (branka A): v rohu pavlač od vnitřního líce kolmé zdi, ne přes její nižší korunu (Míša 12. 11.: rám zábradlí ve vzduchu)
         def rovne(dv, y):   # portálek v ose pavlače a v její výšce (Havran: ochoz vchází do věže rovně) – stačí pavlač až k líci
             s_d = (dv - a).dot(d); ods = abs((dv - (a + d * s_d + g)).dot(vn)); dy = max(abs(ps[0 if i == 0 else -1][2] - y), abs((cur if i else y) - y))
             n_ = konce[0 if i == 0 else 1][2]; uhel = math.degrees(math.acos(min(1.0, abs(d.dot(n_)))))
@@ -422,6 +424,7 @@ def ochoz_hradby(P, osa, uk, t, konce, mezery=None, sirka=0.9, odstup=3.0, otevr
         if cur is None: cur = ps[0][2]; body.append(bod(a + d * pos + g, cur))
         mez = [(sm, sm + dl) for (q, dl) in (mezery or {}).items() for sm in [(V(q) - a).dot(d)]
                if -0.5 < sm < L and abs((V(q) - a).dot(vn)) < t + 3]
+        if otevreny_konec and i > 0: mez.append((pos - 0.05, pos + sirka + 0.15))   # nástup schodů v ose z kolmého úseku: zábradlí pavlače tu má mezeru
         def roh_s(j, k):   # průsečík linií zábradlí úseků j a k, poloha podél úseku j
             o = t / 2 + sirka - 0.06
             aj, bj = V(osa[j]), V(osa[j + 1]); dj = (bj - aj).normalized(); nj = -dj.cross(UP).normalized()
@@ -431,6 +434,7 @@ def ochoz_hradby(P, osa, uk, t, konce, mezery=None, sirka=0.9, odstup=3.0, otevr
             return ((q.x - p.x) * dk.z - (q.z - p.z) * dk.x) / den
         rr0 = roh_s(i, i - 1) if i > 0 else None; rr1 = roh_s(i, i + 1) if i < n - 1 else None
         def plocha(u0, u1, y, pod=(0, 0)):   # pod = přesah plochy pod schody na začátku/konci (bez zábradlí – tam je zábradlí schodů)
+            if os.environ.get("PUCHART_DBGP"): print("DBGP plocha i=%d n=%d L=%.2f u0=%.2f u1=%.2f a=%s d=%s konce=%s otev=%s" % (i, n, L, u0, u1, [round(a.x, 2), round(a.z, 2)], [round(d.x, 2), round(d.z, 2)], list(konce), otevreny_konec), flush=True)
             if u1 - u0 > 0.3:
                 ochoz2(P, a, b, t, y, vn, u0, u1, lehka=True, pod=pod, mezery=mez + ([(u0, u0 + pod[0])] if pod[0] else []) + ([(u1 - pod[1], u1)] if pod[1] else []), sirka=sirka,
                        r0=rr0 if u0 <= -t / 2 + 1e-3 else None, r1=rr1 if u1 >= L + t / 2 - 1e-3 else None)
