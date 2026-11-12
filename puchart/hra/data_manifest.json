@@ -1,46 +1,102 @@
 {
- "popis": "hern\u00ed data mimo APK (nastroje/data_balik.py, scripts/data.gd)",
+ "popis": "hern\u00ed data mimo APK po skupin\u00e1ch (nastroje/data_balik.py, scripts/data.gd) \u2013 stahuj\u00ed se jen zm\u011bn\u011bn\u00e9",
  "vetev": "ccr-f2d32673-9fi7m5",
  "zdroj": "e07abfebeb8727a468fa14a379683dcc",
  "packs": {
-  "puchart_data": {
-   "md5": "9fb1fe07b3d88dbdf920b07683d2fb1f",
-   "size": 596631640,
+  "puchart_zaklad": {
+   "md5": "2bdda24bcda0ab472acd9f8d9c8b5331",
+   "size": 16147636,
    "parts": [
     {
-     "file": "puchart_data-9fb1fe07b3.pck.000",
+     "file": "puchart_zaklad-2bdda24bcd.pck.000",
+     "size": 16147636,
+     "md5": "2bdda24bcda0ab472acd9f8d9c8b5331"
+    }
+   ]
+  },
+  "puchart_les": {
+   "md5": "e5c51ed181e2b0808025e1b70f06eb8b",
+   "size": 122750976,
+   "parts": [
+    {
+     "file": "puchart_les-e5c51ed181.pck.000",
      "size": 94371840,
-     "md5": "42436710efaacbd136e07d043e62916c"
+     "md5": "7ccd152bc8d021708384934dc868ab16"
     },
     {
-     "file": "puchart_data-9fb1fe07b3.pck.001",
+     "file": "puchart_les-e5c51ed181.pck.001",
+     "size": 28379136,
+     "md5": "90888a115bbed5568f6477f0571e59b3"
+    }
+   ]
+  },
+  "puchart_hrady": {
+   "md5": "455219dd47f865a5e877b5e174429f88",
+   "size": 48317496,
+   "parts": [
+    {
+     "file": "puchart_hrady-455219dd47.pck.000",
+     "size": 48317496,
+     "md5": "455219dd47f865a5e877b5e174429f88"
+    }
+   ]
+  },
+  "puchart_predmety": {
+   "md5": "46199dfbeef2aa794ee3fc967da2daaf",
+   "size": 246086548,
+   "parts": [
+    {
+     "file": "puchart_predmety-46199dfbee.pck.000",
      "size": 94371840,
-     "md5": "b1bd612581b41ea420be74d965784432"
+     "md5": "6b1685eed37e0d70595d5b99f187d56e"
     },
     {
-     "file": "puchart_data-9fb1fe07b3.pck.002",
+     "file": "puchart_predmety-46199dfbee.pck.001",
      "size": 94371840,
-     "md5": "6299b819268d465cc9177e3ad2de1bc6"
+     "md5": "83e0969189e1c958193d79a24ca20c58"
     },
     {
-     "file": "puchart_data-9fb1fe07b3.pck.003",
+     "file": "puchart_predmety-46199dfbee.pck.002",
+     "size": 57342868,
+     "md5": "393915bf085e0996d8ed5596e08d21ec"
+    }
+   ]
+  },
+  "puchart_stavby": {
+   "md5": "c6d62fe8d63275e29588617ae5e031cb",
+   "size": 97936592,
+   "parts": [
+    {
+     "file": "puchart_stavby-c6d62fe8d6.pck.000",
      "size": 94371840,
-     "md5": "0eb4c798c6e6986a1b885a14dd25d299"
+     "md5": "84bdfe69e4b5b311b9c5a711d2e155d0"
     },
     {
-     "file": "puchart_data-9fb1fe07b3.pck.004",
-     "size": 94371840,
-     "md5": "e428fa87a7e0d682bdb26370a84b7eef"
-    },
+     "file": "puchart_stavby-c6d62fe8d6.pck.001",
+     "size": 3564752,
+     "md5": "a3620bd8528ccbadf991650089467f30"
+    }
+   ]
+  },
+  "puchart_rostliny": {
+   "md5": "b8473a2ed382d3fd7ae97d98a8e1aa12",
+   "size": 33453516,
+   "parts": [
     {
-     "file": "puchart_data-9fb1fe07b3.pck.005",
-     "size": 94371840,
-     "md5": "5a042cf009b7ab62884db623403bb391"
-    },
+     "file": "puchart_rostliny-b8473a2ed3.pck.000",
+     "size": 33453516,
+     "md5": "b8473a2ed382d3fd7ae97d98a8e1aa12"
+    }
+   ]
+  },
+  "puchart_teren": {
+   "md5": "b93181054a121dfab306f2b88a5d7493",
+   "size": 31943004,
+   "parts": [
     {
-     "file": "puchart_data-9fb1fe07b3.pck.006",
-     "size": 30400600,
-     "md5": "13174a6dada2a77f5893a183e84cdd95"
+     "file": "puchart_teren-b93181054a.pck.000",
+     "size": 31943004,
+     "md5": "b93181054a121dfab306f2b88a5d7493"
     }
    ]
   }
