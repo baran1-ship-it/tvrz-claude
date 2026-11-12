@@ -252,7 +252,9 @@ def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo", t_zdi
     okap_s = okap_s or {}
     def okap(sg):   # vodorovný přesah od osy zdi a výška okapu na dané straně
         po_s = okap_s.get(0 if sg > 0 else 2, po_)
-        po_t = po_s + (t_zdi / 2 if po_s > 0 else 0.0)
+        po_t = po_s + (t_zdi / 2 if (po_s > 0 or okap_s.get("lic_" + str(0 if sg > 0 else 2))) else 0.0)   # strana, která je sama hranou hradu
+        # (palác B v plášti): okap na vnější líc koruny – v ose zdi zůstala škvíra mezi korunou a střechou (Míša 12. 11.: „střecha spodního
+        # hradu“); strana u vyšší hradby (palác A): v ose (hradba stojí za ní)
         return hloubka / 2 + po_t, y - sk_ * po_t, po_s
     w1, ye1, p1 = okap(1); w2, ye2, p2 = okap(-1)
     eL1, eR1 = a2 + s * w1 + UP * ye1, b2 + s * w1 + UP * ye1
@@ -704,7 +706,9 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
     if strecha == "sedlova":
         ok_ = dict(OKAP_STRANY)
         for si_ in (0, 2):
-            if STR_HR.get(si_) is not None: ok_[si_] = 0.0   # strana v hradbě: střecha končí na koruně, nepřetéká za vnější líc
+            if STR_HR.get(si_) is not None:
+                ok_[si_] = 0.0   # strana v hradbě: střecha končí na koruně, nepřetéká za vnější líc
+                if STR_HR[si_] + 2.0 <= ytop: ok_["lic_" + str(si_)] = True   # hradba i se zídkou a cimbuřím (~2 m) pod korunou paláce: okap na vnější líc
         strecha_sedlova(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * STRECHA_POMER, presah=0.5, stity=STRECHA.get("stity", "drevo"), t_zdi=t, okap_s=ok_)   # kamenný palác B: kamenné štíty (kresba misa_01)
     elif strecha == "valba":
         strecha_valba(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * 0.6)

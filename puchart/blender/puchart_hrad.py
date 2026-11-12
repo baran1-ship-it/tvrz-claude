@@ -259,7 +259,7 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
         return None
     stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=cela, y_jemne=min(y0 for _, _, y0 in pata) + 1.5 - 0.3, y_stinky=(koruna + parapet if (cimburi and stinky) else None), y_hrubne=(koruna + 0.1 if parapet > 0 else None))   # pata 1,5 m pod nejnižším terénem
 
-H.STENA_SIT = stena_sit   # zdi budov (hrady.budova) jednou sítí jako hradby (Míša 12. 11.: černé švy z bloků)
+H.STENA_SIT = None if os.environ.get("PUCHART_BEZ_SITE") else stena_sit   # zdi budov (hrady.budova) jednou sítí jako hradby (Míša 12. 11.: černé švy z bloků)
 
 def pokos_ext(poly, i, t):
     """Délka přesahu konců úseku i za vrcholy tak, aby se vnější líce sousedních úseků sešly přesně v pokosu (Míša 5. 11.:
@@ -949,9 +949,9 @@ def plosina(P, c, d, delka, sirka, y, sloupy=True, krakorce=None):
         kz = hz(krakorce).normalized(); po = (c - kz * 0.0)   # líc zdi = kraj podesty na straně kz
         lic = c + kz * (abs(kz.dot(s)) * sirka / 2 + abs(kz.dot(d)) * delka / 2)
         for o_ in (-1, 1):
-            tt = (d if abs(kz.dot(d)) < 0.5 else s) * (o_ * ((delka if abs(kz.dot(d)) < 0.5 else sirka) / 2 - 0.15))
+            tt = (d if abs(kz.dot(d)) < 0.5 else s) * (o_ * ((delka if abs(kz.dot(d)) < 0.5 else sirka) / 2 - 0.1))
             vn_ = lic + tt + kz * 0.25; ven_ = lic + tt - kz * (abs(kz.dot(s)) * sirka + abs(kz.dot(d)) * delka - 0.1)
-            P.beam(vn_ + UP * (y - 0.22), ven_ + UP * (y - 0.22), 0.16, 0.18, "dub", j=0.4)   # trám vetknutý do zdi
+            # nosné trámy = příčné trámy podesty (výš), vetknuté do zdi – vlastní trám by v nich vězel (hlídač spojů)
             P.beam(lic + tt + UP * (y - 0.85), lic + tt - kz * ((abs(kz.dot(s)) * sirka + abs(kz.dot(d)) * delka) * 0.5) + UP * (y - 0.3), 0.12, 0.12, "dub", j=0.4)   # vzpěra ze zdi (kotvená v kapse) nad ostěním dveří pod podestou (Míša 12. 11.: „krakorce nad tím ostěním“)
 
 BUDOVY = []   # půdorysy budov (stavby_vegetace: bez trávy uvnitř – Míša 4. 11.: tráva prorůstala podlahou)
@@ -1037,7 +1037,7 @@ def podkrovi_vystup(P, c, d, L_in, H_out, t_zdi, y0, y1, pomer, kon=-1, sirka=1.
     a = c + d * u_g + s * v_s
     schody2(P, a, s, y0, y1, sirka, zabradli=(), podklad=y0, r=r_, vyska_st=(y1 - y0) / n)
     o = (u_g - sirka / 2 - 0.05, u_g + sirka / 2 + 0.05) + ((v_s - 0.1, v_e + 0.1) if smer > 0 else (-v_e - 0.1, -v_s + 0.1))
-    podlaha(P, c, d, L_in, 2 * vl, y1, [o])
+    podlaha(P, c, d, L_in + 2 * t_zdi - 0.1, 2 * vl + 2 * t_zdi - 0.1, y1, [o])   # strop až přes korunu zdí (Míša 12. 11.: „díry ve stropě paláce“ – škvíra mezi
     ui = u_g - kon * (sirka / 2 + 0.06)   # volná strana otvoru (k vnitřku budovy)
     zabradli(P, c + d * ui + s * (v_s - 0.1), c + d * ui + s * (v_e - 1.1), y1)
     zabradli(P, c + d * u_steny + s * (v_s - 0.1), c + d * ui + s * (v_s - 0.1), y1)

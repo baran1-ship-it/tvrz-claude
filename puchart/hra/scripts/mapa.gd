@@ -343,7 +343,7 @@ func cestuj(cil: Vector2, pohled: Vector2, hodin: float) -> void:
 	var fade := ColorRect.new(); fade.color = Color(0, 0, 0, 0); fade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	fade.mouse_filter = Control.MOUSE_FILTER_STOP; cl.add_child(fade); add_child(cl)
 	# pojistka (Havran Míša 0.995 černá obrazovka): zatmění zmizí nejpozději po 10 s, ať se stane cokoli
-	var wcl := weakref(cl)
+	var wcl: WeakRef = weakref(cl)
 	get_tree().create_timer(10.0, true).timeout.connect(func() -> void:
 		var x: Object = wcl.get_ref()
 		if x != null:

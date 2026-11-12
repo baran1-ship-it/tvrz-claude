@@ -1,6 +1,6 @@
 extends Node
 ## Herní ovladač (Xbox) podle Havrana (scripts/pad.gd, Míša 3. 11.): levá páčka chůze (stisk = běh do zastavení), pravá
-## rozhled, A použít (vrata, dveře), B létání, Start nabídka (pauza, menu.gd), kříž dolů menu hráče (mapa, místa, deník),
+## rozhled (stisk levé = běh), A použít (vrata, dveře), B létání, Y denní doba, Start nabídka (pauza, menu.gd), kříž dolů menu hráče (mapa, místa, deník),
 ## kříž nahoru mapa, LB/RB při létání dolů/nahoru. Když je otevřená nabídka nebo menu hráče, ovladač obslouží ona.
 var proch: Node        # prochazka.gd (nabídka, menu hráče, mapa, dveře)
 var hrac: Node
@@ -20,9 +20,14 @@ func _input(e: InputEvent) -> void:
 		JOY_BUTTON_A:
 			proch.pouzij()
 		JOY_BUTTON_B:
-			hrac.prepni_let()
+			proch._akce("set:let", null)   # i tlačítka ▲/▼ a kruh Let na obrazovce
 		JOY_BUTTON_DPAD_UP:
 			proch.mapa.prepni()
+		JOY_BUTTON_Y:   # Havran pad.gd: Y = další denní doba
+			var den: Node = proch.hlavni.get("den")
+			if den:
+				den.set_time(den.next_key(), 2.0)
+				proch.hv.hud.toast("Denní doba: %s (%s)" % [den.NAMES[den.current], den.clock_text()], 1.5)
 		JOY_BUTTON_LEFT_STICK:
 			hrac.bezi = true; hrac._beh_packa = true
 	get_viewport().set_input_as_handled()

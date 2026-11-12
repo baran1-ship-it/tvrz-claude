@@ -55,6 +55,9 @@ done
 # musí doběhnout všech úseků a variant, zastavit se a předat hru procházce – bez chyby skriptu
 krok "klepnutí na dveře"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_klik.gd timeout 600 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | grep -E "^KLIK_TEST" | tee -a $S)
 grep -q "^KLIK_TEST dvere.*-> OK" $S || { rc=1; echo "KLIK CHYBA: tlačítko dveří nereaguje na dotyk" | tee -a $S; }
+# běh a létání na obrazovce (Míša 12. 11. večer, Havran hud.gd): dotyk na kruh Běh/Let přepne hrac.bezi/leti a zase zpět
+krok "běh a let dotykem"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_beh_let.gd timeout 600 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | grep -E "^BEHLET_TEST" | tee -a $S)
+grep -q "^BEHLET_TEST OK" $S || { rc=1; echo "BEHLET CHYBA: kruh Běh nebo Let nereaguje na dotyk" | tee -a $S; }
 krok "měření (zkrácené)"
 (cd $K/hra && PUCHART_MERENI=1 PUCHART_MERENI_RYCHLE=1 PUCHART_MERENI_BEZ_CEKANI=1 timeout 420 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 > $K/build/hlidaci_mereni.log 2>&1)
 MU=$(python3 -c "import json;d=json.load(open('$K/hra/data/mereni.json'));print(len(d['useky'])*len(d.get('scale_3d',[1]))+len(d.get('varianty',[])))")

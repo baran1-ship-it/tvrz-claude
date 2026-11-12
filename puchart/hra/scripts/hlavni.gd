@@ -167,6 +167,7 @@ func _start() -> void:
 		hrac.position = p - Vector3(0, 1.65, 0)
 		cam.look_at_from_position(p, t, Vector3.UP)
 		cam.top_level = true
+		if OS.get_environment("PUCHART_FOTO_SVETLO") != "": var ls_ := OmniLight3D.new(); ls_.omni_range = 25.0; ls_.light_energy = 3.0; cam.add_child(ls_)   # snímek tmavého interiéru
 		var dvf: Node = load("res://scripts/dvere.gd").new(); dvf.name = "DvereFoto"; add_child(dvf); dvf.zacni(self, CanvasLayer.new())   # řetězy padacích mostů i na snímku
 		if OS.get_environment("PUCHART_FOTO_MOST") != "":   # snímek se zvednutými padacími mosty (ověření výklenku a řetězů)
 			for g: String in dvf.druh:

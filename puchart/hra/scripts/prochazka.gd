@@ -8,6 +8,7 @@ var hrac: CharacterBody3D
 var _nahoru: Button
 var _dolu: Button
 var nabidka: Control        # horní lišta (erb + pauza) – pad.gd
+var kruhy: Control          # Běh a Let vpravo dole (Havran hud.gd)
 var mapa: CanvasLayer
 var dvere: Node
 var menu: CanvasLayer       # menu.gd: úvod + pauza
@@ -50,6 +51,7 @@ func _process(_d: float) -> void:   # Havranovo menu se zavírá samo (B, dotyk)
 	if _mh_otevreno and not menu_hrace.open: _fps_menu(false)
 	_mh_otevreno = menu_hrace != null and menu_hrace.open
 	if nabidka: nabidka.visible = not _mh_otevreno   # horní lišta (Brašna, Nabídka) přes Havranovo menu neprosvítá
+	if kruhy: kruhy.visible = not _mh_otevreno
 
 func pouzij() -> void:   # A: vrata a dveře na dosah
 	if dvere and dvere._blizko != "": dvere.prepni(dvere._blizko)
@@ -69,10 +71,14 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	var lis := Ikony.new(); lis.proch = self; lis.set_anchors_preset(Control.PRESET_FULL_RECT); lis.mouse_filter = Control.MOUSE_FILTER_PASS
 	add_child(lis); nabidka = lis
 	hrac.ui.append(lis)
-	# nahoru/dolů při létání: držená tlačítka vpravo dole
+	# běh a létání na obrazovce jako Havran (hud.gd _run_center/_jump_center, Míša 12. 11. večer: „běh a létání chci mít na
+	# obrazovce pro dotyk i na Xbox ovladači jako Havran“): kruhy vpravo dole, dotyk chytají jen samotné kruhy (_has_point)
+	var kr := Kruhy.new(); kr.proch = self; kr.set_anchors_preset(Control.PRESET_FULL_RECT); kr.mouse_filter = Control.MOUSE_FILTER_PASS
+	add_child(kr); kruhy = kr; hrac.ui.append(kr)
+	# nahoru/dolů při létání: držená tlačítka vlevo od kruhů
 	for i in 2:
 		var t := Button.new(); t.text = "▲ nahoru" if i == 0 else "▼ dolů"; t.custom_minimum_size = Vector2(200, 110)
-		_svitek(t, 28, i); t.position = Vector2(vp.x - 230, vp.y - 260 + i * 130); t.visible = false
+		_svitek(t, 28, i); t.position = Vector2(vp.x - 520, vp.y - 260 + i * 130); t.visible = false
 		var smer := 1.0 if i == 0 else -1.0
 		t.button_down.connect(func(): hrac.vzhuru = smer)
 		t.button_up.connect(func(): hrac.vzhuru = 0.0)
@@ -141,7 +147,7 @@ func _akce(co: String, arg: Variant) -> void:
 		"load":
 			_nahraj(String(arg))
 		"set:beh":
-			hrac.bezi = not hrac.bezi
+			hrac.bezi = not hrac.bezi; hrac._beh_packa = false   # přepínač: běh trvá, dokud ho hráč nevypne (Havran _beh_tl)
 		"set:let":
 			hrac.prepni_let(); _nahoru.visible = hrac.leti; _dolu.visible = hrac.leti
 		"set:obraz":   # rozlišení 3D dokola podle rozpocty.json
@@ -208,6 +214,40 @@ func _nahraj(path: String) -> void:
 	if bool(j.get("let", false)) != hrac.leti: hrac.prepni_let()
 	menu.in_game = true; menu.can_save = true
 	zavri_nabidku()
+
+
+## Běh a Let jako Havran (hud.gd: Běh = přepínač vlevo od skoku, rozsvícený = běží; let v Puchartu vlastním kruhem
+## místo dvojklepnutí skoku – Puchart skok nemá). Kreslí se jen kruhy, dotyk berou jen ony (jinak by kryly tlačítka dveří).
+class Kruhy extends Control:
+	var proch: Node
+	var _font: Font = ThemeDB.fallback_font
+	func run_c() -> Vector2: return let_c() + Vector2(-118, 22)          # Havran _run_center
+	func let_c() -> Vector2: return size - Vector2(120, 120)             # Havran _jump_center
+	func _process(_d: float) -> void:
+		if Engine.get_process_frames() % 6 == 0: queue_redraw()
+	func _draw() -> void:
+		var h: Node = proch.hrac
+		var rc := run_c()
+		draw_circle(rc, 32, Color(1.0, 0.85, 0.4, 0.35) if h.bezi else Color(0, 0, 0, 0.25))
+		draw_arc(rc, 32, 0, TAU, 36, Color(1, 1, 1, 0.45), 2.0, true)
+		draw_string(_font, rc + Vector2(-32, 6), "Běh", HORIZONTAL_ALIGNMENT_CENTER, 64, 15, Color(1, 1, 1, 0.9))
+		var lc := let_c()
+		draw_circle(lc, 40, Color(1.0, 0.85, 0.4, 0.35) if h.leti else Color(0, 0, 0, 0.25))
+		draw_arc(lc, 40, 0, TAU, 40, Color(1, 1, 1, 0.45), 2.0, true)
+		draw_polyline(PackedVector2Array([lc + Vector2(-12, 6), lc + Vector2(0, -8), lc + Vector2(12, 6)]), Color(1, 1, 1, 0.8), 3.0, true)
+		draw_string(_font, lc + Vector2(-40, 58), "Přistát" if h.leti else "Let", HORIZONTAL_ALIGNMENT_CENTER, 80, 15, Color(1, 1, 1, 0.85))
+	func ma_bod(p: Vector2) -> bool:
+		return p.distance_to(run_c()) < 44.0 or p.distance_to(let_c()) < 52.0   # zásahy jako Havran (běh 44, skok 58 px)
+	func _has_point(p: Vector2) -> bool:
+		return ma_bod(p)
+	func _gui_input(e: InputEvent) -> void:
+		if e is InputEventMouseButton: accept_event(); return   # jen dotyk (myš je emulovaná z dotyku a naopak – přepínač by se přepnul 2×)
+		if not (e is InputEventScreenTouch and (e as InputEventScreenTouch).pressed): return
+		var p := (e as InputEventScreenTouch).position
+		if p.distance_to(run_c()) < 44.0: proch._akce("set:beh", null)
+		elif p.distance_to(let_c()) < 52.0: proch._akce("set:let", null)
+		else: return
+		accept_event(); queue_redraw()
 
 
 class Ikony extends Control:
