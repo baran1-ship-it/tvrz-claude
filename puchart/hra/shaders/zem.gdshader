@@ -54,6 +54,7 @@ vec3 vrstva2(int i, vec2 xz, float n) {
 }
 vec3 vrstva_n(int i, vec2 xz) { return texture(pudy_n, vec3(xz / velikost_m[i], float(i))).rgb; }
 
+uniform float mokro = 0.0;   // déšť (pocasi.gd): 0 sucho .. 1 promoklé – tmavší, lesklejší (KCD: mokré povrchy a louže)
 void fragment() {
 	vec2 xz = svet_poz.xz;
 	vec2 muv = (xz - maska_rect.xy) / maska_rect.zw;
@@ -145,4 +146,5 @@ void fragment() {
 	NORMAL = normalize((VIEW_MATRIX * vec4(wn, 0.0)).xyz);
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.08;   // 0,3 dávalo v protisvětle žlutý lesk pásu 100–300 m (snímek 01)
+	ALBEDO *= mix(1.0, 0.66, mokro); ROUGHNESS = mix(ROUGHNESS, 0.55, mokro); SPECULAR = mix(SPECULAR, 0.22, mokro);   // mokro (pocasi.gd)
 }

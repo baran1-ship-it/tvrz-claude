@@ -42,6 +42,7 @@ void vertex() {
 	wn = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
 
+uniform float mokro = 0.0;   // déšť (pocasi.gd): 0 sucho .. 1 promoklé – tmavší, lesklejší (KCD: mokré povrchy a louže)
 void fragment() {
 	vec3 nw = FRONT_FACING ? wn : -wn;   // oboustranné desky (střechy): rub se svítí jako líc
 	vec2 uv = UV;
@@ -100,4 +101,5 @@ void fragment() {
 	ROUGHNESS = mix(texture(tex_r, uv).r, texture(tex_r, uv2).r, atm);
 	SPECULAR = 0.35;
 	NORMAL_MAP = mix(texture(tex_n, uv).rgb, texture(tex_n, uv2).rgb, atm);
+	ALBEDO *= mix(1.0, 0.66, mokro); ROUGHNESS = mix(ROUGHNESS, 0.45, mokro); SPECULAR = mix(SPECULAR, 0.4, mokro);   // mokro (pocasi.gd)
 }

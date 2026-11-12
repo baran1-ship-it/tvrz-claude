@@ -29,6 +29,7 @@ void vertex() {
 	wn = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
 
+uniform float mokro = 0.0;   // déšť (pocasi.gd): 0 sucho .. 1 promoklé – tmavší, lesklejší (KCD: mokré povrchy a louže)
 void fragment() {
 	vec3 n = normalize(wn);
 	vec3 w = pow(abs(n), vec3(4.0)); w /= (w.x + w.y + w.z);
@@ -60,4 +61,5 @@ void fragment() {
 	ALBEDO = c * jas;
 	ROUGHNESS = mix(0.95, 0.85, m);
 	SPECULAR = 0.25;
+	ALBEDO *= mix(1.0, 0.66, mokro); ROUGHNESS = mix(ROUGHNESS, 0.45, mokro); SPECULAR = mix(SPECULAR, 0.4, mokro);   // mokro (pocasi.gd)
 }

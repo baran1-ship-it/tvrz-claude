@@ -87,6 +87,8 @@ func _dalsi_varianta() -> void:
 	for n in _skryte: (n as Node3D).visible = true
 	_skryte.clear()
 	if _slunce: _slunce.shadow_enabled = true
+	var poc0 := get_tree().current_scene.get_node_or_null("Pocasi")
+	if poc0: poc0.vynuceno = -1.0   # po variantě s deštěm a po konci měření zase podle rozvrhu
 	get_viewport().scaling_3d_scale = float(skaly[0])
 	i_var += 1
 	if i_var >= varianty.size(): _konec(); return
@@ -101,6 +103,8 @@ func _dalsi_varianta() -> void:
 			if not l.is_empty(): _slunce = l[0]
 		if _slunce: _slunce.shadow_enabled = false
 	if v.has("scale"): get_viewport().scaling_3d_scale = float(v["scale"])
+	var poc := koren.get_node_or_null("Pocasi")   # varianta s deštěm (pocasi.gd, Míša 12. 11.: „nezasekat tablet“)
+	if poc: poc.vynuceno = float(v.get("dest", -1.0))
 	for k in trasa.size():
 		if trasa[k]["jmeno"] == v["usek"]: i_usek = k
 	t = 0.0

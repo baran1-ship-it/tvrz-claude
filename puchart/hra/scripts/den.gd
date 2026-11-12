@@ -17,6 +17,8 @@ var current := "odpoledne"
 var mlha := Color(0.68, 0.75, 0.84)   # barva mlhy pro hlavni.gd _atmosfera
 var okolni := 1.0                     # násobek neoblohové (teplé) složky okolního světla = poměr jasu oblohy
 var okolni_e := 1.0                   # násobek síly okolního světla (Havran amb – v noci vyšší, obloha je tmavá)
+var zatazeni := 0.0                   # 0..1 zatažení před deštěm a za deště (pocasi.gd)
+var _poc: Dictionary = {}             # pocasi.json obloha
 var svit_oken := 1.0                  # denní světlo prosvítající okny (okno.gdshader)
 
 var slunce: DirectionalLight3D
@@ -154,8 +156,27 @@ static func _jas(c: Color) -> float:
 	return c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
 
 
+## Zatažená obloha (pocasi.gd): slunce slábne, obloha a mraky šednou, mraky skoro celé, víc přízemní mlhy.
+func _zatazit(p0: Dictionary) -> Dictionary:
+	if zatazeni <= 0.001: return p0
+	if _poc.is_empty(): _poc = JSON.parse_string(FileAccess.get_file_as_string("res://data/pocasi.json"))["obloha"]
+	var p := p0.duplicate(); var z := zatazeni
+	var sd: Array = _poc["seda"]; var seda := Color(sd[0], sd[1], sd[2]) * clampf((_jas(p["zenith"]) + _jas(p["horizon"])) / 0.9, 0.05, 1.0)
+	p["sun_e"] = float(p["sun_e"]) * (1.0 - float(_poc["zatazeni_slunce"]) * z)
+	p["_seda"] = seda   # obloha k šedé až po převodu na barvy Puchartu (_apply) – poměr k vztažnému presetu by šedou přebarvil
+	if p.has("c_lit"): p["c_lit"] = (p["c_lit"] as Color).lerp(seda * 1.05, z); p["c_dark"] = (p["c_dark"] as Color).lerp(seda * float(_poc.get("tmave_mraky", 0.8)), z)
+	if p.has("glow"): p["glow"] = float(p["glow"]) * (1.0 - z)
+	if p.has("tint"): p["tint"] = (p["tint"] as Color).lerp(seda, z)
+	p["mist"] = float(p["mist"]) * lerpf(1.0, float(_poc["mlha_nasobek"]), z)
+	p["amb"] = float(p["amb"]) * lerpf(1.0, float(_poc["okolni"]), z)
+	return p
+
+func prekresli() -> void:   # pocasi.gd: změna zatažení – přepočet hned
+	_apply(state_at(hour) if _t >= 1.0 else _mix(_from, _to, smoothstep(0.0, 1.0, _t)))
+
 func _apply(p: Dictionary) -> void:
-	_last = p
+	_last = p   # bez zatažení (přechody set_hour mísí čisté předvolby)
+	p = _zatazit(p)
 	var d := sun_dir(p)
 	if _sun_d == Vector3.ZERO or d.angle_to(_sun_d) > float(cfg["krok_slunce_rad"]):
 		_sun_d = d
@@ -166,12 +187,18 @@ func _apply(p: Dictionary) -> void:
 	var obl_jas := _jas(p["zenith"]) + _jas(hz); var ref_jas := _jas(_ref["zenith"]) + _jas(_ref["horizon"])
 	var nove := {"top": _pomer(_zakl["top"], p["zenith"], _ref["zenith"]), "hor": _pomer(_zakl["hor"], hz, _ref["horizon"]),
 		"g_hor": _pomer(_zakl["g_hor"], hz, _ref["horizon"]), "g_bot": _pomer(_zakl["g_bot"], hz, _ref["horizon"])}
+	if p.has("_seda"):   # zatažení (pocasi.gd)
+		var sd_: Color = p["_seda"]
+		for k_ in ["top", "hor", "g_hor"]: nove[k_] = (nove[k_] as Color).lerp(sd_ * (0.85 if k_ == "top" else 1.0), zatazeni)
 	# obloha (a s ní odraz okolního světla) jen při znatelné změně – přepočet záře oblohy stojí i na tabletu
 	if _rozdil(obloha.get_shader_parameter("zenith"), nove["top"]) > 0.004 or _rozdil(obloha.get_shader_parameter("horizon"), nove["hor"]) > 0.004 \
-			or absf(_par_f("stars") - float(p.get("stars", 0.0))) > 0.01:
+			or absf(_par_f("stars") - float(p.get("stars", 0.0))) > 0.01 or absf(_par_f("cloud_cover") - _kryti()) > 0.01:
 		obloha.set_shader_parameter("zenith", nove["top"]); obloha.set_shader_parameter("horizon", nove["hor"])
 		obloha.set_shader_parameter("ground", nove["g_bot"])
 		obloha.set_shader_parameter("energy", float(p["sky_e"]))
+		if not _poc.is_empty() or zatazeni > 0.0:
+			if _poc.is_empty(): _poc = JSON.parse_string(FileAccess.get_file_as_string("res://data/pocasi.json"))["obloha"]
+			var mk: Array = _poc["mraky_kryti"]; obloha.set_shader_parameter("cloud_cover", lerpf(float(mk[0]), float(mk[1]), zatazeni))
 		for k_: String in ["tint", "glow", "c_lit", "c_dark", "stars"]:   # Havran daylight._apply: záře, mraky, hvězdy
 			if p.has(k_): obloha.set_shader_parameter({"tint": "sun_tint", "glow": "sun_glow", "c_lit": "cloud_lit", "c_dark": "cloud_dark", "stars": "stars"}[k_], p[k_])
 	mlha = _pomer(_zakl["fog"], p["fog"], _ref["fog"])
@@ -197,3 +224,7 @@ static func _rozdil(a: Color, b: Color) -> float:
 func _par_f(jm: String) -> float:   # parametr shaderu oblohy (nenastavený = null → výchozí 0)
 	var v = obloha.get_shader_parameter(jm)
 	return 0.0 if v == null else float(v)
+
+func _kryti() -> float:
+	if _poc.is_empty(): return _par_f("cloud_cover")
+	var mk: Array = _poc["mraky_kryti"]; return lerpf(float(mk[0]), float(mk[1]), zatazeni)

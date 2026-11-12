@@ -474,6 +474,8 @@ func _prostredi() -> void:
 	add_child(we)
 	if FileAccess.file_exists("res://data/den.json"):   # plynulý den a noc (Havran daylight.gd; pravidla/svet/den.json)
 		den = load("res://scripts/den.gd").new(); den.name = "Den"; add_child(den); den.setup(slunce, sky_mat, env, self)
+		if FileAccess.file_exists("res://data/pocasi.json"):   # déšť (pocasi.gd, Míša 12. 11.)
+			var pc: Node3D = load("res://scripts/pocasi.gd").new(); pc.name = "Pocasi"; add_child(pc); pc.setup(den)
 
 ## Hrad blízko plný (reliéf zdiva, ~600 k troj.), dál zjednodušený *_daleko.glb (stavitel ho peče, ale hra ho nenačítala –
 ## hlídač scén 3. 11.: 7/127 snímků nad rozpočtem i 300 m od hradu). Hranice z pravidla/svet/hrad_vzhled.json lod.

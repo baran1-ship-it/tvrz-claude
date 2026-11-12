@@ -1,5 +1,5 @@
 {
- "verze": "L: oprava pádu, cesty podle terénu, Předhradí, krčma, hájovna, 3D 75 %",
+ "verze": "M: déšť (pocasi.gd), obloha Havrana, menu, mapa, opravy hradů / 75 %",
  "useky": [
   {
    "jmeno": "hrad",
@@ -98,8 +98,18 @@
    ]
   },
   {
+   "jmeno": "les dest",
+   "usek": "les",
+   "dest": 1.0
+  },
+  {
    "jmeno": "les znovu",
    "usek": "les"
+  },
+  {
+   "jmeno": "hrad dest",
+   "usek": "hrad",
+   "dest": 1.0
   }
  ],
  "pozn_varianty": "Míša 10. 11.: „jediný pokles byl u stromů“ – cena vrstev lesa na tabletu přímo (Havran: les p50 57 při 100 %, příčina neizolovaná). Plný obraz 100 %; 'les znovu' na konci = drift teplem.",

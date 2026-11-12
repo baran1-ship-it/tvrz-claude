@@ -1,0 +1,91 @@
+{
+ "popis": "Počasí – déšť (hra/scripts/pocasi.gd). Míša 12. 11.: „déšť jednou za 4 dny, nemusí to být celý den“, „co nejlepší efekt, ať to vypadá reálně, ale nezasekat tablet“. Rešerše docs/reference/reserse_dest_kcd.md: KCD – déšť i v noci, náhodný ve volném světě, závoj kolem kamery (ne částice), tmavé lesklé povrchy, uvnitř tlumený zvuk, louče hoří dál; četnost a délka v KCD NEOVERENO (oficiální čísla nejsou) → NAVRH podle Míši.",
+ "zdroj": "Míša 12. 11. + docs/reference/reserse_dest_kcd.md",
+ "rozestup_dni": [
+  2,
+  6
+ ],
+ "rozestup_pozn": "mezi dešti 2–6 herních dní (průměr 4 – Míša); deterministicky podle čísla dne (semínko), bez ukládání",
+ "start_hodina": [
+  0.0,
+  24.0
+ ],
+ "trvani_h": [
+  1.0,
+  4.0
+ ],
+ "trvani_pozn": "NAVRH: 1–4 herní h (4–16 min skutečného času), nikdy celý den",
+ "zatahovani_h": 0.5,
+ "doznivani_h": 0.4,
+ "osychani_h": 1.5,
+ "osychani_pozn": "mokro opadá po dešti ještě 1,5 h (KCD: louže mizí poslední)",
+ "sila": [
+  0.55,
+  1.0
+ ],
+ "obloha": {
+  "zatazeni_slunce": 0.7,
+  "seda": [
+   0.46,
+   0.49,
+   0.53
+  ],
+  "mraky_kryti": [
+   0.46,
+   0.99
+  ],
+  "mlha_nasobek": 4.0,
+  "okolni": 0.75,
+  "pozn": "zatažené nebe: slunce o 70 % slabší, obloha k šedé, mraky skoro celé, přízemní mlha ×4 (dohlednost)",
+  "tmave_mraky": 0.82
+ },
+ "kapky": {
+  "vrstvy": [
+   [
+    5.0,
+    9.0
+   ],
+   [
+    11.0,
+    13.0
+   ]
+  ],
+  "rychlost": [
+   1.6,
+   1.2
+  ],
+  "hustota": [
+   700.0,
+   1100.0
+  ],
+  "delka": [
+   0.07,
+   0.05
+  ],
+  "jas": [
+   0.5,
+   0.35
+  ],
+  "pozn": "2 válce kolem kamery (poloměr, výška) se shaderem čar (KCD: závoj kolem pohledu; Godot: na mobilu málo průhledných vrstev) – svislé, sledují jen polohu kamery",
+  "rychlost_pozn": "opakování výšky válce za s: 9 m × 1,6 ≈ 14 m/s – kapka deště padá 6–9 m/s, čára je rozmazaná pohybem (protažení)"
+ },
+ "dopady": {
+  "pocet": 90,
+  "plocha_m": 7.0,
+  "pozn": "drobné odstřiky kolem hráče (CPUParticles, bez stínu), jen venku"
+ },
+ "strecha_m": 30.0,
+ "strecha_pozn": "paprsek nad kamerou: pod střechou / uvnitř kapky ani dopady nejsou, zvuk tlumený (KCD hotfix 1.5.2)",
+ "zvuk": {
+  "slaby": "res://zvuky/pocasi/dest_slaby.ogg",
+  "silny": "res://zvuky/pocasi/dest_silny.ogg",
+  "db_max": -4.0,
+  "uvnitr_db": -12.0,
+  "uvnitr_lowpass_hz": 900.0,
+  "zdroj": "OpenGameArt Rain loopable (Ylmir, CC0) – hra/zvuky/pocasi/LICENCE.txt"
+ },
+ "mokro": {
+  "nabeh_h": 0.4,
+  "pozn": "povrchy (zem, zdivo, skály, dřevo – uniform mokro) tmavší a lesklejší"
+ }
+}
