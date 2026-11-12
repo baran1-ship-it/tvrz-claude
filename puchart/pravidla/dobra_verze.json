@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "5fb7998",
+ "commit": "81485de",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -68,7 +68,13 @@
    "koryto_kameny_hustota": true,
    "zabradli_ulomky": true,
    "zabradli_spojite": true,
-   "portaly": true
+   "portaly": true,
+   "cesta_bez_porostu": true,
+   "strom_mimo_pas_cesty": true,
+   "ves_vyslapano": true,
+   "ves_vstupy_volne": true,
+   "krcma_bez_plotu": true,
+   "ves_bez_vybaveni": true
   },
   "pruchod": {
    "A_branka_patro": true,
@@ -86,6 +92,7 @@
    "A_vstup": true,
    "A_vstup_ven": true,
    "B_ochoz_vez": true,
+   "B_stit_prizemi": true,
    "B_vez_nadvori": true,
    "B_vez_nahoru": true,
    "B_vstup": true,
@@ -99,6 +106,7 @@
    "lavka_most_440_4": true,
    "lavka_most_440_5": true,
    "lavka_most_440_6": true,
+   "mapa_cestovani": true,
    "povrch_kolize": true,
    "strom_kolize": true,
    "vrata_funkce": true
@@ -106,26 +114,26 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1868843,
-    "troj_max": 1872652,
-    "kresleni_p95": 440,
+    "troj_p95": 1244233,
+    "troj_max": 1250040,
+    "kresleni_p95": 370,
     "kresleni_m_median": 476.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 2243859,
-    "troj_max": 2376262,
-    "kresleni_p95": 869,
-    "kresleni_m_median": 713.0
+    "troj_p95": 1607858,
+    "troj_max": 1767787,
+    "kresleni_p95": 662,
+    "kresleni_m_median": 710.0
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 2150373,
-    "troj_max": 2209180,
-    "kresleni_p95": 1031,
-    "kresleni_m_median": 1760.5
+    "troj_p95": 1564638,
+    "troj_max": 1718089,
+    "kresleni_p95": 817,
+    "kresleni_m_median": 1757.0
    },
-   "zmena_median": 33.49,
+   "zmena_median": 36.87,
    "doskoky": [],
    "ve_zdi": 2
   },
