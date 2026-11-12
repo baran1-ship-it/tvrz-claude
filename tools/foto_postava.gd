@@ -106,8 +106,17 @@ func _beh() -> void:
 		ap.play(a[2], 0.0)
 		ap.seek(float(a[3]), true)
 		ap.advance(0.0)
-		for i in 3:
+		for i in (90 if kostra.find_bone("sukne_0_0") >= 0 else 3):     # pruzne kosti sukne se ustali
 			await process_frame
+		if kostra.find_bone("sukne_0_0") >= 0:
+			var th := kostra.global_transform * kostra.get_bone_global_pose(kostra.find_bone("thigh_l")).origin
+			var cl := kostra.global_transform * kostra.get_bone_global_pose(kostra.find_bone("calf_l")).origin
+			var tx := ""
+			for i in 8:
+				var b := kostra.find_bone("sukne_%d_2" % i)
+				if b >= 0:
+					tx += " %d:%s" % [i, (kostra.global_transform * kostra.get_bone_global_pose(b).origin).snapped(Vector3.ONE * 0.01)]
+			print("SUKNE_DIAG %s stehno %s koleno %s konce retezu%s" % [a[0], th.snapped(Vector3.ONE * 0.01), cl.snapped(Vector3.ONE * 0.01), tx])
 		var pel := kostra.find_bone("pelvis")
 		var hr := kostra.find_bone("hand_r")
 		var hl := kostra.find_bone("hand_l")

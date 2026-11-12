@@ -35,7 +35,7 @@ static var P: Dictionary = {
 	"chuze_postav": Pravidla.cti("postavy", "chuze_postav"), "podminky": Pravidla.cti("postavy", "podminky"),
 	"u_steny": Pravidla.cti("postavy", "u_steny"),
 	"pohledy": Pravidla.cti("postavy", "pohledy"), "kostky": Pravidla.cti("postavy", "kostky"),
-	"poutnici": Pravidla.cti("postavy", "poutnici")}
+	"poutnici": Pravidla.cti("postavy", "poutnici"), "sukne": Pravidla.cti("postavy", "sukne")}
 ## stin postav jen zblizka: trida postava v pravidla_modelu.json (stin_m) - jeden zdroj s testem modelu
 static var STIN_M: float = _stin_m()
 const PREDMETY_DIR := "res://modely/predmety/"
@@ -165,9 +165,20 @@ func nova_postava(o: Dictionary) -> Dictionary:
 ## Data postavy.json sukne (tuhost, odpor, tize, polomer kapsli). Jen zblizka (LOD: c["sukne"].active jako nohy_ik).
 func _sukne(c: Dictionary) -> void:
 	var sk: Skeleton3D = c["kostra"]
+	if OS.has_environment("TVRZ_SUKNE_DIAG"):
+		print("SUKNE_START %s kost %d data %s kosti %d" % [c["id"], sk.find_bone("sukne_0_0"), P.has("sukne"), sk.get_bone_count()])
 	if sk.find_bone("sukne_0_0") < 0 or not P.has("sukne"):
 		return
 	var D: Dictionary = P["sukne"]
+	# nejdriv rizeni stehny (scripts/sukne_ridic.gd), pak pruzina - modifikatory bezi v poradi deti kostry
+	var rid: SkeletonModifier3D = preload("res://scripts/sukne_ridic.gd").new()
+	rid.name = "sukne_ridic"
+	rid.set("D", D)
+	sk.add_child(rid)
+	rid.call("priprav", sk)
+	c["sukne_ridic"] = rid
+	if not bool(D.get("pruzina", true)):
+		return
 	var sim := SpringBoneSimulator3D.new()
 	sim.name = "sukne"
 	var n := 0
@@ -2369,7 +2380,7 @@ func _process_vlastni(dt: float) -> void:
 				(c["nohy_ik"] as SkeletonModifier3D).active = nik_on
 		if (c["ruce"] as Dictionary).has("mod"):
 			(c["ruce"]["mod"] as Node).call("zapni", v_zaberu and d < float(P["do"]))
-		if c.has("sukne"):
+		if c.has("sukne") and is_instance_valid(c["sukne"]):
 			var su_on := v_zaberu and d < float(P["sukne"]["do_m"])
 			var su: SpringBoneSimulator3D = c["sukne"]
 			if su.active != su_on:

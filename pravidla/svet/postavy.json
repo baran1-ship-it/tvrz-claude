@@ -6635,14 +6635,19 @@
  "faze_smycky_podil": 1.0,
  "_faze_smycky_podil": "12. 11. (rešerše Živé postavy jako v KCD - animation twinning, Dawe GAP2 kap. 6): smycka cinnosti zacina v nahodne fazi (podil delky klipu), chuze ne",
  "sukne": {
-  "tuhost": 0.6,
+  "tuhost": 0.2,
   "odpor": 0.5,
-  "tize": 1.0,
+  "tize": 2.5,
   "polomer_m": 0.03,
   "konec_m": 0.06,
   "kapsle_polomer_m": 0.085,
   "kapsle_delka_m": 0.42,
   "do_m": 15.0,
-  "_popis": "12. 11.: pruzne kosti sukne (scripts/lide.gd _sukne, SpringBoneSimulator3D Godot 4.4): tuhost/odpor/tize retezu sukne_<i>_*, kolize kapslemi stehen a lytek (polomer, delka). Jen do do_m (rešerše: simulator jen zblizka). Hodnoty NEOVERENO - ladi se snimky chuze a sedu"
+  "_popis": "12. 11.: pruzne kosti sukne (scripts/lide.gd _sukne, SpringBoneSimulator3D Godot 4.4): tuhost/odpor/tize retezu sukne_<i>_*, kolize kapslemi stehen a lytek (polomer, delka). Jen do do_m (rešerše: simulator jen zblizka). Hodnoty NEOVERENO - ladi se snimky chuze a sedu",
+  "ridic_predek": 0.7,
+  "ridic_bok": 0.25,
+  "_ridic": "12. 11. (diagnostika: vsedе konce retezu 0,40 m svisle pod panvi, kolena 0,95 m vpredu - pruzina sama sed neresi): koren retezu natoci podil otoceni stehna proti panvi - predni retezy ridic_predek (pul z kazdeho stehna), bocni ridic_bok z blizsiho stehna (scripts/sukne_ridic.gd). NEOVERENO snimkem",
+  "pruzina": true,
+  "_ladeni12": "12. 11. ladeno snimky (build/sukne/ridic2.jpg): ridic_predek 0,7 a ridic_bok 0,25 (pri 0,8/0,6 sukne vsede trcela jako ubrus), tuhost 0,2 a tize 2,5 (spodni kosti za koleny padaji k zemi). Chuze i sed overeny snimkem u senkyrky; vykon na tabletu NEOVERENO"
  }
 }
