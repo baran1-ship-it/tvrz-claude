@@ -8042,7 +8042,10 @@ func _ryb_napojeni() -> void:
 			var dd: Vector2 = (body[0] as Vector2) - hc
 			var podel := absf(dd.dot(hu)) - float(hz["delka_m"]) / 2.0
 			var napric := absf(dd.dot(hu.orthogonal()))
-			var pata := float(hz["koruna_sirka_m"]) / 2.0 + float(hz["koruna_nad_hladinou_m"]) / float(hz["sklon_svahu"]) + 3.0
+			# vzdusna pata = koruna/2 + (vyska koruny nad hladinou odtoku) / sklon svahu (+0,5 m na zaobleni)
+			var ryb_h := float(Pravidla.cti("voda", "rybnik_lhota")["hladina_y"])
+			var o0: Array = t["osa_xzy"][0]
+			var pata := float(hz["koruna_sirka_m"]) / 2.0 + (ryb_h + float(hz["koruna_nad_hladinou_m"]) - float(o0[2])) / float(hz["sklon_svahu"]) + 0.5
 			radky.append("odtok zacina %.1f m napric od osy hraze (pata %.1f), podel za koncem hraze %.1f m" % [napric, pata, podel])
 			if napric > pata or podel > 0.0:
 				chyby.append("odtok nezacina u hraze: %.1f m od osy, %.1f m za jejim koncem" % [napric, podel])

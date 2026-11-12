@@ -2931,6 +2931,11 @@
    "do": "potok",
    "osa_xzy": [
     [
+     502.142,
+     883.108,
+     1.794
+    ],
+    [
      501.456,
      883.018,
      1.794
@@ -4570,7 +4575,8 @@
      980.0,
      -6.417
     ]
-   ]
+   ],
+   "_od_paty12": "12. 11. (test ryb_napojeni: odtok zacinal 2.1 m za vzdusnou patou hraze - suchy pas): osa prodlouzena proti proudu k pate (hladina odtoku)"
   },
   {
    "id": "tvrz_potok",
