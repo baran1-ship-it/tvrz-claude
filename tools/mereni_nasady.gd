@@ -19,7 +19,7 @@ func _beh() -> void:
 	var c: Dictionary = lide.nova_postava((Lide.P["obyvatele"] as Array)[0])
 	var sk: Skeleton3D = c["kostra"]
 	var ap: AnimationPlayer = c["ap"]
-	for jm: String in ["TreeChopping_Loop", "Kovar_Swing_Loop", "Prace_Uder_Loop", "Prace_Kovar_Loop", "Kope_Loop"]:
+	for jm: String in ["Uder_Shora_Mx", "Uder_Mec_Mx", "Uder_Tezky_Mx", "TreeChopping_Loop", "Kovar_Swing_Loop", "Prace_Uder_Loop", "Prace_Kovar_Loop", "Kope_Loop"]:
 		if not ap.has_animation(jm):
 			print("NASADA %s chybi" % jm)
 			continue

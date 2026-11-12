@@ -144,6 +144,11 @@ CLIPS = [
     ("Hrac_Pad_Loop", "akce/aap_falling_idle.fbx", 0.0, None, ""),
     ("Hrac_Dopad", "akce/aap_hard_landing.fbx", 0.0, None, ""),
     ("Beh_Zastavi", "akce/aap_run_to_stop.fbx", 0.0, None, ""),
+    # Misa 12. 11. (krumpac a sekera drzene na spatnem miste: CMU 79 nahrany bez nastroje - ruce 22-37 cm, smer az 59 st,
+    # tools/mereni_nasady.gd): obourucni udery Mixamo nahrane se zbrani v obou rukou - vyber podle mereni nasady
+    ("Uder_Shora_Mx", "akce/Standing_Melee_Attack_Downward.fbx", 0.0, None, ""),
+    ("Uder_Mec_Mx", "akce/Great_Sword_Slash.fbx", 0.0, None, ""),
+    ("Uder_Tezky_Mx", "akce/Heavy_Weapon_Swing.fbx", 0.0, None, ""),
 ] + [("Gesto_" + g, "gesta/" + g + ".fbx", 0.0, None, "") for g in (
     "acknowledging", "angry_gesture", "annoyed_head_shake", "being_cocky", "dismissing_gesture", "happy_hand_gesture",
     "hard_head_nod", "head_nod_yes", "lengthy_head_nod", "look_away_gesture", "relieved_sigh", "sarcastic_head_nod",
