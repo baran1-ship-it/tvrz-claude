@@ -707,9 +707,9 @@ def zabradli(P, p0, p1, y):
     if os.environ.get("PUCHART_DBGZ"):
         _q = [float(x) for x in os.environ["PUCHART_DBGZ"].split(",")]
         if min((Vector((_q[0], 0, _q[1])) - hz(p_)).length for p_ in (p0, p1, (p0 + p1) / 2)) < 1.5: print("DBGZ", [round(v, 2) for v in (p0.x, p0.z, p1.x, p1.z, y)], ZABR[-1][3], _s._getframe(2).f_code.co_name, _s._getframe(2).f_lineno, flush=True)
-    ZAB_REC.append({"P": P, "a": hz(p0), "b": hz(p1), "ya": y, "yb": y, "dolu": 0.02, "deska": True})   # staví se až zabradli_stavba() – spojení konců
-    # kolizní deska až v zabradli_stavba() podle výsledné polohy (12. 11.: deska z původní polohy zůstala po spojení / vynechání
-    # úlomku jako neviditelná stěna v patře branky – povrch_kolize A_branka_patro)
+    ZAB_REC.append({"P": P, "a": hz(p0), "b": hz(p1), "ya": y, "yb": y, "dolu": 0.02, "kol_i": len(P.cols)})   # staví se až zabradli_stavba() – spojení konců
+    kol(P, (p0 + p1) / 2 + UP * (y + 0.55), d, (0.1, 1.1, L))   # deska hned (hlídač volných hran podle ní pozná zábradlí); zabradli_stavba
+    # ji přesune do výsledné polohy (12. 11.: deska z původní polohy zůstala po spojení jako neviditelná stěna v patře branky)
 
 def podlaha(P, c, d, iw, idp, y, otvory=(), tl=0.24, mat="prkna_ven"):
     """Trámový strop/podlaha ve věži (lokálně u podél d, v podél s, střed c) s otvory [(u0, u1, v0, v1)] pro schody."""
@@ -1868,12 +1868,12 @@ def zabradli_stavba():
         for j in range(i + 1, len(E_)):
             rj, kj = E_[j]
             if ri is rj: continue
-            if (ri[ki] - rj[kj]).length < 0.45 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: spoj(i, j)
+            if (ri[ki] - rj[kj]).length < 0.45 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: par[f(i)] = f(j)
     for i in range(len(E_)):   # konce blíž než 0,75 m se spojí (dřív 0,45 – zbyly dva konce 0,54 m od sebe: mezera, dva krajní sloupky)
         ri, ki = E_[i]
         for j in range(i + 1, len(E_)):
             rj, kj = E_[j]
-            if ri is not rj and (ri[ki] - rj[kj]).length < 0.75 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: spoj(i, j)
+            if ri is not rj and (ri[ki] - rj[kj]).length < 0.75 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: par[f(i)] = f(j)
     sk = {}
     for i in range(len(E_)): sk.setdefault(f(i), []).append(i)
     for g in sk.values():
@@ -1904,9 +1904,14 @@ def zabradli_stavba():
         return False
     for r in [r for r in ZAB_REC if (r["b"] - r["a"]).length < ZAB_MIN_M and not r.get("sa") and not r.get("sb") and not _blizko_jineho(r)]:
         print("ZABRADLI_ULOMEK vynechán", [round(v, 2) for v in (r["a"].x, r["a"].z, r["ya"], r["b"].x, r["b"].z)], flush=True); ZAB_REC.remove(r)
-    for r in ZAB_REC:   # deska u každého vodorovného zábradlí (i z pavlačí – jejich vlastní deska zůstala v poloze před T-spojem)
-        if abs(r["ya"] - r["yb"]) < 0.05 and (r["b"] - r["a"]).length >= 0.1:
-            kol(r["P"], (r["a"] + r["b"]) / 2 + UP * (r["ya"] + 0.55), hz(r["b"] - r["a"]), (0.1, 1.1, (r["b"] - r["a"]).length))
+        if "kol_i" in r: r["P"].cols[r["kol_i"]] = None
+    for r in ZAB_REC:   # deska u každého zábradlí podle výsledné polohy (i šikmá madla schodů – po spojení konců sahala mimo kolizi schodů)
+        Lh_ = (r["b"] - r["a"]).length
+        if "kol_i" in r: r["P"].cols[r["kol_i"]] = None   # původní deska pryč (nahradí ji deska ve výsledné poloze)
+        if Lh_ >= 0.1:
+            sk_ = math.atan2(r["yb"] - r["ya"], Lh_)
+            kol(r["P"], (r["a"] + r["b"]) / 2 + UP * ((r["ya"] + r["yb"]) / 2 + 0.55), hz(r["b"] - r["a"]), (0.1, 1.1, Lh_ / math.cos(sk_)), sk_)
+    for P_ in {id(r["P"]): r["P"] for r in ZAB_REC}.values(): P_.cols[:] = [c for c in P_.cols if c is not None]
     ZAB_VYSTUP[:] = [{"a": [round(r["a"].x, 2), round(r["a"].z, 2), round(r["ya"], 2)], "b": [round(r["b"].x, 2), round(r["b"].z, 2), round(r["yb"], 2)],
                       "sa": bool(r.get("sa")), "sb": bool(r.get("sb"))} for r in ZAB_REC if (r["b"] - r["a"]).length >= 0.1]   # pro hlídač zabradli_spojite
     hotove = set()

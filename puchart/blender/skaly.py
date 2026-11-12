@@ -239,3 +239,6 @@ for o in list(bpy.data.objects): bpy.data.objects.remove(o)
 H.uloz(list(parts.values()) + list(kol_parts.values()), "skaly", kolize=False)
 json.dump({"popis": "půdorysy skalní plochy (pro šedý podklad terénu a vyloučení trávy)", "skaly": body},
           open(os.path.join(K, "hra/data/skaly_body.json"), "w"), ensure_ascii=False)
+
+# Blender (bpy) občas spadne při úklidu po uložení – návratový kód přerušil řetězec postav_vse.sh (12. 11.); vše je uložené
+import os as _os, sys as _sys; _sys.stdout.flush(); _os._exit(0)

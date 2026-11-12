@@ -335,3 +335,6 @@ for lv in VH["lavky"] + [m_ for m_ in VH.get("mosty", []) if "_konce" in m_]:
     (ax, az, y), (bx, bz, y2_) = lv["_konce"]; y = (y + y2_) / 2; d = np.array([bx - ax, bz - az]); d /= np.linalg.norm(d)   # střed mostovky (sklon)
     TRp["lavka_" + lv["id"]] = [[ax - d[0] * 2.5, az - d[1] * 2.5, None], [(ax + bx) / 2, (az + bz) / 2, y + 0.05], [bx + d[0] * 2.5, bz + d[1] * 2.5, None]]
 json.dump({"popis": "trasy průchodu lávkami (blender/voda.py)", "trasy": TRp}, open(os.path.join(K, "hra/data/pruchody_voda.json"), "w"), ensure_ascii=False)
+
+# Blender (bpy) občas spadne při úklidu po uložení – návratový kód přerušil řetězec postav_vse.sh (12. 11.); vše je uložené
+import os as _os, sys as _sys; _sys.stdout.flush(); _os._exit(0)

@@ -23,6 +23,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	if OS.get_environment("PUCHART_JEN") != "": jmena = []   # ladění: jen vybrané testy (_konec), bez tras
 	if OS.get_environment("PUCHART_TRASA") != "": jmena = [OS.get_environment("PUCHART_TRASA")]   # ladění: jen jedna trasa
 	hrac.set_physics_process(true)
+	_dvere()   # pohyblivé díly s kolizí jako ve hře (padací mosty mají kolizi jen z dvere.gd – bez ní trasy přes most padaly, 12. 11.)
 	_start_trasy()
 
 func _y(b: Array) -> float:
@@ -114,7 +115,7 @@ func _test_povrch() -> void:
 	for vr: Node in vrstvy:
 		for m in vr.find_children("*", "MeshInstance3D", true, false):
 			var mi := m as MeshInstance3D
-			if mi.mesh == null or String(mi.name).begins_with("KOLIZE") or String(mi.get_parent().name).begins_with("Pohyb"):
+			if mi.mesh == null or String(mi.name).begins_with("KOLIZE") or (String(mi.get_parent().name).begins_with("Pohyb") and not String(mi.get_parent().name).begins_with("Pohyb_most")):   # padací most se chodí (spuštěný) – je to povrch
 				continue
 			for si in mi.mesh.get_surface_count():   # hladina se neprochází po povrchu (brodí se) – bez ní
 				var mat := mi.get_active_material(si)

@@ -32,3 +32,6 @@ for i, o in enumerate(obs):
     print("valoun", i, n0, "->", len(me.polygons))
 bpy.ops.export_scene.gltf(filepath=os.path.join(K, "hra/modely/hrady/kameny_koryta.glb"), export_format="GLB", export_yup=True)
 print("ULOZENO kameny_koryta")
+
+# Blender (bpy) občas spadne při úklidu po uložení – návratový kód přerušil řetězec postav_vse.sh (12. 11.); vše je uložené
+import os as _os, sys as _sys; _sys.stdout.flush(); _os._exit(0)
