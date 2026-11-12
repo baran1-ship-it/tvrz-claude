@@ -5670,7 +5670,12 @@
     0.1,
     0.0
    ],
-   "nasada": true
+   "nasada": true,
+   "uchop_uder_y": 0.2,
+   "druha_ruka_rozsah": [
+    -0.08,
+    0.12
+   ]
   },
   "_popis": "predmet v ruce postavy (lide.gd ruce): BoneAttachment3D na hand_r / hand_l, uchop = bod predmetu v jeho souradnicich (m), kam patri dlan; rot_st = natoceni predmetu v soustave kosti ruky (kost UAL: osa x podel prstu, y dlani dolu, z k palci). Overeno snimky tools/foto_postava.gd 5. 11. (docs/screens/postavy_po/): krumpac nad hlavou za konec topurka, palice v rukou pri klecenim, vedro za ucho pri chuzi a pri zalevani naklonene; srp a kosik viz snimky. Kopi (5. 11. vecer): rot_st spocitano z os kosti hand_r v Idle_Loop t 1,0 (DIAG foto_postava: x (-0,99; 0,16; -0,02), y (-0,15; -0,83; 0,54), z (0,07; 0,53; 0,84)) tak, aby hrot (+x predmetu, snimek ruka_kopi3: -x byla patka) mieril svisle nahoru; uchop 0,26 m od stredu k patce (-x) = patka u zeme pri ruce ve vysce 0,94 m.",
   "krumpac": {
@@ -5689,7 +5694,18 @@
     0.06,
     0.0
    ],
-   "nasada": true
+   "nasada": true,
+   "uchop_uder_y": 0.14,
+   "druha_ruka_rozsah": [
+    -0.039999999999999994,
+    0.09
+   ],
+   "dlan_m": [
+    -0.025,
+    0.09,
+    0.02
+   ],
+   "_dlan12": "12. 11. test_drzeni UCHOP_NAVRH (nejmensi nejvetsi mezera/prunik prstu, obe ruce - leva zrcadlene): posun od _dlan_m"
   },
   "kladivo_kamenicke": {
    "uchop": [
@@ -5841,7 +5857,18 @@
     0.0
    ],
    "ostri_osa": "z",
-   "nasada": true
+   "nasada": true,
+   "uchop_uder_y": 0.16,
+   "druha_ruka_rozsah": [
+    -0.06,
+    0.12
+   ],
+   "dlan_m": [
+    -0.03,
+    0.095,
+    0.02
+   ],
+   "_dlan12": "12. 11. test_drzeni UCHOP_NAVRH (nejmensi nejvetsi mezera/prunik prstu, obe ruce - leva zrcadlene): posun od _dlan_m"
   },
   "_rezim": "Misa 0.99993 r. 47 (9. 11.): rot_st plati jen v klipu, ve kterem se ladilo - v jinych klipech (chuze, reakce slozene ruce, kleceni) byl predmet nakrivo. rezim (scripts/uchop.gd, SkeletonModifier3D po animaci): visi = predmet visi z uchopu svisle (tize; vedro, lucerna, kosik), svisle = ruka se natoci, aby predmet mel v soustave postavy svet_rot_st (kopi hrotem nahoru: +x predmetu -> nahoru = [0,0,90]); druha_ruka = bod predmetu (jeho souradnice), kam jde druha ruka IK (obourucni krumpac a sekera). Bez rezimu predmet jde s klipem (srp, kladivo, vedro_drevene pri zalevani - naklon je zadouci).",
   "_test": {
@@ -5872,19 +5899,26 @@
     0.0,
     0.0
    ],
-   "klipy_bez_rezimu": [
+   "klipy_bez_rezimu": [],
+   "_p11": "11. 11. (rešerše: korbel se pri chuzi naklani): svisle = nadoba rovne (osa y nahoru) v kazdem klipu, pri piti (klipy_bez_rezimu) naklon z klipu k ustum",
+   "_ruka11": "11. 11. (snimek uchop4/piti: Mixamo Drinking pije LEVOU rukou, korbel visel v prave u boku) - v_rukou pri piti l",
+   "_uchop11": "11. 11.: za ucho (mereni modelu: ucho x +0,08, y 0,04-0,10), drive stred korbelu",
+   "uchop_r_m": 0.008,
+   "_uchop_r": "12. 11.: ucho korbelu svisle (osa y) v pesti - NEOVERENO z modelu",
+   "_rot12": "12. 11. (test_drzeni dotyk: ucho vedlo skrz dlan - osa y predmetu na -x ruky, prsty nemely kolem ceho sevrit): ucho (y predmetu) napric dlani (z ruky), telo korbelu za prsty (od ucha -x predmetu -> +y ruky k prstum); dlan_m zrusen (dutina pesti _dlan_m jako ostatni)",
+   "klipy_piti": [
     "Napiti",
     "Sed_Piti_Loop",
     "Sed_Piti1_Loop",
     "Piti",
     "Piti_Unavene"
    ],
-   "_p11": "11. 11. (rešerše: korbel se pri chuzi naklani): svisle = nadoba rovne (osa y nahoru) v kazdem klipu, pri piti (klipy_bez_rezimu) naklon z klipu k ustum",
-   "_ruka11": "11. 11. (snimek uchop4/piti: Mixamo Drinking pije LEVOU rukou, korbel visel v prave u boku) - v_rukou pri piti l",
-   "_uchop11": "11. 11.: za ucho (mereni modelu: ucho x +0,08, y 0,04-0,10), drive stred korbelu",
-   "uchop_r_m": 0.008,
-   "_uchop_r": "12. 11.: ucho korbelu svisle (osa y) v pesti - NEOVERENO z modelu",
-   "_rot12": "12. 11. (test_drzeni dotyk: ucho vedlo skrz dlan - osa y predmetu na -x ruky, prsty nemely kolem ceho sevrit): ucho (y predmetu) napric dlani (z ruky), telo korbelu za prsty (od ucha -x predmetu -> +y ruky k prstum); dlan_m zrusen (dutina pesti _dlan_m jako ostatni)"
+   "piti": {
+    "u_ust_m": 0.15,
+    "od_m": 0.35,
+    "naklon_st": 70.0,
+    "_popis": "12. 11.: pri piti nadoba svisle, u ust (ruka do u_ust_m od kosti Head) okraj k ustum o naklon_st, plynule od u_ust_m + od_m; NEOVERENO snimkem pri ustech"
+   }
   },
   "miska": {
    "_popis": "obsluha nese misu (Mixamo Carrying) - dlan pod miskou, NEOVERENO snimkem",
@@ -5923,14 +5957,21 @@
     0.0,
     0.0
    ],
-   "klipy_bez_rezimu": [
+   "klipy_bez_rezimu": [],
+   "_p11": "11. 11. (rešerše: korbel se pri chuzi naklani): svisle = nadoba rovne (osa y nahoru) v kazdem klipu, pri piti (klipy_bez_rezimu) naklon z klipu k ustum",
+   "klipy_piti": [
     "Napiti",
     "Sed_Piti_Loop",
     "Sed_Piti1_Loop",
     "Piti",
     "Piti_Unavene"
    ],
-   "_p11": "11. 11. (rešerše: korbel se pri chuzi naklani): svisle = nadoba rovne (osa y nahoru) v kazdem klipu, pri piti (klipy_bez_rezimu) naklon z klipu k ustum"
+   "piti": {
+    "u_ust_m": 0.15,
+    "od_m": 0.35,
+    "naklon_st": 70.0,
+    "_popis": "12. 11.: pri piti nadoba svisle, u ust (ruka do u_ust_m od kosti Head) okraj k ustum o naklon_st, plynule od u_ust_m + od_m; NEOVERENO snimkem pri ustech"
+   }
   },
   "lzice": {
    "_popis": "jidlo vsedě (Sed_Jidlo_Loop / Consume) - lzice v prstech, NEOVERENO snimkem",
@@ -6009,8 +6050,8 @@
   "__dlan_m": "11. 11. (Misa: kladivo svira jen v prstech; mereni kosti UAL: klouby prstu index_01 y 0,115 m od zapesti, sevrene konecky (-0,03; 0,085; 0,04) - prsty se ohybaji k -x = dlan): bod uchopu v dutine pesti [x k dlani, y k prstum, z k palci], leva ruka x zrcadlene",
   "_reseni": {
    "_popis": "12. 11. (Misa: ani jeden uchop neni spravne, nacti si to na internetu; rešerše docs/rozpracovane/uchop_reserse.md): prsty se neprikruci o pevny uhel, ale kazdy clanek od kloubu se ohne, az se dotkne nasady (polomer z modelu + prst_pul_m), nebo kloub dojde na rozsah klouby_st [MCP, PIP, DIP] (anatomicky rozsah: MCP ~90, PIP ~100-110, DIP ~80 st). Palec pres ukazovak (asset-tooling #390). Test: kazdy clanek nejvys 2 mm v nasade, konecky a stredni clanky nejvys 5 mm od ni (deadnight #507).",
-   "prst_pul_m": 0.009,
-   "_prst_pul": "NEOVERENO z kuze modelu - test_drzeni vypise sirku prstu",
+   "prst_pul_m": 0.0096,
+   "_prst_pul": "12. 11. zmereno z kuze (Male/Female_Peasant, vrcholy s vahou > 0,6 na kosti, median vzdalenosti od osy kosti): stredni clanky 9,2-11,9 mm, koncove 7,4-9,6 mm, median 9,6 mm",
    "klouby_st": [
     90.0,
     105.0,
@@ -6024,8 +6065,31 @@
    "palec_krok_st": 15.0,
    "test_dovnitr_m": 0.002,
    "test_mezera_m": 0.005,
-   "_okno": "polomer nasady = median vzdalenosti vrcholu od osy y predmetu v okne +-okno_m od bodu uchopu (do max_polomer_m) - drive maximum v okne 3 cm: krumpac 40 mm (hlava), sekera bez vrcholu (vychozi)"
-  }
+   "_okno": "polomer nasady = median vzdalenosti vrcholu od osy y predmetu v okne +-okno_m od bodu uchopu (do max_polomer_m) - drive maximum v okne 3 cm: krumpac 40 mm (hlava), sekera bez vrcholu (vychozi)",
+   "sikmo_st": 20.0,
+   "_sikmo": "12. 11. (Misa: ruka na krumpaci spatne; rešerše: silovy uchop - nasada sikmo pres dlan od hypotenaru k bazi ukazovaku, nasada s predloktim ~110 st = 20 st od kolmice; zapesti pri uchopu v ulnarni dukci 5-30 st - ScienceDirect Power grip, ResearchGate Hand tool handle design)",
+   "zalomeni_max_st": 90.0,
+   "svih_min_m": 0.2,
+   "_svih": "12. 11. (Misa: krumpac a sekera mirí od obliceje dopredu; rešerše USDA Ax Manual, Axe Adviser, hackmotion): v napahu zapesti zalomena ~90 st (hlava nastroje za hlavou), pri uderu nasada v jedne care s pazemi; faze = vyska rukou nad rameny mezi min a max klipu (svih_min_m = mensi rozsah neni svih); dolni ruka na konci nasady, horni klouze od hlavy (uchop) k uchop_uder_y",
+   "ik_kol": 12,
+   "svih_rozsah": {
+    "Prace_Uder_Loop": [
+     -0.3891,
+     0.2857
+    ],
+    "Prace_Kovar_Loop": [
+     -0.3574,
+     0.3029
+    ],
+    "Kope_Loop": [
+     -0.3954,
+     -0.103
+    ]
+   },
+   "_svih_rozsah": "12. 11. zmereno test_drzeni (SVIH_ROZSAH, 24 vzorku klipu): vyska stredu rukou nad stredem ramen v soustave kostry [uder, napah]",
+   "_pozy_soubor": "pozy prstu predpocita tools/test_drzeni.gd do pravidla/svet/uchop_pozy.json (hra je jen nacte; chybejici resi za behu s varovanim)"
+  },
+  "_druha_ruka_rozsah": "12. 11.: druha ruka na nasade v rozsahu [od, do] m od bodu druha_ruka (od = k samemu konci nasady 2 cm, do = 10 cm pod horni rukou); misto v rozsahu nejblize dlani z klipu (USDA Ax Manual: jedna ruka na konci, druha klouze)"
  },
  "sedani": {
   "_popis": "sezeni postav (plan krok 3.1, sed ve vzduchu): cinnost se sed hleda nejblizsi volny sedak ze sedaky (zaznam vybaveni sveta, ne naklopeny) do hledat_m od mista; vyska sedaku = rozmer[1] z katalogu (jen sedaky bez operadla), pouzije se jen v tolerance_m od vyska_klipu_m (Sitting_Idle_Loop: sedaci plocha nad korenem postavy, NEOVERENO - ladi se snimkem); lavice ma mist po sirka_mista_m; koren postavy pred_m pred stredem sedaku smerem, kam se diva (k ohnisti/stolu do k_ohni_m, jinak k mistu cinnosti). Prechod Sitting_Enter / Sitting_Exit.",

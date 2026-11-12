@@ -7922,7 +7922,9 @@ func _lednice_blok() -> void:
 			var z1 := xf * Vector3(o.x + bok.x * s * (pul - 0.02), y, o.z + bok.z * s * (pul - 0.02))
 			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(z0, z1))
 			var nm := String((h["collider"] as Node).get_parent().name) if not h.is_empty() else "nic"
-			if h.is_empty() or nm.begins_with("Mlyn_Lednice"):        # teren zvenku = stena zasypana, taky dobre
+			# kolize trojuhelniku jen z licove strany (ConcavePolygonShape3D backface_collision false): zasah = zvenku je
+			# lic (blok, roubeni modelu, teren); vnitrni lic zezadu paprsek neda - projde = papir
+			if h.is_empty():
 				chyby.append("bod %d strana %d: %s" % [i, int(s), nm])
 	_vysledek("lednice_blok", chyby.is_empty(), "paprsku %d, bez vnejsiho lice %d %s" % [zkous, chyby.size(), str(chyby.slice(0, 8))])
 
@@ -7970,6 +7972,7 @@ func _ryb_napojeni() -> void:
 				body.append(b0.move_toward(sv.RYB_C, float(j)))
 		var bez := 0.0
 		var nej := 0.0
+		var nad_min := INF
 		var kde := Vector2.ZERO
 		var pred := Vector2.INF
 		for p: Vector2 in body:
@@ -7978,6 +7981,8 @@ func _ryb_napojeni() -> void:
 			var wy: float = sv._tri_vyska(g, p.x, p.y)
 			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(p.x, 80.0, p.y), Vector3(p.x, -40.0, p.y)))
 			var zem := float((h["position"] as Vector3).y) if not h.is_empty() else -INF
+			if wy != -INF and wy != INF:
+				nad_min = minf(nad_min, wy - zem)
 			if wy == -INF or wy == INF or wy < zem + 0.02:
 				bez += krok
 				if bez > nej:
@@ -7985,7 +7990,28 @@ func _ryb_napojeni() -> void:
 					kde = p
 			else:
 				bez = 0.0
-		radky.append("%s: bodu %d, nejdelsi usek bez vody %.1f m u (%.0f, %.0f)" % [id, body.size(), nej, kde.x, kde.y])
+		# trava a rostliny v korytu (louka MultiMesh): instance do sirka/2 od osy = voda zarostla, neni videt
+		var tr := 0
+		var pul := float(t["sirka_m"]) * 0.5
+		for mmi0 in main.find_children("*", "MultiMeshInstance3D", true, false):
+			var mmi := mmi0 as MultiMeshInstance3D
+			if mmi.multimesh == null or not mmi.is_visible_in_tree():
+				continue
+			var gx := mmi.global_transform
+			var ab := gx * mmi.multimesh.get_aabb()
+			if ab.position.x > sv.RYB_C.x + 70.0 or ab.end.x < sv.RYB_C.x - 70.0 or ab.position.z > sv.RYB_C.y + 70.0 or ab.end.z < sv.RYB_C.y - 70.0:
+				continue
+			var mm := mmi.multimesh
+			for ii in mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count:
+				var q := gx * mm.get_instance_transform(ii).origin
+				var q2 := Vector2(q.x, q.z)
+				for k2 in range(0, body.size(), 2):
+					if q2.distance_to(body[k2]) < pul:
+						tr += 1
+						break
+		radky.append("%s: bodu %d, nejdelsi usek bez vody %.1f m u (%.0f, %.0f), hladina nad zemi nejmene %.2f m, rostlin v korytu %d" % [id, body.size(), nej, kde.x, kde.y, nad_min, tr])
+		if tr > 0:
+			chyby.append("%s: %d rostlin v korytu" % [id, tr])
 		if nej > 1.0:
 			chyby.append("%s bez vody %.1f m u (%.0f, %.0f)" % [id, nej, kde.x, kde.y])
 		if id == "lhota_odtok" and not body.is_empty():

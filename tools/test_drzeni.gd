@@ -27,62 +27,102 @@ func _beh() -> void:
 	var P: Dictionary = Lide.P
 	Uchop.diag = true
 	var T: Dictionary = P["drzeni"]["_test"]
-	var o: Dictionary = (P["obyvatele"] as Array)[0]
-	var c: Dictionary = lide.nova_postava(o)
-	var u: Node3D = c["uzel"]
-	u.rotation.y = 0.7                      # postava natocena (svet_rot_st je v soustave postavy)
-	var kostra: Skeleton3D = c["kostra"]
-	var ap: AnimationPlayer = c["ap"]
-	for rk: String in ["r", "l"]:                       # klouby prstu pro kontrolu dotyku (pred prvnim snimkem)
-		for f: String in ["index", "middle", "ring", "pinky", "thumb"]:
-			for j: String in ["02", "03", "04_leaf"]:
-				_kost(kostra, "%s_%s_%s" % [f, j, rk])
-		_kost(kostra, "hand_" + rk)
-	var reakce: Array = []
-	for r: Dictionary in P["reakce"]:
-		if String(r.get("klip", "")) != "" and not reakce.has(String(r["klip"])):
-			reakce.append(String(r["klip"]))
-	for cid: String in P["cinnosti"]:
-		var cn: Dictionary = P["cinnosti"][cid]
-		if not cn.has("v_rukou"):
-			continue
-		var klipy: Array = (cn.get("klipy", []) as Array).duplicate()
-		if cn.has("chuze"):
-			klipy.append(String(cn["chuze"]))
-		klipy.append("Walk_Loop")
-		for jm: String in klipy:
-			if not ap.has_animation(jm):
+	# kazdy druh tela (kostra ruky - klic predpocitane pozy uchop.gd) zvlast
+	var tela := {}
+	var vyber: Array = []
+	for o0: Dictionary in P["obyvatele"]:
+		var c0: Dictionary = lide.nova_postava(o0)
+		var k0: Skeleton3D = c0["kostra"]
+		var kk := str(k0.get_bone_rest(k0.find_bone("index_01_r")).origin.snapped(Vector3.ONE * 0.001))
+		(c0["uzel"] as Node).queue_free()
+		if not tela.has(kk):
+			tela[kk] = true
+			vyber.append(o0)
+	print("TELA druhu kostry ruky %d" % vyber.size())
+	for o: Dictionary in vyber:
+		var c: Dictionary = lide.nova_postava(o)
+		var u: Node3D = c["uzel"]
+		u.rotation.y = 0.7                      # postava natocena (svet_rot_st je v soustave postavy)
+		var kostra: Skeleton3D = c["kostra"]
+		var ap: AnimationPlayer = c["ap"]
+		for rk: String in ["r", "l"]:                       # klouby prstu pro kontrolu dotyku (pred prvnim snimkem)
+			for f: String in ["index", "middle", "ring", "pinky", "thumb"]:
+				for j: String in ["01", "02", "03", "04_leaf"]:
+					_kost(kostra, "%s_%s_%s" % [f, j, rk])
+			_kost(kostra, "hand_" + rk)
+		var hb := kostra.find_bone("hand_l")
+		print("MERITKO kostra %s, hand_l globalni poza %s, klid %s, uz %s" % [kostra.global_basis.get_scale(), kostra.get_bone_global_pose(hb).basis.get_scale(), kostra.get_bone_global_rest(hb).basis.get_scale(), u.scale])
+		# rozsah svihu (uchop.gd faze): vyska stredu rukou nad stredem ramen v klipu, 24 vzorku - do postavy.json
+		# drzeni._reseni.svih_rozsah (bez dat se modifikator uci za behu, cerstva postava fazi nezna)
+		for kl0: String in ["Prace_Uder_Loop", "Prace_Kovar_Loop", "Kope_Loop"]:
+			if not ap.has_animation(kl0):
 				continue
-			var vr: Dictionary = cn["v_rukou"]
-			var spec: Dictionary = vr.get(jm, vr.get("*", {}))
-			if spec.is_empty():
+			var mn := INF
+			var mx := -INF
+			var nah := (kostra.global_basis.orthonormalized().inverse() * Vector3.UP).normalized()
+			for i in 24:
+				ap.play(kl0, 0.0)
+				ap.seek(ap.get_animation(kl0).length * i / 24.0, true)
+				ap.advance(0.0)
+				var hm := (kostra.get_bone_global_pose(kostra.find_bone("hand_r")).origin + kostra.get_bone_global_pose(kostra.find_bone("hand_l")).origin) * 0.5
+				var rm := (kostra.get_bone_global_pose(kostra.find_bone("upperarm_r")).origin + kostra.get_bone_global_pose(kostra.find_bone("upperarm_l")).origin) * 0.5
+				var hv := (hm - rm).dot(nah)
+				mn = minf(mn, hv)
+				mx = maxf(mx, hv)
+			print("SVIH_ROZSAH %s %.4f %.4f" % [kl0, mn, mx])
+		var reakce: Array = []
+		for r: Dictionary in P["reakce"]:
+			if String(r.get("klip", "")) != "" and not reakce.has(String(r["klip"])):
+				reakce.append(String(r["klip"]))
+		for cid: String in P["cinnosti"]:
+			var cn: Dictionary = P["cinnosti"][cid]
+			if not cn.has("v_rukou"):
 				continue
-			c["cn"] = cn
-			c["klip"] = ""
-			lide.call("ruce", c, {})
-			lide.call("_klip", c, jm, 1.0)
-			var seznam := [jm]
-			var obouruc := false                      # obourucni nastroj: lide._reakce klip reakce nehraje
-			for rr: String in spec:
-				if (P["drzeni"].get(String(spec[rr]), {}) as Dictionary).has("druha_ruka"):
-					obouruc = true
-			# 11. 11.: s predmetem v ruce se reakce nehraje (lide._reakce) - netestuje se
-			for kl: String in seznam:
-				var dl := ap.get_animation(kl).length
-				for f: float in [0.2, 0.55, 0.9]:
-					ap.stop()
-					ap.play(kl, 0.0)
-					ap.seek(dl * f, true)
-					ap.advance(0.0)
-					for sx: String in ["l", "r"]:                  # ruce s upravenou pozou (viz _kontrola)
-						if kostra.get_node_or_null("test_ruka_" + sx) == null:
-							var bt := BoneAttachment3D.new()
-							bt.name = "test_ruka_" + sx
-							bt.bone_name = "hand_" + sx
-							kostra.add_child(bt)
-					await process_frame
-					await process_frame
-					_kontrola(c, kostra, spec, "%s %s %.2f" % [cid, kl, f], T, P)
+			var klipy: Array = (cn.get("klipy", []) as Array).duplicate()
+			if cn.has("chuze"):
+				klipy.append(String(cn["chuze"]))
+			klipy.append("Walk_Loop")
+			for jm: String in klipy:
+				if not ap.has_animation(jm):
+					continue
+				var vr: Dictionary = cn["v_rukou"]
+				var spec: Dictionary = vr.get(jm, vr.get("*", {}))
+				if spec.is_empty():
+					continue
+				c["cn"] = cn
+				c["klip"] = ""
+				lide.call("ruce", c, {})
+				lide.call("_klip", c, jm, 1.0)
+				var seznam := [jm]
+				var obouruc := false                      # obourucni nastroj: lide._reakce klip reakce nehraje
+				for rr: String in spec:
+					if (P["drzeni"].get(String(spec[rr]), {}) as Dictionary).has("druha_ruka"):
+						obouruc = true
+				# 11. 11.: s predmetem v ruce se reakce nehraje (lide._reakce) - netestuje se
+				for kl: String in seznam:
+					var dl := ap.get_animation(kl).length
+					if obouruc:
+						# cely cyklus po 1/24 (modifikator zapamatuje pozy druhe ruky pro vsechny faze svihu)
+						for i in 24:
+							ap.play(kl, 0.0)
+							ap.seek(dl * i / 24.0, true)
+							ap.advance(0.0)
+							await process_frame
+					for f: float in [0.2, 0.55, 0.9]:
+						ap.stop()
+						ap.play(kl, 0.0)
+						ap.seek(dl * f, true)
+						ap.advance(0.0)
+						for sx: String in ["l", "r"]:                  # ruce s upravenou pozou (viz _kontrola)
+							if kostra.get_node_or_null("test_ruka_" + sx) == null:
+								var bt := BoneAttachment3D.new()
+								bt.name = "test_ruka_" + sx
+								bt.bone_name = "hand_" + sx
+								kostra.add_child(bt)
+						await process_frame
+						await process_frame
+						_kontrola(c, kostra, spec, "%s %s %.2f" % [cid, kl, f], T, P)
+	print("UCHOP_POZY zapsano %d poz do %s" % [Uchop.zapis_pozy(), Uchop.POZY_SOUBOR])
 	print("TEST DRZENI: %d chyb z %d" % [chyb, zkous])
 	print("TEST DRZENI %s" % ("OK" if chyb == 0 else "CHYBA"))
 	quit(1 if chyb > 0 else 0)
@@ -100,7 +140,7 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 		zkous += 1
 		var g := uz.global_transform
 		var rez := String(d.get("rezim", ""))
-		if (d.get("klipy_bez_rezimu", []) as Array).has(co.split(" ")[1]):
+		if (d.get("klipy_bez_rezimu", []) as Array).has(co.split(" ")[1]) or (d.get("klipy_piti", []) as Array).has(co.split(" ")[1]):
 			rez = ""                                  # pri piti naklon z klipu (uchop.gd klip_ted)
 		var zp := kostra.global_transform * kostra.get_bone_global_pose(kostra.find_bone("hand_" + ruka)).origin
 		if rez != "":
@@ -135,9 +175,14 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 				var nej_gap := 0.0
 				for f: String in ["index", "middle", "ring", "pinky", "thumb"]:
 					var f_min := INF                        # nejblizsi bod prstu k povrchu (prst se ma nasady dotykat)
-					for j: String in ["02", "03", "04_leaf"]:
-						var bx: BoneAttachment3D = _kost(kostra, "%s_%s_%s" % [f, j, rk])
-						var v := bx.global_position - g.origin
+					# klouby 02, 03, konecek a stredy clanku 01-02, 02-03, 03-konecek (dotyk byva uprostred clanku)
+					var kl: Array = []
+					for j: String in ["01", "02", "03", "04_leaf"]:
+						kl.append(_kost(kostra, "%s_%s_%s" % [f, j, rk]).global_position)
+					var body_p: Array = [["02", kl[1]], ["03", kl[2]], ["04_leaf", kl[3]], ["01-02", (kl[0] + kl[1]) * 0.5], ["02-03", (kl[1] + kl[2]) * 0.5], ["03-04", (kl[2] + kl[3]) * 0.5]]
+					for bp: Array in body_p:
+						var j: String = bp[0]
+						var v: Vector3 = (bp[1] as Vector3) - g.origin
 						var od := (v - ax * v.dot(ax)).length() - (r_m + float(R["prst_pul_m"])) * gs
 						f_min = minf(f_min, od)
 						if od < -float(R["test_dovnitr_m"]):
@@ -176,11 +221,19 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 				ba2.name = "test_ruka_" + druha
 				ba2.bone_name = "hand_" + druha
 				kostra.add_child(ba2)
-			var u0: Node3D = drzi.get(ruka + "_uzel")
-			var z2 := ba2.global_transform * Vector3(-u0.position.x, u0.position.y, u0.position.z)   # bod dlane (uchop.gd dl2)
-			var dd := z2.distance_to(bod)
-			print("DRZENI %-40s %s druha ruka od topurka %.3f m" % [co, id, dd])
-			if dd > float(T["druha_ruka_m"]):
+			# stred prostrednich clanku prstu druhe ruky (ukazovak-prstenik) od osy nasady - pest druhe ruky na nasade
+			var z2 := Vector3.ZERO
+			for pn: String in ["index_02", "middle_02", "ring_02"]:
+				z2 += _kost(kostra, pn + "_" + druha).global_position / 3.0
+			var ax2 := g.basis.y.normalized()
+			var vv := z2 - g.origin
+			var dd := (vv - ax2 * vv.dot(ax2)).length()
+			var zw := _kost(kostra, "hand_" + druha).global_position - g.origin
+			print("TEST_ZAPESTI %s %s osa %s, zapesti od osy %.3f, g %s" % [Engine.get_process_frames(), _kost(kostra, "hand_" + druha).global_position.snapped(Vector3.ONE * 0.001), ax2.snapped(Vector3.ONE * 0.01), (zw - ax2 * zw.dot(ax2)).length(), g.origin.snapped(Vector3.ONE * 0.001)])
+			print("DRZENI %-40s %s druha ruka od osy nasady %.3f m" % [co, id, dd])
+			# pest druhe ruky: stredy prostrednich clanku od osy nejvys polomer + 2 tloustky prstu + druha_ruka_m
+			var r2 := float(((drzi["mod"].get("polozky") as Dictionary)[ruka] as Dictionary).get("r_m", 0.0)) + 2.0 * float(P["drzeni"]["_reseni"]["prst_pul_m"])
+			if dd > r2 + float(T["druha_ruka_m"]) * 0.25:
 				chyb += 1
 				print("DRZENI CHYBA %s %s: druha ruka %.3f m od predmetu" % [co, id, dd])
 

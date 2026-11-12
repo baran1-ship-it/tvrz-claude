@@ -9698,7 +9698,7 @@ func _lednice_blok(sc: Node3D, d: Dictionary) -> void:
 	blok.name = "Lednice_blok"
 	sc.add_child(blok)
 	var kamen: Material = null
-	var ms := sc.find_child(String(lb["sit_modelu"]), true, false) as MeshInstance3D
+	var ms := sc.find_child(String(lb["sit_hry"]), true, false) as MeshInstance3D
 	if ms and ms.mesh:
 		for si in ms.mesh.get_surface_count():
 			var m := ms.get_active_material(si)
@@ -9708,7 +9708,7 @@ func _lednice_blok(sc: Node3D, d: Dictionary) -> void:
 		if kamen:
 			(mi as MeshInstance3D).material_override = kamen
 	if kamen == null:
-		push_warning("mlyn: material %s v %s nenalezen" % [lb["material"], lb["sit_modelu"]])
+		push_warning("mlyn: material %s v %s nenalezen" % [lb["material"], lb["sit_hry"]])
 
 
 func _mlyn_dil(root: Node3D, parent: Node3D) -> void:

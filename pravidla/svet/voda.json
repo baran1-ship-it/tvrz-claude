@@ -5642,7 +5642,9 @@
     "tloustka_vychozi_m": 0.4,
     "pod_rimsou_m": 0.01,
     "zaklad_m": 0.3,
-    "duvod": "Misa 12. 11. (lednice jako ohnuty papir): steny lednice v modelu jen vnitrni lic + rimsa; zaznam = plne hranoly sten (tools/krok_b/lednice_blok.py), tloustka = sirka rimsy modelu, zaklad 0,3 m pod dnem (rešerše: kamenem vyzděný odpadní kanál - Historic England IHA Mills; Chapelizod, rubble-faced tailrace); hra je pridava do dilu mlyna s materialem modelu"
+    "duvod": "Misa 12. 11. (lednice jako ohnuty papir): steny lednice v modelu jen vnitrni lic + rimsa; zaznam = plne hranoly sten (tools/krok_b/lednice_blok.py), tloustka = sirka rimsy modelu, zaklad 0,3 m pod dnem (rešerše: kamenem vyzděný odpadní kanál - Historic England IHA Mills; Chapelizod, rubble-faced tailrace); hra je pridava do dilu mlyna s materialem modelu",
+    "sit_hry": "Mlyn_Lednice",
+    "_sit_hry": "jmeno uzlu ve hre (Godot pri importu odrizne -col; 12. 11. lednice bila - material nenalezen)"
    }
   }
  },
