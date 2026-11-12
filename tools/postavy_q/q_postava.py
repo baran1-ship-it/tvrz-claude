@@ -416,13 +416,15 @@ if TV:
     def _line(p, z0, sz, xs, yf):
         """tenká vodorovná vráska ve výšce z0 (zvlněná), jen na přední ploše do |x|<xs"""
         zz = z0 + 0.002 * np.sin(p[:, 0] * 90 + z0 * 500)
-        return np.exp(-((p[:, 2] - zz) / sz) ** 2) * ss((xs - np.abs(p[:, 0])) / 0.01) * ss((yf - p[:, 1]) / 0.01)
+        # prerusovana: sila kolisa podel x (kazda vraska jinak), k okrajum slabne
+        lom = np.clip(0.55 + 0.45 * np.sin(p[:, 0] * 70 + z0 * 900) + 0.25 * np.sin(p[:, 0] * 160 + z0 * 300), 0, 1)
+        return np.exp(-((p[:, 2] - zz) / sz) ** 2) * ss((xs - np.abs(p[:, 0])) / 0.02) * ss((yf - p[:, 1]) / 0.01) * lom
     if TV.get("vek", 0) > 0:
         v = TV["vek"]
         def vrw(p):
             w = np.zeros(len(p))
-            for k_, dz in enumerate((0.045, 0.058, 0.071)):          # čelo
-                w = np.maximum(w, _line(p, E[2] + dz, 0.003, 0.05 - 0.006 * k_, E[1] + 0.03) * (1 - 0.2 * k_))
+            for k_, dz in enumerate((0.046, 0.057, 0.069)):          # čelo
+                w = np.maximum(w, _line(p, E[2] + dz, 0.0024, 0.045 - 0.008 * k_, E[1] + 0.03) * (0.8 - 0.2 * k_))
             for sx in (-1, 1):                                       # vějíře u očí
                 for a_ in (-0.35, 0.0, 0.35):
                     c = np.array([sx * (EX + 0.032), E[1] + 0.03, E[2] + 0.004])
@@ -439,8 +441,8 @@ if TV:
         hr = np.clip(px_mask(head, lambda p: vrw(p - np.array([0.0, 0.0, 0.003])), S)[..., None] - wm, 0, 1)
         print("VRASKY maska max %.2f px>0.2 %d, hrbet max %.2f, S %d" % (float(wm.max()), int((wm > 0.2).sum()), float(hr.max()), S))
         Image.fromarray((wm[..., 0] * 255).astype(np.uint8)).save(f"{TEXOUT}/dbg_vrasky.png")
-        A[..., :3] *= 1 - 0.6 * v * wm
-        A[..., :3] *= 1 + 0.18 * v * hr
+        A[..., :3] *= 1 - 0.42 * v * wm
+        A[..., :3] *= 1 + 0.12 * v * hr
         print("VRASKY", v)
     if TV.get("kruhy", 0) > 0:
         km = face_mask(head, lambda p: np.maximum(gauss(p, np.array([EX, E[1], E[2] - 0.019]), np.array([0.017, 0.03, 0.007])),
