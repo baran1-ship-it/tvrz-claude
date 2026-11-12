@@ -1261,3 +1261,7 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   Mixamo (pití, položení, sezení…) – po převodu zkontrolovat. Moje předchozí pokusy (směr z ramen, zalomení zápěstí,
   prohození rukou) stavěly na chybných datech ruky. Poučení: **nejdřív ověřit vstupní data (osy kostí po převodu) měřením
   surového klipu**, teprve pak úchop.
+- **Disk 12. 11. podruhé (export chce ≥ 1000 MB):** smazány osiřelé soubory `.godot/imported` (3665 souborů, 300 MB),
+  na které neodkazuje žádný `*.import` (zbytky smazaných/přejmenovaných modelů) – seznam: `grep -rhoE
+  'res://\.godot/imported/[^"]+' --include=*.import .` proti `ls .godot/imported`; chybějící Godot při `--import` vytvoří.
+  Tím 945 MB → 1,3 GB.
