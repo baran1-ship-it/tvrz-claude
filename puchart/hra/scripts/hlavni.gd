@@ -439,13 +439,13 @@ func _prostredi() -> void:
 	slunce.directional_shadow_fade_start = float(_pr.get("stin_slabne_od", 0.35))
 	slunce.shadow_normal_bias = 2.0   # zubaté pruhy stínu na prknech schodů a zdech (Míša 4. 11.)
 	slunce.shadow_bias = 0.06
+	slunce.light_angular_distance = 0.7   # velikost kotouče slunce a v noci měsíce na obloze (Havran daylight.gd)
 	add_child(slunce)
-	var sky_mat := ProceduralSkyMaterial.new()
-	sky_mat.sky_top_color = Color(0.32, 0.5, 0.78)
-	sky_mat.sky_horizon_color = Color(0.72, 0.78, 0.84)
-	sky_mat.ground_horizon_color = Color(0.6, 0.64, 0.62)
-	sky_mat.ground_bottom_color = Color(0.25, 0.27, 0.22)
-	sky_mat.sun_angle_max = 20.0
+	var sky_mat := ShaderMaterial.new()   # obloha Havrana: přechod, záře slunce, mraky, v noci hvězdy a měsíc (shaders/sky.gdshader)
+	sky_mat.shader = load("res://shaders/sky.gdshader")
+	sky_mat.set_shader_parameter("cloud_tex", load("res://textury/nebe/cloud_noise.png"))
+	sky_mat.set_shader_parameter("zenith", Color(0.32, 0.5, 0.78)); sky_mat.set_shader_parameter("horizon", Color(0.72, 0.78, 0.84))
+	sky_mat.set_shader_parameter("ground", Color(0.25, 0.27, 0.22))
 	var sky := Sky.new(); sky.sky_material = sky_mat
 	var env := Environment.new()
 	env.background_mode = Environment.BG_SKY

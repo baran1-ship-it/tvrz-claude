@@ -20,7 +20,7 @@ var okolni_e := 1.0                   # násobek síly okolního světla (Havran
 var svit_oken := 1.0                  # denní světlo prosvítající okny (okno.gdshader)
 
 var slunce: DirectionalLight3D
-var obloha: ProceduralSkyMaterial
+var obloha: ShaderMaterial   # shaders/sky.gdshader (Havran)
 var env: Environment
 var _zakl := {}            # hodnoty Puchartu (odpoledne): slunce, obloha, mlha, přízemní mlha
 var _ref := {}             # Havranův vztažný preset (odpoledne)
@@ -37,7 +37,7 @@ var hl: Node = null
 var _okenni = null         # [[OmniLight3D, energie ve dne]]
 
 
-func setup(sl: DirectionalLight3D, sky: ProceduralSkyMaterial, e: Environment, h: Node) -> void:
+func setup(sl: DirectionalLight3D, sky: ShaderMaterial, e: Environment, h: Node) -> void:
 	slunce = sl; obloha = sky; env = e; hl = h
 	cfg = JSON.parse_string(FileAccess.get_file_as_string("res://data/den.json"))
 	NAMES = cfg["nazvy"]
@@ -49,8 +49,8 @@ func setup(sl: DirectionalLight3D, sky: ProceduralSkyMaterial, e: Environment, h
 		o["night"] = k in cfg["tma"]
 		presets[k] = o
 	_ref = presets[String(cfg["vztazny"])]
-	_zakl = {"sun": slunce.light_color, "sun_e": slunce.light_energy, "top": obloha.sky_top_color, "hor": obloha.sky_horizon_color,
-		"g_hor": obloha.ground_horizon_color, "g_bot": obloha.ground_bottom_color, "fog": env.fog_light_color, "mist": env.fog_height_density}
+	_zakl = {"sun": slunce.light_color, "sun_e": slunce.light_energy, "top": obloha.get_shader_parameter("zenith"), "hor": obloha.get_shader_parameter("horizon"),
+		"g_hor": obloha.get_shader_parameter("horizon"), "g_bot": obloha.get_shader_parameter("ground"), "fog": env.fog_light_color, "mist": env.fog_height_density}
 	var start := OS.get_environment("PUCHART_CAS")   # snímek / ladění: hodina (např. 12, 20.5) nebo název doby
 	if start == "": start = String(cfg["start"])
 	if presets.has(start): hour = float(cfg["klic_hodina"][start])
@@ -167,10 +167,13 @@ func _apply(p: Dictionary) -> void:
 	var nove := {"top": _pomer(_zakl["top"], p["zenith"], _ref["zenith"]), "hor": _pomer(_zakl["hor"], hz, _ref["horizon"]),
 		"g_hor": _pomer(_zakl["g_hor"], hz, _ref["horizon"]), "g_bot": _pomer(_zakl["g_bot"], hz, _ref["horizon"])}
 	# obloha (a s ní odraz okolního světla) jen při znatelné změně – přepočet záře oblohy stojí i na tabletu
-	if _rozdil(obloha.sky_top_color, nove["top"]) > 0.004 or _rozdil(obloha.sky_horizon_color, nove["hor"]) > 0.004 or _rozdil(obloha.ground_bottom_color, nove["g_bot"]) > 0.004:
-		obloha.sky_top_color = nove["top"]; obloha.sky_horizon_color = nove["hor"]
-		obloha.ground_horizon_color = nove["g_hor"]; obloha.ground_bottom_color = nove["g_bot"]
-		obloha.sky_energy_multiplier = float(p["sky_e"])
+	if _rozdil(obloha.get_shader_parameter("zenith"), nove["top"]) > 0.004 or _rozdil(obloha.get_shader_parameter("horizon"), nove["hor"]) > 0.004 \
+			or absf(float(obloha.get_shader_parameter("stars")) - float(p.get("stars", 0.0))) > 0.01:
+		obloha.set_shader_parameter("zenith", nove["top"]); obloha.set_shader_parameter("horizon", nove["hor"])
+		obloha.set_shader_parameter("ground", nove["g_bot"])
+		obloha.set_shader_parameter("energy", float(p["sky_e"]))
+		for k_: String in ["tint", "glow", "c_lit", "c_dark", "stars"]:   # Havran daylight._apply: záře, mraky, hvězdy
+			if p.has(k_): obloha.set_shader_parameter({"tint": "sun_tint", "glow": "sun_glow", "c_lit": "cloud_lit", "c_dark": "cloud_dark", "stars": "stars"}[k_], p[k_])
 	mlha = _pomer(_zakl["fog"], p["fog"], _ref["fog"])
 	env.fog_height_density = float(_zakl["mist"]) * float(p["mist"]) / float(_ref["mist"])
 	okolni_e = float(p["amb"]) / float(_ref["amb"])

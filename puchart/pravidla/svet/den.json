@@ -7,23 +7,318 @@
  "obnova_s": 0.25,
  "krok_slunce_rad": 0.026,
  "krok_slunce_pozn": "Havran Míša 0.53: směr slunce po skocích 1,5° – každá změna překreslí mapu stínů (plazení hran)",
- "klic_hodina": {"rano": 7.0, "poledne": 12.0, "odpoledne": 15.5, "soumrak": 19.6, "noc": 23.0},
- "snimky": [[0.0, "noc"], [4.6, "noc"], [6.6, "rano"], [12.0, "poledne"], [15.5, "odpoledne"], [19.4, "soumrak"], [21.0, "noc"], [24.0, "noc"]],
- "useky": [[5.5, "rano"], [10.5, "poledne"], [14.0, "odpoledne"], [18.6, "soumrak"], [21.0, "noc"]],
+ "klic_hodina": {
+  "rano": 7.0,
+  "poledne": 12.0,
+  "odpoledne": 15.5,
+  "soumrak": 19.6,
+  "noc": 23.0
+ },
+ "snimky": [
+  [
+   0.0,
+   "noc"
+  ],
+  [
+   4.6,
+   "noc"
+  ],
+  [
+   6.6,
+   "rano"
+  ],
+  [
+   12.0,
+   "poledne"
+  ],
+  [
+   15.5,
+   "odpoledne"
+  ],
+  [
+   19.4,
+   "soumrak"
+  ],
+  [
+   21.0,
+   "noc"
+  ],
+  [
+   24.0,
+   "noc"
+  ]
+ ],
+ "useky": [
+  [
+   5.5,
+   "rano"
+  ],
+  [
+   10.5,
+   "poledne"
+  ],
+  [
+   14.0,
+   "odpoledne"
+  ],
+  [
+   18.6,
+   "soumrak"
+  ],
+  [
+   21.0,
+   "noc"
+  ]
+ ],
  "useky_pozn": "Havran key_at: od hodiny platí doba; před 5,5 h noc",
- "poradi": ["rano", "poledne", "odpoledne", "soumrak", "noc"],
- "nazvy": {"rano": "Ráno", "poledne": "Poledne", "odpoledne": "Odpoledne", "soumrak": "Soumrak", "noc": "Noc"},
- "tma": ["soumrak", "noc"],
+ "poradi": [
+  "rano",
+  "poledne",
+  "odpoledne",
+  "soumrak",
+  "noc"
+ ],
+ "nazvy": {
+  "rano": "Ráno",
+  "poledne": "Poledne",
+  "odpoledne": "Odpoledne",
+  "soumrak": "Soumrak",
+  "noc": "Noc"
+ },
+ "tma": [
+  "soumrak",
+  "noc"
+ ],
  "tma_pozn": "Havran presets night=true: louče, svíce a lucerny s „svítit samo“ se rozsvítí (predmety.gd on_time / is_dark)",
  "vztazny": "odpoledne",
  "vztazny_pozn": "Puchart je vyladěný na pevné odpoledne (hlavni.gd _prostredi: slunce 1,0, obloha, mlha a okolní světlo z prostredi.json; snímky schválené Míšou). Barvy a síly Havrana se proto berou jako poměr k jeho odpoledni × hodnota Puchartu – v odpoledne je obraz jako dosud, ráno/večer/noc se mění stejně jako v Havranovi. Směr slunce (el, az) přímo z Havrana.",
  "okolni_pozn": "Okolní světlo Havrana = amb × jas oblohy (AMBIENT_SOURCE_SKY); v Puchartu má okolní světlo i neoblohovou teplou složku (prostredi.json venku/interier barva) – ta se násobí poměrem (amb × jas zenitu a obzoru) / totéž odpoledne, jinak by v noci svítila jako ve dne",
  "presety": {
-  "rano": {"el": 13.0, "az": 100.0, "sun": [1.0, 0.80, 0.60], "sun_e": 2.6, "zenith": [0.19, 0.36, 0.64], "horizon": [0.88, 0.74, 0.62], "sky_e": 1.0, "amb": 0.5, "fog": [0.56, 0.56, 0.60], "mist": 0.025},
-  "poledne": {"el": 48.0, "az": 180.0, "sun": [1.0, 0.97, 0.92], "sun_e": 3.5, "zenith": [0.13, 0.31, 0.66], "horizon": [0.60, 0.74, 0.88], "sky_e": 1.0, "amb": 0.52, "fog": [0.58, 0.60, 0.46], "mist": 0.004},
-  "odpoledne": {"el": 22.0, "az": 238.0, "sun": [1.0, 0.89, 0.72], "sun_e": 3.3, "zenith": [0.14, 0.32, 0.63], "horizon": [0.72, 0.77, 0.80], "sky_e": 1.0, "amb": 0.5, "fog": [0.58, 0.60, 0.46], "mist": 0.006},
-  "soumrak": {"el": 4.5, "az": 286.0, "sun": [1.0, 0.56, 0.30], "sun_e": 1.7, "zenith": [0.14, 0.20, 0.42], "horizon": [0.95, 0.56, 0.32], "sky_e": 0.8, "amb": 0.66, "fog": [0.72, 0.52, 0.44], "mist": 0.03},
-  "noc": {"el": 38.0, "az": 150.0, "sun": [0.55, 0.66, 0.95], "sun_e": 0.32, "zenith": [0.010, 0.016, 0.040], "horizon": [0.030, 0.045, 0.085], "sky_e": 1.0, "amb": 1.6, "fog": [0.030, 0.042, 0.070], "mist": 0.02}
+  "rano": {
+   "el": 13.0,
+   "az": 100.0,
+   "sun": [
+    1.0,
+    0.8,
+    0.6
+   ],
+   "sun_e": 2.6,
+   "zenith": [
+    0.19,
+    0.36,
+    0.64
+   ],
+   "horizon": [
+    0.88,
+    0.74,
+    0.62
+   ],
+   "sky_e": 1.0,
+   "amb": 0.5,
+   "fog": [
+    0.56,
+    0.56,
+    0.6
+   ],
+   "mist": 0.025,
+   "tint": [
+    1.0,
+    0.76,
+    0.52
+   ],
+   "glow": 0.7,
+   "c_lit": [
+    1.0,
+    0.88,
+    0.78
+   ],
+   "c_dark": [
+    0.5,
+    0.52,
+    0.62
+   ],
+   "stars": 0.0
+  },
+  "poledne": {
+   "el": 48.0,
+   "az": 180.0,
+   "sun": [
+    1.0,
+    0.97,
+    0.92
+   ],
+   "sun_e": 3.5,
+   "zenith": [
+    0.13,
+    0.31,
+    0.66
+   ],
+   "horizon": [
+    0.6,
+    0.74,
+    0.88
+   ],
+   "sky_e": 1.0,
+   "amb": 0.52,
+   "fog": [
+    0.58,
+    0.6,
+    0.46
+   ],
+   "mist": 0.004,
+   "tint": [
+    1.0,
+    0.95,
+    0.85
+   ],
+   "glow": 0.3,
+   "c_lit": [
+    1.0,
+    0.99,
+    0.97
+   ],
+   "c_dark": [
+    0.56,
+    0.62,
+    0.72
+   ],
+   "stars": 0.0
+  },
+  "odpoledne": {
+   "el": 22.0,
+   "az": 238.0,
+   "sun": [
+    1.0,
+    0.89,
+    0.72
+   ],
+   "sun_e": 3.3,
+   "zenith": [
+    0.14,
+    0.32,
+    0.63
+   ],
+   "horizon": [
+    0.72,
+    0.77,
+    0.8
+   ],
+   "sky_e": 1.0,
+   "amb": 0.5,
+   "fog": [
+    0.58,
+    0.6,
+    0.46
+   ],
+   "mist": 0.006,
+   "tint": [
+    1.0,
+    0.86,
+    0.64
+   ],
+   "glow": 0.45,
+   "c_lit": [
+    1.0,
+    0.96,
+    0.88
+   ],
+   "c_dark": [
+    0.54,
+    0.59,
+    0.68
+   ],
+   "stars": 0.0
+  },
+  "soumrak": {
+   "el": 4.5,
+   "az": 286.0,
+   "sun": [
+    1.0,
+    0.56,
+    0.3
+   ],
+   "sun_e": 1.7,
+   "zenith": [
+    0.14,
+    0.2,
+    0.42
+   ],
+   "horizon": [
+    0.95,
+    0.56,
+    0.32
+   ],
+   "sky_e": 0.8,
+   "amb": 0.66,
+   "fog": [
+    0.72,
+    0.52,
+    0.44
+   ],
+   "mist": 0.03,
+   "tint": [
+    1.0,
+    0.5,
+    0.25
+   ],
+   "glow": 1.0,
+   "c_lit": [
+    1.0,
+    0.62,
+    0.42
+   ],
+   "c_dark": [
+    0.34,
+    0.3,
+    0.42
+   ],
+   "stars": 0.08
+  },
+  "noc": {
+   "el": 38.0,
+   "az": 150.0,
+   "sun": [
+    0.55,
+    0.66,
+    0.95
+   ],
+   "sun_e": 0.32,
+   "zenith": [
+    0.01,
+    0.016,
+    0.04
+   ],
+   "horizon": [
+    0.03,
+    0.045,
+    0.085
+   ],
+   "sky_e": 1.0,
+   "amb": 1.6,
+   "fog": [
+    0.03,
+    0.042,
+    0.07
+   ],
+   "mist": 0.02,
+   "tint": [
+    0.5,
+    0.6,
+    0.9
+   ],
+   "glow": 0.5,
+   "c_lit": [
+    0.13,
+    0.15,
+    0.22
+   ],
+   "c_dark": [
+    0.025,
+    0.03,
+    0.05
+   ],
+   "stars": 1.0
+  }
  },
- "presety_pozn": "Havran presets (el/az ve stupních, barvy RGB 0–1); vynecháno tint, glow, c_lit, c_dark, stars, fog_d – patří k Havranově shaderu oblohy s mraky a hvězdami a exponenciální mlze; Puchart má ProceduralSkyMaterial a hloubkovou mlhu scén (sceny_pravidla.json). NEOVERENO: hvězdy v noci (Puchart je zatím nemá)."
+ "presety_pozn": "Havran presets beze změny (el/az ve stupních, barvy RGB 0–1) včetně tint/glow/c_lit/c_dark/stars pro Havranovu oblohu shaders/sky.gdshader (Míša 12. 11.: „dej i ty hvězdy a měsíc“; měsíc = kotouč nočního světla). fog_d vynechán (Puchart má hloubkovou mlhu scén)."
 }
