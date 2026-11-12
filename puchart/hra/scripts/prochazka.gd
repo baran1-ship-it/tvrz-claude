@@ -220,6 +220,8 @@ class Ikony extends Control:
 		draw_circle(mp.position + Vector2(50, 18), 3.5, Color(Styl.RED, 0.95))
 		draw_texture_rect(_bag, _r_bag(), false, Color(1, 1, 1, 0.85))
 		if _stavi(): draw_texture_rect(_stav, _r_stav(), false, Color(1, 1, 1, 0.8))
+	func _has_point(p: Vector2) -> bool:   # Míša 12. 11.: „dveře ani vrata nefungují, nabídka je, ale nejde kliknout“ – ikony přes celou
+		return ma_bod(p)                    # obrazovku pohltily dotyk na tlačítku dveří pod sebou; dotyk chytají jen samotné ikony
 	func ma_bod(p: Vector2) -> bool:   # dotyk na ikoně nehýbe postavou (hrac.ui)
 		return _r_menu().has_point(p) or _r_map().has_point(p) or _r_bag().has_point(p) or (_stavi() and _r_stav().has_point(p))
 	func _gui_input(e: InputEvent) -> void:

@@ -53,6 +53,8 @@ for sv in $(grep -ohE "^SVICNY [0-9]+/[0-9]+" $K/build/hlidaci_beh_godot.log 2>/
 done
 # měřicí APK (12. 11.: měření po konci běželo dál, chyba každý snímek a kamera se přetahovala s hráčem): zkrácené měření
 # musí doběhnout všech úseků a variant, zastavit se a předat hru procházce – bez chyby skriptu
+krok "klepnutí na dveře"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_klik.gd timeout 600 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | grep -E "^KLIK_TEST" | tee -a $S)
+grep -q "^KLIK_TEST dvere.*-> OK" $S || { rc=1; echo "KLIK CHYBA: tlačítko dveří nereaguje na dotyk" | tee -a $S; }
 krok "měření (zkrácené)"
 (cd $K/hra && PUCHART_MERENI=1 PUCHART_MERENI_RYCHLE=1 PUCHART_MERENI_BEZ_CEKANI=1 timeout 420 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 > $K/build/hlidaci_mereni.log 2>&1)
 MU=$(python3 -c "import json;d=json.load(open('$K/hra/data/mereni.json'));print(len(d['useky'])*len(d.get('scale_3d',[1]))+len(d.get('varianty',[])))")
