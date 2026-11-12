@@ -1,5 +1,5 @@
 {
- "popis": "stavby nových míst (nastroje/mista_rozmisteni.py z pravidla/svet/mista.json) – čte hra (hlavni.gd _mista) a stavby_vegetace.py",
+ "popis": "stavby nových míst (nastroje/mista_rozmisteni.py z pravidla/svet/mista.json) – čte hra (hlavni.gd _mista domy, ves.gd hospodářské stavby, ploty, drobnosti, stromy, studna) a stavby_vegetace.py (půdorysy, dvory, zahrady, sady, pole)",
  "modely": {
   "domy": {
    "soubor": "res://modely/stavby_h/domy.glb",
@@ -17,98 +17,154 @@
    "soubor": "res://modely/stavby_h/mlyn.glb",
    "daleko": "res://modely/stavby_h/mlyn_lod1.glb",
    "zdroj": "Havran docs/krok_b/zadani_mlyn.md: vesnický mlýn na vrchní vodu (kolo ~3,2 m, náhon ve žlabu na kozách, roubená mlýnice ~8×6 m), scripts/mlyn_kolo.gd (otáčení kola)"
+  },
+  "hospodarske": {
+   "slozka": "res://modely/predmety_h/",
+   "zdroj": "Havran předměty katalogu (nastroje/predmety_z_havrana.sh → hra/modely/predmety_h/, blender/vlastni.py): stodola 9,9 × 7,7 m, stodola_mala 7,9 × 6,7 m, kolna 7,7 × 4,6 m (+ _stredni LOD, _kolize), kurnik, plutek (proutěný díl 2,07 m), zahon_*, hranice_dreva, drevo_hromada, zebrinak, kupka_sena, koryto_kone, sud, trakar, lavice_selska, spalek_stipani, panak_snopu, kad; vrata k domu = +z modelu (Havran vesnice.py _dvorce „celo na +z k domu“)",
+   "rozmery": {
+    "stodola": [
+     9.9,
+     7.69
+    ],
+    "stodola_mala": [
+     7.9,
+     6.69
+    ],
+    "kolna": [
+     7.7,
+     4.61
+    ],
+    "kurnik": [
+     2.12,
+     1.83
+    ],
+    "zebrinak": [
+     5.25,
+     1.61
+    ],
+    "zahon": [
+     3.07,
+     1.17
+    ],
+    "kupka_sena": [
+     2.17,
+     2.17
+    ],
+    "koryto_kone": [
+     2.42,
+     1.43
+    ],
+    "hranice_dreva": [
+     1.81,
+     0.51
+    ]
+   },
+   "rozmery_pozn": "[délka podél x modelu, hloubka podél z] z AABB modelů (Godot, 12. 11.)"
+  },
+  "stromy": {
+   "jablon": {
+    "soubor": "res://modely/stavby_h/jablon.glb",
+    "daleko": "res://modely/stavby_h/jablon_daleko.glb",
+    "zdroj": "Havran z_rostliny jablon (sad za humny, lokace.json ves.dvorec.sad: výška 6 m, poloměr 2,6 m)"
+   },
+   "lipa": {
+    "soubor": "res://modely/stromy/lipa_stredni.glb",
+    "lod1": "res://modely/stromy/lipa_stredni_lod1.glb",
+    "daleko": "res://modely/stromy/lipa_stredni_daleko.glb",
+    "zdroj": "Havran lokace.json ves.dvorec.zelen u_vjezdu / lipa na návsi (lípa střední 10–12 m)"
+   }
   }
  },
  "stavby": [
   {
    "misto": "predhradi",
    "model": "Dum2",
-   "x": -132.0,
-   "z": -280.84,
-   "yaw": 1.5708,
-   "y": 37.547,
-   "teren_y": 37.292,
-   "prevyseni": 0.98
+   "x": -85.42,
+   "z": -298.76,
+   "yaw": -2.4202,
+   "y": 37.787,
+   "teren_y": 37.532,
+   "prevyseni": 1.9
   },
   {
    "misto": "predhradi",
    "model": "Dum1",
-   "x": -104.0,
-   "z": -280.84,
-   "yaw": -1.5708,
-   "y": 37.86,
-   "teren_y": 37.555,
-   "prevyseni": 1.84
+   "x": -130.89,
+   "z": -288.65,
+   "yaw": 1.3948,
+   "y": 38.452,
+   "teren_y": 38.147,
+   "prevyseni": 1.25
   },
   {
    "misto": "predhradi",
    "model": "Dum2",
-   "x": -138.0,
-   "z": -255.49,
-   "yaw": 1.5708,
-   "y": 35.747,
-   "teren_y": 35.492,
-   "prevyseni": 0.93
+   "x": -106.09,
+   "z": -263.05,
+   "yaw": -1.8718,
+   "y": 34.86,
+   "teren_y": 34.605,
+   "prevyseni": 1.98
   },
   {
    "misto": "predhradi",
    "model": "Rychta",
-   "x": -108.0,
-   "z": -255.49,
-   "yaw": -1.0032,
-   "y": 34.714,
-   "teren_y": 34.409,
-   "prevyseni": 1.08
-  },
-  {
-   "misto": "predhradi",
-   "model": "Dum2",
-   "x": -128.42,
-   "z": -226.01,
-   "yaw": 1.8925,
-   "y": 35.87,
-   "teren_y": 35.615,
-   "prevyseni": 0.84
+   "x": -136.5,
+   "z": -259.49,
+   "yaw": 1.6258,
+   "y": 35.838,
+   "teren_y": 35.533,
+   "prevyseni": 1.75
   },
   {
    "misto": "predhradi",
    "model": "Dum1",
-   "x": -98.06,
-   "z": -236.13,
-   "yaw": -1.249,
-   "y": 34.215,
-   "teren_y": 33.91,
-   "prevyseni": 1.34
+   "x": -133.11,
+   "z": -228.39,
+   "yaw": 2.1035,
+   "y": 36.057,
+   "teren_y": 35.752,
+   "prevyseni": 1.11
   },
   {
    "misto": "predhradi",
    "model": "Dum2",
-   "x": -101.33,
-   "z": -204.36,
-   "yaw": 2.3562,
-   "y": 34.491,
-   "teren_y": 34.236,
-   "prevyseni": 0.71
+   "x": -87.19,
+   "z": -224.16,
+   "yaw": -0.7599,
+   "y": 33.056,
+   "teren_y": 32.801,
+   "prevyseni": 1.5
   },
   {
    "misto": "predhradi",
    "model": "Dum1",
-   "x": -84.36,
-   "z": -221.33,
-   "yaw": -0.7854,
-   "y": 32.877,
-   "teren_y": 32.572,
-   "prevyseni": 1.61
+   "x": -70.22,
+   "z": -207.19,
+   "yaw": -0.8106,
+   "y": 32.342,
+   "teren_y": 32.037,
+   "prevyseni": 1.63
+  },
+  {
+   "misto": "predhradi",
+   "model": "Dum2",
+   "x": -52.5,
+   "z": -189.48,
+   "yaw": -1.5127,
+   "y": 30.925,
+   "teren_y": 30.67,
+   "prevyseni": 1.69
   },
   {
    "misto": "krcma",
    "model": "Dum2",
-   "x": -83.0,
+   "x": -81.0,
    "z": 97.0,
-   "yaw": -0.5107,
-   "y": -35.025,
-   "teren_y": -35.28,
-   "prevyseni": 0.53
+   "yaw": -0.5717,
+   "y": -35.07,
+   "teren_y": -35.325,
+   "prevyseni": 0.54
   },
   {
    "misto": "hajovna",
@@ -116,172 +172,8546 @@
    "x": 159.96,
    "z": 306.09,
    "yaw": -1.8823,
-   "y": -34.592,
-   "teren_y": -34.897,
-   "prevyseni": 1.64
+   "y": -34.599,
+   "teren_y": -34.904,
+   "prevyseni": 1.81
+  }
+ ],
+ "lod_ves": {
+  "zdroj": "jako domy míst (hlavni.gd _mista, Havran _ves_domy): podrobný do 30 m, střední stupeň (barva vrcholů) dál, stín jen ze středního; drobnosti jen zblízka (Havran predmety.gd: < 1,5 m → 40 m, větší 80 m)",
+  "podrobny_do_m": 30.0,
+  "stredni_do_m": 450.0,
+  "stredni_do_m_mobil": 300.0,
+  "lod_bias": 50.0,
+  "ploty_do_m": 140.0,
+  "ploty_do_m_mobil": 80.0,
+  "drobne_do_m": 40.0,
+  "zahony_do_m": 60.0,
+  "strom_podrobny_do_m": 45.0,
+  "strom_lod1_do_m": 140.0,
+  "strom_daleko_do_m": 900.0,
+  "stin_drobne_od_m": 1.0,
+  "bunka_m": 25.0,
+  "ploty_pozn": "KCD2 ref_kcd2_ves_shora: ploty jsou z výšky vidět přes celou ves (~150 m); tablet kratší"
+ },
+ "ploty_pravidla": {
+  "zdroj": "Havran vesnice.py picket_fence (sloupky po 2 m, 2 žerdě, latě 5,5–10 cm, výška 1,15 m, 4 % chybí, špice/šikmo/rovně), rail_fence (kůly po 2,8 m, 2–3 žerdě s kůrou, výška 1,1 m, 5 % spadlá), roofed_gate (sloupy 24 cm, 2,7 m, stříška šindel, křídla z prken 1,75 m), wicket (branka 0,9 m, 7 latí 1,05 m); proutěný = předmět plutek (2,07 m díl). KCD1 ves_1 (laťový + krytá vrata), ves_4 (proutěný), KCD2 ref_kcd2_zahrada_plot (proutí a kůly)",
+  "latovy": {
+   "vyska_m": 1.15,
+   "sloupky_m": 2.0,
+   "lata_sirka_m": [
+    0.055,
+    0.1
+   ],
+   "lata_mezera_m": [
+    0.03,
+    0.07
+   ],
+   "chybi_p": 0.04,
+   "zerde_y_m": [
+    0.3,
+    0.9
+   ]
+  },
+  "zerdovy": {
+   "vyska_m": 1.1,
+   "kuly_m": 2.8,
+   "spadla_p": 0.05
+  },
+  "proutěny": {
+   "model": "plutek",
+   "delka_m": 2.065
+  },
+  "kryta_vrata": {
+   "sirka_m": 3.0,
+   "sloupy_m": 2.7,
+   "kridla_m": 1.75
+  },
+  "vrata": {
+   "sirka_m": 3.0,
+   "kridla_m": 1.5
+  },
+  "branka": {
+   "sirka_m": 0.9,
+   "vyska_m": 1.05
+  },
+  "od_cesty_m": 2.5,
+  "od_toku_m": 6.0,
+  "textury": {
+   "zdroj": "textury předmětů Havrana (predmety_h): prkna stodoly = latě a vrata, kůra kůlů plůtku, šindel a kamenné patky kůlny; při načtení zesvětlené na jas_cil jako domy a stodoly (nastroje/havran/stavby_export.gd JAS_CIL, KCD1 ves_2: ohlazené dřevo ~0,5)",
+   "jas_cil": 0.5,
+   "lata": {
+    "albedo": "res://modely/predmety_h/kolna_prkna_stodola_albedo.jpg",
+    "normal": "res://modely/predmety_h/kolna_prkna_stodola_normal.jpg",
+    "velikost_m": 1.2
+   },
+   "vrata": {
+    "albedo": "res://modely/predmety_h/stodola_prkna_vrata_albedo.jpg",
+    "normal": "res://modely/predmety_h/stodola_prkna_vrata_normal.jpg",
+    "velikost_m": 1.5
+   },
+   "kura": {
+    "albedo": "res://modely/predmety_h/plutek_kura_kul_albedo.jpg",
+    "normal": "res://modely/predmety_h/plutek_kura_kul_normal.jpg",
+    "velikost_m": 1.0
+   },
+   "tram": {
+    "albedo": "res://modely/predmety_h/stodola_tram_stodola_albedo.jpg",
+    "normal": "res://modely/predmety_h/stodola_tram_stodola_normal.jpg",
+    "velikost_m": 1.5
+   },
+   "sindel": {
+    "albedo": "res://modely/predmety_h/kolna_sindel_stodola_albedo.jpg",
+    "normal": "res://modely/predmety_h/kolna_sindel_stodola_normal.jpg",
+    "velikost_m": 1.5
+   },
+   "kamen": {
+    "albedo": "res://modely/predmety_h/kolna_kamen_patky_albedo.jpg",
+    "normal": "res://modely/predmety_h/kolna_kamen_patky_normal.jpg",
+    "velikost_m": 1.2
+   },
+   "tma": {
+    "barva": "#0b0a09"
+   }
+  }
+ },
+ "studna_pravidla": {
+  "zdroj": "Havran vesnice.py well (kamenná roubenka kruh r 0,95 m, výška 0,95 m, dva sloupy 2,3 m s rumpálem a stříškou ze šindele), studna na návsi; KCD1 reference/kcd1/11_nadvori_studna_drevo_kone",
+  "polomer_m": 0.95,
+  "vyska_m": 0.95,
+  "sloupy_m": 2.3,
+  "od_cesty_m": 4.0
+ },
+ "usedlosti": [
+  {
+   "i": 1,
+   "misto": "predhradi",
+   "typ": "selska",
+   "stred": [
+    -80.0,
+    -289.241
+   ],
+   "parcela": [
+    [
+     -60.951,
+     -283.307
+    ],
+    [
+     -76.545,
+     -269.59
+    ],
+    [
+     -99.05,
+     -295.176
+    ],
+    [
+     -83.456,
+     -308.892
+    ]
+   ]
+  },
+  {
+   "i": 2,
+   "misto": "predhradi",
+   "typ": "selska",
+   "stred": [
+    -140.914,
+    -292.506
+   ],
+   "parcela": [
+    [
+     -160.356,
+     -284.209
+    ],
+    [
+     -156.305,
+     -306.996
+    ],
+    [
+     -121.472,
+     -300.802
+    ],
+    [
+     -125.524,
+     -278.016
+    ]
+   ]
+  },
+  {
+   "i": 3,
+   "misto": "predhradi",
+   "typ": "selska",
+   "stred": [
+    -97.118,
+    -258.038
+   ],
+   "parcela": [
+    [
+     -79.5,
+     -264.308
+    ],
+    [
+     -86.149,
+     -242.892
+    ],
+    [
+     -114.736,
+     -251.767
+    ],
+    [
+     -108.087,
+     -273.184
+    ]
+   ]
+  },
+  {
+   "i": 4,
+   "misto": "predhradi",
+   "typ": "selska",
+   "stred": [
+    -150.543,
+    -260.864
+   ],
+   "parcela": [
+    [
+     -168.201,
+     -248.649
+    ],
+    [
+     -169.435,
+     -271.066
+    ],
+    [
+     -132.884,
+     -273.078
+    ],
+    [
+     -131.65,
+     -250.661
+    ]
+   ]
+  },
+  {
+   "i": 5,
+   "misto": "predhradi",
+   "typ": "selska",
+   "stred": [
+    -143.892,
+    -224.376
+   ],
+   "parcela": [
+    [
+     -153.313,
+     -205.184
+    ],
+    [
+     -165.246,
+     -225.424
+    ],
+    [
+     -134.471,
+     -243.567
+    ],
+    [
+     -122.538,
+     -223.327
+    ]
+   ]
+  },
+  {
+   "i": 6,
+   "misto": "predhradi",
+   "typ": "selska",
+   "stred": [
+    -78.42,
+    -231.706
+   ],
+   "parcela": [
+    [
+     -74.257,
+     -251.72
+    ],
+    [
+     -58.645,
+     -236.884
+    ],
+    [
+     -82.583,
+     -211.692
+    ],
+    [
+     -98.195,
+     -226.528
+    ]
+   ]
+  },
+  {
+   "i": 7,
+   "misto": "predhradi",
+   "typ": "selska",
+   "stred": [
+    -60.189,
+    -213.207
+   ],
+   "parcela": [
+    [
+     -54.968,
+     -233.01
+    ],
+    [
+     -40.147,
+     -217.421
+    ],
+    [
+     -65.409,
+     -193.404
+    ],
+    [
+     -80.23,
+     -208.992
+    ]
+   ]
+  },
+  {
+   "i": 8,
+   "misto": "predhradi",
+   "typ": "selska",
+   "stred": [
+    -40.178,
+    -187.983
+   ],
+   "parcela": [
+    [
+     -22.924,
+     -199.727
+    ],
+    [
+     -21.678,
+     -178.319
+    ],
+    [
+     -57.432,
+     -176.238
+    ],
+    [
+     -58.678,
+     -197.646
+    ]
+   ]
+  },
+  {
+   "i": 9,
+   "misto": "krcma",
+   "typ": "krcma",
+   "stred": [
+    -78.046,
+    96.363
+   ],
+   "parcela": [
+    [
+     -86.438,
+     82.44
+    ],
+    [
+     -61.897,
+     98.229
+    ],
+    [
+     -69.655,
+     110.286
+    ],
+    [
+     -94.195,
+     94.497
+    ]
+   ]
+  },
+  {
+   "i": 10,
+   "misto": "hajovna",
+   "typ": "hajovna",
+   "stred": [
+    161.911,
+    308.953
+   ],
+   "parcela": [
+    [
+     172.829,
+     301.219
+    ],
+    [
+     166.264,
+     321.606
+    ],
+    [
+     150.993,
+     316.688
+    ],
+    [
+     157.558,
+     296.301
+    ]
+   ]
+  }
+ ],
+ "hospodarske": [
+  {
+   "model": "stodola",
+   "x": -74.995,
+   "z": -290.567,
+   "yaw": -2.42,
+   "misto": "predhradi",
+   "usedlost": 1,
+   "plosina": true,
+   "y": 35.458
+  },
+  {
+   "model": "kolna",
+   "x": -92.851,
+   "z": -292.224,
+   "yaw": -3.991,
+   "misto": "predhradi",
+   "usedlost": 1,
+   "plosina": true,
+   "y": 37.541
+  },
+  {
+   "model": "kurnik",
+   "x": -86.561,
+   "z": -293.135,
+   "yaw": -0.654,
+   "misto": "predhradi",
+   "usedlost": 1,
+   "plosina": false,
+   "y": 37.463
+  },
+  {
+   "model": "stodola_mala",
+   "x": -142.04,
+   "z": -299.635,
+   "yaw": 1.395,
+   "misto": "predhradi",
+   "usedlost": 2,
+   "plosina": true,
+   "y": 38.557
+  },
+  {
+   "model": "kolna",
+   "x": -142.981,
+   "z": -288.404,
+   "yaw": 1.395,
+   "misto": "predhradi",
+   "usedlost": 2,
+   "plosina": true,
+   "y": 37.519
+  },
+  {
+   "model": "kurnik",
+   "x": -133.912,
+   "z": -294.34,
+   "yaw": 3.087,
+   "misto": "predhradi",
+   "usedlost": 2,
+   "plosina": false,
+   "y": 38.117
+  },
+  {
+   "model": "stodola",
+   "x": -93.123,
+   "z": -262.517,
+   "yaw": -1.872,
+   "misto": "predhradi",
+   "usedlost": 3,
+   "plosina": true,
+   "y": 33.982
+  },
+  {
+   "model": "kolna",
+   "x": -109.24,
+   "z": -252.893,
+   "yaw": -3.443,
+   "misto": "predhradi",
+   "usedlost": 3,
+   "plosina": true,
+   "y": 34.634
+  },
+  {
+   "model": "stodola_mala",
+   "x": -152.718,
+   "z": -254.258,
+   "yaw": 1.626,
+   "misto": "predhradi",
+   "usedlost": 4,
+   "plosina": true,
+   "y": 33.923
+  },
+  {
+   "model": "kolna",
+   "x": -152.277,
+   "z": -265.175,
+   "yaw": 1.626,
+   "misto": "predhradi",
+   "usedlost": 4,
+   "plosina": true,
+   "y": 34.363
+  },
+  {
+   "model": "stodola",
+   "x": -142.829,
+   "z": -218.04,
+   "yaw": 2.103,
+   "misto": "predhradi",
+   "usedlost": 5,
+   "plosina": true,
+   "y": 35.837
+  },
+  {
+   "model": "kolna",
+   "x": -147.291,
+   "z": -228.64,
+   "yaw": 2.103,
+   "misto": "predhradi",
+   "usedlost": 5,
+   "plosina": true,
+   "y": 35.271
+  },
+  {
+   "model": "kurnik",
+   "x": -139.1,
+   "z": -230.743,
+   "yaw": 3.514,
+   "misto": "predhradi",
+   "usedlost": 5,
+   "plosina": false,
+   "y": 35.679
+  },
+  {
+   "model": "stodola_mala",
+   "x": -81.752,
+   "z": -236.936,
+   "yaw": -0.76,
+   "misto": "predhradi",
+   "usedlost": 6,
+   "plosina": true,
+   "y": 32.242
+  },
+  {
+   "model": "kolna",
+   "x": -74.916,
+   "z": -229.006,
+   "yaw": -0.76,
+   "misto": "predhradi",
+   "usedlost": 6,
+   "plosina": true,
+   "y": 31.368
+  },
+  {
+   "model": "kurnik",
+   "x": -81.483,
+   "z": -223.525,
+   "yaw": 0.769,
+   "misto": "predhradi",
+   "usedlost": 6,
+   "plosina": false,
+   "y": 32.596
+  },
+  {
+   "model": "stodola",
+   "x": -62.352,
+   "z": -218.056,
+   "yaw": -0.811,
+   "misto": "predhradi",
+   "usedlost": 7,
+   "plosina": true,
+   "y": 30.553
+  },
+  {
+   "model": "kolna",
+   "x": -62.915,
+   "z": -199.507,
+   "yaw": -2.381,
+   "misto": "predhradi",
+   "usedlost": 7,
+   "plosina": true,
+   "y": 31.804
+  },
+  {
+   "model": "kurnik",
+   "x": -63.845,
+   "z": -206.248,
+   "yaw": 0.655,
+   "misto": "predhradi",
+   "usedlost": 7,
+   "plosina": false,
+   "y": 31.697
+  },
+  {
+   "model": "stodola_mala",
+   "x": -39.524,
+   "z": -194.003,
+   "yaw": -1.513,
+   "misto": "predhradi",
+   "usedlost": 8,
+   "plosina": true,
+   "y": 28.855
+  },
+  {
+   "model": "kolna",
+   "x": -39.96,
+   "z": -183.588,
+   "yaw": -1.513,
+   "misto": "predhradi",
+   "usedlost": 8,
+   "plosina": true,
+   "y": 29.039
+  },
+  {
+   "model": "stodola_mala",
+   "x": -72.062,
+   "z": 101.562,
+   "yaw": -2.143,
+   "misto": "krcma",
+   "usedlost": 9,
+   "plosina": true,
+   "y": -35.745
+  },
+  {
+   "model": "kolna",
+   "x": -88.729,
+   "z": 94.56,
+   "yaw": -0.572,
+   "misto": "krcma",
+   "usedlost": 9,
+   "plosina": true,
+   "y": -35.161
+  },
+  {
+   "model": "kolna",
+   "x": 156.853,
+   "z": 315.733,
+   "yaw": -3.453,
+   "misto": "hajovna",
+   "usedlost": 10,
+   "plosina": true,
+   "y": -35.642
+  },
+  {
+   "model": "kurnik",
+   "x": 162.183,
+   "z": 312.134,
+   "yaw": -0.36,
+   "misto": "hajovna",
+   "usedlost": 10,
+   "plosina": false,
+   "y": -35.626
+  }
+ ],
+ "drobne": [
+  {
+   "model": "zahon_zeli",
+   "x": -81.227,
+   "y": 37.356,
+   "z": -303.255,
+   "yaw": -3.989,
+   "usedlost": 1
+  },
+  {
+   "model": "zahon_prazdny",
+   "x": -84.749,
+   "y": 37.512,
+   "z": -304.911,
+   "yaw": -4.018,
+   "usedlost": 1
+  },
+  {
+   "model": "zahon_prazdny",
+   "x": -82.407,
+   "y": 37.454,
+   "z": -302.216,
+   "yaw": -3.951,
+   "usedlost": 1
+  },
+  {
+   "model": "zahon_cibule",
+   "x": -83.549,
+   "y": 37.59,
+   "z": -305.966,
+   "yaw": -4.008,
+   "usedlost": 1
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -80.706,
+   "y": 36.85,
+   "z": -296.221,
+   "yaw": -2.421,
+   "usedlost": 1
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -82.103,
+   "y": 36.918,
+   "z": -294.992,
+   "yaw": -2.443,
+   "usedlost": 1
+  },
+  {
+   "model": "sud",
+   "x": -90.865,
+   "y": 37.515,
+   "z": -299.248,
+   "yaw": 6.169,
+   "usedlost": 1
+  },
+  {
+   "model": "lavice_selska",
+   "x": -85.839,
+   "y": 37.513,
+   "z": -293.903,
+   "yaw": -3.991,
+   "usedlost": 1
+  },
+  {
+   "model": "spalek_stipani",
+   "x": -84.807,
+   "y": 36.946,
+   "z": -291.215,
+   "yaw": 1.613,
+   "usedlost": 1
+  },
+  {
+   "model": "drevo_hromada",
+   "x": -86.237,
+   "y": 37.258,
+   "z": -289.824,
+   "yaw": -2.524,
+   "usedlost": 1
+  },
+  {
+   "model": "zahon_prazdny",
+   "x": -127.401,
+   "y": 37.285,
+   "z": -279.655,
+   "yaw": -0.188,
+   "usedlost": 2
+  },
+  {
+   "model": "zahon_salat",
+   "x": -127.132,
+   "y": 37.687,
+   "z": -281.169,
+   "yaw": -0.181,
+   "usedlost": 2
+  },
+  {
+   "model": "zahon_zeli",
+   "x": -130.918,
+   "y": 37.119,
+   "z": -280.264,
+   "yaw": -0.146,
+   "usedlost": 2
+  },
+  {
+   "model": "zahon_cibule",
+   "x": -130.346,
+   "y": 38.012,
+   "z": -283.483,
+   "yaw": -0.145,
+   "usedlost": 2
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -136.739,
+   "y": 37.891,
+   "z": -287.291,
+   "yaw": 1.381,
+   "usedlost": 2
+  },
+  {
+   "model": "sud",
+   "x": -125.812,
+   "y": 38.127,
+   "z": -292.022,
+   "yaw": 0.105,
+   "usedlost": 2
+  },
+  {
+   "model": "sud_stary",
+   "x": -126.586,
+   "y": 38.127,
+   "z": -292.271,
+   "yaw": 3.776,
+   "usedlost": 2
+  },
+  {
+   "model": "sud",
+   "x": -127.393,
+   "y": 38.127,
+   "z": -292.269,
+   "yaw": 5.559,
+   "usedlost": 2
+  },
+  {
+   "model": "spalek_stipani",
+   "x": -136.414,
+   "y": 38.338,
+   "z": -295.118,
+   "yaw": 4.625,
+   "usedlost": 2
+  },
+  {
+   "model": "drevo_hromada",
+   "x": -136.251,
+   "y": 38.525,
+   "z": -296.609,
+   "yaw": 1.401,
+   "usedlost": 2
+  },
+  {
+   "model": "zebrinak",
+   "x": -128.725,
+   "y": 38.127,
+   "z": -294.84,
+   "yaw": 1.314,
+   "usedlost": 2
+  },
+  {
+   "model": "zahon_prazdny",
+   "x": -103.007,
+   "y": 35.302,
+   "z": -270.305,
+   "yaw": -3.482,
+   "usedlost": 3
+  },
+  {
+   "model": "zahon_salat",
+   "x": -106.893,
+   "y": 34.953,
+   "z": -269.829,
+   "yaw": -3.446,
+   "usedlost": 3
+  },
+  {
+   "model": "zahon_mrkev",
+   "x": -104.0,
+   "y": 34.585,
+   "z": -267.106,
+   "yaw": -3.409,
+   "usedlost": 3
+  },
+  {
+   "model": "zahon_zeli",
+   "x": -107.408,
+   "y": 34.6,
+   "z": -268.169,
+   "yaw": -3.471,
+   "usedlost": 3
+  },
+  {
+   "model": "zahon_cibule",
+   "x": -106.429,
+   "y": 35.78,
+   "z": -271.321,
+   "yaw": -3.417,
+   "usedlost": 3
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -100.741,
+   "y": 34.246,
+   "z": -263.338,
+   "yaw": -1.862,
+   "usedlost": 3
+  },
+  {
+   "model": "sud_stary",
+   "x": -111.024,
+   "y": 34.587,
+   "z": -260.64,
+   "yaw": 3.456,
+   "usedlost": 3
+  },
+  {
+   "model": "lavice_selska",
+   "x": -103.913,
+   "y": 34.581,
+   "z": -258.685,
+   "yaw": -3.443,
+   "usedlost": 3
+  },
+  {
+   "model": "spalek_stipani",
+   "x": -101.594,
+   "y": 34.279,
+   "z": -257.05,
+   "yaw": 1.434,
+   "usedlost": 3
+  },
+  {
+   "model": "drevo_hromada",
+   "x": -101.954,
+   "y": 34.476,
+   "z": -255.552,
+   "yaw": -1.883,
+   "usedlost": 3
+  },
+  {
+   "model": "zahon_zeli",
+   "x": -137.461,
+   "y": 35.448,
+   "z": -252.438,
+   "yaw": 0.049,
+   "usedlost": 4
+  },
+  {
+   "model": "zahon_prazdny",
+   "x": -141.023,
+   "y": 35.292,
+   "z": -252.198,
+   "yaw": 0.02,
+   "usedlost": 4
+  },
+  {
+   "model": "zahon_mrkev",
+   "x": -133.986,
+   "y": 35.519,
+   "z": -254.252,
+   "yaw": 0.018,
+   "usedlost": 4
+  },
+  {
+   "model": "zahon_salat",
+   "x": -141.113,
+   "y": 35.479,
+   "z": -253.831,
+   "yaw": 0.058,
+   "usedlost": 4
+  },
+  {
+   "model": "zahon_prazdny",
+   "x": -137.555,
+   "y": 35.509,
+   "z": -254.138,
+   "yaw": 0.056,
+   "usedlost": 4
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -145.57,
+   "y": 34.813,
+   "z": -256.326,
+   "yaw": 1.608,
+   "usedlost": 4
+  },
+  {
+   "model": "sud",
+   "x": -133.367,
+   "y": 35.513,
+   "z": -264.217,
+   "yaw": 6.008,
+   "usedlost": 4
+  },
+  {
+   "model": "sud_stary",
+   "x": -134.267,
+   "y": 35.513,
+   "z": -264.162,
+   "yaw": 3.318,
+   "usedlost": 4
+  },
+  {
+   "model": "sud_stary",
+   "x": -134.994,
+   "y": 35.513,
+   "z": -264.16,
+   "yaw": 1.961,
+   "usedlost": 4
+  },
+  {
+   "model": "lavice_selska",
+   "x": -144.306,
+   "y": 35.513,
+   "z": -263.391,
+   "yaw": 0.055,
+   "usedlost": 4
+  },
+  {
+   "model": "spalek_stipani",
+   "x": -147.083,
+   "y": 34.868,
+   "z": -264.711,
+   "yaw": 2.147,
+   "usedlost": 4
+  },
+  {
+   "model": "drevo_hromada",
+   "x": -147.253,
+   "y": 34.736,
+   "z": -265.987,
+   "yaw": 1.529,
+   "usedlost": 4
+  },
+  {
+   "model": "kupka_sena",
+   "x": -159.06,
+   "y": 33.021,
+   "z": -261.319,
+   "yaw": 1.19,
+   "usedlost": 4
+  },
+  {
+   "model": "zahon_mrkev",
+   "x": -131.23,
+   "y": 35.57,
+   "z": -219.807,
+   "yaw": 0.507,
+   "usedlost": 5
+  },
+  {
+   "model": "zahon_zeli",
+   "x": -132.892,
+   "y": 35.717,
+   "z": -222.626,
+   "yaw": 0.512,
+   "usedlost": 5
+  },
+  {
+   "model": "zahon_cibule",
+   "x": -129.823,
+   "y": 35.695,
+   "z": -224.45,
+   "yaw": 0.501,
+   "usedlost": 5
+  },
+  {
+   "model": "zahon_mrkev",
+   "x": -128.192,
+   "y": 35.369,
+   "z": -221.684,
+   "yaw": 0.535,
+   "usedlost": 5
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -136.659,
+   "y": 35.742,
+   "z": -223.551,
+   "yaw": 2.122,
+   "usedlost": 5
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -137.604,
+   "y": 35.737,
+   "z": -225.154,
+   "yaw": 2.075,
+   "usedlost": 5
+  },
+  {
+   "model": "sud_stary",
+   "x": -131.368,
+   "y": 35.732,
+   "z": -234.293,
+   "yaw": 2.579,
+   "usedlost": 5
+  },
+  {
+   "model": "lavice_selska",
+   "x": -138.481,
+   "y": 35.731,
+   "z": -229.889,
+   "yaw": 0.533,
+   "usedlost": 5
+  },
+  {
+   "model": "spalek_stipani",
+   "x": -141.393,
+   "y": 35.543,
+   "z": -229.513,
+   "yaw": 4.365,
+   "usedlost": 5
+  },
+  {
+   "model": "drevo_hromada",
+   "x": -142.413,
+   "y": 35.444,
+   "z": -231.047,
+   "yaw": 2.365,
+   "usedlost": 5
+  },
+  {
+   "model": "zebrinak",
+   "x": -136.13,
+   "y": 35.23,
+   "z": -234.119,
+   "yaw": 2.195,
+   "usedlost": 5
+  },
+  {
+   "model": "kupka_sena",
+   "x": -155.667,
+   "y": 33.59,
+   "z": -227.125,
+   "yaw": 4.638,
+   "usedlost": 5
+  },
+  {
+   "model": "zahon_zeli",
+   "x": -94.196,
+   "y": 32.892,
+   "z": -225.672,
+   "yaw": -2.302,
+   "usedlost": 6
+  },
+  {
+   "model": "zahon_salat",
+   "x": -93.062,
+   "y": 32.781,
+   "z": -224.595,
+   "yaw": -2.314,
+   "usedlost": 6
+  },
+  {
+   "model": "zahon_cibule",
+   "x": -91.742,
+   "y": 32.825,
+   "z": -228.266,
+   "yaw": -2.31,
+   "usedlost": 6
+  },
+  {
+   "model": "zahon_zeli",
+   "x": -90.583,
+   "y": 32.781,
+   "z": -227.164,
+   "yaw": -2.326,
+   "usedlost": 6
+  },
+  {
+   "model": "zahon_salat",
+   "x": -95.366,
+   "y": 33.328,
+   "z": -226.784,
+   "yaw": -2.313,
+   "usedlost": 6
+  },
+  {
+   "model": "zahon_cibule",
+   "x": -92.973,
+   "y": 33.068,
+   "z": -229.435,
+   "yaw": -2.298,
+   "usedlost": 6
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -85.081,
+   "y": 32.633,
+   "z": -229.081,
+   "yaw": -0.745,
+   "usedlost": 6
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -83.732,
+   "y": 32.584,
+   "z": -227.8,
+   "yaw": -0.784,
+   "usedlost": 6
+  },
+  {
+   "model": "spalek_stipani",
+   "x": -79.376,
+   "y": 32.205,
+   "z": -225.108,
+   "yaw": 4.759,
+   "usedlost": 6
+  },
+  {
+   "model": "drevo_hromada",
+   "x": -78.435,
+   "y": 31.96,
+   "z": -224.352,
+   "yaw": -0.796,
+   "usedlost": 6
+  },
+  {
+   "model": "trakar",
+   "x": -80.904,
+   "y": 32.515,
+   "z": -215.201,
+   "yaw": -1.063,
+   "usedlost": 6
+  },
+  {
+   "model": "kupka_sena",
+   "x": -75.388,
+   "y": 31.518,
+   "z": -239.089,
+   "yaw": 0.99,
+   "usedlost": 6
+  },
+  {
+   "model": "panak_snopu",
+   "x": -61.607,
+   "y": 30.403,
+   "z": -249.328,
+   "yaw": 3.326,
+   "usedlost": 6
+  },
+  {
+   "model": "panak_snopu",
+   "x": -68.577,
+   "y": 31.478,
+   "z": -254.715,
+   "yaw": 3.805,
+   "usedlost": 6
+  },
+  {
+   "model": "panak_snopu",
+   "x": -68.449,
+   "y": 31.496,
+   "z": -255.559,
+   "yaw": 1.45,
+   "usedlost": 6
+  },
+  {
+   "model": "zahon_zeli",
+   "x": -73.9,
+   "y": 32.017,
+   "z": -210.614,
+   "yaw": -2.363,
+   "usedlost": 7
+  },
+  {
+   "model": "zahon_zeli",
+   "x": -74.986,
+   "y": 32.031,
+   "z": -211.756,
+   "yaw": -2.385,
+   "usedlost": 7
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -67.845,
+   "y": 31.264,
+   "z": -212.704,
+   "yaw": -0.832,
+   "usedlost": 7
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -66.563,
+   "y": 31.622,
+   "z": -211.356,
+   "yaw": -0.816,
+   "usedlost": 7
+  },
+  {
+   "model": "sud",
+   "x": -70.605,
+   "y": 31.953,
+   "z": -201.055,
+   "yaw": 1.124,
+   "usedlost": 7
+  },
+  {
+   "model": "trakar",
+   "x": -63.61,
+   "y": 31.784,
+   "z": -196.77,
+   "yaw": -0.355,
+   "usedlost": 7
+  },
+  {
+   "model": "kupka_sena",
+   "x": -55.968,
+   "y": 29.728,
+   "z": -220.695,
+   "yaw": 4.96,
+   "usedlost": 7
+  },
+  {
+   "model": "panak_snopu",
+   "x": -27.82,
+   "y": 25.845,
+   "z": -238.079,
+   "yaw": 4.398,
+   "usedlost": 7
+  },
+  {
+   "model": "panak_snopu",
+   "x": -39.688,
+   "y": 27.532,
+   "z": -232.0,
+   "yaw": 2.022,
+   "usedlost": 7
+  },
+  {
+   "model": "panak_snopu",
+   "x": -43.875,
+   "y": 27.934,
+   "z": -231.232,
+   "yaw": 4.21,
+   "usedlost": 7
+  },
+  {
+   "model": "panak_snopu",
+   "x": -36.952,
+   "y": 27.191,
+   "z": -232.688,
+   "yaw": 5.944,
+   "usedlost": 7
+  },
+  {
+   "model": "panak_snopu",
+   "x": -29.656,
+   "y": 25.999,
+   "z": -238.122,
+   "yaw": 0.059,
+   "usedlost": 7
+  },
+  {
+   "model": "zahon_cibule",
+   "x": -56.409,
+   "y": 30.668,
+   "z": -195.415,
+   "yaw": -3.044,
+   "usedlost": 8
+  },
+  {
+   "model": "zahon_salat",
+   "x": -56.315,
+   "y": 30.65,
+   "z": -193.8,
+   "yaw": -3.108,
+   "usedlost": 8
+  },
+  {
+   "model": "zahon_mrkev",
+   "x": -52.849,
+   "y": 30.419,
+   "z": -195.678,
+   "yaw": -3.077,
+   "usedlost": 8
+  },
+  {
+   "model": "zahon_cibule",
+   "x": -52.752,
+   "y": 30.615,
+   "z": -194.018,
+   "yaw": -3.09,
+   "usedlost": 8
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -47.597,
+   "y": 30.438,
+   "z": -191.63,
+   "yaw": -1.498,
+   "usedlost": 8
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -47.489,
+   "y": 30.288,
+   "z": -189.774,
+   "yaw": -1.497,
+   "usedlost": 8
+  },
+  {
+   "model": "sud",
+   "x": -56.188,
+   "y": 30.65,
+   "z": -185.477,
+   "yaw": 3.175,
+   "usedlost": 8
+  },
+  {
+   "model": "trakar",
+   "x": -51.576,
+   "y": 30.389,
+   "z": -177.781,
+   "yaw": -1.307,
+   "usedlost": 8
+  },
+  {
+   "model": "panak_snopu",
+   "x": -10.576,
+   "y": 25.653,
+   "z": -184.755,
+   "yaw": 0.834,
+   "usedlost": 8
+  },
+  {
+   "model": "panak_snopu",
+   "x": -12.852,
+   "y": 25.972,
+   "z": -185.349,
+   "yaw": 6.013,
+   "usedlost": 8
+  },
+  {
+   "model": "panak_snopu",
+   "x": -11.288,
+   "y": 25.755,
+   "z": -184.842,
+   "yaw": 4.805,
+   "usedlost": 8
+  },
+  {
+   "model": "panak_snopu",
+   "x": -16.248,
+   "y": 26.424,
+   "z": -183.968,
+   "yaw": 1.107,
+   "usedlost": 8
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -79.852,
+   "y": -35.345,
+   "z": 91.769,
+   "yaw": -0.553,
+   "usedlost": 9
+  },
+  {
+   "model": "hranice_dreva",
+   "x": -78.288,
+   "y": -35.347,
+   "z": 92.776,
+   "yaw": -0.597,
+   "usedlost": 9
+  },
+  {
+   "model": "sud",
+   "x": -79.941,
+   "y": -35.564,
+   "z": 102.34,
+   "yaw": 0.425,
+   "usedlost": 9
+  },
+  {
+   "model": "sud",
+   "x": -79.52,
+   "y": -35.609,
+   "z": 101.677,
+   "yaw": 0.289,
+   "usedlost": 9
+  },
+  {
+   "model": "sud_stary",
+   "x": -79.049,
+   "y": -35.637,
+   "z": 100.986,
+   "yaw": 0.664,
+   "usedlost": 9
+  },
+  {
+   "model": "sud",
+   "x": -78.706,
+   "y": -35.585,
+   "z": 100.287,
+   "yaw": 5.484,
+   "usedlost": 9
+  },
+  {
+   "model": "lavice_selska",
+   "x": -76.216,
+   "y": -35.535,
+   "z": 96.071,
+   "yaw": -2.143,
+   "usedlost": 9
+  },
+  {
+   "model": "lavice_selska",
+   "x": -77.407,
+   "y": -35.584,
+   "z": 97.921,
+   "yaw": -2.143,
+   "usedlost": 9
+  },
+  {
+   "model": "spalek_stipani",
+   "x": -74.015,
+   "y": -35.659,
+   "z": 94.276,
+   "yaw": 0.126,
+   "usedlost": 9
+  },
+  {
+   "model": "drevo_hromada",
+   "x": -72.695,
+   "y": -35.765,
+   "z": 95.007,
+   "yaw": -0.206,
+   "usedlost": 9
+  },
+  {
+   "model": "zebrinak",
+   "x": -76.072,
+   "y": -35.765,
+   "z": 100.375,
+   "yaw": -0.458,
+   "usedlost": 9
+  },
+  {
+   "model": "zebrinak",
+   "x": -74.022,
+   "y": -35.765,
+   "z": 100.885,
+   "yaw": -0.477,
+   "usedlost": 9
+  },
+  {
+   "model": "koryto_kone",
+   "x": -66.85,
+   "y": -35.863,
+   "z": 95.245,
+   "yaw": -0.572,
+   "usedlost": 9
+  },
+  {
+   "model": "kupka_sena",
+   "x": -71.899,
+   "y": -35.704,
+   "z": 93.022,
+   "yaw": 4.628,
+   "usedlost": 9
+  },
+  {
+   "model": "zahon_mrkev",
+   "x": 161.908,
+   "y": -34.924,
+   "z": 301.403,
+   "yaw": -3.446,
+   "usedlost": 10
+  },
+  {
+   "model": "zahon_zeli",
+   "x": 158.484,
+   "y": -34.926,
+   "z": 300.388,
+   "yaw": -3.423,
+   "usedlost": 10
+  },
+  {
+   "model": "zahon_cibule",
+   "x": 162.394,
+   "y": -34.869,
+   "z": 299.893,
+   "yaw": -3.487,
+   "usedlost": 10
+  },
+  {
+   "model": "hranice_dreva",
+   "x": 165.937,
+   "y": -34.924,
+   "z": 305.532,
+   "yaw": -1.892,
+   "usedlost": 10
+  },
+  {
+   "model": "hranice_dreva",
+   "x": 165.367,
+   "y": -34.924,
+   "z": 307.302,
+   "yaw": -1.891,
+   "usedlost": 10
+  },
+  {
+   "model": "hranice_dreva",
+   "x": 164.797,
+   "y": -34.924,
+   "z": 309.073,
+   "yaw": -1.882,
+   "usedlost": 10
+  },
+  {
+   "model": "hranice_dreva",
+   "x": 163.626,
+   "y": -35.444,
+   "z": 312.709,
+   "yaw": -1.905,
+   "usedlost": 10
+  },
+  {
+   "model": "hranice_dreva",
+   "x": 163.056,
+   "y": -35.568,
+   "z": 314.48,
+   "yaw": -1.891,
+   "usedlost": 10
+  },
+  {
+   "model": "sud",
+   "x": 154.369,
+   "y": -35.209,
+   "z": 308.752,
+   "yaw": 2.604,
+   "usedlost": 10
+  },
+  {
+   "model": "lavice_selska",
+   "x": 162.41,
+   "y": -35.186,
+   "z": 311.104,
+   "yaw": -3.453,
+   "usedlost": 10
+  },
+  {
+   "model": "spalek_stipani",
+   "x": 164.69,
+   "y": -34.998,
+   "z": 312.83,
+   "yaw": 3.59,
+   "usedlost": 10
+  },
+  {
+   "model": "drevo_hromada",
+   "x": 164.38,
+   "y": -34.993,
+   "z": 314.118,
+   "yaw": -1.876,
+   "usedlost": 10
+  },
+  {
+   "model": "trakar",
+   "x": 154.324,
+   "y": -35.662,
+   "z": 316.5,
+   "yaw": -2.08,
+   "usedlost": 10
+  }
+ ],
+ "ploty": [
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -92.06,
+     37.596,
+     -301.324
+    ],
+    [
+     -92.81,
+     37.635,
+     -300.664
+    ]
+   ],
+   "usedlost": 1,
+   "semeno": 31
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -95.063,
+     37.809,
+     -298.683
+    ],
+    [
+     -95.727,
+     37.854,
+     -298.098
+    ],
+    [
+     -96.392,
+     37.9,
+     -297.514
+    ],
+    [
+     -97.056,
+     37.865,
+     -296.929
+    ],
+    [
+     -97.721,
+     37.912,
+     -296.345
+    ],
+    [
+     -98.385,
+     37.862,
+     -295.76
+    ],
+    [
+     -99.05,
+     37.756,
+     -295.176
+    ]
+   ],
+   "usedlost": 1,
+   "semeno": 32
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -83.456,
+     38.598,
+     -308.892
+    ],
+    [
+     -84.188,
+     38.388,
+     -308.247
+    ],
+    [
+     -84.921,
+     38.041,
+     -307.603
+    ],
+    [
+     -85.654,
+     37.725,
+     -306.958
+    ],
+    [
+     -86.386,
+     37.646,
+     -306.314
+    ],
+    [
+     -87.119,
+     37.658,
+     -305.67
+    ]
+   ],
+   "usedlost": 1,
+   "semeno": 33
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -83.456,
+     38.598,
+     -308.892
+    ],
+    [
+     -82.814,
+     38.435,
+     -308.163
+    ],
+    [
+     -82.173,
+     38.249,
+     -307.434
+    ],
+    [
+     -81.532,
+     38.078,
+     -306.705
+    ],
+    [
+     -80.891,
+     37.925,
+     -305.976
+    ],
+    [
+     -80.249,
+     37.754,
+     -305.247
+    ],
+    [
+     -79.608,
+     37.596,
+     -304.518
+    ],
+    [
+     -78.967,
+     37.429,
+     -303.789
+    ],
+    [
+     -78.326,
+     37.259,
+     -303.06
+    ],
+    [
+     -77.684,
+     37.083,
+     -302.33
+    ],
+    [
+     -77.043,
+     36.881,
+     -301.601
+    ],
+    [
+     -76.402,
+     36.667,
+     -300.872
+    ]
+   ],
+   "usedlost": 1,
+   "semeno": 34
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -76.402,
+     36.667,
+     -300.872
+    ],
+    [
+     -77.134,
+     36.815,
+     -300.228
+    ],
+    [
+     -77.867,
+     37.07,
+     -299.583
+    ],
+    [
+     -78.6,
+     37.318,
+     -298.939
+    ],
+    [
+     -79.333,
+     37.383,
+     -298.294
+    ],
+    [
+     -80.065,
+     37.356,
+     -297.65
+    ]
+   ],
+   "usedlost": 1,
+   "semeno": 35
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -76.402,
+     36.667,
+     -300.872
+    ],
+    [
+     -75.758,
+     36.288,
+     -300.14
+    ],
+    [
+     -75.114,
+     35.858,
+     -299.409
+    ],
+    [
+     -74.47,
+     35.589,
+     -298.677
+    ],
+    [
+     -73.827,
+     35.458,
+     -297.945
+    ],
+    [
+     -73.183,
+     35.458,
+     -297.213
+    ],
+    [
+     -72.539,
+     35.466,
+     -296.481
+    ],
+    [
+     -71.895,
+     35.459,
+     -295.749
+    ],
+    [
+     -71.252,
+     35.458,
+     -295.017
+    ],
+    [
+     -70.608,
+     35.455,
+     -294.285
+    ],
+    [
+     -69.964,
+     35.457,
+     -293.553
+    ],
+    [
+     -69.32,
+     35.458,
+     -292.821
+    ],
+    [
+     -68.676,
+     35.455,
+     -292.089
+    ],
+    [
+     -68.033,
+     35.458,
+     -291.358
+    ],
+    [
+     -67.389,
+     35.417,
+     -290.626
+    ],
+    [
+     -66.745,
+     35.202,
+     -289.894
+    ],
+    [
+     -66.101,
+     34.755,
+     -289.162
+    ],
+    [
+     -65.458,
+     34.228,
+     -288.43
+    ],
+    [
+     -64.814,
+     33.828,
+     -287.698
+    ],
+    [
+     -64.17,
+     33.661,
+     -286.966
+    ],
+    [
+     -63.526,
+     33.52,
+     -286.234
+    ],
+    [
+     -62.883,
+     33.379,
+     -285.502
+    ],
+    [
+     -62.239,
+     33.238,
+     -284.77
+    ],
+    [
+     -61.595,
+     33.095,
+     -284.039
+    ],
+    [
+     -60.951,
+     32.947,
+     -283.307
+    ]
+   ],
+   "usedlost": 1,
+   "semeno": 36
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -99.05,
+     37.756,
+     -295.176
+    ],
+    [
+     -98.407,
+     37.602,
+     -294.445
+    ],
+    [
+     -97.764,
+     37.541,
+     -293.714
+    ],
+    [
+     -97.121,
+     37.542,
+     -292.983
+    ],
+    [
+     -96.478,
+     37.541,
+     -292.251
+    ],
+    [
+     -95.835,
+     37.541,
+     -291.52
+    ],
+    [
+     -95.192,
+     37.542,
+     -290.789
+    ],
+    [
+     -94.549,
+     37.541,
+     -290.058
+    ],
+    [
+     -93.906,
+     37.541,
+     -289.327
+    ],
+    [
+     -93.263,
+     37.541,
+     -288.596
+    ],
+    [
+     -92.62,
+     37.541,
+     -287.865
+    ],
+    [
+     -91.977,
+     37.541,
+     -287.134
+    ],
+    [
+     -91.334,
+     37.49,
+     -286.403
+    ],
+    [
+     -90.691,
+     37.304,
+     -285.672
+    ],
+    [
+     -90.048,
+     36.939,
+     -284.941
+    ],
+    [
+     -89.405,
+     36.562,
+     -284.21
+    ],
+    [
+     -88.762,
+     36.315,
+     -283.479
+    ],
+    [
+     -88.119,
+     36.195,
+     -282.748
+    ],
+    [
+     -87.476,
+     36.085,
+     -282.017
+    ],
+    [
+     -86.833,
+     35.975,
+     -281.286
+    ],
+    [
+     -86.19,
+     35.865,
+     -280.555
+    ],
+    [
+     -85.547,
+     35.737,
+     -279.824
+    ],
+    [
+     -84.904,
+     35.6,
+     -279.093
+    ],
+    [
+     -84.261,
+     35.457,
+     -278.362
+    ],
+    [
+     -83.618,
+     35.33,
+     -277.631
+    ],
+    [
+     -82.975,
+     35.209,
+     -276.9
+    ],
+    [
+     -82.332,
+     35.089,
+     -276.169
+    ],
+    [
+     -81.689,
+     34.969,
+     -275.438
+    ],
+    [
+     -81.046,
+     34.848,
+     -274.707
+    ],
+    [
+     -80.403,
+     34.736,
+     -273.976
+    ],
+    [
+     -79.76,
+     34.617,
+     -273.245
+    ],
+    [
+     -79.117,
+     34.51,
+     -272.514
+    ],
+    [
+     -78.474,
+     34.422,
+     -271.783
+    ],
+    [
+     -77.831,
+     34.33,
+     -271.052
+    ],
+    [
+     -77.188,
+     34.205,
+     -270.321
+    ],
+    [
+     -76.545,
+     34.015,
+     -269.59
+    ]
+   ],
+   "usedlost": 1,
+   "semeno": 37
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -76.545,
+     34.015,
+     -269.59
+    ],
+    [
+     -75.803,
+     34.071,
+     -270.243
+    ],
+    [
+     -75.06,
+     34.042,
+     -270.897
+    ],
+    [
+     -74.318,
+     34.005,
+     -271.55
+    ],
+    [
+     -73.575,
+     33.964,
+     -272.203
+    ],
+    [
+     -72.832,
+     33.889,
+     -272.856
+    ],
+    [
+     -72.09,
+     33.785,
+     -273.509
+    ],
+    [
+     -71.347,
+     33.683,
+     -274.162
+    ],
+    [
+     -70.605,
+     33.588,
+     -274.816
+    ],
+    [
+     -69.862,
+     33.528,
+     -275.469
+    ],
+    [
+     -69.12,
+     33.453,
+     -276.122
+    ],
+    [
+     -68.377,
+     33.377,
+     -276.775
+    ],
+    [
+     -67.634,
+     33.3,
+     -277.428
+    ],
+    [
+     -66.892,
+     33.223,
+     -278.081
+    ],
+    [
+     -66.149,
+     33.157,
+     -278.735
+    ],
+    [
+     -65.407,
+     33.105,
+     -279.388
+    ],
+    [
+     -64.664,
+     33.07,
+     -280.041
+    ],
+    [
+     -63.922,
+     33.072,
+     -280.694
+    ],
+    [
+     -63.179,
+     33.068,
+     -281.347
+    ],
+    [
+     -62.436,
+     33.03,
+     -282.0
+    ],
+    [
+     -61.694,
+     32.988,
+     -282.653
+    ],
+    [
+     -60.951,
+     32.947,
+     -283.307
+    ]
+   ],
+   "usedlost": 1,
+   "semeno": 38
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -123.191,
+     38.204,
+     -291.134
+    ],
+    [
+     -123.031,
+     38.233,
+     -292.037
+    ],
+    [
+     -122.87,
+     38.355,
+     -292.94
+    ],
+    [
+     -122.71,
+     38.607,
+     -293.843
+    ],
+    [
+     -122.549,
+     38.89,
+     -294.746
+    ]
+   ],
+   "usedlost": 2,
+   "semeno": 70
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -122.024,
+     39.338,
+     -297.7
+    ],
+    [
+     -121.886,
+     39.426,
+     -298.476
+    ],
+    [
+     -121.748,
+     39.514,
+     -299.251
+    ],
+    [
+     -121.61,
+     39.603,
+     -300.027
+    ],
+    [
+     -121.472,
+     39.691,
+     -300.802
+    ]
+   ],
+   "usedlost": 2,
+   "semeno": 71
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -125.524,
+     37.427,
+     -278.016
+    ],
+    [
+     -125.379,
+     37.514,
+     -278.832
+    ],
+    [
+     -125.233,
+     37.64,
+     -279.648
+    ],
+    [
+     -125.088,
+     37.77,
+     -280.464
+    ],
+    [
+     -124.943,
+     37.888,
+     -281.28
+    ],
+    [
+     -124.798,
+     37.985,
+     -282.096
+    ]
+   ],
+   "usedlost": 2,
+   "semeno": 72
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -124.641,
+     38.047,
+     -282.982
+    ],
+    [
+     -124.518,
+     38.094,
+     -283.671
+    ]
+   ],
+   "usedlost": 2,
+   "semeno": 73
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -125.524,
+     37.427,
+     -278.016
+    ],
+    [
+     -126.434,
+     37.359,
+     -278.178
+    ],
+    [
+     -127.344,
+     37.294,
+     -278.34
+    ],
+    [
+     -128.254,
+     37.24,
+     -278.502
+    ],
+    [
+     -129.164,
+     37.214,
+     -278.663
+    ],
+    [
+     -130.074,
+     37.197,
+     -278.825
+    ],
+    [
+     -130.984,
+     37.179,
+     -278.987
+    ],
+    [
+     -131.894,
+     37.144,
+     -279.149
+    ],
+    [
+     -132.804,
+     37.108,
+     -279.311
+    ],
+    [
+     -133.714,
+     37.072,
+     -279.472
+    ],
+    [
+     -134.624,
+     37.036,
+     -279.634
+    ],
+    [
+     -135.534,
+     37.0,
+     -279.796
+    ],
+    [
+     -136.444,
+     36.967,
+     -279.958
+    ],
+    [
+     -137.354,
+     36.943,
+     -280.12
+    ]
+   ],
+   "usedlost": 2,
+   "semeno": 74
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -137.354,
+     36.943,
+     -280.12
+    ],
+    [
+     -137.187,
+     36.998,
+     -281.062
+    ],
+    [
+     -137.019,
+     37.293,
+     -282.005
+    ],
+    [
+     -136.852,
+     37.675,
+     -282.947
+    ],
+    [
+     -136.684,
+     37.945,
+     -283.89
+    ],
+    [
+     -136.516,
+     38.078,
+     -284.832
+    ],
+    [
+     -136.349,
+     38.113,
+     -285.775
+    ]
+   ],
+   "usedlost": 2,
+   "semeno": 75
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -137.354,
+     36.943,
+     -280.12
+    ],
+    [
+     -138.313,
+     36.946,
+     -280.29
+    ],
+    [
+     -139.271,
+     37.005,
+     -280.46
+    ],
+    [
+     -140.229,
+     37.081,
+     -280.631
+    ],
+    [
+     -141.188,
+     37.1,
+     -280.801
+    ],
+    [
+     -142.146,
+     37.104,
+     -280.972
+    ],
+    [
+     -143.105,
+     37.114,
+     -281.142
+    ],
+    [
+     -144.063,
+     37.036,
+     -281.312
+    ],
+    [
+     -145.022,
+     36.857,
+     -281.483
+    ],
+    [
+     -145.98,
+     36.848,
+     -281.653
+    ],
+    [
+     -146.938,
+     36.874,
+     -281.824
+    ],
+    [
+     -147.897,
+     36.794,
+     -281.994
+    ],
+    [
+     -148.855,
+     36.524,
+     -282.164
+    ],
+    [
+     -149.814,
+     36.186,
+     -282.335
+    ],
+    [
+     -150.772,
+     35.964,
+     -282.505
+    ],
+    [
+     -151.73,
+     35.83,
+     -282.676
+    ],
+    [
+     -152.689,
+     35.703,
+     -282.846
+    ],
+    [
+     -153.647,
+     35.545,
+     -283.016
+    ],
+    [
+     -154.606,
+     35.385,
+     -283.187
+    ],
+    [
+     -155.564,
+     35.256,
+     -283.357
+    ],
+    [
+     -156.522,
+     35.14,
+     -283.528
+    ],
+    [
+     -157.481,
+     35.037,
+     -283.698
+    ],
+    [
+     -158.439,
+     34.951,
+     -283.868
+    ],
+    [
+     -159.398,
+     34.862,
+     -284.039
+    ],
+    [
+     -160.356,
+     34.761,
+     -284.209
+    ]
+   ],
+   "usedlost": 2,
+   "semeno": 76
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -121.472,
+     39.691,
+     -300.802
+    ],
+    [
+     -122.44,
+     39.672,
+     -300.975
+    ],
+    [
+     -123.407,
+     39.656,
+     -301.147
+    ],
+    [
+     -124.375,
+     39.64,
+     -301.319
+    ],
+    [
+     -125.343,
+     39.622,
+     -301.491
+    ],
+    [
+     -126.31,
+     39.603,
+     -301.663
+    ],
+    [
+     -127.278,
+     39.583,
+     -301.835
+    ],
+    [
+     -128.245,
+     39.561,
+     -302.007
+    ],
+    [
+     -129.213,
+     39.546,
+     -302.179
+    ],
+    [
+     -130.18,
+     39.53,
+     -302.351
+    ],
+    [
+     -131.148,
+     39.51,
+     -302.523
+    ],
+    [
+     -132.116,
+     39.489,
+     -302.695
+    ],
+    [
+     -133.083,
+     39.448,
+     -302.867
+    ],
+    [
+     -134.051,
+     39.279,
+     -303.039
+    ],
+    [
+     -135.018,
+     38.974,
+     -303.211
+    ],
+    [
+     -135.986,
+     38.688,
+     -303.383
+    ],
+    [
+     -136.953,
+     38.563,
+     -303.555
+    ],
+    [
+     -137.921,
+     38.557,
+     -303.727
+    ],
+    [
+     -138.889,
+     38.557,
+     -303.899
+    ],
+    [
+     -139.856,
+     38.567,
+     -304.071
+    ],
+    [
+     -140.824,
+     38.588,
+     -304.243
+    ],
+    [
+     -141.791,
+     38.568,
+     -304.415
+    ],
+    [
+     -142.759,
+     38.557,
+     -304.587
+    ],
+    [
+     -143.726,
+     38.557,
+     -304.759
+    ],
+    [
+     -144.694,
+     38.557,
+     -304.931
+    ],
+    [
+     -145.662,
+     38.569,
+     -305.103
+    ],
+    [
+     -146.629,
+     38.639,
+     -305.275
+    ],
+    [
+     -147.597,
+     38.774,
+     -305.447
+    ],
+    [
+     -148.564,
+     38.905,
+     -305.619
+    ],
+    [
+     -149.532,
+     38.955,
+     -305.791
+    ],
+    [
+     -150.499,
+     38.925,
+     -305.963
+    ],
+    [
+     -151.467,
+     38.868,
+     -306.135
+    ],
+    [
+     -152.435,
+     38.811,
+     -306.307
+    ],
+    [
+     -153.402,
+     38.754,
+     -306.479
+    ],
+    [
+     -154.37,
+     38.698,
+     -306.651
+    ],
+    [
+     -155.337,
+     38.648,
+     -306.823
+    ],
+    [
+     -156.305,
+     38.633,
+     -306.996
+    ]
+   ],
+   "usedlost": 2,
+   "semeno": 77
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -156.305,
+     38.633,
+     -306.996
+    ],
+    [
+     -156.474,
+     38.457,
+     -306.046
+    ],
+    [
+     -156.642,
+     38.285,
+     -305.097
+    ],
+    [
+     -156.811,
+     38.13,
+     -304.147
+    ],
+    [
+     -156.98,
+     37.979,
+     -303.198
+    ],
+    [
+     -157.149,
+     37.827,
+     -302.248
+    ],
+    [
+     -157.318,
+     37.656,
+     -301.299
+    ],
+    [
+     -157.486,
+     37.47,
+     -300.35
+    ],
+    [
+     -157.655,
+     37.283,
+     -299.4
+    ],
+    [
+     -157.824,
+     37.095,
+     -298.451
+    ],
+    [
+     -157.993,
+     36.909,
+     -297.501
+    ],
+    [
+     -158.162,
+     36.728,
+     -296.552
+    ],
+    [
+     -158.33,
+     36.549,
+     -295.602
+    ],
+    [
+     -158.499,
+     36.374,
+     -294.653
+    ],
+    [
+     -158.668,
+     36.22,
+     -293.704
+    ],
+    [
+     -158.837,
+     36.076,
+     -292.754
+    ],
+    [
+     -159.006,
+     35.933,
+     -291.805
+    ],
+    [
+     -159.174,
+     35.789,
+     -290.855
+    ],
+    [
+     -159.343,
+     35.644,
+     -289.906
+    ],
+    [
+     -159.512,
+     35.499,
+     -288.956
+    ],
+    [
+     -159.681,
+     35.353,
+     -288.007
+    ],
+    [
+     -159.85,
+     35.207,
+     -287.058
+    ],
+    [
+     -160.018,
+     35.06,
+     -286.108
+    ],
+    [
+     -160.187,
+     34.91,
+     -285.159
+    ],
+    [
+     -160.356,
+     34.761,
+     -284.209
+    ]
+   ],
+   "usedlost": 2,
+   "semeno": 78
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -111.757,
+     34.605,
+     -261.361
+    ],
+    [
+     -112.015,
+     34.607,
+     -260.532
+    ],
+    [
+     -112.272,
+     34.627,
+     -259.703
+    ]
+   ],
+   "usedlost": 3,
+   "semeno": 110
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -113.162,
+     34.645,
+     -256.838
+    ],
+    [
+     -113.424,
+     34.663,
+     -255.993
+    ],
+    [
+     -113.686,
+     34.641,
+     -255.148
+    ],
+    [
+     -113.949,
+     34.634,
+     -254.303
+    ],
+    [
+     -114.211,
+     34.671,
+     -253.457
+    ],
+    [
+     -114.474,
+     34.687,
+     -252.612
+    ],
+    [
+     -114.736,
+     34.634,
+     -251.767
+    ]
+   ],
+   "usedlost": 3,
+   "semeno": 111
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -108.087,
+     36.808,
+     -273.184
+    ],
+    [
+     -108.336,
+     36.564,
+     -272.381
+    ],
+    [
+     -108.585,
+     36.131,
+     -271.579
+    ],
+    [
+     -108.834,
+     35.546,
+     -270.777
+    ],
+    [
+     -109.083,
+     35.014,
+     -269.975
+    ],
+    [
+     -109.332,
+     34.779,
+     -269.173
+    ]
+   ],
+   "usedlost": 3,
+   "semeno": 112
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -109.599,
+     34.63,
+     -268.314
+    ],
+    [
+     -109.806,
+     34.605,
+     -267.645
+    ]
+   ],
+   "usedlost": 3,
+   "semeno": 113
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -108.087,
+     36.808,
+     -273.184
+    ],
+    [
+     -107.2,
+     36.693,
+     -272.908
+    ],
+    [
+     -106.313,
+     36.602,
+     -272.633
+    ],
+    [
+     -105.426,
+     36.5,
+     -272.358
+    ],
+    [
+     -104.54,
+     36.39,
+     -272.082
+    ],
+    [
+     -103.653,
+     36.289,
+     -271.807
+    ],
+    [
+     -102.766,
+     36.201,
+     -271.532
+    ],
+    [
+     -101.88,
+     36.124,
+     -271.256
+    ],
+    [
+     -100.993,
+     36.056,
+     -270.981
+    ],
+    [
+     -100.106,
+     35.888,
+     -270.706
+    ],
+    [
+     -99.219,
+     35.525,
+     -270.43
+    ]
+   ],
+   "usedlost": 3,
+   "semeno": 114
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -99.219,
+     35.525,
+     -270.43
+    ],
+    [
+     -99.506,
+     35.292,
+     -269.507
+    ],
+    [
+     -99.792,
+     34.974,
+     -268.584
+    ],
+    [
+     -100.079,
+     34.723,
+     -267.661
+    ],
+    [
+     -100.366,
+     34.58,
+     -266.738
+    ],
+    [
+     -100.652,
+     34.534,
+     -265.815
+    ],
+    [
+     -100.939,
+     34.517,
+     -264.892
+    ]
+   ],
+   "usedlost": 3,
+   "semeno": 115
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -99.219,
+     35.525,
+     -270.43
+    ],
+    [
+     -98.28,
+     34.952,
+     -270.139
+    ],
+    [
+     -97.341,
+     34.374,
+     -269.847
+    ],
+    [
+     -96.402,
+     34.068,
+     -269.556
+    ],
+    [
+     -95.463,
+     34.014,
+     -269.264
+    ],
+    [
+     -94.524,
+     33.982,
+     -268.973
+    ],
+    [
+     -93.585,
+     33.982,
+     -268.681
+    ],
+    [
+     -92.646,
+     33.982,
+     -268.39
+    ],
+    [
+     -91.707,
+     33.988,
+     -268.098
+    ],
+    [
+     -90.768,
+     33.982,
+     -267.807
+    ],
+    [
+     -89.829,
+     33.982,
+     -267.515
+    ],
+    [
+     -88.89,
+     33.987,
+     -267.224
+    ],
+    [
+     -87.951,
+     33.982,
+     -266.932
+    ],
+    [
+     -87.012,
+     33.982,
+     -266.64
+    ],
+    [
+     -86.073,
+     34.104,
+     -266.349
+    ],
+    [
+     -85.134,
+     34.225,
+     -266.057
+    ],
+    [
+     -84.195,
+     34.169,
+     -265.766
+    ],
+    [
+     -83.256,
+     33.966,
+     -265.474
+    ],
+    [
+     -82.317,
+     33.775,
+     -265.183
+    ],
+    [
+     -81.378,
+     33.63,
+     -264.891
+    ],
+    [
+     -80.439,
+     33.49,
+     -264.6
+    ],
+    [
+     -79.5,
+     33.351,
+     -264.308
+    ]
+   ],
+   "usedlost": 3,
+   "semeno": 116
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -114.736,
+     34.634,
+     -251.767
+    ],
+    [
+     -113.783,
+     34.634,
+     -251.471
+    ],
+    [
+     -112.83,
+     34.634,
+     -251.175
+    ],
+    [
+     -111.877,
+     34.634,
+     -250.879
+    ],
+    [
+     -110.924,
+     34.634,
+     -250.584
+    ],
+    [
+     -109.972,
+     34.634,
+     -250.288
+    ],
+    [
+     -109.019,
+     34.634,
+     -249.992
+    ],
+    [
+     -108.066,
+     34.634,
+     -249.696
+    ],
+    [
+     -107.113,
+     34.634,
+     -249.4
+    ],
+    [
+     -106.16,
+     34.634,
+     -249.104
+    ],
+    [
+     -105.207,
+     34.629,
+     -248.809
+    ],
+    [
+     -104.254,
+     34.589,
+     -248.513
+    ],
+    [
+     -103.301,
+     34.516,
+     -248.217
+    ],
+    [
+     -102.349,
+     34.454,
+     -247.921
+    ],
+    [
+     -101.396,
+     34.454,
+     -247.625
+    ],
+    [
+     -100.443,
+     34.42,
+     -247.329
+    ],
+    [
+     -99.49,
+     34.329,
+     -247.033
+    ],
+    [
+     -98.537,
+     34.243,
+     -246.738
+    ],
+    [
+     -97.584,
+     34.157,
+     -246.442
+    ],
+    [
+     -96.631,
+     34.071,
+     -246.146
+    ],
+    [
+     -95.678,
+     33.988,
+     -245.85
+    ],
+    [
+     -94.725,
+     33.914,
+     -245.554
+    ],
+    [
+     -93.773,
+     33.848,
+     -245.258
+    ],
+    [
+     -92.82,
+     33.78,
+     -244.962
+    ],
+    [
+     -91.867,
+     33.701,
+     -244.667
+    ],
+    [
+     -90.914,
+     33.614,
+     -244.371
+    ],
+    [
+     -89.961,
+     33.525,
+     -244.075
+    ],
+    [
+     -89.008,
+     33.439,
+     -243.779
+    ],
+    [
+     -88.055,
+     33.321,
+     -243.483
+    ],
+    [
+     -87.102,
+     33.025,
+     -243.187
+    ],
+    [
+     -86.149,
+     32.693,
+     -242.892
+    ]
+   ],
+   "usedlost": 3,
+   "semeno": 117
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -86.149,
+     32.693,
+     -242.892
+    ],
+    [
+     -85.86,
+     32.795,
+     -243.823
+    ],
+    [
+     -85.571,
+     32.905,
+     -244.754
+    ],
+    [
+     -85.282,
+     33.016,
+     -245.685
+    ],
+    [
+     -84.993,
+     33.081,
+     -246.616
+    ],
+    [
+     -84.704,
+     33.084,
+     -247.547
+    ],
+    [
+     -84.415,
+     33.064,
+     -248.478
+    ],
+    [
+     -84.126,
+     33.044,
+     -249.41
+    ],
+    [
+     -83.837,
+     33.012,
+     -250.341
+    ],
+    [
+     -83.547,
+     32.98,
+     -251.272
+    ],
+    [
+     -83.258,
+     32.986,
+     -252.203
+    ],
+    [
+     -82.969,
+     32.955,
+     -253.134
+    ],
+    [
+     -82.68,
+     32.865,
+     -254.065
+    ],
+    [
+     -82.391,
+     32.788,
+     -254.997
+    ],
+    [
+     -82.102,
+     32.712,
+     -255.928
+    ],
+    [
+     -81.813,
+     32.701,
+     -256.859
+    ],
+    [
+     -81.524,
+     32.704,
+     -257.79
+    ],
+    [
+     -81.235,
+     32.67,
+     -258.721
+    ],
+    [
+     -80.946,
+     32.709,
+     -259.652
+    ],
+    [
+     -80.656,
+     32.783,
+     -260.584
+    ],
+    [
+     -80.367,
+     32.885,
+     -261.515
+    ],
+    [
+     -80.078,
+     33.033,
+     -262.446
+    ],
+    [
+     -79.789,
+     33.192,
+     -263.377
+    ],
+    [
+     -79.5,
+     33.351,
+     -264.308
+    ]
+   ],
+   "usedlost": 3,
+   "semeno": 118
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -132.374,
+     35.533,
+     -263.817
+    ],
+    [
+     -132.425,
+     35.533,
+     -264.741
+    ],
+    [
+     -132.476,
+     35.649,
+     -265.665
+    ],
+    [
+     -132.526,
+     35.963,
+     -266.588
+    ],
+    [
+     -132.577,
+     36.397,
+     -267.512
+    ],
+    [
+     -132.628,
+     36.772,
+     -268.435
+    ]
+   ],
+   "usedlost": 4,
+   "semeno": 150
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -132.793,
+     37.08,
+     -271.431
+    ],
+    [
+     -132.838,
+     37.085,
+     -272.255
+    ],
+    [
+     -132.884,
+     37.083,
+     -273.078
+    ]
+   ],
+   "usedlost": 4,
+   "semeno": 151
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -131.65,
+     35.759,
+     -250.661
+    ],
+    [
+     -131.696,
+     35.782,
+     -251.509
+    ],
+    [
+     -131.743,
+     35.758,
+     -252.357
+    ],
+    [
+     -131.79,
+     35.684,
+     -253.204
+    ],
+    [
+     -131.836,
+     35.592,
+     -254.052
+    ]
+   ],
+   "usedlost": 4,
+   "semeno": 152
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -131.886,
+     35.536,
+     -254.951
+    ],
+    [
+     -131.924,
+     35.533,
+     -255.65
+    ]
+   ],
+   "usedlost": 4,
+   "semeno": 153
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -131.65,
+     35.759,
+     -250.661
+    ],
+    [
+     -132.643,
+     35.713,
+     -250.606
+    ],
+    [
+     -133.637,
+     35.656,
+     -250.552
+    ],
+    [
+     -134.631,
+     35.598,
+     -250.497
+    ],
+    [
+     -135.624,
+     35.54,
+     -250.442
+    ],
+    [
+     -136.618,
+     35.485,
+     -250.387
+    ],
+    [
+     -137.612,
+     35.431,
+     -250.333
+    ],
+    [
+     -138.605,
+     35.373,
+     -250.278
+    ],
+    [
+     -139.599,
+     35.312,
+     -250.223
+    ],
+    [
+     -140.593,
+     35.249,
+     -250.169
+    ],
+    [
+     -141.587,
+     35.185,
+     -250.114
+    ],
+    [
+     -142.58,
+     35.1,
+     -250.059
+    ],
+    [
+     -143.574,
+     34.997,
+     -250.005
+    ],
+    [
+     -144.568,
+     34.813,
+     -249.95
+    ]
+   ],
+   "usedlost": 4,
+   "semeno": 154
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -144.568,
+     34.813,
+     -249.95
+    ],
+    [
+     -144.622,
+     34.936,
+     -250.948
+    ],
+    [
+     -144.677,
+     35.12,
+     -251.945
+    ],
+    [
+     -144.732,
+     35.265,
+     -252.943
+    ],
+    [
+     -144.787,
+     35.33,
+     -253.941
+    ],
+    [
+     -144.842,
+     35.321,
+     -254.939
+    ]
+   ],
+   "usedlost": 4,
+   "semeno": 155
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -144.568,
+     34.813,
+     -249.95
+    ],
+    [
+     -145.552,
+     34.505,
+     -249.896
+    ],
+    [
+     -146.537,
+     34.186,
+     -249.841
+    ],
+    [
+     -147.522,
+     33.995,
+     -249.787
+    ],
+    [
+     -148.507,
+     33.934,
+     -249.733
+    ],
+    [
+     -149.491,
+     33.923,
+     -249.679
+    ],
+    [
+     -150.476,
+     33.923,
+     -249.625
+    ],
+    [
+     -151.461,
+     33.923,
+     -249.57
+    ],
+    [
+     -152.445,
+     33.923,
+     -249.516
+    ],
+    [
+     -153.43,
+     33.923,
+     -249.462
+    ],
+    [
+     -154.415,
+     33.923,
+     -249.408
+    ],
+    [
+     -155.4,
+     33.923,
+     -249.354
+    ],
+    [
+     -156.384,
+     33.923,
+     -249.299
+    ],
+    [
+     -157.369,
+     33.874,
+     -249.245
+    ],
+    [
+     -158.354,
+     33.663,
+     -249.191
+    ],
+    [
+     -159.339,
+     33.277,
+     -249.137
+    ],
+    [
+     -160.323,
+     32.892,
+     -249.082
+    ],
+    [
+     -161.308,
+     32.691,
+     -249.028
+    ],
+    [
+     -162.293,
+     32.621,
+     -248.974
+    ],
+    [
+     -163.278,
+     32.548,
+     -248.92
+    ],
+    [
+     -164.262,
+     32.477,
+     -248.866
+    ],
+    [
+     -165.247,
+     32.407,
+     -248.811
+    ],
+    [
+     -166.232,
+     32.324,
+     -248.757
+    ],
+    [
+     -167.217,
+     32.175,
+     -248.703
+    ],
+    [
+     -168.201,
+     31.958,
+     -248.649
+    ]
+   ],
+   "usedlost": 4,
+   "semeno": 156
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -132.884,
+     37.083,
+     -273.078
+    ],
+    [
+     -133.872,
+     37.049,
+     -273.024
+    ],
+    [
+     -134.86,
+     36.982,
+     -272.969
+    ],
+    [
+     -135.847,
+     36.847,
+     -272.915
+    ],
+    [
+     -136.835,
+     36.7,
+     -272.861
+    ],
+    [
+     -137.823,
+     36.58,
+     -272.806
+    ],
+    [
+     -138.811,
+     36.481,
+     -272.752
+    ],
+    [
+     -139.799,
+     36.392,
+     -272.698
+    ],
+    [
+     -140.787,
+     36.306,
+     -272.643
+    ],
+    [
+     -141.775,
+     36.214,
+     -272.589
+    ],
+    [
+     -142.763,
+     36.105,
+     -272.534
+    ],
+    [
+     -143.75,
+     35.99,
+     -272.48
+    ],
+    [
+     -144.738,
+     35.875,
+     -272.426
+    ],
+    [
+     -145.726,
+     35.742,
+     -272.371
+    ],
+    [
+     -146.714,
+     35.493,
+     -272.317
+    ],
+    [
+     -147.702,
+     35.175,
+     -272.262
+    ],
+    [
+     -148.69,
+     34.943,
+     -272.208
+    ],
+    [
+     -149.678,
+     34.812,
+     -272.154
+    ],
+    [
+     -150.666,
+     34.712,
+     -272.099
+    ],
+    [
+     -151.654,
+     34.619,
+     -272.045
+    ],
+    [
+     -152.641,
+     34.531,
+     -271.991
+    ],
+    [
+     -153.629,
+     34.452,
+     -271.936
+    ],
+    [
+     -154.617,
+     34.402,
+     -271.882
+    ],
+    [
+     -155.605,
+     34.35,
+     -271.827
+    ],
+    [
+     -156.593,
+     34.278,
+     -271.773
+    ],
+    [
+     -157.581,
+     34.163,
+     -271.719
+    ],
+    [
+     -158.569,
+     33.981,
+     -271.664
+    ],
+    [
+     -159.557,
+     33.788,
+     -271.61
+    ],
+    [
+     -160.544,
+     33.599,
+     -271.555
+    ],
+    [
+     -161.532,
+     33.441,
+     -271.501
+    ],
+    [
+     -162.52,
+     33.317,
+     -271.447
+    ],
+    [
+     -163.508,
+     33.212,
+     -271.392
+    ],
+    [
+     -164.496,
+     33.116,
+     -271.338
+    ],
+    [
+     -165.484,
+     32.999,
+     -271.284
+    ],
+    [
+     -166.472,
+     32.826,
+     -271.229
+    ],
+    [
+     -167.46,
+     32.611,
+     -271.175
+    ],
+    [
+     -168.448,
+     32.412,
+     -271.12
+    ],
+    [
+     -169.435,
+     32.256,
+     -271.066
+    ]
+   ],
+   "usedlost": 4,
+   "semeno": 157
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -169.435,
+     32.256,
+     -271.066
+    ],
+    [
+     -169.382,
+     32.235,
+     -270.091
+    ],
+    [
+     -169.328,
+     32.142,
+     -269.117
+    ],
+    [
+     -169.274,
+     32.078,
+     -268.142
+    ],
+    [
+     -169.221,
+     32.031,
+     -267.167
+    ],
+    [
+     -169.167,
+     31.985,
+     -266.193
+    ],
+    [
+     -169.113,
+     31.94,
+     -265.218
+    ],
+    [
+     -169.06,
+     31.894,
+     -264.243
+    ],
+    [
+     -169.006,
+     31.849,
+     -263.269
+    ],
+    [
+     -168.952,
+     31.803,
+     -262.294
+    ],
+    [
+     -168.899,
+     31.757,
+     -261.319
+    ],
+    [
+     -168.845,
+     31.712,
+     -260.345
+    ],
+    [
+     -168.792,
+     31.666,
+     -259.37
+    ],
+    [
+     -168.738,
+     31.624,
+     -258.395
+    ],
+    [
+     -168.684,
+     31.586,
+     -257.421
+    ],
+    [
+     -168.631,
+     31.55,
+     -256.446
+    ],
+    [
+     -168.577,
+     31.515,
+     -255.471
+    ],
+    [
+     -168.523,
+     31.479,
+     -254.497
+    ],
+    [
+     -168.47,
+     31.494,
+     -253.522
+    ],
+    [
+     -168.416,
+     31.577,
+     -252.547
+    ],
+    [
+     -168.362,
+     31.677,
+     -251.573
+    ],
+    [
+     -168.309,
+     31.777,
+     -250.598
+    ],
+    [
+     -168.255,
+     31.876,
+     -249.623
+    ],
+    [
+     -168.201,
+     31.958,
+     -248.649
+    ]
+   ],
+   "usedlost": 4,
+   "semeno": 158
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -129.404,
+     35.728,
+     -234.974
+    ],
+    [
+     -129.909,
+     35.748,
+     -235.83
+    ],
+    [
+     -130.415,
+     35.687,
+     -236.687
+    ],
+    [
+     -130.92,
+     35.554,
+     -237.544
+    ],
+    [
+     -131.425,
+     35.368,
+     -238.401
+    ],
+    [
+     -131.93,
+     35.215,
+     -239.258
+    ]
+   ],
+   "usedlost": 5,
+   "semeno": 190
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -133.454,
+     35.037,
+     -241.843
+    ],
+    [
+     -133.793,
+     34.984,
+     -242.418
+    ],
+    [
+     -134.132,
+     34.926,
+     -242.993
+    ],
+    [
+     -134.471,
+     35.014,
+     -243.567
+    ]
+   ],
+   "usedlost": 5,
+   "semeno": 191
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -122.538,
+     35.115,
+     -223.327
+    ],
+    [
+     -122.979,
+     35.153,
+     -224.075
+    ],
+    [
+     -123.42,
+     35.243,
+     -224.822
+    ],
+    [
+     -123.86,
+     35.393,
+     -225.57
+    ],
+    [
+     -124.301,
+     35.555,
+     -226.318
+    ],
+    [
+     -124.742,
+     35.675,
+     -227.065
+    ]
+   ],
+   "usedlost": 5,
+   "semeno": 192
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -125.199,
+     35.744,
+     -227.841
+    ],
+    [
+     -125.555,
+     35.742,
+     -228.444
+    ]
+   ],
+   "usedlost": 5,
+   "semeno": 193
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -122.538,
+     35.115,
+     -223.327
+    ],
+    [
+     -123.357,
+     35.155,
+     -222.845
+    ],
+    [
+     -124.175,
+     35.204,
+     -222.362
+    ],
+    [
+     -124.993,
+     35.252,
+     -221.88
+    ],
+    [
+     -125.812,
+     35.313,
+     -221.397
+    ],
+    [
+     -126.63,
+     35.379,
+     -220.915
+    ],
+    [
+     -127.449,
+     35.41,
+     -220.432
+    ],
+    [
+     -128.267,
+     35.435,
+     -219.95
+    ],
+    [
+     -129.085,
+     35.552,
+     -219.467
+    ],
+    [
+     -129.904,
+     35.599,
+     -218.985
+    ],
+    [
+     -130.722,
+     35.627,
+     -218.502
+    ],
+    [
+     -131.541,
+     35.652,
+     -218.02
+    ],
+    [
+     -132.359,
+     35.684,
+     -217.537
+    ]
+   ],
+   "usedlost": 5,
+   "semeno": 194
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -132.359,
+     35.684,
+     -217.537
+    ],
+    [
+     -132.862,
+     35.712,
+     -218.39
+    ],
+    [
+     -133.365,
+     35.737,
+     -219.243
+    ],
+    [
+     -133.867,
+     35.752,
+     -220.095
+    ],
+    [
+     -134.37,
+     35.759,
+     -220.948
+    ],
+    [
+     -134.873,
+     35.756,
+     -221.801
+    ],
+    [
+     -135.376,
+     35.757,
+     -222.654
+    ]
+   ],
+   "usedlost": 5,
+   "semeno": 195
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -132.359,
+     35.684,
+     -217.537
+    ],
+    [
+     -133.197,
+     35.731,
+     -217.043
+    ],
+    [
+     -134.035,
+     35.787,
+     -216.549
+    ],
+    [
+     -134.874,
+     35.822,
+     -216.055
+    ],
+    [
+     -135.712,
+     35.834,
+     -215.561
+    ],
+    [
+     -136.55,
+     35.837,
+     -215.066
+    ],
+    [
+     -137.388,
+     35.838,
+     -214.572
+    ],
+    [
+     -138.226,
+     35.837,
+     -214.078
+    ],
+    [
+     -139.064,
+     35.837,
+     -213.584
+    ],
+    [
+     -139.903,
+     35.837,
+     -213.09
+    ],
+    [
+     -140.741,
+     35.84,
+     -212.596
+    ],
+    [
+     -141.579,
+     35.837,
+     -212.102
+    ],
+    [
+     -142.417,
+     35.837,
+     -211.608
+    ],
+    [
+     -143.255,
+     35.837,
+     -211.113
+    ],
+    [
+     -144.093,
+     35.838,
+     -210.619
+    ],
+    [
+     -144.932,
+     35.845,
+     -210.125
+    ],
+    [
+     -145.77,
+     35.834,
+     -209.631
+    ],
+    [
+     -146.608,
+     35.793,
+     -209.137
+    ],
+    [
+     -147.446,
+     35.74,
+     -208.643
+    ],
+    [
+     -148.284,
+     35.718,
+     -208.149
+    ],
+    [
+     -149.122,
+     35.738,
+     -207.654
+    ],
+    [
+     -149.96,
+     35.766,
+     -207.16
+    ],
+    [
+     -150.799,
+     35.799,
+     -206.666
+    ],
+    [
+     -151.637,
+     35.815,
+     -206.172
+    ],
+    [
+     -152.475,
+     35.796,
+     -205.678
+    ],
+    [
+     -153.313,
+     35.765,
+     -205.184
+    ]
+   ],
+   "usedlost": 5,
+   "semeno": 196
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -134.471,
+     35.014,
+     -243.567
+    ],
+    [
+     -135.326,
+     34.945,
+     -243.063
+    ],
+    [
+     -136.18,
+     34.932,
+     -242.559
+    ],
+    [
+     -137.035,
+     34.859,
+     -242.055
+    ],
+    [
+     -137.89,
+     34.849,
+     -241.551
+    ],
+    [
+     -138.745,
+     34.788,
+     -241.047
+    ],
+    [
+     -139.6,
+     34.744,
+     -240.544
+    ],
+    [
+     -140.455,
+     34.649,
+     -240.04
+    ],
+    [
+     -141.31,
+     34.599,
+     -239.536
+    ],
+    [
+     -142.164,
+     34.515,
+     -239.032
+    ],
+    [
+     -143.019,
+     34.454,
+     -238.528
+    ],
+    [
+     -143.874,
+     34.397,
+     -238.024
+    ],
+    [
+     -144.729,
+     34.348,
+     -237.52
+    ],
+    [
+     -145.584,
+     34.361,
+     -237.016
+    ],
+    [
+     -146.439,
+     34.516,
+     -236.512
+    ],
+    [
+     -147.294,
+     34.716,
+     -236.008
+    ],
+    [
+     -148.149,
+     34.855,
+     -235.504
+    ],
+    [
+     -149.003,
+     34.921,
+     -235.0
+    ],
+    [
+     -149.858,
+     34.859,
+     -234.496
+    ],
+    [
+     -150.713,
+     34.936,
+     -233.992
+    ],
+    [
+     -151.568,
+     34.87,
+     -233.488
+    ],
+    [
+     -152.423,
+     34.963,
+     -232.984
+    ],
+    [
+     -153.278,
+     34.839,
+     -232.48
+    ],
+    [
+     -154.133,
+     34.745,
+     -231.976
+    ],
+    [
+     -154.987,
+     34.244,
+     -231.472
+    ],
+    [
+     -155.842,
+     33.449,
+     -230.968
+    ],
+    [
+     -156.697,
+     33.072,
+     -230.464
+    ],
+    [
+     -157.552,
+     32.988,
+     -229.96
+    ],
+    [
+     -158.407,
+     32.984,
+     -229.456
+    ],
+    [
+     -159.262,
+     32.984,
+     -228.952
+    ],
+    [
+     -160.117,
+     32.974,
+     -228.448
+    ],
+    [
+     -160.971,
+     33.005,
+     -227.944
+    ],
+    [
+     -161.826,
+     32.979,
+     -227.44
+    ],
+    [
+     -162.681,
+     32.94,
+     -226.936
+    ],
+    [
+     -163.536,
+     33.277,
+     -226.432
+    ],
+    [
+     -164.391,
+     33.536,
+     -225.928
+    ],
+    [
+     -165.246,
+     33.3,
+     -225.424
+    ]
+   ],
+   "usedlost": 5,
+   "semeno": 197
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -165.246,
+     33.3,
+     -225.424
+    ],
+    [
+     -164.749,
+     33.7,
+     -224.581
+    ],
+    [
+     -164.251,
+     34.5,
+     -223.737
+    ],
+    [
+     -163.754,
+     35.072,
+     -222.894
+    ],
+    [
+     -163.257,
+     35.174,
+     -222.051
+    ],
+    [
+     -162.76,
+     35.057,
+     -221.207
+    ],
+    [
+     -162.263,
+     35.053,
+     -220.364
+    ],
+    [
+     -161.765,
+     35.058,
+     -219.521
+    ],
+    [
+     -161.268,
+     35.063,
+     -218.677
+    ],
+    [
+     -160.771,
+     35.068,
+     -217.834
+    ],
+    [
+     -160.274,
+     35.072,
+     -216.991
+    ],
+    [
+     -159.777,
+     35.077,
+     -216.147
+    ],
+    [
+     -159.279,
+     35.078,
+     -215.304
+    ],
+    [
+     -158.782,
+     35.08,
+     -214.461
+    ],
+    [
+     -158.285,
+     35.103,
+     -213.617
+    ],
+    [
+     -157.788,
+     35.156,
+     -212.774
+    ],
+    [
+     -157.291,
+     35.214,
+     -211.93
+    ],
+    [
+     -156.793,
+     35.272,
+     -211.087
+    ],
+    [
+     -156.296,
+     35.33,
+     -210.244
+    ],
+    [
+     -155.799,
+     35.388,
+     -209.4
+    ],
+    [
+     -155.302,
+     35.446,
+     -208.557
+    ],
+    [
+     -154.805,
+     35.51,
+     -207.714
+    ],
+    [
+     -154.307,
+     35.586,
+     -206.87
+    ],
+    [
+     -153.81,
+     35.67,
+     -206.027
+    ],
+    [
+     -153.313,
+     35.765,
+     -205.184
+    ]
+   ],
+   "usedlost": 5,
+   "semeno": 198
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -88.841,
+     32.817,
+     -217.639
+    ],
+    [
+     -88.181,
+     32.811,
+     -217.012
+    ],
+    [
+     -87.521,
+     32.827,
+     -216.385
+    ],
+    [
+     -86.861,
+     32.851,
+     -215.758
+    ],
+    [
+     -86.201,
+     32.869,
+     -215.131
+    ],
+    [
+     -85.541,
+     32.892,
+     -214.503
+    ]
+   ],
+   "usedlost": 6,
+   "semeno": 230
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -83.366,
+     32.916,
+     -212.437
+    ],
+    [
+     -82.975,
+     32.915,
+     -212.065
+    ],
+    [
+     -82.583,
+     32.898,
+     -211.692
+    ]
+   ],
+   "usedlost": 6,
+   "semeno": 231
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -98.195,
+     33.816,
+     -226.528
+    ],
+    [
+     -97.541,
+     33.758,
+     -225.906
+    ],
+    [
+     -96.886,
+     33.622,
+     -225.283
+    ],
+    [
+     -96.231,
+     33.366,
+     -224.661
+    ],
+    [
+     -95.576,
+     33.109,
+     -224.039
+    ],
+    [
+     -94.921,
+     32.913,
+     -223.416
+    ],
+    [
+     -94.266,
+     32.855,
+     -222.794
+    ],
+    [
+     -93.611,
+     32.855,
+     -222.172
+    ]
+   ],
+   "usedlost": 6,
+   "semeno": 232
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -98.195,
+     33.816,
+     -226.528
+    ],
+    [
+     -97.554,
+     33.769,
+     -227.202
+    ],
+    [
+     -96.914,
+     33.732,
+     -227.877
+    ],
+    [
+     -96.273,
+     33.695,
+     -228.551
+    ],
+    [
+     -95.632,
+     33.656,
+     -229.226
+    ],
+    [
+     -94.991,
+     33.613,
+     -229.9
+    ],
+    [
+     -94.35,
+     33.569,
+     -230.575
+    ],
+    [
+     -93.709,
+     33.518,
+     -231.249
+    ],
+    [
+     -93.068,
+     33.461,
+     -231.924
+    ],
+    [
+     -92.427,
+     33.367,
+     -232.598
+    ],
+    [
+     -91.786,
+     33.303,
+     -233.273
+    ],
+    [
+     -91.145,
+     33.275,
+     -233.947
+    ]
+   ],
+   "usedlost": 6,
+   "semeno": 233
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -91.145,
+     33.275,
+     -233.947
+    ],
+    [
+     -90.49,
+     33.163,
+     -233.325
+    ],
+    [
+     -89.836,
+     33.042,
+     -232.703
+    ],
+    [
+     -89.181,
+     32.906,
+     -232.08
+    ],
+    [
+     -88.526,
+     32.819,
+     -231.458
+    ],
+    [
+     -87.871,
+     32.799,
+     -230.836
+    ],
+    [
+     -87.216,
+     32.798,
+     -230.214
+    ],
+    [
+     -86.561,
+     32.797,
+     -229.591
+    ]
+   ],
+   "usedlost": 6,
+   "semeno": 234
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -91.145,
+     33.275,
+     -233.947
+    ],
+    [
+     -90.47,
+     33.141,
+     -234.658
+    ],
+    [
+     -89.794,
+     32.867,
+     -235.369
+    ],
+    [
+     -89.119,
+     32.521,
+     -236.08
+    ],
+    [
+     -88.443,
+     32.328,
+     -236.791
+    ],
+    [
+     -87.768,
+     32.242,
+     -237.502
+    ],
+    [
+     -87.092,
+     32.245,
+     -238.213
+    ],
+    [
+     -86.417,
+     32.242,
+     -238.923
+    ],
+    [
+     -85.741,
+     32.242,
+     -239.634
+    ],
+    [
+     -85.066,
+     32.245,
+     -240.345
+    ],
+    [
+     -84.39,
+     32.244,
+     -241.056
+    ],
+    [
+     -83.714,
+     32.242,
+     -241.767
+    ],
+    [
+     -83.039,
+     32.243,
+     -242.478
+    ],
+    [
+     -82.363,
+     32.249,
+     -243.189
+    ],
+    [
+     -81.688,
+     32.278,
+     -243.9
+    ],
+    [
+     -81.012,
+     32.351,
+     -244.611
+    ],
+    [
+     -80.337,
+     32.373,
+     -245.322
+    ],
+    [
+     -79.661,
+     32.352,
+     -246.033
+    ],
+    [
+     -78.986,
+     32.309,
+     -246.743
+    ],
+    [
+     -78.31,
+     32.266,
+     -247.454
+    ],
+    [
+     -77.635,
+     32.222,
+     -248.165
+    ],
+    [
+     -76.959,
+     32.179,
+     -248.876
+    ],
+    [
+     -76.284,
+     32.13,
+     -249.587
+    ],
+    [
+     -75.608,
+     32.073,
+     -250.298
+    ],
+    [
+     -74.933,
+     32.012,
+     -251.009
+    ],
+    [
+     -74.257,
+     31.929,
+     -251.72
+    ]
+   ],
+   "usedlost": 6,
+   "semeno": 235
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -82.583,
+     32.898,
+     -211.692
+    ],
+    [
+     -81.899,
+     32.785,
+     -212.412
+    ],
+    [
+     -81.215,
+     32.679,
+     -213.132
+    ],
+    [
+     -80.531,
+     32.567,
+     -213.852
+    ],
+    [
+     -79.847,
+     32.455,
+     -214.572
+    ],
+    [
+     -79.163,
+     32.343,
+     -215.291
+    ],
+    [
+     -78.479,
+     32.231,
+     -216.011
+    ],
+    [
+     -77.795,
+     32.119,
+     -216.731
+    ],
+    [
+     -77.112,
+     32.006,
+     -217.451
+    ],
+    [
+     -76.428,
+     31.898,
+     -218.17
+    ],
+    [
+     -75.744,
+     31.788,
+     -218.89
+    ],
+    [
+     -75.06,
+     31.661,
+     -219.61
+    ],
+    [
+     -74.376,
+     31.529,
+     -220.33
+    ],
+    [
+     -73.692,
+     31.416,
+     -221.05
+    ],
+    [
+     -73.008,
+     31.368,
+     -221.769
+    ],
+    [
+     -72.324,
+     31.326,
+     -222.489
+    ],
+    [
+     -71.64,
+     31.284,
+     -223.209
+    ],
+    [
+     -70.956,
+     31.262,
+     -223.929
+    ],
+    [
+     -70.272,
+     31.214,
+     -224.648
+    ],
+    [
+     -69.588,
+     31.176,
+     -225.368
+    ],
+    [
+     -68.904,
+     31.164,
+     -226.088
+    ],
+    [
+     -68.22,
+     31.126,
+     -226.808
+    ],
+    [
+     -67.536,
+     31.032,
+     -227.527
+    ],
+    [
+     -66.852,
+     30.791,
+     -228.247
+    ],
+    [
+     -66.168,
+     30.431,
+     -228.967
+    ],
+    [
+     -65.484,
+     30.177,
+     -229.687
+    ],
+    [
+     -64.8,
+     30.054,
+     -230.407
+    ],
+    [
+     -64.116,
+     29.966,
+     -231.126
+    ],
+    [
+     -63.432,
+     29.883,
+     -231.846
+    ],
+    [
+     -62.749,
+     29.795,
+     -232.566
+    ],
+    [
+     -62.065,
+     29.711,
+     -233.286
+    ],
+    [
+     -61.381,
+     29.626,
+     -234.005
+    ],
+    [
+     -60.697,
+     29.543,
+     -234.725
+    ],
+    [
+     -60.013,
+     29.459,
+     -235.445
+    ],
+    [
+     -59.329,
+     29.376,
+     -236.165
+    ],
+    [
+     -58.645,
+     29.293,
+     -236.884
+    ]
+   ],
+   "usedlost": 6,
+   "semeno": 236
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -58.645,
+     29.293,
+     -236.884
+    ],
+    [
+     -59.354,
+     29.413,
+     -237.559
+    ],
+    [
+     -60.064,
+     29.545,
+     -238.233
+    ],
+    [
+     -60.774,
+     29.67,
+     -238.907
+    ],
+    [
+     -61.483,
+     29.792,
+     -239.582
+    ],
+    [
+     -62.193,
+     29.914,
+     -240.256
+    ],
+    [
+     -62.903,
+     30.036,
+     -240.93
+    ],
+    [
+     -63.612,
+     30.157,
+     -241.605
+    ],
+    [
+     -64.322,
+     30.279,
+     -242.279
+    ],
+    [
+     -65.032,
+     30.401,
+     -242.953
+    ],
+    [
+     -65.741,
+     30.523,
+     -243.628
+    ],
+    [
+     -66.451,
+     30.645,
+     -244.302
+    ],
+    [
+     -67.161,
+     30.768,
+     -244.976
+    ],
+    [
+     -67.87,
+     30.91,
+     -245.651
+    ],
+    [
+     -68.58,
+     31.055,
+     -246.325
+    ],
+    [
+     -69.29,
+     31.2,
+     -246.999
+    ],
+    [
+     -69.999,
+     31.342,
+     -247.674
+    ],
+    [
+     -70.709,
+     31.44,
+     -248.348
+    ],
+    [
+     -71.418,
+     31.528,
+     -249.022
+    ],
+    [
+     -72.128,
+     31.61,
+     -249.697
+    ],
+    [
+     -72.838,
+     31.718,
+     -250.371
+    ],
+    [
+     -73.547,
+     31.823,
+     -251.045
+    ],
+    [
+     -74.257,
+     31.929,
+     -251.72
+    ]
+   ],
+   "usedlost": 6,
+   "semeno": 237
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -71.962,
+     32.014,
+     -200.297
+    ],
+    [
+     -71.549,
+     31.987,
+     -199.861
+    ],
+    [
+     -71.135,
+     31.967,
+     -199.426
+    ]
+   ],
+   "usedlost": 7,
+   "semeno": 269
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -69.068,
+     31.894,
+     -197.252
+    ],
+    [
+     -68.458,
+     31.9,
+     -196.61
+    ],
+    [
+     -67.848,
+     31.901,
+     -195.969
+    ],
+    [
+     -67.238,
+     31.901,
+     -195.328
+    ],
+    [
+     -66.628,
+     31.892,
+     -194.686
+    ],
+    [
+     -66.019,
+     31.886,
+     -194.045
+    ],
+    [
+     -65.409,
+     31.871,
+     -193.404
+    ]
+   ],
+   "usedlost": 7,
+   "semeno": 270
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -80.23,
+     32.615,
+     -208.992
+    ],
+    [
+     -79.621,
+     32.43,
+     -208.352
+    ],
+    [
+     -79.012,
+     32.214,
+     -207.711
+    ],
+    [
+     -78.403,
+     32.093,
+     -207.071
+    ],
+    [
+     -77.794,
+     32.037,
+     -206.43
+    ],
+    [
+     -77.185,
+     32.043,
+     -205.79
+    ]
+   ],
+   "usedlost": 7,
+   "semeno": 271
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -80.23,
+     32.615,
+     -208.992
+    ],
+    [
+     -79.513,
+     32.53,
+     -209.674
+    ],
+    [
+     -78.796,
+     32.443,
+     -210.356
+    ],
+    [
+     -78.079,
+     32.413,
+     -211.037
+    ],
+    [
+     -77.362,
+     32.354,
+     -211.719
+    ],
+    [
+     -76.645,
+     32.266,
+     -212.401
+    ],
+    [
+     -75.928,
+     32.173,
+     -213.082
+    ],
+    [
+     -75.211,
+     32.074,
+     -213.764
+    ],
+    [
+     -74.494,
+     32.011,
+     -214.446
+    ],
+    [
+     -73.777,
+     31.934,
+     -215.128
+    ],
+    [
+     -73.06,
+     31.789,
+     -215.809
+    ],
+    [
+     -72.343,
+     31.599,
+     -216.491
+    ]
+   ],
+   "usedlost": 7,
+   "semeno": 272
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -72.343,
+     31.599,
+     -216.491
+    ],
+    [
+     -71.734,
+     31.681,
+     -215.851
+    ],
+    [
+     -71.125,
+     31.718,
+     -215.21
+    ],
+    [
+     -70.516,
+     31.686,
+     -214.57
+    ],
+    [
+     -69.907,
+     31.72,
+     -213.929
+    ],
+    [
+     -69.298,
+     31.725,
+     -213.289
+    ]
+   ],
+   "usedlost": 7,
+   "semeno": 273
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -72.343,
+     31.599,
+     -216.491
+    ],
+    [
+     -71.619,
+     31.247,
+     -217.179
+    ],
+    [
+     -70.895,
+     30.84,
+     -217.868
+    ],
+    [
+     -70.171,
+     30.633,
+     -218.556
+    ],
+    [
+     -69.447,
+     30.564,
+     -219.244
+    ],
+    [
+     -68.723,
+     30.553,
+     -219.933
+    ],
+    [
+     -67.999,
+     30.553,
+     -220.621
+    ],
+    [
+     -67.275,
+     30.556,
+     -221.309
+    ],
+    [
+     -66.551,
+     30.553,
+     -221.997
+    ],
+    [
+     -65.827,
+     30.553,
+     -222.686
+    ],
+    [
+     -65.103,
+     30.552,
+     -223.374
+    ],
+    [
+     -64.379,
+     30.552,
+     -224.062
+    ],
+    [
+     -63.655,
+     30.553,
+     -224.751
+    ],
+    [
+     -62.931,
+     30.55,
+     -225.439
+    ],
+    [
+     -62.208,
+     30.476,
+     -226.127
+    ],
+    [
+     -61.484,
+     30.292,
+     -226.815
+    ],
+    [
+     -60.76,
+     30.0,
+     -227.504
+    ],
+    [
+     -60.036,
+     29.72,
+     -228.192
+    ],
+    [
+     -59.312,
+     29.584,
+     -228.88
+    ],
+    [
+     -58.588,
+     29.466,
+     -229.569
+    ],
+    [
+     -57.864,
+     29.355,
+     -230.257
+    ],
+    [
+     -57.14,
+     29.256,
+     -230.945
+    ],
+    [
+     -56.416,
+     29.163,
+     -231.633
+    ],
+    [
+     -55.692,
+     29.07,
+     -232.322
+    ],
+    [
+     -54.968,
+     28.977,
+     -233.01
+    ]
+   ],
+   "usedlost": 7,
+   "semeno": 274
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -65.409,
+     31.871,
+     -193.404
+    ],
+    [
+     -64.687,
+     31.804,
+     -194.09
+    ],
+    [
+     -63.965,
+     31.804,
+     -194.776
+    ],
+    [
+     -63.243,
+     31.804,
+     -195.462
+    ],
+    [
+     -62.522,
+     31.804,
+     -196.148
+    ],
+    [
+     -61.8,
+     31.804,
+     -196.835
+    ],
+    [
+     -61.078,
+     31.804,
+     -197.521
+    ],
+    [
+     -60.356,
+     31.804,
+     -198.207
+    ],
+    [
+     -59.635,
+     31.804,
+     -198.893
+    ],
+    [
+     -58.913,
+     31.804,
+     -199.58
+    ],
+    [
+     -58.191,
+     31.804,
+     -200.266
+    ],
+    [
+     -57.469,
+     31.804,
+     -200.952
+    ],
+    [
+     -56.748,
+     31.666,
+     -201.638
+    ],
+    [
+     -56.026,
+     31.37,
+     -202.325
+    ],
+    [
+     -55.304,
+     30.872,
+     -203.011
+    ],
+    [
+     -54.582,
+     30.481,
+     -203.697
+    ],
+    [
+     -53.861,
+     30.288,
+     -204.383
+    ],
+    [
+     -53.139,
+     30.164,
+     -205.069
+    ],
+    [
+     -52.417,
+     30.053,
+     -205.756
+    ],
+    [
+     -51.695,
+     29.946,
+     -206.442
+    ],
+    [
+     -50.974,
+     29.84,
+     -207.128
+    ],
+    [
+     -50.252,
+     29.736,
+     -207.814
+    ],
+    [
+     -49.53,
+     29.643,
+     -208.501
+    ],
+    [
+     -48.808,
+     29.554,
+     -209.187
+    ],
+    [
+     -48.087,
+     29.465,
+     -209.873
+    ],
+    [
+     -47.365,
+     29.376,
+     -210.559
+    ],
+    [
+     -46.643,
+     29.287,
+     -211.245
+    ],
+    [
+     -45.921,
+     29.197,
+     -211.932
+    ],
+    [
+     -45.2,
+     29.095,
+     -212.618
+    ],
+    [
+     -44.478,
+     28.975,
+     -213.304
+    ],
+    [
+     -43.756,
+     28.852,
+     -213.99
+    ],
+    [
+     -43.034,
+     28.723,
+     -214.677
+    ],
+    [
+     -42.312,
+     28.594,
+     -215.363
+    ],
+    [
+     -41.591,
+     28.465,
+     -216.049
+    ],
+    [
+     -40.869,
+     28.336,
+     -216.735
+    ],
+    [
+     -40.147,
+     28.207,
+     -217.421
+    ]
+   ],
+   "usedlost": 7,
+   "semeno": 275
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -40.147,
+     28.207,
+     -217.421
+    ],
+    [
+     -40.821,
+     28.26,
+     -218.13
+    ],
+    [
+     -41.495,
+     28.313,
+     -218.839
+    ],
+    [
+     -42.168,
+     28.366,
+     -219.547
+    ],
+    [
+     -42.842,
+     28.42,
+     -220.256
+    ],
+    [
+     -43.516,
+     28.466,
+     -220.964
+    ],
+    [
+     -44.189,
+     28.502,
+     -221.673
+    ],
+    [
+     -44.863,
+     28.531,
+     -222.381
+    ],
+    [
+     -45.537,
+     28.56,
+     -223.09
+    ],
+    [
+     -46.21,
+     28.575,
+     -223.799
+    ],
+    [
+     -46.884,
+     28.583,
+     -224.507
+    ],
+    [
+     -47.558,
+     28.592,
+     -225.216
+    ],
+    [
+     -48.231,
+     28.601,
+     -225.924
+    ],
+    [
+     -48.905,
+     28.64,
+     -226.633
+    ],
+    [
+     -49.579,
+     28.686,
+     -227.341
+    ],
+    [
+     -50.252,
+     28.727,
+     -228.05
+    ],
+    [
+     -50.926,
+     28.762,
+     -228.759
+    ],
+    [
+     -51.6,
+     28.801,
+     -229.467
+    ],
+    [
+     -52.274,
+     28.846,
+     -230.176
+    ],
+    [
+     -52.947,
+     28.891,
+     -230.884
+    ],
+    [
+     -53.621,
+     28.918,
+     -231.593
+    ],
+    [
+     -54.295,
+     28.943,
+     -232.301
+    ],
+    [
+     -54.968,
+     28.977,
+     -233.01
+    ]
+   ],
+   "usedlost": 7,
+   "semeno": 276
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -57.992,
+     30.67,
+     -185.862
+    ],
+    [
+     -57.945,
+     30.67,
+     -185.053
+    ],
+    [
+     -57.898,
+     30.757,
+     -184.245
+    ],
+    [
+     -57.851,
+     30.928,
+     -183.436
+    ],
+    [
+     -57.804,
+     31.131,
+     -182.627
+    ],
+    [
+     -57.757,
+     31.306,
+     -181.818
+    ]
+   ],
+   "usedlost": 8,
+   "semeno": 308
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -57.582,
+     31.309,
+     -178.824
+    ],
+    [
+     -57.532,
+     31.265,
+     -177.962
+    ],
+    [
+     -57.482,
+     31.222,
+     -177.1
+    ],
+    [
+     -57.432,
+     31.178,
+     -176.238
+    ]
+   ],
+   "usedlost": 8,
+   "semeno": 309
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -58.678,
+     31.749,
+     -197.646
+    ],
+    [
+     -58.625,
+     31.667,
+     -196.742
+    ],
+    [
+     -58.572,
+     31.516,
+     -195.837
+    ],
+    [
+     -58.52,
+     31.242,
+     -194.933
+    ],
+    [
+     -58.467,
+     30.931,
+     -194.028
+    ]
+   ],
+   "usedlost": 8,
+   "semeno": 310
+  },
+  {
+   "druh": "latovy",
+   "body": [
+    [
+     -58.415,
+     30.755,
+     -193.13
+    ],
+    [
+     -58.374,
+     30.723,
+     -192.431
+    ]
+   ],
+   "usedlost": 8,
+   "semeno": 311
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -58.678,
+     31.749,
+     -197.646
+    ],
+    [
+     -57.764,
+     31.644,
+     -197.699
+    ],
+    [
+     -56.851,
+     31.474,
+     -197.752
+    ],
+    [
+     -55.938,
+     31.193,
+     -197.806
+    ],
+    [
+     -55.025,
+     30.91,
+     -197.859
+    ],
+    [
+     -54.111,
+     30.638,
+     -197.912
+    ],
+    [
+     -53.198,
+     30.487,
+     -197.965
+    ],
+    [
+     -52.285,
+     30.371,
+     -198.018
+    ],
+    [
+     -51.372,
+     30.261,
+     -198.071
+    ],
+    [
+     -50.458,
+     30.152,
+     -198.124
+    ],
+    [
+     -49.545,
+     30.042,
+     -198.178
+    ],
+    [
+     -48.632,
+     29.932,
+     -198.231
+    ]
+   ],
+   "usedlost": 8,
+   "semeno": 312
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -48.632,
+     29.932,
+     -198.231
+    ],
+    [
+     -48.581,
+     30.02,
+     -197.362
+    ],
+    [
+     -48.531,
+     30.196,
+     -196.492
+    ],
+    [
+     -48.48,
+     30.413,
+     -195.623
+    ],
+    [
+     -48.43,
+     30.59,
+     -194.754
+    ],
+    [
+     -48.379,
+     30.67,
+     -193.885
+    ],
+    [
+     -48.329,
+     30.67,
+     -193.015
+    ]
+   ],
+   "usedlost": 8,
+   "semeno": 313
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -48.632,
+     29.932,
+     -198.231
+    ],
+    [
+     -47.643,
+     29.764,
+     -198.288
+    ],
+    [
+     -46.654,
+     29.472,
+     -198.346
+    ],
+    [
+     -45.666,
+     29.139,
+     -198.403
+    ],
+    [
+     -44.677,
+     28.921,
+     -198.461
+    ],
+    [
+     -43.688,
+     28.855,
+     -198.518
+    ],
+    [
+     -42.699,
+     28.855,
+     -198.576
+    ],
+    [
+     -41.711,
+     28.855,
+     -198.634
+    ],
+    [
+     -40.722,
+     28.855,
+     -198.691
+    ],
+    [
+     -39.733,
+     28.855,
+     -198.749
+    ],
+    [
+     -38.744,
+     28.855,
+     -198.806
+    ],
+    [
+     -37.756,
+     28.855,
+     -198.864
+    ],
+    [
+     -36.767,
+     28.855,
+     -198.921
+    ],
+    [
+     -35.778,
+     28.855,
+     -198.979
+    ],
+    [
+     -34.789,
+     28.828,
+     -199.036
+    ],
+    [
+     -33.8,
+     28.674,
+     -199.094
+    ],
+    [
+     -32.812,
+     28.351,
+     -199.151
+    ],
+    [
+     -31.823,
+     27.987,
+     -199.209
+    ],
+    [
+     -30.834,
+     27.751,
+     -199.266
+    ],
+    [
+     -29.845,
+     27.631,
+     -199.324
+    ],
+    [
+     -28.857,
+     27.511,
+     -199.381
+    ],
+    [
+     -27.868,
+     27.391,
+     -199.439
+    ],
+    [
+     -26.879,
+     27.271,
+     -199.497
+    ],
+    [
+     -25.89,
+     27.152,
+     -199.554
+    ],
+    [
+     -24.902,
+     27.037,
+     -199.612
+    ],
+    [
+     -23.913,
+     26.925,
+     -199.669
+    ],
+    [
+     -22.924,
+     26.813,
+     -199.727
+    ]
+   ],
+   "usedlost": 8,
+   "semeno": 314
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -57.432,
+     31.178,
+     -176.238
+    ],
+    [
+     -56.439,
+     31.045,
+     -176.296
+    ],
+    [
+     -55.446,
+     30.912,
+     -176.354
+    ],
+    [
+     -54.453,
+     30.779,
+     -176.412
+    ],
+    [
+     -53.459,
+     30.643,
+     -176.47
+    ],
+    [
+     -52.466,
+     30.502,
+     -176.527
+    ],
+    [
+     -51.473,
+     30.359,
+     -176.585
+    ],
+    [
+     -50.48,
+     30.215,
+     -176.643
+    ],
+    [
+     -49.487,
+     30.071,
+     -176.701
+    ],
+    [
+     -48.494,
+     29.93,
+     -176.759
+    ],
+    [
+     -47.5,
+     29.802,
+     -176.816
+    ],
+    [
+     -46.507,
+     29.678,
+     -176.874
+    ],
+    [
+     -45.514,
+     29.517,
+     -176.932
+    ],
+    [
+     -44.521,
+     29.334,
+     -176.99
+    ],
+    [
+     -43.528,
+     29.2,
+     -177.048
+    ],
+    [
+     -42.535,
+     29.123,
+     -177.105
+    ],
+    [
+     -41.541,
+     29.067,
+     -177.163
+    ],
+    [
+     -40.548,
+     29.016,
+     -177.221
+    ],
+    [
+     -39.555,
+     28.97,
+     -177.279
+    ],
+    [
+     -38.562,
+     28.929,
+     -177.337
+    ],
+    [
+     -37.569,
+     28.891,
+     -177.394
+    ],
+    [
+     -36.576,
+     28.86,
+     -177.452
+    ],
+    [
+     -35.582,
+     28.807,
+     -177.51
+    ],
+    [
+     -34.589,
+     28.659,
+     -177.568
+    ],
+    [
+     -33.596,
+     28.412,
+     -177.625
+    ],
+    [
+     -32.603,
+     28.181,
+     -177.683
+    ],
+    [
+     -31.61,
+     28.042,
+     -177.741
+    ],
+    [
+     -30.617,
+     27.95,
+     -177.799
+    ],
+    [
+     -29.624,
+     27.857,
+     -177.857
+    ],
+    [
+     -28.63,
+     27.762,
+     -177.914
+    ],
+    [
+     -27.637,
+     27.665,
+     -177.972
+    ],
+    [
+     -26.644,
+     27.567,
+     -178.03
+    ],
+    [
+     -25.651,
+     27.47,
+     -178.088
+    ],
+    [
+     -24.658,
+     27.373,
+     -178.146
+    ],
+    [
+     -23.665,
+     27.275,
+     -178.203
+    ],
+    [
+     -22.671,
+     27.178,
+     -178.261
+    ],
+    [
+     -21.678,
+     27.074,
+     -178.319
+    ]
+   ],
+   "usedlost": 8,
+   "semeno": 315
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -21.678,
+     27.074,
+     -178.319
+    ],
+    [
+     -21.735,
+     27.087,
+     -179.292
+    ],
+    [
+     -21.792,
+     27.093,
+     -180.265
+    ],
+    [
+     -21.848,
+     27.095,
+     -181.238
+    ],
+    [
+     -21.905,
+     27.082,
+     -182.211
+    ],
+    [
+     -21.961,
+     27.068,
+     -183.184
+    ],
+    [
+     -22.018,
+     27.054,
+     -184.157
+    ],
+    [
+     -22.075,
+     27.042,
+     -185.131
+    ],
+    [
+     -22.131,
+     27.034,
+     -186.104
+    ],
+    [
+     -22.188,
+     27.036,
+     -187.077
+    ],
+    [
+     -22.245,
+     27.114,
+     -188.05
+    ],
+    [
+     -22.301,
+     27.173,
+     -189.023
+    ],
+    [
+     -22.358,
+     27.08,
+     -189.996
+    ],
+    [
+     -22.414,
+     27.017,
+     -190.969
+    ],
+    [
+     -22.471,
+     27.004,
+     -191.942
+    ],
+    [
+     -22.528,
+     26.983,
+     -192.915
+    ],
+    [
+     -22.584,
+     26.956,
+     -193.888
+    ],
+    [
+     -22.641,
+     26.937,
+     -194.861
+    ],
+    [
+     -22.698,
+     26.913,
+     -195.834
+    ],
+    [
+     -22.754,
+     26.889,
+     -196.807
+    ],
+    [
+     -22.811,
+     26.864,
+     -197.781
+    ],
+    [
+     -22.867,
+     26.839,
+     -198.754
+    ],
+    [
+     -22.924,
+     26.813,
+     -199.727
+    ]
+   ],
+   "usedlost": 8,
+   "semeno": 316
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -80.957,
+     -35.397,
+     103.014
+    ],
+    [
+     -80.248,
+     -35.499,
+     103.47
+    ],
+    [
+     -79.538,
+     -35.606,
+     103.927
+    ],
+    [
+     -78.829,
+     -35.686,
+     104.383
+    ],
+    [
+     -78.12,
+     -35.714,
+     104.84
+    ],
+    [
+     -77.41,
+     -35.733,
+     105.296
+    ]
+   ],
+   "usedlost": 9,
+   "semeno": 348
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -74.887,
+     -35.751,
+     106.919
+    ],
+    [
+     -74.14,
+     -35.758,
+     107.4
+    ],
+    [
+     -73.392,
+     -35.759,
+     107.881
+    ],
+    [
+     -72.645,
+     -35.759,
+     108.362
+    ],
+    [
+     -71.897,
+     -35.759,
+     108.843
+    ],
+    [
+     -71.15,
+     -35.778,
+     109.324
+    ],
+    [
+     -70.402,
+     -35.811,
+     109.805
+    ],
+    [
+     -69.655,
+     -35.848,
+     110.286
+    ]
+   ],
+   "usedlost": 9,
+   "semeno": 349
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -94.195,
+     -35.16,
+     94.497
+    ],
+    [
+     -93.425,
+     -35.161,
+     94.992
+    ],
+    [
+     -92.654,
+     -35.161,
+     95.488
+    ],
+    [
+     -91.884,
+     -35.161,
+     95.984
+    ],
+    [
+     -91.114,
+     -35.161,
+     96.479
+    ],
+    [
+     -90.343,
+     -35.161,
+     96.975
+    ],
+    [
+     -89.573,
+     -35.161,
+     97.471
+    ],
+    [
+     -88.802,
+     -35.161,
+     97.967
+    ],
+    [
+     -88.032,
+     -35.161,
+     98.462
+    ],
+    [
+     -87.261,
+     -35.161,
+     98.958
+    ],
+    [
+     -86.491,
+     -35.161,
+     99.454
+    ]
+   ],
+   "usedlost": 9,
+   "semeno": 350
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -94.195,
+     -35.16,
+     94.497
+    ],
+    [
+     -93.687,
+     -35.161,
+     93.706
+    ],
+    [
+     -93.178,
+     -35.16,
+     92.915
+    ],
+    [
+     -92.669,
+     -35.161,
+     92.124
+    ],
+    [
+     -92.16,
+     -35.159,
+     91.333
+    ],
+    [
+     -91.651,
+     -35.161,
+     90.542
+    ],
+    [
+     -91.142,
+     -35.16,
+     89.751
+    ],
+    [
+     -90.633,
+     -35.155,
+     88.96
+    ],
+    [
+     -90.124,
+     -35.131,
+     88.17
+    ],
+    [
+     -89.616,
+     -35.085,
+     87.379
+    ],
+    [
+     -89.107,
+     -35.036,
+     86.588
+    ]
+   ],
+   "usedlost": 9,
+   "semeno": 351
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     -89.107,
+     -35.036,
+     86.588
+    ],
+    [
+     -88.336,
+     -35.07,
+     87.083
+    ],
+    [
+     -87.566,
+     -35.104,
+     87.579
+    ],
+    [
+     -86.795,
+     -35.131,
+     88.075
+    ],
+    [
+     -86.025,
+     -35.147,
+     88.571
+    ],
+    [
+     -85.255,
+     -35.147,
+     89.066
+    ],
+    [
+     -84.484,
+     -35.178,
+     89.562
+    ],
+    [
+     -83.714,
+     -35.23,
+     90.058
+    ],
+    [
+     -82.943,
+     -35.261,
+     90.553
+    ],
+    [
+     -82.173,
+     -35.281,
+     91.049
+    ],
+    [
+     -81.402,
+     -35.292,
+     91.545
+    ]
+   ],
+   "usedlost": 9,
+   "semeno": 352
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -89.107,
+     -35.036,
+     86.588
+    ],
+    [
+     -88.573,
+     -35.014,
+     85.758
+    ],
+    [
+     -88.039,
+     -35.007,
+     84.929
+    ],
+    [
+     -87.506,
+     -34.789,
+     84.099
+    ],
+    [
+     -86.972,
+     -34.375,
+     83.27
+    ],
+    [
+     -86.438,
+     -33.973,
+     82.44
+    ]
+   ],
+   "usedlost": 9,
+   "semeno": 353
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -69.655,
+     -35.848,
+     110.286
+    ],
+    [
+     -69.138,
+     -35.839,
+     109.482
+    ],
+    [
+     -68.62,
+     -35.831,
+     108.679
+    ],
+    [
+     -68.103,
+     -35.823,
+     107.875
+    ],
+    [
+     -67.586,
+     -35.831,
+     107.071
+    ],
+    [
+     -67.069,
+     -35.822,
+     106.267
+    ],
+    [
+     -66.552,
+     -35.804,
+     105.463
+    ],
+    [
+     -66.035,
+     -35.816,
+     104.66
+    ],
+    [
+     -65.518,
+     -35.861,
+     103.856
+    ],
+    [
+     -65.0,
+     -35.823,
+     103.052
+    ],
+    [
+     -64.483,
+     -35.797,
+     102.248
+    ],
+    [
+     -63.966,
+     -35.787,
+     101.445
+    ],
+    [
+     -63.449,
+     -35.809,
+     100.641
+    ],
+    [
+     -62.932,
+     -35.824,
+     99.837
+    ],
+    [
+     -62.415,
+     -35.828,
+     99.033
+    ],
+    [
+     -61.897,
+     -35.715,
+     98.229
+    ]
+   ],
+   "usedlost": 9,
+   "semeno": 354
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     -61.897,
+     -35.715,
+     98.229
+    ],
+    [
+     -62.716,
+     -35.867,
+     97.703
+    ],
+    [
+     -63.534,
+     -35.904,
+     97.177
+    ],
+    [
+     -64.352,
+     -35.883,
+     96.651
+    ],
+    [
+     -65.17,
+     -35.871,
+     96.124
+    ],
+    [
+     -65.988,
+     -35.833,
+     95.598
+    ],
+    [
+     -66.806,
+     -35.787,
+     95.072
+    ],
+    [
+     -67.624,
+     -35.724,
+     94.545
+    ],
+    [
+     -68.442,
+     -35.671,
+     94.019
+    ],
+    [
+     -69.26,
+     -35.612,
+     93.493
+    ],
+    [
+     -70.078,
+     -35.565,
+     92.966
+    ],
+    [
+     -70.896,
+     -35.503,
+     92.44
+    ],
+    [
+     -71.714,
+     -35.446,
+     91.914
+    ],
+    [
+     -72.532,
+     -35.43,
+     91.387
+    ],
+    [
+     -73.35,
+     -35.372,
+     90.861
+    ],
+    [
+     -74.168,
+     -35.22,
+     90.335
+    ],
+    [
+     -74.986,
+     -35.031,
+     89.808
+    ],
+    [
+     -75.804,
+     -34.927,
+     89.282
+    ],
+    [
+     -76.622,
+     -34.885,
+     88.756
+    ],
+    [
+     -77.44,
+     -34.834,
+     88.229
+    ],
+    [
+     -78.258,
+     -34.802,
+     87.703
+    ],
+    [
+     -79.076,
+     -34.756,
+     87.177
+    ],
+    [
+     -79.894,
+     -34.691,
+     86.651
+    ],
+    [
+     -80.712,
+     -34.62,
+     86.124
+    ],
+    [
+     -81.53,
+     -34.55,
+     85.598
+    ],
+    [
+     -82.348,
+     -34.516,
+     85.072
+    ],
+    [
+     -83.166,
+     -34.438,
+     84.545
+    ],
+    [
+     -83.984,
+     -34.053,
+     84.019
+    ],
+    [
+     -84.802,
+     -34.001,
+     83.493
+    ],
+    [
+     -85.62,
+     -34.194,
+     82.966
+    ],
+    [
+     -86.438,
+     -33.973,
+     82.44
+    ]
+   ],
+   "usedlost": 9,
+   "semeno": 355
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     153.765,
+     -35.039,
+     308.079
+    ],
+    [
+     153.54,
+     -35.216,
+     308.778
+    ]
+   ],
+   "usedlost": 10,
+   "semeno": 387
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     152.62,
+     -35.67,
+     311.633
+    ],
+    [
+     152.349,
+     -35.72,
+     312.476
+    ],
+    [
+     152.078,
+     -35.729,
+     313.318
+    ],
+    [
+     151.807,
+     -35.674,
+     314.161
+    ],
+    [
+     151.535,
+     -35.725,
+     315.003
+    ],
+    [
+     151.264,
+     -35.783,
+     315.845
+    ],
+    [
+     150.993,
+     -35.704,
+     316.688
+    ]
+   ],
+   "usedlost": 10,
+   "semeno": 388
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     157.558,
+     -34.973,
+     296.301
+    ],
+    [
+     157.264,
+     -34.971,
+     297.214
+    ],
+    [
+     156.97,
+     -34.947,
+     298.126
+    ],
+    [
+     156.676,
+     -34.919,
+     299.039
+    ],
+    [
+     156.382,
+     -34.905,
+     299.951
+    ],
+    [
+     156.089,
+     -34.904,
+     300.863
+    ]
+   ],
+   "usedlost": 10,
+   "semeno": 389
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     157.558,
+     -34.973,
+     296.301
+    ],
+    [
+     158.436,
+     -34.811,
+     296.584
+    ],
+    [
+     159.315,
+     -34.649,
+     296.867
+    ],
+    [
+     160.194,
+     -34.512,
+     297.15
+    ],
+    [
+     161.073,
+     -34.451,
+     297.433
+    ],
+    [
+     161.952,
+     -34.398,
+     297.716
+    ],
+    [
+     162.831,
+     -34.353,
+     297.999
+    ],
+    [
+     163.709,
+     -34.245,
+     298.282
+    ],
+    [
+     164.588,
+     -34.077,
+     298.565
+    ],
+    [
+     165.467,
+     -33.816,
+     298.848
+    ],
+    [
+     166.346,
+     -33.546,
+     299.131
+    ],
+    [
+     167.225,
+     -33.386,
+     299.414
+    ]
+   ],
+   "usedlost": 10,
+   "semeno": 390
+  },
+  {
+   "druh": "proutěny",
+   "body": [
+    [
+     167.225,
+     -33.386,
+     299.414
+    ],
+    [
+     166.931,
+     -33.865,
+     300.327
+    ],
+    [
+     166.637,
+     -34.395,
+     301.239
+    ],
+    [
+     166.343,
+     -34.782,
+     302.152
+    ],
+    [
+     166.049,
+     -34.904,
+     303.064
+    ],
+    [
+     165.755,
+     -34.904,
+     303.976
+    ]
+   ],
+   "usedlost": 10,
+   "semeno": 391
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     167.225,
+     -33.386,
+     299.414
+    ],
+    [
+     168.159,
+     -33.235,
+     299.715
+    ],
+    [
+     169.093,
+     -32.981,
+     300.016
+    ],
+    [
+     170.027,
+     -32.571,
+     300.317
+    ],
+    [
+     170.961,
+     -32.164,
+     300.617
+    ],
+    [
+     171.895,
+     -31.999,
+     300.918
+    ],
+    [
+     172.829,
+     -31.899,
+     301.219
+    ]
+   ],
+   "usedlost": 10,
+   "semeno": 392
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     150.993,
+     -35.704,
+     316.688
+    ],
+    [
+     151.891,
+     -35.642,
+     316.977
+    ],
+    [
+     152.789,
+     -35.642,
+     317.266
+    ],
+    [
+     153.688,
+     -35.642,
+     317.556
+    ],
+    [
+     154.586,
+     -35.642,
+     317.845
+    ],
+    [
+     155.484,
+     -35.642,
+     318.134
+    ],
+    [
+     156.383,
+     -35.642,
+     318.424
+    ],
+    [
+     157.281,
+     -35.642,
+     318.713
+    ],
+    [
+     158.179,
+     -35.642,
+     319.002
+    ],
+    [
+     159.078,
+     -35.642,
+     319.291
+    ],
+    [
+     159.976,
+     -35.642,
+     319.581
+    ],
+    [
+     160.874,
+     -35.642,
+     319.87
+    ],
+    [
+     161.772,
+     -35.49,
+     320.159
+    ],
+    [
+     162.671,
+     -35.153,
+     320.448
+    ],
+    [
+     163.569,
+     -34.721,
+     320.738
+    ],
+    [
+     164.467,
+     -34.296,
+     321.027
+    ],
+    [
+     165.366,
+     -33.755,
+     321.316
+    ],
+    [
+     166.264,
+     -33.223,
+     321.606
+    ]
+   ],
+   "usedlost": 10,
+   "semeno": 393
+  },
+  {
+   "druh": "zerdovy",
+   "body": [
+    [
+     166.264,
+     -33.223,
+     321.606
+    ],
+    [
+     166.562,
+     -33.265,
+     320.679
+    ],
+    [
+     166.861,
+     -33.27,
+     319.752
+    ],
+    [
+     167.159,
+     -33.24,
+     318.826
+    ],
+    [
+     167.458,
+     -33.207,
+     317.899
+    ],
+    [
+     167.756,
+     -33.151,
+     316.972
+    ],
+    [
+     168.054,
+     -33.327,
+     316.046
+    ],
+    [
+     168.353,
+     -33.528,
+     315.119
+    ],
+    [
+     168.651,
+     -33.644,
+     314.192
+    ],
+    [
+     168.95,
+     -33.429,
+     313.266
+    ],
+    [
+     169.248,
+     -33.182,
+     312.339
+    ],
+    [
+     169.547,
+     -32.951,
+     311.412
+    ],
+    [
+     169.845,
+     -32.7,
+     310.486
+    ],
+    [
+     170.143,
+     -32.563,
+     309.559
+    ],
+    [
+     170.442,
+     -32.561,
+     308.632
+    ],
+    [
+     170.74,
+     -32.567,
+     307.706
+    ],
+    [
+     171.039,
+     -32.561,
+     306.779
+    ],
+    [
+     171.337,
+     -32.478,
+     305.852
+    ],
+    [
+     171.635,
+     -32.3,
+     304.926
+    ],
+    [
+     171.934,
+     -32.139,
+     303.999
+    ],
+    [
+     172.232,
+     -31.984,
+     303.072
+    ],
+    [
+     172.531,
+     -31.934,
+     302.146
+    ],
+    [
+     172.829,
+     -31.899,
+     301.219
+    ]
+   ],
+   "usedlost": 10,
+   "semeno": 394
+  }
+ ],
+ "brany": [
+  {
+   "druh": "vrata",
+   "a": [
+    -92.81,
+    37.635,
+    -300.664
+   ],
+   "b": [
+    -95.063,
+    37.809,
+    -298.683
+   ],
+   "usedlost": 1
+  },
+  {
+   "druh": "branka",
+   "a": [
+    -124.798,
+    37.985,
+    -282.096
+   ],
+   "b": [
+    -124.641,
+    38.047,
+    -282.982
+   ],
+   "usedlost": 2
+  },
+  {
+   "druh": "vrata",
+   "a": [
+    -122.549,
+    38.89,
+    -294.746
+   ],
+   "b": [
+    -122.024,
+    39.338,
+    -297.7
+   ],
+   "usedlost": 2
+  },
+  {
+   "druh": "branka",
+   "a": [
+    -109.332,
+    34.779,
+    -269.173
+   ],
+   "b": [
+    -109.599,
+    34.63,
+    -268.314
+   ],
+   "usedlost": 3
+  },
+  {
+   "druh": "vrata",
+   "a": [
+    -112.272,
+    34.627,
+    -259.703
+   ],
+   "b": [
+    -113.162,
+    34.645,
+    -256.838
+   ],
+   "usedlost": 3
+  },
+  {
+   "druh": "branka",
+   "a": [
+    -131.836,
+    35.592,
+    -254.052
+   ],
+   "b": [
+    -131.886,
+    35.536,
+    -254.951
+   ],
+   "usedlost": 4
+  },
+  {
+   "druh": "kryta_vrata",
+   "a": [
+    -132.628,
+    36.772,
+    -268.435
+   ],
+   "b": [
+    -132.793,
+    37.08,
+    -271.431
+   ],
+   "usedlost": 4
+  },
+  {
+   "druh": "branka",
+   "a": [
+    -124.742,
+    35.675,
+    -227.065
+   ],
+   "b": [
+    -125.199,
+    35.744,
+    -227.841
+   ],
+   "usedlost": 5
+  },
+  {
+   "druh": "kryta_vrata",
+   "a": [
+    -131.93,
+    35.215,
+    -239.258
+   ],
+   "b": [
+    -133.454,
+    35.037,
+    -241.843
+   ],
+   "usedlost": 5
+  },
+  {
+   "druh": "vrata",
+   "a": [
+    -85.541,
+    32.892,
+    -214.503
+   ],
+   "b": [
+    -83.366,
+    32.916,
+    -212.437
+   ],
+   "usedlost": 6
+  },
+  {
+   "druh": "kryta_vrata",
+   "a": [
+    -71.135,
+    31.967,
+    -199.426
+   ],
+   "b": [
+    -69.068,
+    31.894,
+    -197.252
+   ],
+   "usedlost": 7
+  },
+  {
+   "druh": "branka",
+   "a": [
+    -58.467,
+    30.931,
+    -194.028
+   ],
+   "b": [
+    -58.415,
+    30.755,
+    -193.13
+   ],
+   "usedlost": 8
+  },
+  {
+   "druh": "kryta_vrata",
+   "a": [
+    -57.757,
+    31.306,
+    -181.818
+   ],
+   "b": [
+    -57.582,
+    31.309,
+    -178.824
+   ],
+   "usedlost": 8
+  },
+  {
+   "druh": "vrata",
+   "a": [
+    -77.41,
+    -35.733,
+    105.296
+   ],
+   "b": [
+    -74.887,
+    -35.751,
+    106.919
+   ],
+   "usedlost": 9
+  },
+  {
+   "druh": "vrata",
+   "a": [
+    153.54,
+    -35.216,
+    308.778
+   ],
+   "b": [
+    152.62,
+    -35.67,
+    311.633
+   ],
+   "usedlost": 10
+  }
+ ],
+ "stromy": [
+  {
+   "druh": "jablon",
+   "x": -70.43,
+   "y": 33.652,
+   "z": -278.462,
+   "yaw": 1.76,
+   "meritko": 0.976
+  },
+  {
+   "druh": "jablon",
+   "x": -76.463,
+   "y": 34.304,
+   "z": -275.264,
+   "yaw": 1.038,
+   "meritko": 0.855
+  },
+  {
+   "druh": "jablon",
+   "x": -149.7,
+   "y": 36.957,
+   "z": -291.608,
+   "yaw": 2.08,
+   "meritko": 0.967
+  },
+  {
+   "druh": "jablon",
+   "x": -151.449,
+   "y": 37.845,
+   "z": -299.756,
+   "yaw": 2.641,
+   "meritko": 1.117
+  },
+  {
+   "druh": "jablon",
+   "x": -155.842,
+   "y": 35.837,
+   "z": -289.185,
+   "yaw": 3.377,
+   "meritko": 1.049
+  },
+  {
+   "druh": "jablon",
+   "x": -135.564,
+   "y": 38.602,
+   "z": -300.667,
+   "yaw": 1.566,
+   "meritko": 0.808
+  },
+  {
+   "druh": "jablon",
+   "x": -90.158,
+   "y": 33.591,
+   "z": -250.876,
+   "yaw": 5.186,
+   "meritko": 1.032
+  },
+  {
+   "druh": "jablon",
+   "x": -162.351,
+   "y": 32.409,
+   "z": -254.871,
+   "yaw": 0.16,
+   "meritko": 1.03
+  },
+  {
+   "druh": "jablon",
+   "x": -159.193,
+   "y": 33.504,
+   "z": -266.022,
+   "yaw": 2.731,
+   "meritko": 1.077
+  },
+  {
+   "druh": "jablon",
+   "x": -158.656,
+   "y": 33.448,
+   "z": -260.348,
+   "yaw": 1.563,
+   "meritko": 0.934
+  },
+  {
+   "druh": "jablon",
+   "x": -165.836,
+   "y": 32.402,
+   "z": -264.412,
+   "yaw": 1.665,
+   "meritko": 1.062
+  },
+  {
+   "druh": "lipa",
+   "x": -130.632,
+   "y": 36.988,
+   "z": -272.201,
+   "yaw": 0.223,
+   "meritko": 0.917
+  },
+  {
+   "druh": "jablon",
+   "x": -151.486,
+   "y": 35.584,
+   "z": -220.62,
+   "yaw": 1.414,
+   "meritko": 1.058
+  },
+  {
+   "druh": "jablon",
+   "x": -151.453,
+   "y": 35.458,
+   "z": -209.456,
+   "yaw": 2.998,
+   "meritko": 1.146
+  },
+  {
+   "druh": "jablon",
+   "x": -154.665,
+   "y": 34.348,
+   "z": -225.244,
+   "yaw": 4.835,
+   "meritko": 0.914
+  },
+  {
+   "druh": "jablon",
+   "x": -77.38,
+   "y": 31.938,
+   "z": -241.932,
+   "yaw": 3.319,
+   "meritko": 0.956
+  },
+  {
+   "druh": "jablon",
+   "x": -72.183,
+   "y": 31.157,
+   "z": -237.266,
+   "yaw": 4.321,
+   "meritko": 0.895
+  },
+  {
+   "druh": "jablon",
+   "x": -66.121,
+   "y": 30.173,
+   "z": -233.532,
+   "yaw": 2.951,
+   "meritko": 0.996
+  },
+  {
+   "druh": "jablon",
+   "x": -50.167,
+   "y": 29.197,
+   "z": -218.548,
+   "yaw": 1.276,
+   "meritko": 1.03
+  },
+  {
+   "druh": "jablon",
+   "x": -54.258,
+   "y": 29.098,
+   "z": -225.914,
+   "yaw": 5.544,
+   "meritko": 1.068
+  },
+  {
+   "druh": "jablon",
+   "x": -59.755,
+   "y": 30.183,
+   "z": -225.063,
+   "yaw": 2.816,
+   "meritko": 0.956
+  },
+  {
+   "druh": "lipa",
+   "x": -67.692,
+   "y": 32.274,
+   "z": -192.612,
+   "yaw": 1.821,
+   "meritko": 0.924
+  },
+  {
+   "druh": "jablon",
+   "x": -28.225,
+   "y": 27.478,
+   "z": -189.691,
+   "yaw": 0.759,
+   "meritko": 1.08
+  },
+  {
+   "druh": "jablon",
+   "x": -45.939,
+   "y": 29.455,
+   "z": -179.512,
+   "yaw": 4.164,
+   "meritko": 0.801
+  },
+  {
+   "druh": "jablon",
+   "x": 164.684,
+   "y": -34.552,
+   "z": 318.751,
+   "yaw": 2.579,
+   "meritko": 1.144
+  },
+  {
+   "druh": "lipa",
+   "x": -94.977,
+   "y": 33.748,
+   "z": -241.28,
+   "yaw": 2.176,
+   "meritko": 1.15
+  }
+ ],
+ "studny": [
+  {
+   "x": -99.74,
+   "z": -244.03,
+   "y": 34.256,
+   "yaw": 1.182
   }
  ],
  "pudorysy": [
   [
    [
-    -136.96998725394477,
-    -277.369981744194
+    -79.53208087573056,
+    -297.3197887703319
    ],
    [
-    -136.97001274598816,
-    -284.3099817441472
+    -84.74323461502199,
+    -292.73639737252734
    ],
    [
-    -127.03001274605522,
-    -284.31001825580597
+    -91.30791912426945,
+    -300.20021122966807
    ],
    [
-    -127.02998725401183,
-    -277.37001825585276
+    -86.09676538497801,
+    -304.78360262747265
    ]
   ],
   [
    [
-    -98.52998541741265,
-    -284.8099799075413
+    -136.97060658822673,
+    -285.69906395880673
    ],
    [
-    -98.53001458266117,
-    -276.8699799075949
+    -135.5803986542384,
+    -293.5164114565374
    ],
    [
-    -109.47001458258735,
-    -276.8700200924587
+    -124.80939341177323,
+    -291.6009360411932
    ],
    [
-    -109.46998541733883,
-    -284.81002009240507
+    -126.19960134576156,
+    -283.78358854346254
    ]
   ],
   [
    [
-    -142.96998725394477,
-    -252.01998174419407
+    -100.3146723762633,
+    -264.89048657656167
    ],
    [
-    -142.97001274598816,
-    -258.9599817441472
+    -102.37223596508727,
+    -258.2625131247481
    ],
    [
-    -133.03001274605523,
-    -258.960018255806
+    -111.8653276237367,
+    -261.20951342343835
    ],
    [
-    -133.02998725401184,
-    -252.0200182558528
+    -109.80776403491274,
+    -267.8374868752519
    ]
   ],
   [
    [
-    -102.55504521031177,
-    -264.0256761500335
+    -145.43136962080013,
+    -254.72177845558235
    ],
    [
-    -97.96388282261479,
-    -256.82478537667805
+    -145.90086417126577,
+    -263.24886323685917
    ],
    [
-    -109.38918375692008,
-    -249.54021273577706
+    -132.37135611666375,
+    -263.993787260139
    ],
    [
-    -113.98034614461706,
-    -256.7411035091326
+    -131.9018615661981,
+    -255.46670247886217
    ]
   ],
   [
    [
-    -132.03787364982514,
-    -221.146586563544
+    -135.80584002693763,
+    -222.19207723917432
    ],
    [
-    -134.23218568427075,
-    -227.73055153121257
+    -139.8382820848799,
+    -229.03188798577676
    ],
    [
-    -124.80212635017483,
-    -230.873413436456
+    -130.4141599730624,
+    -234.58792276082565
    ],
    [
-    -122.60781431572923,
-    -224.2894484687874
+    -126.38171791512013,
+    -227.7481120142232
    ]
   ],
   [
    [
-    -94.1263781617378,
-    -241.62621863043552
+    -86.28184067885309,
+    -230.15308323381328
    ],
    [
-    -91.61518491952718,
-    -234.09378817936096
+    -81.2510006779809,
+    -225.37247146484225
    ],
    [
-    -101.9936218382622,
-    -230.63378136956447
+    -88.09815932114691,
+    -218.16691676618672
    ],
    [
-    -104.50481508047282,
-    -238.16621182063903
+    -93.1289993220191,
+    -222.94752853515774
    ]
   ],
   [
    [
-    -102.39062728933504,
-    -198.3920129228426
+    -68.99146996976431,
+    -213.83624058884487
    ],
    [
-    -107.29797538909034,
-    -203.29930694580761
+    -63.52030390145025,
+    -208.08211668915965
    ],
    [
-    -100.26937271066495,
-    -210.32798707715742
+    -71.44853003023569,
+    -200.54375941115512
    ],
    [
-    -95.36202461090966,
-    -205.4206930541924
+    -76.91969609854975,
+    -206.29788331084035
    ]
   ],
   [
    [
-    -83.29932756873829,
-    -228.00508606637857
+    -47.73986584161234,
+    -193.23272205127836
    ],
    [
-    -77.68491003759907,
-    -222.39064791229436
+    -47.33690410122881,
+    -186.30443064316142
    ],
    [
-    -85.4206724312617,
-    -214.65491393362146
+    -57.26013415838766,
+    -185.72727794872162
    ],
    [
-    -91.03508996240093,
-    -220.26935208770567
+    -57.66309589877119,
+    -192.65556935683855
    ]
   ],
   [
    [
-    -83.59796031665802,
-    90.96806470030536
+    -81.22912824980092,
+    90.94283067389205
    ],
    [
-    -77.54348648239561,
-    94.3602537560969
+    -75.39271050085269,
+    94.69780442343571
    ],
    [
-    -82.40203968334198,
-    103.03193529969464
+    -80.77087175019908,
+    103.05716932610795
    ],
    [
-    -88.45651351760439,
-    99.6397462439031
+    -86.60728949914731,
+    99.30219557656429
    ]
   ],
   [
@@ -301,6 +8731,1088 @@
     155.97001684574084,
     300.6345591902461
    ]
+  ],
+  [
+   [
+    -68.3154292458889,
+    -290.92317347012863
+   ],
+   [
+    -76.19835259550653,
+    -283.9870708566971
+   ],
+   [
+    -81.67457075411112,
+    -290.2108265298714
+   ],
+   [
+    -73.79164740449347,
+    -297.14692914330294
+   ]
+  ],
+  [
+   [
+    -92.06628883067543,
+    -287.38739443610115
+   ],
+   [
+    -97.5478435462285,
+    -293.6197742304011
+   ],
+   [
+    -93.63571116932457,
+    -297.06060556389883
+   ],
+   [
+    -88.15415645377149,
+    -290.8282257695989
+   ]
+  ],
+  [
+   [
+    -86.90120854186958,
+    -294.9266704909215
+   ],
+   [
+    -84.74246234311246,
+    -293.27191526752694
+   ],
+   [
+    -86.22079145813044,
+    -291.3433295090785
+   ],
+   [
+    -88.37953765688755,
+    -292.99808473247305
+   ]
+  ],
+  [
+   [
+    -146.37211377542502,
+    -296.08798502445046
+   ],
+   [
+    -144.88552968072628,
+    -304.4569794520617
+   ],
+   [
+    -137.70788622457496,
+    -303.1820149755495
+   ],
+   [
+    -139.1944703192737,
+    -294.81302054793827
+   ]
+  ],
+  [
+   [
+    -146.27165346787376,
+    -284.7735558461298
+   ],
+   [
+    -144.82004782246207,
+    -292.94563275779734
+   ],
+   [
+    -139.69034653212623,
+    -292.0344441538702
+   ],
+   [
+    -141.14195217753792,
+    -283.86236724220265
+   ]
+  ],
+  [
+   [
+    -132.62032327115665,
+    -293.0526009833138
+   ],
+   [
+    -135.33627099110035,
+    -293.2010192521776
+   ],
+   [
+    -135.20367672884336,
+    -295.6273990166861
+   ],
+   [
+    -132.48772900889966,
+    -295.47898074782233
+   ]
+  ],
+  [
+   [
+    -87.6070905352357,
+    -266.30094870162424
+   ],
+   [
+    -90.7221245402385,
+    -256.2736577839498
+   ],
+   [
+    -98.63890946476431,
+    -258.73305129837576
+   ],
+   [
+    -95.52387545976151,
+    -268.7603422160502
+   ]
+  ],
+  [
+   [
+    -106.05041524755414,
+    -249.17344705549647
+   ],
+   [
+    -113.97624829175741,
+    -251.6374215998892
+   ],
+   [
+    -112.42958475244585,
+    -256.61255294450353
+   ],
+   [
+    -104.50375170824258,
+    -254.1485784001108
+   ]
+  ],
+  [
+   [
+    -156.12295097459213,
+    -249.81335897280513
+   ],
+   [
+    -156.5919439070483,
+    -258.30041061806486
+   ],
+   [
+    -149.31304902540785,
+    -258.70264102719494
+   ],
+   [
+    -148.8440560929517,
+    -250.21558938193516
+   ]
+  ],
+  [
+   [
+    -154.64905280778922,
+    -260.8875893038969
+   ],
+   [
+    -155.1070106124229,
+    -269.174945616327
+   ],
+   [
+    -149.90494719221076,
+    -269.4624106961031
+   ],
+   [
+    -149.44698938757708,
+    -261.175054383673
+   ]
+  ],
+  [
+   [
+    -143.73668332256452,
+    -211.4128108533151
+   ],
+   [
+    -149.0647346211653,
+    -220.46056578807534
+   ],
+   [
+    -141.9213166774355,
+    -224.66718914668488
+   ],
+   [
+    -136.59326537883473,
+    -215.61943421192464
+   ]
+  ],
+  [
+   [
+    -147.4298560681769,
+    -223.74211841789426
+   ],
+   [
+    -151.64155376135653,
+    -230.89415327108568
+   ],
+   [
+    -147.1521439318231,
+    -233.5378815821057
+   ],
+   [
+    -142.94044623864346,
+    -226.3858467289143
+   ]
+  ],
+  [
+   [
+    -137.3911339462022,
+    -230.10613124572046
+   ],
+   [
+    -139.92468912885667,
+    -229.11643526389338
+   ],
+   [
+    -140.8088660537978,
+    -231.37986875427953
+   ],
+   [
+    -138.27531087114332,
+    -232.3695647361066
+   ]
+  ],
+  [
+   [
+    -82.32143437822087,
+    -242.50594340087045
+   ],
+   [
+    -76.16032828692319,
+    -236.65011111743078
+   ],
+   [
+    -81.18256562177912,
+    -231.36605659912956
+   ],
+   [
+    -87.3436717130768,
+    -237.22188888256923
+   ]
+  ],
+  [
+   [
+    -76.12942908006177,
+    -233.75322180518884
+   ],
+   [
+    -70.11329019091225,
+    -228.03517381077125
+   ],
+   [
+    -73.70257091993822,
+    -224.25877819481116
+   ],
+   [
+    -79.71870980908774,
+    -229.97682618922875
+   ]
+  ],
+  [
+   [
+    -83.30523639697033,
+    -223.45233973880724
+   ],
+   [
+    -81.3506268644535,
+    -225.3438739244339
+   ],
+   [
+    -79.66076360302968,
+    -223.59766026119277
+   ],
+   [
+    -81.6153731355465,
+    -221.70612607556612
+   ]
+  ],
+  [
+   [
+    -62.96303564882429,
+    -224.71709303612147
+   ],
+   [
+    -55.730910736760805,
+    -217.10484177540297
+   ],
+   [
+    -61.740964351175705,
+    -211.39490696387855
+   ],
+   [
+    -68.9730892632392,
+    -219.00715822459705
+   ]
+  ],
+  [
+   [
+    -58.11286639795242,
+    -200.48067236177556
+   ],
+   [
+    -64.12561540908071,
+    -194.75905988545597
+   ],
+   [
+    -67.71713360204758,
+    -198.53332763822445
+   ],
+   [
+    -61.70438459091928,
+    -204.25494011454404
+   ]
+  ],
+  [
+   [
+    -65.6636736628635,
+    -206.38309666171548
+   ],
+   [
+    -63.50658329842698,
+    -208.0400098035715
+   ],
+   [
+    -62.0263263371365,
+    -206.1129033382845
+   ],
+   [
+    -64.18341670157302,
+    -204.45599019642847
+   ]
+  ],
+  [
+   [
+    -36.130583870795526,
+    -198.45645393756968
+   ],
+   [
+    -35.63958855432558,
+    -189.97064675149687
+   ],
+   [
+    -42.917416129204476,
+    -189.5495460624303
+   ],
+   [
+    -43.408411445674425,
+    -198.0353532485031
+   ]
+  ],
+  [
+   [
+    -37.59907092278007,
+    -187.88154619077721
+   ],
+   [
+    -37.1196284372859,
+    -179.59540505614143
+   ],
+   [
+    -42.32092907721993,
+    -179.29445380922277
+   ],
+   [
+    -42.800371562714105,
+    -187.58059494385856
+   ]
+  ],
+  [
+   [
+    -66.6962973783961,
+    99.9627000354802
+   ],
+   [
+    -71.29892847681957,
+    107.10873298893242
+   ],
+   [
+    -77.4277026216039,
+    103.1612999645198
+   ],
+   [
+    -72.82507152318043,
+    96.01526701106758
+   ]
+  ],
+  [
+   [
+    -90.80827813950278,
+    90.1232075303677
+   ],
+   [
+    -83.82947190724452,
+    94.61612012384128
+   ],
+   [
+    -86.64972186049722,
+    98.99679246963231
+   ],
+   [
+    -93.62852809275547,
+    94.50387987615872
+   ]
+  ],
+  [
+   [
+    160.00523036501457,
+    319.4842622843358
+   ],
+   [
+    152.10443294394466,
+    316.9411539281671
+   ],
+   [
+    153.70076963498545,
+    311.9817377156642
+   ],
+   [
+    161.60156705605536,
+    314.5248460718329
+   ]
+  ],
+  [
+   [
+    161.33819351322722,
+    310.5177924019772
+   ],
+   [
+    163.8838328736312,
+    311.47597831648545
+   ],
+   [
+    163.02780648677276,
+    313.7502075980228
+   ],
+   [
+    160.48216712636878,
+    312.7920216835146
+   ]
   ]
+ ],
+ "dvory": [
+  [
+   [
+    -76.784,
+    -284.138
+   ],
+   [
+    -83.864,
+    -277.911
+   ],
+   [
+    -99.05,
+    -295.176
+   ],
+   [
+    -91.97,
+    -301.403
+   ]
+  ],
+  [
+   [
+    -146.045,
+    -295.076
+   ],
+   [
+    -144.305,
+    -304.862
+   ],
+   [
+    -121.472,
+    -300.802
+   ],
+   [
+    -123.212,
+    -291.016
+   ]
+  ],
+  [
+   [
+    -91.572,
+    -255.22
+   ],
+   [
+    -94.586,
+    -245.511
+   ],
+   [
+    -114.736,
+    -251.767
+   ],
+   [
+    -111.722,
+    -261.476
+   ]
+  ],
+  [
+   [
+    -156.315,
+    -262.379
+   ],
+   [
+    -156.831,
+    -271.76
+   ],
+   [
+    -132.884,
+    -273.078
+   ],
+   [
+    -132.367,
+    -263.698
+   ]
+  ],
+  [
+   [
+    -149.854,
+    -222.778
+   ],
+   [
+    -154.981,
+    -231.475
+   ],
+   [
+    -134.471,
+    -243.567
+   ],
+   [
+    -129.343,
+    -234.87
+   ]
+  ],
+  [
+   [
+    -73.762,
+    -233.682
+   ],
+   [
+    -67.417,
+    -227.653
+   ],
+   [
+    -82.583,
+    -211.692
+   ],
+   [
+    -88.928,
+    -217.722
+   ]
+  ],
+  [
+   [
+    -55.487,
+    -216.126
+   ],
+   [
+    -48.851,
+    -209.146
+   ],
+   [
+    -65.409,
+    -193.404
+   ],
+   [
+    -72.045,
+    -200.384
+   ]
+  ],
+  [
+   [
+    -35.982,
+    -187.263
+   ],
+   [
+    -35.415,
+    -177.52
+   ],
+   [
+    -57.432,
+    -176.238
+   ],
+   [
+    -57.999,
+    -185.982
+   ]
+  ],
+  [
+   [
+    -75.374,
+    94.115
+   ],
+   [
+    -63.971,
+    101.452
+   ],
+   [
+    -69.655,
+    110.286
+   ],
+   [
+    -81.058,
+    102.949
+   ]
+  ],
+  [
+   [
+    164.516,
+    311.414
+   ],
+   [
+    161.707,
+    320.138
+   ],
+   [
+    150.993,
+    316.688
+   ],
+   [
+    153.802,
+    307.964
+   ]
+  ]
+ ],
+ "zahrady": [
+  [
+   [
+    -76.402,
+    -300.872
+   ],
+   [
+    -80.155,
+    -297.571
+   ],
+   [
+    -87.209,
+    -305.59
+   ],
+   [
+    -83.456,
+    -308.892
+   ]
+  ],
+  [
+   [
+    -137.354,
+    -280.12
+   ],
+   [
+    -136.328,
+    -285.893
+   ],
+   [
+    -124.497,
+    -283.789
+   ],
+   [
+    -125.524,
+    -278.016
+   ]
+  ],
+  [
+   [
+    -99.219,
+    -270.43
+   ],
+   [
+    -100.974,
+    -264.777
+   ],
+   [
+    -109.842,
+    -267.53
+   ],
+   [
+    -108.087,
+    -273.184
+   ]
+  ],
+  [
+   [
+    -144.568,
+    -249.95
+   ],
+   [
+    -144.849,
+    -255.058
+   ],
+   [
+    -131.931,
+    -255.77
+   ],
+   [
+    -131.65,
+    -250.661
+   ]
+  ],
+  [
+   [
+    -132.359,
+    -217.537
+   ],
+   [
+    -135.437,
+    -222.757
+   ],
+   [
+    -125.616,
+    -228.547
+   ],
+   [
+    -122.538,
+    -223.327
+   ]
+  ],
+  [
+   [
+    -91.145,
+    -233.947
+   ],
+   [
+    -86.474,
+    -229.509
+   ],
+   [
+    -93.524,
+    -222.089
+   ],
+   [
+    -98.195,
+    -226.528
+   ]
+  ],
+  [
+   [
+    -72.343,
+    -216.491
+   ],
+   [
+    -69.215,
+    -213.202
+   ],
+   [
+    -77.103,
+    -205.703
+   ],
+   [
+    -80.23,
+    -208.992
+   ]
+  ],
+  [
+   [
+    -48.632,
+    -198.231
+   ],
+   [
+    -48.322,
+    -192.896
+   ],
+   [
+    -58.367,
+    -192.311
+   ],
+   [
+    -58.678,
+    -197.646
+   ]
+  ],
+  [
+   [
+    -89.107,
+    86.588
+   ],
+   [
+    -81.301,
+    91.61
+   ],
+   [
+    -86.39,
+    99.519
+   ],
+   [
+    -94.195,
+    94.497
+   ]
+  ],
+  [
+   [
+    167.225,
+    299.414
+   ],
+   [
+    165.719,
+    304.091
+   ],
+   [
+    156.052,
+    300.978
+   ],
+   [
+    157.558,
+    296.301
+   ]
+  ]
+ ],
+ "sady": [
+  [
+   [
+    -60.951,
+    -283.307
+   ],
+   [
+    -76.545,
+    -269.59
+   ],
+   [
+    -83.336,
+    -277.31
+   ],
+   [
+    -67.742,
+    -291.027
+   ]
+  ],
+  [
+   [
+    -160.356,
+    -284.209
+   ],
+   [
+    -156.305,
+    -306.996
+   ],
+   [
+    -145.093,
+    -305.002
+   ],
+   [
+    -149.144,
+    -282.216
+   ]
+  ],
+  [
+   [
+    -79.5,
+    -264.308
+   ],
+   [
+    -86.149,
+    -242.892
+   ],
+   [
+    -93.822,
+    -245.274
+   ],
+   [
+    -87.173,
+    -266.69
+   ]
+  ],
+  [
+   [
+    -168.201,
+    -248.649
+   ],
+   [
+    -169.435,
+    -271.066
+   ],
+   [
+    -157.63,
+    -271.716
+   ],
+   [
+    -156.396,
+    -249.299
+   ]
+  ],
+  [
+   [
+    -153.313,
+    -205.184
+   ],
+   [
+    -165.246,
+    -225.424
+   ],
+   [
+    -155.67,
+    -231.069
+   ],
+   [
+    -143.738,
+    -210.829
+   ]
+  ],
+  [
+   [
+    -74.257,
+    -251.72
+   ],
+   [
+    -58.645,
+    -236.884
+   ],
+   [
+    -66.866,
+    -228.233
+   ],
+   [
+    -82.478,
+    -243.068
+   ]
+  ],
+  [
+   [
+    -54.968,
+    -233.01
+   ],
+   [
+    -40.147,
+    -217.421
+   ],
+   [
+    -48.271,
+    -209.697
+   ],
+   [
+    -63.092,
+    -225.286
+   ]
+  ],
+  [
+   [
+    -22.924,
+    -199.727
+   ],
+   [
+    -21.678,
+    -178.319
+   ],
+   [
+    -34.616,
+    -177.566
+   ],
+   [
+    -35.862,
+    -198.974
+   ]
+  ],
+  [
+   [
+    -86.438,
+    82.44
+   ],
+   [
+    -61.897,
+    98.229
+   ],
+   [
+    -63.538,
+    100.779
+   ],
+   [
+    -88.079,
+    84.99
+   ]
+  ],
+  [
+   [
+    172.829,
+    301.219
+   ],
+   [
+    166.264,
+    321.606
+   ],
+   [
+    162.468,
+    320.383
+   ],
+   [
+    169.033,
+    299.997
+   ]
+  ]
+ ],
+ "pole": [
+  {
+   "plodina": "uhor",
+   "poly": [
+    [
+     -166.665,
+     -197.312
+    ],
+    [
+     -172.327,
+     -206.915
+    ],
+    [
+     -160.267,
+     -214.025
+    ],
+    [
+     -154.605,
+     -204.422
+    ]
+   ]
+  },
+  {
+   "plodina": "strniste",
+   "poly": [
+    [
+     -64.958,
+     -261.506
+    ],
+    [
+     -49.345,
+     -246.671
+    ],
+    [
+     -57.612,
+     -237.972
+    ],
+    [
+     -73.224,
+     -252.807
+    ]
+   ]
+  },
+  {
+   "plodina": "strniste",
+   "poly": [
+    [
+     -33.589,
+     -253.337
+    ],
+    [
+     -18.768,
+     -237.748
+    ],
+    [
+     -39.06,
+     -218.455
+    ],
+    [
+     -53.881,
+     -234.044
+    ]
+   ]
+  },
+  {
+   "plodina": "strniste",
+   "poly": [
+    [
+     -8.789,
+     -189.208
+    ],
+    [
+     -8.201,
+     -179.103
+    ],
+    [
+     -20.181,
+     -178.406
+    ],
+    [
+     -20.769,
+     -188.511
+    ]
+   ]
+  }
  ]
 }

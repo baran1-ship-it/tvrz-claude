@@ -111,6 +111,26 @@ Image.fromarray((kam * 255).astype(np.uint8), "L").save(D + "kamenitost.png")
 VY_ = PZ["vychozy"]   # výchozy droby v hlíně (maska_cesty.B: shader ji kreslí jen tam, kde je hlína) – kde je kamenito
 vy = ((jadra | predhradi) & (kam > VY_["prah_kamenitosti"])).astype(np.float32) * VY_["sila"]
 mk[..., 2] = np.maximum(mk[..., 2], gaussian_filter(vy, 1.0))
+# usedlosti nových míst (nastroje/mista_rozmisteni.py → mista_stavby.json; pravidla/svet/mista.json usedlosti): dvůr = udusaná
+# hlína (KCD1 ves_2, ves_6: dvůr a náves hliněné), zahrádka a sad tráva bez lesa, lány: orané = hlína, strniště = pole,
+# úhor = pastvina (mista.json usedlosti.pole); celá parcela a lány bez stromů lesa (stromy sadu staví ves.gd)
+bez_usedlosti = np.zeros(st.shape, bool)
+if os.path.exists(D + "mista_stavby.json"):
+    MS_ = json.load(open(D + "mista_stavby.json")); UP_ = json.load(open(K + "/pravidla/svet/mista.json"))["usedlosti"]["povrch"]
+    def _m(polys):
+        im_ = Image.new("L", ms.size, 0); di_ = ImageDraw.Draw(im_)
+        for q_ in polys: di_.polygon([pix(r) for r in q_], fill=1)
+        return np.array(im_).astype(bool)
+    for t in set(UP_["tridy"].values()):
+        if t not in SJ["tridy"]: SJ["tridy"].append(t)
+    hl_u = np.zeros(st.shape, np.float32)
+    for klic, polys in (("dvur", MS_.get("dvory", [])), ("zahrada", MS_.get("zahrady", [])), ("sad", MS_.get("sady", []))):
+        m_ = _m(polys) & ~stavba; st[m_] = SJ["tridy"].index(UP_["tridy"][klic]); hl_u[m_] = UP_["hlina"].get(klic, 0.0)
+    for pl_ in MS_.get("pole", []):
+        m_ = _m([pl_["poly"]]) & ~stavba; st[m_] = SJ["tridy"].index(UP_["tridy"][pl_["plodina"]]); hl_u[m_] = UP_["hlina"].get(pl_["plodina"], 0.0)
+    mk[..., 0] = np.maximum(mk[..., 0], gaussian_filter(hl_u, UP_["mekkost_m"] / ks))
+    bez_usedlosti = _m([u_["parcela"] for u_ in MS_.get("usedlosti", [])] + [p_["poly"] for p_ in MS_.get("pole", [])])
+    print("usedlosti: %d buněk parcel a lánů, hlína %d" % (bez_usedlosti.sum(), (hl_u > 0).sum()))
 Image.fromarray((np.clip(mk, 0, 1) * 255).astype(np.uint8), "RGB").save(_mc); open(_hz, "w").write(_h(_mc))
 pas = ~stavba & (d_zed <= V["sirka_m"][1]) & ~chran & ~slap & ~nadvori
 print("pata zdí: vně %d buněk (%.0f %% pásu – skvrny), uvnitř %d, kouty %d, vyšlapáno %d" % (vne.sum(), 100 * vne.sum() / max(1, pas.sum()), uvn.sum(), ko.sum(), (nadvori & slap).sum()))
@@ -119,7 +139,7 @@ bez = binary_dilation(stavba | nadvori | predhradi, iterations=max(1, int(KC["ok
 A = np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5)
 c = np.clip(((A[:, 0] - x0) / ks).astype(int), 0, st.shape[1] - 1); r = np.clip(((A[:, 1] - z0) / ks).astype(int), 0, st.shape[0] - 1)
 # a ze stanoviště koryta (kmen ve vodě/na kamenitém dně; koryta.py maže jen do kraje vody) – test strom_mimo_vodu 3. 11.
-keep = ~bez[r, c] & (st[r, c] != SJ["tridy"].index("koryto_kamenite"))
+keep = ~bez[r, c] & ~bez_usedlosti[r, c] & (st[r, c] != SJ["tridy"].index("koryto_kamenite"))
 # odlesnění okolí hradů roku 1393 (Míša 5. 11.: „vyhodnoť těch 600 let“; kresby GC80T08: hrady na holých skalních hřbetech)
 OD = KC.get("odlesneni_1393")
 if OD:

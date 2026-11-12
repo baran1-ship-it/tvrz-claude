@@ -131,7 +131,11 @@
    "kopriva": 0.12,
    "mech": 0.06,
    "kamen": 0.12
-  }
+  },
+  "pole_orane": {
+   "trava": 0.05
+  },
+  "_pole_orane": "orané lány za humny (mista.json usedlosti.povrch): hlína, jen ojedinělé trsy na hroudách (KCD2 ref_kcd2_ves_shora hnědé pruhy)"
  },
  "pozn": "29. 10.: 2,6/m² bylo z 1,7 m řídké (snímek t_trava) -> 5/m² na louce",
  "modely": {

@@ -17,6 +17,62 @@
    "soubor": "res://modely/stavby_h/mlyn.glb",
    "daleko": "res://modely/stavby_h/mlyn_lod1.glb",
    "zdroj": "Havran docs/krok_b/zadani_mlyn.md: vesnický mlýn na vrchní vodu (kolo ~3,2 m, náhon ve žlabu na kozách, roubená mlýnice ~8×6 m), scripts/mlyn_kolo.gd (otáčení kola)"
+  },
+  "hospodarske": {
+   "slozka": "res://modely/predmety_h/",
+   "zdroj": "Havran předměty katalogu (nastroje/predmety_z_havrana.sh → hra/modely/predmety_h/, blender/vlastni.py): stodola 9,9 × 7,7 m, stodola_mala 7,9 × 6,7 m, kolna 7,7 × 4,6 m (+ _stredni LOD, _kolize), kurnik, plutek (proutěný díl 2,07 m), zahon_*, hranice_dreva, drevo_hromada, zebrinak, kupka_sena, koryto_kone, sud, trakar, lavice_selska, spalek_stipani, panak_snopu, kad; vrata k domu = +z modelu (Havran vesnice.py _dvorce „celo na +z k domu“)",
+   "rozmery": {
+    "stodola": [
+     9.9,
+     7.69
+    ],
+    "stodola_mala": [
+     7.9,
+     6.69
+    ],
+    "kolna": [
+     7.7,
+     4.61
+    ],
+    "kurnik": [
+     2.12,
+     1.83
+    ],
+    "zebrinak": [
+     5.25,
+     1.61
+    ],
+    "zahon": [
+     3.07,
+     1.17
+    ],
+    "kupka_sena": [
+     2.17,
+     2.17
+    ],
+    "koryto_kone": [
+     2.42,
+     1.43
+    ],
+    "hranice_dreva": [
+     1.81,
+     0.51
+    ]
+   },
+   "rozmery_pozn": "[délka podél x modelu, hloubka podél z] z AABB modelů (Godot, 12. 11.)"
+  },
+  "stromy": {
+   "jablon": {
+    "soubor": "res://modely/stavby_h/jablon.glb",
+    "daleko": "res://modely/stavby_h/jablon_daleko.glb",
+    "zdroj": "Havran z_rostliny jablon (sad za humny, lokace.json ves.dvorec.sad: výška 6 m, poloměr 2,6 m)"
+   },
+   "lipa": {
+    "soubor": "res://modely/stromy/lipa_stredni.glb",
+    "lod1": "res://modely/stromy/lipa_stredni_lod1.glb",
+    "daleko": "res://modely/stromy/lipa_stredni_daleko.glb",
+    "zdroj": "Havran lokace.json ves.dvorec.zelen u_vjezdu / lipa na návsi (lípa střední 10–12 m)"
+   }
   }
  },
  "mista": [
@@ -33,10 +89,10 @@
     "Dum1",
     "Dum2",
     "Rychta",
-    "Dum2",
     "Dum1",
     "Dum2",
-    "Dum1"
+    "Dum1",
+    "Dum2"
    ],
    "pocet_usedlosti": "6–8 (NAVRH podle rozsahu mezí)",
    "doklad": "GC80T08 (docs/hrady_podle_kreseb.md): kamenné hrázky políček ~250 m SZ a SV, ves 1547 pustá; DMR 5G lokální reliéf: pravoúhlé linie (meze) na plošině SSZ od hradu A (rozbor 11. 11., scratchpad teren/relief.png)",
@@ -44,7 +100,14 @@
    "cesta": "z hřebenové / hlavní cesty k hradu A (ne úvozem do údolí – Míša 10. 11.)",
    "typ": "ves",
    "dosah_m": 110,
-   "pozn_modely": "Míša 11. 11.: chýše (kůra, prkna) „spíš v lese u hávíru nebo v lomu, ne ve vsi“ (jako Havran: u lomu a uhlířů) – ve vsi jen usedlosti"
+   "pozn_modely": "Míša 11. 11.: chýše (kůra, prkna) „spíš v lese u hávíru nebo v lomu, ne ve vsi“ (jako Havran: u lomu a uhlířů) – ve vsi jen usedlosti",
+   "usedlost": "selska",
+   "pole": true,
+   "naves": {
+    "studna": true,
+    "lipa_u_studny": true,
+    "zdroj": "Havran blender/vesnice.py build: studna na návsi (studna.build), lípa na návsi (lokace.json ves.dvorec.lipa); KCD1 ves_3/ves_6: široká hliněná náves"
+   }
   },
   {
    "id": "mlyn_velicka",
@@ -77,7 +140,8 @@
    "doklad": "skutečná poloha hostince U Tlustého Jana (Kyžlířov 40, OSM dům 49.61062 N 17.68145 E) pod Puchartem u silnice II/440 na levém břehu Veličky (docs/reference/reserse_tlusty_jan.md); Míša 12. 11.: „podle skutečnosti“ (křížek u silnice); dřív krčma na křižovatce podle pravidla – špatně",
    "jistota": "NAVRH (poloha podle pravidla, ne podle nálezu)",
    "typ": "samota",
-   "dosah_m": 30
+   "dosah_m": 40,
+   "usedlost": "krcma"
   },
   {
    "id": "hajovna",
@@ -93,7 +157,8 @@
    "doklad": "skutečný dům Olšovec č. p. 44 (OSM 49.60890 N 17.68510 E) pod dolním hradem u soutoku Veličky a Kouteckého potoka a křižovatky údolních cest; budova je i na vojenské mapě 1:25 000 (Míša 11. 11.); Míša 12. 11. křížek; NE chata Olšovec u silnice 440 (Míša: „chata Olšovec není hájovna“)",
    "jistota": "NAVRH pro 1393 (hájovna jako budova doložena až novověk); poloha DOLOZENO dnešní",
    "typ": "samota",
-   "dosah_m": 30
+   "dosah_m": 40,
+   "usedlost": "hajovna"
   }
  ],
  "schvaleno": "Míša 11. 11.: „místa, která říkáš, jsou v pořádku“ (mapa docs/screens/mista_kandidati_11_11.png)",
@@ -140,7 +205,15 @@
   "mezi_domy_m": 18,
   "prechod_m": 4.0,
   "pozn": "usedlost středověké vsi ~25–30 m podél cesty (Havran ves Lhota: domy po ~27 m), dům štítem do ulice; převýšení pod půdorysem do 2 m vyrovná podezdívka a plošina (bez kopání do svahu)",
-  "pozn_toky": "15 m od osy toku – krčma vyšla na ostrůvek mezi potoky u soutoku (zátopa); stavby na terase nad nivou"
+  "pozn_toky": "15 m od osy toku – krčma vyšla na ostrůvek mezi potoky u soutoku (zátopa); stavby na terase nad nivou",
+  "mezi_usedlostmi_m": 1.0,
+  "mezi_usedlostmi_pozn": "parcely (dvůr + zahrada + humno) se nepřekrývají; mezera 1 m = souseda dělí jeden plot",
+  "odstup_max_m": 30.0,
+  "odstup_pozn": "dům hledá místo od odstup_m po odstup_max_m od osy cesty; u Předhradí je mezi vozovou cestou a pěšinou náves (KCD1 ves_3, ves_6: široká hliněná náves)",
+  "krok_hledani_m": 4,
+  "krok_hledani_pozn": "KCD1 ves_1–6, KCD2 ref_kcd2_ves_ulice: usedlosti těsně vedle sebe podél ulice (sousedy dělí plot); místo pro další usedlost se hledá po 4 m podél cesty, překryv parcel vylučuje mezi_usedlostmi_m (rozestup_m 26 = průměrná šíře parcely, Havran doplnit.rozestup_m)",
+  "max_prevyseni_hospodarske_m": 2.6,
+  "max_prevyseni_hospodarske_pozn": "stodola a kůlna Havrana stojí na kamenných patkách (model kamen_patky; Havran svet.gd „stodola 7 na patkách nad dolinou“) – snesou o něco víc než dům na podezdívce; plošina pak srovná nejvýš ±1,3 m"
  },
  "planovane": [
   {
@@ -152,5 +225,418 @@
    "stav": "REŠERŠE",
    "pozn": "Míša 11. 11.: chýše u lomu (kámen na hrad – droba) a v lese u uhlířů/havíře; poloha až podle dokladu (nic z hlavy)"
   }
- ]
+ ],
+ "usedlosti": {
+  "popis": "Skladba usedlosti (Míša 11.–12. 11.: „mrkni na KCD“, „přesně pestrost“, „ať není každý dům nebo zahrada stejná“, „nemají tam být i hospodářské budovy, ploty a pole?“, „i nějaké stromy by ve vsi měly být“). Usedlost = dům štítem do ulice + dvůr na straně vchodu (+x modelu) + zahrádka na druhé straně + stodola napříč za dvorem + kůlna/kurník + sad za stodolou (humno) + lán za humny. Každá usedlost má vlastní semínko (semeno + pořadí) a z rozsahů níže si vylosuje svou podobu. Rozměry [min, max] v metrech.",
+  "zdroj": "Havran blender/vesnice.py (layout, _dvorce, build: plot laťový do ulice od rohu chalupy, vrata se stříškou 3 m na dvorní straně, branka 0,9 m na zahradní, boční a zadní ohrada žerďová, zahrádka mezi stěnou a bočním plotem, hranice dřeva u zadního štítu, sudy u stěny, vůz na dvoře) a pravidla/svet/lokace.json ves.dvorec (stodola 4,5 m za domem napříč od boku dvora 0,8 m, kůlna na stejné čáře s mezerou 0,6 m, sad 3,5 m za plotem, zeleň u stavení podle Dohnalová & Dohnal 2023); KCD1 docs/screens/kcd1/ves_1–6 (laťový plot do ulice, krytá vrata, otevřená kůlna, proutěný plot kolem zahrad, žerďový kolem pastvin), KCD2 ref_kcd2_ves_plot_cesta, ref_kcd2_zahrada_plot, ref_kcd2_ves_ulice, ref_kcd2_ves_shora (lány za vsí, stromy mezi domy)",
+  "semeno": 1393,
+  "typy": {
+   "selska": {
+    "predzahradka_m": [
+     0.0,
+     2.0
+    ],
+    "predzahradka_pozn": "Havran ves.dvorec.zelen.predzahradka pás 2 m; KCD1 ves_2 dům přímo u ulice → 0–2 m",
+    "dvur_m": [
+     8.5,
+     10.5
+    ],
+    "zahrada_m": [
+     4.5,
+     6.5
+    ],
+    "za_domem_m": [
+     4.0,
+     5.5
+    ],
+    "od_boku_m": 0.8,
+    "mezera_m": 0.6,
+    "sad_m": [
+     8.0,
+     13.0
+    ],
+    "stodola": {
+     "stodola": 0.55,
+     "stodola_mala": 0.45
+    },
+    "kolna": {
+     "za_dvorem": 0.45,
+     "bok_dvora": 0.3,
+     "zadna": 0.25
+    },
+    "kurnik_p": 0.5,
+    "plot_ulice": {
+     "latovy": 0.75,
+     "proutěny": 0.25
+    },
+    "brana": {
+     "krytá": 0.5,
+     "vrata": 0.5
+    },
+    "branka_p": 0.7,
+    "plot_bok": {
+     "zerdovy": 0.55,
+     "proutěny": 0.3,
+     "latovy": 0.15
+    },
+    "plot_zahrada": {
+     "proutěny": 0.8,
+     "latovy": 0.2
+    },
+    "zahony": [
+     2,
+     6
+    ],
+    "zahony_druhy": {
+     "zahon_zeli": 0.35,
+     "zahon_cibule": 0.2,
+     "zahon_mrkev": 0.15,
+     "zahon_salat": 0.15,
+     "zahon_prazdny": 0.15
+    },
+    "jablone": [
+     1,
+     4
+    ],
+    "strom_dvur_p": 0.35,
+    "lipa_vjezd_p": 0.25,
+    "vuz_p": 0.5,
+    "kupka_p": 0.35,
+    "hranice": [
+     1,
+     2
+    ],
+    "sudy": [
+     0,
+     3
+    ],
+    "lavice_p": 0.6,
+    "trakar_p": 0.4,
+    "spalek_p": 0.6,
+    "pole": true,
+    "povinne": true
+   },
+   "krcma": {
+    "zdroj": "Havran vesnice.py layout (tavern: dům 14 × 7,2 m u vjezdu, šindel), docs/reference/reserse_mosty_krcma.md (zájezdní krčma: dvůr pro povozy, stáj, kůlna), KCD1 kcd1/10_kone_pod_pristreskem, 11_nadvori_studna_drevo_kone; Míša 12. 11.: „zájezdní hostinec s dvorem, stájí, kolnou, plotem“",
+    "predzahradka_m": [
+     0.0,
+     0.5
+    ],
+    "dvur_m": [
+     13.0,
+     15.0
+    ],
+    "zahrada_m": [
+     9.0,
+     9.5
+    ],
+    "za_domem_m": [
+     5.0,
+     6.0
+    ],
+    "od_boku_m": 0.8,
+    "mezera_m": 0.6,
+    "sad_m": [
+     3.0,
+     4.0
+    ],
+    "stodola": {
+     "stodola_mala": 1.0
+    },
+    "stodola_pozn": "malá stodola jako stáj pro koně hostů (NAVRH – Havran nemá samostatný model stáje)",
+    "kolna": {
+     "misto_zahrady": 1.0
+    },
+    "kurnik_p": 0.0,
+    "plot_ulice": {
+     "zerdovy": 1.0
+    },
+    "brana": {
+     "vrata": 1.0
+    },
+    "branka_p": 0.0,
+    "plot_bok": {
+     "zerdovy": 1.0
+    },
+    "plot_zahrada": {
+     "proutěny": 1.0
+    },
+    "zahony": [
+     0,
+     0
+    ],
+    "zahony_druhy": {
+     "zahon_zeli": 0.5,
+     "zahon_cibule": 0.5
+    },
+    "jablone": [
+     0,
+     0
+    ],
+    "strom_dvur_p": 0.0,
+    "lipa_vjezd_p": 1.0,
+    "vuz_p": 1.0,
+    "vozy": [
+     1,
+     2
+    ],
+    "kupka_p": 1.0,
+    "hranice": [
+     2,
+     2
+    ],
+    "sudy": [
+     3,
+     5
+    ],
+    "lavice_p": 1.0,
+    "lavice": [
+     2,
+     2
+    ],
+    "koryto_kone": 1,
+    "trakar_p": 0.5,
+    "spalek_p": 1.0,
+    "pole": false,
+    "stodola_poloha": "bok_dvora",
+    "povinne": false,
+    "pozn_poloha": "skutečný hostinec stojí mezi silnicí a strmým svahem (DMR 5G): za domem není místo – stáj bokem do dvora a kůlna na vozy na druhé straně domu, vše v řadě podél cesty (NAVRH)"
+   },
+   "hajovna": {
+    "zdroj": "Míša 12. 11.: „hájovna: dům s dřevníkem a kolnou na kraji lesa“; Havran předměty kolna, hranice_dreva, spalek_stipani (lom a uhlíři); KCD1 reference/kcd1/05_dosky_strecha_srub_hranice, 16_hranice_dreva_detail",
+    "predzahradka_m": [
+     0.0,
+     0.5
+    ],
+    "dvur_m": [
+     9.0,
+     10.0
+    ],
+    "zahrada_m": [
+     4.0,
+     5.0
+    ],
+    "za_domem_m": [
+     3.0,
+     4.0
+    ],
+    "od_boku_m": 0.8,
+    "mezera_m": 0.6,
+    "sad_m": [
+     3.0,
+     4.0
+    ],
+    "stodola": {},
+    "kolna": {
+     "bok_dvora": 1.0
+    },
+    "kurnik_p": 1.0,
+    "plot_ulice": {
+     "zerdovy": 1.0
+    },
+    "brana": {
+     "vrata": 1.0
+    },
+    "branka_p": 0.0,
+    "plot_bok": {
+     "zerdovy": 1.0
+    },
+    "plot_zahrada": {
+     "proutěny": 1.0
+    },
+    "zahony": [
+     2,
+     3
+    ],
+    "zahony_druhy": {
+     "zahon_zeli": 0.4,
+     "zahon_cibule": 0.3,
+     "zahon_mrkev": 0.3
+    },
+    "jablone": [
+     1,
+     1
+    ],
+    "strom_dvur_p": 0.0,
+    "lipa_vjezd_p": 0.0,
+    "vuz_p": 0.0,
+    "kupka_p": 0.0,
+    "hranice": [
+     4,
+     5
+    ],
+    "hranice_pozn": "dřevník: hranice dřeva podél zadního štítu a kůlny (hajný = dříví)",
+    "sudy": [
+     1,
+     1
+    ],
+    "lavice_p": 1.0,
+    "trakar_p": 1.0,
+    "spalek_p": 1.0,
+    "pole": false,
+    "povinne": false
+   }
+  },
+  "ploty": {
+   "zdroj": "Havran vesnice.py picket_fence (sloupky po 2 m, 2 žerdě, latě 5,5–10 cm, výška 1,15 m, 4 % chybí, špice/šikmo/rovně), rail_fence (kůly po 2,8 m, 2–3 žerdě s kůrou, výška 1,1 m, 5 % spadlá), roofed_gate (sloupy 24 cm, 2,7 m, stříška šindel, křídla z prken 1,75 m), wicket (branka 0,9 m, 7 latí 1,05 m); proutěný = předmět plutek (2,07 m díl). KCD1 ves_1 (laťový + krytá vrata), ves_4 (proutěný), KCD2 ref_kcd2_zahrada_plot (proutí a kůly)",
+   "latovy": {
+    "vyska_m": 1.15,
+    "sloupky_m": 2.0,
+    "lata_sirka_m": [
+     0.055,
+     0.1
+    ],
+    "lata_mezera_m": [
+     0.03,
+     0.07
+    ],
+    "chybi_p": 0.04,
+    "zerde_y_m": [
+     0.3,
+     0.9
+    ]
+   },
+   "zerdovy": {
+    "vyska_m": 1.1,
+    "kuly_m": 2.8,
+    "spadla_p": 0.05
+   },
+   "proutěny": {
+    "model": "plutek",
+    "delka_m": 2.065
+   },
+   "kryta_vrata": {
+    "sirka_m": 3.0,
+    "sloupy_m": 2.7,
+    "kridla_m": 1.75
+   },
+   "vrata": {
+    "sirka_m": 3.0,
+    "kridla_m": 1.5
+   },
+   "branka": {
+    "sirka_m": 0.9,
+    "vyska_m": 1.05
+   },
+   "od_cesty_m": 2.5,
+   "od_toku_m": 6.0,
+   "textury": {
+    "zdroj": "textury předmětů Havrana (predmety_h): prkna stodoly = latě a vrata, kůra kůlů plůtku, šindel a kamenné patky kůlny; při načtení zesvětlené na jas_cil jako domy a stodoly (nastroje/havran/stavby_export.gd JAS_CIL, KCD1 ves_2: ohlazené dřevo 0,42–0,55; ploty a stodoly 0,42 jako stavby_export.gd JAS_PREDMETY – při 0,5 vyšla prkna růžová, snímek 12. 11.)",
+    "jas_cil": 0.42,
+    "lata": {
+     "albedo": "res://modely/predmety_h/kolna_prkna_stodola_albedo.jpg",
+     "normal": "res://modely/predmety_h/kolna_prkna_stodola_normal.jpg",
+     "velikost_m": 1.2
+    },
+    "vrata": {
+     "albedo": "res://modely/predmety_h/stodola_prkna_vrata_albedo.jpg",
+     "normal": "res://modely/predmety_h/stodola_prkna_vrata_normal.jpg",
+     "velikost_m": 1.5
+    },
+    "kura": {
+     "albedo": "res://modely/predmety_h/plutek_kura_kul_albedo.jpg",
+     "normal": "res://modely/predmety_h/plutek_kura_kul_normal.jpg",
+     "velikost_m": 1.0
+    },
+    "tram": {
+     "albedo": "res://modely/predmety_h/stodola_tram_stodola_albedo.jpg",
+     "normal": "res://modely/predmety_h/stodola_tram_stodola_normal.jpg",
+     "velikost_m": 1.5
+    },
+    "sindel": {
+     "albedo": "res://modely/predmety_h/kolna_sindel_stodola_albedo.jpg",
+     "normal": "res://modely/predmety_h/kolna_sindel_stodola_normal.jpg",
+     "velikost_m": 1.5
+    },
+    "kamen": {
+     "albedo": "res://modely/predmety_h/kolna_kamen_patky_albedo.jpg",
+     "normal": "res://modely/predmety_h/kolna_kamen_patky_normal.jpg",
+     "velikost_m": 1.2
+    },
+    "tma": {
+     "barva": "#0b0a09"
+    }
+   }
+  },
+  "studna": {
+   "zdroj": "Havran vesnice.py well (kamenná roubenka kruh r 0,95 m, výška 0,95 m, dva sloupy 2,3 m s rumpálem a stříškou ze šindele), studna na návsi; KCD1 reference/kcd1/11_nadvori_studna_drevo_kone",
+   "polomer_m": 0.95,
+   "vyska_m": 0.95,
+   "sloupy_m": 2.3,
+   "od_cesty_m": 4.0
+  },
+  "pole": {
+   "popis": "Lány za humny (záhumenice): pás v šíři usedlosti dělený mezemi na 1–3 pruhy, plodina losem; jen kde je dnes nelesní stanoviště (louka, pastvina, pole) a mimo cesty a toky. Povrch: orané = hlína (maska_cesty.R), úhor = pastvina, strniště = pole (nastroje/stavby_vegetace.py).",
+   "zdroj": "Havran docs/rozpracovane/reserse_pole_kcd2.md + pravidla/svet/plochy.json pole („kousky přímo za vsí, pár úzkých lánů mezi mezemi a remízky“); GC80T08 kamenné hrázky políček SZ od hradu (DOLOZENO existence); KCD2 ref_kcd2_ves_shora (pruhy polí za vsí); Míša 12. 11. „políčka/plužiny za humny (dlouhé úzké pásy)“",
+   "od_humna_m": 1.5,
+   "delka_m": [
+    35.0,
+    70.0
+   ],
+   "pruhy": [
+    1,
+    3
+   ],
+   "mez_m": 1.2,
+   "plodiny": {
+    "orane": 0.4,
+    "strniste": 0.35,
+    "uhor": 0.25
+   },
+   "panaky_strniste": [
+    0,
+    5
+   ],
+   "od_cesty_m": 2.0,
+   "od_toku_m": 6.0,
+   "stanoviste_zakazana": [
+    "skala",
+    "koryto_kamenite",
+    "breh",
+    "luh",
+    "cesta",
+    "les_sut"
+   ],
+   "max_sklon": 0.15,
+   "max_sklon_zdroj": "pravidla/svet/plochy.json pastvina od_sklonu 0,15 (Havran: orná půda do 0,15, výš pastvina, nad 0,3 les); dnešní les na plošině u Předhradí je novověký (v roce 1393 pole – plochy.json les pozn „plošina pole a pastviny“)"
+  },
+  "lod": {
+   "zdroj": "jako domy míst (hlavni.gd _mista, Havran _ves_domy): podrobný do 30 m, střední stupeň (barva vrcholů) dál, stín jen ze středního; drobnosti jen zblízka (Havran predmety.gd: < 1,5 m → 40 m, větší 80 m)",
+   "podrobny_do_m": 30.0,
+   "stredni_do_m": 450.0,
+   "stredni_do_m_mobil": 300.0,
+   "lod_bias": 50.0,
+   "ploty_do_m": 140.0,
+   "ploty_do_m_mobil": 80.0,
+   "drobne_do_m": 40.0,
+   "zahony_do_m": 60.0,
+   "strom_podrobny_do_m": 45.0,
+   "strom_lod1_do_m": 140.0,
+   "strom_daleko_do_m": 900.0,
+   "stin_drobne_od_m": 1.0,
+   "bunka_m": 25.0,
+   "ploty_pozn": "KCD2 ref_kcd2_ves_shora: ploty jsou z výšky vidět přes celou ves (~150 m); tablet kratší"
+  },
+  "povrch": {
+   "popis": "povrch usedlostí a lánů pro stanoviště a masku hlíny (nastroje/stavby_vegetace.py): třída stanoviště (byliny.json, louka.json) a síla hlíny v maska_cesty.R",
+   "zdroj": "KCD1 docs/screens/kcd1/ves_2, ves_6 (dvůr a náves udusaná hlína, tráva u plotů), ref_kcd2_zahrada_plot (záhony, tráva kolem), ref_kcd2_ves_shora (pruhy polí: zelené a hnědé); Havran vesnice.py yard_dirt",
+   "tridy": {
+    "dvur": "nadvori_slap",
+    "zahrada": "pastvina",
+    "sad": "louka_kosena",
+    "orane": "pole_orane",
+    "strniste": "pole",
+    "uhor": "pastvina"
+   },
+   "hlina": {
+    "dvur": 0.85,
+    "orane": 0.95,
+    "zahrada": 0.0,
+    "sad": 0.0,
+    "strniste": 0.15,
+    "uhor": 0.0
+   },
+   "mekkost_m": 1.5
+  }
+ }
 }
