@@ -1295,3 +1295,6 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   po obvodu (`obvod_kol`, `obvod_podil`), vytlačení z kapslí stehen a holení u všech řetězů. test_sukne 480 → 36 (zbývá
   klek u mužů – kotle, viditelně ok).
 - **Malování po hlavě**: `face_mask` průměruje po plochách hrubé sítě – na tenké tahy (vrásky) `px_mask` (po texelech).
+- Sukně: vytlačení z kapslí běží vždy (i stání/chůze, váha 0) a vyhlazuje se jen odchylka od animace (průměr poloh kruh
+  smršťoval → noha skrz sukni při stání). Otevřené: při chůzi horní část stehna prosvítá kabátcem mužů (kořen řetězu
+  pevný u pánve, první kost 15 cm) – test_sukne 18 chyb (klek mužů).

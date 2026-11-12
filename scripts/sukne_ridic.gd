@@ -89,8 +89,7 @@ func _process_modification() -> void:
 	if _diag < 2 and OS.has_environment("TVRZ_SUKNE_DIAG"):
 		_diag += 1
 		print("SUKNE_RIDIC ohyb stehen %.0f st, pokles panve %.2f m, vaha %.2f" % [ohyb, pokles, w_ohyb])
-	if w_ohyb <= 0.001:
-		return
+	# 12. 11. (snimek kotle: pri stani noha od sebe prosla sukni) - vytlaceni z kapsli bezi vzdy, i pri vaze 0
 	var vse: Array = []
 	for r: Array in _retezy:
 		var kosti: Array = r[0]
@@ -132,9 +131,10 @@ func _process_modification() -> void:
 		for k in kosti.size():
 			s_ += float(delky[k])
 			cile.append((anim[k + 1] as Vector3).lerp(_na_draze(dr, s_), w))
-		vse.append([kosti, cile, ref])
+		vse.append([kosti, cile, ref, anim])
 	# vyhlazeni po obvodu (12. 11., snimek kucharka Sed_Poza3: u zkrizenych nohou sousedni retezy kazdy k jine noze,
-	# latka mezi nimi zkroucena - tmavy rub); retezy sukne_<i> jdou po obvodu dokola
+	# latka mezi nimi zkroucena - tmavy rub); retezy sukne_<i> jdou po obvodu dokola. Vyhlazuje se jen odchylka od animace:
+	# prumer poloh sousedu kruh sukne smrstil (snimek kotle - noha pri stani skrz sukni)
 	var n_r := vse.size()
 	for _it in int(D.get("obvod_kol", 2)):
 		var nove: Array = []
@@ -142,9 +142,14 @@ func _process_modification() -> void:
 			var ci: Array = (vse[i][1] as Array).duplicate()
 			var cp: Array = vse[(i - 1 + n_r) % n_r][1]
 			var cn: Array = vse[(i + 1) % n_r][1]
+			var ai: Array = vse[i][3]
+			var ap: Array = vse[(i - 1 + n_r) % n_r][3]
+			var an_: Array = vse[(i + 1) % n_r][3]
 			for k in range(1, ci.size()):
-				if k < cp.size() and k < cn.size():
-					ci[k] = (ci[k] as Vector3).lerp(((cp[k] as Vector3) + (cn[k] as Vector3)) * 0.5, float(D.get("obvod_podil", 0.35)))
+				if k < cp.size() and k < cn.size() and k < ai.size():
+					var odch := (ci[k] as Vector3) - (ai[k] as Vector3)
+					var sous := ((cp[k] as Vector3) - (ap[k] as Vector3) + (cn[k] as Vector3) - (an_[k] as Vector3)) * 0.5
+					ci[k] = (ai[k] as Vector3) + odch.lerp(sous, float(D.get("obvod_podil", 0.35)))
 			nove.append(ci)
 		for i in n_r:
 			vse[i][1] = nove[i]
@@ -154,20 +159,18 @@ func _process_modification() -> void:
 		var ref: Vector3 = v[2]
 		# vytlaceni z kapsli obou nohou (CRYENGINE PRow; 12. 11. test_sukne: zkrizene nohy a klek - prumer drah
 		# dvou nohou padl do druhe nohy)
+		var kapsle: Array = []
+		for s: String in ["l", "r"]:
+			kapsle.append([P["thigh_" + s], P["calf_" + s], r_s + tl])
+			kapsle.append([P["calf_" + s], P["foot_" + s], r_h + tl])
 		for k in range(1, cile.size()):
-			var c: Vector3 = cile[k]
-			for s: String in ["l", "r"]:
-				for kap: Array in [[P["thigh_" + s], P["calf_" + s], r_s + tl], [P["calf_" + s], P["foot_" + s], r_h + tl]]:
-					var a: Vector3 = kap[0]
-					var ab: Vector3 = (kap[1] as Vector3) - a
-					var t := clampf((c - a).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
-					var q := a + ab * t
-					var d := c.distance_to(q)
-					var rr := float(kap[2])
-					if d < rr:
-						var n := (c - q) / d if d > 1e-5 else ref - q
-						c = q + n.normalized() * rr
-			cile[k] = c
+			var c: Vector3 = _ven_z_kapsli(cile[k], kapsle, ref)
+			# latka mezi klouby je rovna tetiva: kdyz stred useku vezi v noze (chuze - stehno vpredu), kloub se odsune
+			# o dvojnasobek hloubky (stred tetivy pak lezi na povrchu)
+			var m: Vector3 = ((cile[k - 1] as Vector3) + c) * 0.5
+			var m2 := _ven_z_kapsli(m, kapsle, ref)
+			c += (m2 - m) * 2.0
+			cile[k] = _ven_z_kapsli(c, kapsle, ref)
 		for k in kosti.size():
 			var b: int = kosti[k]
 			var g := sk.get_bone_global_pose(b)
@@ -180,3 +183,18 @@ func _process_modification() -> void:
 			var p := sk.get_bone_parent(b)
 			var gp := sk.get_bone_global_pose(p) if p >= 0 else Transform3D()
 			sk.set_bone_pose_rotation(b, (gp.basis.inverse() * cil).get_rotation_quaternion().normalized())
+
+
+## Bod vytlaceny ze vsech kapsli [a, b, polomer] po kolmici k ose (CRYENGINE PRow projekce).
+static func _ven_z_kapsli(c: Vector3, kapsle: Array, ref: Vector3) -> Vector3:
+	for kap: Array in kapsle:
+		var a: Vector3 = kap[0]
+		var ab: Vector3 = (kap[1] as Vector3) - a
+		var t := clampf((c - a).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
+		var q := a + ab * t
+		var d := c.distance_to(q)
+		var rr := float(kap[2])
+		if d < rr:
+			var n := (c - q) / d if d > 1e-5 else ref - q
+			c = q + n.normalized() * rr
+	return c
