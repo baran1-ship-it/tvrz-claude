@@ -1277,3 +1277,6 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   nejsou, jsou jen v balících `data/*.pck.*`). Obnoveno nástrojem `tools/obnov_importy.py` (čte `.import` binárně,
   vytáhne chybějící soubory z PCK po částech, varianty textur jen když žádná lokálně není, stop pod 900 MB).
   **Osiřelé importy už nemazat** – úspora 300 MB nestála za riziko; čistit jen vlastní snímky, logy, scratchpad.
+- **Disk 12. 11. – řešení:** `.git` měl 7,5 GB volných (nezabalených) objektů, všechny dosažitelné (`git prune
+  --dry-run` = 0). Zabaleno po dávkách 3000 (`git pack-objects` + `git prune-packed`, žádná nová místa naráz) →
+  volno 0,6 → 5,4 GB. Při nedostatku místa nejdřív tohle, ne mazat importy.
