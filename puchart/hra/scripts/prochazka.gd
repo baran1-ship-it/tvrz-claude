@@ -241,9 +241,10 @@ class Kruhy extends Control:
 	func _has_point(p: Vector2) -> bool:
 		return ma_bod(p)
 	func _gui_input(e: InputEvent) -> void:
-		if e is InputEventMouseButton: accept_event(); return   # jen dotyk (myš je emulovaná z dotyku a naopak – přepínač by se přepnul 2×)
-		if not (e is InputEventScreenTouch and (e as InputEventScreenTouch).pressed): return
-		var p := (e as InputEventScreenTouch).position
+		# jen tlačítko myši: na tabletu ho Godot emuluje z dotyku (emulate_mouse_from_touch), na PC je skutečné – přepínač se
+		# přepne právě jednou (dotyk i myš zároveň by ho přepnuly 2×)
+		if not (e is InputEventMouseButton and (e as InputEventMouseButton).pressed and (e as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT): return
+		var p := (e as InputEventMouseButton).position
 		if p.distance_to(run_c()) < 44.0: proch._akce("set:beh", null)
 		elif p.distance_to(let_c()) < 52.0: proch._akce("set:let", null)
 		else: return

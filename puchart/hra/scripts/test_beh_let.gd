@@ -14,6 +14,10 @@ func _ready() -> void:
 		for co in ["beh", "let"]:
 			var pred: bool = h.bezi if co == "beh" else h.leti
 			var c: Vector2 = pr.kruhy.run_c() if co == "beh" else pr.kruhy.let_c()
+			var mm := InputEventMouseMotion.new(); mm.position = c; mm.global_position = c; Input.parse_input_event(mm)
+			await get_tree().process_frame; await get_tree().process_frame
+			var hc := get_viewport().gui_get_hovered_control()
+			print("BEHLET_TEST pod prstem ", hc.get_path() if hc else "nic", " bod ", c, " velikost ", pr.kruhy.size)
 			for st in [true, false]:
 				var t := InputEventScreenTouch.new(); t.position = c; t.pressed = st; t.index = 0
 				Input.parse_input_event(t); await get_tree().process_frame
