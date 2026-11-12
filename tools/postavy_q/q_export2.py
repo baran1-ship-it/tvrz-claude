@@ -243,6 +243,7 @@ def build_atlas(objs, label, garments=None):
     rgh = np.zeros((A, A, 4), np.uint8); rgh[:] = bgra((255, 200, 0))
     mask = np.zeros((A, A), np.uint8); mn = np.zeros((A, A), np.uint8); mr = np.zeros((A, A), np.uint8)
     dirt = np.zeros((A, A), np.uint8); dmk = np.zeros((A, A), np.uint8)
+    rspina = np.zeros((A, A), np.uint8); rmk = np.zeros((A, A), np.uint8)   # 12. 11.: spina podle role
     gar_of = {}
     for k, v in (garments or {}).items():
         for o in v: gar_of[o.name] = k
@@ -255,10 +256,12 @@ def build_atlas(objs, label, garments=None):
             pc, pr = pats[k]
             skirt = o.name.endswith(("_svrchni_d",)) or "rouska_cip" in o.name or "limec" in o.name
             dw = dirt_weights(o, k)
+            rw = role_weights(o, k)
             for ti, (s_, d, _m) in enumerate(tl):
                 fill_tri(col, mask, d, pc); fill_tri(rgh, mr, d, pr)
                 if skirt: warp_into(nor, mn, FOLDS, s_, d)
                 if dw[ti] > 0.02: fill_tri(dirt, dmk, d, np.broadcast_to(np.uint8(min(255, dw[ti] * 255)), (A, A)))
+                if ti < len(rw) and rw[ti] > 0.02: fill_tri(rspina, rmk, d, np.broadcast_to(np.uint8(min(255, rw[ti] * 255)), (A, A)))
             continue
         mats = o.data.materials
         for mi, m in enumerate(mats):
@@ -287,6 +290,16 @@ def build_atlas(objs, label, garments=None):
         earth = np.array([40, 52, 62], np.float32)            # BGR hlína
         c3 = col[..., :3].astype(np.float32)
         col[..., :3] = np.clip(c3 * (1 - dm) + (c3 * 0.55 + earth * 0.45) * dm, 0, 255).astype(np.uint8)
+    # ušpinění podle role (KROJ.spina.barva, linearni RGB): skvrnite, rozmazane
+    if rspina.max() > 0:
+        rm = cv2.GaussianBlur(rspina.astype(np.float32) / 255, (0, 0), A / 256 * 3.0)
+        rng2 = np.random.default_rng(11); nz2 = cv2.resize(rng2.random((A // 12, A // 12)).astype(np.float32), (A, A), interpolation=cv2.INTER_CUBIC)
+        rm = np.clip(rm * (0.3 + 1.2 * nz2), 0, 1)[..., None]
+        sc_ = np.array(KROJ["spina"]["barva"], np.float32)
+        sc_ = np.where(sc_ <= 0.0031308, sc_ * 12.92, 1.055 * np.power(sc_, 1 / 2.4) - 0.055) * 255
+        sc_bgr = sc_[::-1]
+        c3 = col[..., :3].astype(np.float32)
+        col[..., :3] = np.clip(c3 * (1 - rm) + sc_bgr * rm, 0, 255).astype(np.uint8)
     # drsnost: zdroj (Quaternius) má drsnost v R/G/B šedě -> do G kanálu ORM
     g = rgh[..., 1].copy() if rgh[..., 1].max() > 0 else rgh[..., 2]
     orm = np.dstack([np.zeros_like(g), g, np.full_like(g, 255), np.full_like(g, 255)])   # BGRA: B=0(metal), G=rough, R=1(AO)
@@ -321,6 +334,27 @@ def dirt_weights(o, k):
         w += np.clip(1 - np.linalg.norm(C - p, axis=1) / 0.07, 0, 1) * 0.6
     if k == "skorne": w += 0.35
     return np.clip(w, 0, 1)
+def role_weights(o, k):
+    """12. 11. (rešerše docs/rozpracovane/postavy_vzhled_kcd_reserse.md: KCD maska spiny podle role - mouka u mlynare,
+    saze u kovare, blato u sedlaka): vaha ušpinění role po trojuhelnicich podle KROJ.spina.kde (predek = pred panvi,
+    rukavy = predlokti, lem = u zeme, cele) x KROJ.spina.sila"""
+    sp = KROJ.get("spina")
+    if not sp or k == "skorne": return np.zeros(len(o.data.polygons))
+    mw = o.matrix_world
+    V = np.array([mw @ v.co for v in o.data.vertices])
+    C = np.array([V[list(p.vertices)].mean(0) for p in o.data.polygons]) if len(o.data.polygons) else np.zeros((0, 3))
+    if len(C) == 0: return np.zeros(0)
+    pel = np.array(arm.matrix_world @ arm.data.bones["pelvis"].head_local)
+    w = np.zeros(len(C))
+    for kde in sp.get("kde", ["cele"]):
+        if kde == "cele": w += 0.5
+        elif kde == "predek": w += np.clip((pel[1] - C[:, 1]) / 0.12, 0, 1) * np.clip((C[:, 2] - 0.3) / 0.3, 0, 1)   # -y = predek
+        elif kde == "lem": w += np.clip((0.45 - C[:, 2]) / 0.35, 0, 1)
+        elif kde == "rukavy":
+            for b in ("lowerarm_l", "lowerarm_r"):
+                p = np.array(arm.matrix_world @ arm.data.bones[b].head_local)
+                w += np.clip(1 - np.linalg.norm(C - p, axis=1) / 0.16, 0, 1)
+    return np.clip(w, 0, 1) * float(sp.get("sila", 0.5))
 def fabric_pattern(k):
     """barva + drsnost látky pro kus k v prostoru atlasu"""
     druh, barva = MATS[k]

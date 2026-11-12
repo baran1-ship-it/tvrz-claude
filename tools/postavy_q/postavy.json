@@ -386,7 +386,20 @@
     "skorne",
     "opasek"
    ],
-   "rukav": 0.7
+   "rukav": 0.7,
+   "spina": {
+    "barva": [
+     0.02,
+     0.018,
+     0.016
+    ],
+    "kde": [
+     "predek",
+     "rukavy"
+    ],
+    "sila": 0.5,
+    "_co": "saze (kovar)"
+   }
   },
   "eye": [
    0.15,
@@ -978,7 +991,19 @@
     0.21,
     0.18,
     0.12
-   ]
+   ],
+   "spina": {
+    "barva": [
+     0.06,
+     0.045,
+     0.03
+    ],
+    "kde": [
+     "lem"
+    ],
+    "sila": 0.6,
+    "_co": "blato (sedlak)"
+   }
   },
   "eye": [
    0.3,
@@ -1055,7 +1080,19 @@
     0.075,
     0.055,
     0.037
-   ]
+   ],
+   "spina": {
+    "barva": [
+     0.06,
+     0.045,
+     0.03
+    ],
+    "kde": [
+     "lem"
+    ],
+    "sila": 0.5,
+    "_co": "blato"
+   }
   },
   "eye": [
    0.3,
@@ -1483,7 +1520,20 @@
     0.3,
     0.27,
     0.2
-   ]
+   ],
+   "spina": {
+    "barva": [
+     0.78,
+     0.76,
+     0.7
+    ],
+    "kde": [
+     "predek",
+     "rukavy"
+    ],
+    "sila": 0.55,
+    "_co": "mouka (mlynar)"
+   }
   },
   "eye": [
    0.3,
@@ -1765,7 +1815,19 @@
     0.095,
     0.09,
     0.08
-   ]
+   ],
+   "spina": {
+    "barva": [
+     0.06,
+     0.045,
+     0.03
+    ],
+    "kde": [
+     "lem"
+    ],
+    "sila": 0.6,
+    "_co": "blato (pastyr)"
+   }
   },
   "eye": [
    0.3,
@@ -1842,7 +1904,19 @@
     0.042,
     0.032,
     0.024
-   ]
+   ],
+   "spina": {
+    "barva": [
+     0.06,
+     0.045,
+     0.03
+    ],
+    "kde": [
+     "lem"
+    ],
+    "sila": 0.4,
+    "_co": "blato"
+   }
   },
   "eye": [
    0.3,
@@ -2812,5 +2886,6 @@
   "freckles": 0.15,
   "vyska": 0.96,
   "mekkost": 0.75
- }
+ },
+ "_spina": "12. 11. (rešerše postavy_vzhled_kcd_reserse.md: KCD maska blata/spiny podle role): kroj.spina = barva (linearni RGB), kde (predek/rukavy/lem/cele), sila - tools/postavy_q/q_export2.py role_weights"
 }
