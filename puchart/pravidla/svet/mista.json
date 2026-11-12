@@ -603,8 +603,8 @@
   "lod": {
    "zdroj": "jako domy míst (hlavni.gd _mista, Havran _ves_domy): podrobný do 30 m, střední stupeň (barva vrcholů) dál, stín jen ze středního; drobnosti jen zblízka (Havran predmety.gd: < 1,5 m → 40 m, větší 80 m)",
    "podrobny_do_m": 30.0,
-   "stredni_do_m": 450.0,
-   "stredni_do_m_mobil": 300.0,
+   "stredni_do_m": 180.0,
+   "stredni_do_m_mobil": 120.0,
    "lod_bias": 50.0,
    "ploty_do_m": 140.0,
    "ploty_do_m_mobil": 80.0,
@@ -617,7 +617,8 @@
    "bunka_m": 25.0,
    "ploty_pozn": "KCD2 ref_kcd2_ves_shora: ploty jsou z výšky vidět přes celou ves (~150 m); tablet kratší",
    "stredni_zapnuto": false,
-   "stredni_pozn": "12. 11.: střední stupeň stodol/kůlen (stavby_h *_stredni.glb, barva vrcholů) se kreslí černě (snímky docs/screens/ves_kcd_*; s jednobarevným materiálem osvětlený) – příčina NEOVERENA, stejné černé domy z dálky v _mista. Podrobný model má stejně trojúhelníků (stodola 17,8 tis.), střední šetří jen volání kreslení → vypnuto, podrobný do stredni_do_m."
+   "stredni_pozn": "12. 11.: střední stupeň stodol/kůlen (stavby_h *_stredni.glb, barva vrcholů) se kreslí černě (snímky docs/screens/ves_kcd_*; s jednobarevným materiálem osvětlený) – příčina NEOVERENA, stejné černé domy z dálky v _mista. Podrobný model má stejně trojúhelníků (stodola 17,8 tis.), střední šetří jen volání kreslení → vypnuto, podrobný do stredni_do_m.",
+   "dosah_pozn_12_11": "hlídač scén 12. 11.: stodoly a kůlny v plném detailu do 450 m přetáhly rozpočet trojúhelníků (scény 300–800 m od vsi 2,1–2,4 M) → 180 m (tablet 120 m), dokud střední stupeň kreslí černě"
   },
   "povrch": {
    "popis": "povrch usedlostí a lánů pro stanoviště a masku hlíny (nastroje/stavby_vegetace.py): třída stanoviště (byliny.json, louka.json) a síla hlíny v maska_cesty.R",

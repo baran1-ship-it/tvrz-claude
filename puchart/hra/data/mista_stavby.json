@@ -180,8 +180,8 @@
  "lod_ves": {
   "zdroj": "jako domy míst (hlavni.gd _mista, Havran _ves_domy): podrobný do 30 m, střední stupeň (barva vrcholů) dál, stín jen ze středního; drobnosti jen zblízka (Havran predmety.gd: < 1,5 m → 40 m, větší 80 m)",
   "podrobny_do_m": 30.0,
-  "stredni_do_m": 450.0,
-  "stredni_do_m_mobil": 300.0,
+  "stredni_do_m": 180.0,
+  "stredni_do_m_mobil": 120.0,
   "lod_bias": 50.0,
   "ploty_do_m": 140.0,
   "ploty_do_m_mobil": 80.0,
