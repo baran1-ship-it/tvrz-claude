@@ -1289,3 +1289,9 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - **Sukně vsedě skrz lavici** (kuchařka): řidič vedl lem po holeni dozadu pod lavici. Látka od kolena padá svisle,
   holeň ji jen odtlačuje dopředu (`sukne_ridic.gd`). Test `tools/test_sukne.gd` (lem za kolenem, látka ve stehně).
 - Pozor: `sestav.sh` na konci maže `/tmp/postavy_q/src` a `qd_*.blend` – pro měření v Blenderu znovu rozbalit (viz sestav.sh).
+- **Atlas NPC 512 px**: 1px lem každého trojúhelníku přepisoval tenké ostrovy sousedů (oranžový opasek) → `_jadro_lem`
+  v `q_export2.py` (jádro vždy, lem jen do prázdna). Límec kukle je slupka s UV těla → nesmí dostat normálu záhybů trubky.
+- **Sukně řidič** (`sukne_ridic.gd`): cíl = animace prolnutá s drahou (váha řetězu × ohyb stehen / pokles pánve), vyhlazení
+  po obvodu (`obvod_kol`, `obvod_podil`), vytlačení z kapslí stehen a holení u všech řetězů. test_sukne 480 → 36 (zbývá
+  klek u mužů – kotle, viditelně ok).
+- **Malování po hlavě**: `face_mask` průměruje po plochách hrubé sítě – na tenké tahy (vrásky) `px_mask` (po texelech).
