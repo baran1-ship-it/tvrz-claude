@@ -12,12 +12,14 @@ var D: Dictionary = {}
 var _retezy: Array = []          # [kosti, vaha leve, vaha prave, delky]
 var _b := {}
 var _diag := 0
+var _pel_y0 := 0.0
 
 
 func priprav(sk: Skeleton3D) -> void:
 	for n: String in ["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r", "foot_l", "foot_r"]:
 		_b[n] = sk.find_bone(n)
 	var pel := sk.get_bone_global_rest(_b["pelvis"]).origin
+	_pel_y0 = pel.y
 	var lx := signf(sk.get_bone_global_rest(_b["thigh_l"]).origin.x - pel.x)
 	var i := 0
 	while sk.find_bone("sukne_%d_0" % i) >= 0:
@@ -81,9 +83,12 @@ func _process_modification() -> void:
 		var t: Vector3 = (P["calf_" + s] as Vector3) - (P["thigh_" + s] as Vector3)
 		ohyb = maxf(ohyb, rad_to_deg(t.angle_to(-nahoru)))
 	var w_ohyb := smoothstep(float(D.get("ohyb_od_st", 25.0)), float(D.get("ohyb_do_st", 65.0)), ohyb)
+	# 12. 11. test_sukne Kleci_Loop: pri kleku stehno svisle (ohyb ~0), latka ve stehne - vaha i podle poklesu panve
+	var pokles := _pel_y0 - (P["pelvis"] as Vector3).y
+	w_ohyb = maxf(w_ohyb, smoothstep(float(D.get("pokles_od_m", 0.12)), float(D.get("pokles_do_m", 0.3)), pokles))
 	if _diag < 2 and OS.has_environment("TVRZ_SUKNE_DIAG"):
 		_diag += 1
-		print("SUKNE_RIDIC ohyb stehen %.0f st, vaha %.2f" % [ohyb, w_ohyb])
+		print("SUKNE_RIDIC ohyb stehen %.0f st, pokles panve %.2f m, vaha %.2f" % [ohyb, pokles, w_ohyb])
 	if w_ohyb <= 0.001:
 		return
 	for r: Array in _retezy:
@@ -95,11 +100,15 @@ func _process_modification() -> void:
 			continue
 		var koren := sk.get_bone_global_pose(kosti[0]).origin
 		var drahy: Array = []
+		# smer odsunu od nohy: ven od panve na strane retezu a nahoru (vsede latka na stehne, pri kleku pred stehnem)
+		var ven0 := koren - (P["pelvis"] as Vector3)
+		ven0.y = 0.0
+		var ref := koren + (ven0.normalized() + nahoru) * 0.3
 		for s: String in ["l", "r"]:
 			var th: Vector3 = P["thigh_" + s]
 			var kn: Vector3 = P["calf_" + s]
 			var an: Vector3 = P["foot_" + s]
-			var k_ := _od_osy(th, kn, kn, koren, r_s + tl)
+			var k_ := _od_osy(th, kn, kn, ref, r_s + tl)
 			# od kolena latka pada svisle (tize); holen ji jen odtlacuje (kapsle PRow), kdyz je kotnik pred svislici -
 			# 12. 11. kucharka vsede: nohy zastrcene pod lavici, lem po holeni sel dozadu skrz prkno lavice
 			var a_ := _od_osy(kn, an, an, k_, r_h + tl)
@@ -109,8 +118,8 @@ func _process_modification() -> void:
 			if ven.length_squared() > 1e-8 and (a_ - svisle).dot(ven.normalized()) < 0.0:
 				a_ = svisle
 			# po stehne (12. 11. test_sukne: primka pas-koleno rizla stehno 2-5 cm od osy): body na tretinach stehna
-			var s1 := _od_osy(th, kn, th.lerp(kn, 0.33), koren, r_s + tl)
-			var s2 := _od_osy(th, kn, th.lerp(kn, 0.66), koren, r_s + tl)
+			var s1 := _od_osy(th, kn, th.lerp(kn, 0.33), ref, r_s + tl)
+			var s2 := _od_osy(th, kn, th.lerp(kn, 0.66), ref, r_s + tl)
 			drahy.append([koren, s1, s2, k_, a_, a_ - nahoru * 0.3])
 		var ws := wl + wr
 		var dr: Array = []
@@ -122,6 +131,22 @@ func _process_modification() -> void:
 		for k in kosti.size():
 			s_ += float(delky[k])
 			cile.append(_na_draze(dr, s_))
+		# vytlaceni z kapsli obou nohou (CRYENGINE PRow; 12. 11. test_sukne: zkrizene nohy a klek - prumer drah
+		# dvou nohou padl do druhe nohy)
+		for k in range(1, cile.size()):
+			var c: Vector3 = cile[k]
+			for s: String in ["l", "r"]:
+				for kap: Array in [[P["thigh_" + s], P["calf_" + s], r_s + tl], [P["calf_" + s], P["foot_" + s], r_h + tl]]:
+					var a: Vector3 = kap[0]
+					var ab: Vector3 = (kap[1] as Vector3) - a
+					var t := clampf((c - a).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
+					var q := a + ab * t
+					var d := c.distance_to(q)
+					var rr := float(kap[2])
+					if d < rr:
+						var n := (c - q) / d if d > 1e-5 else ref - q
+						c = q + n.normalized() * rr
+			cile[k] = c
 		for k in kosti.size():
 			var b: int = kosti[k]
 			var g := sk.get_bone_global_pose(b)

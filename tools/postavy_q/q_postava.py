@@ -372,6 +372,53 @@ if CFG.get("freckles", 0) > 0:
     fr *= fm
     fc = np.array([0.42, 0.2, 0.09], np.float32)
     A[..., :3] = A[..., :3] * (1 - fr[..., None] * 0.55) + fc * fr[..., None] * 0.55
+# tvář podle věku a postavení (rešerše docs/rozpracovane/postavy_vzhled_kcd_reserse.md bod 4, KCD: postavení -> vrásky,
+# kruhy pod očima; venkovní práce -> opálení; postavy.json tvar: vek, kruhy, opaleni, rumenec 0..1)
+TV = CFG.get("tvar", {})
+if TV:
+    def _line(p, z0, sz, xs, yf):
+        """tenká vodorovná vráska ve výšce z0 (zvlněná), jen na přední ploše do |x|<xs"""
+        zz = z0 + 0.002 * np.sin(p[:, 0] * 90 + z0 * 500)
+        return np.exp(-((p[:, 2] - zz) / sz) ** 2) * ss((xs - np.abs(p[:, 0])) / 0.01) * ss((yf - p[:, 1]) / 0.01)
+    if TV.get("vek", 0) > 0:
+        v = TV["vek"]
+        def vrw(p):
+            w = np.zeros(len(p))
+            for k_, dz in enumerate((0.045, 0.058, 0.071)):          # čelo
+                w = np.maximum(w, _line(p, E[2] + dz, 0.003, 0.05 - 0.006 * k_, E[1] + 0.03) * (1 - 0.2 * k_))
+            for sx in (-1, 1):                                       # vějíře u očí
+                for a_ in (-0.35, 0.0, 0.35):
+                    c = np.array([sx * (EX + 0.032), E[1] + 0.03, E[2] + 0.004])
+                    d = p - c; t = d[:, 0] * sx * np.cos(a_) + d[:, 2] * np.sin(a_); n = -d[:, 0] * sx * np.sin(a_) + d[:, 2] * np.cos(a_)
+                    w = np.maximum(w, np.exp(-(n / 0.0025) ** 2) * ss(t / 0.004) * ss((0.022 - t) / 0.006) * 0.85)
+                # nosoretní rýha: od křídla nosu ke koutku úst
+                a = np.array([sx * 0.02, YF, E[2] - 0.055]); b = np.array([sx * 0.03, YF + 0.01, E[2] - 0.095])
+                ab = b - a; t = np.clip(((p - a) @ ab) / (ab @ ab), 0, 1)
+                dd = np.linalg.norm(p - (a + np.outer(t, ab)), axis=1)
+                w = np.maximum(w, np.exp(-(dd / 0.004) ** 2) * ss((p[:, 1] - (YF - 0.02)) / 0.01 + 1) * (0.5 + 0.5 * t))
+            return w
+        wm = face_mask(head, vrw, S)[..., None]
+        # hrbet nad ryhou (svetlejsi): tataz maska posunuta o 3 mm nahoru v prostoru hlavy
+        hr = np.clip(face_mask(head, lambda p: vrw(p - np.array([0.0, 0.0, 0.003])), S)[..., None] - wm, 0, 1)
+        A[..., :3] *= 1 - 0.6 * v * wm
+        A[..., :3] *= 1 + 0.18 * v * hr
+        print("VRASKY", v)
+    if TV.get("kruhy", 0) > 0:
+        km = face_mask(head, lambda p: np.maximum(gauss(p, np.array([EX, E[1], E[2] - 0.019]), np.array([0.017, 0.03, 0.007])),
+                                                  gauss(p, np.array([-EX, E[1], E[2] - 0.019]), np.array([0.017, 0.03, 0.007]))), S)[..., None]
+        k = TV["kruhy"] * 0.35 * km
+        A[..., :3] = A[..., :3] * (1 - k) + np.array([0.33, 0.22, 0.24], np.float32) * A[..., :3].mean(2, keepdims=True) / 0.55 * k
+    if TV.get("opaleni", 0) > 0:
+        # opálení: obličej a krk (ne temeno pod čepicí), teplejší a tmavší
+        om = face_mask(head, lambda p: ss((E[2] + 0.06 - p[:, 2]) / 0.03) * ss((p[:, 2] - (E[2] - 0.3)) / 0.03) * ss((0.11 - np.abs(p[:, 0])) / 0.02), S)[..., None]
+        tan = np.array([0.86, 0.74, 0.62], np.float32)
+        A[..., :3] *= 1 - om * TV["opaleni"] * (1 - tan)
+    if TV.get("rumenec", 0) > 0:
+        rm = face_mask(head, lambda p: np.maximum(gauss(p, np.array([EX + 0.01, YF + 0.012, E[2] - 0.04]), np.array([0.02, 0.03, 0.018])),
+                                                  gauss(p, np.array([-EX - 0.01, YF + 0.012, E[2] - 0.04]), np.array([0.02, 0.03, 0.018]))), S)[..., None]
+        k = TV["rumenec"] * 0.25 * rm
+        A[..., :3] = A[..., :3] * (1 - k) + A[..., :3] * np.array([1.15, 0.78, 0.76], np.float32) * k
+    print("TVAR", TV)
 if CFG.get("scalp", True):
     def scw(p):
         return ss((p[:, 2] - (E[2] - 0.12)) / 0.02) * np.clip(ss((p[:, 2] - (E[2] + 0.035)) / 0.02) + ss((p[:, 1] - (E[1] + 0.085)) / 0.02), 0, 1)

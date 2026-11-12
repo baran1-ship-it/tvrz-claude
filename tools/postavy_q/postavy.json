@@ -333,7 +333,11 @@
   "frown": 0.002,
   "stubble": 0.3,
   "grey": 0.1,
-  "vyska": 0.97
+  "vyska": 0.97,
+  "tvar": {
+   "vek": 0.14,
+   "opaleni": 0.55
+  }
  },
  "npc_kovar": {
   "sex": "Male",
@@ -414,7 +418,10 @@
   "brow_th": 1.15,
   "stubble": 0.5,
   "vyska": 1.02,
-  "frown": 0.004
+  "frown": 0.004,
+  "tvar": {
+   "rumenec": 0.5
+  }
  },
  "npc_mestan": {
   "sex": "Male",
@@ -478,7 +485,11 @@
   ],
   "brow_th": 0.8,
   "grey": 0.25,
-  "vyska": 1.0
+  "vyska": 1.0,
+  "tvar": {
+   "vek": 0.35,
+   "kruhy": 0.17
+  }
  },
  "npc_stary": {
   "sex": "Male",
@@ -549,7 +560,12 @@
    0.33,
    0.3
   ],
-  "vyska": 0.95
+  "vyska": 0.95,
+  "tvar": {
+   "vek": 0.84,
+   "kruhy": 0.42,
+   "opaleni": 0.55
+  }
  },
  "npc_mladik": {
   "sex": "Male",
@@ -672,7 +688,10 @@
   "lash_w": 0.6,
   "lash_h": 0.6,
   "brow_th": 0.9,
-  "vyska": 0.97
+  "vyska": 0.97,
+  "tvar": {
+   "opaleni": 0.35
+  }
  },
  "npc_babka": {
   "sex": "Female",
@@ -739,7 +758,12 @@
    0.25
   ],
   "grey": 0.5,
-  "vyska": 0.94
+  "vyska": 0.94,
+  "tvar": {
+   "vek": 0.7,
+   "kruhy": 0.35,
+   "opaleni": 0.35
+  }
  },
  "npc_divka": {
   "sex": "Female",
@@ -796,7 +820,10 @@
   "lash_h": 0.65,
   "brow_th": 0.85,
   "freckles": 0.25,
-  "vyska": 0.95
+  "vyska": 0.95,
+  "tvar": {
+   "rumenec": 0.25
+  }
  },
  "npc_mestka": {
   "sex": "Female",
@@ -932,7 +959,12 @@
   "grey": 0.35,
   "vyska": 1.0,
   "mekkost": 0.45,
-  "stubble": 0.2
+  "stubble": 0.2,
+  "tvar": {
+   "vek": 0.49,
+   "kruhy": 0.24,
+   "opaleni": 0.55
+  }
  },
  "npc_havel": {
   "sex": "Male",
@@ -1018,7 +1050,11 @@
   "brow_th": 0.9,
   "grey": 0.08,
   "vyska": 0.97,
-  "stubble": 0.3
+  "stubble": 0.3,
+  "tvar": {
+   "vek": 0.11,
+   "opaleni": 0.55
+  }
  },
  "npc_mikulas": {
   "sex": "Male",
@@ -1107,7 +1143,12 @@
   "brow_th": 0.9,
   "grey": 0.6,
   "vyska": 0.95,
-  "mekkost": 0.3
+  "mekkost": 0.3,
+  "tvar": {
+   "vek": 0.84,
+   "kruhy": 0.42,
+   "opaleni": 0.55
+  }
  },
  "npc_jakub": {
   "sex": "Male",
@@ -1175,7 +1216,10 @@
   "brow_th": 0.9,
   "stubble": 0.35,
   "vyska": 0.99,
-  "mekkost": 0.65
+  "mekkost": 0.65,
+  "tvar": {
+   "opaleni": 0.55
+  }
  },
  "npc_petr": {
   "sex": "Male",
@@ -1242,7 +1286,10 @@
   "brow_th": 1.1,
   "stubble": 0.5,
   "vyska": 1.01,
-  "frown": 0.003
+  "frown": 0.003,
+  "tvar": {
+   "opaleni": 0.55
+  }
  },
  "npc_vavra": {
   "sex": "Male",
@@ -1316,7 +1363,10 @@
   ],
   "brow_th": 0.9,
   "stubble": 0.6,
-  "vyska": 0.98
+  "vyska": 0.98,
+  "tvar": {
+   "opaleni": 0.55
+  }
  },
  "npc_stepan": {
   "sex": "Male",
@@ -1392,7 +1442,12 @@
   "brow_th": 0.9,
   "grey": 0.4,
   "vyska": 0.96,
-  "mekkost": 0.35
+  "mekkost": 0.35,
+  "tvar": {
+   "vek": 0.56,
+   "kruhy": 0.6,
+   "opaleni": 0.55
+  }
  },
  "npc_matej": {
   "sex": "Male",
@@ -1461,7 +1516,10 @@
   "brow_th": 0.7,
   "freckles": 0.4,
   "vyska": 0.97,
-  "mekkost": 0.75
+  "mekkost": 0.75,
+  "tvar": {
+   "opaleni": 0.55
+  }
  },
  "npc_bartos": {
   "sex": "Male",
@@ -1547,7 +1605,12 @@
   "brow_th": 0.9,
   "grey": 0.2,
   "vyska": 0.98,
-  "stubble": 0.2
+  "stubble": 0.2,
+  "tvar": {
+   "vek": 0.28,
+   "kruhy": 0.14,
+   "opaleni": 0.55
+  }
  },
  "npc_linhart": {
   "sex": "Male",
@@ -1613,7 +1676,10 @@
   ],
   "brow_th": 0.9,
   "stubble": 0.5,
-  "vyska": 1.0
+  "vyska": 1.0,
+  "tvar": {
+   "rumenec": 0.35
+  }
  },
  "npc_hostinsky": {
   "sex": "Male",
@@ -1680,7 +1746,12 @@
   ],
   "brow_th": 0.9,
   "grey": 0.15,
-  "vyska": 0.97
+  "vyska": 0.97,
+  "tvar": {
+   "vek": 0.21,
+   "kruhy": 0.1,
+   "rumenec": 0.4
+  }
  },
  "npc_straz": {
   "sex": "Male",
@@ -1753,7 +1824,11 @@
   "brow_th": 0.9,
   "stubble": 0.7,
   "vyska": 1.01,
-  "frown": 0.002
+  "frown": 0.002,
+  "tvar": {
+   "kruhy": 0.3,
+   "opaleni": 0.55
+  }
  },
  "npc_pastyr": {
   "sex": "Male",
@@ -1841,7 +1916,12 @@
   "brow_th": 0.9,
   "grey": 0.55,
   "vyska": 0.95,
-  "mekkost": 0.3
+  "mekkost": 0.3,
+  "tvar": {
+   "vek": 0.77,
+   "kruhy": 0.39,
+   "opaleni": 0.55
+  }
  },
  "npc_ponocny": {
   "sex": "Male",
@@ -1930,7 +2010,11 @@
   "brow_th": 0.9,
   "grey": 0.7,
   "vyska": 0.94,
-  "mekkost": 0.25
+  "mekkost": 0.25,
+  "tvar": {
+   "vek": 0.98,
+   "kruhy": 0.5
+  }
  },
  "npc_hoch": {
   "sex": "Male",
@@ -2000,7 +2084,10 @@
   "freckles": 0.6,
   "vyska": 0.84,
   "mekkost": 0.85,
-  "krk": 0.2
+  "krk": 0.2,
+  "tvar": {
+   "rumenec": 0.2
+  }
  },
  "npc_marketa": {
   "sex": "Female",
@@ -2070,7 +2157,10 @@
   "lash_w": 0.6,
   "lash_h": 0.6,
   "brow_th": 0.85,
-  "vyska": 0.97
+  "vyska": 0.97,
+  "tvar": {
+   "opaleni": 0.35
+  }
  },
  "npc_dorota": {
   "sex": "Female",
@@ -2142,7 +2232,12 @@
   "brow_th": 0.85,
   "vyska": 0.98,
   "mekkost": 0.45,
-  "grey": 0.15
+  "grey": 0.15,
+  "tvar": {
+   "vek": 0.21,
+   "kruhy": 0.1,
+   "rumenec": 0.3
+  }
  },
  "npc_anezka": {
   "sex": "Female",
@@ -2215,7 +2310,12 @@
   "brow_th": 0.85,
   "grey": 0.5,
   "vyska": 0.94,
-  "mekkost": 0.3
+  "mekkost": 0.3,
+  "tvar": {
+   "vek": 0.7,
+   "kruhy": 0.35,
+   "opaleni": 0.35
+  }
  },
  "npc_katerina": {
   "sex": "Female",
@@ -2283,7 +2383,10 @@
   "brow_th": 0.85,
   "freckles": 0.25,
   "vyska": 0.95,
-  "mekkost": 0.7
+  "mekkost": 0.7,
+  "tvar": {
+   "opaleni": 0.35
+  }
  },
  "npc_hostinska": {
   "sex": "Female",
@@ -2353,7 +2456,10 @@
   "lash_w": 0.6,
   "lash_h": 0.6,
   "brow_th": 0.85,
-  "vyska": 0.96
+  "vyska": 0.96,
+  "tvar": {
+   "opaleni": 0.35
+  }
  },
  "npc_pasacka": {
   "sex": "Female",
@@ -2422,7 +2528,10 @@
   "freckles": 0.5,
   "vyska": 0.83,
   "mekkost": 0.85,
-  "krk": 0.15
+  "krk": 0.15,
+  "tvar": {
+   "opaleni": 0.35
+  }
  },
  "_barvy": {
   "len_bily": [
@@ -2666,7 +2775,12 @@
   "grey": 0.7,
   "vyska": 0.95,
   "mekkost": 0.3,
-  "stubble": 0.2
+  "stubble": 0.2,
+  "tvar": {
+   "vek": 0.98,
+   "kruhy": 0.49,
+   "opaleni": 0.55
+  }
  },
  "npc_martin": {
   "sex": "Male",
@@ -2742,7 +2856,10 @@
   "brow_th": 0.9,
   "vyska": 1.01,
   "stubble": 0.4,
-  "mekkost": 0.55
+  "mekkost": 0.55,
+  "tvar": {
+   "kruhy": 0.45
+  }
  },
  "npc_bara": {
   "sex": "Female",
@@ -2816,7 +2933,11 @@
   "brow_th": 0.85,
   "vyska": 0.99,
   "mekkost": 0.45,
-  "grey": 0.2
+  "grey": 0.2,
+  "tvar": {
+   "vek": 0.28,
+   "kruhy": 0.14
+  }
  },
  "npc_eliska": {
   "sex": "Female",
@@ -2884,7 +3005,11 @@
   "brow_th": 0.85,
   "freckles": 0.15,
   "vyska": 0.96,
-  "mekkost": 0.75
+  "mekkost": 0.75,
+  "tvar": {
+   "rumenec": 0.2
+  }
  },
- "_spina": "12. 11. (rešerše postavy_vzhled_kcd_reserse.md: KCD maska blata/spiny podle role): kroj.spina = barva (linearni RGB), kde (predek/rukavy/lem/cele), sila - tools/postavy_q/q_export2.py role_weights"
+ "_spina": "12. 11. (rešerše postavy_vzhled_kcd_reserse.md: KCD maska blata/spiny podle role): kroj.spina = barva (linearni RGB), kde (predek/rukavy/lem/cele), sila - tools/postavy_q/q_export2.py role_weights",
+ "_tvar": "12. 11. tvar (q_postava.py, rešerše postavy_vzhled_kcd_reserse.md bod 4: KCD tvář podle postavení a věku): vek 0..1 = vrásky čela, vějíře u očí, nosoretní rýha (odvozeno grey*1,4 - šedivění = věk); kruhy pod očima (ponocný, písař, stráž, staří); opaleni = venkovní práce (sedláci, pastýři, lamači, selky); rumenec = výheň, krčma, kuchyně."
 }

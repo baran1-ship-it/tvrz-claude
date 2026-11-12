@@ -149,6 +149,11 @@ if CFG.get("npc"):
 # vrstvy oděvu po decimaci: spodní pod vrchní (pořadí zevnitř ven), jinak prosvítají fleky
 import clothes as _cl
 VRSTVY = ["nohavice", "kosile", "skorne", main_k, "opasek", "kape", "rouska"]
+# telo (vc. hlavy pod kapuci) je nejspodnejsi vrstva: po decimaci prorustalo kapuci (oranzove fleky)
+for k_ in VRSTVY:
+    if k_ in GAR:
+        n_ = _cl.pod_vrstvou(list(PARTS.values()), GAR[k_], KROJ.get("vrstva_mezera_m", 0.006))
+        if n_: print("VRSTVY telo pod", k_, "posunuto", n_)
 for a_ in range(len(VRSTVY)):
     for b_ in range(a_ + 1, len(VRSTVY)):
         if VRSTVY[a_] in GAR and VRSTVY[b_] in GAR:
@@ -222,9 +227,16 @@ def warp_into(atlas, mask, srcimg, tri_src, tri_dst):
     if not np.isfinite(M).all(): return
     patch = cv2.warpAffine(srcimg, M, (x1 - x0, y1 - y0), flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_WRAP)
     mk = np.zeros((y1 - y0, x1 - x0), np.uint8); cv2.fillConvexPoly(mk, np.round(pl * 4).astype(np.int32), 255, lineType=cv2.LINE_8, shift=2)
-    mk = cv2.dilate(mk, np.ones((3, 3), np.uint8))
-    sub = atlas[y0:y1, x0:x1]; m3 = mk > 0
-    sub[m3] = patch[m3]; mask[y0:y1, x0:x1][m3] = 255
+    m3 = _jadro_lem(mk, mask[y0:y1, x0:x1])
+    sub = atlas[y0:y1, x0:x1]
+    sub[m3] = patch[m3]
+def _jadro_lem(mk, msub):
+    """12. 11. (snimek sedlaka: opasek s oranzovymi fleky kuze - 1px lem kazdeho trojuhelniku prepsal tenky ostrov
+    souseda v 512px atlasu): jadro trojuhelniku se zapise vzdy (maska 255), lem 1 px jen do prazdna (maska 128)."""
+    jadro = mk > 0
+    lem = (cv2.dilate(mk, np.ones((3, 3), np.uint8)) > 0) & ~jadro & (msub < 128)
+    msub[jadro] = 255; msub[lem] = 128
+    return jadro | lem
 def fill_tri(atlas, mask, tri_dst, pattern):
     pd = np.float32([[u * A, (1 - v) * A] for u, v in tri_dst])
     x0, y0 = np.floor(pd.min(0)).astype(int) - 2; x1, y1 = np.ceil(pd.max(0)).astype(int) + 2
@@ -232,8 +244,8 @@ def fill_tri(atlas, mask, tri_dst, pattern):
     if x1 <= x0 or y1 <= y0: return
     mk = np.zeros((y1 - y0, x1 - x0), np.uint8)
     cv2.fillConvexPoly(mk, np.round((pd - np.float32([x0, y0])) * 4).astype(np.int32), 255, shift=2)
-    mk = cv2.dilate(mk, np.ones((3, 3), np.uint8)); m3 = mk > 0
-    atlas[y0:y1, x0:x1][m3] = pattern[y0:y1, x0:x1][m3]; mask[y0:y1, x0:x1][m3] = 255
+    m3 = _jadro_lem(mk, mask[y0:y1, x0:x1])
+    atlas[y0:y1, x0:x1][m3] = pattern[y0:y1, x0:x1][m3]
 def pad(img, mask, it=12):
     img = img.copy(); m = mask > 0
     for _ in range(it):
@@ -262,7 +274,8 @@ def build_atlas(objs, label, garments=None):
             k = gar_of[o.name]
             if k not in pats: pats[k] = fabric_pattern(k)
             pc, pr = pats[k]
-            skirt = o.name.endswith(("_svrchni_d",)) or "rouska_cip" in o.name or "limec" in o.name
+            # zahyby (normala v UV trubky) jen u trubek; limec kukle je od 12. 11. slupka s UV tela -> fleky
+            skirt = o.name.endswith(("_svrchni_d",)) or "rouska_cip" in o.name
             dw = dirt_weights(o, k)
             rw = role_weights(o, k)
             for ti, (s_, d, _m) in enumerate(tl):

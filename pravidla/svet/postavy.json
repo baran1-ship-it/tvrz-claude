@@ -6645,7 +6645,7 @@
   "do_m": 15.0,
   "_popis": "12. 11.: pruzne kosti sukne (scripts/lide.gd _sukne, SpringBoneSimulator3D Godot 4.4): tuhost/odpor/tize retezu sukne_<i>_*, kolize kapslemi stehen a lytek (polomer, delka). Jen do do_m (rešerše: simulator jen zblizka). Hodnoty NEOVERENO - ladi se snimky chuze a sedu",
   "ridic_predek": 1.0,
-  "ridic_bok": 0.6,
+  "ridic_bok": 1.0,
   "_ridic": "12. 11. (diagnostika: vsedе konce retezu 0,40 m svisle pod panvi, kolena 0,95 m vpredu - pruzina sama sed neresi): koren retezu natoci podil otoceni stehna proti panvi - predni retezy ridic_predek (pul z kazdeho stehna), bocni ridic_bok z blizsiho stehna (scripts/sukne_ridic.gd). NEOVERENO snimkem",
   "pruzina": false,
   "_ladeni12": "12. 11. ladeno snimky (build/sukne/ridic2.jpg): ridic_predek 0,7 a ridic_bok 0,25 (pri 0,8/0,6 sukne vsede trcela jako ubrus), tuhost 0,2 a tize 2,5 (spodni kosti za koleny padaji k zemi). Chuze i sed overeny snimkem u senkyrky; vykon na tabletu NEOVERENO",
@@ -6666,6 +6666,9 @@
    "Kleci_Loop"
   ],
   "test_tolerance_m": 0.03,
-  "test_stehno_podil": 0.7
+  "test_stehno_podil": 0.7,
+  "pokles_od_m": 0.12,
+  "pokles_do_m": 0.3,
+  "_klek12": "12. 11. test_sukne: bocni retezy s vahou 0,6 zustaly napul ve stehne -> ridic_bok 1; klek (stehno svisle) -> vaha i podle poklesu panve pokles_od..do_m"
  }
 }
