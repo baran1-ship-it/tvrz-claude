@@ -2248,7 +2248,11 @@ func _process_vlastni(dt: float) -> void:
 			var v_cil := 0.0 if ceka else float(c["rych"])
 			if not (c.get("nese", {}) as Dictionary).is_empty():
 				# s nakladem (korbel, misa) pomaleji - rychlost klipu nošení x tempo (nohy neklouzou)
-				v_cil = minf(v_cil, float(P["klip_m_s"].get(String(cn["obchuzka_nese"]["chuze"]), v_cil)) * float(c.get("tempo", 1.0)))
+				# 13. 11. (celá sada: 13 802x chyba - obsluha hostince nese korbel bez klipu chuze v obchuzka_nese): bez
+				# vlastniho klipu noseni jde beznou chuzi cinnosti
+				var ch_n := String((cn.get("obchuzka_nese", {}) as Dictionary).get("chuze", ""))
+				if ch_n != "":
+					v_cil = minf(v_cil, float(P["klip_m_s"].get(ch_n, v_cil)) * float(c.get("tempo", 1.0)))
 			var dv := v_cil - float(c["v"])
 			c["v"] = float(c["v"]) + clampf(dv, -float(pr["brzdeni_m_s2"]) * dt, float(pr["zrychleni_m_s2"]) * dt)
 			if k.length() > 0.35:
@@ -2258,7 +2262,7 @@ func _process_vlastni(dt: float) -> void:
 				u.rotation.y += clampf(dy * minf(1.0, dt * 6.0), -om, om)
 			var ch := _nahrada(c, String(cn.get("chuze", "Walk_Loop")))
 			var nese: Dictionary = c.get("nese", {})
-			if not nese.is_empty():
+			if not nese.is_empty() and (cn.get("obchuzka_nese", {}) as Dictionary).has("chuze"):
 				ch = String(cn["obchuzka_nese"]["chuze"])
 			if float(c["v"]) < 0.15:
 				_klip(c, "Idle_Loop", 1.0)
