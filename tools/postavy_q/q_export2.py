@@ -161,6 +161,12 @@ for k_ in VRSTVY:
     if k_ in GAR:
         n_ = _cl.pod_vrstvou(list(PARTS.values()), GAR[k_], KROJ.get("vrstva_mezera_m", 0.006))
         if n_: print("VRSTVY telo pod", k_, "posunuto", n_)
+# 13. 11. (Misa: kuze prosvita vystrihem, na ramenou a v pasu u vsech zen; snimek atl po atlasu: dekolt pod zivutkem):
+# NPC (jen cela oblecena postava, postup zena30 od modelare) - plochy tela trvale pod vychozim obleceni pryc;
+# posun pod vrstvu nestaci, ve hre tělo a latka maji jine vahy kosti a v pohybu se protnou
+if not CFG.get("dily", not CFG.get("npc")):
+    _vg = [o for k_ in KROJ.get("vychozi", list(GAR)) for o in GAR.get(k_, [])]
+    print("SKRYTO telo pod obleceni", _cl.skryj_pod(list(PARTS.values()), _vg, KROJ.get("telo_pod_dosah_m", 0.04), KROJ.get("telo_pod_okraj_m", 0.015)))
 for a_ in range(len(VRSTVY)):
     for b_ in range(a_ + 1, len(VRSTVY)):
         if VRSTVY[a_] in GAR and VRSTVY[b_] in GAR:
