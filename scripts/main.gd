@@ -149,7 +149,7 @@ func _ready() -> void:
 	# na tabletu vychozi bez MSAA; obe volby se uplatni od startu (za behu ovladac uz pamet zabral)
 	msaa_on = bool(_cfg.get_value("hra", "msaa", not OS.has_feature("mobile")))
 	fyzika_i = int(_cfg.get_value("hra", "fyzika", 1))
-	snimky_i = int(_cfg.get_value("hra", "snimky", 0))
+	snimky_i = int(_cfg.get_value("hra", "snimky", int(Pravidla.cti("kvalita", "snimky_vychozi_mobil")) if OS.has_feature("mobile") else 0))
 	plne_3d = bool(_cfg.get_value("hra", "plne_3d", false))
 	trava_uspora = bool(_cfg.get_value("hra", "trava_uspora", false))
 	trava_gpu = bool(_cfg.get_value("hra", "trava_gpu", bool(Pravidla.cti("trava_gpu", "zapnuto"))))
