@@ -181,3 +181,5 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 | 118 | Míša 13. 11.: na mostě nějaká deska | NEOVĚŘENO | najít díl | test_smyslu most | ČEKÁ |
 | 119 | Míša 13. 11.: u bylinkářky chybí plot | NEOVĚŘENO | záznam plotu zahrady | zasazeni | ČEKÁ |
 | 120 | stráž (snímek 13. 11.): pod kapucí světlý pruh u čela | kapuce × vlasy/čelo | vrstva kapuce nad hlavou | snímek | ČEKÁ |
+| 121 | Míša 13. 11. (fotky z 0.999993): hostinský s hostinskou „plejou trávu u krbu“ | Hleda_Loop (předklon k zemi) v uklid/obsluha hostinec a krčma, i stánek | u stolu PickUp_Table, u krbu Interact; `klipy_k_zemi` jen pro `k_zemi_cinnosti` | lide_chovani (klipy_k_zemi) | HOTOVO 13. 11. (lide_chovani OK) |
+| 122 | Míša 13. 11. (fotky z 0.999993): tráva v hostinci | hostinec_trava 13. 11. OK (0 instancí v obrysu) – fotky byly z 0.999993; ověřit snímkem | test hostinec_trava | hostinec_trava | OVĚŘUJE SE |

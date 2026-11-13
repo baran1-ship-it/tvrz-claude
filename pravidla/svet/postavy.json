@@ -1132,7 +1132,7 @@
   },
   "obsluha_hostinec": {
    "klipy": [
-    "Hleda_Loop",
+    "Interact",
     "Idle_Talking_Loop",
     "Idle_Loop"
    ],
@@ -1155,16 +1155,16 @@
      "Opreny_Loop"
     ],
     "hostinec_krb": [
-     "Hleda_Loop",
-     "Hleda_Loop",
+     "Interact",
+     "Interact",
      "Truhla_Otevri"
     ],
     "hostinec_stul_1": [
-     "Hleda_Loop",
+     "PickUp_Table",
      "Hovor_Mix_Loop"
     ],
     "hostinec_stul_2": [
-     "Hleda_Loop",
+     "PickUp_Table",
      "Hovor_Mix1_Loop"
     ]
    },
@@ -1203,11 +1203,12 @@
    "vysky": [
     "pas",
     "opreni"
-   ]
+   ],
+   "_13_11b": "Misa 13. 11. (hostinsky s hostinskou pleji travu u krbu): Hleda_Loop (predklon k zemi) pryc - u stolu/pultu PickUp_Table, jinde Interact; hlida test lide_chovani (klipy_k_zemi)"
   },
   "uklid_hostinec": {
    "klipy": [
-    "Hleda_Loop"
+    "Interact"
    ],
    "obmena_s": [
     5.0,
@@ -1223,14 +1224,14 @@
    ],
    "obchuzka_klipy": {
     "hostinec_stul_1": [
-     "Hleda_Loop"
+     "PickUp_Table"
     ],
     "hostinec_stul_2": [
-     "Hleda_Loop"
+     "PickUp_Table"
     ],
     "hostinec_krb": [
-     "Hleda_Loop",
-     "Hleda_Loop"
+     "Interact",
+     "Interact"
     ]
    },
    "obchuzka_nese": {
@@ -1252,7 +1253,8 @@
    "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): uklid = sbirani nadobi ze stolu a odnos ke krbu (drive CMU 62_11 predklon k zemi = vypadalo jako pleti zahonu)",
    "vysky": [
     "pas"
-   ]
+   ],
+   "_13_11b": "Misa 13. 11. (hostinsky s hostinskou pleji travu u krbu): Hleda_Loop (predklon k zemi) pryc - u stolu/pultu PickUp_Table, jinde Interact; hlida test lide_chovani (klipy_k_zemi)"
   },
   "svacina": {
    "klipy": [
@@ -1407,7 +1409,7 @@
   },
   "obsluha_krcma": {
    "klipy": [
-    "Hleda_Loop",
+    "Interact",
     "Idle_Talking_Loop",
     "Idle_Loop"
    ],
@@ -1430,12 +1432,12 @@
      "Opreny_Loop"
     ],
     "krcma_obsluha": [
-     "Hleda_Loop",
-     "Hleda_Loop",
+     "PickUp_Table",
+     "PickUp_Table",
      "Truhla_Otevri"
     ],
     "krcma_senk": [
-     "Hleda_Loop",
+     "PickUp_Table",
      "Hovor_Mix_Loop"
     ]
    },
@@ -1472,7 +1474,8 @@
    "vysky": [
     "pas",
     "opreni"
-   ]
+   ],
+   "_13_11b": "Misa 13. 11. (hostinsky s hostinskou pleji travu u krbu): Hleda_Loop (predklon k zemi) pryc - u stolu/pultu PickUp_Table, jinde Interact; hlida test lide_chovani (klipy_k_zemi)"
   },
   "volno": {
    "klipy": [
@@ -1632,7 +1635,7 @@
   },
   "obsluha_senkyrka": {
    "klipy": [
-    "Hleda_Loop",
+    "Interact",
     "Idle_Talking_Loop",
     "Idle_Loop"
    ],
@@ -1652,19 +1655,19 @@
    ],
    "obchuzka_klipy": {
     "hostinec_krb": [
-     "Hleda_Loop",
-     "Hleda_Loop"
+     "Interact",
+     "Interact"
     ],
     "hostinec_stul_1": [
-     "Hleda_Loop",
+     "PickUp_Table",
      "Idle_Talking_Loop"
     ],
     "hostinec_stul_2": [
-     "Hleda_Loop",
+     "PickUp_Table",
      "Idle_Talking_Loop"
     ],
     "hostinec_obsluha_2": [
-     "Hleda_Loop",
+     "PickUp_Table",
      "Truhla_Otevri"
     ]
    },
@@ -1698,11 +1701,12 @@
    "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): senkyrka roznasi: od krbu nese misu/dzban ke stolu (stoji vedle stolu), u druheho vycepu nalije, zpet; nikdy se neopira",
    "vysky": [
     "pas"
-   ]
+   ],
+   "_13_11b": "Misa 13. 11. (hostinsky s hostinskou pleji travu u krbu): Hleda_Loop (predklon k zemi) pryc - u stolu/pultu PickUp_Table, jinde Interact; hlida test lide_chovani (klipy_k_zemi)"
   },
   "uklid_krcma": {
    "klipy": [
-    "Hleda_Loop"
+    "Interact"
    ],
    "obmena_s": [
     5.0,
@@ -1716,11 +1720,11 @@
    ],
    "obchuzka_klipy": {
     "krcma_senk": [
-     "Hleda_Loop"
+     "PickUp_Table"
     ],
     "krcma_obsluha": [
-     "Hleda_Loop",
-     "Hleda_Loop"
+     "PickUp_Table",
+     "PickUp_Table"
     ]
    },
    "obchuzka_nese": {
@@ -1739,7 +1743,8 @@
    "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): krcmar sbira nadobi (jen v krcme)",
    "vysky": [
     "pas"
-   ]
+   ],
+   "_13_11b": "Misa 13. 11. (hostinsky s hostinskou pleji travu u krbu): Hleda_Loop (predklon k zemi) pryc - u stolu/pultu PickUp_Table, jinde Interact; hlida test lide_chovani (klipy_k_zemi)"
   },
   "tesani": {
    "klipy": [
@@ -1888,7 +1893,7 @@
   "prodava": {
    "klipy": [
     "Idle_Loop",
-    "Hleda_Loop"
+    "PickUp_Table"
    ],
    "obmena_s": [
     8.0,
@@ -1898,12 +1903,12 @@
    "sceny": [
     [
      "Truhla_Otevri",
-     "Hleda_Loop",
+     "PickUp_Table",
      "Truhla_Zavri",
-     "Hleda_Loop"
+     "PickUp_Table"
     ],
     [
-     "Hleda_Loop",
+     "PickUp_Table",
      "Idle_Loop",
      "Rozhlizi"
     ]
@@ -1911,7 +1916,8 @@
    "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): kupec u stanku: prerovnava zbozi, hleda v truhle",
    "vysky": [
     "pas"
-   ]
+   ],
+   "_13_11b": "Misa 13. 11. (hostinsky s hostinskou pleji travu u krbu): Hleda_Loop (predklon k zemi) pryc - u stolu/pultu PickUp_Table, jinde Interact; hlida test lide_chovani (klipy_k_zemi)"
   },
   "putuje_a": {
    "klipy": [
@@ -2147,8 +2153,8 @@
    "obchuzka_klipy": {
     "stan_pult": [
      "Truhla_Otevri",
-     "Hleda_Loop",
-     "Hleda_Loop"
+     "PickUp_Table",
+     "PickUp_Table"
     ],
     "stan_pred_1": [
      "Idle_FoldArms_Loop",
@@ -2178,7 +2184,8 @@
    "_p": "Misa 11. 11. (kupec neni prodavac za pultem - prechazi pred stanem, pozoruje, sedi; kolemjdouci si u nej sednou): prechazi pred stanem: u pultu prerovna zbozi, u cesty pozoruje, kdo jde",
    "vysky": [
     "pas"
-   ]
+   ],
+   "_13_11b": "Misa 13. 11. (hostinsky s hostinskou pleji travu u krbu): Hleda_Loop (predklon k zemi) pryc - u stolu/pultu PickUp_Table, jinde Interact; hlida test lide_chovani (klipy_k_zemi)"
   }
  },
  "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.) | Misa 11. 11. (postava ukazuje do prazdna): UAL Interact = natazena ruka vpred v urovni hrudi - jen u stolu a krbu (polozi/vezme); u studny, mlyna, vetraku a ve volnem prostoru Zvedne / Nese_Stoji_Loop / rozhlizeni | Misa 11. 11. (nove klipy): Interact u stolu, krbu a pultu nahrazen Mixamo Putting_Down (Polozi - ruka do vysky pasu, polozi/vezme ze stolu); Picking_Up_1 (Vezme) je zvednuti ze zeme - jen u zeme; hoste vsedě vykladaji (Sitting_Talking); stani i Action Adventure idle 2. | Misa 11. 11. vecer (cledin nabira kyblem z podlahy, krcmar zveda ze zeme a nese naruc dreva): Polozi/Vezme (Mixamo Putting_Down/Picking_Up = krabice na zem / ze zeme) vyrazeny ze stolu, krbu a pultu -> Hleda_Loop (prace rukama ve vysce pasu); obchuzka_nese bez Walk_Carry_Loop (naruc) - korbel/miska v jedne ruce pri chuzi postavy",
@@ -6685,5 +6692,10 @@
  "klipy_bez_predmetu": [
   "Idle_FoldArms_Loop"
  ],
- "_klipy_bez_predmetu": "Misa 13. 11. (zbrojnos ma kopi v hlave): klipy se zkrizenyma rukama - s predmetem v ruce (v_rukou '*') predmet projde telem/hlavou; cinnost s trvalym predmetem je nesmi mit (test lide_chovani)"
+ "_klipy_bez_predmetu": "Misa 13. 11. (zbrojnos ma kopi v hlave): klipy se zkrizenyma rukama - s predmetem v ruce (v_rukou '*') predmet projde telem/hlavou; cinnost s trvalym predmetem je nesmi mit (test lide_chovani)",
+ "klipy_k_zemi": [
+  "Hleda_Loop"
+ ],
+ "_klipy_k_zemi": "Misa 13. 11.: klipy s predklonem k zemi vypadaji jako pleti; smi je jen cinnosti v k_zemi_cinnosti (prace na zemi/zahone)",
+ "k_zemi_cinnosti": []
 }

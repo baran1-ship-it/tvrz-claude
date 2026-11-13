@@ -7666,6 +7666,20 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 			var ut: Array = lide.call("u_stromu", mt[0])
 			if ut.is_empty() or (ut[0] as Vector2).distance_to(mt[0]) > float(ust["od_kmene_m"]) * 0.5:
 				ch.call("%s %s@%s: trha ovoce mimo strom %s" % [c["id"], bl["cinnost"], bl["kde"], (mt[0] as Vector2).round()])
+	# Misa 13. 11. (hostinsky s hostinskou pleji travu u krbu): predklon k zemi jen u prace na zemi (k_zemi_cinnosti)
+	var kz: Array = Pravidla.cti("postavy", "klipy_k_zemi")
+	var kz_ok: Array = Pravidla.cti("postavy", "k_zemi_cinnosti")
+	for k5: String in (P["cinnosti"] as Dictionary):
+		if kz_ok.has(k5):
+			continue
+		var c5: Dictionary = P["cinnosti"][k5]
+		var vse5: Array = (c5.get("klipy", []) as Array) + ((c5.get("sceny", []) as Array).reduce(func(a: Array, x: Array) -> Array: return a + x, []) as Array)
+		for l5: Array in (c5.get("obchuzka_klipy", {}) as Dictionary).values():
+			vse5 += l5
+		for kl5: String in vse5:
+			if kz.has(kl5):
+				ch.call("%s: klip %s (predklon k zemi = vypada jako pleti) mimo k_zemi_cinnosti" % [k5, kl5])
+				break
 	var bez_pr: Array = Pravidla.cti("postavy", "klipy_bez_predmetu")
 	for k4: String in (P["cinnosti"] as Dictionary):
 		var c4: Dictionary = P["cinnosti"][k4]
