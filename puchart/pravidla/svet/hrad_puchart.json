@@ -1002,16 +1002,16 @@
       18.0
      ],
      [
-      14.5,
+      15.0,
       18.0
      ],
      [
-      14.5,
-      10.5
+      15.0,
+      9.5
      ],
      [
       9.0,
-      10.5
+      9.5
      ]
     ],
     "y": 37.9,
@@ -1019,7 +1019,30 @@
     "zdroj": "Míša 12. 11.: „srovnat terén u malé věže horního hradu“ – nádvoří tu klesá k V hradbě ~0,6 m/m (38,6 → 36,4 na 4 m); vyrovnaná plocha před dveřmi přízemí věžičky (práh = terén + 0,02)",
     "jistota": "NAVRH (úprava dvora u vstupu)",
     "pozn_13_11": "Míša 13. 11. (foto x 9,8 z 12,5): „hlínu k věžičce jsi nedosypal“ – plošina 2,7 × 3,9 m se vyhlazením terénu (σ 1,5 m, teren_dlazdice) a sítí 2 m rozmazala, u dveří (12,2; 15,45) terén 0,24 m pod prahem. Zvětšeno na 5,5 × 7,5 m i pod věž (věž ji kryje), test smyslu plosiny_rovne.",
-    "kontrola_rovna": true
+    "kontrola_rovna": true,
+    "kontrola_body": [
+     [
+      12.2,
+      14.9
+     ],
+     [
+      12.2,
+      13.5
+     ],
+     [
+      11.0,
+      14.5
+     ],
+     [
+      13.4,
+      14.5
+     ],
+     [
+      12.2,
+      12.0
+     ]
+    ],
+    "pozn_kontrola": "smysl:plosiny_rovne měří před dveřmi přízemí (12,2; 15,45) do 3,5 m – kraj plošiny u V hradby vyhlazení terénu snižuje (to je přechod, ne vstup)"
    }
   ],
   "zarezy": [

@@ -3,6 +3,7 @@
 # bash nastroje/postav_vse.sh   (~5 min; stahuje ~80 MB z ČÚZK a ~10 MB z Poly Haven)
 set -e
 K=$(cd "$(dirname "$0")/.." && pwd)
+G=/opt/godot47/Godot_v4.7.2-stable_linux.x86_64   # 13. 11.: godot z PATH je 4.4.1 – importy ve špatném formátu
 B=$K/build; mkdir -p $B/dmr
 pip install -q pyproj "laspy[lazrs]" numpy scipy pillow pysheds affine 2>/dev/null || true
 for s in $(python3 -c "import json;print(' '.join(json.load(open('$K/pravidla/svet/zdroje_dat.json'))['dmr5g_listy']))"); do
@@ -40,13 +41,13 @@ python3 $K/nastroje/pole_textur.py $K
 mkdir -p $K/hra/modely/stromy && for m in $(python3 -c "import json;print(' '.join(json.load(open('$K/pravidla/svet/stromy_modely.json'))['varianty']))"); do cp -n $K/../modely/nove/${m}_*.glb $K/hra/modely/stromy/ 2>/dev/null || true; done
 python3 $K/nastroje/stromy_lod.py $K/hra/modely/stromy 0.3 1.45
 cp $K/pravidla/svet/stromy_modely.json $K/hra/data/
-cd $K/hra && godot --headless --import > /dev/null 2>&1 || true
-cp $K/nastroje/godot/r16_zstd.gd $K/hra/_r16z.gd && godot --headless --path $K/hra -s res://_r16z.gd; rm -f $K/hra/_r16z.gd*
+cd $K/hra && $G --headless --import > /dev/null 2>&1 || true
+cp $K/nastroje/godot/r16_zstd.gd $K/hra/_r16z.gd && $G --headless --path $K/hra -s res://_r16z.gd; rm -f $K/hra/_r16z.gd*
 # hrady (návrhy): Blender 4.2 jako modul v /opt/bl (tools/prostredi.sh Havrana)
 bash $K/nastroje/stahni_textury_hradu.sh
 [ -x /opt/bl/bin/python ] && /opt/bl/bin/python $K/blender/puchart_hrad.py $K && bash $K/nastroje/stahni_skaly_scan.sh && /opt/bl/bin/python $K/blender/skaly.py $K && python3 $K/nastroje/skaly_podklad.py $K && /opt/bl/bin/python $K/blender/voda.py $K && /opt/bl/bin/python $K/blender/kameny_koryta.py $K && python3 $K/nastroje/koryto_kameny.py $K && python3 $K/nastroje/stavby_vegetace.py $K && python3 $K/nastroje/kryt_korun.py $K   # dvojhradí podle zdrojů (staré návrhy: blender/hrady.py $K <id>)
 python3 $K/nastroje/stromy_sdilene_textury.py $K/hra/modely/stromy
 echo "postav_vse OK"
-python3 $K/nastroje/import_velikost.py $K && (cd $K/hra && godot --headless --import > /dev/null 2>&1 || true)
-python3 $K/nastroje/import_stromy.py $K && (cd $K/hra && godot --headless --import > /dev/null 2>&1 || true)
+python3 $K/nastroje/import_velikost.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)
+python3 $K/nastroje/import_stromy.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)
 [ -d $K/hra/modely/predmety_h ] || bash $K/nastroje/predmety_z_havrana.sh   # předměty, menu hráče a pískoviště z Havrana (Míša 10. 11.)

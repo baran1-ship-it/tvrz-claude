@@ -102,8 +102,11 @@ for ti, t in enumerate(toky):
                     hlj + KO["prah_nad_hladinou_m"] + (dist - pw - KO["prah_m"]) * KO["sklon_svahu"]))
     wb = np.zeros_like(dist)
     if brody_:   # brod: v pásu podél toku mělké dno a nájezd k vodě (úvoz), náběh do běžného koryta
-        for b_ in brody_:
-            ds_ = np.abs(s_ax[j] - s_ax[b_])
+        pc_ = np.c_[cx.ravel(), cz.ravel()]
+        for b_ in brody_:   # pás brodu = vzdálenost od přímky cesty přes brod (kolmo na tečnu toku), ne po zakřivené ose
+            tg_ = np.array([x[min(b_ + 2, len(x) - 1)] - x[max(b_ - 2, 0)], z[min(b_ + 2, len(z) - 1)] - z[max(b_ - 2, 0)]]); tg_ /= np.linalg.norm(tg_) + 1e-9
+            ds_ = np.abs((pc_ - np.array([x[b_], z[b_]])) @ tg_)
+            ds_ = np.where(np.hypot(pc_[:, 0] - x[b_], pc_[:, 1] - z[b_]) < BR_["dosah_m"] + w, ds_, 1e9)
             wb = np.maximum(wb, np.clip(1 - (ds_ - BR_["polosirka_m"]) / BR_["nabeh_m"], 0, 1))
         wb = wb * wb * (3 - 2 * wb)
         pb = np.where(dist < pw, hlj - BR_["hloubka_m"] * (1 - (dist / pw) ** 2), hlj + (dist - pw) * BR_["sklon_najezdu"])

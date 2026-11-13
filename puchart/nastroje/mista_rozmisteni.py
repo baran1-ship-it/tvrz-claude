@@ -409,7 +409,7 @@ for us in useds:
         m_, x_, z_, yw = h_
         if m_ == "kurnik":
             hosp_out.append({"model": m_, "x": x_, "z": z_, "yaw": yw, "misto": us["misto"], "usedlost": us["i"], "plosina": False}); continue
-        v = stavba_ok(x_, z_, yw, m_)
+        v = stavba_ok(x_, z_, yw, m_, R.get("od_toku_hospodarske_m"))   # stejná pravidla jako při umístění (hospodářské 8 m od toku)
         plosiny.append((x_, z_, yw, m_, v[0]))
         hosp_out.append({"model": m_, "x": x_, "z": z_, "yaw": yw, "misto": us["misto"], "usedlost": us["i"], "plosina": True, "teren_y": v[0]})
 for x_, z_, yw, m_, ty in plosiny:
