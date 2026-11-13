@@ -219,7 +219,7 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 				var s := rng.randf_range(float(mr[0]), float(mr[1]))
 				var lz: Dictionary = cfg.get("lezi", {}).get(druh, {})
 				if not lz.is_empty():   # ležící kmen (byliny.json lezi; Míša 13. 11.: padlé stromy, ne na cestě, u vody jen v lese)
-					var iv := rng.randi() % meshe[druh].size()
+					var iv: int = rng.randi() % (meshe[druh] as Array).size()
 					var tl: Variant = _lezici(x, z, s, rng.randf() * TAU, rng.randf(), meshe[druh][iv], lz, tr)
 					if tl == null: continue
 					if not mista.has(druh + str(iv)): mista[druh + str(iv)] = []
