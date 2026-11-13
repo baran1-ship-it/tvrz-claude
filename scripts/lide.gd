@@ -2204,6 +2204,8 @@ func _process_vlastni(dt: float) -> void:
 	var mm: Dictionary = P["modif_max"]
 	var mez_sukne: float = serazene[mini(int(mm["sukne"]), serazene.size()) - 1] if not serazene.is_empty() else 0.0
 	var mez_hlava: float = serazene[mini(int(mm["hlava"]), serazene.size()) - 1] if not serazene.is_empty() else 0.0
+	var n_sukne := 0                          # pocitadlo: shodne vzdalenosti nesmi prekrocit modif_max (test postavy_modif)
+	var n_hlava := 0
 	for c: Dictionary in _lide:
 		var u: Node3D = c["uzel"]
 		var d := Vector2(u.position.x - pp.x, u.position.z - pp.z).length()
@@ -2231,6 +2233,7 @@ func _process_vlastni(dt: float) -> void:
 		_dvere_zavri_za(c)
 		if not blizko or skryty:
 			u.visible = false
+			_modif_vyp(c)                         # 13. 11.: skryta postava nepocita kostru (modifikatory bezely i neviditelne)
 			if not blizko and not skryty:
 				_daleko_krok(c, dt)
 			continue
@@ -2425,7 +2428,8 @@ func _process_vlastni(dt: float) -> void:
 		var cam: Camera3D = main.player.cam if main.player else null
 		var v_zaberu := cam == null or d < ANIM_OKRAJ or _v_kuzelu(cam, u.global_position + Vector3(0, 1.0, 0))
 		# hlava a krk sleduji jen do hlava_do_m (dal pohyb hlavy neni videt, LookAt stoji cas)
-		var hl_on := d < float(P["hlava_do"]) and d <= mez_hlava and v_zaberu and not trasa_vypni.has("modifikatory")
+		var hl_on := d < float(P["hlava_do"]) and d <= mez_hlava and n_hlava < int(mm["hlava"]) and v_zaberu and not trasa_vypni.has("modifikatory")
+		n_hlava += 1 if hl_on and not (c.get("hlava_mod", []) as Array).is_empty() else 0
 		for la: SkeletonModifier3D in c.get("hlava_mod", []):
 			if la.active != hl_on:
 				la.active = hl_on
@@ -2439,12 +2443,14 @@ func _process_vlastni(dt: float) -> void:
 					and not trasa_vypni.has("modifikatory"))
 		# 13. 11. (kontrola pred vydanim): ridic sukne jen v zaberu do sukne.do_m, jinak bezel u vsech postav kazdy snimek
 		if c.has("sukne_ridic") and is_instance_valid(c["sukne_ridic"]):
-			var sr_on := v_zaberu and d < float(P["sukne"]["do_m"]) and d <= mez_sukne and u.visible and not trasa_vypni.has("sukne") \
+			var sr_on := v_zaberu and d < float(P["sukne"]["do_m"]) and d <= mez_sukne and n_sukne < int(mm["sukne"]) and u.visible and not trasa_vypni.has("sukne") \
 					and not trasa_vypni.has("modifikatory")
 			if (c["sukne_ridic"] as SkeletonModifier3D).active != sr_on:
 				(c["sukne_ridic"] as SkeletonModifier3D).active = sr_on
+			c["sr_on"] = sr_on
+			n_sukne += 1 if sr_on else 0
 		if c.has("sukne") and is_instance_valid(c["sukne"]):
-			var su_on := v_zaberu and d < float(P["sukne"]["do_m"]) and d <= mez_sukne
+			var su_on := v_zaberu and d < float(P["sukne"]["do_m"]) and d <= mez_sukne and bool(c.get("sr_on", true))
 			var su: SpringBoneSimulator3D = c["sukne"]
 			if su.active != su_on:
 				su.active = su_on
@@ -2574,3 +2580,15 @@ func _v_kuzelu(cam: Camera3D, q: Vector3) -> bool:
 		return true
 	var pul := atan(tan(deg_to_rad(cam.fov) * 0.5) * sqrt(1.0 + ANIM_POMER * ANIM_POMER)) + deg_to_rad(ANIM_REZERVA_ST)
 	return (-cam.global_basis.z).angle_to(k) < pul
+
+
+## Vsechny modifikatory kostry postavy vypnout (skryta / mimo dosah - 13. 11. bezely i u neviditelnych postav).
+func _modif_vyp(c: Dictionary) -> void:
+	for k: String in ["sukne_ridic", "sukne", "nohy_ik"]:
+		if c.has(k) and is_instance_valid(c[k]) and (c[k] as SkeletonModifier3D).active:
+			(c[k] as SkeletonModifier3D).active = false
+	for la: SkeletonModifier3D in c.get("hlava_mod", []):
+		if la.active:
+			la.active = false
+	if (c["ruce"] as Dictionary).has("mod"):
+		(c["ruce"]["mod"] as Node).call("zapni", false)
