@@ -1888,7 +1888,11 @@ def postav_B(P):
         TR["B_vstup"] = [bod(zac - (G - zac).normalized() * 8.0), bod(zac - (G - zac).normalized() * 1.2), bod(zac, m["nastup_y"]), bod(zac.lerp(G, 0.5)), bod(G - vnG * (t / 2), yd), bod(G, yd),
                          bod(G + vnG * 2.5)] + [bod(V(q)) for q in B.get("parkan_body", [])] + ([bod(Gp_ - vp_ * 2.0, yh), bod(Gp_, yh), bod(Gp_ + vp_ * 2.0, yh)] if Gp_ is not None else [])
         v0_ = [bod(Gp_ - vp_ * 2.0, yh)] if Gp_ is not None else []   # přední nádvoří (schody na ochoz jsou na Z hradbě)
-    TR["B_ochoz_vez"] = v0_ + ([bod(Gp_ - vp_ * 2.0, yh), bod(Gp_, yh), bod(Gp_ + vp_ * 2.0, yh)] if (Gp_ is not None and sts is not None) else []) + [bod(st + d * 1.2), bod(st, yh), bod(e, kor),
+    _ob = []   # obejít patu zábradlí schodů s odstupem (13. 11.: trasa šla přímo z nádvoří těsně kolem sloupku paty, test průchodu uvízl)
+    if v0_:
+        _w = st + d * 1.2; _q = Vector((v0_[-1][0], 0, v0_[-1][1])) - Vector((_w.x, 0, _w.z)); _sd = (_q - d * _q.dot(d))
+        if _sd.length > 0.3: _ob = [bod(_w + _sd.normalized() * 1.3 + d * 0.6)]
+    TR["B_ochoz_vez"] = v0_ + ([bod(Gp_ - vp_ * 2.0, yh), bod(Gp_, yh), bod(Gp_ + vp_ * 2.0, yh)] if (Gp_ is not None and sts is not None) else []) + _ob + [bod(st + d * 1.2), bod(st, yh), bod(e, kor),
                          bod(a + d * (s_top - 0.75) + vn * ((t / 2 + 0.85 + 3.05) / 2), kor), bod(pochozi(U, so["usek"], s_top - 0.75), kor),
                          *[bod(roh(U, k_), kor) for k_ in B.get("ochoz_rohy", [1, 0, 10, 9, 8])]] + ([] if (STIT_SCHODY or not vz.get("vstup_ochoz", True)) else [bod(pochozi(U, iw, sproj), kor), bod(lav0, kor), bod(c, kor)])
     q = (w - 2 * tv) / 2 - 0.4   # střed rohové podesty od středu věže
