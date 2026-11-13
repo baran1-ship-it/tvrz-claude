@@ -1,0 +1,47 @@
+{
+ "saty_barva": [
+  0.36,
+  0.38,
+  0.22
+ ],
+ "sukne_hore": 1.07,
+ "sukne_lem": 0.06,
+ "sukne_rozsir": 0.1,
+ "sukne_rozsir_od": 0.8,
+ "sklady": 0.01,
+ "stehno_max": 0.8,
+ "stehno_od": 0.95,
+ "stehno_plne": 0.55,
+ "zastera_lem": 0.36,
+ "zastera_sirka": 0.85,
+ "opasek": 1.075,
+ "puncochy_do": 0.36,
+ "puncochy_barva": [
+  0.2,
+  0.17,
+  0.14
+ ],
+ "lytko_od": 0.52,
+ "lytko_plne": 0.2,
+ "strana_exp": 0.6,
+ "lytko_bok": 0.35,
+ "lytko_zad": 0.7,
+ "lytko_pred": 0.55,
+ "sim_okraj": 0.015,
+ "sim_tuhost": [
+  0.1,
+  0.07,
+  0.05,
+  0.04
+ ],
+ "sim_kroky": 3,
+ "sim_iter": 6,
+ "sim_tlumeni": 0.9,
+ "cop_tuhost": 0.005,
+ "sim_nabeh": 30,
+ "sim_hladke": 0.5,
+ "sim_nahoru": 1.5,
+ "sim_ruce": 1,
+ "sim_max_posun": 0.025,
+ "sim_obvod_max": 1.06
+}
