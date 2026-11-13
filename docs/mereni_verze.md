@@ -363,3 +363,6 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
   daylight je měnil každých 0,25 s → opraveno prahem (kvalita.json obloha_prah 0,004, jako Puchart). Vliv na tabletu NEOVĚŘENO.
 - **Les (PC, tools/mereni_prvni.sh, studená keš):** po předehřátí v lese (-85, 214) jen 2 programy (41 ms) → zásek 1,8 s v lese
   sestavením shaderů NEVYSVĚTLEN (hypotéza odložena).
+
+### 0.999995 – vydáno 13. 11. (postavy bez fleků = nový import, hnědé dřevo, déšť, obloha jen při změně, sukně/hlava jen u nejbližších)
+- Trasa: varianty vše / postavy stojí / déšť / vše. Rozdíl vše × stojí = co postavy ještě stojí po omezení modif_max. NEOVĚŘENO NA ZAŘÍZENÍ.

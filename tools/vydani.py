@@ -98,11 +98,19 @@ PRESETS = open("export_presets.cfg").read()
 
 
 def src_hash(files):
+    # 13. 11. (fleky na postavach: balik z_postavy „beze zmeny“, i kdyz se zmenil import site): otisk i z .bin vedle .gltf
+    # a z vysledku importu (.godot/imported/<jmeno>-*.md5 dest_md5) - zmena importu = novy balik
+    import glob as _g2
     h = hashlib.md5()
     for f in sorted(files):
         h.update(f.encode())
         with open(f, "rb") as fh:
             h.update(fh.read())
+        if f.endswith(".gltf") and os.path.exists(f[:-5] + ".bin"):
+            with open(f[:-5] + ".bin", "rb") as fh:
+                h.update(fh.read())
+        for m in sorted(_g2.glob(".godot/imported/%s-*.md5" % os.path.basename(f))):
+            h.update(open(m, "rb").read())
     return h.hexdigest()
 
 

@@ -1337,3 +1337,6 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - Ruční reimport: smazat `.godot/imported/<jmeno>.gltf-*.md5` **a** `touch` zdrojového `.gltf` – Godot soubor
   znovu kontroluje jen při změně času od posledního skenu (13. 11.: bez touch import „OK za 9 s“ a nic). `sestav.sh` soubory
   přepisuje, tam stačí smazat `.md5`.
+- **Vydání bralo balík postav jako „beze zmeny“:** `vydani.py src_hash` počítal jen text zdrojů (.gltf), takže změna importu
+  (nebo jen .bin) balík nepřestavěla – i po reimportu by APK neslo starou síť. Teď otisk zahrnuje .bin vedle .gltf
+  a `.godot/imported/<jmeno>-*.md5` (13. 11., 0.999995: přestavěno z_postavy, z_rostliny, z_svet).
