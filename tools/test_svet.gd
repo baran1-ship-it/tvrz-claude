@@ -801,7 +801,10 @@ func _kresleni_rozbor() -> void:
 			["z_lom_reka", Vector3(188, 0, 935), Vector3(188, 1.6, 900)], ["z_smrky", Vector3(16, 0, 988), Vector3(-10, 1.6, 980)],
 			# 13. 11. trasa 0.999992: ves-vjezd 560-690 kresleni (tvrz ~330) - rozbor pred sloucenim staveb vsi
 			["ves_vjezd", Vector3(440, 0, 790), Vector3(355, 4.1, 738)], ["ves_dvory", Vector3(421, 0, 900), Vector3(420, 1.6, 869)]]
+	var jen_m := OS.get_environment("TVRZ_ROZBOR_MISTA").split(",", false)
 	for m: Array in mista:
+		if not jen_m.is_empty() and not jen_m.has(String(m[0])):
+			continue
 		await main.fast_travel(m[1], m[2], 0.0, "test")
 		var lk: Node = main.get_node_or_null("Louka")
 		if lk:
@@ -812,6 +815,7 @@ func _kresleni_rozbor() -> void:
 		var cp := cam.global_position
 		var fr := cam.get_frustum()
 		var sk := {}
+		var skup := {}
 		var celk := [0, 0, 0]
 		var nezn := 0
 		for n in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
@@ -861,6 +865,12 @@ func _kresleni_rozbor() -> void:
 			var nm := String(gi.name)
 			var rod := String(gi.get_parent().name) if gi.get_parent() else ""
 			var druh := (nm + "<" + rod).replace("0", "").replace("1", "").replace("2", "").replace("3", "").replace("4", "").replace("5", "").replace("6", "").replace("7", "").replace("8", "").replace("9", "").replace("@", "")
+			# 13. 11.: soucet po skupinach sveta (prvni predek pod korenem sceny) - kde lezi kresleni
+			var kor: Node = gi
+			while kor.get_parent() != null and kor.get_parent() != get_tree().current_scene and kor.get_parent().get_parent() != get_tree().current_scene:
+				kor = kor.get_parent()
+			var kg := String(kor.name)
+			skup[kg] = int(skup.get(kg, 0)) + kr
 			if not sk.has(druh):
 				sk[druh] = [0, 0, 0, 0]
 			sk[druh][0] += kr
@@ -878,7 +888,11 @@ func _kresleni_rozbor() -> void:
 		print("INVENTURA (orientacni) %s: povrchu %d (+stin %d), troj spocitanych %.2f M + NEOVERENO u %d uzlu, druhu %d | engine kresleni %d troj %.2f M" % [
 				m[0], celk[0], celk[2], celk[1] / 1e6, nezn, kl.size(), Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 				Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1e6])
-		for k: String in kl.slice(0, 14):
+		var ks: Array = skup.keys()
+		ks.sort_custom(func(a: String, b: String) -> bool: return int(skup[a]) > int(skup[b]))
+		for k: String in ks.slice(0, 25):
+			print("INVENTURA SKUPINA %s %-40s povrchu %4d" % [m[0], k.left(40), int(skup[k])])
+		for k: String in kl.slice(0, 40):
 			print("INVENTURA   %-50s uzlu %4d povrchu %4d stin %4d troj %s" % [k.left(50), sk[k][3], sk[k][0], sk[k][2],
 					"NEOVERENO" if int(sk[k][1]) < 0 else "%.3f M" % (float(sk[k][1]) / 1e6)])
 	_vysledek("kresleni_rozbor", true, "inventura (orientacni) - viz INVENTURA, troj. NEOVERENO se nepocitaji")
