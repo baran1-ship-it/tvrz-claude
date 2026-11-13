@@ -42,7 +42,7 @@ def _ss(t):
     t = np.clip(t, 0, 1); return t * t * (3 - 2 * t)
 
 SUK_N = 8          # retezu kosti sukne po obvodu (rešerše docs/rozpracovane/obleceni_reserse.md: sukne na panev + pruzne kosti)
-SUK_K = 3          # kosti v retezu (shora dolu)
+SUK_K = 5          # kosti v retezu (shora dolu); 13. 11.: 3 -> 5 (ostry ohyb pres koleno vsede prehyb zastery - LBS)
 
 
 def _skirt_bones(ob, arm, z_top, z_bot):
