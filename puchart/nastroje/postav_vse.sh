@@ -28,6 +28,7 @@ python3 $K/nastroje/teren_upravy.py vysek1m vysek1m_upr $K   # plošiny, rampa z
 python3 $K/nastroje/koryta.py vysek1m_upr vysek1m_kor $K   # koryta potoků zaříznutá do terénu (voda_hra.json koryto)
 python3 $K/nastroje/cesty.py vysek1m_kor vysek1m_cesty $K   # cesty (zářez, maska, stromy pryč)
 python3 $K/nastroje/mista_rozmisteni.py vysek1m_cesty vysek1m_mista $K   # stavby nových míst (pravidla/svet/mista.json): domy a plošiny pod nimi
+python3 $K/nastroje/pohyb_mista.py $K   # dveře domů (domy.glb *_Dvere_*) → hra/data/pohyb_mista.json (Míša 13. 11.: funkční dveře ve vsi)
 python3 $K/nastroje/teren_dlazdice.py vysek1m_mista obzor10m $K
 cp $K/pravidla/svet/pudy.json $K/pravidla/svet/rozpocty.json $K/pravidla/svet/kontroly_hra.json $K/pravidla/svet/hrad_vzhled.json $K/pravidla/svet/den.json $K/pravidla/svet/mapa_body.json $K/pravidla/svet/pocasi.json $K/hra/data/
 mkdir -p $K/hra/textury/zem
