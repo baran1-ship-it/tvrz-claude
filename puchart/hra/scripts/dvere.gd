@@ -24,42 +24,66 @@ const ZV := "res://zvuky/pohyb/"
 
 func zacni(h: Node, vrstva: CanvasLayer, jen_mosty := false) -> void:
 	hlavni = h
-	if not FileAccess.file_exists("res://data/pohyb.json"): return
 	var hrad: Node = h.get_node_or_null("Hrad")
-	if hrad == null: return
 	var zelezo := StandardMaterial3D.new(); zelezo.albedo_color = Color(0.09, 0.085, 0.08); zelezo.metallic = 0.75; zelezo.roughness = 0.5
 	_clanek = TorusMesh.new(); _clanek.inner_radius = 0.024; _clanek.outer_radius = 0.046; _clanek.rings = 8; _clanek.ring_segments = 5; _clanek.material = zelezo
-	for e: Dictionary in JSON.parse_string(FileAccess.get_file_as_string("res://data/pohyb.json"))["dily"]:
-		var u: Node3D = hrad.find_child(String(e["name"]), true, false)
-		if u == null: continue
-		var g: String = e.get("group", e["name"])
-		var k := String(e.get("kind", "dvere"))
-		if jen_mosty and k != "most": continue   # test průchodu: trasy jsou pro otevřené dveře, kolizi potřebují jen padací mosty
-		var tel := AnimatableBody3D.new(); tel.sync_to_physics = false   # s true (Jolt) zůstala kolize v otevřené poloze – zavřená vrata pustila (pruchod:vrata_funkce)
-		for c: Array in e.get("cols", []):
-			var sh := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(c[3], c[4], c[5])
-			sh.shape = bx; sh.position = Vector3(c[0], c[1], c[2]); tel.add_child(sh)
-			if c.size() > 6: sh.rotation.x = deg_to_rad(float(c[6]))   # deska padacího mostu ve sklonu
-		u.add_child(tel)
-		if not dily.has(g): dily[g] = []; t[g] = 0.0; cil[g] = 0.0; stav[g] = true
-		dily[g].append({"uzel": u, "zaklad": u.transform, "e": e})
-		if k != "navijak": druh[g] = k; doba[g] = float(e.get("dur", 1.0))
-		if not _zvuk.has(g): _zvuk[g] = {}
-		var hp := AudioStreamPlayer3D.new(); hp.max_distance = 60.0; hp.unit_size = 8.0 if k != "navijak" else 3.0; u.add_child(hp)
-		_zvuk[g]["navijak" if k == "navijak" else "dil"] = hp   # Havran pohyb.gd: zvuk u dílu, rohatka u navijáku
-		if e.has("use"): mista[g] = Vector3(e["use"][0], e["use"][1], e["use"][2])
-		for ch: Array in e.get("chains", []):
-			var mmi := MultiMeshInstance3D.new(); mmi.top_level = true
-			var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = _clanek; mm.instance_count = 90
-			mmi.multimesh = mm; mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(mmi)
-			retezy.append({"mmi": mmi, "a": Vector3(ch[0][0], ch[0][1], ch[0][2]), "uzel": u, "e": Vector3(ch[1][0], ch[1][1], ch[1][2])})
+	if hrad != null and FileAccess.file_exists("res://data/pohyb.json"):
+		for e: Dictionary in JSON.parse_string(FileAccess.get_file_as_string("res://data/pohyb.json"))["dily"]:
+			var u: Node3D = hrad.find_child(String(e["name"]), true, false)
+			if u == null: continue
+			if jen_mosty and String(e.get("kind", "dvere")) != "most": continue   # test průchodu: trasy jsou pro otevřené dveře, kolizi potřebují jen padací mosty
+			_pridej(u, e, e.get("group", e["name"]))
+	# ves, krčma, hájovna (Míša 13. 11.: „jako na hradě tak i ves, hospoda, hájovna – funkční dveře, vrata, vrátka“):
+	# dveře domů z data/pohyb_mista.json (nastroje/pohyb_mista.py, souřadnice uzlu dveří – stejné pro každou instanci domu,
+	# skupina dveře@dům), vrata a vrátka plotů zapisuje ves.gd (pohyb_dily, souřadnice světa)
+	if not jen_mosty:
+		var mi: Node = h.get_node_or_null("Mista")
+		if mi != null and FileAccess.file_exists("res://data/pohyb_mista.json"):
+			for e: Dictionary in JSON.parse_string(FileAccess.get_file_as_string("res://data/pohyb_mista.json"))["dily"]:
+				for u: Node in mi.find_children(String(e["name"]), "Node3D", true, false):
+					_pridej(u as Node3D, e, "%s@%s" % [e.get("group", e["name"]), u.get_parent().name])
+		var ves: Node = h.get_node_or_null("Ves")
+		if ves != null and ves.get("pohyb_dily") != null:
+			for e: Dictionary in ves.pohyb_dily:
+				var u: Node3D = ves.find_child(String(e["name"]), true, false)
+				if u != null: _pridej(u, e, e.get("group", e["name"]))
+	if dily.is_empty(): return
 	tlacitko = Button.new(); tlacitko.custom_minimum_size = Vector2(260, 90); Styl.tlacitko_pruh(tlacitko, load("res://fonty/GrenzeGotisch-Medium.ttf"), 30, 2)   # svitek (Havran styl.gd)
 	tlacitko.anchor_left = 0.5; tlacitko.anchor_right = 0.5; tlacitko.anchor_top = 1.0; tlacitko.anchor_bottom = 1.0
 	tlacitko.offset_left = -170; tlacitko.offset_right = 170; tlacitko.offset_top = -170; tlacitko.offset_bottom = -80
 	tlacitko.visible = false; tlacitko.pressed.connect(func() -> void: prepni(_blizko))
 	vrstva.add_child(tlacitko)
 	call_deferred("_retezy")
-	print("DVERE %d skupin, mostů %d, řetězů %d" % [dily.size(), druh.values().count("most"), retezy.size()])
+	print("DVERE %d skupin, mostů %d, řetězů %d, ve vsi a místech %d" % [dily.size(), druh.values().count("most"), retezy.size(), dily.keys().filter(func(x: String) -> bool: return x.contains("@") or x.begins_with("ves_")).size()])
+
+## jeden pohyblivý díl: kolize (AnimatableBody3D jako dítě uzlu), skupina, zvuk, místo ovládání, řetězy.
+## glb_zavreno (domy Havrana, vrata plotů): díl je v modelu zavřený – základ = otevřená poloha (otočení o open), ve hře
+## výchozí stav otevřeno jako na hradě; use_mistni = místo ovládání v souřadnicích uzlu (počítá se v zavřené poloze)
+func _pridej(u: Node3D, e: Dictionary, g: String) -> void:
+	var k := String(e.get("kind", "dvere"))
+	var tel := AnimatableBody3D.new(); tel.sync_to_physics = false   # s true (Jolt) zůstala kolize v otevřené poloze – zavřená vrata pustila (pruchod:vrata_funkce)
+	for c: Array in e.get("cols", []):
+		var sh := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(c[3], c[4], c[5])
+		sh.shape = bx; sh.position = Vector3(c[0], c[1], c[2]); tel.add_child(sh)
+		if c.size() > 6: sh.rotation.x = deg_to_rad(float(c[6]))   # deska padacího mostu ve sklonu
+	u.add_child(tel)
+	if not u.has_meta("pohyb_use"):   # zacni běží i víckrát (snímek, test průchodu) – díl se otevře a místo spočte jen poprvé
+		var uw: Vector3 = Vector3(e["use"][0], e["use"][1], e["use"][2]) if e.has("use") else (u.global_transform * Vector3(e["use_mistni"][0], e["use_mistni"][1], e["use_mistni"][2]) if e.has("use_mistni") else Vector3.INF)
+		u.set_meta("pohyb_use", uw)
+		if bool(e.get("glb_zavreno", false)): u.transform = u.transform * Transform3D(Basis(Vector3.UP, deg_to_rad(float(e.get("open", 0.0)))), Vector3.ZERO)
+		u.set_meta("pohyb_zaklad", u.transform)
+	if (u.get_meta("pohyb_use") as Vector3) != Vector3.INF: mista[g] = u.get_meta("pohyb_use")
+	if not dily.has(g): dily[g] = []; t[g] = 0.0; cil[g] = 0.0; stav[g] = true
+	dily[g].append({"uzel": u, "zaklad": u.get_meta("pohyb_zaklad"), "e": e})
+	if k != "navijak": druh[g] = k; doba[g] = float(e.get("dur", 1.0))
+	if not _zvuk.has(g): _zvuk[g] = {}
+	var hp := AudioStreamPlayer3D.new(); hp.max_distance = 60.0; hp.unit_size = 8.0 if k != "navijak" else 3.0; u.add_child(hp)
+	_zvuk[g]["navijak" if k == "navijak" else "dil"] = hp   # Havran pohyb.gd: zvuk u dílu, rohatka u navijáku
+	for ch: Array in e.get("chains", []):
+		var mmi := MultiMeshInstance3D.new(); mmi.top_level = true
+		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = _clanek; mm.instance_count = 90
+		mmi.multimesh = mm; mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(mmi)
+		retezy.append({"mmi": mmi, "a": Vector3(ch[0][0], ch[0][1], ch[0][2]), "uzel": u, "e": Vector3(ch[1][0], ch[1][1], ch[1][2])})
 
 func prepni(g: String) -> void:
 	if not dily.has(g): return

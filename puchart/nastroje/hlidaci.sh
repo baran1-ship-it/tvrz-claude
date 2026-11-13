@@ -55,6 +55,9 @@ done
 # musí doběhnout všech úseků a variant, zastavit se a předat hru procházce – bez chyby skriptu
 krok "klepnutí na dveře"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_klik.gd timeout 600 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | grep -E "^KLIK_TEST" | tee -a $S)
 grep -q "^KLIK_TEST dvere.*-> OK" $S || { rc=1; echo "KLIK CHYBA: tlačítko dveří nereaguje na dotyk" | tee -a $S; }
+# dveře domů, vrata a vrátka ve vsi, krčmě a hájovně (Míša 13. 11.: „co jde, bude funkční“): klepnutí u dveří domu je přepne
+krok "klepnutí na dveře ve vsi"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_klik_ves.gd timeout 600 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | grep -E "^KLIK_VES_TEST" | tee -a $S)
+grep -q "^KLIK_VES_TEST dvere.*-> OK" $S || { rc=1; echo "KLIK_VES CHYBA: dveře domu ve vsi nereagují na dotyk (nebo chybí vrata plotů)" | tee -a $S; }
 krok "zapálení louče dotykem"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_louc.gd timeout 600 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | grep -E "^LOUC_TEST" | tee -a $S)
 grep -q "^LOUC_TEST zapaleni.*-> OK" $S || { rc=1; echo "LOUC CHYBA: akce předmětu nereaguje na dotyk" | tee -a $S; }
 # běh a létání na obrazovce (Míša 12. 11. večer, Havran hud.gd): dotyk na kruh Běh/Let přepne hrac.bezi/leti a zase zpět

@@ -1815,10 +1815,10 @@
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 235,
-   "max_rez_m": 0.1,
+   "max_rez_m": 0.3,
    "max_nasyp_m": 2.5,
    "max_pricny": 0.032,
-   "max_uprava_m": 0.35
+   "max_uprava_m": 0.68
   },
   {
    "id": "udoli_440_3",
@@ -5545,9 +5545,9 @@
    ],
    "delka_m": 179,
    "max_rez_m": 0.3,
-   "max_nasyp_m": 0.1,
+   "max_nasyp_m": 0.5,
    "max_pricny": 0.023,
-   "max_uprava_m": 0.67,
+   "max_uprava_m": 1.0,
    "pozn_11_11": "údolní cesta Kouteckého potoka – Míša 11. 11. (vojenská mapa 1:25 000: hlavní cesta údolím od S); OSM track grade2 176022562/1447652676/1447652679"
   },
   {
@@ -6983,7 +6983,7 @@
     ]
    ],
    "delka_m": 60,
-   "max_rez_m": 0.0,
+   "max_rez_m": 0.1,
    "max_nasyp_m": 0.0,
    "max_pricny": 0.151,
    "max_uprava_m": 0.11
@@ -18434,10 +18434,10 @@
     ]
    ],
    "delka_m": 56,
-   "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0,
-   "max_pricny": 0.035,
-   "max_uprava_m": 0.07
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.048,
+   "max_uprava_m": 0.23
   },
   {
    "id": "zluta_1",
@@ -21548,10 +21548,10 @@
   },
   "udoli_440_2": {
    "delka_m": 235,
-   "max_rez_m": 0.1,
+   "max_rez_m": 0.3,
    "max_nasyp_m": 2.5,
    "max_pricny": 0.032,
-   "max_uprava_m": 0.35,
+   "max_uprava_m": 0.68,
    "podle_terenu": true
   },
   "udoli_440_3": {
@@ -21613,9 +21613,9 @@
   "osm_track_0": {
    "delka_m": 179,
    "max_rez_m": 0.3,
-   "max_nasyp_m": 0.1,
+   "max_nasyp_m": 0.5,
    "max_pricny": 0.023,
-   "max_uprava_m": 0.67,
+   "max_uprava_m": 1.0,
    "podle_terenu": true
   },
   "osm_track_1": {
@@ -21668,7 +21668,7 @@
   },
   "osm_track_7": {
    "delka_m": 60,
-   "max_rez_m": 0.0,
+   "max_rez_m": 0.1,
    "max_nasyp_m": 0.0,
    "max_pricny": 0.151,
    "max_uprava_m": 0.11,
@@ -21892,10 +21892,10 @@
   },
   "zluta_0": {
    "delka_m": 56,
-   "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0,
-   "max_pricny": 0.035,
-   "max_uprava_m": 0.07,
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.048,
+   "max_uprava_m": 0.23,
    "podle_terenu": true
   },
   "zluta_1": {

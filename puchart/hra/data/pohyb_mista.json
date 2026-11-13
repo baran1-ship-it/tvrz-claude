@@ -1,0 +1,365 @@
+{
+ "popis": "dveře domů nových míst (nastroje/pohyb_mista.py z pravidla/svet/pohyb_mista.json a domy.glb) – čte dvere.gd pod uzlem Mista; souřadnice uzlu dveří, platí pro každou instanci",
+ "dily": [
+  {
+   "name": "Dum1_Dvere_Dvur",
+   "dum": "Dum1",
+   "kind": "dvere",
+   "group": "Dum1_Dvere_Dvur",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     0.039,
+     0.902,
+     -0.445,
+     0.079,
+     1.795,
+     0.884
+    ]
+   ],
+   "use_mistni": [
+    0.039,
+    1.0,
+    -0.445
+   ],
+   "open": -88,
+   "dur": 1.1
+  },
+  {
+   "name": "Dum1_Dvere_Jizba",
+   "dum": "Dum1",
+   "kind": "dvere",
+   "group": "Dum1_Dvere_Jizba",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     0.445,
+     0.968,
+     0.039,
+     0.884,
+     1.925,
+     0.079
+    ]
+   ],
+   "use_mistni": [
+    0.445,
+    1.0,
+    0.039
+   ],
+   "open": 88,
+   "dur": 1.1
+  },
+  {
+   "name": "Dum1_Dvere_Komora",
+   "dum": "Dum1",
+   "kind": "dvere",
+   "group": "Dum1_Dvere_Komora",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     -0.42,
+     0.968,
+     -0.039,
+     0.834,
+     1.925,
+     0.079
+    ]
+   ],
+   "use_mistni": [
+    -0.42,
+    1.0,
+    -0.039
+   ],
+   "open": 88,
+   "dur": 1.1
+  },
+  {
+   "name": "Dum1_Dvere_Vstup",
+   "dum": "Dum1",
+   "kind": "dvere",
+   "group": "Dum1_Dvere_Vstup",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     -0.039,
+     0.902,
+     0.495,
+     0.079,
+     1.795,
+     0.984
+    ]
+   ],
+   "use_mistni": [
+    -0.039,
+    1.0,
+    0.495
+   ],
+   "open": -88,
+   "dur": 1.1
+  },
+  {
+   "name": "Dum2_Dvere_Chlev",
+   "dum": "Dum2",
+   "kind": "dvere",
+   "group": "Dum2_Dvere_Chlev",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     -0.445,
+     0.967,
+     -0.039,
+     0.884,
+     1.925,
+     0.079
+    ]
+   ],
+   "use_mistni": [
+    -0.445,
+    1.0,
+    -0.039
+   ],
+   "open": 88,
+   "dur": 1.1
+  },
+  {
+   "name": "Dum2_Dvere_ChlevVen",
+   "dum": "Dum2",
+   "kind": "dvere",
+   "group": "Dum2_Dvere_ChlevVen",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     -0.039,
+     0.903,
+     0.52,
+     0.079,
+     1.795,
+     1.034
+    ]
+   ],
+   "use_mistni": [
+    -0.039,
+    1.0,
+    0.52
+   ],
+   "open": -88,
+   "dur": 1.1
+  },
+  {
+   "name": "Dum2_Dvere_Dvur",
+   "dum": "Dum2",
+   "kind": "dvere",
+   "group": "Dum2_Dvere_Dvur",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     0.039,
+     0.903,
+     -0.42,
+     0.079,
+     1.795,
+     0.834
+    ]
+   ],
+   "use_mistni": [
+    0.039,
+    1.0,
+    -0.42
+   ],
+   "open": -88,
+   "dur": 1.1
+  },
+  {
+   "name": "Dum2_Dvere_Jizba",
+   "dum": "Dum2",
+   "kind": "dvere",
+   "group": "Dum2_Dvere_Jizba",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     0.42,
+     0.967,
+     0.039,
+     0.834,
+     1.925,
+     0.079
+    ]
+   ],
+   "use_mistni": [
+    0.42,
+    1.0,
+    0.039
+   ],
+   "open": 88,
+   "dur": 1.1
+  },
+  {
+   "name": "Dum2_Dvere_Vstup",
+   "dum": "Dum2",
+   "kind": "dvere",
+   "group": "Dum2_Dvere_Vstup",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     -0.039,
+     0.903,
+     0.47,
+     0.079,
+     1.795,
+     0.934
+    ]
+   ],
+   "use_mistni": [
+    -0.039,
+    1.0,
+    0.47
+   ],
+   "open": -88,
+   "dur": 1.1
+  },
+  {
+   "name": "Rychta_Dvere_Dvur",
+   "dum": "Rychta",
+   "kind": "dvere",
+   "group": "Rychta_Dvere_Dvur",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     0.039,
+     0.902,
+     -0.445,
+     0.079,
+     1.795,
+     0.884
+    ]
+   ],
+   "use_mistni": [
+    0.039,
+    1.0,
+    -0.445
+   ],
+   "open": -88,
+   "dur": 1.1
+  },
+  {
+   "name": "Rychta_Dvere_Jizba",
+   "dum": "Rychta",
+   "kind": "dvere",
+   "group": "Rychta_Dvere_Jizba",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     0.445,
+     0.968,
+     0.039,
+     0.884,
+     1.925,
+     0.079
+    ]
+   ],
+   "use_mistni": [
+    0.445,
+    1.0,
+    0.039
+   ],
+   "open": -88,
+   "dur": 1.1
+  },
+  {
+   "name": "Rychta_Dvere_Komora",
+   "dum": "Rychta",
+   "kind": "dvere",
+   "group": "Rychta_Dvere_Komora",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     -0.42,
+     0.968,
+     -0.039,
+     0.834,
+     1.925,
+     0.079
+    ]
+   ],
+   "use_mistni": [
+    -0.42,
+    1.0,
+    -0.039
+   ],
+   "open": 88,
+   "dur": 1.1
+  },
+  {
+   "name": "Rychta_Dvere_Vstup",
+   "dum": "Rychta",
+   "kind": "dvere",
+   "group": "Rychta_Dvere_Vstup",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     -0.039,
+     0.902,
+     0.52,
+     0.079,
+     1.795,
+     1.034
+    ]
+   ],
+   "use_mistni": [
+    -0.039,
+    1.0,
+    0.52
+   ],
+   "open": -88,
+   "dur": 1.1
+  },
+  {
+   "name": "ChyseKura_Dvere",
+   "dum": "ChyseKura",
+   "kind": "dvere",
+   "group": "ChyseKura_Dvere",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     0.405,
+     0.93,
+     0.004,
+     0.802,
+     1.815,
+     0.068
+    ]
+   ],
+   "use_mistni": [
+    0.405,
+    1.0,
+    0.004
+   ],
+   "open": 88,
+   "dur": 1.1
+  },
+  {
+   "name": "ChysePrkna_Dvere",
+   "dum": "ChysePrkna",
+   "kind": "dvere",
+   "group": "ChysePrkna_Dvere",
+   "glb_zavreno": true,
+   "cols": [
+    [
+     0.405,
+     0.93,
+     0.004,
+     0.802,
+     1.819,
+     0.068
+    ]
+   ],
+   "use_mistni": [
+    0.405,
+    1.0,
+    0.004
+   ],
+   "open": 88,
+   "dur": 1.1
+  }
+ ]
+}

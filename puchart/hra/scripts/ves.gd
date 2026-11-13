@@ -24,6 +24,11 @@ var _st_mat: StandardMaterial3D
 var _kat := {}            # predmety_h.json (pivot kolizí, rozměry)
 var _site := {}           # model drobnosti -> [Mesh, Transform3D v rámci scény]
 var _uzlu := 0
+var pohyb_dily: Array = []   # vrata a vrátka plotů pro dvere.gd (formát data/pohyb.json, souřadnice světa)
+
+
+func _init() -> void:
+	name = "Ves"   # dvere.gd hledá díly pod uzlem Ves
 
 
 func _ready() -> void:
@@ -253,7 +258,7 @@ func _ploty() -> void:
 					"proutěny": pass   # díly plutek: _drobne (BunkyKolem)
 				_kolize_plotu(kb, body, float(pr["latovy"]["vyska_m"]))
 			else:
-				_brana(sit, e, pr, kb)
+				_brana(sit, e, pr, uzel)
 		var mi := MeshInstance3D.new(); mi.name = "Ploty_%d" % ui; mi.mesh = sit.mesh(); mi.position = c
 		mi.visibility_range_end = dosah; mi.visibility_range_end_margin = 4.0
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
@@ -346,20 +351,32 @@ func _kolize_plotu(kb: StaticBody3D, body: Array, h: float) -> void:
 
 
 ## vrata se stříškou (Havran roofed_gate), prostá vrata a branka (wicket) – zavřená křídla z prken na svlacích se vzpěrou
-func _brana(sit: Sit, e: Dictionary, pr: Dictionary, kb: StaticBody3D) -> void:
+## Křídla jsou samostatné uzly s pantem (Pohyb_ves_*), pohybuje jimi dvere.gd jako dveřmi hradu (Míša 13. 11.: „funkční
+## dveře, vrata, vrátka“; Havran vesnice.py roofed_gate/wicket + kit.movable): v modelu zavřená, ve hře výchozí stav otevřeno,
+## otevírají se do dvora (ke středu parcely), zavřené křídlo má kolizi.
+func _brana(sit: Sit, e: Dictionary, pr: Dictionary, uzel: Node3D) -> void:
 	var a := Vector3(float(e["a"][0]), float(e["a"][1]), float(e["a"][2])); var b := Vector3(float(e["b"][0]), float(e["b"][1]), float(e["b"][2]))
 	var y := minf(a.y, b.y); a.y = y; b.y = y
 	var dn := (b - a); var w := dn.length(); dn /= w; var nrm := Vector3(-dn.z, 0, dn.x)
 	var druh := String(e["druh"])
+	var dovnitr := -nrm   # do dvora: ke středu parcely usedlosti
+	for u_: Dictionary in d["usedlosti"]:
+		if int(u_["i"]) == int(e["usedlost"]):
+			var st_ := Vector3(float(u_["stred"][0]), 0, float(u_["stred"][1])) - (a + b) / 2; st_.y = 0
+			dovnitr = nrm if st_.dot(nrm) > 0 else -nrm
+	var ib := pohyb_dily.size()
 	if druh == "branka":
 		var bp: Dictionary = pr["branka"]
 		for q: Vector3 in [a, b]: sit.valec("kura", q + Vector3(0, -0.4, 0), q + Vector3(0, 1.25, 0), 0.075, 0.068)
-		var wl := w - 0.16; var n := 7
-		for i in n:
-			var x0 := 0.08 + wl * i / n + 0.008; var x1 := 0.08 + wl * (i + 1) / n - 0.008; var hh := float(bp["vyska_m"])
-			var o := a + Vector3(0, 0.08, 0)
-			sit.hranol("lata", [o + dn * x0, o + dn * x1, o + dn * x1 + Vector3(0, hh - 0.04, 0), o + dn * (x0 + x1) / 2 + Vector3(0, hh, 0), o + dn * x0 + Vector3(0, hh - 0.04, 0)], nrm, 0.022)
-		for yy: float in [0.2, 0.85]: sit.kvadr("vrata", a + dn * (w / 2) + Vector3(0, 0.08 + yy, 0) - nrm * 0.03, dn, Vector3.UP, nrm, Vector3(wl, 0.09, 0.035))
+		var wl := w - 0.16; var hh := float(bp["vyska_m"])
+		var kresli_b := func(ls: Sit, x_: Vector3, n_: Vector3) -> void:
+			var n := 7
+			for i in n:
+				var x0 := wl * i / n + 0.008; var x1 := wl * (i + 1) / n - 0.008
+				var o := Vector3(0, 0.08, 0)
+				ls.hranol("lata", [o + x_ * x0, o + x_ * x1, o + x_ * x1 + Vector3(0, hh - 0.04, 0), o + x_ * (x0 + x1) / 2 + Vector3(0, hh, 0), o + x_ * x0 + Vector3(0, hh - 0.04, 0)], n_, 0.022)
+			for yy: float in [0.2, 0.85]: ls.kvadr("vrata", x_ * (wl / 2) + Vector3(0, 0.08 + yy, 0) - n_ * 0.03, x_, Vector3.UP, n_, Vector3(wl, 0.09, 0.035))
+		_kridlo(uzel, "Pohyb_ves_branka_%d" % ib, "ves_branka_%d" % ib, a + dn * 0.08, dn, nrm, dovnitr, wl, hh, (a + b) / 2 + Vector3(0, 1.0, 0), kresli_b)
 		return
 	var kryta := druh == "kryta_vrata"
 	var vp: Dictionary = pr["kryta_vrata"] if kryta else pr["vrata"]
@@ -376,21 +393,37 @@ func _brana(sit: Sit, e: Dictionary, pr: Dictionary, kb: StaticBody3D) -> void:
 			var c := (hr + ok) / 2; var dl := hr.distance_to(ok)
 			var yv := (hr - ok).normalized(); var zv := dn.cross(yv).normalized() * (1.0 if su > 0 else -1.0)
 			sit.kvadr("sindel", c + zv * 0.03, dn, yv, zv, Vector3(w + 0.95, dl + 0.12, 0.05))
-	# dvě křídla z prken (5 prken, svlaky nahoře a dole, vzpěra)
+	# dvě křídla z prken (5 prken, svlaky nahoře a dole, vzpěra) – každé na svém pantu u sloupu
 	var hk := float(vp["kridla_m"]); var wl := w / 2 - 0.14
-	for side: float in [-1.0, 1.0]:
-		var hp := (a + dn * 0.13) if side < 0 else (b - dn * 0.13); var x_ := dn * (-side)
+	var kresli_v := func(ls: Sit, x_: Vector3, n_: Vector3) -> void:
 		for i in 5:
 			var x0 := 0.03 + (wl - 0.03) * i / 5.0; var x1 := 0.03 + (wl - 0.03) * (i + 1) / 5.0 - 0.012
 			var top := hk + 0.1 * sin((x0 + x1) / 2 / wl * PI / 2)
-			sit.kvadr("vrata", hp + x_ * (x0 + x1) / 2 + Vector3(0, 0.06 + top / 2, 0), x_, Vector3.UP, nrm, Vector3(x1 - x0, top, 0.04))
+			ls.kvadr("vrata", x_ * (x0 + x1) / 2 + Vector3(0, 0.06 + top / 2, 0), x_, Vector3.UP, n_, Vector3(x1 - x0, top, 0.04))
 		for yy: float in [0.3, hk - 0.3]:
-			sit.kvadr("vrata", hp + x_ * wl / 2 + Vector3(0, 0.06 + yy, 0) - nrm * 0.04, x_, Vector3.UP, nrm, Vector3(wl - 0.05, 0.12, 0.04))
-		var bp0 := hp + x_ * 0.1 + Vector3(0, 0.36, 0) - nrm * 0.045; var bp1 := hp + x_ * (wl - 0.1) + Vector3(0, hk - 0.36, 0) - nrm * 0.045
+			ls.kvadr("vrata", x_ * wl / 2 + Vector3(0, 0.06 + yy, 0) - n_ * 0.04, x_, Vector3.UP, n_, Vector3(wl - 0.05, 0.12, 0.04))
+		var bp0 := x_ * 0.1 + Vector3(0, 0.36, 0) - n_ * 0.045; var bp1 := x_ * (wl - 0.1) + Vector3(0, hk - 0.36, 0) - n_ * 0.045
 		var bx := (bp1 - bp0).normalized()
-		sit.kvadr("vrata", (bp0 + bp1) / 2, bx, nrm.cross(bx).normalized() * -1.0, nrm, Vector3(bp0.distance_to(bp1), 0.1, 0.035))
-	var cs := CollisionShape3D.new(); var bs := BoxShape3D.new(); bs.size = Vector3(w, hk, 0.1); cs.shape = bs
-	cs.transform = Transform3D(Basis(Vector3.UP, atan2(-dn.z, dn.x)), (a + b) / 2 + Vector3(0, hk / 2, 0)); kb.add_child(cs)
+		ls.kvadr("vrata", (bp0 + bp1) / 2, bx, n_.cross(bx).normalized() * -1.0, n_, Vector3(bp0.distance_to(bp1), 0.1, 0.035))
+	for side: float in [-1.0, 1.0]:
+		var hp := (a + dn * 0.13) if side < 0 else (b - dn * 0.13)
+		_kridlo(uzel, "Pohyb_ves_vrata_%d_%s" % [ib, "l" if side < 0 else "p"], "ves_vrata_%d" % ib, hp, dn * (-side), nrm, dovnitr, wl, hk, (a + b) / 2 + Vector3(0, 1.0, 0), kresli_v)
+
+
+## křídlo jako uzel s pantem v hp: místní osa x podél křídla (od pantu), geometrie z kresli(Sit, x, nrm) v místních
+## souřadnicích; záznam pro dvere.gd (kolize zavřeného křídla, úhel do dvora, místo ovládání ve světě)
+func _kridlo(uzel: Node3D, jm: String, skup: String, hp: Vector3, x_: Vector3, nrm: Vector3, dovnitr: Vector3, wl: float, hk: float, pouzit: Vector3, kresli: Callable) -> void:
+	var B := Basis(x_, Vector3.UP, x_.cross(Vector3.UP).normalized())
+	var bi := B.inverse()
+	var ls := Sit.new(Vector3.ZERO, _mat)
+	kresli.call(ls, Vector3.RIGHT, (bi * nrm).normalized())
+	var mi := MeshInstance3D.new(); mi.name = jm; mi.mesh = ls.mesh(); mi.transform = Transform3D(B, hp)
+	mi.visibility_range_end = _f("ploty_do_m", "ploty_do_m_mobil"); mi.visibility_range_end_margin = 4.0
+	uzel.add_child(mi)
+	var dl := bi * dovnitr   # Basis(UP, a) * (1, 0, 0) = (cos a, 0, −sin a) → do dvora
+	var uhel := float(d["ploty_pravidla"].get("kridlo_uhel_deg", 85.0)) * (-1.0 if dl.z > 0 else 1.0)
+	pohyb_dily.append({"name": jm, "kind": "vrata" if skup.begins_with("ves_vrata") else "dvere", "group": skup, "glb_zavreno": true,
+		"cols": [[wl / 2, hk / 2 + 0.06, 0.0, wl, hk, 0.08]], "use": [pouzit.x, pouzit.y, pouzit.z], "open": uhel, "dur": 1.6 if skup.begins_with("ves_vrata") else 1.0})
 
 
 ## ------------------------------------------------------------------ studna na návsi (Havran vesnice.py well + KCD1 fotky)

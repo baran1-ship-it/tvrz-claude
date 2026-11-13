@@ -20,7 +20,7 @@ for l in open(K + "/docs/chyby.md"):
         if d == "hlidac":   # testy Godotu v hlidaci.sh s vlastním výpisem (KLIK_TEST, BEHLET_TEST) – výsledek z build/hlidaci.txt
             if "--rychle" in sys.argv: continue
             _ht = open(K + "/build/hlidaci.txt").read() if os.path.exists(K + "/build/hlidaci.txt") else ""
-            ok = bool(re.search({"klik": r"KLIK_TEST dvere.*-> OK", "behlet": r"BEHLET_TEST OK", "louc": r"LOUC_TEST zapaleni.*-> OK"}.get(t, "^$NIKDY"), _ht))
+            ok = bool(re.search({"klik": r"KLIK_TEST dvere.*-> OK", "klik_ves": r"KLIK_VES_TEST dvere.*-> OK", "behlet": r"BEHLET_TEST OK", "louc": r"LOUC_TEST zapaleni.*-> OK"}.get(t, "^$NIKDY"), _ht))
             if not ok: chyby.append("#%s: hlidac:%s neprošel/neběžel" % (m.group(1), t))
             continue
         ok = TS.get(t, {}).get("ok") if d == "smysl" else (all(v == "OK" for v in PR.values()) if t == "vse" else PR.get(t) == "OK")

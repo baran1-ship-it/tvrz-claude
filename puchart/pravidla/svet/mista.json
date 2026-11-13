@@ -505,7 +505,9 @@
     }
    },
    "k_narozi_m": 0.05,
-   "k_narozi_pozn": "Míša 13. 11. (foto z tabletu: „ploty nenavazují na domy, jsou tam díry“): konec plotu u stavby končí u nároží – uliční plot před předzahrádkou se vrací podél boku domu až k nároží štítu (+k_narozi_m); test smysl:ploty_navazuji (každý konec plotu do 0,3 m od stavby nebo od jiného plotu/vrat téže usedlosti). Zdroj: KCD2 Havran docs/screens/ref_kcd2_ves_ulice.jpg, ref_kcd2_ves_plot_cesta.jpg (plot navazuje na roh stavení)"
+   "k_narozi_pozn": "Míša 13. 11. (foto z tabletu: „ploty nenavazují na domy, jsou tam díry“): konec plotu u stavby končí u nároží – uliční plot před předzahrádkou se vrací podél boku domu až k nároží štítu (+k_narozi_m); test smysl:ploty_navazuji (každý konec plotu do 0,3 m od stavby nebo od jiného plotu/vrat téže usedlosti). Zdroj: KCD2 Havran docs/screens/ref_kcd2_ves_ulice.jpg, ref_kcd2_ves_plot_cesta.jpg (plot navazuje na roh stavení)",
+   "kridlo_uhel_deg": 85,
+   "kridlo_pozn": "Míša 13. 11.: funkční vrata a vrátka plotů – křídla na pantu (ves.gd _kridlo → dvere.gd), otevírají se do dvora o kridlo_uhel_deg; Havran vesnice.py roofed_gate/wicket + kit.movable"
   },
   "studna": {
    "zdroj": "KCD1 Havran docs/screens/reference/kcd1/11_nadvori_studna_drevo_kone.jpg a docs/reference/kcd_vzhled/misa_kcd_15.jpg (roubení z oblých lomových kamenů nasucho ~0,9 m vysoké, silná zeď, dva sloupy vedle roubení se vzpěrami, rumpál z kulatiny s klikou, lano a vědro na okraji, sedlová stříška z prken/šindele); Havran vesnice.py well (kruh r 0,95 m, výška 0,95 m, sloupy 2,3 m, rumpál ve 1,55 m, stříška)",

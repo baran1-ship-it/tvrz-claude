@@ -614,7 +614,7 @@ func _mista() -> void:
 		var vzor := sc.get_node_or_null(String(s["model"])) as Node3D
 		if vzor == null: continue
 		var dum := vzor.duplicate() as Node3D
-		dum.name = "%s_%s" % [s["misto"], s["model"]]
+		dum.name = "%s_%s_%d" % [s["misto"], s["model"], uzel.get_child_count()]   # jedinečné jméno instance: skupina dveří dvere.gd = dveře@dům
 		dum.transform = Transform3D(Basis(Vector3.UP, float(s["yaw"])), Vector3(float(s["x"]), float(s["teren_y"]), float(s["z"])))
 		uzel.add_child(dum)
 		var st_vzor: MeshInstance3D = ssc.find_child(String(s["model"]) + "_Stredni", true, false) as MeshInstance3D if ssc else null

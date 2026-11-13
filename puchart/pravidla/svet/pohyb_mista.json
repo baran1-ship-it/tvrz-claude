@@ -1,0 +1,10 @@
+{
+ "popis": "Funkční dveře domů nových míst (ves Předhradí, krčma, hájovna) – Míša 13. 11.: „jako na hradě tak i ves, hospoda, hájovna – funkční dveře, vrata, vrátka, prostě co jde, bude funkční“. nastroje/pohyb_mista.py čte uzly <Dům>_Dvere_* z hra/modely/stavby_h/domy.glb (pant = počátek uzlu, křídlo podle obalu sítě) a zapíše hra/data/pohyb_mista.json ve formátu pohyb.json; dvere.gd je najde v každé instanci domu (uzel Mista) – skupina = dveře@instance. V modelu Havrana jsou dveře zavřené (glb_zavreno), ve hře výchozí stav otevřeno jako na hradě; zavřené křídlo má kolizi.",
+ "zdroj": "Havran kit.movable + scripts/pohyb.gd (dveře na pantu, úhel 88°, doba 1,1 s jako hrad pohyb.json); dveře venkovských domů se otvírají dovnitř (KCD1/KCD2: dveře chalup dovnitř, předloha docs/reference/kcd_ves_predloha/01, 02)",
+ "uhel_deg": 88,
+ "doba_s": 1.1,
+ "tloustka_min_m": 0.06,
+ "ovladani_y_m": 1.0,
+ "smer": "dovnitr",
+ "smer_pozn": "křídlo se otočí ke středu domu (vnější dveře dovnitř, vnitřní ke středu půdorysu)"
+}
