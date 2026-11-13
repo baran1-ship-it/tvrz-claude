@@ -1303,6 +1303,9 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - `beh.sh … testy "$T"` s prázdnou proměnnou spustí CELOU sadu (rychle_testy.sh bez seznamu); běžela 1,5 h a držela
   zámek, přestavba postav za ní po 30 min ve frontě spadla na limit pozadí. Seznam testů psát vždy doslova, ne přes
   proměnnou, a dlouhé řetězy pouštět s `timeout` 7 200 000 ms.
+- Oprava téhož dne: celou sadu vydání stejně potřebuje – brána `kontrola_vztahu.py` čte jen log celé sady k otisku
+  exportu A hashi kódu (`scripts/`, `test_svet.gd`). Po přestavbě postav tedy: `otisk_exportu.py zapis` (jen výstupy
+  postav, vstupy beze změny) → `beh.sh … testy` celá sada (~1,5 h, timeout 7 200 000) → `vydani.py`. Počítat předem.
 
 ### 13. 11. – lide_chovani: sed na konci dlouhé lavice, poutníci na společném rozcestí
 - Test sedu bral lavici s nejbližším STŘEDEM (sousední krátká lavice) – krajní místo 4 m lavice hlásil „mimo sedák“.
