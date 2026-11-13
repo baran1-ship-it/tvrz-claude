@@ -122,7 +122,7 @@ TGT = {"kosile": 1200, main_k: 2200 if main_k == "kotle" else 2600, "nohavice": 
 if CFG.get("npc"):
     # NPC ≤ 8 000 troj.: hlava, ruce, oči, obočí i oblečení úsporněji
     DEC = {"trup": 0.35, "paze": 0.4, "stehna": 0.35, "lytka": 0.35, "chodidla": 0.4, "ruce": 0.33, "hlava": 0.5, "dekolt": 1.0}
-    TGT = {"kosile": 450, main_k: 1400 if main_k == "kotle" else 1580, "nohavice": 450, "skorne": 380, "opasek": 120, "kape": 600, "rouska": 560, "zastera": 260, "cepice": 200}
+    TGT = {"kosile": 450, main_k: 1400 if main_k == "kotle" else 1580, "nohavice": 450, "skorne": 380, "opasek": 120, "kape": 600, "rouska": 560, "zastera": 420, "cepice": 200}
 def decimate(o, ratio, keep_edges=False):
     if ratio >= 0.99: return
     if keep_edges:
@@ -275,7 +275,7 @@ def build_atlas(objs, label, garments=None):
             if k not in pats: pats[k] = fabric_pattern(k)
             pc, pr = pats[k]
             # zahyby (normala v UV trubky) jen u trubek; limec kukle je od 12. 11. slupka s UV tela -> fleky
-            skirt = o.name.endswith(("_svrchni_d",)) or "rouska_cip" in o.name
+            skirt = o.name.endswith(("_svrchni_d", "_zastera")) or "rouska_cip" in o.name
             dw = dirt_weights(o, k)
             rw = role_weights(o, k)
             for ti, (s_, d, _m) in enumerate(tl):
