@@ -1298,3 +1298,8 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - Sukně: vytlačení z kapslí běží vždy (i stání/chůze, váha 0) a vyhlazuje se jen odchylka od animace (průměr poloh kruh
   smršťoval → noha skrz sukni při stání). Otevřené: při chůzi horní část stehna prosvítá kabátcem mužů (kořen řetězu
   pevný u pánve, první kost 15 cm) – test_sukne 18 chyb (klek mužů).
+
+### 13. 11. – prázdný seznam testů = celá sada a blokovaný zámek
+- `beh.sh … testy "$T"` s prázdnou proměnnou spustí CELOU sadu (rychle_testy.sh bez seznamu); běžela 1,5 h a držela
+  zámek, přestavba postav za ní po 30 min ve frontě spadla na limit pozadí. Seznam testů psát vždy doslova, ne přes
+  proměnnou, a dlouhé řetězy pouštět s `timeout` 7 200 000 ms.
