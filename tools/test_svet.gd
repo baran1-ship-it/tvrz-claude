@@ -7611,13 +7611,13 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 			ch.call("scena %s v %.1f: ucastniku %d (%s)" % [sc["kde"], float(sc["od"]), cinn.size(), str(sc["kdo"])])
 	# Misa 13. 11. (bylinkarka trha jablka ze stromu, ale stoji nad zahonem): kazdy blok s trhanim (vsechny klipy 'nad')
 	# ma misto u kmene ovocneho stromu (lide.u_stromu); (kucharky pily a pleli v kuchyni): v kuchyni zadne Napiti/Hleda_Loop
-	var vyz: Dictionary = Pravidla.cti("postavy", "klipy_vyznam")
+	var vyz_o: Dictionary = Pravidla.cti("postavy", "klipy_vyznam")
 	var ust: Dictionary = Pravidla.cti("postavy", "u_stromu")
 	for c: Dictionary in ll:
 		for bl: Dictionary in c["role"]["rozvrh"]:
 			var cn2: Dictionary = P["cinnosti"][bl["cinnost"]]
 			var kl2: Array = cn2.get("klipy", [])
-			if kl2.is_empty() or not kl2.all(func(k: String) -> bool: return String(vyz.get(k, "")) == "nad"):
+			if kl2.is_empty() or not kl2.all(func(k: String) -> bool: return String(vyz_o.get(k, "")) == "nad"):
 				continue
 			lide.call("_uvolni", c)
 			var mt: Array = lide.call("_misto_cinnosti", c, String(bl["kde"]), cn2)
@@ -7625,7 +7625,7 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 			if ut.is_empty() or (ut[0] as Vector2).distance_to(mt[0]) > float(ust["od_kmene_m"]) * 0.5:
 				ch.call("%s %s@%s: trha ovoce mimo strom %s" % [c["id"], bl["cinnost"], bl["kde"], (mt[0] as Vector2).round()])
 	for k3: String in (P["cinnosti"] as Dictionary):
-		if k3 == "vareni" and str(P["cinnosti"][k3]).contains("Napiti"):
+		if k3 == "vareni" and (str(P["cinnosti"][k3].get("klipy", [])) + str(P["cinnosti"][k3].get("sceny", []))).contains("Napiti"):
 			ch.call("vareni: piti v kuchyni")
 	# Misa 11. 11. (tri poutnici sli spolu): cile poutniku (c.misto) od sebe aspon poutnici_od_m
 	var pt_m: Array = []
