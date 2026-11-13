@@ -2233,7 +2233,7 @@ func _process_vlastni(dt: float) -> void:
 		_dvere_zavri_za(c)
 		if not blizko or skryty:
 			u.visible = false
-			if not OS.has_environment("TVRZ_BEZ_MODIF_VYP"): _modif_vyp(c)                         # 13. 11.: skryta postava nepocita kostru (modifikatory bezely i neviditelne)
+			_modif_vyp(c)                         # 13. 11.: skryta postava nepocita kostru (modifikatory bezely i neviditelne)
 			if not blizko and not skryty:
 				_daleko_krok(c, dt)
 			continue
