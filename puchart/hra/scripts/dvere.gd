@@ -59,8 +59,18 @@ func zacni(h: Node, vrstva: CanvasLayer, jen_mosty := false) -> void:
 ## jeden pohyblivý díl: kolize (AnimatableBody3D jako dítě uzlu), skupina, zvuk, místo ovládání, řetězy.
 ## glb_zavreno (domy Havrana, vrata plotů): díl je v modelu zavřený – základ = otevřená poloha (otočení o open), ve hře
 ## výchozí stav otevřeno jako na hradě; use_mistni = místo ovládání v souřadnicích uzlu (počítá se v zavřené poloze)
+var _dosahy := {}
 func _pridej(u: Node3D, e: Dictionary, g: String) -> void:
 	var k := String(e.get("kind", "dvere"))
+	if _dosahy.is_empty():   # kreslit jen zblízka (rozpocty.json pohyblive_dily; Míša 13. 11.: hrad se kreslil celý i z vesnice)
+		_dosahy = {"_": true}
+		if FileAccess.file_exists("res://data/rozpocty.json"):
+			var r: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json")).get("pohyblive_dily", {})
+			for kk in r: _dosahy[kk] = r[kk]
+	var dd := float(_dosahy.get("most_do_m" if k == "most" else ("navijak_do_m" if k == "navijak" else "dvere_do_m"), 0.0))
+	if dd > 0.0:
+		for gi in [u] + u.find_children("*", "GeometryInstance3D", true, false):
+			if gi is GeometryInstance3D: (gi as GeometryInstance3D).visibility_range_end = dd
 	var tel := AnimatableBody3D.new(); tel.sync_to_physics = false   # s true (Jolt) zůstala kolize v otevřené poloze – zavřená vrata pustila (pruchod:vrata_funkce)
 	for c: Array in e.get("cols", []):
 		var sh := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(c[3], c[4], c[5])

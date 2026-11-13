@@ -96,5 +96,12 @@
   "tablet": 30,
   "pc": 0,
   "popis": "Havran měření 0.99991 (5. 11.): sekání = škrcení teplem (studený tablet p95 28–38 ms, zahřátý 94–126 ms); limit 30 FPS = méně práce za minutu, méně tepla. Měřicí APK měří bez limitu (pc 0)."
+ },
+ "pohyblive_dily": {
+  "dvere_do_m": 60.0,
+  "most_do_m": 250.0,
+  "navijak_do_m": 40.0,
+  "retezy_do_m": 120.0,
+  "pozn": "Míša 13. 11. (z Havrana: „hrad se maluje celý i s vnitřkem i na dohled z vesnice, což je zbytečné“): dveře, vrata, navijáky a řetězy hradu (Pohyb_*, dvere.gd) se kreslily na jakoukoli vzdálenost (~60 tis. troj., desítky kreslení i z vsi – daleká verze hradu je bez nich). Dveře a navijáky jen zblízka, padací mosty jsou vidět z cesty dál; zbytek hradu: blízká verze do hrad_vzhled lod.daleko_od_m, pak daleká"
  }
 }
