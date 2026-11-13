@@ -47,13 +47,25 @@ func _beh() -> void:
 		c["klip"] = ""
 		lide.call("_klip", c, "Walk_Loop", 1.0)
 		postavy.append(c)
+	# staticke kopie: stejne site bez kostry (skin pryc) na mistech postav - rozdil zastavene x staticke = skinovani
+	var stat := Node3D.new()
+	koren.add_child(stat)
+	for c: Dictionary in postavy:
+		for mi: Node in (c["uzel"] as Node3D).find_children("*", "MeshInstance3D", true, false):
+			var m2 := MeshInstance3D.new()
+			m2.mesh = (mi as MeshInstance3D).mesh
+			m2.global_transform = (mi as MeshInstance3D).global_transform
+			for si in (mi as MeshInstance3D).get_surface_override_material_count():
+				m2.set_surface_override_material(si, (mi as MeshInstance3D).get_surface_override_material(si))
+			stat.add_child(m2)
 	for _i in 30:
 		await process_frame
 	var vysl := {}
 	for kolo in 2:
-		for rez in ["animovane", "zastavene", "skryte", "prazdna"]:
+		for rez in ["animovane", "zastavene", "staticke", "skryte"]:
 			for c: Dictionary in postavy:
 				(c["uzel"] as Node3D).visible = rez in ["animovane", "zastavene"]
+			stat.visible = rez == "staticke"
 			await process_frame
 			var ms: float = await _prumer(90, postavy, rez == "animovane")
 			vysl[rez] = minf(float(vysl.get(rez, INF)), ms)
