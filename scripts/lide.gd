@@ -35,7 +35,8 @@ static var P: Dictionary = {
 	"chuze_postav": Pravidla.cti("postavy", "chuze_postav"), "podminky": Pravidla.cti("postavy", "podminky"),
 	"u_steny": Pravidla.cti("postavy", "u_steny"),
 	"pohledy": Pravidla.cti("postavy", "pohledy"), "kostky": Pravidla.cti("postavy", "kostky"),
-	"poutnici": Pravidla.cti("postavy", "poutnici"), "sukne": Pravidla.cti("postavy", "sukne")}
+	"poutnici": Pravidla.cti("postavy", "poutnici"), "sukne": Pravidla.cti("postavy", "sukne"),
+	"u_stromu": Pravidla.cti("postavy", "u_stromu"), "vyznam": Pravidla.cti("postavy", "klipy_vyznam")}
 ## stin postav jen zblizka: trida postava v pravidla_modelu.json (stin_m) - jeden zdroj s testem modelu
 static var STIN_M: float = _stin_m()
 const PREDMETY_DIR := "res://modely/predmety/"
@@ -1324,6 +1325,11 @@ func _misto_cinnosti(c: Dictionary, kde: String, cn: Dictionary) -> Array:
 					var k2 := stred - q
 					return [q, atan2(k2.x, k2.y)]
 	var m: Array = _misto(c, kde)
+	# Misa 13. 11. (bylinkarka trha jablka nad zahonem): trhani ovoce (vsechny klipy 'nad') stoji u kmene ovocneho stromu
+	if not (cn.get("klipy", []) as Array).is_empty() and (cn["klipy"] as Array).all(func(k: String) -> bool: return String(P["vyznam"].get(k, "")) == "nad"):
+		var us := u_stromu(m[0])
+		if not us.is_empty():
+			return us
 	if kde == "zahrada":
 		var zh := _zahon(c, m[0])
 		if not zh.is_empty():
@@ -1517,6 +1523,30 @@ func _zahon(c: Dictionary, kde: Vector2) -> Array:
 		if not u.is_empty():
 			return u
 	return []
+
+
+## Misto u nejblizsiho ovocneho stromu (postavy.json u_stromu, svet.json rostliny <druh>_N) do hledat_m od kde:
+## [Vector2 stani od_kmene_m od osy kmene, yaw celem ke kmeni], jinak [].
+func u_stromu(kde: Vector2) -> Array:
+	var us: Dictionary = P["u_stromu"]
+	var ro: Dictionary = main.svet.data.get("rostliny", {}) if main != null and main.svet != null else {}
+	var nej := INF
+	var kmen := Vector2.ZERO
+	for k: String in ro:
+		if k.contains("daleko") or not (us["druhy"] as Array).any(func(dr: String) -> bool: return k.begins_with(dr + "_")):
+			continue
+		for t: Array in ro[k]:
+			var q := Vector2(float(t[3]), float(t[11]))
+			var dd := q.distance_to(kde)
+			if dd < nej:
+				nej = dd
+				kmen = q
+	if nej > float(us["hledat_m"]):
+		return []
+	var sm := (kde - kmen).normalized() if kde.distance_to(kmen) > 0.01 else Vector2.RIGHT
+	var q2 := kmen + sm * float(us["od_kmene_m"])
+	var k2 := kmen - q2
+	return [q2, atan2(k2.x, k2.y)]
 
 
 ## Je cil q do r od ciloveho mista jine postavy?

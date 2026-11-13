@@ -917,35 +917,31 @@
   },
   "vareni": {
    "klipy": [
-    "Hleda_Loop",
-    "Hleda_Loop"
+    "Interact",
+    "PickUp_Table"
    ],
    "obmena_s": [
     6.0,
     14.0
    ],
    "soustredeni": 0.7,
-   "v_rukou": {
-    "Napiti": {
-     "l": "korbel"
-    }
-   },
    "sceny": [
     [
      "Truhla_Otevri",
-     "Hleda_Loop",
+     "Interact",
      "Truhla_Zavri",
-     "Hleda_Loop"
+     "PickUp_Table"
     ],
     [
-     "Hleda_Loop",
-     "Hleda_Loop",
-     "Napiti"
+     "PickUp_Table",
+     "Interact",
+     "PickUp_Table"
     ]
    ],
    "vysky": [
     "pas"
-   ]
+   ],
+   "_13_11": "Misa 13. 11. (kucharky chlastaji v kuchyni a pleji v peci): pryc Napiti s korbelem a Hleda_Loop (predklon k zemi = pleti); prace u stolu a kotliku (Interact, PickUp_Table, truhla)"
   },
   "kovani": {
    "klipy": [
@@ -6680,5 +6676,17 @@
   "test_latka_podil": 0.8,
   "test_latka_vrcholu": 3,
   "_noha13": "13. 11. (Misa: noha z obleceni; rešerše obleceni_noha_reserse.md): predni/bocni retezy jdou noha_podil svihu stehna (Kawaii 0,3-0,5, NEOVERENO pro nas); test latka ve stehne z vrcholu (CPU skinning) v chuzi a stani"
+ },
+ "u_stromu": {
+  "druhy": [
+   "jablon",
+   "hruska",
+   "tresen",
+   "sliva",
+   "visen"
+  ],
+  "hledat_m": 40.0,
+  "od_kmene_m": 0.9,
+  "_pozn": "Misa 13. 11. (bylinkarka trha jablka ze stromu, ale stoji nad zahonem): cinnost, jejiz klipy jsou vsechny trizeni 'nad' (klipy_vyznam), stoji u kmene nejblizsiho ovocneho stromu (svet.json rostliny <druh>_N, ne daleko) do hledat_m od mista bloku, od_kmene_m od osy kmene, celem ke kmeni"
  }
 }
