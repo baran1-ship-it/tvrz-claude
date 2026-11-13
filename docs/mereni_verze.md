@@ -311,3 +311,12 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
   (b) +24 kostí sukně na postavu (ec42097f), (c) úchopy – druhá ruka IK ve 3 kolech (8dd3ab02, e0f27d6f),
   (d) LOD: jdoucí postava v záběru do anim_do_m plná animace (fe4e4039).
 - Izolovaný test: varianty trasy bez_sukne / bez_uchopu / anim_lod_stary (zavést), PC headless měření stejných skupin.
+
+### 0.999991 – měřicí sestavení 13. 11. 14:30 (stejný obsah jako 0.99999, varianty izolace postav)
+- **Měřeno 13. 11. 14:56 (Míša, tablet, 3D 75 %).** p50 vše / bez postav / bez modif. / bez sukně / bez úchopů:
+  tvrz-cesta 20/17/33/26/27, louka 25/17/28/25/27, les 24/19/27/23/23, ves 28/18/30/28/28, mlýn 24/17/33/25/25,
+  ves-vjezd 29/20/30/29/31, ves-dvory 36/30/37/35/35, hostinec 29/18/28/28/27, věž 26/19/26/26/30.
+- **VYVRÁCENO:** řidič sukně, úchopy ani ostatní modifikátory kostry cenu postav nedělají (vypnuté ≈ vše; „bez modif.“
+  dokonce +80–100 kreslení – NEOVĚŘENO proč). Postavy dál +8–11 ms p50, skripty jen +1–2 ms, kreslení stejné.
+- Zbývající podezření: animace a přepočet kostry (+24 kostí sukně na postavu, ec42097f) a plná animace jdoucích postav
+  v záběru do 45 m (fe4e4039). Izolace v dalším sestavení: varianty bez_animace a chuze_lod.

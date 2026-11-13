@@ -2447,9 +2447,10 @@ func _process_vlastni(dt: float) -> void:
 					su.reset()                    # po vypnuti/skoku pozy (rešerše: bez reset() simulace „vystreli“)
 		# LOD animaci: zblizka kazdy snimek (plne_max nejblizsich), do anim_do_m anim_daleko_fps, dal do dosahu
 		# anim_dalka_fps - nikdy ztuhla klouzajici poza (plan krok 3.2)
-		if not v_zaberu:
+		if not v_zaberu or trasa_vypni.has("animace"):
 			c["anim_t"] = minf(float(c["anim_t"]) + dt, 1.0)     # po navratu do zaberu jeden krok (faze dobehne)
-		elif (d < float(P["plna"]) and d <= mez_plne) or (d < float(P["do"]) and float(c.get("v", 0.0)) > 0.1):
+		elif (d < float(P["plna"]) and d <= mez_plne) or (d < float(P["do"]) and float(c.get("v", 0.0)) > 0.1 \
+				and not trasa_vypni.has("chuze_plna")):
 			# 12. 11. (The Last Eagle devlog: vzdalene postavy po nekolika snimcich = trhana chuze): kdo jde a je v zaberu
 			# do anim_do_m, ma plnou animaci; stojici a pracujici dal uspornou
 			anim_kroku += 1

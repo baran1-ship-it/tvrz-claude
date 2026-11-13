@@ -116,10 +116,10 @@ func _varianta(zap: bool) -> void:
 		if li:
 			(li as Node3D).visible = not zap
 			li.process_mode = Node.PROCESS_MODE_DISABLED if zap else Node.PROCESS_MODE_INHERIT
-	elif v in ["bez_sukne", "bez_uchopu", "bez_modifikatoru"]:  # 13. 11. regrese 0.99999 (postavy +8-10 ms): izolovany test skupin
+	elif v in ["bez_sukne", "bez_uchopu", "bez_modifikatoru", "bez_animace", "chuze_lod"]:  # 13. 11. regrese 0.99999 (postavy +8-10 ms): izolovany test skupin
 		var lm: Node = main.world.get_node_or_null("Lide") if main.world else null
 		if lm:
-			var k := {"bez_sukne": "sukne", "bez_uchopu": "uchop", "bez_modifikatoru": "modifikatory"}[v] as String
+			var k := {"bez_sukne": "sukne", "bez_uchopu": "uchop", "bez_modifikatoru": "modifikatory", "bez_animace": "animace", "chuze_lod": "chuze_plna"}[v] as String
 			if zap:
 				lm.trasa_vypni[k] = true
 			else:
@@ -212,6 +212,10 @@ func _jm(v: String) -> String:
 		return "bez úchopů"
 	if v == "bez_modifikatoru":
 		return "bez modif."
+	if v == "bez_animace":
+		return "bez animace"
+	if v == "chuze_lod":
+		return "chůze LOD"
 	if v == "les_bez_travy":
 		return "les-tráva"
 	if v == "les_bez_korun":
