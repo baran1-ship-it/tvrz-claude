@@ -116,6 +116,14 @@ func _varianta(zap: bool) -> void:
 		if li:
 			(li as Node3D).visible = not zap
 			li.process_mode = Node.PROCESS_MODE_DISABLED if zap else Node.PROCESS_MODE_INHERIT
+	elif v in ["bez_sukne", "bez_uchopu", "bez_modifikatoru"]:  # 13. 11. regrese 0.99999 (postavy +8-10 ms): izolovany test skupin
+		var lm: Node = main.world.get_node_or_null("Lide") if main.world else null
+		if lm:
+			var k := {"bez_sukne": "sukne", "bez_uchopu": "uchop", "bez_modifikatoru": "modifikatory"}[v] as String
+			if zap:
+				lm.trasa_vypni[k] = true
+			else:
+				lm.trasa_vypni.erase(k)
 	elif v == "bez_svetel":                    # rozbor 0.99993: ohne a svetla (life.lights, i ve dne) skryta
 		for d: Dictionary in main.life.lights:
 			var l: Light3D = d["light"]
@@ -198,6 +206,12 @@ func _jm(v: String) -> String:
 		return "karty bez ořezu"
 	if v == "bez_postav":
 		return "bez postav"
+	if v == "bez_sukne":
+		return "bez sukně"
+	if v == "bez_uchopu":
+		return "bez úchopů"
+	if v == "bez_modifikatoru":
+		return "bez modif."
 	if v == "les_bez_travy":
 		return "les-tráva"
 	if v == "les_bez_korun":

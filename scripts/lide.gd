@@ -49,6 +49,7 @@ var _ves_replika := -1000.0            # cas posledni repliky ve vsi (odstup ves
 var DOSAH: float = P["dosah"]
 
 var main: Node
+var trasa_vypni := {}                 # merici trasa (izolovany test 13. 11.): "sukne", "uchop", "modifikatory" vypnute
 var anim_kroku := 0                   # pocet advance() animaci (test_vykon postavy_mimo_zaber)
 var _lide: Array = []                  # obyvatel: {id, uzel, kostra, ap, cil_hlavy, role, blok, cesta, i, misto...}
 var _t := 0.0
@@ -2389,19 +2390,22 @@ func _process_vlastni(dt: float) -> void:
 		var cam: Camera3D = main.player.cam if main.player else null
 		var v_zaberu := cam == null or d < ANIM_OKRAJ or _v_kuzelu(cam, u.global_position + Vector3(0, 1.0, 0))
 		# hlava a krk sleduji jen do hlava_do_m (dal pohyb hlavy neni videt, LookAt stoji cas)
-		var hl_on := d < float(P["hlava_do"]) and v_zaberu
+		var hl_on := d < float(P["hlava_do"]) and v_zaberu and not trasa_vypni.has("modifikatory")
 		for la: SkeletonModifier3D in c.get("hlava_mod", []):
 			if la.active != hl_on:
 				la.active = hl_on
 		if c.has("nohy_ik"):
-			var nik_on := v_zaberu and d < float(P["nohy_ik"]["do_m"]) and not bool(c.get("v_posteli", false)) and not bool(c.get("sedi", false))
+			var nik_on := v_zaberu and d < float(P["nohy_ik"]["do_m"]) and not bool(c.get("v_posteli", false)) and not bool(c.get("sedi", false)) \
+					and not trasa_vypni.has("modifikatory")
 			if (c["nohy_ik"] as SkeletonModifier3D).active != nik_on:
 				(c["nohy_ik"] as SkeletonModifier3D).active = nik_on
 		if (c["ruce"] as Dictionary).has("mod"):
-			(c["ruce"]["mod"] as Node).call("zapni", v_zaberu and d < float(P["do"]))
+			(c["ruce"]["mod"] as Node).call("zapni", v_zaberu and d < float(P["do"]) and not trasa_vypni.has("uchop") \
+					and not trasa_vypni.has("modifikatory"))
 		# 13. 11. (kontrola pred vydanim): ridic sukne jen v zaberu do sukne.do_m, jinak bezel u vsech postav kazdy snimek
 		if c.has("sukne_ridic") and is_instance_valid(c["sukne_ridic"]):
-			var sr_on := v_zaberu and d < float(P["sukne"]["do_m"]) and u.visible
+			var sr_on := v_zaberu and d < float(P["sukne"]["do_m"]) and u.visible and not trasa_vypni.has("sukne") \
+					and not trasa_vypni.has("modifikatory")
 			if (c["sukne_ridic"] as SkeletonModifier3D).active != sr_on:
 				(c["sukne_ridic"] as SkeletonModifier3D).active = sr_on
 		if c.has("sukne") and is_instance_valid(c["sukne"]):

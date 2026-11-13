@@ -237,11 +237,11 @@
  ],
  "varianty": [
   "",
-  "les_bez_travy",
   "bez_postav",
-  "stiny",
-  "",
-  "auto"
+  "bez_modifikatoru",
+  "bez_sukne",
+  "bez_uchopu",
+  ""
  ],
  "samo_na_tabletu": false,
  "hlidac_sceny": {
@@ -258,5 +258,6 @@
   "usek_m": 50.0
  },
  "_samo_na_tabletu": "Misa 11. 11.: trasa se nespousti sama - Hrat -> Merici trasa (volba na zacatku hry); true = postaru sama jednou po nove verzi",
- "_varianty_11_11": "Misa 11. 11. (0.99998 sekani v pritomnosti postav, ves-vjezd 26 -> 34 ms): les_bez_korun nahrazena bez_postav - izolovany test vlivu postav (skinning OpenGL Godot #88954, AI, IK, LookAt)"
+ "_varianty_11_11": "Misa 11. 11. (0.99998 sekani v pritomnosti postav, ves-vjezd 26 -> 34 ms): les_bez_korun nahrazena bez_postav - izolovany test vlivu postav (skinning OpenGL Godot #88954, AI, IK, LookAt)",
+ "_varianty_13_11": "regrese 0.99999 (postavy +8-10 ms p50 proti bez_postav): izolovany test skupin postav - modifikatory kostry vsechny (sukne, uchop, nohy IK, hlava), jen ridic sukne, jen uchopy; rozdil bez_postav - bez_modifikatoru = animace + skinning (+24 kosti sukne)"
 }
