@@ -409,7 +409,7 @@ def ochoz_hradby(P, osa, uk, t, konce, mezery=None, sirka=0.9, odstup=3.0, otevr
         for s0, s1, y in uk[i]:
             if ps and abs(ps[-1][2] - y) < 1e-3: ps[-1] = (ps[-1][0], s1, y)
             else: ps.append((s0, s1, y))
-        pos = (-t / 2 if not otevreny_konec else t / 2 - 0.12) if i > 0 else 0.0; pod_ = False   # schody v ose (branka A): v rohu pavlač od vnitřního líce kolmé zdi, ne přes její nižší korunu (Míša 12. 11.: rám zábradlí ve vzduchu)
+        pos = (-t / 2 if not otevreny_konec else t / 2 + 0.02) if i > 0 else 0.0; pod_ = False   # (13. 11.: od líce +2 cm – 12 cm do zdi dávalo bod trasy ve zdi, povrch_kolize) schody v ose (branka A): v rohu pavlač od vnitřního líce kolmé zdi, ne přes její nižší korunu (Míša 12. 11.: rám zábradlí ve vzduchu)
         def rovne(dv, y):   # portálek v ose pavlače a v její výšce (Havran: ochoz vchází do věže rovně) – stačí pavlač až k líci
             s_d = (dv - a).dot(d); ods = abs((dv - (a + d * s_d + g)).dot(vn)); dy = max(abs(ps[0 if i == 0 else -1][2] - y), abs((cur if i else y) - y))
             n_ = konce[0 if i == 0 else 1][2]; uhel = math.degrees(math.acos(min(1.0, abs(d.dot(n_)))))
@@ -540,6 +540,8 @@ def hrany_a_zabradli(parts, doplnit=True):
                     pad = all(not uvnitr(ven - UP * h_, i0) for h_ in (0.6, 0.85, 1.1)) and ven.y - ter(ven.x, ven.z) > 1.0
                     if pad and os.environ.get("PUCHART_DBGZ") and abs(b.x - float(os.environ["PUCHART_DBGZ"].split(",")[0])) < 2.5 and abs(b.z - float(os.environ["PUCHART_DBGZ"].split(",")[1])) < 2.5:
                         print("DBGHRANA", [round(b.x, 2), round(b.z, 2), round(y, 2)], druh, "plocha", [round(v_, 2) for v_ in c], [round(v_, 2) for v_ in sz], "n", [round(n_.x, 2), round(n_.z, 2)], flush=True)
+                        for (mm_, ss_) in C:
+                            if (mm_.translation - b).length < 2.5: print("   DBGKOL", [round(v_, 2) for v_ in mm_.translation], [round(v_, 2) for v_ in ss_], flush=True)
                     if pad:
                         volne.append([round(b.x, 2), round(b.z, 2), round(y, 2), druh]); behy.setdefault((round(y, 2), round(n_.x, 2), round(n_.z, 2), round(b.dot(n_) * 5) / 5), (Pd, y, n_, []))[3].append(b)   # jedna hrana přes více polí podlahy = jedno zábradlí
                 k += 0.3
@@ -1036,7 +1038,9 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
         ZAB_REC.append({"P": P, "a": hz(a + o), "b": hz(a + d * run + o), "ya": y0, "yb": y1, "dolu": 0.34})
         nk = max(1, math.ceil(run / 0.5))   # kolize po svislých dílech 0,5 m podél sklonu: celá délka jako viditelné zábradlí, nic nepřečnívá patu
         for i in range(nk):                  # (šikmý kvádr musel být o 1,5 m kratší – konce zábradlí byly bez kolize, povrch_kolize 3. 11.)
-            t0_, t1_ = run * i / nk, run * (i + 1) / nk; yl = y0 + (y1 - y0) * t0_ / run; yh = y0 + (y1 - y0) * t1_ / run
+            t0_, t1_ = run * i / nk, run * (i + 1) / nk
+            if i == 0: t0_ = min(0.15, t1_ - 0.05)   # pata: první sloupek stojí 0,15 m od začátku schodů (13. 11. povrch_kolize: kolize 0,45 m před viditelným zábradlím)
+            t0_, t1_ = t0_, t1_; yl = y0 + (y1 - y0) * t0_ / run; yh = y0 + (y1 - y0) * t1_ / run
             kol(P, a + d * ((t0_ + t1_) / 2) + s * sg * (w / 2 + 0.05) + UP * ((yl + yh) / 2 + 0.55), d, (0.12, 1.1 + (yh - yl), t1_ - t0_))   # kolize na původní linii (o 3 cm dovnitř zúžila průchod v paláci)
     return a + d * run, y1
 
