@@ -590,7 +590,37 @@ func _process(delta: float) -> void:
 		dg.cas("zivot", Time.get_ticks_usec() - t_us)
 
 
+var _cast_t := 0.0
+var _cast_cfg: Dictionary = {}
+
+
+## 13. 11. (rozpocty.json castice): castice dal nez dosah od kamery skryte a bez zpracovani (CPUParticles3D se jinak
+## pocitaji na CPU kazdy snimek i daleko); stav zapnuti (noc, krb) urcuje dal set_fire / _on_time pres meta zap.
+func _castice_lod(delta: float) -> void:
+	if _cast_cfg.is_empty():
+		_cast_cfg = Pravidla.cti("rozpocty", "castice")
+	_cast_t += delta
+	if _cast_t < float(_cast_cfg["kontrola_s"]):
+		return
+	_cast_t = 0.0
+	var cam := get_viewport().get_camera_3d()
+	if cam == null:
+		return
+	var cp := cam.global_position
+	for ch in get_children():
+		if not (ch is CPUParticles3D):
+			continue
+		var p := ch as CPUParticles3D
+		var do_m := float(_cast_cfg["kour_do_m"] if p.lifetime >= 4.0 else _cast_cfg["plamen_do_m"])
+		var daleko := p.global_position.distance_to(cp) > do_m
+		var pm := Node.PROCESS_MODE_DISABLED if daleko else Node.PROCESS_MODE_INHERIT
+		if p.process_mode != pm:
+			p.process_mode = pm
+			p.visibility_range_end = do_m
+
+
 func _process_vlastni(delta: float) -> void:
+	_castice_lod(delta)
 	_t += delta
 	for d: Dictionary in lights:
 		var l: OmniLight3D = d["light"]

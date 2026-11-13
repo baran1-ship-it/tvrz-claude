@@ -182,6 +182,12 @@ func spawn(rec: Dictionary) -> void:
 	var dosah := 20.0 if vel < 0.5 else (40.0 if vel < 1.5 else 80.0)
 	if rec.has("sc"):
 		dosah = 160.0                       # lomova stena je videt z dalky
+	# 13. 11. (rozbor kresleni ves_vjezd): predmety uvnitr domu vsi jen zblizka (rozpocty.json ves_vnitrek)
+	if main and main.get("svet") and main.svet.has_method("v_dome") and rec.has("p"):
+		var pr: Variant = rec["p"]
+		var pw := Vector3(float(pr[0]), float(pr[1]), float(pr[2])) if pr is Array else pr as Vector3
+		if main.svet.v_dome(pw) >= 0:
+			dosah = minf(dosah, float(Pravidla.cti("rozpocty", "ves_vnitrek", "do_m")))
 	for g in m.find_children("*", "GeometryInstance3D", true, false):
 		var gi3 := g as GeometryInstance3D
 		gi3.visibility_range_end = dosah

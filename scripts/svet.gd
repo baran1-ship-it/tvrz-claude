@@ -738,6 +738,8 @@ func build(parent: Node3D, quality: int) -> void:
 		if nm.begins_with("Rakos") or nm.begins_with("Slama"):
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			mi.visibility_range_end = 70.0
+		if (_tvrz_drobne["predpony"] as Array).any(func(pr: String) -> bool: return nm.begins_with(pr)):
+			mi.visibility_range_end = float(_tvrz_drobne["do_m"])      # rozpocty.json tvrz_drobne (13. 11.)
 	_reka(parent)
 	_krok_cas("_reka")
 	_zaplaty(root)
@@ -790,6 +792,7 @@ func build(parent: Node3D, quality: int) -> void:
 ## Velke sloucene site tvrz.glb (teren, ves, rakos, ochozy, ruiny - az 1400 m) se kreslily cele, kdykoli byl videt
 ## kousek: zadne orezani pohledem ani LOD (prikop 2,8 M troj.). Po stavbe sveta (koryto, kolize, rostliny pouzily
 ## puvodni site) se rozdeli na ctverce a kazdy dostane LOD; puvodni sit se uvolni, jeji kolize zustava.
+var _tvrz_drobne: Dictionary = Pravidla.cti("rozpocty", "tvrz_drobne")
 const DELIT_OD := 60.0                 # site vetsi nez 60 m a s vic nez 8000 troj.
 const DELIT_TROJ := 8000
 
@@ -6651,6 +6654,20 @@ func _rychta_tram_pryc(mi: MeshInstance3D) -> void:
 
 
 ## Modely domu do sveta: kazdy dum = kopie korene z domy.glb (site sdilene), dvere jako Pohyb_*, mistnosti, ohne, vybaveni.
+## Dum vsi, v jehoz pudorysu (lokalne |x| < hw, b < z < f) lezi bod p, nebo -1 (predmety.gd: dosah vnitrku, 13. 11.).
+func v_dome(p: Vector3) -> int:
+	for d: Dictionary in _domy:
+		if not d.has("xf"):
+			continue
+		var m: Dictionary = d["m"]
+		if not (m.has("hw") and m.has("f") and m.has("b")):
+			continue
+		var q: Vector3 = (d["xf"] as Transform3D).affine_inverse() * p
+		if absf(q.x) < float(m["hw"]) and q.z < float(m["f"]) and q.z > float(m["b"]):
+			return int(d["k"])
+	return -1
+
+
 func _ves_domy(root: Node3D) -> void:
 	if _domy.is_empty():
 		return

@@ -26,5 +26,30 @@
   "louka_ms": 3.0,
   "predmety_vnitrek_ms": 1.5,
   "zasek_ms": 40
+ },
+ "castice": {
+  "plamen_do_m": 60.0,
+  "kour_do_m": 250.0,
+  "kontrola_s": 0.5,
+  "_pozn": "13. 11. (trasa 0.999992: ves-vjezd 560-690 kresleni, CPU 95 %, GPU 33-44 %): CPUParticles3D (plameny, jiskry, kour) se kreslily a pocitaly na CPU kazdy snimek v cele vsi (16 kresleni u vjezdu). Dal nez dosah: skryte a bez zpracovani; kour komina je videt zdaleka (delsi dosah)"
+ },
+ "tvrz_drobne": {
+  "predpony": [
+   "Sklep",
+   "KuchyneOhniste",
+   "Sin",
+   "Pohyb_sklep",
+   "Pohyb_dvere",
+   "BranaMechanismy",
+   "SchodyHradba",
+   "Studna",
+   "Hnojiste"
+  ],
+  "do_m": 200.0,
+  "_pozn": "13. 11. (rozbor kresleni ves_k_tvrzi: tvrz z 900 m 119 kresleni vc. sklepa, ohniste kuchyne, sine, dveri): vnitrni a drobne dily tvrze.glb jen do do_m (Compatibility nema occlusion culling)"
+ },
+ "ves_vnitrek": {
+  "do_m": 12.0,
+  "_pozn": "13. 11. (rozbor kresleni ves_vjezd: predmety 87 kresleni vc. luzek, maselnic, hrncu uvnitr domu vsi): predmet uvnitr pudorysu domu vsi (svet.v_dome) jen do do_m - zvenku je dovnitr videt jen dvermi zblizka (jako portaly tvrze: zvenku do 12 m)"
  }
 }
