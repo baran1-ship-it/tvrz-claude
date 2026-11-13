@@ -33,11 +33,13 @@
   },
   "luh": {
    "bez": 0.012,
-   "liska": 0.006
+   "liska": 0.006,
+   "vrba_ker": 0.004
   },
   "breh": {
+   "vrba_ker": 0.03,
    "bez": 0.03,
-   "liska": 0.03,
+   "liska": 0.02,
    "zmlazeni_buk": 0.004
   },
   "pastvina": {
@@ -115,6 +117,10 @@
   ],
   "zmlazeni_jedle": [
    "jedle_mlada"
+  ],
+  "vrba_ker": [
+   "vrba_ker_1",
+   "vrba_ker_2"
   ]
  },
  "meritko_druh": {
@@ -141,5 +147,6 @@
   "_": 0.5,
   "pozn": "3. 11. (nic nelevituje): poloměr paty rostliny × měřítko; na svahu sedí na nejnižší bod obvodu"
  },
- "pata_zapusteni_m": 0.03
+ "pata_zapusteni_m": 0.03,
+ "pozn_vrby": "13. 11.: keřové vrby (Salix triandra/viminalis vrba_ker_1 ~3,6 m, S. purpurea vrba_ker_2 ~2,6 m; blender/rostliny_u_vody.py, 4,6 a 3,4 tis. troj.) – breh 0,03/m² (líska 0,03 → 0,02), luh 0,004/m²; hustoty NEOVERENO. Zdroj: docs/reference/potoky/README_jak_se_stavi.md §2.3 a krok 8 (pásma u vody podle snímků KCD a misa_real_01–04; Chytrý et al. 2010, Katalog biotopů ČR: K2 vrbové křoviny 2–5 m na březích a náplavech, M5 devětsilové lemy podhorských potoků 450–800 m n. m.); modely blender/rostliny_u_vody.py (licence hra/modely/rostliny/LICENCE.txt)"
 }

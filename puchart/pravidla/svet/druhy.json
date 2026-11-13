@@ -769,6 +769,40 @@
    "poznamka": "ozim i jarina, ve 14. st. v Cechach vedle zita hlavni obili; zelena varianta = mlady lan",
    "dosah_m": 45.0,
    "_dosah_m": "3D trsy do 45 m, dal jen textura obili (reserse_pole_kcd2.md: KCD2 zblizka 3D, v dalce barva terenu; NEOVERENO na tabletu)"
+  },
+  {
+   "id": "ostrice",
+   "nazev": "ostrice (ostra, trasa)",
+   "latinsky": "Carex acuta, C. brizoides",
+   "skupina": "bylina",
+   "historicky": true,
+   "stanoviste": [
+    "breh",
+    "voda"
+   ],
+   "zdroj": "README_jak_se_stavi.md §2.3; puvodni druh (Pladias)"
+  },
+  {
+   "id": "devetsil",
+   "nazev": "devetsil lekarsky",
+   "latinsky": "Petasites hybridus",
+   "skupina": "bylina",
+   "historicky": true,
+   "stanoviste": [
+    "breh"
+   ],
+   "zdroj": "Katalog biotopu CR M5 (Chytry et al. 2010); puvodni druh (Pladias)"
+  },
+  {
+   "id": "vrba_ker",
+   "nazev": "vrba kerova (trojmuzna, kosikarska, nachova)",
+   "latinsky": "Salix triandra, S. viminalis, S. purpurea",
+   "skupina": "ker",
+   "historicky": true,
+   "stanoviste": [
+    "breh"
+   ],
+   "zdroj": "Katalog biotopu CR K2.1, K2.2 (Chytry et al. 2010); puvodni druhy (Pladias)"
   }
  ],
  "puchart_zapojeno": false
