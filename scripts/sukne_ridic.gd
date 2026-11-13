@@ -226,6 +226,9 @@ func _process_modification() -> void:
 	for v: Array in vse:
 		var kosti: Array = v[0]
 		var cile: Array = v[1]
+		# 13. 11. test_sukne po tetive: vsede posun od souseda dostal kloub do stehna (108 chyb) - klouby znovu ven z kapsli
+		for k in range(1, cile.size()):
+			cile[k] = _ven_z_kapsli(cile[k], kapsle, v[2])
 		for k in kosti.size():
 			var b: int = kosti[k]
 			var g := sk.get_bone_global_pose(b)
