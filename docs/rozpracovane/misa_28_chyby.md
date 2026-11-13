@@ -177,7 +177,7 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 | 114 | Míša 13. 11.: pás mezi živůtkem a sukní – oranžový pruh kůže | mezera mezi lemem horní vrstvy a horem sukně | překryv vrstev v pasu | snímek | ČEKÁ |
 | 115 | Míša 13. 11.: klučina – hrozná anatomie | dětské tělo z dospělého měřítkem | tělo dítěte (nové tváře/proporce) | snímek | ČEKÁ |
 | 116 | Míša 13. 11.: při chůzi zezadu vidět jen bota, ne zadní noha | NEOVĚŘENO (kabátec přes nohu × nohavice) | rozbor snímku zezadu | test_sukne | ČEKÁ |
-| 117 | Míša 13. 11.: borec na dvoře něco sbírá | Prace_Sbirani_Loop na nádvoří bez předmětu | ověřit činnost a místo | lide_chovani | ČEKÁ |
+| 117 | Míša 13. 11.: borec na dvoře něco sbírá | čeledín „staje“: Zvedne/Hodi na nádvoří bez sena a žlabu | nosí vodu studna ↔ stáje (vědro); stáje zpět až se senem a vidlemi | lide_chovani | HOTOVO 13. 11. (test OK) |
 | 118 | Míša 13. 11.: na mostě nějaká deska | NEOVĚŘENO | najít díl | test_smyslu most | ČEKÁ |
 | 119 | Míša 13. 11.: u bylinkářky chybí plot | NEOVĚŘENO | záznam plotu zahrady | zasazeni | ČEKÁ |
 | 120 | stráž (snímek 13. 11.): pod kapucí světlý pruh u čela | kapuce × vlasy/čelo | vrstva kapuce nad hlavou | snímek | ČEKÁ |
