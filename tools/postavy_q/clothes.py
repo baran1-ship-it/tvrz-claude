@@ -245,15 +245,19 @@ def pod_vrstvou(dolni, horni, mezera, dosah=0.03):
         o.data.update()
     return n
 
-def skryj_pod(dolni, horni, dosah=0.03, okraj=0.03):
+def skryj_pod(dolni, horni, dosah=0.03, okraj=0.03, okraj_z=None):
     """13. 11. (snimek kucharky vsede: hrubsi sit sukne v prohnutem klinu prorustala zasterou - tmave diry): plochy
     spodnich vrstev trvale schovane pod vrchni (vsechny vrcholy do dosah od vrchni plochy a aspon okraj od jejiho
     okraje) se odstrani - jako skryvani tela pod obleceni. Jen pro vrchni kus, ktery je obleceny vzdy. Vraci pocet ploch."""
     from mathutils.bvhtree import BVHTree
     hb = []; okr = []
+    # okraj_z: kusy, jejichz okraje jsou otvory ven (13. 11.: okraje orezane spodni kosile na hrudi drzely dekolt pod
+    # kotli -> oranzove fleky na hrudi muzu bez kape); vychozi = vsechny horni
     for o in horni:
         mw = o.matrix_world
         hb.append(BVHTree.FromPolygons([mw @ v.co for v in o.data.vertices], [p.vertices[:] for p in o.data.polygons]))
+    for o in (horni if okraj_z is None else okraj_z):
+        mw = o.matrix_world
         b2 = bmesh.new(); b2.from_mesh(o.data)
         okr += [mw @ v.co for v in b2.verts if v.is_boundary]; b2.free()
     kd = kdtree.KDTree(max(1, len(okr)))

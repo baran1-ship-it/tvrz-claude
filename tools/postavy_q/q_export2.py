@@ -166,7 +166,8 @@ for k_ in VRSTVY:
 # posun pod vrstvu nestaci, ve hre tělo a latka maji jine vahy kosti a v pohybu se protnou
 if not CFG.get("dily", not CFG.get("npc")):
     _vg = [o for k_ in KROJ.get("vychozi", list(GAR)) for o in GAR.get(k_, [])]
-    print("SKRYTO telo pod obleceni", _cl.skryj_pod(list(PARTS.values()), _vg, KROJ.get("telo_pod_dosah_m", 0.04), KROJ.get("telo_pod_okraj_m", 0.035)))
+    _vz = [o for k_ in KROJ.get("vychozi", list(GAR)) if k_ != "kosile" for o in GAR.get(k_, [])]   # okraje jen vnejsich kusu
+    print("SKRYTO telo pod obleceni", _cl.skryj_pod(list(PARTS.values()), _vg, KROJ.get("telo_pod_dosah_m", 0.04), KROJ.get("telo_pod_okraj_m", 0.035), _vz))
 for a_ in range(len(VRSTVY)):
     for b_ in range(a_ + 1, len(VRSTVY)):
         if VRSTVY[a_] in GAR and VRSTVY[b_] in GAR:
