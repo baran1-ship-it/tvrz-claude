@@ -997,8 +997,7 @@
   },
   "strazi": {
    "klipy": [
-    "Idle_Loop",
-    "Idle_FoldArms_Loop"
+    "Idle_Loop"
    ],
    "obmena_s": [
     10.0,
@@ -2107,8 +2106,7 @@
   },
   "hlida_stan": {
    "klipy": [
-    "Idle_Loop",
-    "Idle_FoldArms_Loop"
+    "Idle_Loop"
    ],
    "obmena_s": [
     10.0,
@@ -2118,8 +2116,7 @@
    "sceny": [
     [
      "Idle_Loop",
-     "Rozhlizi2",
-     "Idle_FoldArms_Loop"
+     "Rozhlizi2"
     ]
    ],
    "v_rukou": {
@@ -6688,5 +6685,9 @@
   "hledat_m": 40.0,
   "od_kmene_m": 0.9,
   "_pozn": "Misa 13. 11. (bylinkarka trha jablka ze stromu, ale stoji nad zahonem): cinnost, jejiz klipy jsou vsechny trizeni 'nad' (klipy_vyznam), stoji u kmene nejblizsiho ovocneho stromu (svet.json rostliny <druh>_N, ne daleko) do hledat_m od mista bloku, od_kmene_m od osy kmene, celem ke kmeni"
- }
+ },
+ "klipy_bez_predmetu": [
+  "Idle_FoldArms_Loop"
+ ],
+ "_klipy_bez_predmetu": "Misa 13. 11. (zbrojnos ma kopi v hlave): klipy se zkrizenyma rukama - s predmetem v ruce (v_rukou '*') predmet projde telem/hlavou; cinnost s trvalym predmetem je nesmi mit (test lide_chovani)"
 }

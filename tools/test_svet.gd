@@ -7624,6 +7624,13 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 			var ut: Array = lide.call("u_stromu", mt[0])
 			if ut.is_empty() or (ut[0] as Vector2).distance_to(mt[0]) > float(ust["od_kmene_m"]) * 0.5:
 				ch.call("%s %s@%s: trha ovoce mimo strom %s" % [c["id"], bl["cinnost"], bl["kde"], (mt[0] as Vector2).round()])
+	var bez_pr: Array = Pravidla.cti("postavy", "klipy_bez_predmetu")
+	for k4: String in (P["cinnosti"] as Dictionary):
+		var c4: Dictionary = P["cinnosti"][k4]
+		if (c4.get("v_rukou", {}) as Dictionary).has("*"):
+			for kl4: String in (c4.get("klipy", []) as Array) + ((c4.get("sceny", []) as Array).reduce(func(a: Array, x: Array) -> Array: return a + x, []) as Array):
+				if bez_pr.has(kl4):
+					ch.call("%s: klip %s se zkrizenyma rukama a predmetem v ruce (projde telem)" % [k4, kl4])
 	for k3: String in (P["cinnosti"] as Dictionary):
 		if k3 == "vareni" and (str(P["cinnosti"][k3].get("klipy", [])) + str(P["cinnosti"][k3].get("sceny", []))).contains("Napiti"):
 			ch.call("vareni: piti v kuchyni")
