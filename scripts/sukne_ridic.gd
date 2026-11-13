@@ -211,13 +211,15 @@ func _process_modification() -> void:
 			cile[k] = _ven_z_kapsli(c, kapsle, ref)
 	# 13. 11. (snimek ch_s4 zepredu: stehno v kroku proslo latkou MEZI retezy, retezy samy venku): latka mezi sousednimi
 	# retezy po obvodu je take tetiva - kdyz jeji stred lezi v noze, oba sousedni klouby se odsunou o hloubku stredu
-	for _it in int(D.get("obvod_tetiva_kol", 2)):
+	for _it in (int(D.get("obvod_tetiva_kol", 2)) if n_r >= 3 else 0):
 		for i in n_r:
 			var ca: Array = vse[i][1]
 			var cb: Array = vse[(i + 1) % n_r][1]
 			for k in range(1, mini(ca.size(), cb.size())):
 				var m: Vector3 = ((ca[k] as Vector3) + (cb[k] as Vector3)) * 0.5
-				var ven := _ven_z_kapsli(m, kapsle, ((vse[i][2] as Vector3) + (vse[(i + 1) % n_r][2] as Vector3)) * 0.5) - m
+				# kontrola 13. 11.: kdyz osa stehna uz prosla mezerou (je pred tetivou), tlak po kolmici by latku stahl za
+				# stehno - strana vytlaceni vzdy k ref (ven od panve), ne podle polohy osy
+				var ven := _ven_z_kapsli(m, kapsle, ((vse[i][2] as Vector3) + (vse[(i + 1) % n_r][2] as Vector3)) * 0.5, true) - m
 				if ven.length_squared() > 1e-8:
 					ca[k] = (ca[k] as Vector3) + ven
 					cb[k] = (cb[k] as Vector3) + ven
@@ -239,7 +241,7 @@ func _process_modification() -> void:
 
 
 ## Bod vytlaceny ze vsech kapsli [a, b, polomer] po kolmici k ose (CRYENGINE PRow projekce).
-static func _ven_z_kapsli(c: Vector3, kapsle: Array, ref: Vector3) -> Vector3:
+static func _ven_z_kapsli(c: Vector3, kapsle: Array, ref: Vector3, k_ref := false) -> Vector3:
 	for kap: Array in kapsle:
 		var a: Vector3 = kap[0]
 		var ab: Vector3 = (kap[1] as Vector3) - a
@@ -249,5 +251,7 @@ static func _ven_z_kapsli(c: Vector3, kapsle: Array, ref: Vector3) -> Vector3:
 		var rr := float(kap[2])
 		if d < rr:
 			var n := (c - q) / d if d > 1e-5 else ref - q
+			if k_ref and n.dot(ref - q) < 0.0:
+				n = n - n.project(ref - q) * 2.0  # zrcadlo na stranu ref (k_ref: tetiva mezi retezy)
 			c = q + n.normalized() * rr
 	return c
