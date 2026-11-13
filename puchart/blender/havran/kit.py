@@ -604,7 +604,7 @@ def drawbridge(P: Part, m: Matrix, w=3.5, L=4.2, angle=0.0):
         P.beam(mm @ Vector((x, -0.2, 0.0)), mm @ Vector((x, -0.2, L)), 0.24, 0.28, "dub_ven", j=1)
     for k in range(5):
         z = 0.2 + (L - 0.4) * k / 4
-        P.beam(mm @ Vector((-w / 2, -0.425, z)), mm @ Vector((w / 2, -0.425, z)), 0.16, 0.14, "dub_ven", j=1)
+        P.beam(mm @ Vector((-w / 2, -0.445, z)), mm @ Vector((w / 2, -0.445, z)), 0.16, 0.14, "dub_ven", j=1)   # 13. 11.: delší a širší most (most_kryti) – s chvěním j trámy příčníků sahaly do podélníků (kontrola_spoju vrostlý); mezera 3,5 cm
     deck(P, mm @ Vector((0, -0.06, 0.02)), mm @ Vector((0, -0.06, L - 0.02)), w / 2 - 0.05, "prkna_ven", 0.9,
          beams=(-(w / 2 - 0.15), 0.0, w / 2 - 0.15))
     # kovane hrany a oka pro retezy
