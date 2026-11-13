@@ -1,0 +1,2501 @@
+{
+ "npc_sedlak": {
+  "pohlavi": "Male",
+  "vek_let": 33,
+  "role": "sedlák",
+  "seed": 735900,
+  "tvar": {
+   "nos_delka": 0.41,
+   "nos_spicka": -0.73,
+   "nos_sirka": 0.49,
+   "nos_hrbet": -0.68,
+   "nos_hacek": -0.27,
+   "celist": -0.63,
+   "brada_delka": -0.62,
+   "brada_vpred": -0.02,
+   "brada_sirka": 0.66,
+   "licni_kosti": -0.02,
+   "tvare_plnost": 0.81,
+   "nadocnice": 0.62,
+   "oci": 0.29,
+   "rty": 0.52,
+   "usta_sirka": -0.25,
+   "oboci_vyska": 0.43,
+   "obliceji_delka": 0.45,
+   "usi": -0.85,
+   "vek_pokles": 0.17,
+   "vaha": -0.52,
+   "lebka_sirka": -0.78,
+   "nos_kratky_pres": 0.29
+  },
+  "plet": {
+   "ton": [
+    0.895,
+    0.861,
+    0.857
+   ],
+   "opaleni": 0.55,
+   "vek": 0.14,
+   "kruhy": 0.0,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.335,
+    0.278,
+    0.232
+   ],
+   "sedive": 0.11,
+   "linie": {},
+   "cepice": 0.004,
+   "objem": 0.001,
+   "chomacu": 5,
+   "delka_chomacu": 0.09,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "kratky",
+   "tloustka": 0.004034157813583726,
+   "delka": 0.004
+  },
+  "oboci": [
+   1.02,
+   -0.0005,
+   -0.063
+  ],
+  "oci": [
+   0.3,
+   0.42,
+   0.55
+  ]
+ },
+ "npc_kovar": {
+  "pohlavi": "Male",
+  "vek_let": 38,
+  "role": "kovář",
+  "seed": 500392,
+  "tvar": {
+   "nos_delka": -0.7,
+   "nos_spicka": 0.5,
+   "nos_sirka": 0.7,
+   "nos_hrbet": -0.7,
+   "nos_hacek": -0.21,
+   "celist": 0.9,
+   "brada_delka": 0.3,
+   "brada_vpred": 0.69,
+   "brada_sirka": -0.5,
+   "licni_kosti": 0.6,
+   "tvare_plnost": -0.33,
+   "nadocnice": 0.8,
+   "oci": 0.56,
+   "rty": -0.51,
+   "usta_sirka": 0.55,
+   "oboci_vyska": -0.51,
+   "obliceji_delka": -0.23,
+   "usi": 0.14,
+   "vek_pokles": 0.24,
+   "vaha": 0.2,
+   "lebka_sirka": -0.79,
+   "nos_kratky_pres": 0.23
+  },
+  "plet": {
+   "ton": [
+    1.028,
+    0.955,
+    0.975
+   ],
+   "opaleni": 0.0,
+   "vek": 0.16,
+   "kruhy": 0.0,
+   "rumenec": 0.5,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.232,
+    0.203,
+    0.187
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.004,
+   "objem": 0.001,
+   "chomacu": 5,
+   "delka_chomacu": 0.09,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "plny",
+   "tloustka": 0.003971741237039298,
+   "delka": 0.02605649992056743
+  },
+  "oboci": [
+   1.19,
+   0.0014,
+   0.033
+  ],
+  "oci": [
+   0.3,
+   0.42,
+   0.55
+  ]
+ },
+ "npc_mestan": {
+  "pohlavi": "Male",
+  "vek_let": 42,
+  "role": "měšťan",
+  "seed": 154755,
+  "tvar": {
+   "nos_delka": 0.34,
+   "nos_spicka": 0.18,
+   "nos_sirka": 0.33,
+   "nos_hrbet": 0.25,
+   "nos_hacek": -0.45,
+   "celist": -0.65,
+   "brada_delka": 0.35,
+   "brada_vpred": 0.52,
+   "brada_sirka": -0.76,
+   "licni_kosti": -0.83,
+   "tvare_plnost": -0.58,
+   "nadocnice": 0.01,
+   "oci": -0.76,
+   "rty": 0.4,
+   "usta_sirka": -0.15,
+   "oboci_vyska": -0.12,
+   "obliceji_delka": -0.15,
+   "usi": 0.79,
+   "vek_pokles": 0.32,
+   "vaha": -0.8,
+   "lebka_sirka": -0.03,
+   "nos_kratky_pres": 0.72
+  },
+  "plet": {
+   "ton": [
+    0.985,
+    0.948,
+    0.892
+   ],
+   "opaleni": 0.0,
+   "vek": 0.35,
+   "kruhy": 0.17,
+   "rumenec": 0.0,
+   "pihy": 1.0,
+   "odlicit": 1.0,
+   "strniste": 0.33
+  },
+  "vlasy": {
+   "barva": [
+    0.381,
+    0.317,
+    0.256
+   ],
+   "sedive": 0.28,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 8,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "strniste"
+  },
+  "oboci": [
+   0.98,
+   0.0022,
+   0.051
+  ],
+  "oci": [
+   0.35,
+   0.48,
+   0.3
+  ]
+ },
+ "npc_stary": {
+  "pohlavi": "Male",
+  "vek_let": 62,
+  "role": "stařec",
+  "seed": 462470,
+  "tvar": {
+   "nos_delka": 0.6,
+   "nos_spicka": 0.84,
+   "nos_sirka": -0.69,
+   "nos_hrbet": -0.22,
+   "nos_hacek": 0.7,
+   "celist": 0.69,
+   "brada_delka": -0.67,
+   "brada_vpred": -0.76,
+   "brada_sirka": 0.11,
+   "licni_kosti": 0.59,
+   "tvare_plnost": 0.33,
+   "nadocnice": 0.78,
+   "oci": 0.28,
+   "rty": 0.59,
+   "usta_sirka": -0.59,
+   "oboci_vyska": -0.32,
+   "obliceji_delka": -0.01,
+   "usi": 0.73,
+   "vek_pokles": 0.84,
+   "vaha": -0.5,
+   "lebka_sirka": 0.27,
+   "nos_kratky_pres": -0.32
+  },
+  "plet": {
+   "ton": [
+    0.905,
+    0.905,
+    0.88
+   ],
+   "opaleni": 0.55,
+   "vek": 0.84,
+   "kruhy": 0.42,
+   "rumenec": 0.0,
+   "pihy": 1.0,
+   "odlicit": 1.0,
+   "strniste": 0.35
+  },
+  "vlasy": {
+   "barva": [
+    0.674,
+    0.659,
+    0.636
+   ],
+   "sedive": 0.66,
+   "linie": {
+    "plesh": 0.059908203554815034
+   },
+   "cepice": 0.004,
+   "objem": 0.001,
+   "chomacu": 3,
+   "delka_chomacu": 0.09,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "knir",
+   "tloustka": 0.004951620548508404,
+   "delka": 0.002
+  },
+  "oboci": [
+   1.0,
+   -0.0011,
+   0.002
+  ],
+  "oci": [
+   0.35,
+   0.48,
+   0.3
+  ]
+ },
+ "npc_mladik": {
+  "pohlavi": "Male",
+  "vek_let": 18,
+  "role": "mladík",
+  "seed": 671618,
+  "tvar": {
+   "nos_delka": 0.79,
+   "nos_spicka": -0.74,
+   "nos_sirka": -0.34,
+   "nos_hrbet": 0.1,
+   "nos_hacek": 0.62,
+   "celist": -0.63,
+   "brada_delka": 0.43,
+   "brada_vpred": 0.57,
+   "brada_sirka": 0.77,
+   "licni_kosti": 0.06,
+   "tvare_plnost": -0.32,
+   "nadocnice": -0.54,
+   "oci": 0.18,
+   "rty": -0.63,
+   "usta_sirka": 0.15,
+   "oboci_vyska": -0.62,
+   "obliceji_delka": -0.8,
+   "usi": -0.5,
+   "vek_pokles": 0.09,
+   "vaha": -0.72,
+   "lebka_sirka": 0.27,
+   "nos_kratky_pres": -0.53
+  },
+  "plet": {
+   "ton": [
+    1.089,
+    1.008,
+    0.961
+   ],
+   "opaleni": 0.0,
+   "vek": 0.0,
+   "kruhy": 0.0,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0,
+   "strniste": 0.42
+  },
+  "vlasy": {
+   "barva": [
+    0.73,
+    0.604,
+    0.396
+   ],
+   "sedive": 0.0,
+   "linie": {
+    "predni": 0.04,
+    "spanky": 0.03,
+    "nad_usima": 0.012,
+    "za_usima": -0.03,
+    "tyl": -0.06
+   },
+   "cepice": 0.005,
+   "objem": 0.008,
+   "chomacu": 7,
+   "delka_chomacu": 0.1,
+   "sirka_chomacu": 0.035,
+   "smer": "temeno"
+  },
+  "vousy": {
+   "typ": "strniste"
+  },
+  "oboci": [
+   1.01,
+   -0.0011,
+   -0.029
+  ],
+  "oci": [
+   0.35,
+   0.48,
+   0.3
+  ]
+ },
+ "npc_selka": {
+  "pohlavi": "Female",
+  "vek_let": 36,
+  "role": "selka",
+  "seed": 872675,
+  "tvar": {
+   "nos_delka": -0.18,
+   "nos_spicka": -0.57,
+   "nos_sirka": 0.69,
+   "nos_hrbet": 0.06,
+   "nos_hacek": -0.1,
+   "celist": -0.19,
+   "brada_delka": -0.16,
+   "brada_vpred": 0.45,
+   "brada_sirka": -0.83,
+   "licni_kosti": -0.3,
+   "tvare_plnost": 0.26,
+   "nadocnice": -0.5,
+   "oci": -0.12,
+   "rty": 0.18,
+   "usta_sirka": -0.3,
+   "oboci_vyska": 0.48,
+   "obliceji_delka": 0.23,
+   "usi": -0.07,
+   "vek_pokles": 0.17,
+   "vaha": -0.01,
+   "lebka_sirka": 0.0,
+   "nos_kratky_pres": 0.74
+  },
+  "plet": {
+   "ton": [
+    0.957,
+    0.924,
+    0.935
+   ],
+   "opaleni": 0.35,
+   "vek": 0.12,
+   "kruhy": 0.0,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.28,
+    0.18,
+    0.09
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 7,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka",
+   "doplnek": "drdol",
+   "drdol_z": 0.011246753044367383
+  },
+  "vousy": null,
+  "oboci": [
+   0.63,
+   0.003,
+   -0.039
+  ],
+  "oci": [
+   0.3,
+   0.42,
+   0.55
+  ]
+ },
+ "npc_babka": {
+  "pohlavi": "Female",
+  "vek_let": 58,
+  "role": "bába",
+  "seed": 192289,
+  "tvar": {
+   "nos_delka": 0.48,
+   "nos_spicka": 0.51,
+   "nos_sirka": 0.15,
+   "nos_hrbet": -0.37,
+   "nos_hacek": 0.19,
+   "celist": -0.92,
+   "brada_delka": 0.68,
+   "brada_vpred": 0.11,
+   "brada_sirka": 0.0,
+   "licni_kosti": -0.15,
+   "tvare_plnost": -0.12,
+   "nadocnice": 0.0,
+   "oci": 0.25,
+   "rty": 0.34,
+   "usta_sirka": 0.57,
+   "oboci_vyska": -0.75,
+   "obliceji_delka": -0.58,
+   "usi": 0.73,
+   "vek_pokles": 0.72,
+   "vaha": 0.59,
+   "lebka_sirka": -0.78,
+   "nos_kratky_pres": -0.61
+  },
+  "plet": {
+   "ton": [
+    1.081,
+    1.023,
+    0.98
+   ],
+   "opaleni": 0.35,
+   "vek": 0.7,
+   "kruhy": 0.35,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.45,
+    0.32,
+    0.18
+   ],
+   "sedive": 0.55,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 7,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka",
+   "doplnek": "drdol",
+   "drdol_z": -0.0015520482019944354
+  },
+  "vousy": null,
+  "oboci": [
+   0.71,
+   0.0007,
+   0.013
+  ],
+  "oci": [
+   0.4,
+   0.45,
+   0.48
+  ]
+ },
+ "npc_divka": {
+  "pohlavi": "Female",
+  "vek_let": 16,
+  "role": "dívka",
+  "seed": 127617,
+  "tvar": {
+   "nos_delka": -0.6,
+   "nos_spicka": -0.23,
+   "nos_sirka": -0.81,
+   "nos_hrbet": -0.5,
+   "nos_hacek": 0.06,
+   "celist": -0.8,
+   "brada_delka": -0.6,
+   "brada_vpred": 0.82,
+   "brada_sirka": -0.11,
+   "licni_kosti": -0.52,
+   "tvare_plnost": 0.5,
+   "nadocnice": -0.6,
+   "oci": 0.7,
+   "rty": -0.36,
+   "usta_sirka": 0.53,
+   "oboci_vyska": -0.2,
+   "obliceji_delka": -0.9,
+   "usi": -0.84,
+   "vek_pokles": 0,
+   "vaha": 0.0,
+   "lebka_sirka": 0.0,
+   "nos_kratky_pres": -0.82
+  },
+  "plet": {
+   "ton": [
+    1.036,
+    1.031,
+    0.993
+   ],
+   "opaleni": 0.0,
+   "vek": 0.0,
+   "kruhy": 0.0,
+   "rumenec": 0.5,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.38,
+    0.17,
+    0.07
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 8,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka",
+   "doplnek": "cop",
+   "cop_delka": 0.3
+  },
+  "vousy": null,
+  "oboci": [
+   0.8,
+   0.0029,
+   -0.075
+  ],
+  "oci": [
+   0.5,
+   0.45,
+   0.25
+  ]
+ },
+ "npc_mestka": {
+  "pohlavi": "Female",
+  "vek_let": 34,
+  "role": "měšťka",
+  "seed": 333763,
+  "tvar": {
+   "nos_delka": -0.24,
+   "nos_spicka": 0.3,
+   "nos_sirka": -0.66,
+   "nos_hrbet": 0.3,
+   "nos_hacek": 0.38,
+   "celist": 0.0,
+   "brada_delka": -0.85,
+   "brada_vpred": -0.77,
+   "brada_sirka": -1.05,
+   "licni_kosti": -0.6,
+   "tvare_plnost": -0.71,
+   "nadocnice": 0.0,
+   "oci": 0.01,
+   "rty": 0.03,
+   "usta_sirka": -0.21,
+   "oboci_vyska": 0.6,
+   "obliceji_delka": 0.64,
+   "usi": 0.51,
+   "vek_pokles": 0.11,
+   "vaha": 0.02,
+   "lebka_sirka": -0.79,
+   "nos_kratky_pres": -0.82
+  },
+  "plet": {
+   "ton": [
+    0.942,
+    0.913,
+    0.873
+   ],
+   "opaleni": 0.0,
+   "vek": 0.08,
+   "kruhy": 0.0,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.1,
+    0.07,
+    0.05
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 7,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka",
+   "doplnek": "drdol",
+   "drdol_z": 0.026042715897298226
+  },
+  "vousy": null,
+  "oboci": [
+   0.88,
+   0.0022,
+   0.024
+  ],
+  "oci": [
+   0.35,
+   0.24,
+   0.14
+  ]
+ },
+ "npc_rychtar": {
+  "pohlavi": "Male",
+  "vek_let": 46,
+  "role": "rychtář",
+  "seed": 828224,
+  "tvar": {
+   "nos_delka": -0.79,
+   "nos_spicka": -0.63,
+   "nos_sirka": 0.35,
+   "nos_hrbet": 0.55,
+   "nos_hacek": 0.21,
+   "celist": 0.63,
+   "brada_delka": -0.17,
+   "brada_vpred": 0.84,
+   "brada_sirka": 0.04,
+   "licni_kosti": 0.03,
+   "tvare_plnost": -0.81,
+   "nadocnice": 0.71,
+   "oci": 0.74,
+   "rty": 0.0,
+   "usta_sirka": 0.27,
+   "oboci_vyska": -0.32,
+   "obliceji_delka": -0.12,
+   "usi": -0.77,
+   "vek_pokles": 0.46,
+   "vaha": 0.75,
+   "lebka_sirka": -0.72,
+   "nos_kratky_pres": -0.6
+  },
+  "plet": {
+   "ton": [
+    0.957,
+    0.927,
+    0.88
+   ],
+   "opaleni": 0.55,
+   "vek": 0.49,
+   "kruhy": 0.24,
+   "rumenec": 0.0,
+   "pihy": 0.6,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.351,
+    0.299,
+    0.244
+   ],
+   "sedive": 0.39,
+   "linie": {
+    "predni": 0.08226218329073355,
+    "spanky": 0.03,
+    "nad_usima": 0.012,
+    "za_usima": -0.03,
+    "tyl": -0.06,
+    "kouty": 0.012
+   },
+   "cepice": 0.005,
+   "objem": 0.008,
+   "chomacu": 7,
+   "delka_chomacu": 0.1,
+   "sirka_chomacu": 0.035,
+   "smer": "temeno"
+  },
+  "vousy": {
+   "typ": "kratky",
+   "tloustka": 0.0031455105293596067,
+   "delka": 0.004
+  },
+  "oboci": [
+   1.14,
+   0.0021,
+   0.056
+  ],
+  "oci": [
+   0.55,
+   0.38,
+   0.2
+  ]
+ },
+ "npc_havel": {
+  "pohlavi": "Male",
+  "vek_let": 30,
+  "role": "sedlák Havel",
+  "seed": 822729,
+  "tvar": {
+   "nos_delka": -0.76,
+   "nos_spicka": 0.32,
+   "nos_sirka": 0.28,
+   "nos_hrbet": -0.51,
+   "nos_hacek": 0.06,
+   "celist": -0.03,
+   "brada_delka": 0.19,
+   "brada_vpred": -0.28,
+   "brada_sirka": -0.67,
+   "licni_kosti": 0.35,
+   "tvare_plnost": 0.77,
+   "nadocnice": -0.75,
+   "oci": -0.76,
+   "rty": 0.2,
+   "usta_sirka": -0.74,
+   "oboci_vyska": 0.72,
+   "obliceji_delka": 0.28,
+   "usi": -0.52,
+   "vek_pokles": 0.06,
+   "vaha": 0.82,
+   "lebka_sirka": 0.44,
+   "nos_kratky_pres": -0.81
+  },
+  "plet": {
+   "ton": [
+    1.002,
+    0.956,
+    0.904
+   ],
+   "opaleni": 0.55,
+   "vek": 0.11,
+   "kruhy": 0.0,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.335,
+    0.278,
+    0.232
+   ],
+   "sedive": 0.09,
+   "linie": {},
+   "cepice": 0.004,
+   "objem": 0.001,
+   "chomacu": 5,
+   "delka_chomacu": 0.09,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "plny",
+   "tloustka": 0.003343379217141098,
+   "delka": 0.019296302024510874
+  },
+  "oboci": [
+   1.03,
+   -0.0013,
+   -0.078
+  ],
+  "oci": [
+   0.35,
+   0.24,
+   0.14
+  ]
+ },
+ "npc_mikulas": {
+  "pohlavi": "Male",
+  "vek_let": 66,
+  "role": "stařec Mikuláš",
+  "seed": 907934,
+  "tvar": {
+   "nos_delka": 0.6,
+   "nos_spicka": 0.19,
+   "nos_sirka": -0.2,
+   "nos_hrbet": 0.58,
+   "nos_hacek": 0.7,
+   "celist": -0.27,
+   "brada_delka": 0.21,
+   "brada_vpred": -0.71,
+   "brada_sirka": -0.84,
+   "licni_kosti": 0.51,
+   "tvare_plnost": 0.76,
+   "nadocnice": -0.12,
+   "oci": -0.84,
+   "rty": -0.62,
+   "usta_sirka": 0.15,
+   "oboci_vyska": 0.74,
+   "obliceji_delka": -0.24,
+   "usi": 0.39,
+   "vek_pokles": 0.95,
+   "vaha": -0.5,
+   "lebka_sirka": -0.71,
+   "nos_kratky_pres": 0.69
+  },
+  "plet": {
+   "ton": [
+    0.966,
+    0.954,
+    0.946
+   ],
+   "opaleni": 0.55,
+   "vek": 0.84,
+   "kruhy": 0.42,
+   "rumenec": 0.0,
+   "pihy": 1.0,
+   "odlicit": 1.0,
+   "strniste": 0.35
+  },
+  "vlasy": {
+   "barva": [
+    0.659,
+    0.644,
+    0.621
+   ],
+   "sedive": 0.66,
+   "linie": {
+    "plesh": 0.055895766611844463
+   },
+   "cepice": 0.004,
+   "objem": 0.001,
+   "chomacu": 3,
+   "delka_chomacu": 0.09,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "bradka",
+   "tloustka": 0.003412651003872166,
+   "delka": 0.012
+  },
+  "oboci": [
+   0.78,
+   -0.002,
+   -0.069
+  ],
+  "oci": [
+   0.5,
+   0.45,
+   0.25
+  ]
+ },
+ "npc_jakub": {
+  "pohlavi": "Male",
+  "vek_let": 25,
+  "role": "chalupník Jakub",
+  "seed": 752184,
+  "tvar": {
+   "nos_delka": -0.53,
+   "nos_spicka": -0.67,
+   "nos_sirka": 0.81,
+   "nos_hrbet": 0.8,
+   "nos_hacek": -0.73,
+   "celist": 0.19,
+   "brada_delka": 0.78,
+   "brada_vpred": 0.21,
+   "brada_sirka": 0.82,
+   "licni_kosti": 0.79,
+   "tvare_plnost": -0.72,
+   "nadocnice": -0.5,
+   "oci": -0.84,
+   "rty": 0.21,
+   "usta_sirka": 0.26,
+   "oboci_vyska": 0.74,
+   "obliceji_delka": 0.71,
+   "usi": 0.8,
+   "vek_pokles": 0.11,
+   "vaha": -0.64,
+   "lebka_sirka": 0.53,
+   "nos_kratky_pres": -0.39
+  },
+  "plet": {
+   "ton": [
+    1.063,
+    1.026,
+    0.991
+   ],
+   "opaleni": 0.55,
+   "vek": 0.0,
+   "kruhy": 0.0,
+   "rumenec": 0.0,
+   "pihy": 0.6,
+   "odlicit": 1.0,
+   "strniste": 0.3
+  },
+  "vlasy": {
+   "barva": [
+    0.696,
+    0.596,
+    0.422
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 8,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "strniste"
+  },
+  "oboci": [
+   1.15,
+   0.0013,
+   -0.017
+  ],
+  "oci": [
+   0.5,
+   0.45,
+   0.25
+  ]
+ },
+ "npc_petr": {
+  "pohlavi": "Male",
+  "vek_let": 33,
+  "role": "sedlák Petr",
+  "seed": 627942,
+  "tvar": {
+   "nos_delka": -0.78,
+   "nos_spicka": 0.67,
+   "nos_sirka": -0.66,
+   "nos_hrbet": 0.37,
+   "nos_hacek": -0.51,
+   "celist": -0.56,
+   "brada_delka": 0.72,
+   "brada_vpred": -0.84,
+   "brada_sirka": 0.78,
+   "licni_kosti": -0.24,
+   "tvare_plnost": -0.84,
+   "nadocnice": 0.4,
+   "oci": -0.12,
+   "rty": -0.79,
+   "usta_sirka": -0.33,
+   "oboci_vyska": -0.15,
+   "obliceji_delka": -0.81,
+   "usi": 0.51,
+   "vek_pokles": 0.16,
+   "vaha": -0.41,
+   "lebka_sirka": 0.55,
+   "nos_kratky_pres": -0.12
+  },
+  "plet": {
+   "ton": [
+    1.103,
+    1.069,
+    1.033
+   ],
+   "opaleni": 0.55,
+   "vek": 0.06,
+   "kruhy": 0.0,
+   "rumenec": 0.0,
+   "pihy": 1.0,
+   "odlicit": 1.0,
+   "strniste": 0.35
+  },
+  "vlasy": {
+   "barva": [
+    0.256,
+    0.218,
+    0.187
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.004,
+   "objem": 0.001,
+   "chomacu": 5,
+   "delka_chomacu": 0.09,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "bradka",
+   "tloustka": 0.003916748860100239,
+   "delka": 0.012
+  },
+  "oboci": [
+   0.8,
+   -0.0013,
+   -0.037
+  ],
+  "oci": [
+   0.35,
+   0.24,
+   0.14
+  ]
+ },
+ "npc_vavra": {
+  "pohlavi": "Male",
+  "vek_let": 33,
+  "role": "pacholek Vávra",
+  "seed": 592082,
+  "tvar": {
+   "nos_delka": -0.54,
+   "nos_spicka": -0.53,
+   "nos_sirka": -0.58,
+   "nos_hrbet": -0.49,
+   "nos_hacek": 0.68,
+   "celist": -0.1,
+   "brada_delka": -0.49,
+   "brada_vpred": -0.42,
+   "brada_sirka": -0.84,
+   "licni_kosti": 0.12,
+   "tvare_plnost": -0.71,
+   "nadocnice": -0.29,
+   "oci": 0.38,
+   "rty": -0.58,
+   "usta_sirka": -0.6,
+   "oboci_vyska": 0.82,
+   "obliceji_delka": -0.66,
+   "usi": -0.68,
+   "vek_pokles": 0.21,
+   "vaha": -0.14,
+   "lebka_sirka": -0.75,
+   "nos_kratky_pres": 0.08
+  },
+  "plet": {
+   "ton": [
+    0.994,
+    0.937,
+    0.973
+   ],
+   "opaleni": 0.55,
+   "vek": 0.06,
+   "kruhy": 0.0,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0,
+   "strniste": 0.34
+  },
+  "vlasy": {
+   "barva": [
+    0.409,
+    0.335,
+    0.256
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.004,
+   "objem": 0.001,
+   "chomacu": 5,
+   "delka_chomacu": 0.09,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "strniste"
+  },
+  "oboci": [
+   0.83,
+   0.0026,
+   -0.046
+  ],
+  "oci": [
+   0.3,
+   0.42,
+   0.55
+  ]
+ },
+ "npc_stepan": {
+  "pohlavi": "Male",
+  "vek_let": 49,
+  "role": "mlynář Štěpán",
+  "seed": 491920,
+  "tvar": {
+   "nos_delka": 0.13,
+   "nos_spicka": 0.65,
+   "nos_sirka": -0.67,
+   "nos_hrbet": -0.77,
+   "nos_hacek": 0.28,
+   "celist": -0.37,
+   "brada_delka": 0.61,
+   "brada_vpred": -0.31,
+   "brada_sirka": 0.01,
+   "licni_kosti": -0.82,
+   "tvare_plnost": 0.57,
+   "nadocnice": 0.21,
+   "oci": 0.71,
+   "rty": 0.3,
+   "usta_sirka": 0.81,
+   "oboci_vyska": -0.0,
+   "obliceji_delka": -0.24,
+   "usi": -0.77,
+   "vek_pokles": 0.47,
+   "vaha": 0.33,
+   "lebka_sirka": 0.75,
+   "nos_kratky_pres": -0.26
+  },
+  "plet": {
+   "ton": [
+    1.069,
+    1.031,
+    0.988
+   ],
+   "opaleni": 0.55,
+   "vek": 0.56,
+   "kruhy": 0.6,
+   "rumenec": 0.0,
+   "pihy": 0.6,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.481,
+    0.435,
+    0.381
+   ],
+   "sedive": 0.44,
+   "linie": {
+    "predni": 0.07791314666823561,
+    "kouty": 0.012
+   },
+   "cepice": 0.004,
+   "objem": 0.001,
+   "chomacu": 5,
+   "delka_chomacu": 0.09,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "plny",
+   "tloustka": 0.0038980017858432927,
+   "delka": 0.021525773237861527
+  },
+  "oboci": [
+   0.9,
+   -0.0016,
+   -0.0
+  ],
+  "oci": [
+   0.35,
+   0.24,
+   0.14
+  ]
+ },
+ "npc_matej": {
+  "pohlavi": "Male",
+  "vek_let": 25,
+  "role": "chalupník Matěj",
+  "seed": 586134,
+  "tvar": {
+   "nos_delka": 0.68,
+   "nos_spicka": 0.79,
+   "nos_sirka": -0.5,
+   "nos_hrbet": 0.21,
+   "nos_hacek": -0.75,
+   "celist": -0.51,
+   "brada_delka": -0.84,
+   "brada_vpred": 0.78,
+   "brada_sirka": -0.41,
+   "licni_kosti": 0.42,
+   "tvare_plnost": 0.3,
+   "nadocnice": 0.77,
+   "oci": -0.83,
+   "rty": 0.3,
+   "usta_sirka": 0.63,
+   "oboci_vyska": -0.75,
+   "obliceji_delka": 0.03,
+   "usi": -0.64,
+   "vek_pokles": 0.04,
+   "vaha": 0.25,
+   "lebka_sirka": 0.53,
+   "nos_kratky_pres": 0.73
+  },
+  "plet": {
+   "ton": [
+    1.128,
+    1.067,
+    1.036
+   ],
+   "opaleni": 0.55,
+   "vek": 0.0,
+   "kruhy": 0.0,
+   "rumenec": 0.0,
+   "pihy": 0.6,
+   "odlicit": 1.0,
+   "strniste": 0.23
+  },
+  "vlasy": {
+   "barva": [
+    0.73,
+    0.604,
+    0.396
+   ],
+   "sedive": 0.0,
+   "linie": {
+    "predni": 0.04,
+    "spanky": 0.03,
+    "nad_usima": 0.012,
+    "za_usima": -0.03,
+    "tyl": -0.06
+   },
+   "cepice": 0.005,
+   "objem": 0.008,
+   "chomacu": 7,
+   "delka_chomacu": 0.1,
+   "sirka_chomacu": 0.035,
+   "smer": "temeno"
+  },
+  "vousy": {
+   "typ": "strniste"
+  },
+  "oboci": [
+   0.79,
+   0.0024,
+   -0.006
+  ],
+  "oci": [
+   0.3,
+   0.42,
+   0.55
+  ]
+ },
+ "npc_bartos": {
+  "pohlavi": "Male",
+  "vek_let": 38,
+  "role": "sedlák Bartoš",
+  "seed": 305989,
+  "tvar": {
+   "nos_delka": 0.38,
+   "nos_spicka": 0.51,
+   "nos_sirka": -0.24,
+   "nos_hrbet": 0.37,
+   "nos_hacek": 0.69,
+   "celist": 0.19,
+   "brada_delka": -0.82,
+   "brada_vpred": 0.22,
+   "brada_sirka": 0.43,
+   "licni_kosti": -0.42,
+   "tvare_plnost": -0.78,
+   "nadocnice": -0.12,
+   "oci": -0.41,
+   "rty": 0.6,
+   "usta_sirka": 0.4,
+   "oboci_vyska": 0.52,
+   "obliceji_delka": 0.46,
+   "usi": 0.28,
+   "vek_pokles": 0.32,
+   "vaha": 0.64,
+   "lebka_sirka": -0.18,
+   "nos_kratky_pres": -0.28
+  },
+  "plet": {
+   "ton": [
+    1.022,
+    0.969,
+    0.892
+   ],
+   "opaleni": 0.55,
+   "vek": 0.28,
+   "kruhy": 0.14,
+   "rumenec": 0.0,
+   "pihy": 1.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.435,
+    0.381,
+    0.317
+   ],
+   "sedive": 0.22,
+   "linie": {},
+   "cepice": 0.004,
+   "objem": 0.001,
+   "chomacu": 5,
+   "delka_chomacu": 0.09,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "kratky",
+   "tloustka": 0.0047522742317173145,
+   "delka": 0.004
+  },
+  "oboci": [
+   1.05,
+   -0.0014,
+   -0.042
+  ],
+  "oci": [
+   0.3,
+   0.42,
+   0.55
+  ]
+ },
+ "npc_linhart": {
+  "pohlavi": "Male",
+  "vek_let": 28,
+  "role": "Linhart",
+  "seed": 562005,
+  "tvar": {
+   "nos_delka": 0.05,
+   "nos_spicka": 0.29,
+   "nos_sirka": 0.32,
+   "nos_hrbet": 0.36,
+   "nos_hacek": 0.62,
+   "celist": 0.05,
+   "brada_delka": -0.69,
+   "brada_vpred": -0.26,
+   "brada_sirka": 0.54,
+   "licni_kosti": 0.82,
+   "tvare_plnost": 0.74,
+   "nadocnice": -0.83,
+   "oci": 0.36,
+   "rty": 0.2,
+   "usta_sirka": 0.81,
+   "oboci_vyska": -0.85,
+   "obliceji_delka": 0.64,
+   "usi": -0.51,
+   "vek_pokles": 0.1,
+   "vaha": -0.75,
+   "lebka_sirka": 0.51,
+   "nos_kratky_pres": -0.34
+  },
+  "plet": {
+   "ton": [
+    0.884,
+    0.842,
+    0.826
+   ],
+   "opaleni": 0.0,
+   "vek": 0.0,
+   "kruhy": 0.0,
+   "rumenec": 0.35,
+   "pihy": 0.0,
+   "odlicit": 1.0,
+   "strniste": 0.48
+  },
+  "vlasy": {
+   "barva": [
+    0.381,
+    0.317,
+    0.256
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 8,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "strniste"
+  },
+  "oboci": [
+   1.18,
+   0.0005,
+   -0.077
+  ],
+  "oci": [
+   0.35,
+   0.24,
+   0.14
+  ]
+ },
+ "npc_hostinsky": {
+  "pohlavi": "Male",
+  "vek_let": 35,
+  "role": "hostinský",
+  "seed": 680196,
+  "tvar": {
+   "nos_delka": -0.19,
+   "nos_spicka": -0.34,
+   "nos_sirka": 0.09,
+   "nos_hrbet": 0.52,
+   "nos_hacek": 0.16,
+   "celist": -0.8,
+   "brada_delka": -0.28,
+   "brada_vpred": -0.6,
+   "brada_sirka": -0.74,
+   "licni_kosti": -0.53,
+   "tvare_plnost": 0.38,
+   "nadocnice": 0.42,
+   "oci": 0.24,
+   "rty": -0.6,
+   "usta_sirka": 0.62,
+   "oboci_vyska": -0.73,
+   "obliceji_delka": 0.66,
+   "usi": 0.6,
+   "vek_pokles": 0.15,
+   "vaha": 0.75,
+   "lebka_sirka": -0.53,
+   "nos_kratky_pres": -0.46
+  },
+  "plet": {
+   "ton": [
+    0.984,
+    0.938,
+    0.915
+   ],
+   "opaleni": 0.0,
+   "vek": 0.21,
+   "kruhy": 0.1,
+   "rumenec": 0.4,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.367,
+    0.299,
+    0.232
+   ],
+   "sedive": 0.17,
+   "linie": {},
+   "cepice": 0.004,
+   "objem": 0.001,
+   "chomacu": 5,
+   "delka_chomacu": 0.09,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "plny",
+   "tloustka": 0.003267647620776813,
+   "delka": 0.020239920883114805
+  },
+  "oboci": [
+   0.85,
+   -0.0007,
+   -0.058
+  ],
+  "oci": [
+   0.3,
+   0.42,
+   0.55
+  ]
+ },
+ "npc_straz": {
+  "pohlavi": "Male",
+  "vek_let": 31,
+  "role": "stráž",
+  "seed": 131431,
+  "tvar": {
+   "nos_delka": 0.72,
+   "nos_spicka": -0.46,
+   "nos_sirka": -0.46,
+   "nos_hrbet": -0.62,
+   "nos_hacek": -0.84,
+   "celist": 0.7,
+   "brada_delka": -0.82,
+   "brada_vpred": 0.6,
+   "brada_sirka": 0.23,
+   "licni_kosti": 0.56,
+   "tvare_plnost": -0.44,
+   "nadocnice": -0.53,
+   "oci": 0.74,
+   "rty": 0.74,
+   "usta_sirka": -0.58,
+   "oboci_vyska": 0.78,
+   "obliceji_delka": 0.69,
+   "usi": -0.16,
+   "vek_pokles": 0.16,
+   "vaha": -0.45,
+   "lebka_sirka": 0.51,
+   "nos_kratky_pres": -0.67
+  },
+  "plet": {
+   "ton": [
+    0.931,
+    0.905,
+    0.911
+   ],
+   "opaleni": 0.55,
+   "vek": 0.02,
+   "kruhy": 0.3,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0,
+   "strniste": 0.47
+  },
+  "vlasy": {
+   "barva": [
+    0.317,
+    0.268,
+    0.218
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.004,
+   "objem": 0.001,
+   "chomacu": 5,
+   "delka_chomacu": 0.09,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "strniste"
+  },
+  "oboci": [
+   0.93,
+   0.0,
+   0.022
+  ],
+  "oci": [
+   0.45,
+   0.5,
+   0.55
+  ]
+ },
+ "npc_pastyr": {
+  "pohlavi": "Male",
+  "vek_let": 63,
+  "role": "pastýř",
+  "seed": 886277,
+  "tvar": {
+   "nos_delka": -0.74,
+   "nos_spicka": 0.51,
+   "nos_sirka": 0.49,
+   "nos_hrbet": 0.5,
+   "nos_hacek": 0.55,
+   "celist": 0.32,
+   "brada_delka": 0.58,
+   "brada_vpred": 0.47,
+   "brada_sirka": 0.24,
+   "licni_kosti": -0.07,
+   "tvare_plnost": 0.31,
+   "nadocnice": -0.13,
+   "oci": -0.08,
+   "rty": 0.42,
+   "usta_sirka": -0.67,
+   "oboci_vyska": 0.31,
+   "obliceji_delka": -0.5,
+   "usi": -0.83,
+   "vek_pokles": 0.83,
+   "vaha": -0.5,
+   "lebka_sirka": 0.54,
+   "nos_kratky_pres": 0.53
+  },
+  "plet": {
+   "ton": [
+    0.997,
+    0.958,
+    0.913
+   ],
+   "opaleni": 0.55,
+   "vek": 0.77,
+   "kruhy": 0.39,
+   "rumenec": 0.0,
+   "pihy": 0.6,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.621,
+    0.604,
+    0.579
+   ],
+   "sedive": 0.61,
+   "linie": {
+    "plesh": 0.05531582100466451
+   },
+   "cepice": 0.005,
+   "objem": 0.006,
+   "chomacu": 3,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "temeno",
+   "doplnek": "dlouhe",
+   "dlouhe_delka": 0.2
+  },
+  "vousy": {
+   "typ": "kratky",
+   "tloustka": 0.003709413369453782,
+   "delka": 0.004
+  },
+  "oboci": [
+   0.95,
+   -0.0011,
+   -0.049
+  ],
+  "oci": [
+   0.35,
+   0.48,
+   0.3
+  ]
+ },
+ "npc_ponocny": {
+  "pohlavi": "Male",
+  "vek_let": 68,
+  "role": "ponocný",
+  "seed": 293765,
+  "tvar": {
+   "nos_delka": 0.6,
+   "nos_spicka": -0.14,
+   "nos_sirka": -0.76,
+   "nos_hrbet": 0.65,
+   "nos_hacek": 0.7,
+   "celist": -0.19,
+   "brada_delka": -0.2,
+   "brada_vpred": -0.41,
+   "brada_sirka": 0.38,
+   "licni_kosti": 0.64,
+   "tvare_plnost": 0.59,
+   "nadocnice": -0.08,
+   "oci": -0.28,
+   "rty": 0.66,
+   "usta_sirka": -0.34,
+   "oboci_vyska": -0.36,
+   "obliceji_delka": -0.69,
+   "usi": -0.54,
+   "vek_pokles": 0.97,
+   "vaha": -0.5,
+   "lebka_sirka": -0.68,
+   "nos_kratky_pres": 0.64
+  },
+  "plet": {
+   "ton": [
+    1.048,
+    0.993,
+    0.979
+   ],
+   "opaleni": 0.0,
+   "vek": 0.98,
+   "kruhy": 0.5,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0,
+   "strniste": 0.35
+  },
+  "vlasy": {
+   "barva": [
+    0.674,
+    0.659,
+    0.636
+   ],
+   "sedive": 0.77,
+   "linie": {
+    "predni": 0.08195846076588115,
+    "kouty": 0.012,
+    "plesh": 0.05760318320480817
+   },
+   "cepice": 0.004,
+   "objem": 0.001,
+   "chomacu": 3,
+   "delka_chomacu": 0.09,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "bradka",
+   "tloustka": 0.0033054298902544855,
+   "delka": 0.012
+  },
+  "oboci": [
+   1.19,
+   0.0014,
+   0.026
+  ],
+  "oci": [
+   0.5,
+   0.45,
+   0.25
+  ]
+ },
+ "npc_hoch": {
+  "pohlavi": "Male",
+  "vek_let": 12,
+  "role": "hoch",
+  "seed": 965368,
+  "tvar": {
+   "nos_delka": -0.6,
+   "nos_spicka": 0.36,
+   "nos_sirka": 0.72,
+   "nos_hrbet": -0.5,
+   "nos_hacek": -0.84,
+   "celist": -0.8,
+   "brada_delka": -0.6,
+   "brada_vpred": -0.84,
+   "brada_sirka": 0.84,
+   "licni_kosti": -0.32,
+   "tvare_plnost": 0.5,
+   "nadocnice": -0.6,
+   "oci": 0.7,
+   "rty": -0.67,
+   "usta_sirka": 0.22,
+   "oboci_vyska": 0.46,
+   "obliceji_delka": -0.9,
+   "usi": 0.62,
+   "vek_pokles": 0,
+   "vaha": 0.0,
+   "lebka_sirka": -0.62,
+   "nos_kratky_pres": 0.27
+  },
+  "plet": {
+   "ton": [
+    0.946,
+    0.942,
+    0.873
+   ],
+   "opaleni": 0.0,
+   "vek": 0.0,
+   "kruhy": 0.0,
+   "rumenec": 0.45,
+   "pihy": 0.0,
+   "odlicit": 1.0,
+   "strniste": 0.0
+  },
+  "vlasy": {
+   "barva": [
+    0.762,
+    0.659,
+    0.481
+   ],
+   "sedive": 0.0,
+   "linie": {
+    "predni": 0.04,
+    "spanky": 0.03,
+    "nad_usima": 0.012,
+    "za_usima": -0.03,
+    "tyl": -0.06
+   },
+   "cepice": 0.005,
+   "objem": 0.008,
+   "chomacu": 7,
+   "delka_chomacu": 0.1,
+   "sirka_chomacu": 0.035,
+   "smer": "temeno"
+  },
+  "vousy": null,
+  "oboci": [
+   0.9,
+   -0.0005,
+   0.016
+  ],
+  "oci": [
+   0.45,
+   0.5,
+   0.55
+  ]
+ },
+ "npc_marketa": {
+  "pohlavi": "Female",
+  "vek_let": 35,
+  "role": "selka Markéta",
+  "seed": 328905,
+  "tvar": {
+   "nos_delka": -0.12,
+   "nos_spicka": 0.75,
+   "nos_sirka": -0.66,
+   "nos_hrbet": -0.81,
+   "nos_hacek": -0.75,
+   "celist": -0.51,
+   "brada_delka": -0.11,
+   "brada_vpred": 0.39,
+   "brada_sirka": -0.71,
+   "licni_kosti": -0.83,
+   "tvare_plnost": 0.68,
+   "nadocnice": -0.39,
+   "oci": -0.53,
+   "rty": 0.07,
+   "usta_sirka": 0.39,
+   "oboci_vyska": -0.42,
+   "obliceji_delka": -0.15,
+   "usi": 0.74,
+   "vek_pokles": 0.15,
+   "vaha": 0.44,
+   "lebka_sirka": 0.0,
+   "nos_kratky_pres": 0.3
+  },
+  "plet": {
+   "ton": [
+    1.052,
+    1.001,
+    0.98
+   ],
+   "opaleni": 0.35,
+   "vek": 0.1,
+   "kruhy": 0.0,
+   "rumenec": 0.0,
+   "pihy": 0.6,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.55,
+    0.42,
+    0.25
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 7,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka",
+   "doplnek": "drdol",
+   "drdol_z": -0.009282692975202404
+  },
+  "vousy": null,
+  "oboci": [
+   0.68,
+   -0.0008,
+   0.008
+  ],
+  "oci": [
+   0.35,
+   0.48,
+   0.3
+  ]
+ },
+ "npc_dorota": {
+  "pohlavi": "Female",
+  "vek_let": 36,
+  "role": "kuchařka Dorota",
+  "seed": 397841,
+  "tvar": {
+   "nos_delka": -0.04,
+   "nos_spicka": -0.8,
+   "nos_sirka": -0.7,
+   "nos_hrbet": -0.78,
+   "nos_hacek": -0.54,
+   "celist": 0.0,
+   "brada_delka": 0.37,
+   "brada_vpred": 0.47,
+   "brada_sirka": 0.0,
+   "licni_kosti": 0.61,
+   "tvare_plnost": -0.16,
+   "nadocnice": -0.19,
+   "oci": 0.8,
+   "rty": -0.54,
+   "usta_sirka": -0.78,
+   "oboci_vyska": -0.49,
+   "obliceji_delka": -0.33,
+   "usi": 0.28,
+   "vek_pokles": 0.24,
+   "vaha": 0.75,
+   "lebka_sirka": -0.81,
+   "nos_kratky_pres": 0.79
+  },
+  "plet": {
+   "ton": [
+    1.025,
+    0.981,
+    0.961
+   ],
+   "opaleni": 0.0,
+   "vek": 0.21,
+   "kruhy": 0.1,
+   "rumenec": 0.3,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.06,
+    0.045,
+    0.035
+   ],
+   "sedive": 0.17,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 7,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka",
+   "doplnek": "drdol",
+   "drdol_z": -0.016107185955018193
+  },
+  "vousy": null,
+  "oboci": [
+   0.83,
+   0.0029,
+   0.009
+  ],
+  "oci": [
+   0.45,
+   0.5,
+   0.55
+  ]
+ },
+ "npc_anezka": {
+  "pohlavi": "Female",
+  "vek_let": 58,
+  "role": "bába Anežka",
+  "seed": 479261,
+  "tvar": {
+   "nos_delka": 0.4,
+   "nos_spicka": 0.42,
+   "nos_sirka": -0.59,
+   "nos_hrbet": 0.12,
+   "nos_hacek": 0.25,
+   "celist": 0.0,
+   "brada_delka": 0.76,
+   "brada_vpred": -0.76,
+   "brada_sirka": -1.06,
+   "licni_kosti": 0.69,
+   "tvare_plnost": 0.82,
+   "nadocnice": 0.0,
+   "oci": 0.41,
+   "rty": 0.4,
+   "usta_sirka": 0.37,
+   "oboci_vyska": -0.52,
+   "obliceji_delka": -0.68,
+   "usi": 0.82,
+   "vek_pokles": 0.65,
+   "vaha": -0.36,
+   "lebka_sirka": 0.0,
+   "nos_kratky_pres": -0.1
+  },
+  "plet": {
+   "ton": [
+    0.99,
+    0.947,
+    0.88
+   ],
+   "opaleni": 0.35,
+   "vek": 0.7,
+   "kruhy": 0.35,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.18,
+    0.11,
+    0.06
+   ],
+   "sedive": 0.55,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 7,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka",
+   "doplnek": "drdol",
+   "drdol_z": -0.012126438764762276
+  },
+  "vousy": null,
+  "oboci": [
+   0.68,
+   0.0006,
+   0.044
+  ],
+  "oci": [
+   0.45,
+   0.5,
+   0.55
+  ]
+ },
+ "npc_katerina": {
+  "pohlavi": "Female",
+  "vek_let": 18,
+  "role": "Kateřina",
+  "seed": 792558,
+  "tvar": {
+   "nos_delka": -0.63,
+   "nos_spicka": 0.79,
+   "nos_sirka": -0.82,
+   "nos_hrbet": 0.3,
+   "nos_hacek": 0.83,
+   "celist": -0.38,
+   "brada_delka": -0.6,
+   "brada_vpred": -0.43,
+   "brada_sirka": 0.0,
+   "licni_kosti": -0.68,
+   "tvare_plnost": 0.07,
+   "nadocnice": 0.0,
+   "oci": -0.54,
+   "rty": -0.7,
+   "usta_sirka": 0.3,
+   "oboci_vyska": -0.84,
+   "obliceji_delka": 0.25,
+   "usi": 0.52,
+   "vek_pokles": 0.08,
+   "vaha": 0.42,
+   "lebka_sirka": 0.0,
+   "nos_kratky_pres": 0.48
+  },
+  "plet": {
+   "ton": [
+    0.926,
+    0.911,
+    0.898
+   ],
+   "opaleni": 0.35,
+   "vek": 0.0,
+   "kruhy": 0.0,
+   "rumenec": 0.0,
+   "pihy": 0.6,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.28,
+    0.18,
+    0.09
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 8,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka",
+   "doplnek": "dlouhe",
+   "dlouhe_delka": 0.26
+  },
+  "vousy": null,
+  "oboci": [
+   0.8,
+   -0.0018,
+   0.054
+  ],
+  "oci": [
+   0.35,
+   0.48,
+   0.3
+  ]
+ },
+ "npc_hostinska": {
+  "pohlavi": "Female",
+  "vek_let": 25,
+  "role": "šenkýřka",
+  "seed": 438799,
+  "tvar": {
+   "nos_delka": 0.83,
+   "nos_spicka": -0.67,
+   "nos_sirka": -0.53,
+   "nos_hrbet": 0.3,
+   "nos_hacek": -0.12,
+   "celist": -0.13,
+   "brada_delka": -0.2,
+   "brada_vpred": 0.09,
+   "brada_sirka": -0.65,
+   "licni_kosti": 0.72,
+   "tvare_plnost": -0.07,
+   "nadocnice": -0.61,
+   "oci": 0.33,
+   "rty": -0.58,
+   "usta_sirka": -0.53,
+   "oboci_vyska": 0.56,
+   "obliceji_delka": 0.29,
+   "usi": 0.61,
+   "vek_pokles": 0.04,
+   "vaha": 0.75,
+   "lebka_sirka": -0.61,
+   "nos_kratky_pres": -0.63
+  },
+  "plet": {
+   "ton": [
+    1.035,
+    0.995,
+    0.98
+   ],
+   "opaleni": 0.35,
+   "vek": 0.0,
+   "kruhy": 0.0,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.45,
+    0.32,
+    0.18
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 7,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka",
+   "doplnek": "drdol",
+   "drdol_z": 0.029717370598706123
+  },
+  "vousy": null,
+  "oboci": [
+   0.95,
+   -0.0012,
+   -0.004
+  ],
+  "oci": [
+   0.35,
+   0.24,
+   0.14
+  ]
+ },
+ "npc_pasacka": {
+  "pohlavi": "Female",
+  "vek_let": 13,
+  "role": "pasačka",
+  "seed": 489225,
+  "tvar": {
+   "nos_delka": -0.6,
+   "nos_spicka": -0.27,
+   "nos_sirka": -0.71,
+   "nos_hrbet": -0.5,
+   "nos_hacek": 0.26,
+   "celist": -0.8,
+   "brada_delka": -0.6,
+   "brada_vpred": -0.68,
+   "brada_sirka": 0.0,
+   "licni_kosti": 0.2,
+   "tvare_plnost": 0.5,
+   "nadocnice": -0.6,
+   "oci": 0.7,
+   "rty": 0.42,
+   "usta_sirka": 0.84,
+   "oboci_vyska": 0.17,
+   "obliceji_delka": -0.9,
+   "usi": 0.16,
+   "vek_pokles": 0,
+   "vaha": 0.0,
+   "lebka_sirka": -1.05,
+   "nos_kratky_pres": 0.42
+  },
+  "plet": {
+   "ton": [
+    0.952,
+    0.863,
+    0.856
+   ],
+   "opaleni": 0.35,
+   "vek": 0.0,
+   "kruhy": 0.0,
+   "rumenec": 0.25,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.38,
+    0.17,
+    0.07
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 8,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka",
+   "doplnek": "cop",
+   "cop_delka": 0.3
+  },
+  "vousy": null,
+  "oboci": [
+   0.73,
+   0.0003,
+   -0.031
+  ],
+  "oci": [
+   0.4,
+   0.45,
+   0.48
+  ]
+ },
+ "npc_bilek": {
+  "pohlavi": "Male",
+  "vek_let": 69,
+  "role": "stařec Bílek",
+  "seed": 98571,
+  "tvar": {
+   "nos_delka": 0.6,
+   "nos_spicka": -0.22,
+   "nos_sirka": 0.82,
+   "nos_hrbet": -0.08,
+   "nos_hacek": 0.7,
+   "celist": -0.17,
+   "brada_delka": 0.62,
+   "brada_vpred": 0.84,
+   "brada_sirka": 0.73,
+   "licni_kosti": -0.82,
+   "tvare_plnost": 0.21,
+   "nadocnice": -0.69,
+   "oci": -0.59,
+   "rty": -0.66,
+   "usta_sirka": 0.62,
+   "oboci_vyska": 0.66,
+   "obliceji_delka": 0.45,
+   "usi": -0.62,
+   "vek_pokles": 1.02,
+   "vaha": -0.5,
+   "lebka_sirka": -0.63,
+   "nos_kratky_pres": 0.48
+  },
+  "plet": {
+   "ton": [
+    0.956,
+    0.885,
+    0.871
+   ],
+   "opaleni": 0.55,
+   "vek": 0.98,
+   "kruhy": 0.49,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.659,
+    0.644,
+    0.621
+   ],
+   "sedive": 0.77,
+   "linie": {
+    "plesh": 0.05231178674553708
+   },
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 3,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka"
+  },
+  "vousy": {
+   "typ": "plny",
+   "tloustka": 0.003608936091662342,
+   "delka": 0.026563155015020646
+  },
+  "oboci": [
+   0.88,
+   0.0001,
+   -0.04
+  ],
+  "oci": [
+   0.35,
+   0.24,
+   0.14
+  ]
+ },
+ "npc_martin": {
+  "pohlavi": "Male",
+  "vek_let": 25,
+  "role": "Martin",
+  "seed": 953436,
+  "tvar": {
+   "nos_delka": 0.19,
+   "nos_spicka": -0.29,
+   "nos_sirka": 0.68,
+   "nos_hrbet": 0.42,
+   "nos_hacek": 0.43,
+   "celist": -0.67,
+   "brada_delka": 0.29,
+   "brada_vpred": 0.47,
+   "brada_sirka": 0.61,
+   "licni_kosti": 0.72,
+   "tvare_plnost": -0.32,
+   "nadocnice": 0.02,
+   "oci": 0.44,
+   "rty": -0.59,
+   "usta_sirka": -0.13,
+   "oboci_vyska": 0.71,
+   "obliceji_delka": -0.18,
+   "usi": 0.35,
+   "vek_pokles": 0.01,
+   "vaha": 0.85,
+   "lebka_sirka": 0.16,
+   "nos_kratky_pres": -0.84
+  },
+  "plet": {
+   "ton": [
+    0.91,
+    0.892,
+    0.849
+   ],
+   "opaleni": 0.0,
+   "vek": 0.0,
+   "kruhy": 0.45,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0,
+   "strniste": 0.25
+  },
+  "vlasy": {
+   "barva": [
+    0.351,
+    0.299,
+    0.244
+   ],
+   "sedive": 0.0,
+   "linie": {
+    "predni": 0.04,
+    "spanky": 0.03,
+    "nad_usima": 0.012,
+    "za_usima": -0.03,
+    "tyl": -0.06
+   },
+   "cepice": 0.005,
+   "objem": 0.008,
+   "chomacu": 7,
+   "delka_chomacu": 0.1,
+   "sirka_chomacu": 0.035,
+   "smer": "temeno"
+  },
+  "vousy": {
+   "typ": "strniste"
+  },
+  "oboci": [
+   1.17,
+   0.0013,
+   0.053
+  ],
+  "oci": [
+   0.55,
+   0.38,
+   0.2
+  ]
+ },
+ "npc_bara": {
+  "pohlavi": "Female",
+  "vek_let": 40,
+  "role": "Bára",
+  "seed": 489937,
+  "tvar": {
+   "nos_delka": -0.19,
+   "nos_spicka": 0.66,
+   "nos_sirka": 0.08,
+   "nos_hrbet": 0.3,
+   "nos_hacek": -0.83,
+   "celist": -0.54,
+   "brada_delka": -0.71,
+   "brada_vpred": -0.44,
+   "brada_sirka": 0.0,
+   "licni_kosti": 0.82,
+   "tvare_plnost": 0.82,
+   "nadocnice": 0.0,
+   "oci": -0.7,
+   "rty": -0.5,
+   "usta_sirka": 0.38,
+   "oboci_vyska": -0.5,
+   "obliceji_delka": -0.04,
+   "usi": -0.66,
+   "vek_pokles": 0.26,
+   "vaha": -0.37,
+   "lebka_sirka": 0.0,
+   "nos_kratky_pres": -0.55
+  },
+  "plet": {
+   "ton": [
+    0.937,
+    0.93,
+    0.869
+   ],
+   "opaleni": 0.0,
+   "vek": 0.28,
+   "kruhy": 0.14,
+   "rumenec": 0.0,
+   "pihy": 0.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.1,
+    0.07,
+    0.05
+   ],
+   "sedive": 0.22,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 7,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka",
+   "doplnek": "drdol",
+   "drdol_z": 0.02868989161428419
+  },
+  "vousy": null,
+  "oboci": [
+   0.93,
+   0.0007,
+   -0.047
+  ],
+  "oci": [
+   0.3,
+   0.42,
+   0.55
+  ]
+ },
+ "npc_eliska": {
+  "pohlavi": "Female",
+  "vek_let": 20,
+  "role": "Eliška",
+  "seed": 970987,
+  "tvar": {
+   "nos_delka": 0.63,
+   "nos_spicka": 0.35,
+   "nos_sirka": 0.69,
+   "nos_hrbet": -0.72,
+   "nos_hacek": -0.42,
+   "celist": 0.0,
+   "brada_delka": 0.2,
+   "brada_vpred": -0.59,
+   "brada_sirka": 0.0,
+   "licni_kosti": -0.53,
+   "tvare_plnost": 0.66,
+   "nadocnice": -0.83,
+   "oci": -0.23,
+   "rty": -0.54,
+   "usta_sirka": 0.37,
+   "oboci_vyska": -0.56,
+   "obliceji_delka": 0.81,
+   "usi": 0.24,
+   "vek_pokles": 0.1,
+   "vaha": 0.37,
+   "lebka_sirka": -0.6,
+   "nos_kratky_pres": 0.05
+  },
+  "plet": {
+   "ton": [
+    0.996,
+    1.004,
+    0.96
+   ],
+   "opaleni": 0.0,
+   "vek": 0.0,
+   "kruhy": 0.0,
+   "rumenec": 0.2,
+   "pihy": 1.0,
+   "odlicit": 1.0
+  },
+  "vlasy": {
+   "barva": [
+    0.55,
+    0.42,
+    0.25
+   ],
+   "sedive": 0.0,
+   "linie": {},
+   "cepice": 0.005,
+   "objem": 0.003,
+   "chomacu": 8,
+   "delka_chomacu": 0.12,
+   "sirka_chomacu": 0.035,
+   "smer": "pesinka",
+   "doplnek": "cop",
+   "cop_delka": 0.38
+  },
+  "vousy": null,
+  "oboci": [
+   0.85,
+   -0.0014,
+   -0.059
+  ],
+  "oci": [
+   0.45,
+   0.5,
+   0.55
+  ]
+ }
+}
