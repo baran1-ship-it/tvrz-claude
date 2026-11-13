@@ -23,6 +23,9 @@ func _prumer(n: int, postavy: Array, anim: bool) -> float:
 
 
 func _beh() -> void:
+	# A/B (13. 11.): TVRZ_MP_PCK = starsi balik postav (napr. z_postavy z 0.99998) prekryje modely pred nactenim
+	if OS.has_environment("TVRZ_MP_PCK"):
+		print("MERENI_POSTAV balik %s: %s" % [OS.get_environment("TVRZ_MP_PCK"), ProjectSettings.load_resource_pack(OS.get_environment("TVRZ_MP_PCK"), true)])
 	var n := int(OS.get_environment("TVRZ_MP_N")) if OS.has_environment("TVRZ_MP_N") else 20
 	var koren := Node3D.new()
 	root.add_child(koren)
