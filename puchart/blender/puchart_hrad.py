@@ -1068,7 +1068,7 @@ def podkrovi_vystup(P, c, d, L_in, H_out, t_zdi, y0, y1, pomer, kon=-1, sirka=1.
     zabradli(P, c + d * u_steny + s * (v_s - 0.1), c + d * ui + s * (v_s - 0.1), y1)
     kolenni_steny(P, c, d, L_in, H_out, y1, pomer)
     v_t = v_e + 0.25   # výstup těsně za horním stupněm (0,4 m stál v prknech kolenní stěny; dál k ní ne – test 10. 11.)
-    return [(c + d * (ui - kon * 0.9) + s * (v_s - 0.6), y0), (a - s * 0.5, y0), (a + s * 0.8, None), (c + d * u_g + s * v_t, y1), (c + d * (ui - kon * 0.9) + s * v_t, y1), (c + d * (ui - kon * 0.9) + s * 0.0, y1)]   # od výstupu nejdřív vedle otvoru, pak do středu (ne přes zábradlí)
+    return [(c + d * (ui - kon * 0.9) + s * (v_s - 0.6), y0), (a - s * 0.5, y0), (a + s * 0.8, None), (c + d * u_g + s * v_t, y1), (c + d * (ui - kon * 1.2) + s * v_t, y1), (c + d * (ui - kon * 1.2) + s * 0.0, y1)]   # od výstupu nejdřív vedle otvoru, pak do středu (ne přes zábradlí)
 
 def kolenni_steny(P, c, d, delka, hloubka, y, pomer, vyska=1.75):
     """Podkroví pod sedlovou střechou (Míša 5. 11.: „přístupné aspoň středem, nebo ho zbedni“): bedněné kolenní stěny
@@ -1455,7 +1455,7 @@ def palac_A(P, p0, p1, bd, PI):
     # trasa: ze dveří přízemí nejdřív dál od zábradlí venkovních schodů a kolem jejich paty, ne přes schodnici (test 9. 11.)
     TR["A_palac"] = [bod(W(vs["od_m"], vi + 3.5)), bod(W(vs["od_m"], vi + 1.2)), bod(W(vs["od_m"], vi - 0.8), F0),
                      bod(W(pu + 0.9, dv_), F0), bod(W(pu - 1.2, dv_), F0), bod(W(pu + 0.9, dv_), F0), bod(W(vs["od_m"], vi - 0.8), F0),
-                     bod(W(vs["od_m"], vi + 1.2)), bod(W(vs["od_m"], vi + 2.2)), bod(W(vs["od_m"], (foot_ - p0).dot(s) + 1.6)), bod(foot_ + s * 1.6), bod(foot_ + s * 1.0), bod(foot_ - s * 0.6), bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][1]["u"]),
+                     bod(W(vs["od_m"], vi + 1.2)), bod(W(vs["od_m"], vi + 2.2)), bod(W(vs["od_m"], (foot_ - p0).dot(s) + 1.6)), bod(foot_ + s * 1.6), bod(foot_ + s * 1.0), bod(foot_ - s * 0.6), bod(top_ - s * 0.4, F1), bod(W(sv["u"], h / 2 + t / 2 + PV["sirka"] / 2), F1, 0.15), pav(DS["dvere_pavlac"][1]["u"]),   # 13. 11.: přesně na pavlač, jinak zatáčka zkrácená přes rohový sloupek podesty
                      bod(W(DS["dvere_pavlac"][1]["u"], vi - 1.0), F1)] + ([bod(q_, y_) for q_, y_ in PKV_] if PKV_ else [])
     TR["A_palac_svetnice"] = [bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][0]["u"]), bod(W(DS["dvere_pavlac"][0]["u"], vi - 1.0), F1), bod(W(3.95, 1.2), F1), bod(W(3.95, -0.6), F1)]   # kolem stolu k kamnům
     TR["A_palac_komora"] = [bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][2]["u"]), bod(W(DS["dvere_pavlac"][2]["u"], vi - 1.0), F1), bod(W(10.4, 0.6), F1)]
