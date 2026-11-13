@@ -1303,3 +1303,12 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - `beh.sh … testy "$T"` s prázdnou proměnnou spustí CELOU sadu (rychle_testy.sh bez seznamu); běžela 1,5 h a držela
   zámek, přestavba postav za ní po 30 min ve frontě spadla na limit pozadí. Seznam testů psát vždy doslova, ne přes
   proměnnou, a dlouhé řetězy pouštět s `timeout` 7 200 000 ms.
+
+### 13. 11. – lide_chovani: sed na konci dlouhé lavice, poutníci na společném rozcestí
+- Test sedu bral lavici s nejbližším STŘEDEM (sousední krátká lavice) – krajní místo 4 m lavice hlásil „mimo sedák“.
+  Test teď měří vzdálenost k otočenému půdorysu sedáku (rozmer + yaw).
+- Poutníci: `cesta_rozcesti` je na všech trasách, další bod byl vždy (obch+1) % n → sešli se. `_poutnik_volny`
+  (lide.gd) vybírá další volný bod trasy (od_sebe_m) při startu, v `_obchuzka_dalsi` i `_daleko_krok`.
+- Sukně: 8 řetězů má mezi sebou ~20 cm, stehno v kroku prošlo MEZI řetězy → tětiva po obvodu (`obvod_tetiva_kol`),
+  vytlačení vždy ven (k ref). Nezávislá kontrola: zubatý lem v klíně vsedě (Sed_Poza, i v 0.99998) a úchop druhé
+  ruky může dopočítat pózu za běhu (uchop.gd:266/389) – na další verzi.
