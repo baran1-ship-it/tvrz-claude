@@ -1038,9 +1038,7 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
         ZAB_REC.append({"P": P, "a": hz(a + o), "b": hz(a + d * run + o), "ya": y0, "yb": y1, "dolu": 0.34})
         nk = max(1, math.ceil(run / 0.5))   # kolize po svislých dílech 0,5 m podél sklonu: celá délka jako viditelné zábradlí, nic nepřečnívá patu
         for i in range(nk):                  # (šikmý kvádr musel být o 1,5 m kratší – konce zábradlí byly bez kolize, povrch_kolize 3. 11.)
-            t0_, t1_ = run * i / nk, run * (i + 1) / nk
-            if i == 0: t0_ = min(0.15, t1_ - 0.05)   # pata: první sloupek stojí 0,15 m od začátku schodů (13. 11. povrch_kolize: kolize 0,45 m před viditelným zábradlím)
-            t0_, t1_ = t0_, t1_; yl = y0 + (y1 - y0) * t0_ / run; yh = y0 + (y1 - y0) * t1_ / run
+            t0_, t1_ = run * i / nk, run * (i + 1) / nk; yl = y0 + (y1 - y0) * t0_ / run; yh = y0 + (y1 - y0) * t1_ / run
             kol(P, a + d * ((t0_ + t1_) / 2) + s * sg * (w / 2 + 0.05) + UP * ((yl + yh) / 2 + 0.55), d, (0.12, 1.1 + (yh - yl), t1_ - t0_))   # kolize na původní linii (o 3 cm dovnitř zúžila průchod v paláci)
     return a + d * run, y1
 
@@ -1670,7 +1668,7 @@ def postav_A(P):
         po_k_vezi = bb[k0:] if ut == 1 else bb[:k0 + 1][::-1]
         STAVBY.append({"ochoz_hradby_mezera": [i, round(sT, 2), round(sT + 1.2, 2)]})
         if hw.get("schody_v_ose"):
-            TR["A_branka_patro"] = [bod(f_ + vn * 1.8 - dS * 0.6), bod(f_ - dS * 0.4), bod(a + d * sT + vn * st_o, y_k, 0.25)] + po_k_vezi   # ze dvora z boku (13. 11.: za patou je prohlubeň valu)
+            TR["A_branka_patro"] = [bod(f_ - dS * 1.2), bod(f_ - dS * 0.4), bod(a + d * sT + vn * st_o, y_k, 0.25)] + po_k_vezi   # pata schodů na plošině A_schody_vychod_pata (13. 11.: za ní prohlubeň valu)
         else:
           TR["A_branka_patro"] = [bod(f_ - d * 1.8 + vn * 0.0), bod(f_ - d * 0.5), bod(a + d * (sT + 0.6) + vn * st_o, y_k),
                                 bod(a + d * (sT + 0.6) + vn * (tt / 2 + SW / 2), y_k, 0.25)] + po_k_vezi + [bod(dvere - n_dv * 0.9, yp), bod(dvere - n_dv * 1.6, yp)]
