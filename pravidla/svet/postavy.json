@@ -6671,6 +6671,8 @@
   "pokles_do_m": 0.3,
   "_klek12": "12. 11. test_sukne: bocni retezy s vahou 0,6 zustaly napul ve stehne -> ridic_bok 1; klek (stehno svisle) -> vaha i podle poklesu panve pokles_od..do_m",
   "noha_podil": 0.45,
+  "obvod_tetiva_kol": 2,
+  "_tetiva13": "13. 11. snimek ch_s4 zepredu: stehno v kroku proslo latkou mezi sousednimi retezy (8 retezu, mezera ~20 cm); stred tetivy mezi sousedy se vytlaci z kapsli nohou, oba klouby o jeho hloubku",
   "test_latka_klipy": [
    "Walk_Loop",
    "Idle_Loop"

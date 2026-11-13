@@ -187,21 +187,20 @@ func _process_modification() -> void:
 			nove.append(ci)
 		for i in n_r:
 			vse[i][1] = nove[i]
+	# vytlaceni z kapsli obou nohou (CRYENGINE PRow; 12. 11. test_sukne: zkrizene nohy a klek - prumer drah
+	# dvou nohou padl do druhe nohy)
+	var kapsle: Array = []
+	# ruce (13. 11. Misa: vsede ruce zapadly do zastery) - latka pod dlani; nohy az po nich (vyhrava noha)
+	for s: String in ["l", "r"]:
+		if _ruce:
+			kapsle.append([P["lowerarm_" + s], P["hand_" + s], float(D.get("polomer_predlokti_m", 0.035))])
+			kapsle.append([P["hand_" + s], P["middle_01_" + s], float(D.get("polomer_dlane_m", 0.03))])
+	for s: String in ["l", "r"]:
+		kapsle.append([P["thigh_" + s], P["calf_" + s], r_s + tl])
+		kapsle.append([P["calf_" + s], P["foot_" + s], r_h + tl])
 	for v: Array in vse:
-		var kosti: Array = v[0]
 		var cile: Array = v[1]
 		var ref: Vector3 = v[2]
-		# vytlaceni z kapsli obou nohou (CRYENGINE PRow; 12. 11. test_sukne: zkrizene nohy a klek - prumer drah
-		# dvou nohou padl do druhe nohy)
-		var kapsle: Array = []
-		# ruce (13. 11. Misa: vsede ruce zapadly do zastery) - latka pod dlani; nohy az po nich (vyhrava noha)
-		for s: String in ["l", "r"]:
-			if _ruce:
-				kapsle.append([P["lowerarm_" + s], P["hand_" + s], float(D.get("polomer_predlokti_m", 0.035))])
-				kapsle.append([P["hand_" + s], P["middle_01_" + s], float(D.get("polomer_dlane_m", 0.03))])
-		for s: String in ["l", "r"]:
-			kapsle.append([P["thigh_" + s], P["calf_" + s], r_s + tl])
-			kapsle.append([P["calf_" + s], P["foot_" + s], r_h + tl])
 		for k in range(1, cile.size()):
 			var c: Vector3 = _ven_z_kapsli(cile[k], kapsle, ref)
 			# latka mezi klouby je rovna tetiva: kdyz stred useku vezi v noze (chuze - stehno vpredu), kloub se odsune
@@ -210,6 +209,21 @@ func _process_modification() -> void:
 			var m2 := _ven_z_kapsli(m, kapsle, ref)
 			c += (m2 - m) * 2.0
 			cile[k] = _ven_z_kapsli(c, kapsle, ref)
+	# 13. 11. (snimek ch_s4 zepredu: stehno v kroku proslo latkou MEZI retezy, retezy samy venku): latka mezi sousednimi
+	# retezy po obvodu je take tetiva - kdyz jeji stred lezi v noze, oba sousedni klouby se odsunou o hloubku stredu
+	for _it in int(D.get("obvod_tetiva_kol", 2)):
+		for i in n_r:
+			var ca: Array = vse[i][1]
+			var cb: Array = vse[(i + 1) % n_r][1]
+			for k in range(1, mini(ca.size(), cb.size())):
+				var m: Vector3 = ((ca[k] as Vector3) + (cb[k] as Vector3)) * 0.5
+				var ven := _ven_z_kapsli(m, kapsle, ((vse[i][2] as Vector3) + (vse[(i + 1) % n_r][2] as Vector3)) * 0.5) - m
+				if ven.length_squared() > 1e-8:
+					ca[k] = (ca[k] as Vector3) + ven
+					cb[k] = (cb[k] as Vector3) + ven
+	for v: Array in vse:
+		var kosti: Array = v[0]
+		var cile: Array = v[1]
 		for k in kosti.size():
 			var b: int = kosti[k]
 			var g := sk.get_bone_global_pose(b)
