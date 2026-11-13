@@ -5,6 +5,7 @@ const Pravidla := preload("res://scripts/pravidla.gd")
 
 const Svet := preload("res://scripts/svet.gd")
 const Daylight := preload("res://scripts/daylight.gd")
+const Pocasi := preload("res://scripts/pocasi.gd")
 const Player := preload("res://scripts/player.gd")
 const Life := preload("res://scripts/life.gd")
 const Hud := preload("res://scripts/hud.gd")
@@ -32,6 +33,7 @@ var info := {"rooms": [], "fires": [], "use": [], "smoke": [], "targets": []}
 var svet: RefCounted
 var world: Node3D
 var day: Node
+var pocasi: Node3D                       # dest (pocasi.gd)
 var player: CharacterBody3D
 var telo: Node3D                 # telo hrace v prvni osobe (scripts/telo.gd)
 var kun: CharacterBody3D         # kun hrace (scripts/kun.gd)
@@ -471,6 +473,11 @@ func _build() -> void:
 	add_child(day)
 	day.time_changed.connect(predmety.on_time)
 	day.setup(String(_cfg.get_value("hra", "cas", "odpoledne")))
+	# dest (pocasi.gd, prevzato z Pucharta 13. 11.; pravidla/svet/pocasi.json)
+	pocasi = Pocasi.new()
+	pocasi.name = "Pocasi"
+	add_child(pocasi)
+	pocasi.setup(self, day)
 	# vyskova mlha (rano v nivach) jen nad nejnizsim mistem terenu: pevna hranice -6 m lezela nad celym udolim
 	# (ves, louky -8 az -21 m), krajina pak stala cela v huste mlze a byla vybledla az bila
 	var dno := 0.0

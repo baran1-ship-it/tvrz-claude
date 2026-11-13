@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -8204,3 +8204,64 @@ func _ryb_napojeni() -> void:
 		chyby.append("rybnik bez viditelne hladiny")
 	print("RYB_NAPOJENI " + " | ".join(radky))
 	_vysledek("ryb_napojeni", chyby.is_empty(), "; ".join(radky) + ("" if chyby.is_empty() else " CHYBY " + str(chyby)))
+
+
+## Dest z Pucharta (13. 11.): rozvrh za 60 dni - destivych dni v rozsahu rozestupu, zadny dest delsi nez trvani_h + doznivani,
+## zatazeni pred kapkami; uvnitr (daylight.interior 1) zadny zavoj kapek ani dopady.
+func _pocasi() -> void:
+	var pc: Node = main.get("pocasi")
+	if pc == null or not pc.is_processing():
+		_vysledek("pocasi", false, "uzel Pocasi chybi nebo je vypnuty (pocasi.json zapnuto)")
+		return
+	var chyby: Array = []
+	var rz: Array = Pravidla.cti("pocasi", "rozestup_dni")
+	var tr: Array = Pravidla.cti("pocasi", "trvani_h")
+	var dni := 0
+	var nejdelsi := 0.0
+	var beh := 0.0
+	var pred := 0
+	var t := 0.0
+	var krok := 0.05
+	while t < 60.0 * 24.0:
+		var s: Vector3 = pc.stav(t)
+		if s.y > 0.05:
+			beh += krok
+			if beh <= krok and pc.stav(t - 0.3).x < 0.2:
+				pred += 1                               # kapky bez zatazeni predem
+		else:
+			if beh > 0.0:
+				dni += 1
+			nejdelsi = maxf(nejdelsi, beh)
+			beh = 0.0
+		t += krok
+	var ocek := 60.0 / float(rz[1])
+	if dni < int(ocek):
+		chyby.append("destu za 60 dni %d (< %d)" % [dni, int(ocek)])
+	if dni > int(60.0 / float(rz[0])) + 1:
+		chyby.append("destu za 60 dni %d (> %d)" % [dni, int(60.0 / float(rz[0])) + 1])
+	if nejdelsi > float(tr[1]) + float(Pravidla.cti("pocasi", "doznivani_h")) + 0.3:
+		chyby.append("nejdelsi dest %.1f h" % nejdelsi)
+	if pred > 0:
+		chyby.append("%d destu bez zatazeni predem" % pred)
+	# venku za deste zavoj kapek, v hostinci (pod strechou, paprsek vzhuru) zadny
+	pc.vynuceno = 1.0
+	await main.fast_travel(Vector3(-40.0, 0.0, 905.0), Vector3(-45.0, 1.6, 910.0), 0.0, "test")
+	for i in 90:
+		await get_tree().process_frame
+	var venku := 0
+	for c: Node in pc.get_children():
+		if c is MeshInstance3D and (c as MeshInstance3D).visible:
+			venku += 1
+	if venku == 0:
+		chyby.append("venku za deste zadna vrstva kapek")
+	await main.fast_travel(Vector3(-63.0, 0.0, 930.0), Vector3(-66.0, 1.6, 932.0), 0.0, "test")
+	for i in 90:
+		await get_tree().process_frame
+	var vidno := 0
+	for c: Node in pc.get_children():
+		if c is MeshInstance3D and (c as MeshInstance3D).visible:
+			vidno += 1
+	if vidno > 0:
+		chyby.append("v hostinci viditelne vrstvy kapek %d" % vidno)
+	pc.vynuceno = -1.0
+	_vysledek("pocasi", chyby.is_empty(), "%d chyb %s; destu za 60 dni %d, nejdelsi %.1f h" % [chyby.size(), str(chyby), dni, nejdelsi])

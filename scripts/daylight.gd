@@ -233,8 +233,49 @@ func sun_dir(p: Dictionary) -> Vector3:
 	return Vector3(sin(az) * cos(el), sin(el), -cos(az) * cos(el)).normalized()
 
 
+## Zatazeni pred destem a za deste (pocasi.gd, prevzato z Pucharta 13. 11.): slunce slabne, obloha a mraky sednou, mraky
+## skoro cele, vic prizemni mlhy. Cisla pravidla/svet/pocasi.json obloha.
+var zatazeni := 0.0
+var _kryti_zmena := false
+
+
+func _zatazit(p0: Dictionary) -> Dictionary:
+	if zatazeni <= 0.001:
+		return p0
+	var ob: Dictionary = Pravidla.cti("pocasi", "obloha")
+	var p := p0.duplicate()
+	var z := zatazeni
+	var sd: Array = ob["seda"]
+	var jas := (_jas(p["zenith"]) + _jas(p["horizon"])) / 0.9
+	var seda := Color(float(sd[0]), float(sd[1]), float(sd[2])) * clampf(jas, 0.05, 1.0)
+	p["sun_e"] = float(p["sun_e"]) * (1.0 - float(ob["zatazeni_slunce"]) * z)
+	p["zenith"] = (p["zenith"] as Color).lerp(seda * 0.85, z)
+	p["horizon"] = (p["horizon"] as Color).lerp(seda, z)
+	p["c_lit"] = (p["c_lit"] as Color).lerp(seda * 1.05, z)
+	p["c_dark"] = (p["c_dark"] as Color).lerp(seda * float(ob["tmave_mraky"]), z)
+	p["glow"] = float(p["glow"]) * (1.0 - z)
+	p["tint"] = (p["tint"] as Color).lerp(seda, z)
+	p["mist"] = float(p["mist"]) * lerpf(1.0, float(ob["mlha_nasobek"]), z)
+	p["amb"] = float(p["amb"]) * lerpf(1.0, float(ob["okolni"]), z)
+	return p
+
+
+static func _jas(c: Color) -> float:
+	return c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
+
+
+## pocasi.gd: zmena zatazeni - prepocet hned
+func prekresli() -> void:
+	_apply(state_at(hour) if _t >= 1.0 else _mix(_from, _to, smoothstep(0.0, 1.0, _t)))
+
+
 func _apply(p: Dictionary) -> void:
-	_last = p
+	_last = p                 # bez zatazeni (prechody michaji ciste predvolby)
+	p = _zatazit(p)
+	if zatazeni > 0.001 or _kryti_zmena:
+		var mk: Array = (Pravidla.cti("pocasi", "obloha") as Dictionary)["mraky_kryti"]
+		sky_mat.set_shader_parameter("cloud_cover", lerpf(float(mk[0]), float(mk[1]), zatazeni))
+		_kryti_zmena = zatazeni > 0.001
 	var d := sun_dir(p)
 	# stiny neblikaji (Misa 0.53): smer slunce se meni po skocich 1,5 deg, ne kazdych 0,25 s o kousek - kazda
 	# zmena preklesli mapu stinu (plazeni a blikani hran na moste, stavbach); prechod je pri chuzi nepostrehnutelny

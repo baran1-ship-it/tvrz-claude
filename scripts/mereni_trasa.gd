@@ -111,6 +111,9 @@ func _varianta(zap: bool) -> void:
 			main.kvalita.nastav(zap)
 	elif v.begins_with("3d_"):                 # rozliseni 3D v % soucasneho: roste-li FPS, brzdi vyplnovani pixelu (GPU)
 		get_viewport().scaling_3d_scale = _sc0 * float(v.substr(3)) / 100.0 if zap else _sc0
+	elif v == "dest":                          # 13. 11.: cena deste (pocasi.gd z Pucharta) - plny dest po celou variantu
+		if main.pocasi:
+			main.pocasi.vynuceno = 1.0 if zap else -1.0
 	elif v == "postavy_skryte" or v == "postavy_stoji":   # 13. 11.: rozdeli cenu postav na kresleni (skryte, logika bezi) a logiku (stoji, kresli se)
 		var lx: Node = main.world.get_node_or_null("Lide") if main.world else null
 		if lx:

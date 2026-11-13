@@ -31,6 +31,8 @@ void vertex() {
 	wn = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
 
+uniform float dest_mokro = 0.0;     // dest (pocasi.gd, pravidla/svet/pocasi.json mokro): 0 sucho .. 1 promokle
+uniform vec3 dest_povrch = vec3(0.66, 0.55, 0.22);  // mokre: nasobek barvy, drsnost, odlesk (pocasi.json mokro)
 void fragment() {
 	vec2 uv;
 	vec3 t; vec3 b;
@@ -146,4 +148,5 @@ void fragment() {
 		if (prohodit) { nm = vec3(nm.y, nm.x, nm.z); }
 		NORMAL_MAP = nm * 0.5 + 0.5;
 	}
+	if (dest_mokro > 0.001) { ALBEDO *= mix(1.0, dest_povrch.x, dest_mokro); ROUGHNESS = mix(ROUGHNESS, dest_povrch.y, dest_mokro); SPECULAR = mix(SPECULAR, dest_povrch.z, dest_mokro); }
 }

@@ -126,6 +126,8 @@ vec3 atln(sampler2D t, vec2 uv, int k) {
 	return textureGrad(t, atl_uv(vec2(textureSize(t, 0)), uv, k), dFdx(uv) * 0.5, dFdy(uv) * 0.5).rgb;
 }
 
+uniform float dest_mokro = 0.0;     // dest (pocasi.gd, pravidla/svet/pocasi.json mokro): 0 sucho .. 1 promokle
+uniform vec3 dest_povrch = vec3(0.66, 0.55, 0.22);  // mokre: nasobek barvy, drsnost, odlesk (pocasi.json mokro)
 void fragment() {
 	vec2 p = wp.xz;
 	float n1 = texture(sum, p * 0.03).r;
@@ -552,5 +554,6 @@ void fragment() {
 	nl = nl.b < 0.4 ? vec3(0.5, 0.5, 1.0) : nl;
 	NORMAL_MAP = mix(mix(nh, nt, gm), nl, lm);
 	SPECULAR = (0.5 - 0.35 * sk) * (1.0 - 0.6 * clamp(mokro, 0.0, 1.0));          // skala matna (odlesk oblohy na strmine modrobily)
+	if (dest_mokro > 0.001) { ALBEDO *= mix(1.0, dest_povrch.x, dest_mokro); ROUGHNESS = mix(ROUGHNESS, dest_povrch.y, dest_mokro); SPECULAR = mix(SPECULAR, dest_povrch.z, dest_mokro); }
 }
 

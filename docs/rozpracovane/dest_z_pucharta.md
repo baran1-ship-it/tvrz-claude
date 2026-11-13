@@ -15,3 +15,13 @@ Převzetí do Havrana (na další verzi, PO vydání 0.99999 – změna scripts/
 3. `mokro` do našich shaderů terénu, zdiva a dřeva (jen ty, které už jsou ShaderMaterial; StandardMaterial3D řešit zvlášť).
 4. Měřicí trasa: varianta s vynuceným deštěm (Puchart přidal „les dest“, „hrad dest“) → `docs/mereni_verze.md`.
 5. Test: déšť se v rozvrhu objeví, pod střechou nejsou kapky, snímek s deštěm prohlédnout sám.
+
+## Stav 13. 11. večer (po vydání 0.999994)
+- Hotovo v kódu: `pravidla/svet/pocasi.json` (poznámky jako `_klíč`, čísla odstřiků a přechodů z kódu do dat), `scripts/pocasi.gd`
+  (čte `Pravidla`, den z `daylight.gd`), `shaders/dest.gdshader` (beze změny; předehřátí ho vezme z `res://shaders`),
+  `daylight.gd` `zatazeni` + `_zatazit` + `prekresli` (obloha šedne, `cloud_cover` z `obloha.mraky_kryti`).
+- Zvuky: Havranovy `zvuky/prostredi/dest.ogg` a `dest_strecha.ogg` (CC0, už v seznamu) – venku / pod střechou (paprsek vzhůru
+  jako Puchart; `daylight.interior` = kolik oblohy je vidět, ne střecha → nepoužito).
+- Měřicí trasa: varianta `dest` (vynucený plný déšť); do seznamu variant až při vydání.
+- Test `pocasi`: rozvrh 60 dní (počet dešťů, délka, zatažení předem), závoj venku ano, v hostinci ne.
+- Zbývá: `mokro` do našich shaderů (žádný zatím nemá – krok 3), snímek deště prohlédnout, měření na tabletu (NEOVĚŘENO).
