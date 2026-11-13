@@ -388,7 +388,9 @@
     "kotle",
     "nohavice",
     "skorne",
-    "opasek"
+    "opasek",
+    "zastera",
+    "cepice"
    ],
    "rukav": 0.7,
    "spina": {
@@ -403,6 +405,24 @@
     ],
     "sila": 0.7,
     "_co": "saze (kovar) - 12. 11. snimek: 0,5 na tmavem odevu neviditelne"
+   },
+   "zastera": {
+    "druh": "kuze",
+    "barva": [
+     0.2,
+     0.12,
+     0.07
+    ],
+    "kratsi_m": 0.05,
+    "uhel_st": 60
+   },
+   "cepice": {
+    "druh": "vlna",
+    "barva": [
+     0.14,
+     0.11,
+     0.09
+    ]
    }
   },
   "eye": [
@@ -671,8 +691,17 @@
     "cotte",
     "skorne",
     "opasek",
-    "rouska"
-   ]
+    "rouska",
+    "zastera"
+   ],
+   "zastera": {
+    "druh": "len",
+    "barva": [
+     0.55,
+     0.36,
+     0.14
+    ]
+   }
   },
   "eye": [
    0.3,
@@ -1200,8 +1229,17 @@
     "kotle",
     "nohavice",
     "skorne",
-    "opasek"
-   ]
+    "opasek",
+    "cepice"
+   ],
+   "cepice": {
+    "druh": "vlna",
+    "barva": [
+     0.45,
+     0.36,
+     0.24
+    ]
+   }
   },
   "eye": [
    0.3,
@@ -1269,9 +1307,18 @@
     "kotle",
     "nohavice",
     "skorne",
-    "opasek"
+    "opasek",
+    "cepice"
    ],
-   "rukav": 0.75
+   "rukav": 0.75,
+   "cepice": {
+    "druh": "vlna",
+    "barva": [
+     0.5,
+     0.42,
+     0.3
+    ]
+   }
   },
   "eye": [
    0.3,
@@ -1500,8 +1547,17 @@
     "kotle",
     "nohavice",
     "skorne",
-    "opasek"
-   ]
+    "opasek",
+    "cepice"
+   ],
+   "cepice": {
+    "druh": "vlna",
+    "barva": [
+     0.3,
+     0.32,
+     0.22
+    ]
+   }
   },
   "eye": [
    0.3,
@@ -1571,7 +1627,8 @@
     "nohavice",
     "skorne",
     "opasek",
-    "kape"
+    "kape",
+    "zastera"
    ],
    "kape": true,
    "kape_barva": [
@@ -1590,6 +1647,15 @@
     ],
     "sila": 0.3,
     "_co": "mouka (mlynar) - 12. 11. snimek: 0,55 + rukavy = cely odev bily, sila 0,3 jen predek"
+   },
+   "zastera": {
+    "druh": "len",
+    "barva": [
+     0.84,
+     0.82,
+     0.76
+    ],
+    "kratsi_m": 0.06
    }
   },
   "eye": [
@@ -1661,8 +1727,18 @@
     "kotle",
     "nohavice",
     "skorne",
-    "opasek"
-   ]
+    "opasek",
+    "zastera"
+   ],
+   "zastera": {
+    "druh": "kuze",
+    "barva": [
+     0.26,
+     0.17,
+     0.1
+    ],
+    "kratsi_m": 0.06
+   }
   },
   "eye": [
    0.3,
@@ -1731,8 +1807,27 @@
     "kotle",
     "nohavice",
     "skorne",
-    "opasek"
-   ]
+    "opasek",
+    "zastera",
+    "cepice"
+   ],
+   "zastera": {
+    "druh": "len",
+    "barva": [
+     0.76,
+     0.72,
+     0.62
+    ],
+    "kratsi_m": 0.06
+   },
+   "cepice": {
+    "druh": "vlna",
+    "barva": [
+     0.55,
+     0.2,
+     0.12
+    ]
+   }
   },
   "eye": [
    0.3,
@@ -2135,13 +2230,22 @@
     "cotte",
     "skorne",
     "opasek",
-    "rouska"
+    "rouska",
+    "zastera"
    ],
    "rouska_barva": [
     0.3,
     0.27,
     0.2
-   ]
+   ],
+   "zastera": {
+    "druh": "len",
+    "barva": [
+     0.5,
+     0.3,
+     0.12
+    ]
+   }
   },
   "eye": [
    0.3,
@@ -2208,13 +2312,22 @@
     "cotte",
     "skorne",
     "opasek",
-    "rouska"
+    "rouska",
+    "zastera"
    ],
    "rouska_barva": [
     0.21,
     0.18,
     0.12
-   ]
+   ],
+   "zastera": {
+    "druh": "len",
+    "barva": [
+     0.82,
+     0.78,
+     0.68
+    ]
+   }
   },
   "eye": [
    0.3,
@@ -2286,13 +2399,22 @@
     "cotte",
     "skorne",
     "opasek",
-    "rouska"
+    "rouska",
+    "zastera"
    ],
    "rouska_barva": [
     0.3,
     0.27,
     0.2
-   ]
+   ],
+   "zastera": {
+    "druh": "len",
+    "barva": [
+     0.7,
+     0.66,
+     0.56
+    ]
+   }
   },
   "eye": [
    0.28,
@@ -2434,13 +2556,22 @@
     "cotte",
     "skorne",
     "opasek",
-    "rouska"
+    "rouska",
+    "zastera"
    ],
    "rouska_barva": [
     0.3,
     0.27,
     0.2
-   ]
+   ],
+   "zastera": {
+    "druh": "len",
+    "barva": [
+     0.78,
+     0.72,
+     0.6
+    ]
+   }
   },
   "eye": [
    0.3,
@@ -2985,9 +3116,18 @@
     "kosile",
     "cotte",
     "skorne",
-    "opasek"
+    "opasek",
+    "zastera"
    ],
-   "rouska": false
+   "rouska": false,
+   "zastera": {
+    "druh": "len",
+    "barva": [
+     0.6,
+     0.4,
+     0.16
+    ]
+   }
   },
   "eye": [
    0.25,
@@ -3011,5 +3151,7 @@
   }
  },
  "_spina": "12. 11. (rešerše postavy_vzhled_kcd_reserse.md: KCD maska blata/spiny podle role): kroj.spina = barva (linearni RGB), kde (predek/rukavy/lem/cele), sila - tools/postavy_q/q_export2.py role_weights",
- "_tvar": "12. 11. tvar (q_postava.py, rešerše postavy_vzhled_kcd_reserse.md bod 4: KCD tvář podle postavení a věku): vek 0..1 = vrásky čela, vějíře u očí, nosoretní rýha (odvozeno grey*1,4 - šedivění = věk); kruhy pod očima (ponocný, písař, stráž, staří); opaleni = venkovní práce (sedláci, pastýři, lamači, selky); rumenec = výheň, krčma, kuchyně."
+ "_tvar": "12. 11. tvar (q_postava.py, rešerše postavy_vzhled_kcd_reserse.md bod 4: KCD tvář podle postavení a věku): vek 0..1 = vrásky čela, vějíře u očí, nosoretní rýha (odvozeno grey*1,4 - šedivění = věk); kruhy pod očima (ponocný, písař, stráž, staří); opaleni = venkovní práce (sedláci, pastýři, lamači, selky); rumenec = výheň, krčma, kuchyně.",
+ "_zastera": "13. 11. (reference docs/reference/kcd_13_11): zástěra kroj.zastera {druh len|kuze, barva, kratsi_m nad lemem šatu, uhel_st půlšířka vpředu, od_pasu_m, odsazeni_m} - kovář a hostinský kožená, kuchařka, hostinská, šenkýřka, selky, mlynář lněná",
+ "_cepice": "13. 11. (reference kcd_13_11): čepice kroj.cepice {druh, barva, celo_m nad očima vpředu, tyl_m vzadu, odsazeni_m nad hlavou} - jen bez kápě"
 }

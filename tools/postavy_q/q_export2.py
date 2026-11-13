@@ -118,11 +118,11 @@ print("DILY", {s: tris(o) for s, o in PARTS.items()})
 
 # --- 2) decimace na rozpočet (hlava, oči, vlasy beze změny)
 DEC = {"trup": 0.55, "paze": 0.6, "stehna": 0.55, "lytka": 0.55, "chodidla": 0.6, "ruce": 0.6}
-TGT = {"kosile": 1200, main_k: 2200 if main_k == "kotle" else 2600, "nohavice": 900, "skorne": 700, "opasek": 200, "kape": 1100, "rouska": 1100}
+TGT = {"kosile": 1200, main_k: 2200 if main_k == "kotle" else 2600, "nohavice": 900, "skorne": 700, "opasek": 200, "kape": 1100, "rouska": 1100, "zastera": 500, "cepice": 400}
 if CFG.get("npc"):
     # NPC ≤ 8 000 troj.: hlava, ruce, oči, obočí i oblečení úsporněji
     DEC = {"trup": 0.35, "paze": 0.4, "stehna": 0.35, "lytka": 0.35, "chodidla": 0.4, "ruce": 0.33, "hlava": 0.5, "dekolt": 1.0}
-    TGT = {"kosile": 450, main_k: 1400 if main_k == "kotle" else 1580, "nohavice": 450, "skorne": 380, "opasek": 120, "kape": 600, "rouska": 560}
+    TGT = {"kosile": 450, main_k: 1400 if main_k == "kotle" else 1580, "nohavice": 450, "skorne": 380, "opasek": 120, "kape": 600, "rouska": 560, "zastera": 260, "cepice": 200}
 def decimate(o, ratio, keep_edges=False):
     if ratio >= 0.99: return
     if keep_edges:
@@ -148,7 +148,7 @@ if CFG.get("npc"):
         for h in hairs: decimate(h, 900 / th)
 # vrstvy oděvu po decimaci: spodní pod vrchní (pořadí zevnitř ven), jinak prosvítají fleky
 import clothes as _cl
-VRSTVY = ["nohavice", "kosile", "skorne", main_k, "opasek", "kape", "rouska"]
+VRSTVY = ["nohavice", "kosile", "skorne", main_k, "zastera", "opasek", "kape", "rouska", "cepice"]
 # telo (vc. hlavy pod kapuci) je nejspodnejsi vrstva: po decimaci prorustalo kapuci (oranzove fleky)
 for k_ in VRSTVY:
     if k_ in GAR:
@@ -404,7 +404,9 @@ for k in GAR:
     MATS[k] = {"kosile": ("len", KROJ.get("kosile", [0.78, 0.74, 0.64])), "kotle": ("vlna", KROJ["barva"]), "cotte": ("vlna", KROJ["barva"]),
                "nohavice": ("vlna", KROJ.get("nohavice", [0.24, 0.22, 0.18])), "skorne": ("kuze", KROJ.get("skorne", [0.2, 0.13, 0.08])),
                "opasek": ("kuze", KROJ.get("opasek", [0.16, 0.1, 0.06])), "kape": ("vlna", KROJ.get("kape_barva", [0.3, 0.28, 0.2])),
-               "rouska": ("len", KROJ.get("rouska_barva", [0.86, 0.84, 0.78]))}.get(k, ("vlna", [0.3, 0.3, 0.3]))
+               "rouska": ("len", KROJ.get("rouska_barva", [0.86, 0.84, 0.78])),
+               "cepice": ((KROJ.get("cepice") or {}).get("druh", "vlna"), (KROJ.get("cepice") or {}).get("barva", [0.25, 0.2, 0.15])),
+               "zastera": ((KROJ.get("zastera") or {}).get("druh", "len"), (KROJ.get("zastera") or {}).get("barva", [0.72, 0.62, 0.45]))}.get(k, ("vlna", [0.3, 0.3, 0.3]))
 
 hc, hn, ho, hm = build_atlas(HEAD, "hlava")
 # měkčí tvář: normálová mapa hlavy (vyrýsované svaly Superhero) z poloviny k rovině

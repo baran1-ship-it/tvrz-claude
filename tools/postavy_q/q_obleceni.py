@@ -229,6 +229,29 @@ def build(body, kroj, NAME):
                      N=40, rows=2, ease=0.022, flare=0.0, hang=False)
     cl.transfer_weights(ob, body, co, k=8); cl._link(ob, body)
     K["opasek"] = [ob]; HIDE["opasek"] = []; MAT["opasek"] = ("kuze", kroj.get("opasek", [0.16, 0.1, 0.06]))
+    # --- zástěra (13. 11., reference docs/reference/kcd_13_11: lněná u selek a kuchařky, kožená u kováře): kopie předního
+    # dílu sukně svrchního šatu posunutá ven -> stejné váhy (kosti sukně), jde se sukní vsedě i v chůzi
+    za = kroj.get("zastera")
+    if za:
+        zo = sk.copy(); zo.data = sk.data.copy(); zo.name = f"{NAME}_zastera"; zo.data.name = zo.name
+        bpy.context.collection.objects.link(zo)
+        b2 = bmesh.new(); b2.from_mesh(zo.data); b2.verts.ensure_lookup_table(); b2.normal_update()
+        cx_, cy_ = float(c_[0]), float(c_[1])
+        z_hore = z_hip + 0.03 - float(za.get("od_pasu_m", 0.02))
+        z_dole = z_bot + float(za.get("kratsi_m", 0.12))
+        uh = math.radians(float(za.get("uhel_st", 55)))
+        kill = []
+        for v in b2.verts:
+            a_ = math.atan2(v.co.x - cx_, -(v.co.y - cy_))           # 0 = predek (-y)
+            if abs(a_) > uh or v.co.z > z_hore + 1e-4 or v.co.z < z_dole:
+                kill.append(v)
+        bmesh.ops.delete(b2, geom=kill, context='VERTS')
+        b2.normal_update()
+        for v in b2.verts:
+            v.co += v.normal * float(za.get("odsazeni_m", 0.007))
+        b2.to_mesh(zo.data); b2.free()
+        K["zastera"] = [zo]; HIDE["zastera"] = []
+        MAT["zastera"] = (za.get("druh", "len"), za.get("barva", [0.72, 0.62, 0.45]))
     # --- kápě s límcem (muž, volitelná) / rouška (vdaná žena)
     E_z = bz("Head") + 0.09
     if kroj.get("kape", False) or (female and kroj.get("rouska", True)):
@@ -261,4 +284,13 @@ def build(body, kroj, NAME):
             parts.append(cp)
         kn = "rouska" if female else "kape"
         K[kn] = parts; HIDE[kn] = []; MAT[kn] = ("len" if female else "vlna", kroj.get(kn + "_barva", [0.86, 0.84, 0.78] if female else [0.3, 0.28, 0.2]))
+    # --- čepice (13. 11., reference kcd_13_11: plstěná/vlněná čapka u mužů bez kápě - kovář, sedláci): slupka temene
+    # nad vlasy, vpředu nad čelem, vzadu níž přes týl
+    ce = kroj.get("cepice")
+    if ce and not kroj.get("kape", False):
+        E_z = bz("Head") + 0.09
+        m_ce = (headw > 0.3) & (((y < 0.0) & (z > E_z + float(ce.get("celo_m", 0.035)))) | ((y >= 0.0) & (z > E_z - float(ce.get("tyl_m", 0.04)))))
+        cep = cl.shell(body, co, no, m_ce, float(ce.get("odsazeni_m", 0.022)), f"{NAME}_cepice", smooth=4, smooth_border=3)
+        K["cepice"] = [cep]; HIDE["cepice"] = []
+        MAT["cepice"] = (ce.get("druh", "vlna"), ce.get("barva", [0.25, 0.2, 0.15]))
     return K, HIDE, MAT
