@@ -63,6 +63,10 @@ for m in list(body.modifiers):
     if m.type == 'MASK': body.modifiers.remove(m)
 eyes = bpy.data.objects[f"{NAME}_oci"]; brows = bpy.data.objects[f"{NAME}_oboci"]
 hairs = [o for o in bpy.data.objects if o.type == 'MESH' and "_hair_" in o.name]
+# 13. 11. (snimek chalupnika: ucesem prorustala cepice - vypadala jako obvaz): pod cepici vlasy pryc, vousy zustanou
+if KROJ.get("cepice") and not KROJ.get("kape", False):
+    for h in [h for h in hairs if "beard" not in h.name.lower() and "moustache" not in h.name.lower()]:
+        hairs.remove(h); bpy.data.objects.remove(h)
 GAR = {}   # kus -> objekty
 import importlib; sys.path.insert(0, _HERE)
 KUS_OF = {"kosile": "kosile", "svrchni_h": None, "svrchni_d": None, "nohavice": "nohavice", "skorne": "skorne", "opasek": "opasek",
@@ -149,6 +153,9 @@ if CFG.get("npc"):
 # vrstvy oděvu po decimaci: spodní pod vrchní (pořadí zevnitř ven), jinak prosvítají fleky
 import clothes as _cl
 VRSTVY = ["nohavice", "kosile", "skorne", main_k, "zastera", "opasek", "kape", "rouska", "cepice"]
+# zastera obleceni vzdy (vychozi) -> plochy sukne trvale pod ni pryc (jinak prorusta v klinu vsede)
+if "zastera" in GAR and "zastera" in KROJ.get("vychozi", list(GAR)):
+    print("SKRYTO pod zasterou", _cl.skryj_pod([o for o in GAR[main_k] if o.name.endswith("_svrchni_d")], GAR["zastera"]))
 # telo (vc. hlavy pod kapuci) je nejspodnejsi vrstva: po decimaci prorustalo kapuci (oranzove fleky)
 for k_ in VRSTVY:
     if k_ in GAR:

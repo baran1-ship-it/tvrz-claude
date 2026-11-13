@@ -245,6 +245,41 @@ def pod_vrstvou(dolni, horni, mezera, dosah=0.03):
         o.data.update()
     return n
 
+def skryj_pod(dolni, horni, dosah=0.03, okraj=0.03):
+    """13. 11. (snimek kucharky vsede: hrubsi sit sukne v prohnutem klinu prorustala zasterou - tmave diry): plochy
+    spodnich vrstev trvale schovane pod vrchni (vsechny vrcholy do dosah od vrchni plochy a aspon okraj od jejiho
+    okraje) se odstrani - jako skryvani tela pod obleceni. Jen pro vrchni kus, ktery je obleceny vzdy. Vraci pocet ploch."""
+    from mathutils.bvhtree import BVHTree
+    hb = []; okr = []
+    for o in horni:
+        mw = o.matrix_world
+        hb.append(BVHTree.FromPolygons([mw @ v.co for v in o.data.vertices], [p.vertices[:] for p in o.data.polygons]))
+        b2 = bmesh.new(); b2.from_mesh(o.data)
+        okr += [mw @ v.co for v in b2.verts if v.is_boundary]; b2.free()
+    kd = kdtree.KDTree(max(1, len(okr)))
+    for i, c in enumerate(okr): kd.insert(c, i)
+    kd.balance()
+    n = 0
+    for o in dolni:
+        mw = o.matrix_world
+        pod = []
+        for v in o.data.vertices:
+            w = mw @ v.co
+            ok = False
+            for t in hb:
+                loc, nor, i, d = t.find_nearest(w)
+                if loc is not None and d < dosah:
+                    ok = True
+            if ok and okr:
+                ok = kd.find(w)[2] > okraj
+            pod.append(ok)
+        b2 = bmesh.new(); b2.from_mesh(o.data)
+        kill = [f for f in b2.faces if all(pod[v.index] for v in f.verts)]
+        bmesh.ops.delete(b2, geom=kill, context='FACES')
+        b2.to_mesh(o.data); b2.free(); o.data.update()
+        n += len(kill)
+    return n
+
 def hide_body_under(obj, mask, name="skryto"):
     """Plochy těla schované pod oblečením odstranit (aby nepropichovaly) – přes masku vertex group."""
     g = obj.vertex_groups.get(name) or obj.vertex_groups.new(name=name)
