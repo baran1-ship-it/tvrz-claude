@@ -104,7 +104,7 @@ void fragment() {
 	ROUGHNESS = mix(texture(kamen_r, uk).r, texture(omitka_r, uo).r, pm);
 	SPECULAR = 0.3;
 	AO = mix(mix(0.35, 1.0, smoothstep(0.0, 0.45, h)), 1.0, pm * 0.7);
-	AO_LIGHT_AFFECT = 0.6;
+	AO_LIGHT_AFFECT = 0.0;   // 13. 11. (Puchart 79e7cba8): prime svetlo (louce, okna) netlumit zapecenym stinenim
 	vec3 nk = texture(kamen_n, uk).rgb * 2.0 - 1.0;
 	vec3 no = texture(omitka_n, uo).rgb * 2.0 - 1.0;
 	vec3 tn = normalize(mix(nk * vec3(1.4, 1.4, 1.0), no * vec3(0.6, 0.6, 1.0), pm));

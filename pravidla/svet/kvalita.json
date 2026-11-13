@@ -200,5 +200,7 @@
   "popis": "Sdilene textury predmetu (tools/textury_predmetu.py, Misa 10. 11. zasek 0,5-1,9 s pri prvnim zobrazeni noveho predmetu): obrazky vlozene v modely/predmety/*.glb se vyjmou, ulozi JEDNOU podle md5 (a role: normalova mapa zvlast) do slozky a v glb zustane jen uri. Stejna cesta res:// = jeden zdroj, jeden import, jedna textura v graficke pameti pro vsechny modely (drive 268 MB vlozenych obrazku, z toho jen 139 MB unikatnich; Godot rozbalil kazdou kopii zvlast jako <id>_Image_N). mez_px = nejvetsi strana ulozene textury (vetsi se zmensi); size_limit_importu = strop textury v graficke pameti (shodne s tools/limity_textur.py). Balik: vydani.py skupina tex_predmety, v p_<id> baliku vyloucena."
  },
  "snimky_vychozi_mobil": 1,
- "_snimky_13_11": "Misa 13. 11. (Puchart: pevnych 30 FPS, p95 36 ms, jede plynule; Havran volne 20-45 FPS = nerovnomerne snimky): na tabletu vychozi volba Snimky = pevnych 30 (main.snimky_i 1); hrac ji muze v Nastaveni zmenit, ulozena volba ma prednost"
+ "_snimky_13_11": "Misa 13. 11. (Puchart: pevnych 30 FPS, p95 36 ms, jede plynule; Havran volne 20-45 FPS = nerovnomerne snimky): na tabletu vychozi volba Snimky = pevnych 30 (main.snimky_i 1); hrac ji muze v Nastaveni zmenit, ulozena volba ma prednost",
+ "obloha_prah": 0.004,
+ "_obloha_prah": "13. 11.: parametry oblohy (barvy, záře, hvězdy, mraky) se přenastaví jen při změně větší než prah - každá změna = přepočet radiance mapy (tools/mereni_oblohy.gd PC: změna každý snímek 24 ms proti 7 ms); daylight je měnil každých 0,25 s. Puchart (bez sekání) totéž s prahem 0,004"
 }

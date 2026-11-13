@@ -1,4 +1,5 @@
 extends Node
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Slunce, obloha, mlha a denni doba.
 
 signal time_changed(key: String, night: bool)
@@ -264,6 +265,26 @@ static func _jas(c: Color) -> float:
 	return c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
 
 
+var _obloha_posl: Dictionary = {}
+
+
+func _obloha_zmena(nove: Dictionary) -> bool:
+	if _obloha_posl.is_empty():
+		return true
+	var prah := float(Pravidla.cti("kvalita", "obloha_prah"))
+	for k: String in nove:
+		var a: Variant = nove[k]
+		var b: Variant = _obloha_posl[k]
+		if a is Color:
+			var ca: Color = a
+			var cb: Color = b
+			if maxf(maxf(absf(ca.r - cb.r), absf(ca.g - cb.g)), absf(ca.b - cb.b)) > prah:
+				return true
+		elif absf(float(a) - float(b)) > prah:
+			return true
+	return false
+
+
 ## pocasi.gd: zmena zatazeni - prepocet hned
 func prekresli() -> void:
 	_apply(state_at(hour) if _t >= 1.0 else _mix(_from, _to, smoothstep(0.0, 1.0, _t)))
@@ -284,16 +305,16 @@ func _apply(p: Dictionary) -> void:
 		sun.look_at_from_position(d * 100.0, Vector3.ZERO, Vector3.UP)
 	sun.light_color = p["sun"]
 	sun.light_energy = p["sun_e"] * sun_k
-	sky_mat.set_shader_parameter("zenith", p["zenith"])
-	sky_mat.set_shader_parameter("horizon", p["horizon"])
-	sky_mat.set_shader_parameter("sun_tint", p["tint"])
-	sky_mat.set_shader_parameter("sun_glow", p["glow"])
-	sky_mat.set_shader_parameter("cloud_lit", p["c_lit"])
-	sky_mat.set_shader_parameter("cloud_dark", p["c_dark"])
-	sky_mat.set_shader_parameter("stars", p["stars"])
-	sky_mat.set_shader_parameter("energy", p["sky_e"])
+	# 13. 11. (mereni_oblohy.gd: zmena parametru oblohy = prepocet radiance mapy, PC 24 ms proti 7 ms): obloha jen pri
+	# znatelne zmene (kvalita.json obloha_prah), ne kazdych 0,25 s
 	var hz: Color = p["horizon"]
-	sky_mat.set_shader_parameter("ground", Color(hz.r * 0.32, hz.g * 0.31, hz.b * 0.3))
+	var nove := {"zenith": p["zenith"], "horizon": hz, "sun_tint": p["tint"], "sun_glow": float(p["glow"]),
+			"cloud_lit": p["c_lit"], "cloud_dark": p["c_dark"], "stars": float(p["stars"]), "energy": float(p["sky_e"]),
+			"ground": Color(hz.r * 0.32, hz.g * 0.31, hz.b * 0.3)}
+	if _obloha_zmena(nove):
+		for k: String in nove:
+			sky_mat.set_shader_parameter(k, nove[k])
+		_obloha_posl = nove
 	amb_base = p["amb"]
 	_amb()
 	_fog_zakl = [p["fog"], float(p["fog_d"])]

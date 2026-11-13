@@ -998,9 +998,8 @@ func material(name: String) -> Material:
 			s2.set_shader_parameter("svet", String(d["coord"]) == "world")
 			s2.set_shader_parameter("tint", _v3(d["tint"]))
 			s2.set_shader_parameter("sedost", float(d.get("grey", 0.0)))
-			if base == "deska_stodola":
-				# Misa 0.83: stodola temer cerna - zvetrala prkna sedohneda (KCD2), svetlejsi
-				s2.set_shader_parameter("tint", _v3(d["tint"]) * 1.7)
+			# 13. 11. (Misa: vsechno drevo cerne, ma byt hnede osoupane): barva dreva v datech (blender/lib.py mat_tex),
+			# vyjimka stodoly (tint x 1,7, Misa 0.83) zrusena - stodola ma hnedy ton primo v zaznamu
 			if d.has("tint2"):
 				s2.set_shader_parameter("tint2", _v3(d["tint2"]))
 				s2.set_shader_parameter("pestrost", 1.0)
@@ -3388,6 +3387,21 @@ func pod_strechou_tvrze(x: float, z: float) -> bool:
 	var i := int((x - TK_R.position.x) * 2.0)
 	var j := int((z - TK_R.position.y) * 2.0)
 	return kryti_tvrz[j * int(TK_R.size.x * 2.0) + i] == 1
+
+
+## Bod pod strechou (dest pocasi.gd 13. 11.: strechy nemaji kolize, paprsek vzhuru v hostinci nenarazi): kryti tvrze,
+## pudorys staveb (_uvnitr, bez dilu mlyna) a domy vsi (v_dome).
+func pod_strechou(p: Vector3) -> bool:
+	if pod_strechou_tvrze(p.x, p.z) or v_dome(p) >= 0:
+		return true
+	for st: Array in _uvnitr:
+		if st.size() > 2:
+			continue
+		var q: Vector3 = (st[0] as Transform3D) * Vector3(p.x, 0.0, p.z)
+		var b: AABB = st[1]
+		if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
+			return true
+	return false
 
 
 func kolize_rozdel() -> void:

@@ -14,12 +14,27 @@ func _initialize() -> void:
 
 func _prumer(n: int, postavy: Array, anim: bool) -> float:
 	var t0 := Time.get_ticks_usec()
+	_proc = 0.0
 	for _i in n:
 		if anim:
 			for c: Dictionary in postavy:
 				(c["ap"] as AnimationPlayer).advance(1.0 / 30.0)
 		await process_frame
+		_proc += Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
+	_proc /= n
 	return float(Time.get_ticks_usec() - t0) / n / 1000.0
+
+
+var _proc := 0.0
+
+
+## 13. 11. (trasa 0.999994: postavy stoji -9..-12 ms, skryte nic; jednotlive vypinace nic): vsechny modifikatory kostry
+## postavy (LookAt hlavy, nohy IK, uchop, ridic sukne, pruzina sukne) zapnout / vypnout
+func _modif(postavy: Array, zap: bool, jen := "") -> void:
+	for c: Dictionary in postavy:
+		for m: Node in (c["kostra"] as Skeleton3D).get_children():
+			if m is SkeletonModifier3D:
+				(m as SkeletonModifier3D).active = zap or (jen != "" and String(m.name) == jen)
 
 
 func _beh() -> void:
@@ -65,12 +80,24 @@ func _beh() -> void:
 		await process_frame
 	var vysl := {}
 	for kolo in 2:
-		for rez in ["animovane", "zastavene", "staticke", "skryte"]:
+		var rezimy: Array = ["animovane", "zastavene", "anim_bez_modif", "kostry_stoji", "staticke", "skryte"]
+		for c0: Dictionary in postavy:
+			for m: Node in (c0["kostra"] as Skeleton3D).get_children():
+				if m is SkeletonModifier3D and not rezimy.has("anim+" + String(m.name)):
+					rezimy.append("anim+" + String(m.name))
+		for rez: String in rezimy:
 			for c: Dictionary in postavy:
-				(c["uzel"] as Node3D).visible = rez in ["animovane", "zastavene"]
+				(c["uzel"] as Node3D).visible = rez in ["animovane", "zastavene", "anim_bez_modif", "kostry_stoji"] or rez.begins_with("anim+")
 			stat.visible = rez == "staticke"
+			_modif(postavy, rez in ["animovane", "zastavene"], rez.trim_prefix("anim+") if rez.begins_with("anim+") else "")
 			await process_frame
-			var ms: float = await _prumer(90, postavy, rez == "animovane")
-			vysl[rez] = minf(float(vysl.get(rez, INF)), ms)
-	print("MERENI_POSTAV n=%d: %s (ms/snimek, mensi ze 2 kol; llvmpipe - jen pomer)" % [n, str(vysl)])
+			var ms: float = await _prumer(90, postavy, rez in ["animovane", "anim_bez_modif"] or rez.begins_with("anim+"))
+			var a: Array = vysl.get(rez, [INF, INF])
+			vysl[rez] = [minf(a[0], snappedf(ms, 0.01)), minf(a[1], snappedf(_proc, 0.01))]
+	var nm := 0
+	for m: Node in (postavy[0]["kostra"] as Skeleton3D).get_children():
+		nm += 1 if m is SkeletonModifier3D else 0
+	print("MERENI_POSTAV modifikatory %s" % str((postavy[0]["kostra"] as Skeleton3D).get_children().filter(func(x: Node) -> bool: return x is SkeletonModifier3D).map(func(x: Node) -> String: return "%s(%s)" % [x.name, x.get_class()])))
+	print("MERENI_POSTAV modifikatoru na postave %d, kosti %d" % [nm, (postavy[0]["kostra"] as Skeleton3D).get_bone_count()])
+	print("MERENI_POSTAV n=%d: %s ([ms/snimek, proces ms], mensi ze 2 kol; llvmpipe - jen pomer)" % [n, str(vysl)])
 	quit()

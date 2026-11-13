@@ -1,4 +1,5 @@
 extends Node3D
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Pocasi - dest (prevzato z Pucharta 13. 11., commit 6d4c1b0e; Misa: „u Pucharta je pripravena zmena pocasi, vem si ji i
 ## pro Havrana“). Cisla v pravidla/svet/pocasi.json. Rozvrh deterministicky podle cisla dne (daylight day_n, hour) - stejny
 ## po nahrani hry, nic se neuklada: zatahovani (obloha sedne) -> mrholeni -> vrchol -> dozniva -> osychani (mokro).
@@ -196,7 +197,8 @@ func _krok(dt: float) -> void:
 	if _t_paprsek <= 0.0 and (sila > 0.001 or mokro > 0.001):
 		_t_paprsek = float(P["strecha_kontrola_s"])
 		var q := PhysicsRayQueryParameters3D.create(cam.global_position, cam.global_position + Vector3.UP * float(P["strecha_m"]))
-		_uvnitr_cil = 0.0 if get_world_3d().direct_space_state.intersect_ray(q).is_empty() else 1.0
+		var sv: Object = main.get("svet")
+		_uvnitr_cil = 0.0 if get_world_3d().direct_space_state.intersect_ray(q).is_empty() and not (sv and sv.pod_strechou(cam.global_position)) else 1.0
 	_uvnitr = move_toward(_uvnitr, _uvnitr_cil, dt / float(P["prechod_uvnitr_s"]))
 	var venku := sila * (1.0 - _uvnitr)
 	var p := cam.global_position

@@ -138,7 +138,7 @@ void fragment() {
 	}
 	ALBEDO = c;
 	AO = mix(0.4, 1.0, smoothstep(0.0, 0.45, hgt));
-	AO_LIGHT_AFFECT = 0.5;
+	AO_LIGHT_AFFECT = 0.0;   // 13. 11. (Misa: drevo cerne; Puchart 79e7cba8): zapecene stineni jen na okolni svetlo, louce a okna netlumi
 	ROUGHNESS = mix(texture(tex_r, uv).r, texture(tex_r, uv2).r, atm);
 	SPECULAR = 0.35;
 	vec3 nm = mix(texture(tex_n, uv).rgb, texture(tex_n, uv2).rgb, atm) * 2.0 - 1.0;

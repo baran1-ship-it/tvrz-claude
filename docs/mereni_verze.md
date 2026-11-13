@@ -343,3 +343,23 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
 - **PC A/B 13. 11. (tools/mereni_postav.gd, 20 postav, llvmpipe):** nové modely 72/59/54 ms (animované/zastavené/statické),
   staré z 0.99998 75/63/56 ms → **nové modely VYVRÁCENY** jako příčina (aspoň na PC). Skinování ~10 % kreslení postavy.
   Další izolace na tabletu: varianty postavy_skryte / postavy_stoji. Pevných 30 FPS (výchozí) skryje cenu, dokud snímek < 33 ms.
+
+### 0.999994 – vydáno 13. 11. 20:44 (sukně ve stehnech, kuchařky, trhání u stromu)
+- **Měřeno 13. 11. 21:29 (Míša, tablet, 3D 75 %, bez omezení 30 FPS – p50 až 17 ms = 60 FPS).** p50 vše / bez postav /
+  post. skryté / post. stojí / vše znovu: tvrz-cesta 26/30/29/17/30, louka 27/29/32/17/26, les 32/25/26/18/26, skály 33/25/30/17/26,
+  ves 27/22/28/17/22, mlýn 32/20/25/17/20, ves-vjezd 29/33/31/17/36, ves-dvory 29/31/37/20/32, hostinec 27/27/30/17/24, věž 26/22/24/19/27.
+- **Naměřený vliv (dosud nejsilnější):** „post. stojí“ (Lide zastavené, postavy vidět) = 17 ms skoro všude, sousední varianty
+  (skryté, vše znovu) 20–37 ms → **cena postav je výpočet podstromu postav (~9–12 ms), ne kreslení** („skryté“ ≈ vše).
+  Skripty (skr) jen 3–6 ms → většina mimo měřené skripty. Podezření: přepočet kostry (Skeleton3D + skin) se spustí, když
+  kostrou hne cokoli – animace, LookAt hlavy, nohy IK, úchop, řidič sukně, **pružina sukně (SpringBoneSimulator3D – vypínač
+  „modifikatory“ ji nezahrnoval)**; proto jednotlivé vypínače dřív nic neukázaly. Izolace: tools/mereni_postav.gd režimy
+  anim_bez_modif / kostry_stoji (PC) → pak varianta trasy.
+- „Bez postav“ (2. v pořadí) jen −2..−5 ms, méně než „stojí“ – nesedí (mělo by být ≤); teplo/pořadí (FPS z 60 na ~40 od 1033 s
+  v záznamu panelu) – šum pořadí NEOVĚŘENO.
+- Špička **2230 ms ve vsi (439, 802), vše znovu:** fyzika 243 ms, skripty 6, proces 2209 ms → mimo skripty i krok fyziky;
+  podezření: synchronní načtení / stavba kolizní sítě při přiblížení (predmety kolize glb, load v hlavním vlákně) – NEOVĚŘENO.
+- Hostinec 226–266 ms (bez postav, skryté) – přepnutí interiéru (dříve predmety 96 ms) – NEOVĚŘENO.
+- **Obloha (PC, tools/mereni_oblohy.gd):** změna parametrů oblohy každý snímek 24 ms proti 7 ms (radiance QUALITY 128);
+  daylight je měnil každých 0,25 s → opraveno prahem (kvalita.json obloha_prah 0,004, jako Puchart). Vliv na tabletu NEOVĚŘENO.
+- **Les (PC, tools/mereni_prvni.sh, studená keš):** po předehřátí v lese (-85, 214) jen 2 programy (41 ms) → zásek 1,8 s v lese
+  sestavením shaderů NEVYSVĚTLEN (hypotéza odložena).

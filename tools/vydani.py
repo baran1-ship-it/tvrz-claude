@@ -38,6 +38,17 @@ if True:
     # predpeceny z tohoto exportu - balik je kompatibilni sada s jednim otiskem
     if subprocess.run([sys.executable, "tools/otisk_exportu.py", "over"]).returncode != 0:
         sys.exit("CHYBA: otisk exportu nesedi (tools/otisk_exportu.py over) - nevydavat")
+# 13. 11. (fleky kuze na muzich 0.999993-4): Godot u scen hlida jen md5 textu .gltf, ne .bin a textury - import site
+# zustal stary (stara UV + novy atlas). Kazdy .gltf, jehoz .bin je novejsi nez importovana scena = stary import, nevydavat.
+import glob as _glob
+_stare = []
+for _g in _glob.glob("modely/**/*.gltf", recursive=True):
+    _scn = _glob.glob(".godot/imported/%s-*.scn" % os.path.basename(_g))
+    _bin = _g[:-5] + ".bin"
+    if _scn and os.path.exists(_bin) and os.path.getmtime(_bin) > max(os.path.getmtime(s) for s in _scn) + 1:
+        _stare.append(_g)
+if _stare:
+    sys.exit("CHYBA: stary import sceny (.bin novejsi nez import) - smazat .godot/imported/<jmeno>.gltf-*.md5 a godot --import: %s" % _stare[:10])
 # kazda chyba od cloveka = kontrola v testu (CLAUDE.md, Misa 28. 10. „at nelepime diry“): radek tabulky chyb
 # (docs/rozpracovane/*chyby*.md), ktery je opraveny, musi mit vyplneny sloupec kontroly - jinak se nevydava
 # matice vztahu (pravidla/svet/vztahy.json): kazda dvojice druhu hlidana testem, povoleni jen ze zaznamu

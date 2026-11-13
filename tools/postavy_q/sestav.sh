@@ -36,5 +36,9 @@ for f in sorted(glob.glob(f"{R}/modely/postavy/npc/*_sada.json")):
 json.dump(d, open(p, "w"), indent=1, ensure_ascii=False)
 print("troj", d["troj"])
 PY
+# 13. 11. (fleky kuze na muzich 0.999993-4): Godot hlida u scen jen md5 textu .gltf, ne .bin - pri stejnem poctu
+# trojuhelniku je .gltf do bajtu stejny a import zustal stary (stara UV + novy atlas = barva kuze na latce). Po stavbe
+# smazat zaznam importu prestavenych postav -> dalsi godot --import je importuje znovu (kontrola: tools/vydani.py)
+for n in $SADY; do rm -f "$R"/.godot/imported/${n}_cela.gltf-*.md5; done
 [ -n "${Q_NECHAT_ZDROJE:-}" ] || rm -rf "${W:?}/src"      # zdroje se pri dalsim behu znovu rozbali z vetve assets
 echo HOTOVO
