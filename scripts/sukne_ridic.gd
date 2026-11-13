@@ -16,7 +16,7 @@ var _pel_y0 := 0.0
 
 
 func priprav(sk: Skeleton3D) -> void:
-	for n: String in ["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r", "foot_l", "foot_r"]:
+	for n: String in ["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r", "foot_l", "foot_r", "lowerarm_l", "lowerarm_r", "hand_l", "hand_r", "middle_01_l", "middle_01_r"]:
 		_b[n] = sk.find_bone(n)
 	var pel := sk.get_bone_global_rest(_b["pelvis"]).origin
 	_pel_y0 = pel.y
@@ -160,6 +160,11 @@ func _process_modification() -> void:
 		# vytlaceni z kapsli obou nohou (CRYENGINE PRow; 12. 11. test_sukne: zkrizene nohy a klek - prumer drah
 		# dvou nohou padl do druhe nohy)
 		var kapsle: Array = []
+		# ruce (13. 11. Misa: vsede ruce zapadly do zastery) - latka pod dlani; nohy az po nich (vyhrava noha)
+		for s: String in ["l", "r"]:
+			if int(_b.get("hand_" + s, -1)) >= 0:
+				kapsle.append([P["lowerarm_" + s], P["hand_" + s], float(D.get("polomer_predlokti_m", 0.035))])
+				kapsle.append([P["hand_" + s], P["middle_01_" + s], float(D.get("polomer_dlane_m", 0.03))])
 		for s: String in ["l", "r"]:
 			kapsle.append([P["thigh_" + s], P["calf_" + s], r_s + tl])
 			kapsle.append([P["calf_" + s], P["foot_" + s], r_h + tl])

@@ -65,7 +65,7 @@ func _beh() -> void:
 			for j: String in jm:
 				_kost(kostra, j)
 			i0 += 1
-		for jm: String in ["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r"]:
+		for jm: String in ["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r", "hand_l", "hand_r", "middle_01_l", "middle_01_r"]:
 			_kost(kostra, jm)
 		for kl: String in klipy:
 			if not ap.has_animation(kl):
@@ -118,6 +118,21 @@ func _beh() -> void:
 						if d < r_s and t > 0.15:
 							chyb += 1
 							print("SUKNE CHYBA %s %s retez %d bod %d: %.3f m od osy stehna %s (latka ve stehne)" % [o["id"], kl, i, j + 1, d, s])
+			# Misa 13. 11. (snimek zastery vsede: ruce zapadly do zastery/sukne): dlan nad latkou v klinu
+			var hor_ruka := -1.0
+			for s: String in ["l", "r"]:
+				var dl_ := (_kost(kostra, "hand_" + s) + _kost(kostra, "middle_01_" + s)) * 0.5
+				for i in ret.size():
+					var jm: Array = ret[i][0]
+					for j in range(1, jm.size()):
+						var p := _kost(kostra, jm[j])
+						var dh := Vector2(p.x - dl_.x, p.z - dl_.z).length()
+						if dh < 0.06 and p.y > dl_.y + tol:
+							chyb += 1
+							print("SUKNE CHYBA %s %s retez %d bod %d: latka %.3f m nad dlani %s (ruka v latce)" % [o["id"], kl, i, j, p.y - dl_.y, s])
+						if dh < 0.06:
+							hor_ruka = maxf(hor_ruka, p.y - dl_.y)
+			print("SUKNE %s %s: latka nad dlani %.3f m" % [o["id"], kl, hor_ruka])
 			print("SUKNE %s %s: nejvic za kolenem %.3f m, nejbliz ose stehna %.3f m" % [o["id"], kl, horsi_pk, horsi_st])
 		u.queue_free()
 	print("TEST SUKNE %s (%d chyb, modelu %d)" % ["OK" if chyb == 0 else "CHYBA", chyb, videne.size()])
