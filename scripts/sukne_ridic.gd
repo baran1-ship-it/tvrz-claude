@@ -14,6 +14,8 @@ var _b := {}
 var _diag := 0
 var _pel_y0 := 0.0
 var _ruce := false
+var _svih := {}
+var _klid_osa := {}
 
 
 func priprav(sk: Skeleton3D) -> void:
@@ -28,6 +30,8 @@ func priprav(sk: Skeleton3D) -> void:
 	for n: String in ["lowerarm_l", "lowerarm_r", "hand_l", "hand_r", "middle_01_l", "middle_01_r"]:
 		if int(_b[n]) < 0:
 			_ruce = false
+	for s: String in ["l", "r"]:
+		_klid_osa[s] = (sk.get_bone_global_rest(_b["calf_" + s]).origin - sk.get_bone_global_rest(_b["thigh_" + s]).origin).normalized()
 	var pel := sk.get_bone_global_rest(_b["pelvis"]).origin
 	_pel_y0 = pel.y
 	var lx := signf(sk.get_bone_global_rest(_b["thigh_l"]).origin.x - pel.x)
@@ -88,6 +92,10 @@ func _process_modification() -> void:
 	for n: String in _b:
 		if int(_b[n]) >= 0:
 			P[n] = sk.get_bone_global_pose(int(_b[n])).origin
+	# svih stehen proti klidove poze (jen natoceni osy stehna, bez zkrutu)
+	for s: String in ["l", "r"]:
+		var t1: Vector3 = (P["calf_" + s] as Vector3) - (P["thigh_" + s] as Vector3)
+		_svih[s] = Quaternion(_klid_osa[s], t1.normalized()) if t1.length_squared() > 1e-8 else Quaternion.IDENTITY
 	# ohnuti stehen (uhel stehna od svisle dolu): prolnuti s pozou animace
 	var ohyb := 0.0
 	for s: String in ["l", "r"]:
@@ -115,6 +123,21 @@ func _process_modification() -> void:
 			anim.append(sk.get_bone_global_pose(kosti[k]).origin)
 		var gl := sk.get_bone_global_pose(kosti[kosti.size() - 1])
 		anim.append(gl.origin + gl.basis.y.normalized() * float(delky[delky.size() - 1]))
+		# 13. 11. (Misa: noha vylezla z kabatce pri chuzi; rešerše docs/rozpracovane/obleceni_noha_reserse.md - QualiArts,
+		# Kawaii Sync Bone, CRYENGINE): predni a bocni retezy jdou podilem svihu stehna (bez zkrutu) kolem kycle
+		var pod := float(D.get("noha_podil", 0.45))
+		if pod > 0.0 and (wl > 0.0 or wr > 0.0):
+			for k in range(1, anim.size()):
+				var p0: Vector3 = anim[k]
+				var posun := Vector3.ZERO
+				for s: String in ["l", "r"]:
+					var ws := wl if s == "l" else wr
+					if ws <= 0.0:
+						continue
+					var q: Quaternion = _svih[s]
+					var hip: Vector3 = P["thigh_" + s]
+					posun += ((hip + Quaternion.IDENTITY.slerp(q, clampf(pod * ws, 0.0, 1.0)) * (p0 - hip)) - p0)
+				anim[k] = p0 + posun
 		var drahy: Array = []
 		# smer odsunu od nohy: ven od panve na strane retezu a nahoru (vsede latka na stehne, pri kleku pred stehnem)
 		var ven0 := koren - (P["pelvis"] as Vector3)

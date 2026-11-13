@@ -6669,6 +6669,14 @@
   "test_stehno_podil": 0.7,
   "pokles_od_m": 0.12,
   "pokles_do_m": 0.3,
-  "_klek12": "12. 11. test_sukne: bocni retezy s vahou 0,6 zustaly napul ve stehne -> ridic_bok 1; klek (stehno svisle) -> vaha i podle poklesu panve pokles_od..do_m"
+  "_klek12": "12. 11. test_sukne: bocni retezy s vahou 0,6 zustaly napul ve stehne -> ridic_bok 1; klek (stehno svisle) -> vaha i podle poklesu panve pokles_od..do_m",
+  "noha_podil": 0.45,
+  "test_latka_klipy": [
+   "Walk_Loop",
+   "Idle_Loop"
+  ],
+  "test_latka_podil": 0.8,
+  "test_latka_vrcholu": 3,
+  "_noha13": "13. 11. (Misa: noha z obleceni; rešerše obleceni_noha_reserse.md): predni/bocni retezy jdou noha_podil svihu stehna (Kawaii 0,3-0,5, NEOVERENO pro nas); test latka ve stehne z vrcholu (CPU skinning) v chuzi a stani"
  }
 }

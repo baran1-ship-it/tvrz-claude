@@ -42,6 +42,7 @@ def _ss(t):
     t = np.clip(t, 0, 1); return t * t * (3 - 2 * t)
 
 SUK_N = 8          # retezu kosti sukne po obvodu (rešerše docs/rozpracovane/obleceni_reserse.md: sukne na panev + pruzne kosti)
+SUK_PASEK = 0.08   # podil delky sukne od pasu na panvi (pasek); 13. 11. z 0,25
 SUK_K = 3          # kosti v retezu (shora dolu); 13. 11. zkouska 5 kosti nepomohla prehybu zastery a zhorsila test_sukne (149 x 60) - zpet 3
 
 
@@ -96,7 +97,7 @@ def _skirt_bones(ob, arm, z_top, z_bot):
     t = np.clip((z_top - Pw[:, 2]) / max(z_top - z_bot, 1e-3), 0.0, 1.0)
     fa = ((ang + math.pi) / (2 * math.pi) * SUK_N - 0.5) % SUK_N
     for vi in range(len(Pw)):
-        w_pel = 1.0 - _ss(t[vi] / 0.25)                      # horni ctvrtina z panve do kosti
+        w_pel = 1.0 - _ss(t[vi] / SUK_PASEK)                 # 13. 11.: panev jen pasek (rešerše obleceni_noha_reserse.md: horni pas vpredu jde se stehnem, ne s panvi; driv ctvrtina)
         i0 = int(math.floor(fa[vi])) % SUK_N
         i1 = (i0 + 1) % SUK_N
         u = fa[vi] - math.floor(fa[vi])
