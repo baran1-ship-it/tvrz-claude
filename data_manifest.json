@@ -1,5 +1,5 @@
 {
- "verze": "0.99999",
+ "verze": "0.999991",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -4349,7 +4349,7 @@
  "otisk_vstupu": "f7378cad59dbfea51ffcfd01d3bc049b",
  "otisk_sady": "022e2cf0a72022fca095bea3504501b7",
  "testovaci": [
-  "POKRYTI_MATICE 44/114 (39 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, voda|voda, voda|cesta, voda|strom",
-  "USPESNOST_MATICE 32/44 (73 %); s chybou: teren|predmet, budova|predmet, plot|predmet, predmet|predmet, cesta|kun, cesta|postava, budova|postava, kamen|lod, predmet|postava, predmet|lod, posun|lod, postava|postava"
+  "POKRYTI_MATICE 0/114 (0 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, teren|predmet, voda|voda, voda|cesta",
+  "USPESNOST_MATICE 0/0 (0 %)"
  ]
 }
