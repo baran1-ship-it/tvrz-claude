@@ -320,3 +320,14 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
   dokonce +80–100 kreslení – NEOVĚŘENO proč). Postavy dál +8–11 ms p50, skripty jen +1–2 ms, kreslení stejné.
 - Zbývající podezření: animace a přepočet kostry (+24 kostí sukně na postavu, ec42097f) a plná animace jdoucích postav
   v záběru do 45 m (fe4e4039). Izolace v dalším sestavení: varianty bez_animace a chuze_lod.
+
+### 0.999992 – vydáno 13. 11. 15:28 (postavy bez prosvítání, atlas jen viditelné části)
+- **Měřeno 13. 11. 17:16 (Míša, tablet, 3D 75 %, Game Turbo „Výkon“).** p50 vše / bez postav / bez animace / chůze LOD /
+  vše znovu: tvrz-cesta 24/27/35/31/32, louka 24/29/30/28/30, les 30/29/32/28/26, ves 34/23/27/28/30, mlýn 21/22/27/26/28,
+  ves-vjezd 42/33/27/27/42, ves-dvory 32/38/36/38/33, hostinec 31/19/29/30/33, věž 27/19/31/33/35.
+- **Šum větší než hledaný vliv:** stejná varianta vše × vše znovu se liší až o 8 ms (tvrz-cesta 24/32, věž 27/35); celý
+  běh pomalejší než 0.999991 (jiný režim Game Turbo / teplota – NEOVĚŘENO). „Bez postav“ tentokrát ≈ vše → vliv postav
+  z 0.99999/0.999991 (+8–11 ms) se NEPOTVRDIL ani nevyvrátil.
+- **Naměřená souvislost:** ves-vjezd 42 ms při 692 kresleních (vše, vše znovu) × 27 ms při 561–563 (bez animace, chůze
+  LOD). Varianty „vše“ a „bez postav“ mají o ~100–130 kreslení víc než ostatní na většině úseků – PROČ NEOVĚŘENO
+  (podezření: louka/stíny po startu trasy, ne postavy). Ves potřebuje 560–690 kreslení (tvrz ~330) → sloučení staveb vsi.
