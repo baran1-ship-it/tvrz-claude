@@ -1602,7 +1602,7 @@ def postav_A(P):
             kor_[j_] = round((max(ter(*(a_.lerp(b_, k / 12)).xz) for k in range(13)) + hd["vyska"]) * 2) / 2
             if hd.get("koruna_rohu_v_ochozu"): kor_[j_] = max(kor_[j_], yp_b)   # Míša 13. 11.: „na hradbách budou hradbičky, zábradlí jen
             # tam, kde není hradba“ – za rohem koruna ve výšce ochozu: podesta u věže dojde ke koruně, ven chrání cimbuří (dřív o stupeň níž → rám zábradlí)
-        uk = H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=A.get("cimburi_vnejsi", A.get("cimburi", True)), koruny=kor_, cimburi_pevne=hd.get("cimburi_u_branky", False), plynule=hd.get("plynula_koruna", False) and not any(k_ is not None for k_ in kor_))
+        uk = H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=A.get("cimburi_vnejsi", A.get("cimburi", True)), koruny=kor_, cimburi_pevne=hd.get("cimburi_u_branky", False), volno_u_konce=((u_v, hd.get("bez_stinek_u_veze_m", 2.5)) if hd.get("cimburi_u_branky") else None), plynule=hd.get("plynula_koruna", False) and not any(k_ is not None for k_ in kor_))
         HRADBY.append((osa, uk, hd))
     H.VEZ_PATRO.clear()
     # portálky strážnice: kde osa pavlače ochozu narazí do věže (hradba přiléhá k věži šikmo – pevná boční stěna nestačila, test průchodu)

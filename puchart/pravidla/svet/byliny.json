@@ -19,7 +19,7 @@
    "kamen": 0.3,
    "kapradi": 0.9,
    "mech": 0.6,
-   "kmen": 0.05,
+   "kmen": 0.0025,
    "ostrice": 0.3,
    "devetsil": 0.04
   },
@@ -29,7 +29,8 @@
    "kapradi": 0.2,
    "ostruzina": 0.2,
    "parez": 0.008,
-   "kopriva": 0.04
+   "kopriva": 0.04,
+   "spalek": 0.001
   },
   "pole": {
    "trava": 0.4
@@ -38,7 +39,7 @@
    "kapradi": 0.08,
    "mech": 0.1,
    "parez": 0.00072,
-   "kmen": 0.0015,
+   "kmen": 0.001,
    "kamen": 0.01,
    "trava": 0.12,
    "ostruzina": 0.02
@@ -48,7 +49,7 @@
    "kopriva": 0.03,
    "mech": 0.16,
    "kamen": 0.09,
-   "kmen": 0.002
+   "kmen": 0.0015
   },
   "luh": {
    "kopriva": 0.25,
@@ -62,13 +63,13 @@
    "ostruzina": 0.05,
    "mech": 0.04,
    "parez": 0.00048,
-   "kmen": 0.0009
+   "kmen": 0.0006
   },
   "les_bucina_kysela": {
    "kapradi": 0.1,
    "mech": 0.12,
    "parez": 0.00072,
-   "kmen": 0.0015,
+   "kmen": 0.001,
    "kamen": 0.01
   },
   "les_doubrava": {
@@ -161,8 +162,8 @@
    "parez_2"
   ],
   "kmen": [
-   "kmen_1",
-   "kmen_2"
+   "padly_strom_1",
+   "padly_strom_2"
   ],
   "kamen": [
    "kamen_droba_1",
@@ -179,6 +180,10 @@
    "devetsil_1",
    "devetsil_2",
    "devetsil_3"
+  ],
+  "spalek": [
+   "kmen_1",
+   "kmen_2"
   ]
  },
  "pozn_podrost": "2. 11. (Míša bod 6): podrost podle stanovišť – mech, ostružiník, pařezy, padlé kmeny, kameny droby z modelů Havrana (modely/nove, CC0/vlastní); kyčelnice a bika zatím chybí model",
@@ -275,5 +280,83 @@
   "pozn": "13. 11.: ostřice (Carex) a devětsil (Petasites hybridus) mají model (hra/modely/rostliny ostrice_*, devetsil_*; blender/rostliny_u_vody.py); keřové vrby v kere.json (vrba_ker). Hustoty ostřice a devětsilu NEOVERENO (README_jak_se_stavi.md: „hustoty v trsech na m² nejsou ve snímcích ani v katalogu“). Devětsil jen v lese a řídce: M5 uvádí 450–800 m n. m., Potštátsko ~400 m (README krok 8, okrajově)."
  },
  "pozn_koryto_13_11": "13. 11.: koryto (dno pod vodou) bez mechu – docs/reference/potoky/README_jak_se_stavi.md krok 8: „vodní mech pod hladinou NEOVERENO, nedělat“; mech jen na kamenech nad vodou. Třída koryto_kamenite a břeh se dřív ve stanovištích přepisovaly na „cesta“ (cesty.py bral zářez koryt jako jámu sklepa) – porost u vody proto chyběl úplně (docs/chyby.md).",
- "pozn_vodni_rostliny": "13. 11. (Míša: „pokud ti chybí nějaké rostliny, stáhni si je z internetu“): ostřice v pásu čáry vody (voda_pas) a v breh 0,3/m², devětsil v lesním pásu 0,15/m² a v breh 0,04/m²; vše NEOVERENO. Zdroj: docs/reference/potoky/README_jak_se_stavi.md §2.3 a krok 8 (pásma u vody podle snímků KCD a misa_real_01–04; Chytrý et al. 2010, Katalog biotopů ČR: K2 vrbové křoviny 2–5 m na březích a náplavech, M5 devětsilové lemy podhorských potoků 450–800 m n. m.); modely blender/rostliny_u_vody.py (licence hra/modely/rostliny/LICENCE.txt)"
+ "pozn_vodni_rostliny": "13. 11. (Míša: „pokud ti chybí nějaké rostliny, stáhni si je z internetu“): ostřice v pásu čáry vody (voda_pas) a v breh 0,3/m², devětsil v lesním pásu 0,15/m² a v breh 0,04/m²; vše NEOVERENO. Zdroj: docs/reference/potoky/README_jak_se_stavi.md §2.3 a krok 8 (pásma u vody podle snímků KCD a misa_real_01–04; Chytrý et al. 2010, Katalog biotopů ČR: K2 vrbové křoviny 2–5 m na březích a náplavech, M5 devětsilové lemy podhorských potoků 450–800 m n. m.); modely blender/rostliny_u_vody.py (licence hra/modely/rostliny/LICENCE.txt)",
+ "meritko_druh": {
+  "kmen": [
+   0.9,
+   1.25
+  ],
+  "spalek": [
+   0.8,
+   1.2
+  ],
+  "pozn": "padlý kmen 5–7 m (modely 4,9 a 5,6 m); bukové kmeny 0,3–0,6 m – NEOVERENO (podle oka z misa_real_02 a kcd2_potok_skaly_mech_listi)"
+ },
+ "lezi": {
+  "popis": "Ležící kmeny (byliny.gd _lezici): osa X modelu po zemi mezi konci (sklon z výšek konců, délka z modelu), konce, střed a čtvrtiny ne na zakázané třídě (cesta = i brod, ves, louka, stavby); třída v les_okoli jen s lesem (les_* nebo les_tridy) a bez zakázané třídy (louka, ves, cesta) do r m – břeh lesního potoka ano, břeh v louce, ve vsi a u cesty/brodu ne (podle stanoviste.png splní ~89 % břehů, NEOVERENO snímkem). Kmen může ležet přes koryto (misa_real_02). Strmější svah než max_sklon_st nebo hrbol pod středem = nepoložit (konce by visely).",
+  "zdroj": "docs/reference/potoky/misa_real_02_les_skala_perej.jpg (kmen šikmo přes lesní potok), kcd2_potok_skaly_mech_listi.jpg (kmen přes potok), README_jak_se_stavi.md krok 9; Míša 13. 11.: „není tam těch klád zase moc? a mají to být popadané stromy, ne pokácené“",
+  "kmen": {
+   "zakazane_tridy": [
+    "nic",
+    "cesta",
+    "stavba",
+    "nadvori",
+    "nadvori_slap",
+    "predhradi",
+    "pata_zdi_vne",
+    "pata_zdi_uvnitr",
+    "kout_zdi",
+    "pata_zdi_lic",
+    "ves_slap",
+    "louka_kosena",
+    "pastvina",
+    "pole",
+    "zemedelstvi",
+    "pole_orane"
+   ],
+   "les_okoli": {
+    "breh": 10.0
+   },
+   "les_tridy": [
+    "luh"
+   ],
+   "max_sklon_st": 25.0,
+   "max_hrbol_m": 0.35,
+   "vyska_nahoda": [
+    0.9,
+    1.1
+   ]
+  },
+  "spalek": {
+   "zakazane_tridy": [
+    "nic",
+    "cesta",
+    "stavba",
+    "nadvori",
+    "nadvori_slap",
+    "predhradi",
+    "pata_zdi_vne",
+    "pata_zdi_uvnitr",
+    "kout_zdi",
+    "pata_zdi_lic",
+    "ves_slap",
+    "louka_kosena",
+    "pastvina",
+    "pole",
+    "zemedelstvi",
+    "pole_orane"
+   ],
+   "les_okoli": {},
+   "les_tridy": [
+    "luh"
+   ],
+   "max_sklon_st": 25.0,
+   "max_hrbol_m": 0.35,
+   "vyska_nahoda": [
+    0.9,
+    1.1
+   ]
+  }
+ },
+ "pozn_padle_stromy": "13. 11. (Míša 13. 11.: „není tam těch klád zase moc? a mají to být popadané stromy, ne pokácené“): kmen = padlé stromy s vylomenými konci (Poly Haven dead_tree_trunk_02 a dead_tree_trunk, CC0; build/padle_stromy/skripty/preved.py), staré rovně uříznuté špalky kmen_1/2 jen jako „spalek“ na pasekách u pařezů (stopa těžby, pozn_parezy). Hustoty: břeh 0,05 → 0,0025/m² (≈1 na 400 m² břehu a jen v lese, les_okoli; předtím 1 na 20 m²), les ~1 na 1000 m² (bučiny 0,001, suť 0,0015, dubohabřina 0,0006), paseka špalek 0,001. Vše NEOVERENO (žádné měření mrtvého dřeva 1393; les se tehdy probíral na palivo – docs/reference/potoky/README_jak_se_stavi.md krok 9: „hustota NEOVERENO, první návrh pár míst“); laděno snímkem. Kořenový talíř (vývrat) chybí: Poly Haven nemá CC0 model vývratu."
 }

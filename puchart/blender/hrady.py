@@ -122,7 +122,7 @@ def zed_plynula(P, a, b, t, h, mat="zdivo", pata=2.0, krok=1.5, e0=0.0, e1=0.0, 
             P.box(M((p.x, yk + CIMB["vyska_m"] / 2 - 0.04, p.z), basis=frame(d) @ Matrix.Rotation(-math.atan(sk_), 3, "X")), (t * 0.4, CIMB["vyska_m"] + 0.08, sw), mat + "_koruna" if mat == "zdivo" else mat, collide=True)   # stínka má kolizi (povrch_kolize 12. 11.: „projde viditelným“)
     return out
 
-def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=None, okna=0, pilire=False):
+def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=None, okna=0, pilire=False, bez_stinek=None):
     """Hradba a->b (x, z). Koruna = terén + h po stupních (zaokrouhleno na stupen_po_m), nebo pevně koruna (y).
     Úseky mají délku násobku rytmu cimbuří (hrad_vzhled.json cimburi) – stupeň koruny je vždy v proluce mezi stínkami,
     stínky jdou v pravidelném rytmu po celé hradbě (Míša 4. 11.). Vrací seznam (s0, s1, y_koruny) úseků pro ochoz."""
@@ -141,12 +141,13 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
         if cimburi:   # stínky na vnější polovině koruny (+strana = vpravo od směru), uprostřed každého rytmu – proluky na hranách úseků
             out_n = d.cross(UP).normalized(); sw = min(CIMB["stinka_m"], Rl - 0.5)
             for k in range(i0, i1):
+                if bez_stinek and bez_stinek[0] <= (k + 0.5) * Rl <= bez_stinek[1]: continue   # vstup ochozu do věže (13. 11. povrch_kolize: stínka v cestě k portálku)
                 p = a + d * ((k + 0.5) * Rl) + out_n * (t * 0.3)
-                P.box(M((p.x, y1 + CIMB["vyska_m"] / 2, p.z), basis=frame(d)), (t * 0.4, CIMB["vyska_m"], sw), mat + "_koruna" if mat == "zdivo" else mat)   # stínka holý kámen (Míša 10. 11.)
+                P.box(M((p.x, y1 + CIMB["vyska_m"] / 2, p.z), basis=frame(d)), (t * 0.4, CIMB["vyska_m"], sw), mat + "_koruna" if mat == "zdivo" else mat, collide=True)   # stínka holý kámen (Míša 10. 11.); kolize jako u plynulé koruny (13. 11.: stínky byly průchozí)
     return out
 
 NAROZI_POKOS = True
-def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None, plynule=False, cimburi_pevne=False):
+def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None, plynule=False, cimburi_pevne=False, volno_u_konce=None):
     """Hradba po lomené čáře (3. 11., Míša: hradby nenavazují): úseky bez přesahů, v každém vrcholu nárožní pilíř t × t
     natočený podle osy úhlu, výška = vyšší z korun sousedních úseků (žádné prolínání kvádrů a světlé čelo v rohu)."""
     if plynule:   # koruna plynule po terénu: konce úseků na pokos (přesah t/2·tg(úhel/2)), nároží bez pilíře
@@ -156,7 +157,13 @@ def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None, plynule=False
             u = p1 - p0; v = p2 - p1; u /= np.linalg.norm(u); v /= np.linalg.norm(v)
             return t / 2 * math.tan(math.acos(max(-1.0, min(1.0, float(u @ v)))) / 2) + 0.02
         return [zed_plynula(P, p, q, t, h, mat=mat, e0=_e(k, 0), e1=_e(k, 1), cimburi=cimburi) for k, (p, q) in enumerate(zip(osa, osa[1:]))]
-    useky = [zed(P, p, q, t, h, mat=mat, cimburi=cimburi and (cimburi_pevne or not (koruny and koruny[k] is not None)), pilire=True, koruna=(koruny[k] if koruny else None)) for k, (p, q) in enumerate(zip(osa, osa[1:]))]   # úsek s pevnou korunou (pod ochozem u branky) bez stínek – ochoz po něm vede k portálku (povrch_kolize 10. 11.)
+    def _volno(k, p, q):   # volno_u_konce = (1 = konec osy | 0 = začátek, metry bez stínek od toho konce)
+        if not volno_u_konce: return None
+        L_ = math.hypot(q[0] - p[0], q[1] - p[1]); kon_, m_ = volno_u_konce
+        if kon_ == 1 and k == len(osa) - 2: return (L_ - m_, L_ + 1)
+        if kon_ == 0 and k == 0: return (-1, m_)
+        return None
+    useky = [zed(P, p, q, t, h, mat=mat, cimburi=cimburi and (cimburi_pevne or not (koruny and koruny[k] is not None)), pilire=True, koruna=(koruny[k] if koruny else None), bez_stinek=_volno(k, p, q)) for k, (p, q) in enumerate(zip(osa, osa[1:]))]   # úsek s pevnou korunou (pod ochozem u branky) bez stínek – ochoz po něm vede k portálku (povrch_kolize 10. 11.)
     for i, v in enumerate(osa):
         sous = ([useky[i - 1][-1][2]] if i > 0 else []) + ([useky[i][0][2]] if i < len(useky) else [])
         a = Vector((osa[max(i - 1, 0)][0], 0, osa[max(i - 1, 0)][1])); b = Vector((osa[min(i + 1, len(osa) - 1)][0], 0, osa[min(i + 1, len(osa) - 1)][1]))

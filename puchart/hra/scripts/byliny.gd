@@ -164,6 +164,34 @@ func _kamenitost(x: float, z: float) -> float:
 	var r := clampi(int((z - float(sj["z0_hra"])) / float(sj["krok_m"])), 0, km_img.get_height() - 1)
 	return km_img.get_pixel(c, r).r
 
+## (vlákno) ležící kmen: osa X modelu leží na zemi mezi konci (délka z AABB modelu × měřítko, sklon z výšek konců);
+## konce, střed a čtvrtiny ne na zakázané třídě; třída v les_okoli jen s lesem a bez zakázané třídy do r m; strmý svah nebo hrbol = null
+func _lezici(x: float, z: float, s: float, yaw: float, nv: float, m: Mesh, lz: Dictionary, tr: String) -> Variant:
+	var L: float = maxf(absf(m.get_aabb().position.x), absf(m.get_aabb().end.x)) * s
+	var d := Basis(Vector3.UP, yaw).x
+	var a := Vector2(x - d.x * L, z - d.z * L); var b := Vector2(x + d.x * L, z + d.z * L)
+	var zak: Array = lz.get("zakazane_tridy", [])
+	for f in [0.0, 0.25, 0.5, 0.75, 1.0]:
+		var p := a.lerp(b, f); var t := _trida(p.x, p.y)
+		if t == "" or t in zak: return null
+	var lo: Dictionary = lz.get("les_okoli", {})
+	if lo.has(tr):
+		var r := float(lo[tr]); var les := false
+		for u in 8:
+			var t := _trida(x + r * cos(u * PI / 4), z + r * sin(u * PI / 4))
+			if t in zak: return null   # louka, ves, cesta do r m: ne
+			if t.begins_with("les_") or t in lz.get("les_tridy", []): les = true
+		if not les: return null
+	var ha: float = svet.vyska(a.x, a.y); var hb: float = svet.vyska(b.x, b.y)
+	var sk := atan2(hb - ha, 2.0 * L)
+	if absf(rad_to_deg(sk)) > float(lz.get("max_sklon_st", 25.0)): return null
+	for f in [0.25, 0.5, 0.75]:   # hrbol pod kmenem: konce by visely
+		var p := a.lerp(b, f)
+		if svet.vyska(p.x, p.y) > lerpf(ha, hb, f) + float(lz.get("max_hrbol_m", 0.35)): return null
+	var vn: Array = lz.get("vyska_nahoda", [1.0, 1.0])
+	var bz := Basis(Vector3.UP, yaw) * Basis(Vector3.BACK, sk) * Basis.from_scale(Vector3(s, s * lerpf(float(vn[0]), float(vn[1]), nv), s))
+	return Transform3D(bz, Vector3(x, (ha + hb) * 0.5 - float(cfg.get("pata_zapusteni_m", 0.03)), z))
+
 func _bunka_mista(i: int, j: int, B: float) -> Array:
 	var rng := RandomNumberGenerator.new(); rng.seed = hash(Vector2i(i, j))
 	var tridy: Dictionary = cfg["tridy"]
@@ -189,6 +217,14 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 			if rng.randf() < float(h[druh]) * nas * nk / na_m2:
 				var mr: Array = cfg.get("meritko_druh", {}).get(druh, cfg.get("meritko", [0.8, 1.3]))
 				var s := rng.randf_range(float(mr[0]), float(mr[1]))
+				var lz: Dictionary = cfg.get("lezi", {}).get(druh, {})
+				if not lz.is_empty():   # ležící kmen (byliny.json lezi; Míša 13. 11.: padlé stromy, ne na cestě, u vody jen v lese)
+					var iv := rng.randi() % meshe[druh].size()
+					var tl: Variant = _lezici(x, z, s, rng.randf() * TAU, rng.randf(), meshe[druh][iv], lz, tr)
+					if tl == null: continue
+					if not mista.has(druh + str(iv)): mista[druh + str(iv)] = []
+					mista[druh + str(iv)].append(tl)
+					continue
 				var y: float = svet.vyska(x, z)
 				var rp: float = float(cfg.get("pata_polomer_m", {}).get(druh, cfg.get("pata_polomer_m", {}).get("_", 0.25))) * s
 				for u in 4:   # na svahu sednout na nejnižší bod obvodu paty (Míša 3. 11.: nic nelevituje)

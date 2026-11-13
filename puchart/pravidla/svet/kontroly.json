@@ -361,10 +361,12 @@
   "stromu_v_korytu_max": 0,
   "bunek_keru_ve_stavbe_max": 0,
   "parez_max": 0.001,
-  "kmen_max": 0.002,
+  "kmen_max": 0.0015,
   "svah_sklon": 0.6,
   "svah_les_min": 0.6,
-  "pozn_3_11": "pařezy jen na pasekách; strmé svahy (sklon > 0,6) do 150 m od hradů aspoň ze 60 % les (Míša: kopec holý)"
+  "pozn_3_11": "pařezy jen na pasekách; strmé svahy (sklon > 0,6) do 150 m od hradů aspoň ze 60 % les (Míša: kopec holý)",
+  "kmen_breh_max": 0.003,
+  "pozn_kmen_13_11": "Míša 13. 11.: „není tam těch klád zase moc? a mají to být popadané stromy, ne pokácené“ – kmen v lese ≤ 0,0015/m², na břehu ≤ 0,003/m² (dřív 0,05); padlé stromy ne na louce a ve vsi (byliny.json lezi)"
  },
  "pruchod": {
   "tras_min": 11

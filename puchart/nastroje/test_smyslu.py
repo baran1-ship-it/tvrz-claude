@@ -351,6 +351,10 @@ TEST("strom_mimo_trasy", int((_dd < 1.0).sum()) == 0, "stromů do 1 m od trasy p
 TEST("most_kozy", kz and not zle_k, "koz %d, patka nad/u mostovky: %s" % (len(kz), zle_k[:2]))
 md = {t: (h.get("parez", 0), h.get("kmen", 0)) for t, h in BY["tridy"].items() if t.startswith("les_") and t != "les_paseka"}
 TEST("mrtve_drevo", all(p_ <= KC["vegetace"]["parez_max"] and k_ <= KC["vegetace"]["kmen_max"] for p_, k_ in md.values()), "pařez/kmen na m² v lese: %s" % {t: v for t, v in md.items() if v[0] > KC["vegetace"]["parez_max"] or v[1] > KC["vegetace"]["kmen_max"]})
+# Míša 13. 11. („není tam těch klád zase moc? a mají to být popadané stromy, ne pokácené“): břeh ≤ kmen_breh_max, kmen = padlé stromy, ležící jen mimo louku/ves
+_kb = BY["tridy"].get("breh", {}).get("kmen", 0); _lz = BY.get("lezi", {}).get("kmen", {})
+TEST("padle_stromy", _kb <= KC["vegetace"].get("kmen_breh_max", 0) and all(m_.startswith("padly_strom") for m_ in BY["modely"]["kmen"]) and "louka_kosena" in _lz.get("zakazane_tridy", []) and "cesta" in _lz.get("zakazane_tridy", []) and "breh" in _lz.get("les_okoli", {}),
+     "břeh kmen %.4f/m² (max %s), modely %s, ležení %s" % (_kb, KC["vegetace"].get("kmen_breh_max"), BY["modely"]["kmen"], sorted(_lz)))
 gy, gx = np.gradient(Yt); sl = np.hypot(gx, gy)
 X_, Z_ = np.meshgrid(np.arange(-150, 200, 2.0), np.arange(-120, 260, 2.0))
 s_sl = sl[np.clip((Z_ - VY["z0_hra"]).astype(int), 0, VY["vyska"] - 1), np.clip((X_ - VY["x0_hra"]).astype(int), 0, VY["sirka"] - 1)]
