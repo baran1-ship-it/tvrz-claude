@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -926,6 +926,31 @@ func _fyz_stani() -> void:
 
 ## Misa 0.89 (tablet, rybnik 525,888 na mole): fyzika 43-63 ms kazdy snimek i ve stani. Rozbor: prumer fyziky
 ## snimku (razitka diag) ve stani, pak po jednom vypnout kazdy objekt fyziky do 60 m (vrstvy/zpracovani) a zmerit znovu.
+## Misa 13. 11. (zasek fyzika 2641 ms u (0, 9) pri vstupu na nadvori a ze sine na nadvori): hrac jde po krocich ze sine
+## a z prujezdu na nadvori; kazdy snimek cas fyziky (diag _sn) - nejdelsi snimky s polohou. Rozpocet fyz_nadvori_ms.
+func _fyz_nadvori() -> void:
+	_jako_hra()
+	var dg: Object = Engine.get_meta("diag")
+	var cesty := [[Vector3(3.2, 0.0, -14.0), Vector3(0.0, 0.0, 9.0)], [Vector3(0.0, 0.0, 30.0), Vector3(0.0, 0.0, 9.0)]]
+	var nej: Array = []
+	for ce: Array in cesty:
+		await main.fast_travel(ce[0], ce[1], 0.0, "test")
+		for _i in 60:
+			await get_tree().process_frame
+		var a: Vector3 = player.global_position
+		var b: Vector3 = ce[1]
+		for k in 120:
+			var q := a.lerp(Vector3(b.x, a.y, b.z), float(k) / 119.0)
+			player.global_position = Vector3(q.x, player.global_position.y, q.z)
+			await get_tree().physics_frame
+			await get_tree().process_frame
+			var f := float(dg.get("_sn").get("fyzika", 0)) / 1000.0
+			nej.append([f, player.global_position.round()])
+	nej.sort_custom(func(x: Array, y: Array) -> bool: return float(x[0]) > float(y[0]))
+	print("FYZNADVORI nejdelsi fyzika: %s" % str(nej.slice(0, 8)))
+	_vysledek("fyz_nadvori", float(nej[0][0]) < 50.0, "nejdelsi snimek fyziky %.1f ms u %s" % [float(nej[0][0]), str(nej[0][1])])
+
+
 func _fyz_misto() -> void:
 	_jako_hra()
 	await main.fast_travel(Vector3(525.0, 0.0, 888.0), Vector3(525.0, 3.7, 860.0), 0.0, "test")
