@@ -238,8 +238,8 @@
  "varianty": [
   "",
   "bez_postav",
-  "bez_animace",
-  "chuze_lod",
+  "postavy_skryte",
+  "postavy_stoji",
   ""
  ],
  "samo_na_tabletu": false,
@@ -259,5 +259,6 @@
  "_samo_na_tabletu": "Misa 11. 11.: trasa se nespousti sama - Hrat -> Merici trasa (volba na zacatku hry); true = postaru sama jednou po nove verzi",
  "_varianty_11_11": "Misa 11. 11. (0.99998 sekani v pritomnosti postav, ves-vjezd 26 -> 34 ms): les_bez_korun nahrazena bez_postav - izolovany test vlivu postav (skinning OpenGL Godot #88954, AI, IK, LookAt)",
  "_varianty_13_11": "regrese 0.99999 (postavy +8-10 ms p50 proti bez_postav): izolovany test skupin postav - modifikatory kostry vsechny (sukne, uchop, nohy IK, hlava), jen ridic sukne, jen uchopy; rozdil bez_postav - bez_modifikatoru = animace + skinning (+24 kosti sukne)",
- "_varianty_13_11b": "0.999991 (13. 11. 14:56): bez sukne / bez uchopu / bez modifikatoru = vse (modifikatory nejsou cena); bez postav -8..-11 ms. Dalsi izolace: bez_animace (AnimationPlayer postav stoji, kostra se neprepocitava) a chuze_lod (jdouci postavy opet usporna animace, pred fe4e4039)"
+ "_varianty_13_11b": "0.999991 (13. 11. 14:56): bez sukne / bez uchopu / bez modifikatoru = vse (modifikatory nejsou cena); bez postav -8..-11 ms. Dalsi izolace: bez_animace (AnimationPlayer postav stoji, kostra se neprepocitava) a chuze_lod (jdouci postavy opet usporna animace, pred fe4e4039)",
+ "_varianty_13_11c": "0.999993: bez postav -7..-9 ms (3/4 behy), bez animace/modifikatoru nepomaha; PC: stare modely z 0.99998 stoji stejne jako nove. Rozdeleni: postavy_skryte (neviditelne, logika bezi) x postavy_stoji (viditelne, Lide bez zpracovani)"
 }

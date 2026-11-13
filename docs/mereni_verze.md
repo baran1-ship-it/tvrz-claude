@@ -340,3 +340,6 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
   ani skripty; kreslení stejné → zbývá vykreslení skinovaných sítí postav (Compatibility/GLES3, Godot #88954) – podezření.
 - Izolovaný test: PC (xvfb, gl_compatibility) N postav před kamerou – animované / zastavené / skryté; na trase varianta
   postavy_skryte (neviditelné, logika běží).
+- **PC A/B 13. 11. (tools/mereni_postav.gd, 20 postav, llvmpipe):** nové modely 72/59/54 ms (animované/zastavené/statické),
+  staré z 0.99998 75/63/56 ms → **nové modely VYVRÁCENY** jako příčina (aspoň na PC). Skinování ~10 % kreslení postavy.
+  Další izolace na tabletu: varianty postavy_skryte / postavy_stoji. Pevných 30 FPS (výchozí) skryje cenu, dokud snímek < 33 ms.

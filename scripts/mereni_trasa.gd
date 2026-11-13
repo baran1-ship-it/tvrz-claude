@@ -111,6 +111,13 @@ func _varianta(zap: bool) -> void:
 			main.kvalita.nastav(zap)
 	elif v.begins_with("3d_"):                 # rozliseni 3D v % soucasneho: roste-li FPS, brzdi vyplnovani pixelu (GPU)
 		get_viewport().scaling_3d_scale = _sc0 * float(v.substr(3)) / 100.0 if zap else _sc0
+	elif v == "postavy_skryte" or v == "postavy_stoji":   # 13. 11.: rozdeli cenu postav na kresleni (skryte, logika bezi) a logiku (stoji, kresli se)
+		var lx: Node = main.world.get_node_or_null("Lide") if main.world else null
+		if lx:
+			if v == "postavy_skryte":
+				(lx as Node3D).visible = not zap
+			else:
+				lx.process_mode = Node.PROCESS_MODE_DISABLED if zap else Node.PROCESS_MODE_INHERIT
 	elif v == "bez_postav":                    # rozbor 0.99993: 32 postav (skinning, AI, stin do 15 m) - kresleni i skripty
 		var li: Node = main.world.get_node_or_null("Lide") if main.world else null
 		if li:
@@ -206,6 +213,10 @@ func _jm(v: String) -> String:
 		return "karty bez ořezu"
 	if v == "bez_postav":
 		return "bez postav"
+	if v == "postavy_skryte":
+		return "post. skryté"
+	if v == "postavy_stoji":
+		return "post. stojí"
 	if v == "bez_sukne":
 		return "bez sukně"
 	if v == "bez_uchopu":
