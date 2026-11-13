@@ -993,26 +993,28 @@
     "id": "A_vezicka_vstup",
     "polygon": [
      [
-      10.3,
-      15.45
+      9.0,
+      18.0
      ],
      [
-      13.0,
-      15.45
+      14.5,
+      18.0
      ],
      [
-      13.0,
-      11.6
+      14.5,
+      10.5
      ],
      [
-      10.3,
-      11.6
+      9.0,
+      10.5
      ]
     ],
     "y": 37.9,
-    "prechod_m": 2.0,
+    "prechod_m": 2.5,
     "zdroj": "Míša 12. 11.: „srovnat terén u malé věže horního hradu“ – nádvoří tu klesá k V hradbě ~0,6 m/m (38,6 → 36,4 na 4 m); vyrovnaná plocha před dveřmi přízemí věžičky (práh = terén + 0,02)",
-    "jistota": "NAVRH (úprava dvora u vstupu)"
+    "jistota": "NAVRH (úprava dvora u vstupu)",
+    "pozn_13_11": "Míša 13. 11. (foto x 9,8 z 12,5): „hlínu k věžičce jsi nedosypal“ – plošina 2,7 × 3,9 m se vyhlazením terénu (σ 1,5 m, teren_dlazdice) a sítí 2 m rozmazala, u dveří (12,2; 15,45) terén 0,24 m pod prahem. Zvětšeno na 5,5 × 7,5 m i pod věž (věž ji kryje), test smyslu plosiny_rovne.",
+    "kontrola_rovna": true
    }
   ],
   "zarezy": [
@@ -1165,7 +1167,9 @@
   "navijak_ochoz_od_zidky_m": 0.34,
   "navijak_ochoz_vyska_m": 0.62,
   "kolo_r_m": 0.5,
-  "pozn_ochoz": "brány v hradbě (A jádro, B): naviják na ochozu nad bránou u zídky – dole u brány není místo (B: schody na ochoz a nároží); věž branky A: v patře strážnice (Havran)"
+  "pozn_ochoz": "brány v hradbě (A jádro, B): naviják na ochozu nad bránou u zídky – dole u brány není místo (B: schody na ochoz a nároží); věž branky A: v patře strážnice (Havran)",
+  "mezera_vyklenku_m": 0.08,
+  "pozn_13_11": "Míša 13. 11. (foto z průjezdu branky: „most není dobrý pro zvednutí“ – užší a nižší než oblouk, kolem nebe): zvednutý most zakryje otvor portálu s přesahem vyklenek_okraj_m po stranách i nahoře; výklenek = most + mezera_vyklenku_m (puchart_hrad.most_kryti, všechny tři mosty). vyklenek_nad_m nahrazeno přesahem."
  },
  "vybaveni": {
   "stavet": false,

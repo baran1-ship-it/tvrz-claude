@@ -421,6 +421,31 @@ def _zed_nad_strechou(f):
             if vv >= -0.01 and ww >= -0.01 and vv + ww <= 1.01 and a[1] * (1 - vv - ww) + b_[1] * vv + c[1] * ww >= q[1] - 0.02: kryto = True; break
         if not kryto: out.append((round(float(q[0]), 1), round(float(q[2]), 1)))
     return sorted(set(out))
+# střecha souměrná (Míša 13. 11.: „spodní budova spodního hradu nemá stejnou střechu na obě strany“): stejný přesah i výška
+# okapu na obou stranách, kromě strany, která končí na koruně vyšší hradby
+_ns = []
+if os.path.exists(D + "strechy.json"):
+    for st_ in json.load(open(D + "strechy.json"))["strechy"]:
+        if any(st_["v_hradbe"]): continue
+        if abs(st_["presah"][0] - st_["presah"][1]) > 0.05 or abs(st_["okap_y"][0] - st_["okap_y"][1]) > 0.05: _ns.append(st_["stred"])
+TEST("strecha_soumerna", os.path.exists(D + "strechy.json") and not _ns, "nesouměrné střechy: %s" % _ns[:5])
+# plošiny hradů po vyhlazení terénu rovné (Míša 13. 11.: hlína pod prahem věžičky A – malá plošina se rozmazala): vnitřek
+# plošiny (1 m od kraje) ve výšce y ± plosina_tol_m
+from matplotlib.path import Path as _Path
+_pz = []
+for q_ in json.load(open(K + "/pravidla/svet/hrad_puchart.json"))["teren"]["plosiny"]:
+    if "polygon" not in q_ or q_.get("y") is None or not q_.get("kontrola_rovna"): continue   # nádvoří B mají rampy za branami
+    pg_ = np.array(q_["polygon"], float); x0_, z0_ = pg_.min(0) + 1.0; x1_, z1_ = pg_.max(0) - 1.0
+    for xx_ in np.linspace(x0_, x1_, 5):
+        for zz_ in np.linspace(z0_, z1_, 5):
+            if not _Path(pg_).contains_point((xx_, zz_)): continue
+            dy_ = float(ter(xx_, zz_)) - q_["y"]
+            if abs(dy_) > KC.get("plosina_tol_m", 0.12): _pz.append("%s (%.1f, %.1f) %+.2f m" % (q_["id"], xx_, zz_, dy_)); break
+TEST("plosiny_rovne", not _pz, "nerovné plošiny: %s" % _pz[:5])
+# padací most zakryje otvor brány (Míša 13. 11.: zvednutý most užší a nižší než oblouk, kolem nebe)
+_mk = json.load(open(D + "mosty_kryti.json"))["mosty"] if os.path.exists(D + "mosty_kryti.json") else []
+_mk_zle = [m_ for m_ in _mk if m_["most"][0] < m_["otvor"][0] + 0.2 or m_["most"][1] < m_["otvor"][1] + 0.1]
+TEST("most_kryje_otvor", bool(_mk) and not _mk_zle, "%d výpočtů mostů; nekryje: %s" % (len(_mk), _mk_zle[:3]))
 _zs = _zed_nad_strechou(K + "/hra/modely/hrady/puchart.glb")
 TEST("zed_nad_strechou", len(_zs) <= KC.get("zed_nad_strechou_max", 20), "vrcholů zdi nad střechou: %d %s" % (len(_zs), _zs[:4]))
 # kamenný potok (Míša 10. 11.): kameny v korytě na každých 10 m toku, pata na dně (ne pod ním, ne ve vzduchu)
@@ -544,6 +569,46 @@ if os.path.exists(D + "mista_stavby.json"):
     _kr = [u["i"] for u in MS["usedlosti"] if u["typ"] == "krcma"]
     _kp = [p_ for p_ in MS["ploty"] if p_["usedlost"] in _kr] + [b for b in MS["brany"] if b["usedlost"] in _kr]
     TEST("krcma_bez_plotu", _kr and not _kp, "krčma (usedlost %s): plotů a vrat %d" % (_kr, len(_kp)))
+    # ploty navazují (Míša 13. 11., foto 40db6a53: „ploty nenavazují na domy, jsou tam díry“; předloha kcd_ves_predloha/03):
+    # každý konec plotu a vrat leží do 0,3 m od stavby (půdorys s okrajem 0,3 m) nebo do 0,3 m od jiného plotu/vrat téže usedlosti
+    _seg = [(p_["usedlost"], _Ls([(b_[0], b_[2]) for b_ in p_["body"]])) for p_ in MS["ploty"]] + \
+           [(b["usedlost"], _Ls([(b["a"][0], b["a"][2]), (b["b"][0], b["b"][2])])) for b in MS["brany"]]
+    _volne = []
+    for i_, (u_, l_) in enumerate(_seg):
+        for q_ in (l_.coords[0], l_.coords[-1]):
+            P_ = _Pt(q_)
+            if any(pp_.buffer(0.01).contains(P_) for pp_ in _pud): continue
+            if any(j_ != i_ and s_[0] == u_ and s_[1].distance(P_) < 0.3 for j_, s_ in enumerate(_seg)): continue
+            _volne.append((u_, round(q_[0], 1), round(q_[1], 1)))
+    TEST("ploty_navazuji", _seg and not _volne, "konců plotů a vrat %d, volných (díra u stavby) %d %s" % (2 * len(_seg), len(_volne), _volne[:4]))
+    # krčma (Míša 13. 11., foto 99af0653): venkovní sezení ne v cestě a ne před vstupem, stáj vraty k cestě, boční stavby dál od domu
+    _kr9 = [u["i"] for u in MS["usedlosti"] if u["typ"] == "krcma"]; _sz = [e for e in MS.get("sezeni", []) if e["usedlost"] in _kr9]
+    _osy = [_Ls(np.array(c_["osa"])[:, :2]) for c_ in json.load(open(K + "/pravidla/svet/cesty_puchart.json"))["cesty"] if c_.get("osa") and not c_.get("jen_maska")]
+    _odc = min((min(o_.distance(_Pt(e["x"], e["z"])) for o_ in _osy) for e in _sz), default=0.0)
+    _vst = [_Pg(v["pred"]) for v in MS.get("vstupy", []) if v["usedlost"] in _kr9]
+    _zav = [e["model"] for e in _sz if any(q_.intersects(_Pt(e["x"], e["z"]).buffer(0.5)) for q_ in _vst) or any(q_.contains(_Pt(e["x"], e["z"])) for q_ in _pud)]
+    _dk = [s_ for s_ in MS["stavby"] if s_["misto"] == "krcma"]; _hk = [h for h in MS["hospodarske"] if h["usedlost"] in _kr9]
+    _vr = [v for v in MS.get("vstupy", []) if v["usedlost"] in _kr9 and v["stavba"] == "stodola_mala"]
+    _k_ceste = bool(_vr) and all(min(o_.distance(_Pt(*v["c"])) for o_ in _osy) < min(o_.distance(_Pt(h["x"], h["z"])) for o_ in _osy for h in _hk if h["model"] == "stodola_mala") for v in _vr)
+    _odst = min((_Pg(MS["pudorysy"][MS["stavby"].index(_dk[0])]).distance(_Pg(MS["pudorysy"][len(MS["stavby"]) + MS["hospodarske"].index(h)])) for h in _hk), default=0.0) if _dk else 0.0
+    _szj = MIJ["usedlosti"]["typy"]["krcma"].get("sezeni", {})
+    TEST("krcma_sezeni", sum(1 for e in _sz if e["model"] == _szj.get("stul")) >= 2 and _odc >= _szj.get("od_cesty_min_m", 3.0) and not _zav and _k_ceste and _odst >= 3.0,
+         "stolů %d, od osy cesty %.1f m, zavazí %s, stáj vraty k cestě %s, boční stavby od domu %.1f m (půdorysy s okrajem)" % (sum(1 for e in _sz if e["model"] == _szj.get("stul")), _odc, _zav, _k_ceste, _odst))
+    # pás trávy u paty plotů a zdí (Míša 13. 11.; předloha kcd_ves_predloha: tráva 0,3–1 m u paty, ne kde se chodí): skvrny
+    # pokrývají část délky (sem tam, ne pruh ani nic), žádná na cestě, ulici, cestičce, před vstupem, ve vratech
+    if os.path.exists(D + "pata_pas.json"):
+        _PP = json.load(open(D + "pata_pas.json")); _pk = _PP["pokryti"]
+        _zak = [_Ls(c_["body"]).buffer(c_["polosirka"] - 0.2) for c_ in MS["vyslapano"]["cary"] if len(c_["body"]) > 1] + _vst + \
+               [_Pg(v["pred"]) for v in MS.get("vstupy", [])] + [_Ls([(b["a"][0], b["a"][2]), (b["b"][0], b["b"][2])]).buffer(0.8) for b in MS["brany"]]
+        from shapely.ops import unary_union as _uu2
+        _Z = _uu2(_zak); _cs = TR.index("cesta"); _spat = []
+        for v_ in _PP["bunky"].values():
+            for sk in v_:
+                m_ = ((sk[0] + sk[2]) / 2 + sk[4] * sk[6] / 2, (sk[1] + sk[3]) / 2 + sk[5] * sk[6] / 2)
+                if _Z.contains(_Pt(*m_)) or trida(np.array([m_[0]]), np.array([m_[1]]))[0] == _cs: _spat.append((sk[7], round(m_[0], 1), round(m_[1], 1)))
+        _okp = all(0.15 <= _pk.get(k_, 0) <= 0.85 for k_ in ("ves_plot", "ves_stavba")) and _pk.get("hrad_zed", 0) + _pk.get("hrad_budova", 0) > 0.02
+        TEST("pata_pas_u_zdi", _okp and not _spat, "pokrytí délky hran %s (ves 15–85 %%, hrad > 2 %%), skvrn v cestě/před vstupem %d %s" % (_pk, len(_spat), _spat[:3]))
+    else: TEST("pata_pas_u_zdi", False, "chybí hra/data/pata_pas.json (nastroje/stavby_vegetace.py)")
     TEST("ves_bez_vybaveni", not MS["drobne"] and not any(h["model"] == "kurnik" for h in MS["hospodarske"]),
          "drobností %d, kurníků %d (Míša 12. 11. večer: vybavení si udělá sama)" % (len(MS["drobne"]), sum(1 for h in MS["hospodarske"] if h["model"] == "kurnik")))
 

@@ -235,6 +235,7 @@ def strecha_okraje(P, eL, eR, rR, rL, w_okap):
         q = eL + e_ * (L_ * i / nk) - n_ * (tl - 0.03 + pr[1] / 2)
         P.beam(q + sp * 0.05, q + sp * max(0.1, ww - 0.03), pr[0], pr[1], "dub", up=n_, collide=None)
 
+STRECHY_LOG = []   # sedlové střechy (strecha_sedlova) – puchart_hrad.py zapíše hra/data/strechy.json
 OKAP_STRANY = {}   # přesah okapu podle strany budovy (0 = +s, 2 = −s): v hradbě 0 (střecha končí na koruně – Míša 9. 11.: střecha
                    # trčela přes vnější líc hradby pod cimbuřím), nad pavlačí krátký (Míša 6. 11.: „co přesahuje, useknout“)
 
@@ -257,6 +258,10 @@ def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo", t_zdi
         # hradu“); strana u vyšší hradby (palác A): v ose (hradba stojí za ní)
         return hloubka / 2 + po_t, y - sk_ * po_t, po_s
     w1, ye1, p1 = okap(1); w2, ye2, p2 = okap(-1)
+    # záznam pro test smyslu strecha_soumerna (Míša 13. 11.): strana s nulovým přesahem kvůli vyšší hradbě se nepočítá
+    STRECHY_LOG.append({"stred": [round((a.x + b.x) / 2, 2), round((a.z + b.z) / 2, 2)], "presah": [round(p1, 3), round(p2, 3)],
+                        "okap_y": [round(ye1, 3), round(ye2, 3)],
+                        "v_hradbe": [okap_s.get(0) == 0.0 and not okap_s.get("lic_0"), okap_s.get(2) == 0.0 and not okap_s.get("lic_2")]})
     eL1, eR1 = a2 + s * w1 + UP * ye1, b2 + s * w1 + UP * ye1
     eL2, eR2 = b2 - s * w2 + UP * ye2, a2 - s * w2 + UP * ye2
     rA, rB = a2 + UP * (y + vyska), b2 + UP * (y + vyska)
@@ -302,7 +307,7 @@ VEZ_PATRO = []   # strážnice nad průjezdem (pro schody a test průchodu ve st
 BRANA_PW, BRANA_PH, PATRO_TW, PORTAL_W = 3.2, 4.2, 0.9, 0.9   # průjezd branky (šířka, výška), zdi strážnice, portálek
 def patro_brany_y(yf): return yf + BRANA_PH + 0.6              # podlaha strážnice = ochozy hradeb ve stejné výšce (Havran WALK)
 def portal_v(dpt): return dpt / 2 - PATRO_TW - PORTAL_W / 2 - 0.05   # osa portálku v boční stěně (od osy průjezdu ke dvoru)
-def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf=None, patro=False, portalky=None, vyklenek=0.0):
+def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf=None, patro=False, portalky=None, vyklenek=0.0, vyklenek_rozmer=None):
     cx, cz = stred; w, dpt = rozmer
     d = Vector((yaw_d[0], 0, yaw_d[1])).normalized(); s = d.cross(UP).normalized()
     c = Vector((cx, 0, cz))
@@ -317,10 +322,17 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
         # dveře na vnitřní (+s) straně u kraje – přístup po dřevěných schodech zvenku (stavitel hradu, VEZ_PATRO)
         tw = PATRO_TW; yp = patro_brany_y(yf); hor = y1 if patro else None
         Wo, Ho = portaly.otvor(pw, ph, "lomeny")   # otvor průjezdu: portál ho vyplní ostěním, polodrážkou a lomenou klenbou
-        for sg in (-1, 1):   # boční pilíře
-            L = (w - Wo) / 2; cc = c + d * sg * (Wo / 2 + L / 2)
-            P.box(M((cc.x, (y0 + (yp if patro else y1)) / 2, cc.z), basis=frame(d)), (dpt, (yp if patro else y1) - y0, L), "zdivo")
-        P.box(M((c.x, (yf + Ho + (yp if patro else y1)) / 2, c.z), basis=frame(d)), (dpt, (yp if patro else y1) - yf - Ho, Wo + 0.02), "zdivo")   # nad průjezdem
+        ytop_ = yp if patro else y1
+        Wv_, Hv_ = vyklenek_rozmer if (vyklenek > 0 and vyklenek_rozmer) else (Wo, Ho)   # výklenek padacího mostu (Míša 13. 11.:
+        Wv_ = max(Wv_, Wo); Hv_ = max(Hv_, Ho)                                           # zvednutý most zakryje průjezd s přesahem)
+        for (hl_, cs_, Ws_, Hs_) in (((dpt - vyklenek), vyklenek / 2, Wo, Ho), (vyklenek, -(dpt - vyklenek) / 2, Wv_, Hv_)):   # zadní díl (portál) a přední díl (výklenek)
+            if hl_ < 0.01: continue
+            c_ = c + s * cs_   # ven = −s
+            for sg in (-1, 1):   # boční pilíře
+                L = (w - Ws_) / 2; cc = c_ + d * sg * (Ws_ / 2 + L / 2)
+                P.box(M((cc.x, (y0 + ytop_) / 2, cc.z), basis=frame(d)), (hl_, ytop_ - y0, L), "zdivo")
+            P.box(M((c_.x, (yf + Hs_ + ytop_) / 2, c_.z), basis=frame(d)), (hl_, ytop_ - yf - Hs_, Ws_ + 0.02), "zdivo")   # nad průjezdem / výklenkem
+            if Ws_ > Wo + 0.01: P.box(M((c_.x, (y0 + yf) / 2, c_.z), basis=frame(d)), (hl_, yf - y0, Ws_ + 0.02), "zdivo")   # dno výklenku vedle prahu
         if patro:
             # vstup portálky v BOČNÍCH stěnách z ochozů přilehlých hradeb (docs/reference/branka_ochoz.md: Kost, Žebrák,
             # Hradní brána II…; Míša 3. 11.: „vstup není ve správném místě“) – dřív dveře do předbraní a 7m schody u mostu
@@ -708,7 +720,9 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
         for si_ in (0, 2):
             if STR_HR.get(si_) is not None:
                 ok_[si_] = 0.0   # strana v hradbě: střecha končí na koruně, nepřetéká za vnější líc
-                if STR_HR[si_] + 2.0 <= ytop: ok_["lic_" + str(si_)] = True   # hradba i se zídkou a cimbuřím (~2 m) pod korunou paláce: okap na vnější líc
+                if STR_HR[si_] + 2.0 <= ytop:   # hradba i se zídkou a cimbuřím (~2 m) pod korunou paláce: střecha volně nad ní –
+                    ok_[si_] = OKAP_STRANY.get(si_, STRECHA.get("presah_okap_m", 0.5))   # stejný přesah na obě strany (Míša 13. 11.:
+                    ok_["lic_" + str(si_)] = True                                       # „spodní budova nemá stejnou střechu na obě strany“)
         strecha_sedlova(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * STRECHA_POMER, presah=0.5, stity=STRECHA.get("stity", "drevo"), t_zdi=t, okap_s=ok_)   # kamenný palác B: kamenné štíty (kresba misa_01)
     elif strecha == "valba":
         strecha_valba(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * 0.6)

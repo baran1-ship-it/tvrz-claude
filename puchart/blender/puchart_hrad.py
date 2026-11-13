@@ -604,11 +604,25 @@ def portal(P, stred, nrm, w, h, yf, hloubka, kridla=True):
     m = M(stred + UP * yf, basis=Matrix((x, UP, nrm)).transposed())
     kit.doorway(P, m, kind="hlavni", w=w, h=h, depth=hloubka, top="lomeny", leaf=kridla, double=True, venec_vnitrni=True)
 
+def most_kryti(W, H, w, Lp, strop_v=None):
+    """Padací most a výklenek pro otvor brány W × H (Míša 13. 11., foto z průjezdu: zvednutý most užší a nižší než oblouk – po
+    stranách a nahoře nebe). Zvednutý most otvor zakryje s přesahem vyklenek_okraj_m po stranách i nahoře (KCD Talmberk,
+    Havran fort.gate_mechanisms: most zapadne do výklenku kolem portálu); výklenek = most + mezera_vyklenku_m.
+    Vrací (šířka mostu, délka padací části, šířka výklenku, výška výklenku)."""
+    pm = D["padaci_most"]; ok_ = pm["vyklenek_okraj_m"]; mz = pm.get("mezera_vyklenku_m", 0.08)
+    wb = max(w - 0.2, W + 2 * ok_); Lp2 = max(Lp, H + ok_)
+    Hv = Lp2 + mz
+    if strop_v is not None and Hv > strop_v: Hv = strop_v; Lp2 = Hv - mz
+    MOST_KRYTI.append({"otvor": [round(W, 3), round(H, 3)], "most": [round(wb, 3), round(Lp2, 3)], "vyklenek": [round(wb + 2 * mz, 3), round(Hv, 3)]})
+    return wb, Lp2, wb + 2 * mz, Hv
+MOST_KRYTI = []
+
 def brana_otvor_most(br, s_stred, yf, strop, wb, Lp):
     """Otvor ve zdi pro bránu s padacím mostem: obdélník výklenku (Míša 12. 11.: most zapadne do výklenku, řetězy z jeho
-    horních rohů) – aspoň tak velký jako otvor portálu, šířka mostu + okraje, výška délka mostu + rezerva (pod korunou)."""
-    W, H = portaly.otvor(br["sirka"], brana_vyska(br, yf, strop), "lomeny"); pm = D["padaci_most"]
-    return (s_stred, max(W, wb + 2 * pm["vyklenek_okraj_m"]), yf, max(H, min(Lp + pm["vyklenek_nad_m"], strop - yf - 0.15)))
+    horních rohů) – most_kryti: zvednutý most zakryje otvor portálu s přesahem, výklenek kolem něj (pod korunou)."""
+    W, H = portaly.otvor(br["sirka"], brana_vyska(br, yf, strop), "lomeny")
+    _, _, Wv, Hv = most_kryti(W, H, wb + 0.2, Lp, strop - yf - 0.15)
+    return (s_stred, max(W, Wv), yf, max(H, Hv))
 
 def portal_vyklenek(P, face, nrm, br, yf, strop, t, wb, Lp):
     """Portál na dně výklenku hloubky vyklenek_hloubka_m (KCD brána Talmberg, Havran fort.gatehouse); zdivo za výklenkem mezi
@@ -767,6 +781,8 @@ def most2(P, a, ya, b, yb, w, Lp, na_terenu=True, vyk=None, navijak=None):
     _d = Vector((_b.x - _a.x, 0, _b.z - _a.z)).normalized(); _s = _d.cross(UP).normalized(); _hw = w / 2 + 0.4
     BUDOVY.append([[round(q.x, 2), round(q.z, 2)] for q in (_a + _s * _hw, _b + _s * _hw, _b - _s * _hw, _a - _s * _hw)])   # pod mostovkou bez keřů a trávy (Míša 10. 11.)
     d = hz(b - a); L = d.length; d /= L; s = d.cross(UP).normalized()
+    mz_ = D["padaci_most"].get("mezera_vyklenku_m", 0.08)
+    if vyk: Lp = max(Lp, vyk[1] - mz_)   # zvednutý most vyplní výšku výklenku (most_kryti) – pevná část o to kratší
     if na_terenu: NASTUPY.append([round(a.x, 2), round(a.z, 2), round(ya, 2), round(-d.x, 3), round(-d.z, 3)])   # ne z podlahy branky
     sk = math.atan2(yb - ya, L); tg = (yb - ya) / L
     g0_ = min(ter(*(a - d * k_).xz) for k_ in (0.3, 0.9, 1.5))   # nájezd z terénu na začátek mostu (hlídač 5. 11.: hrana 0,26–0,5 m zastavila postavu)
@@ -863,10 +879,10 @@ def most2(P, a, ya, b, yb, w, Lp, na_terenu=True, vyk=None, navijak=None):
     # padací most: osa otáčení na prahu, vede od brány
     bb = a + d * L
     if H.DETAIL:   # padací most jako pohyblivý díl (Havran fort.gate_mechanisms, Míša 12. 11.): zvedá se naviják zevnitř, řetězy z
-        pm = D["padaci_most"]; wb = w - 0.2   # horních rohů výklenku do zdi; ve glb spuštěný (průchozí), hra ho otočí o open° kolem pantu
+        pm = D["padaci_most"]; wb = (vyk[0] - 2 * mz_) if vyk else w - 0.2   # šířka výklenku bez mezery (most_kryti) – řetězy z; ve glb spuštěný (průchozí), hra ho otočí o open° kolem pantu
         mg = M(bb + UP * yb, basis=Matrix((s, UP, -d)).transposed())   # sklon mostu je v tvaru dílu (natočení uzlu se při exportu ztratilo – most trčel 0,2 m nad pevnou částí, 12. 11.)
         gid = "most%d" % (len([e for e in lib.MOVABLE if e["kind"] == "most"]) + 1)
-        Wv, Hv = vyk if vyk else (wb + 0.3, Lp + 0.1)
+        Wv, Hv = vyk if vyk else (wb + 2 * mz_, Lp + mz_)
         kotvy = [bb + s * (sx * (Wv / 2 - 0.08)) + UP * (yb + Hv - 0.08) for sx in (-1, 1)]
         oka = [[sx * (wb / 2 + 0.02), -math.sin(sk) * (Lp - 0.25), math.cos(sk) * (Lp - 0.25)] for sx in (-1, 1)]   # oko na skloněném mostě
         tg_ = math.tan(sk); n3_ = 3   # kolize po třetinách délky ve sklonu mostovky (schůdky po ≤ Lp·tg/3)
@@ -1594,8 +1610,12 @@ def postav_A(P):
             pred = (u_, v_)
         else: POR.append(None)
     rV_ = D["padaci_most"]["vyklenek_hloubka_m"] if A.get("most_vnejsi") else 0.0
+    VYK_V_ = None
+    if A.get("most_vnejsi"):   # výklenek branky kolem průjezdu podle mostu (most_kryti), pod podlahou strážnice
+        _W, _H = portaly.otvor(H.BRANA_PW, H.BRANA_PH, "lomeny")
+        VYK_V_ = most_kryti(_W, _H, A["most_vnejsi"]["sirka"], A["most_vnejsi"]["padaci_m"], H.patro_brany_y(vb["podlaha_y"]) - vb["podlaha_y"] - 0.15)[2:]
     H.vez(P, (O.x, O.z), tuple(vb["rozmer"]), vb["vyska"], "jehlan", yaw_d=(-nA.z, nA.x), brana=True, yf=vb["podlaha_y"], patro=vb.get("patro", True),
-          portalky=[q for q in POR if q], vyklenek=rV_)
+          portalky=[q for q in POR if q], vyklenek=rV_, vyklenek_rozmer=VYK_V_)
     dv0_ = Vector((-nA.z, 0, nA.x)).normalized(); sv0_ = dv0_.cross(UP).normalized()   # průjezd branky bez trávy a keřů (Míša 10. 11.)
     BUDOVY.append([[round(q.x, 2), round(q.z, 2)] for q in (O + dv0_ * (vb["rozmer"][0] / 2 + 0.3) + sv0_ * (vb["rozmer"][1] / 2 + 1.0), O - dv0_ * (vb["rozmer"][0] / 2 + 0.3) + sv0_ * (vb["rozmer"][1] / 2 + 1.0),
                    O - dv0_ * (vb["rozmer"][0] / 2 + 0.3) - sv0_ * (vb["rozmer"][1] / 2 + 1.0), O + dv0_ * (vb["rozmer"][0] / 2 + 0.3) - sv0_ * (vb["rozmer"][1] / 2 + 1.0))])
@@ -1655,7 +1675,7 @@ def postav_A(P):
     if mv_:   # most před vnější brankou přes vnější příkop (náčrt Míši 5. 11.), rovně v ose brány
         kv_ = O + nA * (vb["rozmer"][1] / 2); zv_ = kv_ + nA * mv_["delka_m"]
         pl_ = next(q for q in D["teren"]["plosiny"] if q["id"] == "A_nastup_vnejsi")
-        Wo_, Ho_ = portaly.otvor(H.BRANA_PW, H.BRANA_PH, "lomeny"); pm_ = D["padaci_most"]; tw_ = H.PATRO_TW; yp_ = H.patro_brany_y(vb["podlaha_y"])
+        Wo_, Ho_ = VYK_V_; pm_ = D["padaci_most"]; tw_ = H.PATRO_TW; yp_ = H.patro_brany_y(vb["podlaha_y"])
         dv_ = Vector((-nA.z, 0, nA.x)).normalized()   # osa bubnu podél líce (Havran: naviják v patře brány nad průjezdem)
         nv_V = {"c": O + nA * (vb["rozmer"][1] / 2 - tw_ - 0.75) + UP * (yp_ + pm_["navijak_vyska_m"]), "osa": dv_, "dovnitr": -nA, "patro": True,
                 "podlaha": yp_, "zed": tw_ - rV_ + 0.12}
@@ -2032,6 +2052,10 @@ def stavba(suf):
                    "cols = kolize v místních souřadnicích uzlu, use = místo ovládání (svět). Čte hra/scripts/dvere.gd.",
                    "dily": [{k: e[k] for k in ("name", "kind", "group", "cols", "use", "open", "dur", "chains", "turns") if k in e} for e in lib.MOVABLE]},
                   open(os.path.join(K, "hra/data/pohyb.json"), "w"), ensure_ascii=False)
+        json.dump({"popis": "padací mosty (most_kryti): otvor portálu [š, v], zvednutý most [š, délka], výklenek – test smyslu most_kryje_otvor",
+                   "mosty": MOST_KRYTI}, open(os.path.join(K, "hra/data/mosty_kryti.json"), "w"), ensure_ascii=False)
+        json.dump({"popis": "sedlové střechy (hrady.strecha_sedlova): přesah okapu a výška okapu po stranách (+s, −s), v_hradbe = strana končí na koruně vyšší hradby – test smyslu strecha_soumerna",
+                   "strechy": H.STRECHY_LOG}, open(os.path.join(K, "hra/data/strechy.json"), "w"), ensure_ascii=False)
         json.dump({"popis": "trámy hradu (Part.beam) pro hlídač tesařských spojů nastroje/kontrola_spoju.py: [střed xyz, osy 3×3 (sloupce), poloviční rozměry, materiál, díl]",
                    "tramy": [[[round(x, 4) for x in c], [[round(bs[r][k], 5) for r in range(3)] for k in range(3)], [round(x, 4) for x in hs], m_, dn]
                              for c, bs, hs, m_, dn in H.TRAMY]}, open(os.path.join(K, "build/tramy.json"), "w"))
