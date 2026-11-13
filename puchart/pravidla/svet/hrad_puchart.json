@@ -219,7 +219,7 @@
    "pozn_vyska": "Míša 6. 11.: vnější hradba vlevo od vstupu moc nízká (3,2 m) → 4,5 m nad valem, koruna blízko podlahy strážnice branky (NAVRH)",
    "cimburi_u_branky": true,
    "koruna_rohu_v_ochozu": true,
-   "bez_stinek_u_veze_m": 2.5
+   "bez_stinek_u_veze_m": 3.8
   },
   "hradba_vychod": {
    "osa": [
@@ -257,7 +257,7 @@
    "schody_v_ose": true,
    "cimburi_u_branky": true,
    "koruna_rohu_v_ochozu": true,
-   "bez_stinek_u_veze_m": 2.5
+   "bez_stinek_u_veze_m": 3.8
   },
   "sklep": {
    "jistota": "NAVRH (Míša 30. 10.: sklepení a vězení s klenbami a kobkami) – podle běžné skladby českých hradů 14. st.: valeně zaklenutý sklep pod palácem, přístup ze dvora sklepní šíjí, kobky u hradby bez oken",
@@ -444,7 +444,7 @@
   "cimburi_vnejsi_pozn": "vnější hradba na valu s plynulou korunou (Míša 5. 11.: bez skoků) – stínky po rytmu by dělaly schody a zavřely ochoz u branky (test A_branka_patro)",
   "pozn_10_11_branka": "Míša 10. 11. (nákres): schody podél zdi v ose ochozu, rovně na ochoz; na vnější hradbě cimbuří („udělej tam ty hradbičky“)",
   "pozn_13_11_branka": "Míša 13. 11.: „na hradbách budou hradbičky, zábradlí stačí dodat jen tam, kde není hradba“ – krajní úseky u branky (pevná koruna pro ochoz) i s cimbuřím, úsek za rohem s korunou ve výšce ochozu (dřív o stupeň níž: podesta nad korunou s rámem zábradlí)",
-  "pozn_13_11_stinky": "bez_stinek_u_veze_m: u vstupu ochozu portálkem do věže branky (koruna krajního úseku = podlaha strážnice) žádná stínka – stála v cestě bez kolize (test průchodu povrch_kolize 13. 11.)"
+  "pozn_13_11_stinky": "bez_stinek_u_veze_m: u vstupu ochozu portálkem do věže branky (koruna krajního úseku = podlaha strážnice) žádná stínka – stála v cestě bez kolize (test průchodu povrch_kolize 13. 11.); 3,8 m: krajní úsek končí 0,3 m před středem stěny věže (konec osy uvnitř věže), stínka u líce věže stála v portálku"
  },
  "B": {
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",

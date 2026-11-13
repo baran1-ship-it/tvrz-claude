@@ -143,6 +143,7 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
             for k in range(i0, i1):
                 if bez_stinek and bez_stinek[0] <= (k + 0.5) * Rl <= bez_stinek[1]: continue   # vstup ochozu do věže (13. 11. povrch_kolize: stínka v cestě k portálku)
                 p = a + d * ((k + 0.5) * Rl) + out_n * (t * 0.3)
+                if os.environ.get("PUCHART_DBGS") and (p - Vector((12.45, 0, -45.45))).length < 1.5: print("DBGSTINKA", [round(p.x, 2), round(p.z, 2)], "s", round((k + 0.5) * Rl, 2), "L", round(L, 2), "a", [round(a.x, 2), round(a.z, 2)], "b", [round(b.x, 2), round(b.z, 2)], "volno", bez_stinek, flush=True)
                 P.box(M((p.x, y1 + CIMB["vyska_m"] / 2, p.z), basis=frame(d)), (t * 0.4, CIMB["vyska_m"], sw), mat + "_koruna" if mat == "zdivo" else mat, collide=True)   # stínka holý kámen (Míša 10. 11.); kolize jako u plynulé koruny (13. 11.: stínky byly průchozí)
     return out
 
