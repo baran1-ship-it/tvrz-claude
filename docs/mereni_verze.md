@@ -299,3 +299,15 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
 - Špičky 2,5–3,6 s (3× za 30 min: (-24,331), (172,894), (439,802)) mimo skripty (proces max 28 ms při snímku 3588 ms),
   bez vztahu ke krokům kvality – kreslení/ovladač/systém, NEOVĚŘENO. Paměť u špiček „-0/0“: trasa četla
   OS.get_memory_info – opraveno (bere diag: /proc/meminfo, halda).
+
+### 0.99999 – vydáno 13. 11. 12:45 (testovací, commit 80686596 → e3c0e84a)
+- **Měřeno 13. 11. 14:17 (Míša, tablet, 3D 75 %).** p50/p95 „vše“ / „bez postav“: tvrz-cesta 21/33 / 17/26, louka 25/31 /
+  17/25, les 27/62 / 19/38, ves 30/35 / 20/24, mlýn 26/32 / 17/22, ves-vjezd 29/34 / 20/25, ves-dvory 33/38 / 29/42,
+  hostinec 28/33 / 20/27, věž 29/33 / 17/22. VRAM 741 MB, uzlů 26,7 k.
+- **REGRESE (naměřený vliv):** postavy stojí +8–10 ms p50 skoro na každém úseku (i louka/les). 0.99995: „bez postav ≈ vše“;
+  ves/mlýn/hostinec p50 0.99996 21/20/18, 0.99998 20/20/19 → 0.99999 30/26/28; „bez postav“ 20/17/20 = stará úroveň.
+  Měřené skripty (skr) jen +1–2 ms → cena je mimo měřené skripty (kostra, modifikátory, skinning). Příčina NEOVĚŘENO.
+- Podezření (vše nové u postav mezi 0.99998 a 0.99999): (a) `sukne_ridic.gd` SkeletonModifier3D (jen v záběru do 15 m),
+  (b) +24 kostí sukně na postavu (ec42097f), (c) úchopy – druhá ruka IK ve 3 kolech (8dd3ab02, e0f27d6f),
+  (d) LOD: jdoucí postava v záběru do anim_do_m plná animace (fe4e4039).
+- Izolovaný test: varianty trasy bez_sukne / bez_uchopu / anim_lod_stary (zavést), PC headless měření stejných skupin.
