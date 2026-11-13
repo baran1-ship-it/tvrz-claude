@@ -409,7 +409,7 @@ def ochoz_hradby(P, osa, uk, t, konce, mezery=None, sirka=0.9, odstup=3.0, otevr
         for s0, s1, y in uk[i]:
             if ps and abs(ps[-1][2] - y) < 1e-3: ps[-1] = (ps[-1][0], s1, y)
             else: ps.append((s0, s1, y))
-        pos = (-t / 2 if not otevreny_konec else t / 2 + 0.02) if i > 0 else 0.0; pod_ = False   # (13. 11.: od líce +2 cm – 12 cm do zdi dávalo bod trasy ve zdi, povrch_kolize) schody v ose (branka A): v rohu pavlač od vnitřního líce kolmé zdi, ne přes její nižší korunu (Míša 12. 11.: rám zábradlí ve vzduchu)
+        pos = (-t / 2 if not otevreny_konec else t / 2 - 0.12) if i > 0 else 0.0; pod_ = False   # schody v ose (branka A): v rohu pavlač od vnitřního líce kolmé zdi, ne přes její nižší korunu (Míša 12. 11.: rám zábradlí ve vzduchu)
         def rovne(dv, y):   # portálek v ose pavlače a v její výšce (Havran: ochoz vchází do věže rovně) – stačí pavlač až k líci
             s_d = (dv - a).dot(d); ods = abs((dv - (a + d * s_d + g)).dot(vn)); dy = max(abs(ps[0 if i == 0 else -1][2] - y), abs((cur if i else y) - y))
             n_ = konce[0 if i == 0 else 1][2]; uhel = math.degrees(math.acos(min(1.0, abs(d.dot(n_)))))
@@ -1670,7 +1670,7 @@ def postav_A(P):
         po_k_vezi = bb[k0:] if ut == 1 else bb[:k0 + 1][::-1]
         STAVBY.append({"ochoz_hradby_mezera": [i, round(sT, 2), round(sT + 1.2, 2)]})
         if hw.get("schody_v_ose"):
-            TR["A_branka_patro"] = [bod(f_ - dS * 2.0), bod(f_ - dS * 0.4), bod(a + d * sT + vn * st_o, y_k, 0.25)] + po_k_vezi
+            TR["A_branka_patro"] = [bod(f_ + vn * 1.8 - dS * 0.6), bod(f_ - dS * 0.4), bod(a + d * sT + vn * st_o, y_k, 0.25)] + po_k_vezi   # ze dvora z boku (13. 11.: za patou je prohlubeň valu)
         else:
           TR["A_branka_patro"] = [bod(f_ - d * 1.8 + vn * 0.0), bod(f_ - d * 0.5), bod(a + d * (sT + 0.6) + vn * st_o, y_k),
                                 bod(a + d * (sT + 0.6) + vn * (tt / 2 + SW / 2), y_k, 0.25)] + po_k_vezi + [bod(dvere - n_dv * 0.9, yp), bod(dvere - n_dv * 1.6, yp)]

@@ -1043,6 +1043,42 @@
      ]
     ],
     "pozn_kontrola": "smysl:plosiny_rovne měří před dveřmi přízemí (12,2; 15,45) do 3,5 m – kraj plošiny u V hradby vyhlazení terénu snižuje (to je přechod, ne vstup)"
+   },
+   {
+    "id": "A_schody_vychod_pata",
+    "polygon": [
+     [
+      10.4,
+      -31.0
+     ],
+     [
+      13.5,
+      -31.0
+     ],
+     [
+      13.5,
+      -27.6
+     ],
+     [
+      10.4,
+      -27.6
+     ]
+    ],
+    "y": 33.35,
+    "prechod_m": 1.5,
+    "zdroj": "Míša 13. 11. (koruna u branky ve výšce ochozu → delší schody v ose ochozu): pata schodů podél V hradby by končila ve svahu prohlubně valu (terén 33,4 → 29,4 m na 6 m, test průchodu A_branka_patro uvízl); vyrovnaná plocha u paty schodů ze dvora předhradí",
+    "jistota": "NAVRH (úprava terénu u paty schodů)",
+    "kontrola_body": [
+     [
+      12.6,
+      -29.0
+     ],
+     [
+      11.2,
+      -29.5
+     ]
+    ],
+    "kontrola_rovna": true
    }
   ],
   "zarezy": [

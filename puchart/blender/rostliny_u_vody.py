@@ -122,7 +122,10 @@ def atlas_ostrice(res=1024):
         nx, ny = nn[..., 0] / 127.5 - 1, nn[..., 1] / 127.5 - 1
         nx2 = nx * math.cos(t) - ny * math.sin(t)
         ny2 = nx * math.sin(t) + ny * math.cos(t)
-        nn[..., 0], nn[..., 1] = (nx2 + 1) * 127.5, (ny2 + 1) * 127.5
+        # čepel je v atlasu roztažená napříč (~4×) -> sklon normály napříč by se přehnal; zmírnit a znormovat
+        nx2, ny2 = nx2 * 0.3, ny2 * 0.6
+        nz2 = np.sqrt(np.clip(1 - nx2 ** 2 - ny2 ** 2, 0.05, 1))
+        nn[..., 0], nn[..., 1], nn[..., 2] = (nx2 + 1) * 127.5, (ny2 + 1) * 127.5, (nz2 + 1) * 127.5
         xo = ci * colw + 2
         C[:, xo:xo + cw] = cc
         A[:, xo:xo + cw] = aa
@@ -452,7 +455,7 @@ VRBY = {
         ramena=dict(n=(8, 10), od=0.05, uhel=(6, 34), delka=(2.6, 3.7), r=0.4, krivost=0.22, gravitace=0.03, svetlo=0.06),
         vetve=dict(rozestup=(0.3, 0.5), uhel=(15, 35), delka=(0.5, 1.0), r=0.55, krivost=0.25, gravitace=0.05, svetlo=0.06, od=0.12),
         vetvicky=dict(rozestup=(0.9, 1.3), uhel=(20, 40), delka=(0.25, 0.45), r=0.5, krivost=0.2, gravitace=0.05, svetlo=0.05, od=0.4),
-        karet_m=0.11, koruna=(0.95, 0.95), listi_od=0.35, cil_troj=9000),
+        karet_m=0.08, koruna=(0.95, 0.95), listi_od=0.35, cil_troj=9000),
     "vrba_ker_2": dict(   # ~2,5 m (S. purpurea na štěrku, K2.2) – nižší, prutovitější, modrozelená
         vyska=2.6, listy="LeafSet013", tint=(0.47, 0.62, 0.48), kura="bark_willow", kura_m=0.5,
         karta_m=0.65, list_m=0.08, listu=40, plod=None, plodu=(0, 0), plod_karet=0,
@@ -460,7 +463,7 @@ VRBY = {
         ramena=dict(n=(9, 11), od=0.05, uhel=(8, 40), delka=(1.9, 2.7), r=0.4, krivost=0.2, gravitace=0.05, svetlo=0.05),
         vetve=dict(rozestup=(0.3, 0.5), uhel=(15, 35), delka=(0.4, 0.75), r=0.55, krivost=0.22, gravitace=0.06, svetlo=0.05, od=0.12),
         vetvicky=dict(rozestup=(0.9, 1.3), uhel=(20, 40), delka=(0.2, 0.35), r=0.5, krivost=0.2, gravitace=0.05, svetlo=0.05, od=0.45),
-        karet_m=0.11, koruna=(1.05, 0.95), listi_od=0.35, cil_troj=8000),
+        karet_m=0.08, koruna=(1.05, 0.95), listi_od=0.35, cil_troj=8000),
 }
 
 
@@ -488,7 +491,18 @@ def vrby(nfp_list):
         me, _ = strom2.postav(k, 3, 0)
         # názvy materiálů jako Havranovy keře (game_<model>_listi / _kura)
         for m in me.materials:
-            m.name = "game_%s_%s" % (k, "listi" if m.name.endswith("_listi") else "kura")
+            listi = m.name.endswith("_listi")
+            m.name = "game_%s_%s" % (k, "listi" if listi else "kura")
+            if listi:      # alfa přes Round -> glTF MASK 0,5 (jako Havranovy keře), ne BLEND
+                nt = m.node_tree
+                bsdf = nt.nodes["Principled BSDF"]
+                src = bsdf.inputs["Alpha"].links[0].from_socket
+                rd = nt.nodes.new("ShaderNodeMath")
+                rd.operation = "ROUND"
+                nt.links.new(src, rd.inputs[0])
+                nt.links.new(rd.outputs[0], bsdf.inputs["Alpha"])
+            else:
+                m.use_backface_culling = True
         fp = os.path.join(OUT, k + ".glb")
         ob = bpy.data.objects.new(k, me)
         export([ob], fp)
@@ -542,6 +556,8 @@ def nahled(mes, fp):
     sc.view_settings.exposure = 0.0
     sc.render.film_transparent = False
     sc.cycles.samples = 24
+    sc.cycles.transparent_max_bounces = 64
+    sc.cycles.max_bounces = 64
     sc.render.resolution_x = 1400
     sc.render.resolution_y = 700
     sc.render.image_settings.file_format = "PNG"
