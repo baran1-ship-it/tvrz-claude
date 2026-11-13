@@ -1278,7 +1278,44 @@ def barvy_vrcholu(ob, barvy):
     for v in vi: data.extend(barvy[v] if v < len(barvy) else (1.0, 1.0, 1.0, 1.0))
     col.data.foreach_set("color", data); me.color_attributes.active_color = col
 
-def uloz(parts, jmeno, kolize=False, vzhled=None):
+def odstran_neviditelne(objs, smeru=48, dosah=600.0, min_y=-0.35):
+    """Daleká verze bez vnitřku (Míša 13. 11., rešerše docs/reference/vykon_vnitrek_reserse.md krok 1): plocha, ze které
+    žádný paprsek (smeru směrů po kouli, ne prudce dolů – tam je terén) neunikne z hradu ven, není zvenku vidět – pryč.
+    Okna daleké verze jsou tmavé výplně, takže vnitřek je uzavřený; co je vidět otvorem, zůstane. Vrací (smazáno, celkem)."""
+    import bmesh
+    from mathutils.bvhtree import BVHTree
+    V_, F_ = [], []
+    for ob in objs:
+        mw = ob.matrix_world; o_ = len(V_)
+        V_ += [mw @ v.co for v in ob.data.vertices]; F_ += [[o_ + i for i in p.vertices] for p in ob.data.polygons]
+    if not F_: return 0, 0
+    T_ = BVHTree.FromPolygons(V_, F_, all_triangles=False, epsilon=0.0)
+    gold = math.pi * (3.0 - math.sqrt(5.0)); dirs = []
+    for i in range(smeru * 2):
+        y = 1.0 - (i + 0.5) / smeru
+        if y < min_y: break
+        r = math.sqrt(max(0.0, 1.0 - y * y)); th = gold * i
+        dirs.append(Vector((math.cos(th) * r, y, math.sin(th) * r)))
+    smaz = 0; celk = 0
+    for ob in objs:
+        mw = ob.matrix_world; n3 = mw.to_3x3().inverted().transposed()
+        bm = bmesh.new(); bm.from_mesh(ob.data); bm.faces.ensure_lookup_table(); pryc = []
+        for f in bm.faces:
+            celk += 1; c = mw @ f.calc_center_median(); n = (n3 @ f.normal).normalized()
+            vid = False
+            for d in dirs:
+                dn = d.dot(n)
+                if abs(dn) < 0.05: continue
+                o = c + n * (0.02 if dn > 0 else -0.02) + d * 0.02
+                if T_.ray_cast(o, d, dosah)[0] is None: vid = True; break
+            if not vid: pryc.append(f)
+        if pryc:
+            bmesh.ops.delete(bm, geom=pryc, context="FACES"); smaz += len(pryc)
+            bm.to_mesh(ob.data); ob.data.update()
+        bm.free()
+    return smaz, celk
+
+def uloz(parts, jmeno, kolize=False, vzhled=None, vnitrek_pryc=False):
     for o in list(bpy.data.objects):
         if not (kolize and o.name.startswith("Pohyb_")): bpy.data.objects.remove(o)   # křídla vrat (kit.movable) zůstanou
     coll = bpy.context.scene.collection
@@ -1312,6 +1349,9 @@ def uloz(parts, jmeno, kolize=False, vzhled=None):
             vel = mt.get("vel", 1.0) if mt else 1.0
             for li in poly.loop_indices: uv[li].uv = (uv[li].uv[0] / vel, uv[li].uv[1] / vel)
         for mo in list(ob.modifiers): ob.modifiers.remove(mo)
+    if vnitrek_pryc:
+        sm_, ce_ = odstran_neviditelne([o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith(("KOLIZE", "Pohyb_"))])
+        print("VNITREK_PRYC %s: neviditelných ploch %d z %d" % (jmeno, sm_, ce_), flush=True)
     out = os.path.join(K, "hra/modely/hrady"); os.makedirs(out, exist_ok=True)
     kw_ = {"export_vertex_color": "ACTIVE"} if vzhled or any(getattr(P, "barvy", None) is not None for P in parts) else {}
     try:

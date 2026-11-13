@@ -2058,7 +2058,7 @@ def stavba(suf):
             for m_, sz_ in Pq.cols:
                 l_ = m_.inverted() @ Vector((qx_, qy_, qz_))
                 if all(abs(l_[k]) <= sz_[k] / 2 + 0.05 for k in range(3)): print("DBGB", Pq.name if hasattr(Pq, "name") else "", [round(v_, 2) for v_ in m_.translation], sz_, flush=True)
-    H.uloz([PA, PB], "puchart" + suf, kolize=(suf == ""), vzhled=VZ if suf == "" else None)
+    H.uloz([PA, PB], "puchart" + suf, kolize=(suf == ""), vzhled=VZ if suf == "" else None, vnitrek_pryc=(suf == "_daleko"))
     if suf == "":
         cc = json.load(open(os.path.join(K, "pravidla/svet/cesty_puchart.json")))
         for k_ in ("A_vstup", "B_vstup"):   # ven branou (Míša 4. 11.: „ve vstupu do dolního hradu jsem nemohl vyjít, u země překážka“)
