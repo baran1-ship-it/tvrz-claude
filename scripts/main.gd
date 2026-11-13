@@ -1347,7 +1347,9 @@ func _process(_delta: float) -> void:
 
 
 func _process_vlastni(_delta: float) -> void:
+	var _tq := Time.get_ticks_usec()
 	_pred_dohrivej()
+	diag.cas("main: dohrivani", Time.get_ticks_usec() - _tq)     # 13. 11. zasek main 114 ms na nadvori - rozpis
 	if not ready_done:
 		return
 	if svet and player:
@@ -1376,6 +1378,7 @@ func _process_vlastni(_delta: float) -> void:
 	if not _zas.is_empty():
 		_zaseky_krok(_delta)
 	_kam_t -= _delta
+	_tq = Time.get_ticks_usec()
 	if _kam_t <= 0.0 and svet and player:
 		_kam_t = 0.5
 		svet.kameny_toku_k(Vector2(player.global_position.x, player.global_position.z))
@@ -1386,7 +1389,11 @@ func _process_vlastni(_delta: float) -> void:
 			for o: Vector2 in [Vector2.ZERO, Vector2(10, 0), Vector2(-10, 0), Vector2(0, 10), Vector2(0, -10)]:
 				z += svet._les(pp.x + o.x, pp.z + o.y)
 			day.les_cil = clampf((z / 5.0 - 0.3) / 0.5, 0.0, 1.0) * (0.0 if day.interior > 0.5 else 1.0)
+	diag.cas("main: kameny a les", Time.get_ticks_usec() - _tq)
+	_tq = Time.get_ticks_usec()
 	_music_inside()
+	diag.cas("main: hudba", Time.get_ticks_usec() - _tq)
+	_tq = Time.get_ticks_usec()
 	if predmety.placing != "" or player.seated or player.climbing:
 		_use = {}
 	elif build_mode:
@@ -1398,8 +1405,11 @@ func _process_vlastni(_delta: float) -> void:
 		var lide_u: Node = world.get_node_or_null("Lide") if world else null
 		if _use.is_empty() and lide_u and lide_u.has_method("obchodnik_u"):
 			_use = lide_u.obchodnik_u(player.global_position)      # Misa 11. 11.: obchod u kupce (KCD)
+	diag.cas("main: pouziti", Time.get_ticks_usec() - _tq)
+	_tq = Time.get_ticks_usec()
 	hud.build_mode = build_mode
 	_build_acts()
+	diag.cas("main: akce", Time.get_ticks_usec() - _tq)
 
 
 # ------------------------------------------------------------------ nabidka akci (svitek u predmetu)

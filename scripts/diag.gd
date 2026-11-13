@@ -246,6 +246,16 @@ func _detektor() -> void:
 			cel, pr, fz, poloha_text().get_slice(" (", 0), int(Time.get_ticks_msec() / 1000), fy, int(_sn.get("kroku", 0)), pc,
 			float(_sn.get("skripty", 0)) / 1000.0, String(_sn.get("nej", "-")), float(_sn.get("nej_us", 0)) / 1000.0, kr,
 			int(_sn.get("uzly", 0)), String(_sn.get("plan", "")), ", měřič PSS" if bool(_sn.get("pss", false)) else ""]
+	# 13. 11. (zasek main 114 ms na nadvori bez rozpisu): u skriptu main nejdrazsi cast (main: ...)
+	if String(_sn.get("nej", "")) == "main":
+		var nk := ""
+		var nv := 0
+		for k: String in _cas_minule:
+			if k.begins_with("main: ") and int(_cas_minule[k]) > nv:
+				nv = int(_cas_minule[k])
+				nk = k
+		if nk != "":
+			z += " [%s %.0f ms]" % [nk, nv / 1000.0]
 	if main.player and bool(main.player.get("flying")):
 		z += ", LET"                      # rychly pohyb = rychlejsi nacitani okoli (Misa 26. 10.)
 	z += " | " + _fronty_zasek()
