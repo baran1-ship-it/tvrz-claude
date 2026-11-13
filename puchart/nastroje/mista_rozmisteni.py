@@ -93,6 +93,10 @@ def _dvere_domu():
         jm = nd.get("name", ""); m_ = jm.split("_Dvere")[0]
         if "_Dvere" not in jm or m_ not in MI["pudorysy"] or "translation" not in nd: continue
         tx, _, tz = nd["translation"]
+        # uzel dveří = pant na kraji otvoru (13. 11.: trasy a rovina před vchodem mířily na zárubeň) – střed otvoru = střed křídla
+        if "mesh" in nd:
+            acc_ = j["accessors"][j["meshes"][nd["mesh"]]["primitives"][0]["attributes"]["POSITION"]]
+            tz = tz + (acc_["min"][2] + acc_["max"][2]) / 2
         if abs(tx) > MI["pudorysy"][m_][0] - 0.3: out_.setdefault(m_, []).append((tx, tz, 1.0 if tx > 0 else -1.0))
     return out_
 DVERE = _dvere_domu()

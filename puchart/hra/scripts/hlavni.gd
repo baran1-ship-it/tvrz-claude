@@ -623,6 +623,7 @@ func _mista() -> void:
 		dum.name = "%s_%s_%d" % [s["misto"], s["model"], uzel.get_child_count()]   # jedinečné jméno instance: skupina dveří dvere.gd = dveře@dům
 		dum.transform = Transform3D(Basis(Vector3.UP, float(s["yaw"])), Vector3(float(s["x"]), float(s["teren_y"]), float(s["z"])))
 		uzel.add_child(dum)
+		_rampy_dveri(dum)
 		var st_vzor: MeshInstance3D = ssc.find_child(String(s["model"]) + "_Stredni", true, false) as MeshInstance3D if ssc else null
 		var se_st := st_vzor != null and blizko < st_do
 		if se_st:
@@ -648,6 +649,31 @@ func _mista() -> void:
 	sc.queue_free()
 	if ssc: ssc.queue_free()
 	print("MISTA staveb %d" % uzel.get_child_count())
+
+
+## Šikmá kolize u vnějších dveří domu (Míša 13. 11.: „do hájovny nemůžu vstoupit, všechny budovy musí být vstupné“): domy
+## Havrana mají před prahem kamenný stupeň 0,15 m a podlahu 0,3 m nad základem, postava nemá krok nahoru (hradní schody mají
+## rampu) – rampa z terénu na práh jako u schodů hradu (puchart_hrad.schody2 kol). Vnější dveře = uzel *_Dvere_* na obvodové stěně.
+func _rampy_dveri(dum: Node3D) -> void:
+	var xmax := 0.0
+	for ch in dum.get_children():
+		if String(ch.name).contains("_Dvere_") and ch is Node3D: xmax = maxf(xmax, absf((ch as Node3D).position.x))
+	var kb := StaticBody3D.new(); kb.name = "RampyDveri"
+	for ch in dum.get_children():
+		if not (String(ch.name).contains("_Dvere_") and ch is MeshInstance3D): continue
+		var mi := ch as MeshInstance3D
+		if absf(mi.position.x) < xmax - 0.05: continue   # vnitřní dveře
+		var sg := signf(mi.position.x); var ab := mi.get_aabb()
+		var zc := mi.position.z + ab.position.z + ab.size.z * 0.5
+		var x0 := mi.position.x + sg * 2.8; var x1 := mi.position.x - sg * 0.25   # venku na terénu → za prahem na podlaze (nad hranou stupně 1,05 m před stěnou je rampa 0,17 m – nad stupněm 0,15)
+		var y0 := -0.02; var y1 := 0.32
+		var L := Vector2(x1 - x0, y1 - y0).length(); var uh := atan2(y1 - y0, absf(x1 - x0))
+		var cs := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(L, 0.12, 0.9); cs.shape = bx
+		cs.position = Vector3((x0 + x1) * 0.5, (y0 + y1) * 0.5 - 0.06, zc)
+		cs.rotation.z = uh * (-sg)   # stoupá směrem dovnitř
+		kb.add_child(cs)
+	if kb.get_child_count() > 0: dum.add_child(kb)
+	else: kb.free()
 
 
 ## Rostliny na skalách (blender/skaly.py → hra/data/skaly_rostliny.json; Míša 10. 11.: „vegetaci sem tam, ne jen mech“, fotky
