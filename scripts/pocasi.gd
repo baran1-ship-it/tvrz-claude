@@ -25,6 +25,7 @@ var _mat_mokro: Array = []
 var _posl_mokro := -1.0
 var _posl_st := -1.0
 var _posl_zat := -1.0
+var _sh_mokro := {}      # Shader -> ma uniform dest_mokro (kontrolni sber 13. 11.: kod shaderu jen jednou)
 
 
 func setup(m: Node, d: Node) -> void:
@@ -119,8 +120,15 @@ func _sber_materialu() -> void:
 			for s in (g as MeshInstance3D).mesh.get_surface_count():
 				ms.append((g as MeshInstance3D).mesh.surface_get_material(s))
 		for m: Variant in ms:
-			if m is ShaderMaterial and not videno.has(m) and (m as ShaderMaterial).shader and "uniform float dest_mokro" in (m as ShaderMaterial).shader.code:
-				videno[m] = true
+			if not (m is ShaderMaterial) or videno.has(m):
+				continue
+			videno[m] = true                         # kazdy material jednou (kontrola: kod shaderu jen jednou na shader)
+			var sh: Shader = (m as ShaderMaterial).shader
+			if sh == null:
+				continue
+			if not _sh_mokro.has(sh):
+				_sh_mokro[sh] = "uniform float dest_mokro" in sh.code
+			if _sh_mokro[sh]:
 				_mat_mokro.append(m)
 				var pv: Array = (P["mokro"] as Dictionary)["povrch"]
 				(m as ShaderMaterial).set_shader_parameter("dest_povrch", Vector3(float(pv[0]), float(pv[1]), float(pv[2])))
@@ -154,7 +162,7 @@ func stav(t: float) -> Vector3:
 	var nab := float((P["mokro"] as Dictionary)["nabeh_h"])
 	var v := Vector3.ZERO
 	var d0 := int(floor(t / 24.0)) + 1
-	for d in [d0 - 1, d0]:          # dest muze zacit vecer a prejit pres pulnoc
+	for d in [d0 - 1, d0, d0 + 1]:  # dest muze zacit vecer a prejit pres pulnoc; zatahovani pred destem tesne po pulnoci
 		if d < 1:
 			continue
 		var r := _dest_dne(d)
@@ -186,7 +194,8 @@ func _krok(dt: float) -> void:
 	zatazeni = st.x
 	sila = st.y
 	mokro = st.z
-	if absf(zatazeni - _posl_zat) > 0.02:
+	# kontrola 13. 11.: konecnou 0 (a 1) propsat vzdy - jinak zatazeni zustalo tesne nad nulou a obloha se prepocitavala dal
+	if absf(zatazeni - _posl_zat) > 0.02 or (zatazeni <= 0.0 and _posl_zat > 0.0) or (zatazeni >= 1.0 and _posl_zat < 1.0):
 		_posl_zat = zatazeni
 		day.zatazeni = zatazeni
 		day.prekresli()
@@ -219,7 +228,7 @@ func _krok(dt: float) -> void:
 	if mokro > 0.001 and _posl_mokro <= 0.001:
 		_sber_materialu()
 	var mk_st := mokro * (1.0 - float((P["mokro"] as Dictionary)["stavby_uvnitr"]) * _uvnitr)
-	if absf(mokro - _posl_mokro) > 0.02 or absf(mk_st - _posl_st) > 0.02:
+	if absf(mokro - _posl_mokro) > 0.02 or absf(mk_st - _posl_st) > 0.02 or (mokro <= 0.0 and _posl_mokro > 0.0) or (mk_st <= 0.0 and _posl_st > 0.0):
 		_posl_mokro = mokro
 		_posl_st = mk_st
 		for m: ShaderMaterial in _mat_mokro:

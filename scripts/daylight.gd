@@ -238,6 +238,7 @@ func sun_dir(p: Dictionary) -> Vector3:
 ## skoro cele, vic prizemni mlhy. Cisla pravidla/svet/pocasi.json obloha.
 var zatazeni := 0.0
 var _kryti_zmena := false
+var _kryti_posl := -1.0
 
 
 func _zatazit(p0: Dictionary) -> Dictionary:
@@ -294,8 +295,12 @@ func _apply(p: Dictionary) -> void:
 	_last = p                 # bez zatazeni (prechody michaji ciste predvolby)
 	p = _zatazit(p)
 	if zatazeni > 0.001 or _kryti_zmena:
+		# jen pri znatelne zmene (obloha_prah) - kazdy zapis = prepocet radiance oblohy (kontrola 13. 11.)
 		var mk: Array = (Pravidla.cti("pocasi", "obloha") as Dictionary)["mraky_kryti"]
-		sky_mat.set_shader_parameter("cloud_cover", lerpf(float(mk[0]), float(mk[1]), zatazeni))
+		var kr := lerpf(float(mk[0]), float(mk[1]), zatazeni)
+		if absf(kr - _kryti_posl) > float(Pravidla.cti("kvalita", "obloha_prah")) or (zatazeni <= 0.0 and kr != _kryti_posl):
+			sky_mat.set_shader_parameter("cloud_cover", kr)
+			_kryti_posl = kr
 		_kryti_zmena = zatazeni > 0.001
 	var d := sun_dir(p)
 	# stiny neblikaji (Misa 0.53): smer slunce se meni po skocich 1,5 deg, ne kazdych 0,25 s o kousek - kazda
