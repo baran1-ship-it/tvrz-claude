@@ -91,6 +91,18 @@ if os.path.exists(vys_pre + "_koryta.npz"):
             # 2m trojúhelník u nástupu sklonil k nižšímu pásu a mostovka „visela“ 0,3 m (povrch_kolize 10. 11.)
             mkd[_sl] &= ~_m; mL[_sl] &= ~_m
             Y[_sl] = np.where(_m, (H_SUROVY - P["H"])[_sl], Y[_sl])
+    # plošiny u vstupů (hrad_puchart.json teren.plosiny kontrola_rovna): bez vyhlazení jako násypy (Míša 13. 11.: hlína pod
+    # prahem věžičky – vyhlazení σ 1,5 m stáhlo plošinu u hradby o 0,3 m, smysl:plosiny_rovne)
+    from matplotlib.path import Path as _Path
+    for _pl in json.load(open(os.path.join(koren, "pravidla/svet/hrad_puchart.json")))["teren"]["plosiny"]:
+        if not _pl.get("kontrola_rovna") or "polygon" not in _pl: continue
+        _pg = np.array(_pl["polygon"], float); _c0 = int(_pg[:, 0].min() - x_hra0) - 1; _c1 = int(_pg[:, 0].max() - x_hra0) + 2
+        _r0 = int(_pg[:, 1].min() - z_hra0) - 1; _r1 = int(_pg[:, 1].max() - z_hra0) + 2
+        _cc, _rr = np.meshgrid(np.arange(_c0, _c1), np.arange(_r0, _r1))
+        _m = _Path(_pg).contains_points(np.c_[(_cc + x_hra0).ravel(), (_rr + z_hra0).ravel()]).reshape(_cc.shape)
+        _sl = (slice(_r0, _r1), slice(_c0, _c1))
+        NAST_M[_sl] |= _m; mkd[_sl] &= ~_m; mL[_sl] &= ~_m
+        Y[_sl] = np.where(_m, (H_SUROVY - P["H"])[_sl], Y[_sl])
     for _ in range(12):
         vy = np.where(mL, jako_sit(Y.astype(np.float64), k0) - Yp, -9.0)   # o kolik je síť nad skutečným terénem pásu
         if vy.max() <= -JP["rezerva_m"]: break
