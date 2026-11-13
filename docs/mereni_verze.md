@@ -331,3 +331,12 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
 - **Naměřená souvislost:** ves-vjezd 42 ms při 692 kresleních (vše, vše znovu) × 27 ms při 561–563 (bez animace, chůze
   LOD). Varianty „vše“ a „bez postav“ mají o ~100–130 kreslení víc než ostatní na většině úseků – PROČ NEOVĚŘENO
   (podezření: louka/stíny po startu trasy, ne postavy). Ves potřebuje 560–690 kreslení (tvrz ~330) → sloučení staveb vsi.
+
+### 0.999993 – vydáno 13. 11. 17:58 (částice, drobné díly tvrze, předměty v domech)
+- **Měřeno 13. 11. 19:46 (Míša, tablet, 3D 75 %).** p50 vše / bez postav / bez animace / chůze LOD / vše znovu: tvrz-cesta
+  26/18/30/31/25, louka 27/18/27/24/22, les 31/19/25/22/21, ves 25/18/27/23/35, mlýn 17/20/24/20/20, ves-vjezd 25/22/27/24/29,
+  ves-dvory 28/27/37/36/36, hostinec 21/18/25/28/22, věž 27/17/27/26/24.
+- **Bez postav** zase −7..−9 ms (3 ze 4 běhů). **Bez animace ani chůze LOD nepomáhají** → cena postav NENÍ animace, modifikátory
+  ani skripty; kreslení stejné → zbývá vykreslení skinovaných sítí postav (Compatibility/GLES3, Godot #88954) – podezření.
+- Izolovaný test: PC (xvfb, gl_compatibility) N postav před kamerou – animované / zastavené / skryté; na trase varianta
+  postavy_skryte (neviditelné, logika běží).
