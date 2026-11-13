@@ -220,6 +220,9 @@ func _process_modification() -> void:
 				# kontrola 13. 11.: kdyz osa stehna uz prosla mezerou (je pred tetivou), tlak po kolmici by latku stahl za
 				# stehno - strana vytlaceni vzdy k ref (ven od panve), ne podle polohy osy
 				var ven := _ven_z_kapsli(m, kapsle, ((vse[i][2] as Vector3) + (vse[(i + 1) % n_r][2] as Vector3)) * 0.5, true) - m
+				# vsede a v kleku (w_ohyb 1) klade latku na stehno draha - tetiva jen pri chuzi a stani (test_sukne 13. 11.:
+				# vsede tetiva stahla klouby do stehna, 66 -> 165 chyb)
+				ven *= 1.0 - w_ohyb
 				if ven.length_squared() > 1e-8:
 					ca[k] = (ca[k] as Vector3) + ven
 					cb[k] = (cb[k] as Vector3) + ven
