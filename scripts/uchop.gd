@@ -383,6 +383,35 @@ func _poza(sk: Skeleton3D, ruka: String, p: Dictionary, d: Dictionary, bod := Ve
 		p["r_m"] = float(zs["r"])
 		p["posun_dlane"] = _pozy[klic + "|p"]
 		return pz0
+	# 13. 11. (kontrola pred vydanim): ve hre se poza nikdy nepocita (zasek) - chybi-li presny klic, vezme se
+	# predpocitana poza tehoz predmetu a ruky s nejblizsi osou
+	if not diag:
+		var pref := "%s|%s|" % [String(p["id"]), ruka]
+		var nej_k := ""
+		var nej_d := INF
+		for k2: String in _soubor:
+			if k2.begins_with(pref) and not k2.ends_with("|r") and not k2.ends_with("|p") and _soubor[k2] is Dictionary:
+				var ost := k2.split("|")
+				var ov = str_to_var("Vector3" + ost[ost.size() - 1]) if ost.size() >= 4 else null
+				var dd := (ov as Vector3).distance_to(osa) if ov is Vector3 else 10.0
+				if dd < nej_d:
+					nej_d = dd
+					nej_k = k2
+		if nej_k != "":
+			var zs: Dictionary = _soubor[nej_k]
+			var pz1 := {}
+			for jm: String in zs["kosti"]:
+				var ib := sk.find_bone(jm)
+				var q: Array = zs["kosti"][jm]
+				if ib >= 0:
+					pz1[ib] = Quaternion(float(q[0]), float(q[1]), float(q[2]), float(q[3]))
+			_pozy[klic] = pz1
+			_pozy[klic + "|r"] = float(zs["r"])
+			var ps1: Array = zs.get("posun", [0.0, 0.0, 0.0])
+			_pozy[klic + "|p"] = Vector3(float(ps1[0]), float(ps1[1]), float(ps1[2]))
+			p["r_m"] = float(zs["r"])
+			p["posun_dlane"] = _pozy[klic + "|p"]
+			return pz1
 	if R.is_empty():
 		R = (preload("res://scripts/pravidla.gd").soubor("postavy")["drzeni"] as Dictionary).get("_reseni", {})
 	var on2: Array = d.get("osa_nasady", [0.0, 1.0, 0.0])

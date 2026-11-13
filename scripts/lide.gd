@@ -2380,6 +2380,11 @@ func _process_vlastni(dt: float) -> void:
 				(c["nohy_ik"] as SkeletonModifier3D).active = nik_on
 		if (c["ruce"] as Dictionary).has("mod"):
 			(c["ruce"]["mod"] as Node).call("zapni", v_zaberu and d < float(P["do"]))
+		# 13. 11. (kontrola pred vydanim): ridic sukne jen v zaberu do sukne.do_m, jinak bezel u vsech postav kazdy snimek
+		if c.has("sukne_ridic") and is_instance_valid(c["sukne_ridic"]):
+			var sr_on := v_zaberu and d < float(P["sukne"]["do_m"]) and u.visible
+			if (c["sukne_ridic"] as SkeletonModifier3D).active != sr_on:
+				(c["sukne_ridic"] as SkeletonModifier3D).active = sr_on
 		if c.has("sukne") and is_instance_valid(c["sukne"]):
 			var su_on := v_zaberu and d < float(P["sukne"]["do_m"])
 			var su: SpringBoneSimulator3D = c["sukne"]

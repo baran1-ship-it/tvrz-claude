@@ -67,6 +67,31 @@ func _beh() -> void:
 			i0 += 1
 		for jm: String in ["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r", "hand_l", "hand_r", "middle_01_l", "middle_01_r"]:
 			_kost(kostra, jm)
+		var lat := _latka_priprav(u, kostra)
+		# Misa 13. 11. (snimek chuze: noha vylezla z kabatce - „obleceni se ma hybat s nohou“): skutecne vrcholy latky
+		# sukne (CPU skinning z vah a poz kosti po modifikatorech) proti kapslim stehen, chuze v 8 fazich a stani
+		for kl2: String in (S.get("test_latka_klipy", ["Walk_Loop", "Idle_Loop"]) as Array):
+			if not ap.has_animation(kl2):
+				continue
+			var dl2 := ap.get_animation(kl2).length
+			var horsi_l := 0
+			var hloubka := 0.0
+			for f in 8:
+				c["klip"] = ""
+				lide.call("_klip", c, kl2, 1.0)
+				ap.stop()
+				ap.play(kl2, 0.0)
+				ap.seek(dl2 * f / 8.0, true)
+				ap.advance(0.0)
+				for i in 6:
+					await process_frame
+				var r_lat := _latka_v_noze(lat, kostra, float(S.get("polomer_stehna_m", 0.09)) * float(S.get("test_latka_podil", 0.8)))
+				horsi_l = maxi(horsi_l, int(r_lat[0]))
+				hloubka = maxf(hloubka, float(r_lat[1]))
+			print("SUKNE %s %s: latka ve stehne nejvic %d vrcholu, hloubka %.3f m" % [o["id"], kl2, horsi_l, hloubka])
+			if horsi_l > int(S.get("test_latka_vrcholu", 3)):
+				chyb += 1
+				print("SUKNE CHYBA %s %s: noha z obleceni (%d vrcholu latky ve stehne, hloubka %.3f m)" % [o["id"], kl2, horsi_l, hloubka])
 		for kl: String in klipy:
 			if not ap.has_animation(kl):
 				continue
@@ -137,3 +162,71 @@ func _beh() -> void:
 		u.queue_free()
 	print("TEST SUKNE %s (%d chyb, modelu %d)" % ["OK" if chyb == 0 else "CHYBA", chyb, videne.size()])
 	quit(1 if chyb else 0)
+
+
+## Vrcholy latky sukne (vaha kosti sukne_* >= 0,3) se zdrojem skinningu: [[mi, vrchol, [kosti], [vahy]], ...]
+## a uchyty (BoneAttachment3D) vsech kosti, ktere je hybou.
+func _latka_priprav(u: Node3D, kostra: Skeleton3D) -> Array:
+	var out: Array = []
+	for mi0: Node in u.find_children("*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		if mi.skin == null or mi.mesh == null:
+			continue
+		var sk := mi.skin
+		var jmena: Array = []
+		for b in sk.get_bind_count():
+			var jm := String(sk.get_bind_name(b))
+			if jm == "":
+				jm = kostra.get_bone_name(sk.get_bind_bone(b))
+			jmena.append(jm)
+		for si in mi.mesh.get_surface_count():
+			var ar: Array = mi.mesh.surface_get_arrays(si)
+			var vv: PackedVector3Array = ar[Mesh.ARRAY_VERTEX]
+			var bb: PackedInt32Array = ar[Mesh.ARRAY_BONES]
+			var ww: PackedFloat32Array = ar[Mesh.ARRAY_WEIGHTS]
+			if bb.is_empty():
+				continue
+			var k := bb.size() / vv.size()
+			for vi in range(0, vv.size(), 2):         # kazdy druhy vrchol staci
+				var su := 0.0
+				var kosti: Array = []
+				var vahy: Array = []
+				for j in k:
+					var w := ww[vi * k + j]
+					if w <= 0.0:
+						continue
+					var jm: String = jmena[bb[vi * k + j]]
+					kosti.append([jm, sk.get_bind_pose(bb[vi * k + j])])
+					vahy.append(w)
+					if jm.begins_with("sukne_"):
+						su += w
+				if su >= 0.3:
+					out.append([vv[vi], kosti, vahy])
+					for kb: Array in kosti:
+						_kost(kostra, kb[0])
+	return out
+
+
+## [pocet vrcholu latky blize ose stehna nez r, nejvetsi hloubka]
+func _latka_v_noze(lat: Array, kostra: Skeleton3D, r: float) -> Array:
+	var n := 0
+	var hl := 0.0
+	var osy: Array = []
+	for s: String in ["l", "r"]:
+		osy.append([_kost(kostra, "thigh_" + s), _kost(kostra, "calf_" + s)])
+	for z: Array in lat:
+		var p := Vector3.ZERO
+		var kosti: Array = z[1]
+		var vahy: Array = z[2]
+		for j in kosti.size():
+			var bx: BoneAttachment3D = kostra.get_node("test_" + String(kosti[j][0]))
+			p += (bx.global_transform * (kosti[j][1] as Transform3D) * (z[0] as Vector3)) * float(vahy[j])
+		for o: Array in osy:
+			var a: Vector3 = o[0]
+			var ab: Vector3 = (o[1] as Vector3) - a
+			var t := clampf((p - a).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
+			var d := p.distance_to(a + ab * t)
+			if d < r and t > 0.1:
+				n += 1
+				hl = maxf(hl, r - d)
+	return [n, hl]

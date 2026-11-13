@@ -13,11 +13,21 @@ var _retezy: Array = []          # [kosti, vaha leve, vaha prave, delky]
 var _b := {}
 var _diag := 0
 var _pel_y0 := 0.0
+var _ruce := false
 
 
 func priprav(sk: Skeleton3D) -> void:
 	for n: String in ["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r", "foot_l", "foot_r", "lowerarm_l", "lowerarm_r", "hand_l", "hand_r", "middle_01_l", "middle_01_r"]:
 		_b[n] = sk.find_bone(n)
+	# 13. 11. (kontrola pred vydanim): chybi-li povinna kost, ridic se vypne (jinak get_bone_global_pose(-1) kazdy snimek)
+	for n: String in ["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r", "foot_l", "foot_r"]:
+		if int(_b[n]) < 0:
+			active = false
+			return
+	_ruce = true
+	for n: String in ["lowerarm_l", "lowerarm_r", "hand_l", "hand_r", "middle_01_l", "middle_01_r"]:
+		if int(_b[n]) < 0:
+			_ruce = false
 	var pel := sk.get_bone_global_rest(_b["pelvis"]).origin
 	_pel_y0 = pel.y
 	var lx := signf(sk.get_bone_global_rest(_b["thigh_l"]).origin.x - pel.x)
@@ -76,7 +86,8 @@ func _process_modification() -> void:
 	var nahoru := Vector3.UP
 	var P := {}
 	for n: String in _b:
-		P[n] = sk.get_bone_global_pose(int(_b[n])).origin
+		if int(_b[n]) >= 0:
+			P[n] = sk.get_bone_global_pose(int(_b[n])).origin
 	# ohnuti stehen (uhel stehna od svisle dolu): prolnuti s pozou animace
 	var ohyb := 0.0
 	for s: String in ["l", "r"]:
@@ -162,7 +173,7 @@ func _process_modification() -> void:
 		var kapsle: Array = []
 		# ruce (13. 11. Misa: vsede ruce zapadly do zastery) - latka pod dlani; nohy az po nich (vyhrava noha)
 		for s: String in ["l", "r"]:
-			if int(_b.get("hand_" + s, -1)) >= 0:
+			if _ruce:
 				kapsle.append([P["lowerarm_" + s], P["hand_" + s], float(D.get("polomer_predlokti_m", 0.035))])
 				kapsle.append([P["hand_" + s], P["middle_01_" + s], float(D.get("polomer_dlane_m", 0.03))])
 		for s: String in ["l", "r"]:
