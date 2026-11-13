@@ -1316,3 +1316,9 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - Sukně: 8 řetězů má mezi sebou ~20 cm, stehno v kroku prošlo MEZI řetězy → tětiva po obvodu (`obvod_tetiva_kol`),
   vytlačení vždy ven (k ref). Nezávislá kontrola: zubatý lem v klíně vsedě (Sed_Poza, i v 0.99998) a úchop druhé
   ruky může dopočítat pózu za běhu (uchop.gd:266/389) – na další verzi.
+
+### 13. 11. – oranžové fleky na oblečení NPC (atlas a tělo pod oblečením)
+- Atlas NPC (512) balil i skryté části těla (trup, nohy) a nevýchozí oblečení – půlka plochy kůže, tenké ostrůvky látky
+  vedle ní braly barvu kůže. NPC (`cela`): do atlasu jen viditelné tělo a výchozí oblečení (`NPC_CELA` v q_export2.py).
+- Tělo jen posunuté pod látku (`pod_vrstvou`) v pohybu prorůstá (tělo a látka mají jiné váhy). NPC: plochy těla trvale
+  pod výchozím oblečením pryč (`skryj_pod`, dosah 4 cm, u okraje látky ponechat 3,5 cm – při 1,5 cm díry u výstřihu).
