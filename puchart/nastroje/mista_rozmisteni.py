@@ -113,12 +113,12 @@ def vstupy_stavby(m, x, z, yaw):
         out_.append({"stavba": m, "druh": druh, "c": c, "n": n_, "w": w, "pred_poly": pred})
     return out_
 
-def stavba_ok(x, z, yaw, m):
+def stavba_ok(x, z, yaw, m, od_toku=None):
     """budova: malé převýšení pod půdorysem, odstup od os cest a toků; vrací (výška plošiny, převýšení) nebo None"""
     b = body_pudorysu(x, z, yaw, m, R["okraj_m"])
     h = np.array([vys(p[0], p[1]) for p in b])
     if h.max() - h.min() > (R["max_prevyseni_m"] if m in MI["pudorysy"] else R["max_prevyseni_hospodarske_m"]): return None
-    if kc.query(b)[0].min() < R["od_cesty_m"] or kt.query(b)[0].min() < R["od_toku_m"]: return None
+    if kc.query(b)[0].min() < R["od_cesty_m"] or kt.query(b)[0].min() < (R["od_toku_m"] if od_toku is None else od_toku): return None
     return float(np.median(h)), float(h.max() - h.min())
 
 def los(rng, tab):
@@ -179,7 +179,8 @@ def _usedlost(x, z, yaw, m, typ, rng, zabrano):
         hosp.append(["kolna", *F.w(uf - 0.6 - kh / 2, -hw - T.get("odstup_kolny_m", 0.8) - kl / 2), yaw])
     elif kol == "bok_dvora_u_domu":
         # kůlna bokem do dvora, odstup_kolny_m od boku domu, čelo v linii štítu (krčma 13. 11.: za dvorem tok – od_toku_m)
-        hosp.append(["kolna", *F.w(zf - kl / 2, hw + T["odstup_kolny_m"] + kh / 2), yaw - math.pi / 2])
+        ks_ = T.get("kolna_strana", 1)   # strana kůlny u domu (krčma: stáj u dvora, kůlna na druhém boku)
+        hosp.append(["kolna", *F.w(zf - kl / 2, ks_ * (hw + T["odstup_kolny_m"] + kh / 2)), yaw - ks_ * math.pi / 2])
     elif kol == "bok_dvora" or (kol and not sd):
         # kůlna bokem do dvora (otevřenou stranou +z do dvora, KCD1 ves_1 vpravo), podél vnějšího boku dvora
         if dv >= kh + 4.0:
@@ -193,7 +194,7 @@ def _usedlost(x, z, yaw, m, typ, rng, zabrano):
     if parc.buffer(R["mezi_usedlostmi_m"]).intersects(zabrano): return "soused"
     # budovy: sklon a odstupy (dům už prověřen) a volné vstupy (žádná stavba před dveřmi domu ani před vraty jiné stavby)
     def _hosp_ok(h_, q, yw):
-        if not stavba_ok(q[0], q[1], yw, h_[0]): return False
+        if not stavba_ok(q[0], q[1], yw, h_[0], R.get("od_toku_hospodarske_m")): return False   # hospodářské blíž k vodě (Míša 13. 11.: 8 m)
         ja = Polygon(rohy(q[0], q[1], yw, h_[0], 0.3))
         for o_ in [(m, x, z, yaw)] + [g_ for g_ in hosp if g_ is not h_]:
             if any(ja.intersects(v_["pred_poly"]) for v_ in vstupy_stavby(*o_)): return False

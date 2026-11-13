@@ -213,7 +213,9 @@
   "krok_hledani_m": 4,
   "krok_hledani_pozn": "KCD1 ves_1–6, KCD2 ref_kcd2_ves_ulice: usedlosti těsně vedle sebe podél ulice (sousedy dělí plot); místo pro další usedlost se hledá po 4 m podél cesty, překryv parcel vylučuje mezi_usedlostmi_m (rozestup_m 26 = průměrná šíře parcely, Havran doplnit.rozestup_m)",
   "max_prevyseni_hospodarske_m": 2.6,
-  "max_prevyseni_hospodarske_pozn": "stodola a kůlna Havrana stojí na kamenných patkách (model kamen_patky; Havran svet.gd „stodola 7 na patkách nad dolinou“) – snesou o něco víc než dům na podezdívce; plošina pak srovná nejvýš ±1,3 m"
+  "max_prevyseni_hospodarske_pozn": "stodola a kůlna Havrana stojí na kamenných patkách (model kamen_patky; Havran svet.gd „stodola 7 na patkách nad dolinou“) – snesou o něco víc než dům na podezdívce; plošina pak srovná nejvýš ±1,3 m",
+  "od_toku_hospodarske_m": 8.0,
+  "pozn_toky_hospodarske": "Míša 13. 11.: „pro hospodářské budovy 8 m v pohodě“ – stáj, kůlna, stodola smí k potoku blíž než obytné domy (napajedlo, voda k dobytku); obytné budovy dál od_toku_m"
  },
  "planovane": [
   {
@@ -336,7 +338,7 @@
     "pole": false,
     "stodola_poloha": "k_ceste",
     "povinne": false,
-    "pozn_poloha": "skutečný hostinec stojí mezi silnicí a strmým svahem (DMR 5G): za domem není místo – stáj a kůlna po stranách domu v řadě podél cesty (NAVRH). Míša 13. 11.: stáj otočená vraty k cestě (koně rovnou z cesty), stáj odstup_staje_m a kůlna odstup_kolny_m od boku krčmy (dřív 3,5 m, stísněné). Stáj na straně bez dvora (stodola_strana −1: na straně dvora by nesplnila od_toku_m 15 m od Veličky), kůlna na vozy bokem do dvora u domu; mezi nimi před štítem sezení",
+    "pozn_poloha": "skutečný hostinec stojí mezi silnicí a strmým svahem (DMR 5G): za domem není místo – stáj a kůlna po stranách domu v řadě podél cesty (NAVRH). Míša 13. 11.: stáj otočená vraty k cestě (koně rovnou z cesty), stáj odstup_staje_m a kůlna odstup_kolny_m od boku krčmy (dřív 3,5 m, stísněné). Stáj na straně dvora (stodola_strana 1; Míša 13. 11.: hospodářské budovy 8 m od potoka – od_toku_hospodarske_m), kůlna na vozy na druhém boku domu (kolna_strana −1); mezi nimi před štítem sezení",
     "ploty_pozn": "Míša 12. 11. večer: „u hospody dej pryč ploty, ať se dá ustájit kůň apod.“ – zájezdní dvůr otevřený k cestě (vozy a koně vjedou ke stáji a kůlně přímo z cesty, docs/reference/reserse_mosty_krcma.md), žádný plot ani vrata; vyšlapaný vjezd přes celou šíři dvora (vyslapano.vjezd_bez_vrat)",
     "odstup_staje_m": 5.0,
     "odstup_kolny_m": 4.5,
@@ -359,7 +361,8 @@
      "vyslapano_okraj_m": 1.2,
      "vybaveni_pozn": "jen sezení, o které Míša požádala 13. 11. (modely Havrana stul_hospoda, lavice_selska); jiné vybavení ne (vybaveni_pozn 12. 11.)"
     },
-    "stodola_strana": -1
+    "stodola_strana": 1,
+    "kolna_strana": -1
    },
    "hajovna": {
     "zdroj": "Míša 12. 11.: „hájovna: dům s dřevníkem a kolnou na kraji lesa“; Havran předměty kolna, hranice_dreva, spalek_stipani (lom a uhlíři); KCD1 reference/kcd1/05_dosky_strecha_srub_hranice, 16_hranice_dreva_detail",
