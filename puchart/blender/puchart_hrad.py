@@ -409,7 +409,14 @@ def ochoz_hradby(P, osa, uk, t, konce, mezery=None, sirka=0.9, odstup=3.0, otevr
         for s0, s1, y in uk[i]:
             if ps and abs(ps[-1][2] - y) < 1e-3: ps[-1] = (ps[-1][0], s1, y)
             else: ps.append((s0, s1, y))
-        pos = (-t / 2 if not otevreny_konec else t / 2 - 0.12) if i > 0 else 0.0; pod_ = False   # schody v ose (branka A): v rohu pavlač od vnitřního líce kolmé zdi, ne přes její nižší korunu (Míša 12. 11.: rám zábradlí ve vzduchu)
+        pos = (-t / 2 if not otevreny_konec else t / 2 - 0.12) if i > 0 else 0.0; pod_ = False
+        if i > 0 and H.VEZ_PATRO:   # 13. 11. (povrch_kolize): začátek pavlače v rohu u branky nesmí ležet v půdorysu věže (nároží bez kolize)
+            vp_ = H.VEZ_PATRO[0]
+            def _ve_vezi(q_):
+                r_ = q_ - vp_["stred"]; return abs(r_.dot(vp_["d"])) < vp_["w"] / 2 + 0.02 and abs(r_.dot(vp_["s"])) < vp_["dpt"] / 2 + 0.02
+            for _k in range(40):
+                if not any(_ve_vezi(a + d * pos + vn * (t / 2 + o_)) for o_ in (0.05, sirka / 2, sirka - 0.05)): break
+                pos += 0.05   # schody v ose (branka A): v rohu pavlač od vnitřního líce kolmé zdi, ne přes její nižší korunu (Míša 12. 11.: rám zábradlí ve vzduchu)
         def rovne(dv, y):   # portálek v ose pavlače a v její výšce (Havran: ochoz vchází do věže rovně) – stačí pavlač až k líci
             s_d = (dv - a).dot(d); ods = abs((dv - (a + d * s_d + g)).dot(vn)); dy = max(abs(ps[0 if i == 0 else -1][2] - y), abs((cur if i else y) - y))
             n_ = konce[0 if i == 0 else 1][2]; uhel = math.degrees(math.acos(min(1.0, abs(d.dot(n_)))))
