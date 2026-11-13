@@ -92,6 +92,12 @@ func _material() -> ShaderMaterial:
 		if k == "popis": continue
 		if v is Array: m.set_shader_parameter(k, Vector3(v[0], v[1], v[2]) if v.size() == 3 else Vector2(v[0], v[1]))
 		else: m.set_shader_parameter(k, float(v))
+	if FileAccess.file_exists("res://data/voda_hra.json"):   # mokrý pás u vody a dno pod vodou (voda_hra.json vzhled_13_11)
+		var vz: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/voda_hra.json")).get("vzhled_13_11", {})
+		for k in ["mokro_albedo", "mokro_drsnost", "mokro_specular", "dno_albedo"]:
+			if not vz.has(k): continue
+			var v = vz[k]
+			m.set_shader_parameter(k, Vector3(v[0], v[1], v[2]) if v is Array else float(v))
 	return m
 
 ## Výška terénu ve hře (bilineárně z r16) – pro pokládání a start hráče.

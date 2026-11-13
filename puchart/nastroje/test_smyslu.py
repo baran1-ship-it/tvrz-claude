@@ -65,7 +65,9 @@ for k, t in TH.items():
     o = np.array(t["osa"]); dh = np.diff(o[:, 2])
     if (dh > 1e-3).any(): stoupa.append(k)
     d = np.gradient(o[:, :2], axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-9; n = np.c_[-d[:, 1], d[:, 0]]
-    okraj = t["sirka"] / 2 + 1.2
+    # brod (voda_hra.json koryto.brod rozliti_sirky, Míša 13. 11.): voda se v pásu brodu rozlévá – břeh se měří od rozlitého kraje
+    _rz = json.load(open(K + "/pravidla/svet/voda_hra.json"))["koryto"].get("brod", {}).get("rozliti_sirky", 1.0)
+    okraj = t["sirka"] / 2 * (1 + np.array(t.get("brod_vaha", [0.0] * len(o))) * (_rz - 1)) + 1.2
     b1 = ter(o[:, 0] + n[:, 0] * okraj, o[:, 1] + n[:, 1] * okraj); b2 = ter(o[:, 0] - n[:, 0] * okraj, o[:, 1] - n[:, 1] * okraj)
     # soutok: body do soutok_m od osy jiného toku se nepočítají (koryto hlavního toku tam břeh správně snižuje)
     from scipy.spatial import cKDTree
@@ -77,17 +79,77 @@ TEST("hladina_nestoupa", not stoupa, "toky se stoupající hladinou: %s" % stoup
 TEST("voda_v_korytu", max(nad) <= KC["voda"]["podil_nad_brehem_max"], "nejhorší tok: %.1f %% bodů hladiny nad nižším břehem" % (max(nad) * 100))
 # brod (Míša 13. 11.: „brod k hájovně není dobrý“ – příkop s hrbem): od kraje vody napříč tokem pozvolný nájezd
 # (voda_hra.json koryto.brod sklon_najezdu, s rezervou na vyhlazení terénu a profil cesty)
-BRK = json.load(open(K + "/pravidla/svet/voda_hra.json"))["koryto"].get("brod", {}); spatne_br = []
+KO_ = json.load(open(K + "/pravidla/svet/voda_hra.json"))["koryto"]; BRK = KO_.get("brod", {}); spatne_br = []
 for k, t in TH.items():
     o = np.array(t["osa"])
     for i in t.get("brody", []):
         d = o[min(i + 1, len(o) - 1), :2] - o[max(i - 1, 0), :2]; d /= np.linalg.norm(d) + 1e-9; n = np.array([-d[1], d[0]])
+        # nájezd končí u jiného koryta (druhé rameno téhož toku nebo jiný tok): jeho břeh a práh už nejsou nájezd brodu
+        # (tok 9 (211, 848): rameno o 2 m výš 6 m od brodu – nájezd 10 % se tam nevejde, viz docs/chyby.md)
+        so_ = np.r_[0, np.cumsum(np.hypot(*np.diff(o[:, :2], axis=0).T))]
+        jine_ = [np.array(t2["osa"])[:, :2] for k2, t2 in TH.items() if k2 != k] + [o[np.abs(so_ - so_[i]) > BRK.get("polosirka_m", 3) + BRK.get("nabeh_m", 5) + 2, :2]]
+        sir_ = [t2["sirka"] for k2, t2 in TH.items() if k2 != k] + [t["sirka"]]
         for sg in (1, -1):
             dd = t["sirka"] / 2 + np.arange(0.0, 9.0, 1.0)
+            px_, pz_ = o[i, 0] + sg * n[0] * dd, o[i, 1] + sg * n[1] * dd
+            u_ = np.zeros(len(dd), bool)
+            for a_, s2_ in zip(jine_, sir_):
+                if len(a_): u_ |= cKDTree(a_).query(np.c_[px_, pz_])[0] < s2_ / 2 + KO_["prah_m"] + 1.0
+            if u_.any(): dd = dd[:max(1, int(np.argmax(u_)))]
             y = ter(o[i, 0] + sg * n[0] * dd, o[i, 1] + sg * n[1] * dd)
             mx = float(np.max(np.diff(y))) if len(y) > 1 else 0
-            if mx > KC["voda"].get("brod_sklon_max", 0.3): spatne_br.append("%s (%.0f, %.0f) %.0f %%" % (t.get("jmeno") or k, o[i, 0], o[i, 1], mx * 100))
+            voz_ = next((bt_.get("vozovy", True) for bt_ in t.get("brody_tvar", []) if bt_["i"] == i), True)
+            if mx > KC["voda"].get("brod_sklon_max" if voz_ else "brod_sklon_max_pesi", 0.3): spatne_br.append("%s (%.0f, %.0f) %.0f %%" % (t.get("jmeno") or k, o[i, 0], o[i, 1], mx * 100))
 TEST("brod_najezd", not spatne_br, "%d brodů; strmé: %s" % (sum(len(t.get("brody", [])) for t in TH.values()), spatne_br[:6]))
+# hladina bez hrany (Míša 13. 11., misa_13_11_voda_deska.jpg: „deska s ostrou hranou“): v hra/modely/voda.glb každá hrana na
+# okraji sítě hladiny podél toku má aspoň jeden vrchol s krytím 0 (barva vrcholu A) a vrchol s krytím > 0 má hloubku > 0
+# (UV v = 1 − hloubka – glTF převrací v, dřív shader četl v přímo a krytí bylo všude 0,55)
+def _glb_voda(f):
+    import struct
+    b = open(f, "rb").read(); n = struct.unpack("<I", b[12:16])[0]; j = json.loads(b[20:20 + n]); b0 = 20 + n + 8
+    TY = {5126: np.float32, 5123: np.uint16, 5125: np.uint32, 5121: np.uint8}; CN = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}
+    def acc(i):
+        a = j["accessors"][i]; bv = j["bufferViews"][a["bufferView"]]; dt = TY[a["componentType"]]; k = CN[a["type"]]
+        o = b0 + bv.get("byteOffset", 0) + a.get("byteOffset", 0)
+        x = np.frombuffer(b[o:o + a["count"] * k * np.dtype(dt).itemsize], dt).reshape(-1, k).astype(np.float64)
+        return x / np.iinfo(dt).max if a.get("normalized") else x
+    for m in j["meshes"]:
+        if not m["name"].startswith("VODA_") or m["name"].startswith("VODA_DALEKO"): continue
+        pr = m["primitives"][0]; at = pr["attributes"]
+        yield acc(at["POSITION"]), (acc(at["COLOR_0"]) if "COLOR_0" in at else None), acc(at["TEXCOORD_0"]), acc(pr["indices"]).astype(int).ravel()
+_tvrde = 0; _bez_barvy = 0; _mel = 0; _kusu = 0
+_OSA_ = np.vstack([np.array(t["osa"])[:, :2] for t in TH.values()]); _TG_ = np.vstack([np.gradient(np.array(t["osa"])[:, :2], axis=0) for t in TH.values()])
+_TG_ /= np.linalg.norm(_TG_, axis=1, keepdims=True) + 1e-9; _KO_ = cKDTree(_OSA_)
+_KE_ = cKDTree(np.array([np.array(t["osa"])[e, :2] for t in TH.values() for e in (0, -1)]))
+if os.path.exists(K + "/hra/modely/voda.glb"):
+    for P_, C_, U_, I_ in _glb_voda(K + "/hra/modely/voda.glb"):
+        _kusu += 1
+        if C_ is None: _bez_barvy += 1; continue
+        a_ = C_[:, 3]; h_ = 1.0 - U_[:, 1]
+        _mel += int(((a_ > 0.01) & (h_ <= 0.0)).sum())
+        T_ = I_.reshape(-1, 3); E_ = np.sort(np.r_[T_[:, [0, 1]], T_[:, [1, 2]], T_[:, [2, 0]]], axis=1)
+        u_, c_ = np.unique(E_, axis=0, return_counts=True); ok_ = u_[c_ == 1]   # okrajové hrany sítě
+        d_ = P_[ok_[:, 1]][:, [0, 2]] - P_[ok_[:, 0]][:, [0, 2]]; d_ /= np.linalg.norm(d_, axis=1, keepdims=True) + 1e-9
+        tg_ = _TG_[_KO_.query((P_[ok_[:, 0]][:, [0, 2]] + P_[ok_[:, 1]][:, [0, 2]]) / 2)[1]]
+        podel_ = np.abs((d_ * tg_).sum(1)) > 0.5   # hrana podél toku = kraj vody (napříč = šev mezi kusy po kus_m)
+        podel_ &= _KE_.query((P_[ok_[:, 0]][:, [0, 2]] + P_[ok_[:, 1]][:, [0, 2]]) / 2)[0] > KC["voda"]["soutok_m"]   # konec toku (soutok, kraj výseku): přítok končí ve vodě hlavního toku
+        _tvrde += int((podel_ & (a_[ok_[:, 0]] > 0.01) & (a_[ok_[:, 1]] > 0.01)).sum())
+TEST("voda_bez_hrany", _kusu > 0 and _tvrde == 0 and _bez_barvy == 0 and _mel == 0,
+     "kusů hladiny %d, bez barvy vrcholu %d, tvrdých hran na kraji %d, krytí bez vody %d" % (_kusu, _bez_barvy, _tvrde, _mel))
+# porost až k vodě (Míša 13. 11.: „hlavně ty břehy a přechod vody a hlíny plus vegetace“; misa_real_01/04): břeh u vody není
+# třída cesta (mimo brody) a pás trsů na čáře vody (byliny.json voda_pas, pata_pas.json skvrny voda_*) kryje dost délky
+_bc = []; _bd = 0
+for k, t in TH.items():
+    o = np.array(t["osa"]); d = np.gradient(o[:, :2], axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-9; n = np.c_[-d[:, 1], d[:, 0]]
+    bv_ = np.array(t.get("brod_vaha", [0.0] * len(o))); m_ = bv_ == 0
+    for sg in (1, -1):
+        q_ = o[:, :2] + sg * n * (t["sirka"] / 2 + 1.0)
+        _bc.append(np.array(TR)[trida(q_[m_, 0], q_[m_, 1])] == "cesta"); _bd += float(m_.sum())
+_bc = float(np.concatenate(_bc).mean()) if _bc else 1.0
+_PP = json.load(open(D + "pata_pas.json"))["bunky"] if os.path.exists(D + "pata_pas.json") else {}
+_vd = sum(math.hypot(sk[2] - sk[0], sk[3] - sk[1]) for v in _PP.values() for sk in v if str(sk[7]).startswith("voda"))
+TEST("breh_porost", _bc <= KC["voda"]["breh_cesta_max"] and _vd >= KC["voda"]["voda_pas_pokryti_min"] * _bd,
+     "břeh u vody třídy cesta %.1f %% (mez %.0f %%), pás na čáře vody %.0f m z %.0f m čáry (mez %.0f %%)" % (_bc * 100, KC["voda"]["breh_cesta_max"] * 100, _vd, _bd, KC["voda"]["voda_pas_pokryti_min"] * 100))
 LV = json.load(open(D + "lavky.json"))
 lv_ok = all(abs(ter(a[0], a[1]) + 0.15 - a[2]) < 0.6 or a[2] > ter(a[0], a[1]) for a, b in LV.values())
 TEST("lavka_na_brehu", lv_ok, "%d lávek" % len(LV))

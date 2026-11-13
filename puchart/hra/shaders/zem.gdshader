@@ -1,7 +1,7 @@
 shader_type spatial;
 // Terén Puchartu. Povrchy z pole textur (pravidla/svet/pudy.json), podíl z pečené masky stanovišť (nastroje/stanoviste.py):
 // R tráva, G opad, B skála (triplanárně – fotka shora by se na strmině natáhla do pruhů, Havran hlášení 0.54), A břeh, zbytek hlína.
-// Vzorkovače: 4 (Adreno limit ~13). Žádná kopie obrazovky (pády Havrana 0.58–0.59).
+// Vzorkovače: 4 (Adreno limit ~13); mokrý pás u vody z barvy vrcholu (bez vzorkovače). Žádná kopie obrazovky (pády Havrana 0.58–0.59).
 render_mode cull_back, diffuse_burley, specular_schlick_ggx;
 
 uniform sampler2DArray pudy_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
@@ -55,6 +55,12 @@ vec3 vrstva2(int i, vec2 xz, float n) {
 vec3 vrstva_n(int i, vec2 xz) { return texture(pudy_n, vec3(xz / velikost_m[i], float(i))).rgb; }
 
 uniform float mokro = 0.0;   // déšť (pocasi.gd): 0 sucho .. 1 promoklé – tmavší, lesklejší (KCD: mokré povrchy a louže)
+// mokrý pás u vody a dno pod vodou (pravidla/svet/voda_hra.json vzhled_13_11, svet.gd): jen jemný pás břehů (blender/voda.py
+// BREH) má barvu vrcholu A = sucho (0,5 čára vody → 1 nad mokry_pas_m; pod vodou → 0); terén bez barvy vrcholu má A = 1
+uniform float mokro_albedo = 0.62;
+uniform float mokro_drsnost = 0.45;
+uniform float mokro_specular = 0.22;
+uniform vec3 dno_albedo = vec3(0.55, 0.6, 0.45);
 void fragment() {
 	vec2 xz = svet_poz.xz;
 	vec2 muv = (xz - maska_rect.xy) / maska_rect.zw;
@@ -147,4 +153,8 @@ void fragment() {
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.08;   // 0,3 dávalo v protisvětle žlutý lesk pásu 100–300 m (snímek 01)
 	ALBEDO *= mix(1.0, 0.66, mokro); ROUGHNESS = mix(ROUGHNESS, 0.55, mokro); SPECULAR = mix(SPECULAR, 0.22, mokro);   // mokro (pocasi.gd)
+	float mok_v = clamp(2.0 * (1.0 - COLOR.a), 0.0, 1.0) * (1.0 - mokro);   // u vody (déšť už zmokřil vše)
+	float pod_v = clamp(1.0 - 2.0 * COLOR.a, 0.0, 1.0);                      // pod hladinou
+	ALBEDO *= mix(1.0, mokro_albedo, mok_v) * mix(vec3(1.0), dno_albedo, pod_v);
+	ROUGHNESS = mix(ROUGHNESS, mokro_drsnost, mok_v); SPECULAR = mix(SPECULAR, mokro_specular, mok_v);
 }

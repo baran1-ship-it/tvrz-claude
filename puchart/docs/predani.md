@@ -1,5 +1,19 @@
 # Předání – Puchart (stav 30. 10. 2026 ráno)
 
+## 13. 11.: potoky, břehy a brody podle předlohy (misa_real_01–04, rešerše potoky/ a brody/)
+- Hotovo: brod podle rešerše (koryta.py: voda 2× šíře, ploché dno 0,12, nájezd 10 % až na terén, zaoblení; jemný pás BREH až na
+  konec nájezdu), hladina bez hrany (voda.py síť přes celou vodu + řada za čárou, krytí kraje v barvě vrcholu; shader: hloubka
+  = 1 − UV.y – glTF převrací v, Beer–Lambert + Fresnel, odraz lesa), mokrý pás a tmavší dno (BREH barva A, zem.gdshader),
+  porost až k vodě (oprava cesty.py: koryto bylo třídou „cesta“) + pás trsů na čáře vody nakloněných k vodě (byliny.json
+  voda_pas), hřbety valounů lámou hladinu + pěna za nimi (koryto_kameny.py před voda.py). Chyby 215–217, testy
+  smysl:brod_najezd, voda_bez_hrany, breh_porost. Snímky docs/screens/potok13_*.png (srovnání potok13_srovnani.png).
+- NEOVERENO: tablet (kreslení +5–10 % u potoků, hlavně porost břehů), barvy a čirost vody jen podle snímku z PC.
+- Chybí modely: ostřice (Carex), keřové vrby (Salix fragilis/triandra/viminalis/purpurea), devětsil; hlavatá vrba v Havranovi
+  je useknutý válec (druhy.json pouzit false). Rákos (modely/nove rakos_1–3) jen k tůni/náhonu – zatím nepoužit.
+- Další kroky z README_jak_se_stavi.md: 5 tůně a peřeje se stupni hladiny, 6 flow kolem kamenů (+2 vzorky), 7 nesouměrný
+  břeh (nárazový/jesep, štěrková lavice, podemletý břeh jako předmět), 9 kmeny přes potok a naplavené větve; mokré (tmavší)
+  kameny u vody (skala.gdshader podle výšky nad hladinou).
+
 ## 2. 11.: původní hřeben, skály, zadní hrad podle vizualizace, cesta po hřbetu
 - **Profily** (`docs/profily_hradu.csv`, `docs/screens/profily_hradu.png`): DMR 5G má u hradů 0,07 bodu/m² (1 bod na ~15 m²),
   skály 2–6 m mezi body propadnou → svah vypadá pozvolněji. Herní terén sedí na DMR (rozdíl < 0,3 m) kromě starých zásahů.

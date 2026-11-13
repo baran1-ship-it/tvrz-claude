@@ -73,7 +73,11 @@
    "zdroj": "docs/reference/brody/README.md (rešerše 13. 11.: Clarkin 2006 a Keller & Sherar – USDA příručky brodů: nájezd ≤ 10 %, žádný lom v profilu; River Cole: koryto ~3 m, brod ~6 m, dno zvýšené; Gu 2005 hloubka 0,15 m; fotky real_* CC BY-SA, KCD1/2 snímky kcd*_brod_*); Havran kraj.py brod_hloubka_m 0,12",
    "rozliti_sirky": 2.0,
    "dno_ploche": true,
-   "pozn_13_11": "rešerše: brod = mělká rozlitá plocha (voda ~2× šíře koryta), ploché dno, nájezd 10 % až na původní terén (délka = výška břehu / sklon), přechody zaoblené, bez prahu břehu; pás 3 m + náběh 5 m; kameny po stranách a pod brodem, pruh cesty volný (brod_volno_m)"
+   "pozn_13_11": "rešerše: brod = mělká rozlitá plocha (voda ~2× šíře koryta), ploché dno, nájezd 10 % až na původní terén (délka = výška břehu / sklon), přechody zaoblené, bez prahu břehu; pás 3 m + náběh 5 m; kameny po stranách a pod brodem, pruh cesty volný (brod_volno_m)",
+   "zaobleni_m": 2.5,
+   "pozn_zaobleni": "svislé zakružení lomů (dno → nájezd, nájezd → terén) jako hladké minimum/maximum šířky zaobleni_m: Clarkin 2006 kap. 4 („vertical curve dip … gentle“), Keller & Sherar kap. 9 („avoid sharp vertical curves“); délka 2–3 m NEOVERENO (docs/reference/brody/README.md §4)",
+   "vyhlazeni_terenu_m": 2.0,
+   "pozn_vyhlazeni": "nájezd končí na terénu vyhlazeném (sigma m) – bez hrbolů a děr DMR 1 m v úvozu (fotky Wupperfurt, Retlage: travnaté zaoblené hrany); NAVRH, ověřit snímkem"
   }
  },
  "soutok_m": 8.0,
@@ -209,10 +213,70 @@
    0.45,
    0.75
   ],
-  "zdroj_foto": "docs/reference/potok/misa_potok_01–02.jpg (Míša 10. 11.): balvany droby 2–4 m na březích a v toku s mechem a kapradím nahoře, ve vodě šedé ploché hranaté kameny, peřeje"
+  "zdroj_foto": "docs/reference/potok/misa_potok_01–02.jpg (Míša 10. 11.): balvany droby 2–4 m na březích a v toku s mechem a kapradím nahoře, ve vodě šedé ploché hranaté kameny, peřeje",
+  "hrbet_podil": 0.12,
+  "hrbet_nad_m": [
+   -0.03,
+   0.05
+  ],
+  "hrbet_pas": 0.7,
+  "zdroj_hrbet": "Míšina předloha misa_real_01_potok_trava_kameny.jpg: hladinu lámou hřbety valounů po celém dně (světlé čárky a vrásky za kameny); README_jak_se_stavi.md krok 4 – část valounů v proudnici má vrch 0–5 cm pod/nad hladinou. Podíl 12 % a pás 70 % poloviny šíře NEOVERENO (ladit snímkem)"
  },
  "predloha_13_11": {
   "popis": "Míša 13. 11.: „takhle by měly vypadat všechny toky“ – závazná předloha pro všechny potoky a Veličku: docs/reference/potoky/misa_real_01–04 (README_misa_real.md) + KCD (rešerše docs/reference/potoky/README_jak_se_stavi.md). Hladina lámaná valouny, tůně a peřeje s bílou vodou, mechové balvany, mokré kamení a štěrk na kraji, tráva a ostřice převislé do vody, listí, kořeny, padlé kmeny; žádná rovná deska s ostrou hranou.",
   "zdroj": "docs/reference/potoky/README_misa_real.md"
+ },
+ "vzhled_13_11": {
+  "popis": "Vzhled vody a břehu podle Míšiny předlohy (docs/reference/potoky/misa_real_01–04, „takhle by měly vypadat všechny toky“) a rešerše docs/reference/potoky/README_jak_se_stavi.md kroky 1–3: hladina bez hrany (voda.py: síť přes celou plochu s hloubkou > 0 + řada za čárou vody, krytí kraje v barvě vrcholu), krytí podle hloubky (Beer–Lambert) a úhlu (Fresnel, Schlick), mokrý pás a tmavší dno pod vodou (barva vrcholu BREH A, zem.gdshader). Čte blender/voda.py, hra/scripts/hlavni.gd (shader vody), hra/scripts/svet.gd (terén).",
+  "melka": [
+   0.384,
+   0.404,
+   0.31
+  ],
+  "zdroj_melka": "pipeta (medián) misa_real_01_potok_trava_kameny.jpg výřez x 150–280, y 300–360 (mělká voda s valouny, sRGB)",
+  "hluboka": [
+   0.31,
+   0.267,
+   0.161
+  ],
+  "zdroj_hluboka": "pipeta (medián) misa_real_03_perej_listi_breh.jpg výřez x 10–120, y 520–600 (klidná tůň pod peřejí, sRGB)",
+  "cirost_m": 0.5,
+  "zdroj_cirost": "hloubka, na které voda pohltí 63 % pohledu na dno (1 − exp(−h/c)); v real_01 je dno vidět i uprostřed toku (~0,3–0,4 m) – NEOVERENO, laděno snímkem; Havran reka cirost 0,35",
+  "hloubka_barvy_m": 0.5,
+  "zdroj_hloubka_barvy": "od mělké k tůňové barvě (1 − exp(−h/x)) – NEOVERENO, snímek",
+  "fresnel_f0": 0.02,
+  "zdroj_fresnel": "Schlick: F0 = ((n−1)/(n+1))², voda n ≈ 1,33 → 0,02 (https://en.wikipedia.org/wiki/Schlick%27s_approximation); krytí = max(hloubka, Fresnel) – shora průhledná, do dálky zrcadlí (kcd1_oficial_potok_valouny_pruhlednost.jpg)",
+  "drsnost_klid": 0.15,
+  "drsnost_pena": 0.5,
+  "specular": 0.12,
+  "zdroj_drsnost": "snímek 13. 11. (docs/screens/potok13_*): s drsností 0,08 a specular 0,35 odrážela hladina jen oblohu (Compatibility bez SSR) – šedobílá deska; odraz lesa je proto barva odraz × Fresnel, lesk jen slunce. Hodnoty NEOVERENO, laděno snímkem",
+  "mokry_pas_m": 0.3,
+  "zdroj_mokry_pas": "mokrý tmavší pás nad čárou vody (výška nad hladinou): KCD snímky 0,2–0,5 m (odhad z fotky, README_jak_se_stavi.md §2.2), Havran voda_toky.md 0,2–0,4 m (NAVRH); na plochém brodu vychází vodorovně 2–4 m jako bahno u mlýna (kcd1_melcina_mlyn_mokre_bahno.jpg)",
+  "dno_tmave_m": 0.3,
+  "zdroj_dno_tmave": "hloubka, do které dno pod vodou plně ztmavne a zezelená (kameny pod vodou tmavší a sytější: kcd1_oficial_potok_valouny_pruhlednost.jpg, misa_real_01) – NEOVERENO, snímek",
+  "mokro_albedo": 0.62,
+  "mokro_drsnost": 0.45,
+  "zdroj_mokro": "mokrý povrch tmavší a lesklejší (zem.gdshader déšť: albedo × 0,66, drsnost 0,55 – pocasi.gd); na čáře vody o málo tmavší a lesklejší (KCD snímky) – NEOVERENO, snímek",
+  "dno_albedo": [
+   0.72,
+   0.78,
+   0.6
+  ],
+  "zdroj_dno": "dno pod vodou: násobek barvy (tmavší, olivové – pohlcení červené; real_01 kameny pod vodou zelenohnědé) – NEOVERENO, snímek",
+  "mokro_specular": 0.22,
+  "odraz": [
+   0.282,
+   0.302,
+   0.149
+  ],
+  "zdroj_odraz": "pipeta (medián) misa_real_01_potok_trava_kameny.jpg výřez x 330–420, y 230–270 (vzdálenější hladina zrcadlící keře); KCD kcd1_lesni_potok_kameny_mech.jpg: hladina tmavá, zrcadlí koruny",
+  "kraj_m": 0.08,
+  "zdroj_kraj": "krytí u čáry vody doroste na prvních 8 cm hloubky (hrana vody se nečte jako čára – README_jak_se_stavi.md §2.2 d) – NEOVERENO, snímek",
+  "pena_kamen_polomer": 0.8,
+  "pena_kamen_po_proudu": 2.0,
+  "pena_kamen_pod_hladinou_m": 0.04,
+  "zdroj_pena_kamen": "pěna u kamene, který láme hladinu (README_jak_se_stavi.md krok 4; S. Schreibt, River – Horizon: pěna = vzdálenost k překážce ve vertex color, protažená po proudu; CryEngine „foam soft intersection“): stopa poloměr × šíře kamene napříč a po_proudu × průměr za kamenem; kámen s vrchem do pod_hladinou_m pod hladinou se počítá. Čísla NEOVERENO (Schreibt 1–3× průměr)",
+  "pena_kamen_min_hloubka_m": 0.08,
+  "zdroj_pena_kamen_hloubka": "pěna jen u kamenů v proudu (hloubka u kamene nad 8 cm) – kameny na mělkém kraji vody pěnu nedělají (misa_real_01: světlé čárky za kameny v proudnici, kraj klidný); NEOVERENO"
  }
 }

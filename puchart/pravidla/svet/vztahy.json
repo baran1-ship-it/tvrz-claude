@@ -53,7 +53,10 @@
    "testy_puchart": [
     "smysl:hladina_nestoupa",
     "smysl:potok_jemny_pas",
-    "smysl:voda_v_korytu"
+    "smysl:voda_v_korytu",
+    "smysl:brod_najezd",
+    "smysl:voda_bez_hrany",
+    "smysl:breh_porost"
    ]
   },
   "teren|cesta": {

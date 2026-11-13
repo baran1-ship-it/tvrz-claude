@@ -1262,6 +1262,14 @@ def barva_kusu(ob, ao=None):
             data[li * 4:li * 4 + 4] = [0.8 + 0.2 * r, ao[me.loops[li].vertex_index] if ao else 1.0, r, 1.0]
     col.data.foreach_set("color", data); me.color_attributes.active_color = col
 
+def barvy_vrcholu(ob, barvy):
+    """Barva vrcholu z dat dílu (Part.barvy = RGBA ke každému vrcholu Part.v, lineárně): voda.py – hladina A = krytí kraje
+    (0 na krajní řadě a nad vodou), břeh A = sucho (mokrý pás a dno, zem.gdshader). Vrcholy Part.commit nepřečísluje."""
+    me = ob.data; col = me.color_attributes.new("Col", "FLOAT_COLOR", "CORNER"); vi = [0] * len(me.loops)
+    me.loops.foreach_get("vertex_index", vi); data = []
+    for v in vi: data.extend(barvy[v] if v < len(barvy) else (1.0, 1.0, 1.0, 1.0))
+    col.data.foreach_set("color", data); me.color_attributes.active_color = col
+
 def uloz(parts, jmeno, kolize=False, vzhled=None):
     for o in list(bpy.data.objects):
         if not (kolize and o.name.startswith("Pohyb_")): bpy.data.objects.remove(o)   # křídla vrat (kit.movable) zůstanou
@@ -1286,6 +1294,7 @@ def uloz(parts, jmeno, kolize=False, vzhled=None):
                 uv[li].uv = (uv[li].uv[0] / vel, uv[li].uv[1] / vel)
         for mo in list(ob.modifiers): ob.modifiers.remove(mo)   # bevel jen pro Cycles; ve hře ne
         if vzhled and not ob.name.startswith("KOLIZE"): relief(ob, vzhled)
+        if getattr(P, "barvy", None) is not None: barvy_vrcholu(ob, P.barvy)   # voda.py: hladina a břeh (krytí, mokro) – hrad je nemá
     if vzhled: zapec_ao([o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith(("KOLIZE", "Pohyb_"))])
     for ob in [o for o in bpy.data.objects if o.name.startswith("Pohyb_") and o.type == "MESH"]:   # křídla vrat: UV v metrech -> fotka
         if vzhled: vlakna_dreva(ob, vzhled)   # křídla vrat: prkna s vlákny (dřív bez – tablet 3. 11. „vrata průsvitná, žádné dřevo“)
@@ -1296,7 +1305,7 @@ def uloz(parts, jmeno, kolize=False, vzhled=None):
             for li in poly.loop_indices: uv[li].uv = (uv[li].uv[0] / vel, uv[li].uv[1] / vel)
         for mo in list(ob.modifiers): ob.modifiers.remove(mo)
     out = os.path.join(K, "hra/modely/hrady"); os.makedirs(out, exist_ok=True)
-    kw_ = {"export_vertex_color": "ACTIVE"} if vzhled else {}
+    kw_ = {"export_vertex_color": "ACTIVE"} if vzhled or any(getattr(P, "barvy", None) is not None for P in parts) else {}
     try:
         bpy.ops.export_scene.gltf(filepath=os.path.join(out, jmeno + ".glb"), export_format="GLB", export_yup=True,
                                   export_apply=True, export_image_format="JPEG", **kw_)

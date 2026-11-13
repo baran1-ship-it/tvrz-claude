@@ -11,19 +11,7 @@
  "vyhlazeni_m": 12.0,
  "presah_m": 0.35,
  "min_nad_dnem_m": 0.03,
- "lavky": [
-  {
-   "id": "brod_velicka",
-   "u_bodu": [
-    -68,
-    108
-   ],
-   "tok": "Velička",
-   "sirka": 1.3,
-   "delka_nad_m": 2.5,
-   "zdroj": "NAVRH – konec stezky z údolí Veličky (místo ‚Brod u Veličky‘)"
-  }
- ],
+ "lavky": [],
  "koryto": {
   "popis": "Zářez koryta do terénu (nastroje/koryta.py, Míša 2. 11.: „koryto není dle reality“; Havran koryto.gd): pod hladinou dno (parabola), u vody práh břehu, pak svah až k původnímu terénu – terén se jen snižuje. Podhorský potok na drobě: kamenité dno, břehy 0,3–0,8 m, nárazové břehy strmější.",
   "hloubka_vody_m": {
@@ -63,6 +51,304 @@
    "nabeh_m": 1.0,
    "rezerva_m": 0.15,
    "pozn_rezerva": "3. 11. teren_shoda: síť pod pásem nejméně o rezervu níž než skutečný terén i mezi body mřížky"
+  },
+  "kolisani_sirky": {
+   "amp": 0.35,
+   "vlna1_sirek": 4.0,
+   "vlna2_sirek": 9.0,
+   "zdroj": "docs/reference/detaily_hradu_1393.md §9 (střídání tůní a peřejí po 2–5 šířkách koryta) – NEOVERENO rozměrově"
+  },
+  "brod": {
+   "hloubka_m": 0.12,
+   "sklon_najezdu": 0.1,
+   "polosirka_m": 3.0,
+   "nabeh_m": 5.0,
+   "dosah_m": 24.0,
+   "mezera_cest_m": [
+    1.5,
+    32.0
+   ],
+   "od_mostu_m": 25.0,
+   "popis": "Brod (Míša 13. 11.: „brod k hájovně není dobrý“ – cesta přes úzký příkop s hrbem): kde cesta kříží tok bez mostu (konec cesty u toku a protější cesta do mezera_cest_m, spojnice kříží osu toku), je koryto mělké (hloubka_m) a břehy místo prahu a svahu 0,9 sjíždějí k vodě nájezdem sklon_najezdu v pásu ±polosirka_m podél toku (náběh nabeh_m) – úvoz k vodě, cesta vede dnem (nastroje/cesty.py jen_maska).",
+   "zdroj": "docs/reference/brody/README.md (rešerše 13. 11.: Clarkin 2006 a Keller & Sherar – USDA příručky brodů: nájezd ≤ 10 %, žádný lom v profilu; River Cole: koryto ~3 m, brod ~6 m, dno zvýšené; Gu 2005 hloubka 0,15 m; fotky real_* CC BY-SA, KCD1/2 snímky kcd*_brod_*); Havran kraj.py brod_hloubka_m 0,12",
+   "rozliti_sirky": 2.0,
+   "dno_ploche": true,
+   "pozn_13_11": "rešerše: brod = mělká rozlitá plocha (voda ~2× šíře koryta), ploché dno, nájezd 10 % až na původní terén (délka = výška břehu / sklon), přechody zaoblené, bez prahu břehu; pás 3 m + náběh 5 m; kameny po stranách a pod brodem, pruh cesty volný (brod_volno_m)",
+   "zaobleni_m": 2.5,
+   "pozn_zaobleni": "svislé zakružení lomů (dno → nájezd, nájezd → terén) jako hladké minimum/maximum šířky zaobleni_m: Clarkin 2006 kap. 4 („vertical curve dip … gentle“), Keller & Sherar kap. 9 („avoid sharp vertical curves“); délka 2–3 m NEOVERENO (docs/reference/brody/README.md §4)",
+   "vyhlazeni_terenu_m": 2.0,
+   "pozn_vyhlazeni": "nájezd končí na terénu vyhlazeném (sigma m) – bez hrbolů a děr DMR 1 m v úvozu (fotky Wupperfurt, Retlage: travnaté zaoblené hrany); NAVRH, ověřit snímkem"
   }
+ },
+ "soutok_m": 8.0,
+ "pozn_soutok": "délka náběhu hladiny přítoku na hladinu hlavního toku (blender/voda.py, Míša 4. 11.: zub na soutoku)",
+ "mosty": [
+  {
+   "id": "most_440_1",
+   "u_bodu": [
+    146.7,
+    528.6
+   ],
+   "tok": "Velička",
+   "sirka": 3.2,
+   "delka_nad_m": 3.0,
+   "jarmo_po_m": 3.5,
+   "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)",
+   "_konce": [
+    [
+     153.6699981689453,
+     529.6300048828125,
+     -43.13
+    ],
+    [
+     139.7899932861328,
+     527.5900268554688,
+     -44.53
+    ]
+   ]
+  },
+  {
+   "id": "most_440_2",
+   "u_bodu": [
+    32.4,
+    320.8
+   ],
+   "tok": "Velička",
+   "sirka": 3.2,
+   "delka_nad_m": 3.0,
+   "jarmo_po_m": 3.5,
+   "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)",
+   "_konce": [
+    [
+     38.16999816894531,
+     324.7900085449219,
+     -41.2
+    ],
+    [
+     26.940000534057617,
+     316.3999938964844,
+     -40.99
+    ]
+   ]
+  },
+  {
+   "id": "most_440_3",
+   "u_bodu": [
+    -7.9,
+    185.7
+   ],
+   "tok": "Velička",
+   "sirka": 3.2,
+   "delka_nad_m": 3.0,
+   "jarmo_po_m": 3.5,
+   "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)",
+   "_konce": [
+    [
+     -2.9000000953674316,
+     187.8000030517578,
+     -36.54
+    ],
+    [
+     -12.699999809265137,
+     183.1999969482422,
+     -37.62
+    ]
+   ]
+  },
+  {
+   "id": "most_440_4",
+   "u_bodu": [
+    -66.3,
+    122.7
+   ],
+   "tok": "Velička",
+   "sirka": 3.2,
+   "delka_nad_m": 3.0,
+   "jarmo_po_m": 3.5,
+   "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)",
+   "_konce": [
+    [
+     -63.83000183105469,
+     129.2899932861328,
+     -36.01
+    ],
+    [
+     -69.18000030517578,
+     116.33000183105469,
+     -35.65
+    ]
+   ]
+  },
+  {
+   "id": "most_440_5",
+   "u_bodu": [
+    -983.3,
+    -654.2
+   ],
+   "tok": "Velička",
+   "sirka": 3.2,
+   "delka_nad_m": 3.0,
+   "jarmo_po_m": 3.5,
+   "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)",
+   "_konce": [
+    [
+     -977.0900268554688,
+     -650.8400268554688,
+     -1.2
+    ],
+    [
+     -990.0800170898438,
+     -656.1500244140625,
+     -0.69
+    ]
+   ]
+  },
+  {
+   "id": "most_440_6",
+   "u_bodu": [
+    -1085.8,
+    -977.7
+   ],
+   "tok": "Velička",
+   "sirka": 3.2,
+   "delka_nad_m": 3.0,
+   "jarmo_po_m": 3.5,
+   "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)",
+   "_konce": [
+    [
+     -1088.3399658203125,
+     -971.1199951171875,
+     14.09
+    ],
+    [
+     -1097.1300048828125,
+     -973.1693115234375,
+     14.48
+    ]
+   ]
+  }
+ ],
+ "pozn_lavky_5_11": "lávka brod_velicka zrušena – stála 15 m od mostu údolní cesty (Míša 5. 11.: „dva mosty vedle sebe“)",
+ "kameny_koryta": {
+  "krok_m": 0.5,
+  "valouny_na_m2": 2.2,
+  "balvany_na_m": 0.3,
+  "breh_na_m2": 0.6,
+  "valoun_m": [
+   0.1,
+   0.32
+  ],
+  "balvan_m": [
+   0.6,
+   1.3
+  ],
+  "breh_kamen_m": [
+   0.15,
+   0.5
+  ],
+  "balvan_nad_hladinou": [
+   0.05,
+   0.35
+  ],
+  "breh_pas_m": 1.5,
+  "brod_volno_m": 2.0,
+  "most_volno_m": 1.5,
+  "dosah_m": 45,
+  "bunka_m": 25,
+  "zdroj": "AOPK (voda_hra.json: kamenité koryto Veličky), geologie droba/břidlice (ČGS, skaly.json), Míša 10. 11.: „kamenný potok – brod a potok nemají jediný kámen“; podhorský tok: valouny po celém dně, balvany vyčnívají nad hladinu, kamení na březích (štěrkové lavice). Hustoty NEOVERENO (odhad z fotek podhorských potoků), na brodu volný pruh cesty.",
+  "okraj_na_m2": 2.5,
+  "okraj_pas_m": 0.7,
+  "okraj_m": [
+   0.15,
+   0.5
+  ],
+  "pozn_10_11b": "Míša 10. 11.: „je to divný přechod, podívej se na fotky potoka ve skutečnosti, je to samý kámen“ – dno souvisle valouny (5/m²), okraj vody pás kamenů přes čáru břehu (zakrývá přechod hlína–voda), balvany 0,3/m",
+  "pozn_rozpocet": "skenované kameny 200 troj.; v dohledu 45 m ~1 300 kamenů ≈ 0,26 M troj. (hlídač scén)",
+  "velke_balvany_na_m": 0.07,
+  "velky_balvan_m": [
+   1.8,
+   3.6
+  ],
+  "velky_zapusteni": 0.35,
+  "velky_od_kraje_m": [
+   -0.6,
+   1.2
+  ],
+  "velky_dosah_m": 160,
+  "plochost": [
+   0.45,
+   0.75
+  ],
+  "zdroj_foto": "docs/reference/potok/misa_potok_01–02.jpg (Míša 10. 11.): balvany droby 2–4 m na březích a v toku s mechem a kapradím nahoře, ve vodě šedé ploché hranaté kameny, peřeje",
+  "hrbet_podil": 0.12,
+  "hrbet_nad_m": [
+   -0.03,
+   0.05
+  ],
+  "hrbet_pas": 0.7,
+  "zdroj_hrbet": "Míšina předloha misa_real_01_potok_trava_kameny.jpg: hladinu lámou hřbety valounů po celém dně (světlé čárky a vrásky za kameny); README_jak_se_stavi.md krok 4 – část valounů v proudnici má vrch 0–5 cm pod/nad hladinou. Podíl 12 % a pás 70 % poloviny šíře NEOVERENO (ladit snímkem)"
+ },
+ "predloha_13_11": {
+  "popis": "Míša 13. 11.: „takhle by měly vypadat všechny toky“ – závazná předloha pro všechny potoky a Veličku: docs/reference/potoky/misa_real_01–04 (README_misa_real.md) + KCD (rešerše docs/reference/potoky/README_jak_se_stavi.md). Hladina lámaná valouny, tůně a peřeje s bílou vodou, mechové balvany, mokré kamení a štěrk na kraji, tráva a ostřice převislé do vody, listí, kořeny, padlé kmeny; žádná rovná deska s ostrou hranou.",
+  "zdroj": "docs/reference/potoky/README_misa_real.md"
+ },
+ "vzhled_13_11": {
+  "popis": "Vzhled vody a břehu podle Míšiny předlohy (docs/reference/potoky/misa_real_01–04, „takhle by měly vypadat všechny toky“) a rešerše docs/reference/potoky/README_jak_se_stavi.md kroky 1–3: hladina bez hrany (voda.py: síť přes celou plochu s hloubkou > 0 + řada za čárou vody, krytí kraje v barvě vrcholu), krytí podle hloubky (Beer–Lambert) a úhlu (Fresnel, Schlick), mokrý pás a tmavší dno pod vodou (barva vrcholu BREH A, zem.gdshader). Čte blender/voda.py, hra/scripts/hlavni.gd (shader vody), hra/scripts/svet.gd (terén).",
+  "melka": [
+   0.384,
+   0.404,
+   0.31
+  ],
+  "zdroj_melka": "pipeta (medián) misa_real_01_potok_trava_kameny.jpg výřez x 150–280, y 300–360 (mělká voda s valouny, sRGB)",
+  "hluboka": [
+   0.31,
+   0.267,
+   0.161
+  ],
+  "zdroj_hluboka": "pipeta (medián) misa_real_03_perej_listi_breh.jpg výřez x 10–120, y 520–600 (klidná tůň pod peřejí, sRGB)",
+  "cirost_m": 0.5,
+  "zdroj_cirost": "hloubka, na které voda pohltí 63 % pohledu na dno (1 − exp(−h/c)); v real_01 je dno vidět i uprostřed toku (~0,3–0,4 m) – NEOVERENO, laděno snímkem; Havran reka cirost 0,35",
+  "hloubka_barvy_m": 0.5,
+  "zdroj_hloubka_barvy": "od mělké k tůňové barvě (1 − exp(−h/x)) – NEOVERENO, snímek",
+  "fresnel_f0": 0.02,
+  "zdroj_fresnel": "Schlick: F0 = ((n−1)/(n+1))², voda n ≈ 1,33 → 0,02 (https://en.wikipedia.org/wiki/Schlick%27s_approximation); krytí = max(hloubka, Fresnel) – shora průhledná, do dálky zrcadlí (kcd1_oficial_potok_valouny_pruhlednost.jpg)",
+  "drsnost_klid": 0.15,
+  "drsnost_pena": 0.5,
+  "specular": 0.12,
+  "zdroj_drsnost": "snímek 13. 11. (docs/screens/potok13_*): s drsností 0,08 a specular 0,35 odrážela hladina jen oblohu (Compatibility bez SSR) – šedobílá deska; odraz lesa je proto barva odraz × Fresnel, lesk jen slunce. Hodnoty NEOVERENO, laděno snímkem",
+  "mokry_pas_m": 0.3,
+  "zdroj_mokry_pas": "mokrý tmavší pás nad čárou vody (výška nad hladinou): KCD snímky 0,2–0,5 m (odhad z fotky, README_jak_se_stavi.md §2.2), Havran voda_toky.md 0,2–0,4 m (NAVRH); na plochém brodu vychází vodorovně 2–4 m jako bahno u mlýna (kcd1_melcina_mlyn_mokre_bahno.jpg)",
+  "dno_tmave_m": 0.3,
+  "zdroj_dno_tmave": "hloubka, do které dno pod vodou plně ztmavne a zezelená (kameny pod vodou tmavší a sytější: kcd1_oficial_potok_valouny_pruhlednost.jpg, misa_real_01) – NEOVERENO, snímek",
+  "mokro_albedo": 0.62,
+  "mokro_drsnost": 0.45,
+  "zdroj_mokro": "mokrý povrch tmavší a lesklejší (zem.gdshader déšť: albedo × 0,66, drsnost 0,55 – pocasi.gd); na čáře vody o málo tmavší a lesklejší (KCD snímky) – NEOVERENO, snímek",
+  "dno_albedo": [
+   0.72,
+   0.78,
+   0.6
+  ],
+  "zdroj_dno": "dno pod vodou: násobek barvy (tmavší, olivové – pohlcení červené; real_01 kameny pod vodou zelenohnědé) – NEOVERENO, snímek",
+  "mokro_specular": 0.22,
+  "odraz": [
+   0.282,
+   0.302,
+   0.149
+  ],
+  "zdroj_odraz": "pipeta (medián) misa_real_01_potok_trava_kameny.jpg výřez x 330–420, y 230–270 (vzdálenější hladina zrcadlící keře); KCD kcd1_lesni_potok_kameny_mech.jpg: hladina tmavá, zrcadlí koruny",
+  "kraj_m": 0.08,
+  "zdroj_kraj": "krytí u čáry vody doroste na prvních 8 cm hloubky (hrana vody se nečte jako čára – README_jak_se_stavi.md §2.2 d) – NEOVERENO, snímek",
+  "pena_kamen_polomer": 0.8,
+  "pena_kamen_po_proudu": 2.0,
+  "pena_kamen_pod_hladinou_m": 0.04,
+  "zdroj_pena_kamen": "pěna u kamene, který láme hladinu (README_jak_se_stavi.md krok 4; S. Schreibt, River – Horizon: pěna = vzdálenost k překážce ve vertex color, protažená po proudu; CryEngine „foam soft intersection“): stopa poloměr × šíře kamene napříč a po_proudu × průměr za kamenem; kámen s vrchem do pod_hladinou_m pod hladinou se počítá. Čísla NEOVERENO (Schreibt 1–3× průměr)",
+  "pena_kamen_min_hloubka_m": 0.08,
+  "zdroj_pena_kamen_hloubka": "pěna jen u kamenů v proudu (hloubka u kamene nad 8 cm) – kameny na mělkém kraji vody pěnu nedělají (misa_real_01: světlé čárky za kameny v proudnici, kraj klidný); NEOVERENO"
  }
 }

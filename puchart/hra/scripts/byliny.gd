@@ -200,21 +200,29 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 	# pás u paty: trsy podél hrany, u zdi hustěji (vzdálenost = šířka × náhoda^1,6)
 	var kp := "%d,%d" % [i, j]
 	if _pas.has(kp):
-		var hp: Dictionary = cfg["pata_pas"]
 		for sk: Array in _pas[kp]:
+			# čára vody (stavby_vegetace.py voda_pas, Míša 13. 11.): hustoty voda_pas[zdroj], trsy nakloněné k vodě, část přes čáru
+			var voda: bool = sk.size() > 9
+			if voda and not cfg.has("voda_pas"): continue
+			var hp: Dictionary = cfg["voda_pas"].get(str(sk[7]), {}) if voda else cfg["pata_pas"]
 			var a := Vector2(float(sk[0]), float(sk[1])); var b := Vector2(float(sk[2]), float(sk[3])); var nn := Vector2(float(sk[4]), float(sk[5])); var w := float(sk[6])
 			var plocha := a.distance_to(b) * w
+			var osa := Vector3(b.x - a.x, 0.0, b.y - a.y).normalized()
+			var k_vode := 1.0 if Vector3(-osa.z, 0.0, osa.x).dot(Vector3(-nn.x, 0.0, -nn.y)) > 0.0 else -1.0   # znaménko otočení vrcholu k vodě
 			for druh: String in hp:
 				if not (hp[druh] is float or hp[druh] is int) or not meshe.has(druh) or meshe[druh].is_empty(): continue
 				var n := int(plocha * float(hp[druh]) + rng.randf())
 				for q in n:
 					var p := a.lerp(b, rng.randf()) + nn * (w * pow(rng.randf(), 1.6))
+					if voda: p -= nn * float(sk[9]) * rng.randf() * rng.randf()   # přes čáru vody (převis, 0–presah_m)
 					var mr: Array = cfg.get("meritko_druh", {}).get(druh, cfg.get("meritko", [0.8, 1.3]))
 					var sc := rng.randf_range(float(mr[0]), float(mr[1]))
 					var y: float = svet.vyska(p.x, p.y)
 					var rp: float = float(cfg.get("pata_polomer_m", {}).get(druh, cfg.get("pata_polomer_m", {}).get("_", 0.25))) * sc
 					for u in 4: y = minf(y, svet.vyska(p.x + rp * cos(u * PI / 2 + 0.785), p.y + rp * sin(u * PI / 2 + 0.785)))
-					var tf := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(sc, sc * rng.randf_range(0.85, 1.2), sc)), Vector3(p.x, y - float(cfg.get("pata_zapusteni_m", 0.03)), p.y))
+					var bz := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(sc, sc * rng.randf_range(0.85, 1.2), sc))
+					if voda: bz = Basis(osa, k_vode * deg_to_rad(float(sk[8])) * rng.randf_range(0.5, 1.2)) * bz   # nakloněný k vodě (30–50°)
+					var tf := Transform3D(bz, Vector3(p.x, y - float(cfg.get("pata_zapusteni_m", 0.03)), p.y))
 					var klic: String = druh + str(rng.randi() % meshe[druh].size())
 					if not mista.has(klic): mista[klic] = []
 					mista[klic].append(tf)

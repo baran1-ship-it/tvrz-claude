@@ -61,19 +61,27 @@ for ti, t in enumerate(toky):
     # jemná hladina je na mřížce jemného pásu (níž, jen do jemny_pas.dosah_kresleni_m); dál jednoduchý pás po 4 m (VODA_DALEKO)
     vs2 = []; fs2 = []; us2 = []; st = 2
     ii = list(range(0, len(x), st)) + ([len(x) - 1] if (len(x) - 1) % st else [])
+    wbd_ = np.array(TH[str(ti)].get("brod_vaha", [0.0] * len(TH[str(ti)]["osa"])), float)[::kk]
+    wbd_ = np.r_[wbd_, wbd_[-1:]][:len(x)]   # brod: voda rozlitá (koryta.py rozliti_sirky) i v dálce
     for i in ii:
-        for o in (hw, -hw): vs2.append((x[i] + n[i, 0] * o, hl[i] - 0.03, z[i] + n[i, 1] * o))
+        hwi = hw + (w / 2) * (VH["koryto"].get("brod", {}).get("rozliti_sirky", 1.0) - 1) * wbd_[i]
+        for o in (hwi, 0.0, -hwi): vs2.append((x[i] + n[i, 0] * o, hl[i] - 0.03, z[i] + n[i, 1] * o))
+    # dálka (návrh krok 10): tři vrcholy napříč – uprostřed hloubka koryta, na krajích 0 (krytí do ztracena, žádná hrana pásu);
+    # dřív v = 0 na jednom a 0,3 na druhém kraji (a glTF v převrací – „deska“ i v dálce)
+    hv_d = TH[str(ti)].get("hloubka", 0.3)
     for k in range(len(ii) - 1):
-        a = 2 * k; fs2.append((a, a + 2, a + 3, a + 1)); us2.append([(s[ii[k]], 0.0), (s[ii[k + 1]], 0.0), (s[ii[k + 1]], 0.3), (s[ii[k]], 0.3)])
+        a = 3 * k
+        for j_, (d0_, d1_) in enumerate(((0.0, hv_d), (hv_d, 0.0))):
+            fs2.append((a + j_, a + 3 + j_, a + 4 + j_, a + 1 + j_)); us2.append([(s[ii[k]], d0_), (s[ii[k + 1]], d0_), (s[ii[k + 1]], d1_), (s[ii[k]], d1_)])
     # po kusech (Míša 4. 11.: dvoubarevná hladina – jeden pás přes všechny toky měl střed daleko, visibility_range ho kreslil i
     # vedle jemné hladiny); kus = kus_m po proudu jako jemná hladina
-    KM_ = VH["koryto"]["jemny_pas"]["kus_m"]; kus2 = [int(s[ii[k]] // KM_) for k in range(len(ii) - 1)]
+    KM_ = VH["koryto"]["jemny_pas"]["kus_m"]; kus2 = [int(s[ii[k // 2]] // KM_) for k in range(len(fs2))]
     for kk in sorted(set(kus2)):
-        sel = [k for k in range(len(ii) - 1) if kus2[k] == kk]
+        sel = [k for k in range(len(fs2)) if kus2[k] == kk]
         Pd = Part("VODA_DALEKO_%d_%d" % (ti, kk)); vmap = {}; vv = []; ff = []; uu = []
         for k in sel:
             q = []
-            for vi in (2 * k, 2 * k + 2, 2 * k + 3, 2 * k + 1):
+            for vi in fs2[k]:
                 if vi not in vmap: vmap[vi] = len(vv); vv.append(vs2[vi])
                 q.append(vmap[vi])
             ff.append(tuple(q)); uu.append(us2[k])
@@ -84,50 +92,113 @@ for ti, t in enumerate(toky):
 # jemný pás břehů (voda_hra.json koryto.jemny_pas; Míša 3. 11.: hrany potoka jak pila – terén dlaždic má 2m trojúhelníky):
 # síť podél osy po krok_podel_m × body_napric, výšky ze skutečného terénu (vysek.r16 = DMR 1 m s korytem) + nad_m;
 # kusy po kus_m (ořez pohledem); ve hře materiál terénu, terén dlaždic je pod pásem snížen (teren_dlazdice.py)
-JP = VH["koryto"]["jemny_pas"]; BR = []
+JP = VH["koryto"]["jemny_pas"]; BR = []; BRD = VH["koryto"].get("brod", {}); VZ = VH.get("vzhled_13_11", {})
+# KAMENY, KTERÉ LÁMOU HLADINU (návrh krok 4; misa_real_01): z nastroje/koryto_kameny.py (běží před voda.py) – kámen s vrchem nad
+# hladinou − pena_kamen_pod_hladinou_m a patou pod hladinou; pěna do barvy vrcholu hladiny R = 1 − pěna (Schreibt: vzdálenost
+# k překážce, protažená po proudu). Bez kamenů (první stavba) hladina bez pěny u kamenů.
+from scipy.spatial import cKDTree as _KDT
+_osy = [(np.array(t_["osa"], float)) for t_ in TH.values()]
+_OS = np.vstack([o_ for o_ in _osy]); _TG = np.vstack([np.gradient(o_[:, :2], axis=0) for o_ in _osy]); _TG /= np.linalg.norm(_TG, axis=1, keepdims=True) + 1e-9
+_KO = _KDT(_OS[:, :2]); KAM = np.zeros((0, 6))
+_kb = os.path.join(K, "hra/data/koryto_kameny.bin"); _kg = os.path.join(K, "hra/modely/hrady/kameny_koryta.glb")
+if os.path.exists(_kb) and os.path.exists(_kg):
+    import struct as _st
+    _f = open(_kg, "rb").read(); _n = _st.unpack("<I", _f[12:16])[0]; _j = json.loads(_f[20:20 + _n])
+    _vt = {int(nd_["name"].split("_")[1]): _j["accessors"][_j["meshes"][nd_["mesh"]]["primitives"][0]["attributes"]["POSITION"]]["max"][1] for nd_ in _j["nodes"] if "mesh" in nd_ and nd_["name"].startswith("valoun_")}
+    _A = np.fromfile(_kb, np.float32).reshape(-1, 7)
+    _vrch = _A[:, 2] + _A[:, 5] * _A[:, 6] * np.array([_vt.get(int(t_) % 6, 0.5) for t_ in _A[:, 0]])
+    _d, _i = _KO.query(_A[:, [1, 3]]); _hl = _OS[_i, 2]
+    _lam = (_vrch > _hl - VZ.get("pena_kamen_pod_hladinou_m", 0.04)) & (_A[:, 2] < _hl) & (_d < 6.0)
+    _lam[_lam] &= np.array([h_ - ter(x_, z_) > VZ.get("pena_kamen_min_hloubka_m", 0.08) for x_, z_, h_ in zip(_A[_lam, 1], _A[_lam, 3], _hl[_lam])])   # v proudu, ne kameny na mělkém kraji
+    KAM = np.c_[_A[_lam][:, [1, 3]], _A[_lam][:, 5] * 0.5, _TG[_i[_lam]], _hl[_lam]]   # x, z, poloměr, tečna toku x, z, hladina
+    print("kamenů lámajících hladinu: %d" % len(KAM))
+_KK = _KDT(KAM[:, :2]) if len(KAM) else None
+def _pena(px, pz):
+    """pěna 0..1 ve vrcholech hladiny od kamenů, které ji lámou (stopa za kamenem po proudu)"""
+    out_ = np.zeros(len(px))
+    if _KK is None: return out_
+    R_ = 0.6 * (VZ.get("pena_kamen_po_proudu", 2.0) * 2 + 1) + 0.5
+    for q_, js_ in enumerate(_KK.query_ball_point(np.c_[px, pz], R_)):
+        for k_ in js_:
+            x_, z_, r_, tx_, tz_, _ = KAM[k_]; rx_, rz_ = px[q_] - x_, pz[q_] - z_
+            al_ = rx_ * tx_ + rz_ * tz_; ac_ = -rx_ * tz_ + rz_ * tx_
+            if al_ < -r_ * 1.5: continue
+            fa_ = np.exp(-(ac_ / (r_ * VZ.get("pena_kamen_polomer", 0.8) + 0.3)) ** 2)
+            fl_ = 1.0 if al_ < 0 else np.exp(-al_ / (VZ.get("pena_kamen_po_proudu", 2.0) * 2 * r_ + 0.3))
+            out_[q_] = max(out_[q_], fa_ * fl_)
+    return out_
+def _brod_rady(t_, x, z, n):
+    """brod (nastroje/koryta.py → toky_hladina.json): váha brodu v řadě (0 mimo, 1 v pásu brodu), normála řady natočená do
+    kolmice brodu (řady se na 20 m nesmí křížit), rozlitá polovina vody a dosah jemného pásu od osy"""
+    wb_ = np.array(t_.get("brod_vaha", [0.0] * len(x)), float)[:len(x)]; rb_ = np.array(t_.get("brod_breh_m", [0.0] * len(x)), float)[:len(x)]
+    nr_ = n.copy()
+    for bt_ in t_.get("brody_tvar", []):
+        nb_ = np.array([-bt_["tecna"][1], bt_["tecna"][0]]); blz_ = np.hypot(x - bt_["stred"][0], z - bt_["stred"][1]) < BRD.get("polosirka_m", 3) + BRD.get("nabeh_m", 5) + 3
+        sg_ = np.sign(n @ nb_); sg_[sg_ == 0] = 1; nb2_ = sg_[:, None] * nb_[None, :]
+        nr_ = np.where((blz_ & (wb_ > 0))[:, None], n * (1 - wb_[:, None]) + nb2_ * wb_[:, None], nr_)
+    nr_ /= np.linalg.norm(nr_, axis=1, keepdims=True) + 1e-9
+    return wb_, rb_, nr_
 for ti, t in enumerate(toky):
     if str(ti) not in TH: continue
     o = np.array(TH[str(ti)]["osa"]); w = TH[str(ti)]["sirka"]; pw = w / 2 + VH["koryto"]["prah_m"]
-    off = []
-    for f in JP["body_napric"]: off.append(f * pw if f <= 1.0 else pw + (f - 1.0) / (JP["body_napric"][-1] - 1.0) * VH["koryto"]["breh_m"])
-    off = sorted(set([-x for x in off] + off))
     kk = max(1, int(round(JP["krok_podel_m"])))
-    o = np.r_[o[::kk], o[-1:]]; x, z = o[:, 0], o[:, 1]
+    sel_ = np.r_[np.arange(0, len(o), kk), [len(o) - 1]] if (len(o) - 1) % kk else np.arange(0, len(o), kk)
+    o = o[sel_]; x, z = o[:, 0], o[:, 1]
     d = np.gradient(np.c_[x, z], axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-9; n = np.c_[-d[:, 1], d[:, 0]]
+    wbr, rbr, n = _brod_rady({k_: (np.array(v_)[sel_].tolist() if k_ in ("brod_vaha", "brod_breh_m") else v_) for k_, v_ in TH[str(ti)].items()}, x, z, n)
+    fmax_ = JP["body_napric"][-1]
+    def _off(i):   # body napříč v řadě i: násobky (kraj vody + práh), pak metry břehu; v brodu rozlitá voda a pás až na konec nájezdu
+        pw_i = pw + (w / 2) * (BRD.get("rozliti_sirky", 1.0) - 1) * wbr[i]; bm_i = max(VH["koryto"]["breh_m"], rbr[i] - pw_i)
+        of_ = [f * pw_i if f <= 1.0 else pw_i + (f - 1.0) / (fmax_ - 1.0) * bm_i for f in JP["body_napric"]]
+        return sorted(set([-v_ for v_ in of_] + of_))
     s_ = np.r_[0, np.cumsum(np.hypot(np.diff(x), np.diff(z)))]
     kus = np.floor(s_ / JP["kus_m"]).astype(int)
+    hl_o = o[:, 2]
     for k in range(kus.max() + 1):
         idx = np.nonzero(kus == k)[0]
         if len(idx) == 0: continue
         idx = np.r_[idx, idx[-1] + 1] if idx[-1] + 1 < len(x) else idx
         if len(idx) < 2: continue
-        Pk = Part("BREH_%d_%d" % (ti, k)); V_ = []; F_ = []
+        Pk = Part("BREH_%d_%d" % (ti, k)); V_ = []; F_ = []; C_ = []
         for i in idx:
-            for ov in off:
+            for ov in _off(i):
                 px_, pz_ = x[i] + n[i, 0] * ov, z[i] + n[i, 1] * ov
                 V_.append((px_, ter(px_, pz_) + JP["nad_m"], pz_))
-        m_ = len(off)
+                # MOKRO (návrh krok 3, docs/reference/potoky/README_jak_se_stavi.md): A = sucho – 0,5 na čáře vody, k 1 do mokry_pas_m
+                # nad hladinou (KCD 0,2–0,5 m, Havran voda_toky.md 0,2–0,4 m), pod vodou k 0 do dno_tmave_m hloubky (mokré kamení
+                # tmavší a sytější: kcd1_oficial_potok_valouny); zem.gdshader větev mokro
+                dh_ = V_[-1][1] - JP["nad_m"] - hl_o[i]
+                a_ = 0.5 + 0.5 * min(1.0, dh_ / VZ.get("mokry_pas_m", 0.3)) if dh_ >= 0 else 0.5 - 0.5 * min(1.0, -dh_ / VZ.get("dno_tmave_m", 0.3))
+                C_.append((1.0, 1.0, 1.0, a_))
+        m_ = len(_off(idx[0]))
         for a in range(len(idx) - 1):   # trojúhelníky výslovně (stejná úhlopříčka jako hladina)
             for b in range(m_ - 1):
                 i0 = a * m_ + b; F_ += [(i0, i0 + 1, i0 + m_ + 1), (i0, i0 + m_ + 1, i0 + m_)]
-        Pk.mesh(V_, F_, "breh_teren", smooth=True)
-        # HLADINA na téže mřížce (Míša 4. 11.: „má to zuby a hladina je přerušena“ – hladina měla mřížku 2 m a jiné body napříč,
-        # průsečík dvou triangulací byl pila): vrcholy nad vrcholy břehu, UV.y = hloubka nad nimi (0 na břehu → průhlednost)
-        hlr = o[:, 2]; VW = []; UW = []
-        sl = [b for b, ov in enumerate(off) if abs(ov) <= pw + 1.3]
-        for a, i in enumerate(idx):
-            for b in sl: VW.append((V_[a * m_ + b][0], hlr[i], V_[a * m_ + b][2]))
-        mw = len(sl); FW = []; UWf = []
+        Pk.mesh(V_, F_, "breh_teren", smooth=True); Pk.barvy = C_
+        # HLADINA na téže mřížce (Míša 4. 11.: „má to zuby a hladina je přerušena“): vrcholy nad vrcholy břehu, UV.y = hloubka.
+        # Míša 13. 11. (misa_13_11_voda_deska.jpg): „deska s ostrou hranou“ – síť dřív končila na pw + 1,3 m i tam, kde byla
+        # voda (brod), a hrana byla vidět. Teď celá plocha, kde je hloubka > 0, a jedna řada za čárou vody; krytí kraje v barvě
+        # vrcholu A = 0 na vrcholech bez vody a na krajní řadě pásu (README_jak_se_stavi.md krok 1, Havran voda_toky.md)
+        hlr = hl_o; VW = []; UWf = []; FW = []; CW = []; vm_ = {}
+        def _vw(aa, bb):
+            if (aa, bb) not in vm_:
+                q_ = V_[aa * m_ + bb]; hq_ = hlr[idx[aa]] - q_[1]
+                vm_[(aa, bb)] = len(VW); VW.append((q_[0], hlr[idx[aa]], q_[2]))
+                CW.append((1.0, 1.0, 1.0, 1.0 if hq_ > 0 and 0 < bb < m_ - 1 else 0.0))
+            return vm_[(aa, bb)]
         for a in range(len(idx) - 1):
-            for bi in range(mw - 1):
-                q = [(a, sl[bi]), (a, sl[bi + 1]), (a + 1, sl[bi + 1]), (a + 1, sl[bi])]
+            for bi in range(m_ - 1):
+                q = [(a, bi), (a, bi + 1), (a + 1, bi + 1), (a + 1, bi)]
                 hq = [max(0.0, hlr[idx[aa]] - V_[aa * m_ + bb][1]) for aa, bb in q]
-                if max(hq) <= 0.0 and min(abs(off[bb]) for _, bb in q) > w * 0.3: continue   # celý čtverec nad vodou (střed toku vždy – Míša 5. 11.: „někde chybí voda“)
-                j0 = a * mw + bi; tri = [(j0, j0 + 1, j0 + mw + 1, (0, 1, 2)), (j0, j0 + mw + 1, j0 + mw, (0, 2, 3))]
-                for t0, t1, t2, kk_ in tri:
-                    FW.append((t0, t1, t2)); UWf.append([(s_[idx[q[k_][0]]], hq[k_]) for k_ in kk_])
+                if max(hq) <= 0.0: continue   # celý čtverec nad vodou
+                ix_ = [_vw(aa, bb) for aa, bb in q]
+                for kk_ in ((0, 1, 2), (0, 2, 3)):
+                    FW.append(tuple(ix_[k_] for k_ in kk_)); UWf.append([(s_[idx[q[k_][0]]], hq[k_]) for k_ in kk_])
         if FW:   # po kusech jako břeh (dosah kreslení podle vzdálenosti kusu, ne celé sítě všech potoků)
-            Pw = Part("VODA_%d_%d" % (ti, k)); Pw.mesh(VW, FW, "voda", uvs=UWf, smooth=True); VJ.append(Pw)
+            pn_ = _pena(np.array([v_[0] for v_ in VW]), np.array([v_[2] for v_ in VW]))
+            CW = [(1.0 - float(pn_[q_]), c_[1], c_[2], c_[3]) for q_, c_ in enumerate(CW)]   # R = 1 − pěna (bez barvy vrcholu = bez pěny)
+            Pw = Part("VODA_%d_%d" % (ti, k)); Pw.mesh(VW, FW, "voda", uvs=UWf, smooth=True); Pw.barvy = CW; VJ.append(Pw)
+        else: print("POZOR: kus %d_%d bez hladiny" % (ti, k))
         BR.append(Pk)
 print("jemný pás břehů: %d kusů" % len(BR))
 
@@ -258,6 +329,7 @@ for mo in VH.get("mosty", []):
             PN.mesh([tuple(b0), tuple(b0b), tuple(b1b), tuple(b1)], [(0, 1, 2, 3)], "breh")     # svah vpravo
     mo["_konce"] = [[a.x, a.z, yA], [b.x, b.z, yB]]
     print("most", mo["id"], "délka %.1f m, výška %.2f, jařem %d, konce %.2f %.2f, hladina %.2f" % (L, max(yA, yB), nj, ya, yb, hl[i]))
+json.dump(VH, open(os.path.join(K, "hra/data/voda_hra.json"), "w"), ensure_ascii=False, indent=1)   # hra čte vzhled vody (hlavni.gd, svet.gd)
 json.dump({"popis": "konce údolních mostů [x, z, y mostovky, směr ven] – cesty.py zvedne cestu (Míša 9. 11.: nájezdy)", "nastupy": NAST_UD},
           open(os.path.join(K, "hra/data/nastupy_udoli.json"), "w"), ensure_ascii=False)
 # brody (Havran: cesty.json prechody druh brod, _brody ř. 9403, uprava_y): kde osa cesty kříží tok a není tam most –

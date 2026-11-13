@@ -341,7 +341,13 @@
   "soutok_m": 8.0,
   "tolerance_m": 0.15,
   "brod_sklon_max": 0.3,
-  "_brod_sklon_max": "smysl:brod_najezd – největší sklon terénu na 1 m napříč tokem u brodu (9 m od kraje vody); nájezd v datech 12 %, rezerva na vyhlazení dlaždic a profil cesty (Míša 13. 11.: příkop s hrbem u brodu k hájovně)"
+  "_brod_sklon_max": "smysl:brod_najezd – největší sklon terénu na 1 m napříč tokem u brodu vozové cesty (9 m od rozlitého kraje vody, do břehu jiného koryta); nájezd v datech 10 % (voda_hra.json koryto.brod), rezerva na vyhlazení dlaždic a profil cesty (Míša 13. 11.: příkop s hrbem u brodu k hájovně)",
+  "brod_sklon_max_pesi": 1.0,
+  "_brod_sklon_max_pesi": "smysl:brod_najezd u brodu jen pěší cesty (pěšina, stezka): US Army FM 5-34 tab. 1-3 „Trafficability of Fords“ – pěší nájezd do 100 % (1:1), https://armyengineer.tpub.com/EN5621/EN56210017.htm (docs/reference/brody/README.md §3.2)",
+  "breh_cesta_max": 0.1,
+  "_breh_cesta_max": "smysl:breh_porost – podíl bodů břehu 1 m od kraje vody (mimo brody) ve třídě stanoviště „cesta“ (bez porostu); 13. 11. bylo celé koryto „cesta“ (cesty.py bral zářez koryt jako jámu sklepa) – Míša 13. 11.: břehy a vegetace u vody. Mez 10 % = cesty podél toku a mosty",
+  "voda_pas_pokryti_min": 0.5,
+  "_voda_pas_pokryti_min": "smysl:breh_porost – délka pásu trsů na čáře vody (byliny.json voda_pas) vůči délce obou břehů mimo brody; skvrny s mezerami (skvrna 2–6 m, mezera 0–2 m) dávají ~75 %, cesty a mosty ubírají; mez 50 % NAVRH"
  },
  "vegetace": {
   "smi_byt_hole": [

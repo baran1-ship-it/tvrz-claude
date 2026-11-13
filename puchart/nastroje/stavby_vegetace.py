@@ -262,7 +262,46 @@ for a_, b_, strany, zdroj in hrany:
                 skvrny.setdefault(k_, []).append([round(float(p0[0]), 2), round(float(p0[1]), 2), round(float(p1[0]), 2), round(float(p1[1]), 2), round(float(n_[0]), 3), round(float(n_[1]), 3), round(float(w_), 2), zdroj])
                 pocty[zdroj] = pocty.get(zdroj, 0.0) + l_
             t_ += l_ + rg.uniform(*PP["mezera_m"])
-json.dump({"popis": "pás trávy u paty plotů a zdí (nastroje/stavby_vegetace.py z pravidla/svet/pata_zdi.json pas_u_paty) – čte byliny.gd; skvrna = [x0, z0, x1, z1, nx, nz, šířka, zdroj] podél hrany, n ven od zdi; klíč = buňka bylin (bunka_m)",
+# --- pás na čáře vody (návrh krok 8, docs/reference/potoky/README_jak_se_stavi.md; Míša 13. 11.: „hlavně ty břehy a přechod vody
+# a hlíny plus vegetace“, předloha misa_real_01/04: tráva a ostřice přepadají přes hranu až do vody). Stejný mechanismus jako
+# pás u paty: skvrny podél čáry vody (kde terén r16 protne hladinu toky_hladina.json), n od vody na břeh; byliny.gd trsy nakloní
+# k vodě (naklon_st) a část posadí přes čáru do vody (presah_m). Louka/ves tráva, v lese kapradí a mech (byliny.json voda_pas).
+VP = json.load(open(D + "byliny.json")).get("voda_pas", {}); rgv = np.random.default_rng(VP.get("seminko", 1393))
+def _ter16(x_, z_):
+    c__ = np.clip(np.asarray(x_) - VYJ["x0_hra"], 0, VYJ["sirka"] - 1.001); r__ = np.clip(np.asarray(z_) - VYJ["z0_hra"], 0, VYJ["vyska"] - 1.001)
+    c0, r0 = c__.astype(int), r__.astype(int); fc, fr = c__ - c0, r__ - r0
+    return ((Hm[r0, c0] * (1 - fc) + Hm[r0, c0 + 1] * fc) * (1 - fr) + (Hm[r0 + 1, c0] * (1 - fc) + Hm[r0 + 1, c0 + 1] * fc) * fr) + 300.0 - VYJ["pocatek_H"]
+_cesta_i = SJ["tridy"].index("cesta"); _les_i = [i_ for i_, t_ in enumerate(SJ["tridy"]) if t_.startswith("les")]
+nv_ = 0; dv_ = 0.0; _odm = {}
+if VP:
+    for k_, t_ in json.load(open(D + "toky_hladina.json"))["toky"].items():
+        o_ = np.array(t_["osa"], float); dd_ = np.gradient(o_[:, :2], axis=0); dd_ /= np.linalg.norm(dd_, axis=1, keepdims=True) + 1e-9
+        nn_ = np.c_[-dd_[:, 1], dd_[:, 0]]; aa_ = np.arange(0.0, VP["hledat_m"], 0.1)
+        for sg_ in (1, -1):
+            hr_ = []   # kraj vody v každém bodě osy (první bod napříč, kde je terén nad hladinou)
+            for i_ in range(len(o_)):
+                px_ = o_[i_, 0] + sg_ * nn_[i_, 0] * aa_; pz_ = o_[i_, 1] + sg_ * nn_[i_, 1] * aa_
+                nad_ = np.nonzero(_ter16(px_, pz_) >= o_[i_, 2])[0]
+                hr_.append(np.array([px_[nad_[0]], pz_[nad_[0]]]) if len(nad_) and nad_[0] > 0 else None)
+            t0_ = rgv.uniform(0, VP["mezera_m"][1]); i_ = int(t0_)
+            while i_ < len(o_) - 2:
+                l_ = int(round(rgv.uniform(*VP["skvrna_m"])))
+                for j_ in range(i_, min(i_ + l_, len(o_) - 1)):
+                    a_, b_ = hr_[j_], hr_[j_ + 1]
+                    if a_ is None or b_ is None or np.hypot(*(b_ - a_)) > 2.5: _odm["kraj"] = _odm.get("kraj", 0) + 1; continue
+                    m_ = (a_ + b_) / 2; n2_ = sg_ * nn_[j_]; w_ = float(rgv.uniform(*VP["sirka_m"]))
+                    rcs_ = [_cell(q_) for q_ in (a_, b_, m_, m_ + n2_ * w_ / 2, m_ + n2_ * w_)]; rc = rcs_[2]
+                    if any(q_ is None or st[q_] == _cesta_i or slap[q_] or pas_c[q_] for q_ in rcs_):   # brod (cesta), vyšlapané, most
+                        _odm["cesta"] = _odm.get("cesta", 0) + 1; continue
+                    les_ = st[rc] in _les_i
+                    kb_ = "%d,%d" % (int(np.floor(m_[0] / B_)), int(np.floor(m_[1] / B_)))
+                    skvrny.setdefault(kb_, []).append([round(float(a_[0]), 2), round(float(a_[1]), 2), round(float(b_[0]), 2), round(float(b_[1]), 2),
+                        round(float(n2_[0]), 3), round(float(n2_[1]), 3), round(w_, 2), "voda_les" if les_ else "voda_louka",
+                        VP["naklon_st"], VP["presah_m"]])
+                    nv_ += 1; dv_ += float(np.hypot(*(b_ - a_)))
+                i_ += l_ + int(round(rgv.uniform(*VP["mezera_m"])))
+    print("pás na čáře vody: skvrn %d, délka %.0f m, vynecháno úseků %s" % (nv_, dv_, _odm))
+json.dump({"popis": "pás trávy u paty plotů a zdí (nastroje/stavby_vegetace.py z pravidla/svet/pata_zdi.json pas_u_paty) a na čáře vody (byliny.json voda_pas) – čte byliny.gd; skvrna = [x0, z0, x1, z1, nx, nz, šířka, zdroj(, náklon °, přesah m)] podél hrany, n ven od zdi / od vody; klíč = buňka bylin (bunka_m)",
            "bunka_m": B_, "bunky": skvrny, "pokryti": {k: round(pocty.get(k, 0.0) / max(v, 1e-6), 3) for k, v in delky.items()}},
           open(D + "pata_pas.json", "w"), ensure_ascii=False)
 print("pás u paty: skvrn %d, pokrytí délky hran %s" % (sum(len(v) for v in skvrny.values()), {k: "%.0f %%" % (100 * pocty.get(k, 0.0) / max(v, 1e-6)) for k, v in delky.items()}))

@@ -239,7 +239,9 @@ rez = np.clip(gaussian_filter(rez, 1.0) * (0.75 + 0.35 * sum_), 0, 1)
 np.save(out + ".npy", H.astype(np.float32)); shutil.copy(pre + ".json", out + ".json")
 if os.path.exists(pre + "_jamy.npz"):   # sklep a šíje (teren_upravy.py): cesty je nemění, jen se předají dál
     J = np.load(pre + "_jamy.npz"); H[J["r"], J["c"]] = J["y"]; np.save(out + ".npy", H.astype(np.float32)); shutil.copy(pre + "_jamy.npz", out + "_jamy.npz")
-    na_ceste[J["r"], J["c"]] = True
+    # jen sklep a šíje (prvních n_upr, koryta.py) – ne zářez koryt: celé koryto i břeh pak byly třída „cesta“, holé bez trávy
+    # a bylin až k vodě (13. 11., Míša: „hlavně ty břehy a přechod vody a hlíny plus vegetace“; docs/chyby.md)
+    _nu = int(J["n_upr"]) if "n_upr" in J.files else len(J["r"]); na_ceste[J["r"][:_nu], J["c"][:_nu]] = True
 # maska 2 m (stejná mřížka jako maska stanovišť: výsek 2000 m / 2)
 k = 2
 mk = np.stack([maskR, maskG, rez], -1)[:ny - 1:k, :nx - 1:k][:1000, :1000]

@@ -9,7 +9,16 @@ import numpy as np
 K = sys.argv[1] if len(sys.argv) > 1 else "."
 VH = json.load(open(os.path.join(K, "pravidla/svet/voda_hra.json"))); C = VH["kameny_koryta"]; HV = VH["koryto"]["hloubka_vody_m"]
 TH = json.load(open(os.path.join(K, "hra/data/toky_hladina.json")))["toky"]
-BR = json.load(open(os.path.join(K, "hra/data/brody.json")))["brody"]
+# brody z nastroje/koryta.py (toky_hladina.json brody_tvar – i křížení osy cesty s tokem, např. hájovna) a z voda.py (brody.json,
+# dvojice konců cest), pokud už je – krok běží PŘED voda.py (hladinu lámou kameny: voda.py z nich peče pěnu, návrh krok 4)
+TH0 = json.load(open(os.path.join(K, "hra/data/toky_hladina.json")))["toky"]; RZ0 = VH["koryto"].get("brod", {}).get("rozliti_sirky", 1.0)
+BR = [{"stred": b_["stred"], "smer": [-b_["tecna"][1], b_["tecna"][0]], "delka": t_["sirka"] * RZ0 + 4.0} for t_ in TH0.values() for b_ in t_.get("brody_tvar", [])]
+if os.path.exists(os.path.join(K, "hra/data/brody.json")): BR += json.load(open(os.path.join(K, "hra/data/brody.json")))["brody"]
+# výška tvarů kamenů (hra/modely/hrady/kameny_koryta.glb, blender/kameny_koryta.py: půdorys 1 m, výška podle skenu) – hřbet u hladiny
+import struct as _st
+_f = open(os.path.join(K, "hra/modely/hrady/kameny_koryta.glb"), "rb").read(); _n = _st.unpack("<I", _f[12:16])[0]; _j = json.loads(_f[20:20 + _n])
+VYS_TVARU = {int(nd_["name"].split("_")[1]): _j["accessors"][_j["meshes"][nd_["mesh"]]["primitives"][0]["attributes"]["POSITION"]]["max"][1]
+             for nd_ in _j["nodes"] if "mesh" in nd_ and nd_["name"].startswith("valoun_")}
 NU = json.load(open(os.path.join(K, "hra/data/nastupy_udoli.json")))["nastupy"]
 rg = np.random.default_rng(1393); out = []
 VY = json.load(open(os.path.join(K, "hra/data/vysek.json"))); Hr = np.fromfile(os.path.join(K, "hra/data/vysek.r16"), "<u2").reshape(VY["vyska"], VY["sirka"])
@@ -27,11 +36,13 @@ def volno(x, z):
         if math.hypot(x - n[0], z - n[1]) < C["most_volno_m"] + 1.5: return False
     return True
 for k, t in TH.items():
-    o = np.array(t["osa"], float); w = float(t["sirka"]); h0 = HV["zaklad"] + HV["na_m_sirky"] * w
+    o = np.array(t["osa"], float); w0 = float(t["sirka"]); h0 = HV["zaklad"] + HV["na_m_sirky"] * w0
+    bv_ = np.array(t.get("brod_vaha", [0.0] * len(o)), float); RZ_ = VH["koryto"].get("brod", {}).get("rozliti_sirky", 1.0)
     seg = np.diff(o[:, :2], axis=0); L = np.linalg.norm(seg, axis=1); s_ = np.concatenate([[0], np.cumsum(L)])
     for s in np.arange(0, s_[-1], C["krok_m"]):
         i = min(np.searchsorted(s_, s) - 1, len(L) - 1); i = max(i, 0); f = (s - s_[i]) / max(L[i], 1e-6)
         p = o[i] + (o[i + 1] - o[i]) * f; tg = seg[i] / max(L[i], 1e-6); nrm = np.array([-tg[1], tg[0]])
+        w = w0 * (1 + bv_[i] * (RZ_ - 1))   # brod: voda rozlitá (koryta.py), kameny dna, okraje a břehu podle rozlitého kraje
         def dej(v, tvar_m, typ):
             x, z = p[0] + nrm[0] * v, p[1] + nrm[1] * v
             if not volno(x, z): return
@@ -41,9 +52,16 @@ for k, t in TH.items():
                 vys = (p[2] + rg.uniform(*C["balvan_nad_hladinou"])) - yb
                 sc = max(sc, vys / 0.6)
             if typ == "velky": yb -= sc * C["velky_zapusteni"] * 0.6
-            out.append([int(rg.integers(0, 6)) + (6 if typ == "velky" else 0), round(float(x), 2), round(float(yb - sc * 0.15), 2), round(float(z), 2), round(float(rg.uniform(0, 6.283)), 2), round(float(sc), 2), round(float(rg.uniform(*C["plochost"])) if typ != "velky" else 0.8, 2)])
+            tv_ = int(rg.integers(0, 6)); pl_ = float(rg.uniform(*C["plochost"])) if typ != "velky" else 0.8; y_ = yb - sc * 0.15
+            if typ == "hrbet":   # hřbet valounu láme hladinu (misa_real_01): vrch těsně pod / nad hladinou, pata 15 % v zemi
+                h_ = VYS_TVARU.get(tv_, 0.5) * pl_; vrch_ = p[2] + rg.uniform(*C["hrbet_nad_m"])
+                sc = float(np.clip((vrch_ - yb) / (h_ * 0.85), C["valoun_m"][0], C["balvan_m"][0]))   # větší valoun v hlubší vodě (do balvanu)
+                y_ = min(vrch_ - sc * h_, yb - sc * h_ * 0.15)
+            out.append([tv_ + (6 if typ == "velky" else 0), round(float(x), 2), round(float(y_), 2), round(float(z), 2), round(float(rg.uniform(0, 6.283)), 2), round(float(sc), 2), round(pl_, 2)])
         a = C["krok_m"]
-        for _ in range(rg.poisson(C["valouny_na_m2"] * w * a)): dej(rg.uniform(-w / 2, w / 2), C["valoun_m"], "valoun")
+        for _ in range(rg.poisson(C["valouny_na_m2"] * w * a)):
+            v_ = rg.uniform(-w / 2, w / 2)
+            dej(v_, C["valoun_m"], "hrbet" if abs(v_) < w / 2 * C["hrbet_pas"] and rg.random() < C["hrbet_podil"] else "valoun")
         if rg.random() < C["balvany_na_m"] * a: dej(rg.uniform(-w / 2 * 0.8, w / 2 * 0.8), C["balvan_m"], "balvan")
         if rg.random() < C.get("velke_balvany_na_m", 0) * a:   # velký balvan droby na břehu / zasahující do toku (fotky potok_01–02), mech nahoře
             sg_ = rg.choice([-1, 1]); dej(sg_ * (w / 2 + rg.uniform(*C["velky_od_kraje_m"])), C["velky_balvan_m"], "velky")
