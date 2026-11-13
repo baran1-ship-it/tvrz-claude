@@ -48,7 +48,7 @@ for _g in _glob.glob("modely/**/*.gltf", recursive=True):
     if _scn and os.path.exists(_bin) and os.path.getmtime(_bin) > max(os.path.getmtime(s) for s in _scn) + 1:
         _stare.append(_g)
 if _stare:
-    sys.exit("CHYBA: stary import sceny (.bin novejsi nez import) - smazat .godot/imported/<jmeno>.gltf-*.md5 a godot --import: %s" % _stare[:10])
+    sys.exit("CHYBA: stary import sceny (.bin novejsi nez import) - smazat .godot/imported/<jmeno>.gltf-*.md5, touch <jmeno>.gltf (cas se musi zmenit, jinak ho Godot nezkontroluje) a godot --import: %s" % _stare[:10])
 # kazda chyba od cloveka = kontrola v testu (CLAUDE.md, Misa 28. 10. „at nelepime diry“): radek tabulky chyb
 # (docs/rozpracovane/*chyby*.md), ktery je opraveny, musi mit vyplneny sloupec kontroly - jinak se nevydava
 # matice vztahu (pravidla/svet/vztahy.json): kazda dvojice druhu hlidana testem, povoleni jen ze zaznamu

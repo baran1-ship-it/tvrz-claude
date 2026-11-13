@@ -1334,3 +1334,6 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   v povrchu těla s oblečením) – počítat po ostrovech, ne podle výšky.
 - Měřidla postav: `tools/mereni_postav.gd` režimy animovane / zastavene / anim_bez_modif / kostry_stoji / anim+<modifikátor>
   (PC: animace + modifikátory 85 ms, každé zvlášť ~51–61, nic 56 → cena je souběh, ne jedna část).
+- Ruční reimport: smazat `.godot/imported/<jmeno>.gltf-*.md5` **a** `touch` zdrojového `.gltf` – Godot soubor
+  znovu kontroluje jen při změně času od posledního skenu (13. 11.: bez touch import „OK za 9 s“ a nic). `sestav.sh` soubory
+  přepisuje, tam stačí smazat `.md5`.
