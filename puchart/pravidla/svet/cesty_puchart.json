@@ -19,7 +19,10 @@
    "pozn_11_11": "Míša 11. 11.: „nemůžeme vykopat půl kopce, abychom měli dálnici, jsme ve středověku, chodilo se podle terénu“; „nahoru dolů je to v pořádku, ale velký sklon do boku by nedával smysl… samozřejmě lehce“ – podélně podle terénu (max_uprava_m), napříč jen lehce srovnat (max_uprava_napric_m; vozová ve svahu = polovina zářez, polovina násyp). Výjimka: doložené nájezdy k mostům.",
    "pozn_napric": "2,0 m: tři krátká místa ve strmém bočním svahu (u mostu pod B 6,5/194, údolní 156/530, hájovna −69/778) – s 1,2 m zůstal příčný sklon 9–29 % (vůz by se převrátil); lavice ve svahu, ne zářez podél cesty",
    "max_uprava_u_mostu_m": 1.5,
-   "pozn_u_mostu": "nájezd k mostu: od mostovky plynule nejvýš 10 %, násypem nebo mělkým zářezem v břehu (nejvýš 1,5 m) – úvoz k vodě u brodu/mostu; jinde cesta podle terénu (11. 11.)"
+   "pozn_u_mostu": "nájezd k mostu: od mostovky plynule nejvýš 10 %, násypem nebo mělkým zářezem v břehu (nejvýš 1,5 m) – úvoz k vodě u brodu/mostu; jinde cesta podle terénu (11. 11.)",
+   "hrad_profil_m": 40.0,
+   "hrad_profil_prechod_m": 25.0,
+   "pozn_13_11": "Míša 13. 11.: val ve vsi – cesta s nástupem hradního mostu má vyrovnaný profil (max_sklon) jen do hrad_profil_m od nástupu, pak přechod hrad_profil_prechod_m a dál podle terénu (max_uprava_m)"
   },
   "stezka": {
    "sirka_m": 1.6,
@@ -459,10 +462,10 @@
    ],
    "delka_m": 1197,
    "max_rez_m": 0.3,
-   "max_nasyp_m": 3.8,
+   "max_nasyp_m": 1.9,
    "pozn_konec": "konec u vnější branky na východním valu (hrad_puchart.json A.vnejsi_brana; GC80T08 nástup mostu ve V části valu)",
    "pozn_konec_5_11": "konec na nástupu vnějšího mostu před vnější brankou (náčrt Míši 5. 11.)",
-   "max_pricny": 0.036,
+   "max_pricny": 0.054,
    "pozn_konec_9_11": "Míša 6. a 9. 11.: „nechápu napojení cesty na most u vstupu, to snad má jít rovně“ – posledních ~7 m v ose mostu vnější branky (x = 7, od jihu), dřív přijížděla z boku po z = −60",
    "max_uprava_m": 1.56
   },
@@ -10393,7 +10396,7 @@
    "delka_m": 769,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.896,
+   "max_pricny": 0.616,
    "max_uprava_m": 0.3
   },
   {
@@ -20588,7 +20591,7 @@
    "delka_m": 769,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.896,
+   "max_pricny": 0.616,
    "max_uprava_m": 0.3
   },
   {
@@ -21517,8 +21520,8 @@
   "hlavni_kyzlirov": {
    "delka_m": 1197,
    "max_rez_m": 0.3,
-   "max_nasyp_m": 3.8,
-   "max_pricny": 0.036,
+   "max_nasyp_m": 1.9,
+   "max_pricny": 0.054,
    "max_uprava_m": 1.56,
    "podle_terenu": false
   },
@@ -21750,7 +21753,7 @@
    "delka_m": 769,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.896,
+   "max_pricny": 0.616,
    "max_uprava_m": 0.3,
    "podle_terenu": true
   },
@@ -21934,7 +21937,7 @@
    "delka_m": 769,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.896,
+   "max_pricny": 0.616,
    "max_uprava_m": 0.3,
    "podle_terenu": true
   },

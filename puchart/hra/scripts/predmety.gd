@@ -546,7 +546,14 @@ func use2(u: Dictionary) -> void:
 
 # ------------------------------------------------------------------ louce a svetla
 
+var _sv_nas := Vector2(-1, -1)
 func _fire_fx(parent: Node3D, tips: Variant, energy: float, rng: float, size := 0.42) -> Dictionary:
+	if _sv_nas.x < 0.0:   # zesílení plamenů z dat (prostredi.json atmosfera.svitidla; Míša 13. 11.: „osvětlují jen na oko“)
+		_sv_nas = Vector2(1, 1)
+		if FileAccess.file_exists("res://data/prostredi.json"):
+			var sv_: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/prostredi.json")).get("atmosfera", {}).get("svitidla", {})
+			_sv_nas = Vector2(float(sv_.get("energie_nasobek", 1.0)), float(sv_.get("dosah_nasobek", 1.0)))
+	energy *= _sv_nas.x; rng *= _sv_nas.y
 	# plamen (castice ve svetovych souradnicich, tahnou se za pohybem) a mihotave svetlo se stiny;
 	# u svicnu s vice svickami ma kazda svicka plaminek, svetlo je jedno (vykon)
 	var tip := Node3D.new()

@@ -136,6 +136,13 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
         for _ in range(4):
             for i in range(1, len(yp)): yp[i] = np.clip(yp[i], yp[i - 1] - T["max_sklon"], yp[i - 1] + T["max_sklon"])
             for i in range(len(yp) - 2, -1, -1): yp[i] = np.clip(yp[i], yp[i + 1] - T["max_sklon"], yp[i + 1] + T["max_sklon"])
+        # hradní profil jen u nástupu hradního mostu (Míša 13. 11.: „val ve vesnici, co jde po něm cesta dál do lesa, by tam nemusel
+        # být“ – cesta od Kyžlířova končí u mostu branky, a tak celá dostala vyrovnaný sklon: násyp 2,4 m přes Předhradí);
+        # dál než HRAD_PROFIL_M od nástupu podle terénu jako ostatní cesty, mezi tím plynulý přechod
+        dn_ = np.min([np.hypot(px - hx_, pz - hz_) for hx_, hz_ in NASTUPY_HRAD_], axis=0)
+        HP_ = float(T.get("hrad_profil_m", 40.0)); PR_ = float(T.get("hrad_profil_prechod_m", 25.0))
+        wh_ = np.clip((HP_ + PR_ - dn_) / PR_, 0, 1); wh_ = wh_ * wh_ * (3 - 2 * wh_)
+        yp = yp * wh_ + np.clip(yp, y - LIM, y + LIM) * (1 - wh_)
     y_bez_mostu = yp.copy()
     # konec u nástupu mostu: cesta vystoupá na výšku mostovky násypem v terénu, nejvýš max_sklon (Míša 9. 11.: „co je to za
     # nájezd“ – samostatný hranol hlíny pod mostem); obálka ny − sklon·vzdálenost od konce

@@ -293,7 +293,8 @@ func _svicny() -> void:
 			l.global_position = lc.to_global(Vector3(0, 0.56, 0))
 			_plamen(l.global_position)
 		for mi in uzel.find_children("*", "GeometryInstance3D", true, false): (mi as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		l.light_energy = maxf(l.light_energy, 2.2); l.omni_range = maxf(l.omni_range, 8.0); l.omni_attenuation = 0.7   # místnost nesmí zůstat tmavá
+		var sv_: Dictionary = _pr.get("atmosfera", {}).get("svitidla", {})
+		l.light_energy = maxf(l.light_energy, 2.2) * float(sv_.get("energie_nasobek", 1.0)); l.omni_range = maxf(l.omni_range, 8.0) * float(sv_.get("dosah_nasobek", 1.0)); l.omni_attenuation = 0.7   # místnost nesmí zůstat tmavá
 		_svicnu += 1
 	print("SVICNY %d/%d" % [_svicnu + _svicnu_bez, _k_svicnum.size()])
 	print("LOUCE %d, bez plné zdi vynecháno %d" % [_svicnu, _svicnu_bez])
@@ -342,6 +343,13 @@ func _atmosfera(d: float) -> void:
 		_les_cil = les.zapoj(p.x, p.z, lm) if les and les.has_method("zapoj") and not lm.is_empty() else 0.0
 		var q := PhysicsRayQueryParameters3D.create(p, p + Vector3.UP * float(it.get("paprsek_nahoru_m", 25.0)))
 		_uvnitr_cil = 1.0 if not it.is_empty() and get_world_3d().direct_space_state.intersect_ray(q).size() > 0 else 0.0
+		if _uvnitr_cil > 0.5 and it.has("otvory_paprsky"):   # kolik je vidět ven (okna, dveře) – světlo jen přes otvory (Míša 13. 11.)
+			var n_ := int(it["otvory_paprsky"]); var ven_ := 0; var zd: Array = it["otvory_zdvih_st"]; var L_ := float(it["otvory_delka_m"])
+			for k_ in n_:
+				var az := TAU * float(k_ % 8) / 8.0 + (0.39 if k_ >= 8 else 0.0); var el := deg_to_rad(float(zd[0] if k_ < 8 else zd[1]))
+				var sm := Vector3(cos(az) * cos(el), sin(el), sin(az) * cos(el))
+				if get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(p, p + sm * L_)).is_empty(): ven_ += 1
+			_otvory_cil = float(ven_) / float(n_)
 	_les = move_toward(_les, _les_cil, d * float(lm.get("rychlost", 0.5))); _uvnitr = move_toward(_uvnitr, _uvnitr_cil, d * float(it.get("rychlost", 1.5)))
 	var hloubkova := _sceny(d, cam) > 0.0
 	if not lm.is_empty():
@@ -355,7 +363,10 @@ func _atmosfera(d: float) -> void:
 		var ab: Array = it["ambient_barva"]; var ub := float(it["ubytek_oblohy"])
 		var ve: Dictionary = _pr["atmosfera"].get("venku", {})   # venku: část okolního světla odraz od země a zdí (teplý), ne jen modrá obloha
 		var vb: Array = ve.get("barva", ab); var vo := float(ve.get("podil_oblohy", 1.0))
-		_env.ambient_light_energy = lerpf(float(ve.get("ambient", it["ambient"])), float(it["ambient"]), _uvnitr) * (1.0 - _uvnitr * ub) * (float(den.okolni_e) if den else 1.0)
+		_otvory = move_toward(_otvory, _otvory_cil, d * 0.8)
+		var amb_in := float(it["ambient"]) * (1.0 - ub)
+		if it.has("ambient_tma"): amb_in = lerpf(float(it["ambient_tma"]), float(it["ambient_okno"]), sqrt(_otvory))
+		_env.ambient_light_energy = lerpf(float(ve.get("ambient", it["ambient"])), amb_in, _uvnitr) * (float(den.okolni_e) if den else 1.0)
 		_env.ambient_light_sky_contribution = lerpf(vo, 1.0, _uvnitr) * (1.0 - _uvnitr * ub)
 		var ok_ := float(den.okolni) if den else 1.0   # v noci teplá složka ubude s oblohou (den.json okolni_pozn)
 		var ac_ := Color(vb[0], vb[1], vb[2]).lerp(Color(ab[0], ab[1], ab[2]), _uvnitr)
@@ -364,6 +375,8 @@ func _atmosfera(d: float) -> void:
 
 var _les_cil := 0.0
 var _uvnitr_cil := 0.0
+var _otvory := 1.0
+var _otvory_cil := 1.0
 var _dh: Dictionary = {}        # data/dohled.json (nastroje/viditelnost.py: dohled na mřížce × směry)
 var _dh_data := PackedByteArray()
 var _sc_pr: Dictionary = {}     # data/sceny_pravidla.json hra

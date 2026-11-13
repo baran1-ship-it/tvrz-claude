@@ -44,6 +44,17 @@ func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json") -> v
 	if cfg.has("pata_pas") and FileAccess.file_exists("res://data/pata_pas.json"):
 		var pp: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/pata_pas.json"))
 		if pp is Dictionary and is_equal_approx(float(pp.get("bunka_m", 0.0)), float(cfg["bunka_m"])): _pas = pp["bunky"]
+	# uvnitř staveb vsi nic neroste (Míša 13. 11.: „v hájovně je tráva“) – půdorysy z mista_stavby.json, zúžené o okraj na líc zdi
+	if FileAccess.file_exists("res://data/mista_stavby.json"):
+		var ms: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mista_stavby.json"))
+		for q: Array in ms.get("pudorysy", []):
+			var pg := PackedVector2Array()
+			for v: Array in q: pg.append(Vector2(float(v[0]), float(v[1])))
+			var zuz := Geometry2D.offset_polygon(pg, -float(cfg.get("stavba_okraj_m", 0.3)))
+			if zuz.is_empty(): continue
+			var pz: PackedVector2Array = zuz[0]; var bb := Rect2(pz[0], Vector2.ZERO)
+			for v in pz: bb = bb.expand(v)
+			_stavby.append([bb, pz])
 	aktualizuj(1000)
 
 var _pas := {}   # "i,j" -> skvrny [x0, z0, x1, z1, nx, nz, šířka, zdroj]
@@ -131,10 +142,19 @@ func _uloha(k: Vector2i, B: float) -> void:
 	_mutex.lock(); _hotove[k] = d; _mutex.unlock()
 
 ## (vlákno) polohy trsů buňky -> {klic druh+varianta: PackedFloat32Array 12 čísel na trs}
+var _stavby: Array = []   # [Rect2, polygon] líců zdí staveb vsi
+
+func _ve_stavbe(x: float, z: float) -> bool:
+	var p := Vector2(x, z)
+	for e: Array in _stavby:
+		if (e[0] as Rect2).has_point(p) and Geometry2D.is_point_in_polygon(p, e[1]): return true
+	return false
+
 func _pocitej(i: int, j: int, B: float) -> Dictionary:
 	var out := {}
 	for tf: Array in _bunka_mista(i, j, B):
 		var klic: String = tf[0]; var t: Transform3D = tf[1]
+		if not _stavby.is_empty() and _ve_stavbe(t.origin.x, t.origin.z): continue
 		if not out.has(klic): out[klic] = PackedFloat32Array()
 		var bs := t.basis; var o := t.origin
 		out[klic].append_array(PackedFloat32Array([bs.x.x, bs.y.x, bs.z.x, o.x - (i + 0.5) * B, bs.x.y, bs.y.y, bs.z.y, o.y, bs.x.z, bs.y.z, bs.z.z, o.z - (j + 0.5) * B]))

@@ -69,10 +69,19 @@
     0.45,
     0.34
    ],
-   "expozice_navic": 0.15,
+   "expozice_navic": 0.0,
    "paprsek_nahoru_m": 25.0,
    "rychlost": 1.5,
-   "pozn": "Havran _amb: pod střechou/klenbou méně modrého světla z oblohy (tablet 2. 11.: modré interiéry věží)"
+   "pozn": "Havran _amb: pod střechou/klenbou méně modrého světla z oblohy (tablet 2. 11.: modré interiéry věží)",
+   "ambient_tma": 0.015,
+   "ambient_okno": 0.22,
+   "otvory_paprsky": 16,
+   "otvory_delka_m": 30.0,
+   "otvory_zdvih_st": [
+    0,
+    22
+   ],
+   "pozn_13_11": "Míša 13. 11.: „v budovách bude reálné světlo – když nebude mít okno, tak žádné, a kde je okno, tak jen přes to okno“. Uvnitř (strop nad kamerou) okolní světlo podle otvorů: 16 paprsků do stran a mírně vzhůru (otvory_zdvih_st), podíl těch, které uniknou ven (okno, dveře) → ambient od ambient_tma (bez otvoru – tma, jen louče) po ambient_okno (√podílu); bez přidané expozice. Slunce svítí okny dál přímo (stíny)."
   },
   "venku": {
    "ambient": 0.6,
@@ -85,6 +94,11 @@
    "pozn": "3. 11. (Míša: ne jen šeď; snímek nádvoří: stín černomodrý): venku 40 % okolního světla jako teplý odraz od hlíny a kamene (KCD2 ref: stíny na nádvoří hnědé), zbytek obloha",
    "zdroj": "docs/reference/misa_3_11/kcd2_nadvori_brana_hlina.jpg",
    "pozn_5_11": "Míša 5. 11. (KCD fotky docs/reference/kcd_vzhled): stíny v KCD čitelné, měkké – okolní světlo 0,42 → 0,6 (stinné střechy byly černé)"
+  },
+  "svitidla": {
+   "energie_nasobek": 1.8,
+   "dosah_nasobek": 1.6,
+   "pozn": "Míša 13. 11.: „světla loučí, svícnů a ostatních svítících zařízení potřebuji naopak zvětšit, osvětlují jen na oko“ – násobí energii a dosah plamenů (predmety.gd SVETLA, louče hradu hlavni.gd _svicny); NEOVERENO na tabletu (víc světel přes pixely = výkon)"
   }
  },
  "predehrati": {

@@ -229,15 +229,15 @@
  "vzhled_13_11": {
   "popis": "Vzhled vody a břehu podle Míšiny předlohy (docs/reference/potoky/misa_real_01–04, „takhle by měly vypadat všechny toky“) a rešerše docs/reference/potoky/README_jak_se_stavi.md kroky 1–3: hladina bez hrany (voda.py: síť přes celou plochu s hloubkou > 0 + řada za čárou vody, krytí kraje v barvě vrcholu), krytí podle hloubky (Beer–Lambert) a úhlu (Fresnel, Schlick), mokrý pás a tmavší dno pod vodou (barva vrcholu BREH A, zem.gdshader). Čte blender/voda.py, hra/scripts/hlavni.gd (shader vody), hra/scripts/svet.gd (terén).",
   "melka": [
-   0.384,
-   0.404,
-   0.31
+   0.15,
+   0.16,
+   0.11
   ],
   "zdroj_melka": "pipeta (medián) misa_real_01_potok_trava_kameny.jpg výřez x 150–280, y 300–360 (mělká voda s valouny, sRGB)",
   "hluboka": [
-   0.31,
-   0.267,
-   0.161
+   0.09,
+   0.085,
+   0.05
   ],
   "zdroj_hluboka": "pipeta (medián) misa_real_03_perej_listi_breh.jpg výřez x 10–120, y 520–600 (klidná tůň pod peřejí, sRGB)",
   "cirost_m": 0.5,
@@ -284,6 +284,17 @@
    0.74,
    0.7
   ],
-  "pozn_bila_13_11": "Míša 13. 11. (tablet): „voda je nějaká bílá“ – pěna měla všude základ 8 % (bílý film) a hladká hladina (drsnost 0,15, specular 0,12) dávala na tabletu mléčný odlesk; pěna jen na peřejích a za kameny, drsnost 0,3, specular 0,05, pěna tlumenější (0,72)"
+  "pozn_bila_13_11": "Míša 13. 11. (tablet): „voda je nějaká bílá“ – pěna měla všude základ 8 % (bílý film) a hladká hladina (drsnost 0,15, specular 0,12) dávala na tabletu mléčný odlesk; pěna jen na peřejích a za kameny, drsnost 0,3, specular 0,05, pěna tlumenější (0,72)",
+  "melka_pipeta": [
+   0.384,
+   0.404,
+   0.31
+  ],
+  "hluboka_pipeta": [
+   0.31,
+   0.267,
+   0.161
+  ],
+  "pozn_barva_13_11": "Míša 13. 11. večer (tablet): „voda je pořád moc bílá“ – pipeta z fotky (melka_pipeta) obsahuje světlé dno viděné vodou; kreslená průsvitně přes dno ho zesvětlila podruhé (mléčný film). Barva vody = pohlcení/tónování (tmavá olivová), dno dodá terén pod ní; měřeno snímkem: plocha brodu ze 90/90/68 (sRGB)"
  }
 }
