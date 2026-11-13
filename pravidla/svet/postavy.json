@@ -1803,7 +1803,8 @@
    "_p": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): celedin ve stajich: zvedne seno a hodi do zlabu, uklizi stelivo",
    "vysky": [
     "zem"
-   ]
+   ],
+   "_13_11": "Misa 13. 11. (borec na dvore neco sbira): staje = zvedani a hazeni niceho na nadvori (bez sena a zlabu) - celedin misto toho nosi vodu studna <-> staje (vedro); staje se vrati az s predmetem prace (seno, vidle s uchopem)"
   },
   "voda_staje": {
    "klipy": [
@@ -2571,8 +2572,8 @@
     },
     {
      "od": 5.5,
-     "cinnost": "staje",
-     "kde": "nadvori_staje"
+     "cinnost": "voda_staje",
+     "kde": "nadvori_studna"
     },
     {
      "od": 8.0,
@@ -2583,11 +2584,6 @@
        "cinnost": "voda_staje",
        "kde": "nadvori_studna",
        "vaha": 1.0
-      },
-      {
-       "cinnost": "staje",
-       "kde": "nadvori_staje",
-       "vaha": 2.0
       }
      ]
     },
@@ -2598,8 +2594,8 @@
     },
     {
      "od": 13.0,
-     "cinnost": "staje",
-     "kde": "nadvori_staje"
+     "cinnost": "voda_staje",
+     "kde": "nadvori_studna"
     },
     {
      "od": 15.0,
@@ -2609,8 +2605,8 @@
     },
     {
      "od": 15.5,
-     "cinnost": "staje",
-     "kde": "nadvori_staje"
+     "cinnost": "voda_staje",
+     "kde": "nadvori_studna"
     },
     {
      "od": 17.0,
