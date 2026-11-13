@@ -52,10 +52,11 @@ func _beh() -> void:
 	var dl := ap.get_animation(a[2]).length
 	var nej := Vector3(0, INF, 0)
 	var nej_f := 0.0
-	for i in 48:
+	for i in range(-12, 48):
+		var ii := posmod(i, 48)
 		ap.stop()
 		ap.play(a[2], 0.0)
-		ap.seek(dl * i / 48.0, true)
+		ap.seek(dl * ii / 48.0, true)
 		ap.advance(0.0)
 		await process_frame
 		await process_frame
@@ -63,8 +64,12 @@ func _beh() -> void:
 		if uz == null:
 			continue
 		var w := u.global_transform.affine_inverse() * (uz.global_transform * hl)
+		if i < 0:
+			continue                       # zahrati (uchop.gd prvni snimky bez predmetu v ruce)
+		if i % 4 == 0:
+			print("UDER faze %.2f hlava %s" % [float(ii) / 48.0, w.snapped(Vector3.ONE * 0.01)])
 		if w.y < nej.y:
 			nej = w
-			nej_f = float(i) / 48.0
+			nej_f = float(ii) / 48.0
 	print("UDER %s %s: nejnize hlava %s (x bok, y vyska, z dopredu) ve fazi %.2f, delka klipu %.2f s" % [a[0], a[2], nej.snapped(Vector3.ONE * 0.01), nej_f, dl])
 	quit()
