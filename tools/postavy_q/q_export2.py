@@ -201,7 +201,20 @@ def pack(objs, density):
         o.data.uv_layers.active = o.data.uv_layers["atlas"]
 
 HEAD = [PARTS["hlava"]] + ([PARTS["dekolt"]] if "dekolt" in PARTS else []) + [eyes, brows] + hairs
-BODY = [o for s, o in PARTS.items() if s not in ("hlava", "dekolt")] + [o for v in GAR.values() for o in v]
+HIDE = {"kosile": ["trup", "paze"], main_k: ["trup", "paze", "stehna"] + (["lytka"] if main_k == "cotte" else []),
+        "nohavice": ["stehna", "lytka"], "skorne": ["chodidla"], "opasek": [], "kape": [], "rouska": []}
+# 13. 11. (Misa: oranzove fleky kuze na ramenou, rukavech a v pasu u vsech zen; atlas npc_marketa: pulka plochy = trup a nohy
+# pod obleceny, tenke ostruvky latky vedle nich po zmenseni na 512 braly barvu kuze): NPC je jen cela oblecena postava ->
+# do atlasu jen viditelne casti tela a vychozi obleceni (hrdinove s dily dal vse)
+NPC_CELA = not CFG.get("dily", not CFG.get("npc"))
+_vych0 = KROJ.get("vychozi", list(GAR))
+_skryte0 = set(s_ for k in _vych0 for s_ in HIDE.get(k, []))
+BODY = [o for s, o in PARTS.items() if s not in ("hlava", "dekolt") and not (NPC_CELA and s in _skryte0)] + \
+       [o for k, v in GAR.items() for o in v if not NPC_CELA or k in _vych0]
+if NPC_CELA:                     # nevychozi obleceni NPC neexportuje (cela postava jen s vychozim) - pryc, at nema atlas ani UV
+    for k in [k for k in GAR if k not in _vych0]:
+        for o in GAR.pop(k):
+            bpy.data.objects.remove(o)
 dens_h = {PARTS["hlava"].name: 1.0, eyes.name: 0.55, brows.name: 0.6}
 if "dekolt" in PARTS: dens_h[PARTS["dekolt"].name] = 0.7
 for h in hairs: dens_h[h.name] = 0.55
@@ -466,8 +479,6 @@ an = aom.node_tree.nodes.new("ShaderNodeTexImage"); an.image = ao_img
 au = aom.node_tree.nodes.new("ShaderNodeUVMap"); au.uv_map = "atlas"; aom.node_tree.links.new(au.outputs[0], an.inputs["Vector"])
 aom.node_tree.nodes.active = an
 default = KROJ.get("vychozi", list(GAR))
-HIDE = {"kosile": ["trup", "paze"], main_k: ["trup", "paze", "stehna"] + (["lytka"] if main_k == "cotte" else []),
-        "nohavice": ["stehna", "lytka"], "skorne": ["chodidla"], "opasek": [], "kape": [], "rouska": []}
 def bake_ao(objs, visible):
     for o in bpy.data.objects:
         if o.type == 'MESH': o.hide_render = o not in visible
@@ -484,7 +495,7 @@ vis_parts = [o for s, o in PARTS.items() if s not in hidden_def]
 def_gar = [o for k in default for o in GAR.get(k, [])]
 bake_ao([o for o in BODY if o in def_gar or o in vis_parts], vis_parts + def_gar + HEAD)
 for k, objs in GAR.items():
-    if k in default: continue
+    if k in default or NPC_CELA: continue
     bake_ao(objs, vis_parts + def_gar + objs + HEAD)
 hid_parts = [o for s, o in PARTS.items() if s in hidden_def and o in BODY]
 if hid_parts: bake_ao(hid_parts, hid_parts + [o for o in vis_parts if o in BODY])
