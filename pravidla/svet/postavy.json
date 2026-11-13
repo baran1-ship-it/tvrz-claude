@@ -6697,5 +6697,10 @@
   "Hleda_Loop"
  ],
  "_klipy_k_zemi": "Misa 13. 11.: klipy s predklonem k zemi vypadaji jako pleti; smi je jen cinnosti v k_zemi_cinnosti (prace na zemi/zahone)",
- "k_zemi_cinnosti": []
+ "k_zemi_cinnosti": [],
+ "modif_max": {
+  "sukne": 4,
+  "hlava": 6,
+  "_pozn": "13. 11.: řidič a pružina sukně jen u 4 nejbližších postav, LookAt hlavy u 6 (trasa 0.999994: postavy stojí −9..−12 ms; PC tools/mereni_postav.gd 20 postav: řidič sukně +18 ms, hlava +13 ms). Ostatní: sukně jen skinovaná, hlava podle animace. Vliv na tabletu NEOVĚŘENO"
+ }
 }

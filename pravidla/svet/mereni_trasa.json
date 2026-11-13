@@ -237,9 +237,8 @@
  ],
  "varianty": [
   "",
-  "bez_postav",
-  "postavy_skryte",
   "postavy_stoji",
+  "dest",
   ""
  ],
  "samo_na_tabletu": false,

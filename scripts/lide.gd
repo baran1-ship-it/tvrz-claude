@@ -26,7 +26,7 @@ static var P: Dictionary = {
 	"reakce": Pravidla.cti("postavy", "reakce"), "repliky": Pravidla.cti("postavy", "repliky"),
 	"dojem": Pravidla.cti("postavy", "hrac_dojem"), "schod_m": float(Pravidla.cti("hrac", "schod_m")[0]),
 	"dalka_fps": float(Pravidla.cti("postavy", "anim_dalka_fps")), "hlava_do": float(Pravidla.cti("postavy", "hlava_do_m")),
-	"drzeni": Pravidla.cti("postavy", "drzeni"), "sedani": Pravidla.cti("postavy", "sedani"),
+	"drzeni": Pravidla.cti("postavy", "drzeni"), "sedani": Pravidla.cti("postavy", "sedani"), "modif_max": Pravidla.cti("postavy", "modif_max"),
 	"rozvrh": Pravidla.cti("postavy", "rozvrh_rozptyl"), "hovor": Pravidla.cti("postavy", "hovor_skupina"),
 	"dvere": Pravidla.cti("postavy", "dvere"), "lom": Pravidla.cti("postavy", "lom"),
 	"u_predmetu": Pravidla.cti("postavy", "u_predmetu"), "rozestup": Pravidla.cti("postavy", "rozestup"),
@@ -2199,6 +2199,11 @@ func _process_vlastni(dt: float) -> void:
 	var serazene := poradi.duplicate()
 	serazene.sort()
 	var mez_plne: float = serazene[mini(int(pr["plne_max"]), serazene.size()) - 1] if not serazene.is_empty() else 0.0
+	# 13. 11. (trasa 0.999994: postavy stoji -9..-12 ms; PC mereni_postav: ridic sukne +18 ms, LookAt hlavy +13 ms na
+	# 20 postav, GDScript v kostre mimo merene skripty): ridic a pruzina sukne a hlava jen u modif_max nejblizsich
+	var mm: Dictionary = P["modif_max"]
+	var mez_sukne: float = serazene[mini(int(mm["sukne"]), serazene.size()) - 1] if not serazene.is_empty() else 0.0
+	var mez_hlava: float = serazene[mini(int(mm["hlava"]), serazene.size()) - 1] if not serazene.is_empty() else 0.0
 	for c: Dictionary in _lide:
 		var u: Node3D = c["uzel"]
 		var d := Vector2(u.position.x - pp.x, u.position.z - pp.z).length()
@@ -2420,7 +2425,7 @@ func _process_vlastni(dt: float) -> void:
 		var cam: Camera3D = main.player.cam if main.player else null
 		var v_zaberu := cam == null or d < ANIM_OKRAJ or _v_kuzelu(cam, u.global_position + Vector3(0, 1.0, 0))
 		# hlava a krk sleduji jen do hlava_do_m (dal pohyb hlavy neni videt, LookAt stoji cas)
-		var hl_on := d < float(P["hlava_do"]) and v_zaberu and not trasa_vypni.has("modifikatory")
+		var hl_on := d < float(P["hlava_do"]) and d <= mez_hlava and v_zaberu and not trasa_vypni.has("modifikatory")
 		for la: SkeletonModifier3D in c.get("hlava_mod", []):
 			if la.active != hl_on:
 				la.active = hl_on
@@ -2434,12 +2439,12 @@ func _process_vlastni(dt: float) -> void:
 					and not trasa_vypni.has("modifikatory"))
 		# 13. 11. (kontrola pred vydanim): ridic sukne jen v zaberu do sukne.do_m, jinak bezel u vsech postav kazdy snimek
 		if c.has("sukne_ridic") and is_instance_valid(c["sukne_ridic"]):
-			var sr_on := v_zaberu and d < float(P["sukne"]["do_m"]) and u.visible and not trasa_vypni.has("sukne") \
+			var sr_on := v_zaberu and d < float(P["sukne"]["do_m"]) and d <= mez_sukne and u.visible and not trasa_vypni.has("sukne") \
 					and not trasa_vypni.has("modifikatory")
 			if (c["sukne_ridic"] as SkeletonModifier3D).active != sr_on:
 				(c["sukne_ridic"] as SkeletonModifier3D).active = sr_on
 		if c.has("sukne") and is_instance_valid(c["sukne"]):
-			var su_on := v_zaberu and d < float(P["sukne"]["do_m"])
+			var su_on := v_zaberu and d < float(P["sukne"]["do_m"]) and d <= mez_sukne
 			var su: SpringBoneSimulator3D = c["sukne"]
 			if su.active != su_on:
 				su.active = su_on

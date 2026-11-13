@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -8265,3 +8265,30 @@ func _pocasi() -> void:
 		chyby.append("v hostinci viditelne vrstvy kapek %d" % vidno)
 	pc.vynuceno = -1.0
 	_vysledek("pocasi", chyby.is_empty(), "%d chyb %s; destu za 60 dni %d, nejdelsi %.1f h" % [chyby.size(), str(chyby), dni, nejdelsi])
+
+
+## 13. 11. (trasa 0.999994: postavy stoji -9..-12 ms; PC: ridic sukne +18 ms, hlava +13 ms na 20 postav): aktivnich ridicu
+## sukne a pruzin nejvys modif_max.sukne, aktivnich LookAt hlav nejvys 2 x modif_max.hlava (hlava + krk) - ve vsi u hostince
+func _postavy_modif() -> void:
+	var li: Node = main.world.get_node_or_null("Lide") if main.world else null
+	if li == null:
+		_vysledek("postavy_modif", false, "uzel Lide nenalezen")
+		return
+	await main.fast_travel(Vector3(-58.0, 0.0, 918.0), Vector3(-66.0, 1.6, 926.0), 0.0, "test")
+	var mm: Dictionary = Pravidla.cti("postavy", "modif_max")
+	var nejvic := [0, 0, 0]
+	for i in 240:
+		await get_tree().process_frame
+		var n := [0, 0, 0]
+		for c: Dictionary in li.get("_lide"):
+			if c.has("sukne_ridic") and is_instance_valid(c["sukne_ridic"]) and (c["sukne_ridic"] as SkeletonModifier3D).active:
+				n[0] += 1
+			if c.has("sukne") and is_instance_valid(c["sukne"]) and (c["sukne"] as SkeletonModifier3D).active:
+				n[1] += 1
+			for la: SkeletonModifier3D in c.get("hlava_mod", []):
+				n[2] += 1 if la.active else 0
+		for k in 3:
+			nejvic[k] = maxi(nejvic[k], n[k])
+	var ok: bool = nejvic[0] <= int(mm["sukne"]) and nejvic[1] <= int(mm["sukne"]) and nejvic[2] <= 2 * int(mm["hlava"])
+	_vysledek("postavy_modif", ok, "nejvic aktivnich: ridic sukne %d, pruzina %d, LookAt %d (meze %d / %d / %d), postav %d" % [nejvic[0], nejvic[1], nejvic[2],
+			int(mm["sukne"]), int(mm["sukne"]), 2 * int(mm["hlava"]), (li.get("_lide") as Array).size()])
