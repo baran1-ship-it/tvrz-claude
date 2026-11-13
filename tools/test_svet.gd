@@ -798,7 +798,9 @@ func _kresleni_rozbor() -> void:
 			["nadvori2", Vector3(4, 0, 1), Vector3(-10, 1.6, -10)],
 			# zaseky z tabletu 0.991 (Misa 29. 10.): remizek, listnaty les u lomu, lom-reka, smrkovy les
 			["z_remizek", Vector3(-145, 0, 470), Vector3(-112, 1.6, 480)], ["z_les_lom", Vector3(127, 0, 895), Vector3(127, 1.6, 930)],
-			["z_lom_reka", Vector3(188, 0, 935), Vector3(188, 1.6, 900)], ["z_smrky", Vector3(16, 0, 988), Vector3(-10, 1.6, 980)]]
+			["z_lom_reka", Vector3(188, 0, 935), Vector3(188, 1.6, 900)], ["z_smrky", Vector3(16, 0, 988), Vector3(-10, 1.6, 980)],
+			# 13. 11. trasa 0.999992: ves-vjezd 560-690 kresleni (tvrz ~330) - rozbor pred sloucenim staveb vsi
+			["ves_vjezd", Vector3(440, 0, 790), Vector3(355, 4.1, 738)], ["ves_dvory", Vector3(421, 0, 900), Vector3(420, 1.6, 869)]]
 	for m: Array in mista:
 		await main.fast_travel(m[1], m[2], 0.0, "test")
 		var lk: Node = main.get_node_or_null("Louka")
