@@ -58,7 +58,15 @@
     "dvere": "prkno_dvere",
     "okenice": "prkno_dvere"
    }
-  }
+  },
+  "ton_prken": [
+   118,
+   90,
+   62
+  ],
+  "sytost_prken": 0.6,
+  "foto_prken": "weathered_brown_planks",
+  "pozn_13_11": "Míša 13. 11.: „proč máme vůbec černé dřevo, nebylo by hezčí hnědé, ale opotřebované?“ – dřív zešedlé jako Havran (rough_wood_sedy ton 100/97/91, wood_planks_grey) → podlahy v místnostech černé. Prkna, okenice, dveře: Poly Haven weathered_brown_planks (CC0); jedno prkno a atlas prken (drevo_tex.py) do hnědé ton_prken se sytostí sytost_prken"
  },
  "rozpocet_troj_hrad": 900000,
  "lod": {

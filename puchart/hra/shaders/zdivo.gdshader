@@ -128,7 +128,7 @@ void fragment() {
 	ROUGHNESS = mix(0.9, texture(omitka_r, uo).r, pm);
 	SPECULAR = 0.3;
 	AO = min(mix(mix(0.35, 1.0, smoothstep(0.0, 0.45, h)), 1.0, pm * 0.7), ao);
-	AO_LIGHT_AFFECT = 0.6;
+	AO_LIGHT_AFFECT = 0.0;   // 13. 11.: přímé světlo (louče, okna) netlumit zapečeným stíněním
 	vec3 nk = (texture(kamen_n, uk + o1).rgb * hv.x + texture(kamen_n, uk + o2).rgb * hv.y + texture(kamen_n, uk + o3).rgb * hv.z) * 2.0 - 1.0;
 	vec3 no = texture(omitka_n, uo).rgb * 2.0 - 1.0;
 	vec3 tn = normalize(mix(nk * vec3(2.2, 2.2, 1.0), no * vec3(0.6, 0.6, 1.0), pm));

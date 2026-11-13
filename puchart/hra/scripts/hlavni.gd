@@ -544,7 +544,7 @@ const TEXTURA_NAST := {   # Havran scripts/svet.gd material(): šindel radky+skv
 	"dub": {"kus": 1.0, "pestrost": 1.0, "tint2": Vector3(0.82, 0.78, 0.72)},
 	"hraz": {"kus": 1.0, "stekance": 0.4, "skvrny": 0.5},
 	"dub_ven": {"kus": 1.0, "stekance": 0.5, "skvrny": 0.6},
-	"prkna_ven": {"kus": 1.0, "stekance": 0.35, "skvrny": 0.5, "pestrost": 1.0, "tint2": Vector3(0.8, 0.78, 0.74), "sedost": 0.35},
+	"prkna_ven": {"kus": 1.0, "stekance": 0.35, "skvrny": 0.5, "pestrost": 1.0, "tint2": Vector3(0.86, 0.8, 0.72), "sedost": 0.08},   # Míša 13. 11.: hnědé opotřebované (dřív sedost 0,35 – šedé)
 	"prkno": {"kus": 1.0}, "prkno_ven": {"kus": 1.0, "stekance": 0.3}, "okenice": {"kus": 1.0, "stekance": 0.4},
 	"dvere": {"kus": 1.0, "stekance": 0.3},
 	"omitka": {"skvrny": 0.7, "stekance": 0.45, "budova": 0.6},

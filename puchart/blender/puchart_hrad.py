@@ -513,7 +513,11 @@ def pres_trasu(b, n_, r=0.5):
             P0 = Vector((p[0], 0, p[1])); Q0 = Vector((q[0], 0, q[1])); d = Q0 - P0; L = d.length
             if L < 1e-3: continue
             bb = Vector((b.x, 0, b.z)); t = max(0.0, min(L, (bb - P0).dot(d / L)))
-            if (P0 + d / L * t - bb).length < r and abs((d / L).dot(Vector((n_.x, 0, n_.z)))) > 0.3: return True
+            if (P0 + d / L * t - bb).length < r and abs((d / L).dot(Vector((n_.x, 0, n_.z)))) > 0.3:
+                # 13. 11. (Míša: zábradlí podesty u věže B pořád chybí): trasa po zemi pod podestou ji nesmí „otevřít“ – výška trasy
+                ys_ = [v_ for v_ in (p[2], q[2]) if v_ is not None]; y_tr = (sum(ys_) / len(ys_)) if ys_ else ter(bb.x, bb.z)
+                nh_ = Vector((n_.x, 0, n_.z)).normalized()   # trasa hranu opravdu přechází (jeden konec venku), ne jen míří k ní
+                if abs(y_tr - b.y) < 1.0 and max((P0 - bb).dot(nh_), (Q0 - bb).dot(nh_)) > -0.05: return True
     return False
 
 def hrany_a_zabradli(parts, doplnit=True):
@@ -543,6 +547,13 @@ def hrany_a_zabradli(parts, doplnit=True):
                 navaz = navaz or any(uvnitr(b + t_ * sg_ * 0.35 + UP * 0.5, i0) for sg_ in (-1, 1)) \
                     or any(uvnitr(b + n_ * o2_ + UP * h2_, i0) for o2_ in (0.1, 0.25, 0.35) for h2_ in (0.2, 0.4, 1.4)) \
                     or any(uvnitr(b + vv_ * 0.45 + UP * hh_, i0) for vv_ in (n_, -n_, t_, -t_) for hh_ in (0.5, 1.2))   # u zdi (0,45 m): zábradlí ne (Míša 5. 11.)
+                if os.environ.get("PUCHART_DBGZ2"):
+                    _q = [float(v_) for v_ in os.environ["PUCHART_DBGZ2"].split(",")]
+                    if abs(b.x - _q[0]) < 0.4 and abs(b.z - _q[1]) < 0.4:
+                        print("DBGZ2", [round(b.x, 2), round(b.z, 2), round(y, 2)], "n", [round(n_.x, 2), round(n_.z, 2)], "zab", zab, "navaz", navaz,
+                              "pod", any(uvnitr(b + n_ * o_ - UP * h_, i0) for o_ in (0.2, 0.5, 0.8) for h_ in (0.12, 0.3, 0.45, -0.15, -0.3)), "trasa", pres_trasu(b, n_),
+                              "zed035", any(uvnitr(b + t_ * sg_ * 0.35 + UP * 0.5, i0) for sg_ in (-1, 1)),
+                              "zed045", any(uvnitr(b + vv_ * 0.45 + UP * hh_, i0) for vv_ in (n_, -n_, t_, -t_) for hh_ in (0.5, 1.2)), flush=True)
                 if not (zab or navaz):
                     pad = all(not uvnitr(ven - UP * h_, i0) for h_ in (0.6, 0.85, 1.1)) and ven.y - ter(ven.x, ven.z) > 1.0
                     if pad and os.environ.get("PUCHART_DBGZ") and abs(b.x - float(os.environ["PUCHART_DBGZ"].split(",")[0])) < 2.5 and abs(b.z - float(os.environ["PUCHART_DBGZ"].split(",")[1])) < 2.5:
@@ -1807,7 +1818,7 @@ def postav_B(P):
         xk_ = xd_ + sm_ * (vn_["sirka"] / 2 + 0.2)
         plosina(P, V(((x1_ + xk_) / 2, zs_)), Vector((1, 0, 0)), abs(xk_ - x1_), 1.36, vz["dno_y"], sloupy=not pz_b, krakorce=(V((0, -sz_)) if pz_b else None))   # Míša 12. 11.: místo dlouhých sloupů podpěry ze stěny (pod podestou jsou dveře přízemí)
         TR["B_vez_nadvori"] = [bod(V((x0_ + sm_ * 1.0, zs_ + sz_ * 2.2)), B["horni_y"]), bod(V((x0_ - sm_ * 0.6, zs_)), B["horni_y"]), bod(V((x0_ + sm_ * 0.3, zs_))),
-                               bod(e_n, vz["dno_y"]), bod(V((xd_, zs_ + math.copysign(0.6, zs_ - zf_))), vz["dno_y"]), bod(V((xd_, zs_)), vz["dno_y"]), bod(V((xd_, zf_ - sz_ * 1.6)), vz["dno_y"]), bod(c, vz["dno_y"])]   # ke dveřím zepředu v ose (12. 11.: bod 0,6 m od předchozího se bral hned jako dosažený – postava šla šikmo do ostění)
+                               bod(e_n, vz["dno_y"]), bod(V((xd_, zs_ + math.copysign(0.3, zs_ - zf_))), vz["dno_y"], 0.15), bod(V((xd_, zs_)), vz["dno_y"], 0.15), bod(V((xd_, zf_ - sz_ * 1.6)), vz["dno_y"]), bod(c, vz["dno_y"])]   # ke dveřím zepředu v ose (12. 11.: bod 0,6 m od předchozího se bral hned jako dosažený – postava šla šikmo do ostění; 13. 11.: 0,6 m sahalo na přední hranu podesty a hlídač hran tam pak nedal zábradlí – 0,3 m s přesnými body)
     ram_b = vnitrek_veze(P, c, Vector((1, 0, 0)), wd - 2 * tv, w - 2 * tv, [vz["dno_y"]] + vz["patra_y"], vz["steny_ramen"], sq=1.0)   # podesty 1,0 m (Míša 4. 11.: „schody moc blízko zdi, ne pansky“; reference 1,0–1,4 m), ramena 3,2 m = 45° (při 45° postava občas uvízla na konci ramene)
     # hladomorna v přízemí věže: valená klenba (osa S–J) s otvorem nad schody, kruhy s řetězy, slabé světlo
     iv = w - 2 * tv; ivu = wd - 2 * tv; ov = c - Vector((ivu / 2, 0, iv / 2)); hl = vz.get("hladomorna")

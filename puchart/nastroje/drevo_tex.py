@@ -8,6 +8,9 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 K = sys.argv[1] if len(sys.argv) > 1 else "."
 T = os.path.join(K, "blender/tex")
+import json as _json
+_DV = _json.load(open(os.path.join(K, "pravidla/svet/hrad_vzhled.json"))).get("drevo", {})
+TON_P = tuple(_DV.get("ton_prken", [100, 97, 91])); SAT_P = float(_DV.get("sytost_prken", 0.3))   # Míša 13. 11.: hnědé opotřebované, ne šedé
 def sedy(a, ton, sat=0.3):
     L = a.mean(2, keepdims=True); b = L * (1 - sat) + a * sat
     return np.clip(b / b.mean((0, 1)) * np.array(ton), 0, 255).astype("uint8")
@@ -23,7 +26,7 @@ im = im.filter(ImageFilter.GaussianBlur(0.8))
 Image.fromarray(sedy(np.asarray(im, float), (92, 86, 77))).save(os.path.join(T, "letokruhy_Diffuse.jpg"), quality=88)
 Image.new("RGB", (64, 64), (128, 128, 255)).save(os.path.join(T, "letokruhy_nor_gl.jpg"), quality=95)
 a = np.asarray(Image.open(os.path.join(T, "rough_wood_Diffuse.jpg")).convert("RGB"), float)
-Image.fromarray(sedy(a, (100, 97, 91))).save(os.path.join(T, "rough_wood_sedy_Diffuse.jpg"), quality=88)
+Image.fromarray(sedy(a, TON_P, SAT_P)).save(os.path.join(T, "rough_wood_sedy_Diffuse.jpg"), quality=88)
 shutil.copy(os.path.join(T, "rough_wood_nor_gl.jpg"), os.path.join(T, "rough_wood_sedy_nor_gl.jpg"))
 # vápenná omítka (docs/reference/okna_palace.md, KCD: palác omítnutý světle) – plastered_stone_wall byla nejtmavší textura (jas 68)
 a = np.asarray(Image.open(os.path.join(T, "plastered_stone_wall_Diffuse.jpg")).convert("RGB"), float)
@@ -45,8 +48,8 @@ for k in range(8):
     y0 = R2.randrange(0, 1024 - 128); sh = R2.randrange(0, 1024)
     blk = np.roll(src[y0:y0 + 128], sh, axis=1); nb = np.roll(nsrc[y0:y0 + 128], sh, axis=1)
     if R2.random() < 0.5: blk = blk[:, ::-1]; nb = nb[:, ::-1].copy(); nb[..., 0] = 255 - nb[..., 0]
-    ton = np.array([100, 97, 91]) * R2.uniform(0.82, 1.12) * np.array([R2.uniform(0.97, 1.04), 1.0, R2.uniform(0.94, 1.0)])
-    atl[k * 128:(k + 1) * 128] = sedy(blk, tuple(ton)); atn[k * 128:(k + 1) * 128] = nb
+    ton = np.array(TON_P) * R2.uniform(0.82, 1.12) * np.array([R2.uniform(0.97, 1.04), 1.0, R2.uniform(0.94, 1.0)])
+    atl[k * 128:(k + 1) * 128] = sedy(blk, tuple(ton), SAT_P); atn[k * 128:(k + 1) * 128] = nb
     atl[k * 128:k * 128 + 2] *= 0.55; atl[(k + 1) * 128 - 2:(k + 1) * 128] *= 0.55   # hrana prkna
 Image.fromarray(atl.clip(0, 255).astype("uint8")).save(os.path.join(T, "prkna_atlas_Diffuse.jpg"), quality=88)
 Image.fromarray(atn.clip(0, 255).astype("uint8")).save(os.path.join(T, "prkna_atlas_nor_gl.jpg"), quality=92)

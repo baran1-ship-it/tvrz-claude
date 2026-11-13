@@ -96,8 +96,8 @@ void fragment() {
 		float st = noise(vec2(h * 1.2, wp.y * 0.08)); float st2 = noise(vec2(h * 3.1 + 0.4, wp.y * 0.15));
 		c *= 1.0 - (smoothstep(0.58, 0.82, st) * 0.3 + smoothstep(0.62, 0.86, st2) * 0.18) * stekance;
 	}
-	ALBEDO = c * mix(0.5, 1.0, COLOR.g);   // zapečené stínění (hrady.zapec_ao)
-	AO = COLOR.g; AO_LIGHT_AFFECT = 0.6;
+	ALBEDO = c * mix(0.7, 1.0, COLOR.g);   // zapečené stínění (hrady.zapec_ao); 13. 11. 0,5 → 0,7 (černé podlahy v místnostech – Míša)
+	AO = COLOR.g; AO_LIGHT_AFFECT = 0.0;   // zapečené stínění jen na okolní světlo – louč a svíce ho nemají tlumit (13. 11.: černé podlahy i u rozsvícené louče)
 	ROUGHNESS = mix(texture(tex_r, uv).r, texture(tex_r, uv2).r, atm);
 	SPECULAR = 0.35;
 	NORMAL_MAP = mix(texture(tex_n, uv).rgb, texture(tex_n, uv2).rgb, atm);

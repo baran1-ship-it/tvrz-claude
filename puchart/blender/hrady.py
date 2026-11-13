@@ -985,8 +985,8 @@ TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "sindel": ("sindel", 1.5, 1.35), "sindel_hra": ("sindel", 1.5, 1.35),
     "rez_drevo": ("letokruhy", 1.0, 0.85),   # čela (textura zešedlá na tón zvětralého dubu – čerstvě oranžová svítila, 3. 11.) trámů a prken: letokruhy (Havran vlastni._tex_endgrain; Míša 3. 11.: „víš jak vypadá řez dřeva?“)
     "provaz": ("rough_wood", 0.3, 0.55), "voda": ("droba", 2.0, 0.12),
-    "dub": ("rough_wood", 0.5, 0.75), "hraz": ("rough_wood", 0.5, 0.6), "prkna_ven": ("wood_planks_grey", 1.5, 0.95),
-    "okenice": ("wood_planks_grey", 1.5, 0.8), "dvere": ("wood_planks_grey", 1.5, 0.7),
+    "dub": ("rough_wood", 0.5, 0.75), "hraz": ("rough_wood", 0.5, 0.6), "prkna_ven": ("weathered_brown_planks", 1.5, 1.0),   # Míša 13. 11.: hnědé opotřebované (dřív wood_planks_grey – černé podlahy)
+    "okenice": ("weathered_brown_planks", 1.5, 0.85), "dvere": ("weathered_brown_planks", 1.5, 0.78),
     "prkno": ("rough_wood_sedy", 0.6, 0.95), "prkno_ven": ("prkna_atlas", 2.56, 1.0), "prkno_dvere": ("rough_wood_sedy", 0.6, 0.72),   # jedno prkno (hrad_vzhled.json drevo.deska)
     "skala_mech": ("mossy_rock", 2.0, 1.0), "skala_tm": ("droba", 2.5, 0.6), "skala_sv": ("droba", 3.0, 0.92), "skala": ("droba", 2.5, 0.78), "sut": ("droba", 1.2, 0.7),
 }
