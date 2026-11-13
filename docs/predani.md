@@ -1305,7 +1305,8 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   proměnnou, a dlouhé řetězy pouštět s `timeout` 7 200 000 ms.
 - Oprava téhož dne: celou sadu vydání stejně potřebuje – brána `kontrola_vztahu.py` čte jen log celé sady k otisku
   exportu A hashi kódu (`scripts/`, `test_svet.gd`). Po přestavbě postav tedy: `otisk_exportu.py zapis` (jen výstupy
-  postav, vstupy beze změny) → `beh.sh … testy` celá sada (~1,5 h, timeout 7 200 000) → `vydani.py`. Počítat předem.
+  postav, vstupy beze změny) → `TVRZ_TEST_LIMIT=6600 BEH_LIMIT=7000 beh.sh … testy` celá sada (~1,5 h; bez TVRZ_TEST_LIMIT ji watchdog
+  rychle_testy.sh zabije po 300 s; Bash timeout 7 200 000) → `vydani.py`. Počítat předem.
 
 ### 13. 11. – lide_chovani: sed na konci dlouhé lavice, poutníci na společném rozcestí
 - Test sedu bral lavici s nejbližším STŘEDEM (sousední krátká lavice) – krajní místo 4 m lavice hlásil „mimo sedák“.
