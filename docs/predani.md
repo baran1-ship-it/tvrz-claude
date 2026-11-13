@@ -1322,3 +1322,15 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   vedle ní braly barvu kůže. NPC (`cela`): do atlasu jen viditelné tělo a výchozí oblečení (`NPC_CELA` v q_export2.py).
 - Tělo jen posunuté pod látku (`pod_vrstvou`) v pohybu prorůstá (tělo a látka mají jiné váhy). NPC: plochy těla trvale
   pod výchozím oblečením pryč (`skryj_pod`, dosah 4 cm, u okraje látky ponechat 3,5 cm – při 1,5 cm díry u výstřihu).
+
+## 13. 11. večer – poučení (fleky kůže na mužích 0.999993–0.999994)
+- **Godot u scén (.gltf) hlídá jen md5 textu `.gltf`, ne `.bin` ani textury.** Přestavba postav se stejným počtem
+  trojúhelníků dala do bajtu stejný `.gltf` → `godot --import` nechal starou síť (stará UV) a importoval jen nové
+  textury → barva kůže z nového atlasu na látce. 15 postav, ve hře od 0.999993. Tři „opravy“ schovávání těla pod oblečení
+  proto nic neřešily – chyba nebyla v geometrii. Poučení: **před opravou vzhledu ověřit, že hra kreslí to, co pipeline
+  vyrobila** (čas `.godot/imported/*.scn` ≥ čas `.bin`). Teď: `tools/postavy_q/sestav.sh` maže `.md5` přestavěných postav,
+  `tools/vydani.py` nevydá, je-li `.bin` novější než importovaná scéna.
+- Rozbor UV na atlas (`docs` skript v historii 13. 11.): „oranžové“ trojúhelníky povrchu oblečení byly ruce (ruce jsou
+  v povrchu těla s oblečením) – počítat po ostrovech, ne podle výšky.
+- Měřidla postav: `tools/mereni_postav.gd` režimy animovane / zastavene / anim_bez_modif / kostry_stoji / anim+<modifikátor>
+  (PC: animace + modifikátory 85 ms, každé zvlášť ~51–61, nic 56 → cena je souběh, ne jedna část).
