@@ -66,5 +66,43 @@
   "popis": "vyšlapaná plocha před i za každým portálem (build/portaly.json) – bez trávy a bylin (Míša 4. 11.)",
   "delka_m": 3.5,
   "okraj_m": 0.8
+ },
+ "pas_u_paty": {
+  "popis": "Pás trávy a bylin u paty plotů, zdí domů, hospodářských staveb, hradeb a budov na hradech (Míša 13. 11.: „sem tam kolem plotu a kolem zdí staveb i na hradě by měla nějaká růst – mrkni na KCD“). Raster stanovišť má 2 m – pruh 0,3–1 m se kreslí přesně podél hrany: stavby_vegetace.py → hra/data/pata_pas.json (skvrny po bunka_m), byliny.gd rozseje trsy (byliny.json pata_pas). Ne v průchodech (trasy, před vstupy, vrata, branky), ne na cestách, ulicích a cestičkách, ne ve stavbě.",
+  "zdroj": "závazná předloha vsi docs/reference/kcd_ves_predloha/ (01_ulice_rattay, 02_ulice_hrazdene_domy: tráva jen v pruhu u zdí a podezdívek; 03_ves_ploty_zahrady, 04_dvur_remeslo_hlina: trsy u paty plotu a kůlů), KCD1 Havran docs/screens/reference/kcd1/15_sudy_lavice_hranice_lide.jpg (tráva u paty roubené a kamenné zdi), 07_kout_hradba_plot_kere_skala.jpg (byliny u hradby), KCD2 ref_kcd2_dvur_zed.jpg (hrad: tráva v pruhu u zdi, nádvoří hlína)",
+  "sirka_m": [
+   0.3,
+   1.0
+  ],
+  "skvrna_m": [
+   0.8,
+   3.5
+  ],
+  "mezera_m": [
+   0.6,
+   3.5
+  ],
+  "od_hrany_m": 0.04,
+  "seminko": 1313,
+  "vynechat_tridy": [
+   "cesta",
+   "koryto_kamenite",
+   "breh",
+   "skala"
+  ],
+  "uz_roste_tridy": [
+   "pata_zdi_vne",
+   "pata_zdi_lic",
+   "kout_zdi"
+  ],
+  "pozn_uz_roste": "tam, kde pata zdí z rastru už porost má (vně hradeb), se pás nepřidává (rozpočet trojúhelníků)",
+  "brana_okraj_m": 1.2,
+  "vstup_okraj_m": 0.3,
+  "zdroje": {
+   "ves_ploty": true,
+   "ves_stavby": true,
+   "hrad_zdi": true,
+   "hrad_budovy": true
+  }
  }
 }

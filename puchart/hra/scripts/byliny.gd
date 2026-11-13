@@ -40,7 +40,13 @@ func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json") -> v
 				if zanik.size() == 2: m = _fade(m, float(zanik[0]), float(zanik[1]))
 				meshe[k].append(m)
 			n.queue_free()   # ne free(): okamžité uvolnění 3D uzlu během načítání shodilo hru na tabletu (renderer_scene_cull, 11. 11.)
+	# pás u paty plotů a zdí (stavby_vegetace.py → data/pata_pas.json, byliny.json pata_pas; Míša 13. 11., KCD předloha vsi)
+	if cfg.has("pata_pas") and FileAccess.file_exists("res://data/pata_pas.json"):
+		var pp: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/pata_pas.json"))
+		if pp is Dictionary and is_equal_approx(float(pp.get("bunka_m", 0.0)), float(cfg["bunka_m"])): _pas = pp["bunky"]
 	aktualizuj(1000)
+
+var _pas := {}   # "i,j" -> skvrny [x0, z0, x1, z1, nx, nz, šířka, zdroj]
 
 var _listi_sh: Shader
 func _fade(m: Mesh, od: float, do_: float) -> Mesh:
@@ -191,6 +197,27 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 				var klic: String = druh + str(rng.randi() % meshe[druh].size())
 				if not mista.has(klic): mista[klic] = []
 				mista[klic].append(tf)
+	# pás u paty: trsy podél hrany, u zdi hustěji (vzdálenost = šířka × náhoda^1,6)
+	var kp := "%d,%d" % [i, j]
+	if _pas.has(kp):
+		var hp: Dictionary = cfg["pata_pas"]
+		for sk: Array in _pas[kp]:
+			var a := Vector2(float(sk[0]), float(sk[1])); var b := Vector2(float(sk[2]), float(sk[3])); var nn := Vector2(float(sk[4]), float(sk[5])); var w := float(sk[6])
+			var plocha := a.distance_to(b) * w
+			for druh: String in hp:
+				if not (hp[druh] is float or hp[druh] is int) or not meshe.has(druh) or meshe[druh].is_empty(): continue
+				var n := int(plocha * float(hp[druh]) + rng.randf())
+				for q in n:
+					var p := a.lerp(b, rng.randf()) + nn * (w * pow(rng.randf(), 1.6))
+					var mr: Array = cfg.get("meritko_druh", {}).get(druh, cfg.get("meritko", [0.8, 1.3]))
+					var sc := rng.randf_range(float(mr[0]), float(mr[1]))
+					var y: float = svet.vyska(p.x, p.y)
+					var rp: float = float(cfg.get("pata_polomer_m", {}).get(druh, cfg.get("pata_polomer_m", {}).get("_", 0.25))) * sc
+					for u in 4: y = minf(y, svet.vyska(p.x + rp * cos(u * PI / 2 + 0.785), p.y + rp * sin(u * PI / 2 + 0.785)))
+					var tf := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(sc, sc * rng.randf_range(0.85, 1.2), sc)), Vector3(p.x, y - float(cfg.get("pata_zapusteni_m", 0.03)), p.y))
+					var klic: String = druh + str(rng.randi() % meshe[druh].size())
+					if not mista.has(klic): mista[klic] = []
+					mista[klic].append(tf)
 	var vys := []
 	for klic in mista:
 		for t in mista[klic]: vys.append([klic, t])

@@ -292,18 +292,18 @@
     "povinne": true
    },
    "krcma": {
-    "zdroj": "Havran vesnice.py layout (tavern: dům 14 × 7,2 m u vjezdu, šindel), docs/reference/reserse_mosty_krcma.md (zájezdní krčma: dvůr pro povozy, stáj, kůlna), KCD1 kcd1/10_kone_pod_pristreskem, 11_nadvori_studna_drevo_kone; Míša 12. 11.: „zájezdní hostinec s dvorem, stájí, kolnou, plotem“",
+    "zdroj": "Havran vesnice.py layout (tavern: dům 14 × 7,2 m u vjezdu, šindel), docs/reference/reserse_mosty_krcma.md (zájezdní krčma: dvůr pro povozy, stáj, kůlna), KCD1 kcd1/10_kone_pod_pristreskem, 11_nadvori_studna_drevo_kone; Míša 12. 11.: „zájezdní hostinec s dvorem, stájí, kolnou, plotem“; Míša 13. 11. (foto 99af0653): „boční budovy kousek dál od hospody, venkovní sezení jako v Havranovi (ne v cestě), stáj otočit k cestě, mrkni na KCD“ – KCD1 docs/reference/kcd_vzhled/web_kcd1_broken_wheel_hostinec.jpg (krčma U Zlomeného kola: stoly s lavicemi venku před průčelím na udusaném dvoře, stáje a kůlny stranou s mezerou, otevřené k cestě), KCD1 Havran reference/kcd1/15_sudy_lavice_hranice_lide.jpg (lavice u zdi, sudy, tráva u paty)",
     "predzahradka_m": [
      0.0,
      0.5
     ],
     "dvur_m": [
      13.0,
-     15.0
+     14.0
     ],
     "zahrada_m": [
-     9.0,
-     9.5
+     16.5,
+     17.0
     ],
     "za_domem_m": [
      5.0,
@@ -320,7 +320,7 @@
     },
     "stodola_pozn": "malá stodola jako stáj pro koně hostů (NAVRH – Havran nemá samostatný model stáje)",
     "kolna": {
-     "misto_zahrady": 1.0
+     "bok_dvora_u_domu": 1.0
     },
     "plot_ulice": {},
     "brana": {},
@@ -332,12 +332,34 @@
      0
     ],
     "strom_dvur_p": 0.0,
-    "lipa_vjezd_p": 1.0,
+    "lipa_vjezd_p": 0.0,
     "pole": false,
-    "stodola_poloha": "bok_dvora",
+    "stodola_poloha": "k_ceste",
     "povinne": false,
-    "pozn_poloha": "skutečný hostinec stojí mezi silnicí a strmým svahem (DMR 5G): za domem není místo – stáj bokem do dvora a kůlna na vozy na druhé straně domu, vše v řadě podél cesty (NAVRH)",
-    "ploty_pozn": "Míša 12. 11. večer: „u hospody dej pryč ploty, ať se dá ustájit kůň apod.“ – zájezdní dvůr otevřený k cestě (vozy a koně vjedou ke stáji a kůlně přímo z cesty, docs/reference/reserse_mosty_krcma.md), žádný plot ani vrata; vyšlapaný vjezd přes celou šíři dvora (vyslapano.vjezd_bez_vrat)"
+    "pozn_poloha": "skutečný hostinec stojí mezi silnicí a strmým svahem (DMR 5G): za domem není místo – stáj a kůlna po stranách domu v řadě podél cesty (NAVRH). Míša 13. 11.: stáj otočená vraty k cestě (koně rovnou z cesty), stáj odstup_staje_m a kůlna odstup_kolny_m od boku krčmy (dřív 3,5 m, stísněné). Stáj na straně bez dvora (stodola_strana −1: na straně dvora by nesplnila od_toku_m 15 m od Veličky), kůlna na vozy bokem do dvora u domu; mezi nimi před štítem sezení",
+    "ploty_pozn": "Míša 12. 11. večer: „u hospody dej pryč ploty, ať se dá ustájit kůň apod.“ – zájezdní dvůr otevřený k cestě (vozy a koně vjedou ke stáji a kůlně přímo z cesty, docs/reference/reserse_mosty_krcma.md), žádný plot ani vrata; vyšlapaný vjezd přes celou šíři dvora (vyslapano.vjezd_bez_vrat)",
+    "odstup_staje_m": 5.0,
+    "odstup_kolny_m": 4.5,
+    "sezeni": {
+     "zdroj": "Havran blender/kraj.py _stavby_cesty + lokace.json stoly_venku (stoly stul_hospoda 1,14 × 2,64 m podél průčelí, lavice lavice_selska 0,6 m od středu stolu po obou stranách); KCD1 docs/reference/kcd_vzhled/web_kcd1_broken_wheel_hostinec.jpg (stoly s lavicemi venku před krčmou)",
+     "poloha_pozn": "před štítem do cesty (mezi štítem a cestou ~7 m volna; dveře jsou na bocích – sezení nezavazí cestě ke dveřím, ke stáji ani ke kůlně); lípa u sezení (stín, KCD1 Broken Wheel strom u stolů)",
+     "stul": "stul_hospoda",
+     "lavice": "lavice_selska",
+     "od_stitu_m": 1.9,
+     "stoly_v_m": [
+      -1.55,
+      1.55
+     ],
+     "lavice_od_m": 0.6,
+     "lipa": [
+      3.9,
+      -4.6
+     ],
+     "od_cesty_min_m": 3.0,
+     "vyslapano_okraj_m": 1.2,
+     "vybaveni_pozn": "jen sezení, o které Míša požádala 13. 11. (modely Havrana stul_hospoda, lavice_selska); jiné vybavení ne (vybaveni_pozn 12. 11.)"
+    },
+    "stodola_strana": -1
    },
    "hajovna": {
     "zdroj": "Míša 12. 11.: „hájovna: dům s dřevníkem a kolnou na kraji lesa“; Havran předměty kolna, hranice_dreva, spalek_stipani (lom a uhlíři); KCD1 reference/kcd1/05_dosky_strecha_srub_hranice, 16_hranice_dreva_detail",
@@ -468,15 +490,46 @@
     },
     "tma": {
      "barva": "#0b0a09"
+    },
+    "valoun": {
+     "albedo": "res://modely/hrady/kameny_koryta_rock_moss_set_01_diff_droba.jpg",
+     "velikost_m": 1.1,
+     "pozn": "kameny roubení studny: droba s mechem jako kameny koryt (blender/kameny_koryta.py, Poly Haven rock_moss_set_01 CC0, přebarveno na drobu); KCD1 kcd1/11_nadvori_studna_drevo_kone: šedé oblé kameny s mechem; 13. 11.: oblé elipsoidy se ve hře kreslily naruby/černě – kameny jsou nepravidelné kvádry (lomový kámen) natočené ± 7°, tón ztlumený (barva)",
+     "barva": "#a39d92"
+    },
+    "spara": {
+     "albedo": "res://modely/hrady/kameny_koryta_droba_Diffuse.jpg",
+     "barva": "#5a5248",
+     "velikost_m": 0.8,
+     "pozn": "jádro za kameny roubení (zemina a drť droby ve spárách), tmavší než kámen – KCD1 kcd1/11_nadvori_studna: tmavé spáry mezi valouny"
     }
-   }
+   },
+   "k_narozi_m": 0.05,
+   "k_narozi_pozn": "Míša 13. 11. (foto z tabletu: „ploty nenavazují na domy, jsou tam díry“): konec plotu u stavby končí u nároží – uliční plot před předzahrádkou se vrací podél boku domu až k nároží štítu (+k_narozi_m); test smysl:ploty_navazuji (každý konec plotu do 0,3 m od stavby nebo od jiného plotu/vrat téže usedlosti). Zdroj: KCD2 Havran docs/screens/ref_kcd2_ves_ulice.jpg, ref_kcd2_ves_plot_cesta.jpg (plot navazuje na roh stavení)"
   },
   "studna": {
-   "zdroj": "Havran vesnice.py well (kamenná roubenka kruh r 0,95 m, výška 0,95 m, dva sloupy 2,3 m s rumpálem a stříškou ze šindele), studna na návsi; KCD1 reference/kcd1/11_nadvori_studna_drevo_kone",
+   "zdroj": "KCD1 Havran docs/screens/reference/kcd1/11_nadvori_studna_drevo_kone.jpg a docs/reference/kcd_vzhled/misa_kcd_15.jpg (roubení z oblých lomových kamenů nasucho ~0,9 m vysoké, silná zeď, dva sloupy vedle roubení se vzpěrami, rumpál z kulatiny s klikou, lano a vědro na okraji, sedlová stříška z prken/šindele); Havran vesnice.py well (kruh r 0,95 m, výška 0,95 m, sloupy 2,3 m, rumpál ve 1,55 m, stříška)",
    "polomer_m": 0.95,
    "vyska_m": 0.95,
    "sloupy_m": 2.3,
-   "od_cesty_m": 4.0
+   "od_cesty_m": 4.0,
+   "tloustka_zdi_m": 0.34,
+   "kamenu_ve_vrstve": 17,
+   "vrstvy": 5,
+   "kamen_rozmer_m": [
+    0.3,
+    0.18,
+    0.3
+   ],
+   "sloupy_od_okraje_m": 0.1,
+   "rumpal_y_m": 1.55,
+   "rumpal_r_m": 0.11,
+   "klika_m": 0.35,
+   "vzpera_m": 0.7,
+   "strisky_sirka_m": 2.4,
+   "vedro_r_m": 0.15,
+   "vedro_v_m": 0.3,
+   "pozn_13_11": "Míša 13. 11. (foto ec383bfe: „co je se studnou ve vsi?“): válec se kreslil s normálami dovnitř (zvenku průhledný, vidět jen vnitřní stěny) a bez kamene; teď kameny po vrstvách (valouny s vazbou), jádro, koruna, sloupy vně roubení se vzpěrami, klika, lano, vědro"
   },
   "pole": {
    "popis": "Lány za humny (záhumenice): pás v šíři usedlosti dělený mezemi na 1–3 pruhy, plodina losem; jen kde je dnes nelesní stanoviště (louka, pastvina, pole) a mimo cesty a toky. Povrch: orané = hlína (maska_cesty.R), úhor = pastvina, strniště = pole (nastroje/stavby_vegetace.py).",

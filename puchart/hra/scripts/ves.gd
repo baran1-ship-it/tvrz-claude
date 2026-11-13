@@ -37,6 +37,7 @@ func _ready() -> void:
 	_hospodarske()
 	_ploty()
 	_studny()
+	_sezeni()
 	_drobne()
 	_stromy()
 	print("VES uzlů %d, hospodářských %d, plotů %d, bran %d, drobností %d, stromů %d" % [_pocet(self), (d["hospodarske"] as Array).size(),
@@ -392,38 +393,115 @@ func _brana(sit: Sit, e: Dictionary, pr: Dictionary, kb: StaticBody3D) -> void:
 	cs.transform = Transform3D(Basis(Vector3.UP, atan2(-dn.z, dn.x)), (a + b) / 2 + Vector3(0, hk / 2, 0)); kb.add_child(cs)
 
 
-## ------------------------------------------------------------------ studna na návsi (Havran vesnice.py well)
+## ------------------------------------------------------------------ studna na návsi (Havran vesnice.py well + KCD1 fotky)
+## mista.json usedlosti.studna (zdroj: KCD1 kcd1/11_nadvori_studna_drevo_kone, kcd_vzhled/misa_kcd_15): roubení z oblých
+## kamenů po vrstvách s vazbou (každá vrstva pootočená o půl kamene), za kameny jádro, nahoře koruna z plochých kamenů,
+## uvnitř tma; dva sloupy vně roubení s pražcem a vzpěrami, rumpál z kulatiny s klikou, lano, vědro na koruně, sedlová stříška.
+## Míša 13. 11. (foto ec383bfe): dřív válec s normálami dovnitř – zvenku průhledný, bez kamene.
 func _studny() -> void:
 	var sp: Dictionary = d["studna_pravidla"]
 	for s: Dictionary in d["studny"]:
 		var c := Vector3(float(s["x"]), float(s["y"]), float(s["z"]))
 		var sit := Sit.new(c, _mat); var yaw := float(s["yaw"])
+		var rng := RandomNumberGenerator.new(); rng.seed = int(absf(c.x) * 100.0 + absf(c.z) * 7.0)
 		var x := Vector3(cos(yaw), 0, -sin(yaw)); var z := Vector3(sin(yaw), 0, cos(yaw))
-		var ro := float(sp["polomer_m"]); var ri := ro - 0.2; var h := float(sp["vyska_m"]); var n := 16
-		for i in n:   # kamenná roubenka: vnější a vnitřní plášť, koruna
-			var f0 := TAU * i / n; var f1 := TAU * (i + 1) / n
-			var d0 := x * cos(f0) + z * sin(f0); var d1 := x * cos(f1) + z * sin(f1)
-			var y0 := c + Vector3(0, -0.2, 0); var y1 := c + Vector3(0, h, 0)
-			var u0 := ro * f0 / 1.0; var u1 := ro * f1 / 1.0
-			sit.quad("kamen", y0 + d0 * ro, y0 + d1 * ro, y1 + d1 * ro, y1 + d0 * ro, Vector2(u0, h + 0.2), Vector2(u1, 0))
-			sit.quad("kamen", y0 + d1 * ri, y0 + d0 * ri, y1 + d0 * ri, y1 + d1 * ri, Vector2(u0, h + 0.2), Vector2(u1, 0))
-			sit.quad("kamen", y1 + d0 * ro, y1 + d1 * ro, y1 + d1 * ri, y1 + d0 * ri, Vector2(u0, 0.2), Vector2(u1, 0))
-			var t := sit.s("tma")   # tma v šachtě
-			for p: Vector3 in [c + Vector3(0, 0.3, 0), c + Vector3(0, 0.3, 0) + d1 * ri, c + Vector3(0, 0.3, 0) + d0 * ri]:
+		var ro := float(sp["polomer_m"]); var tl := float(sp.get("tloustka_zdi_m", 0.34)); var ri := ro - tl; var h := float(sp["vyska_m"])
+		var rm := (ro + ri) / 2.0
+		var nk := int(sp.get("kamenu_ve_vrstve", 15)); var nv := int(sp.get("vrstvy", 5)); var kr: Array = sp.get("kamen_rozmer_m", [0.32, 0.2, 0.3])
+		var hv := h / nv
+		# jádro za kameny (zemina a drobné kamení): válec vně i uvnitř, normály ven / dovnitř
+		_valec_plast(sit, "spara", c + Vector3(0, -0.2, 0), h + 0.15, rm + 0.08, x, z, 20, 1.0)   # jádro ve spárách, kameny ho přečnívají
+		_valec_plast(sit, "spara", c + Vector3(0, 0.25, 0), h - 0.3, rm - 0.08, x, z, 20, -1.0)
+		for i in nv:   # vrstvy valounů s vazbou
+			var y := c.y + (i + 0.5) * hv - 0.04
+			for k in nk:
+				var f := TAU * (k + (0.5 if i % 2 else 0.0) + rng.randf_range(-0.12, 0.12)) / nk
+				var dr := x * cos(f) + z * sin(f); var tg := Vector3.UP.cross(dr).normalized()
+				var sc := rng.randf_range(0.88, 1.12)
+				var p := Vector3(c.x, y, c.z) + dr * (rm + rng.randf_range(-0.02, 0.02))
+				var xk := tg.rotated(dr, rng.randf_range(-0.12, 0.12)).rotated(Vector3.UP, rng.randf_range(-0.15, 0.15))
+				var yk := Vector3.UP.rotated(xk.cross(Vector3.UP).normalized(), rng.randf_range(-0.1, 0.1))
+				sit.kvadr("valoun", p + dr * rng.randf_range(0.0, 0.03), xk, yk, Vector3.ZERO, Vector3(float(kr[0]) * sc, float(kr[1]) * rng.randf_range(0.8, 1.0), float(kr[2]) * sc))
+		for k in 12:   # koruna: ploché kameny přes celou tloušťku
+			var f := TAU * (k + rng.randf_range(-0.1, 0.1)) / 12.0
+			var dr := x * cos(f) + z * sin(f); var tg := Vector3.UP.cross(dr).normalized()
+			sit.kvadr("valoun", Vector3(c.x, c.y + h + 0.04, c.z) + dr * rm, tg.rotated(Vector3.UP, rng.randf_range(-0.12, 0.12)), Vector3.UP, Vector3.ZERO, Vector3(0.48 * rng.randf_range(0.9, 1.1), 0.1, tl + 0.08))
+		var t := sit.s("tma")   # hladina hluboko dole: tma
+		for i in 16:
+			var f0 := TAU * i / 16.0; var f1 := TAU * (i + 1) / 16.0
+			var q0 := c + Vector3(0, 0.3, 0); var q1 := q0 + (x * cos(f0) + z * sin(f0)) * (ri + 0.06); var q2 := q0 + (x * cos(f1) + z * sin(f1)) * (ri + 0.06)
+			var tri := [q0, q1, q2] if Vector3.UP.dot((q1 - q0).cross(q2 - q0)) < 0 else [q0, q2, q1]   # přední strana nahoru (jako Sit.quad: vektorový součin proti normále)
+			for p: Vector3 in tri:
 				t.set_normal(Vector3.UP); t.set_uv(Vector2.ZERO); t.add_vertex(p - c)
+		# sloupy vně roubení, pražec, vzpěry (čep a dlab – vzpěra osedlaná na sloupu a pražci)
+		var hs := float(sp["sloupy_m"]); var xs := ro + float(sp.get("sloupy_od_okraje_m", 0.1)) + 0.08
 		for sx: float in [-1.0, 1.0]:
-			sit.kvadr("tram", c + x * sx * (ro - 0.1) + Vector3(0, float(sp["sloupy_m"]) / 2, 0), x, Vector3.UP, z, Vector3(0.14, float(sp["sloupy_m"]), 0.14))
-		sit.valec("kura", c + x * -(ro - 0.1) + Vector3(0, 1.55, 0), c + x * (ro - 0.1) + Vector3(0, 1.55, 0), 0.11, 0.11, 10)
-		var hr := c + Vector3(0, float(sp["sloupy_m"]) + 0.45, 0)
+			var q := c + x * sx * xs
+			sit.kvadr("tram", q + Vector3(0, (hs - 0.4) / 2, 0), x, Vector3.UP, z, Vector3(0.16, hs + 0.4, 0.16))
+			var b0 := q + Vector3(0, hs - 0.62, 0) - x * sx * 0.08; var b1 := q - x * sx * 0.5 + Vector3(0, hs - 0.06, 0)
+			var bx := (b1 - b0).normalized()
+			sit.kvadr("tram", (b0 + b1) / 2, bx, z.cross(bx).normalized(), z, Vector3(b0.distance_to(b1), 0.09, 0.09))
+		sit.kvadr("tram", c + Vector3(0, hs + 0.05, 0), x, Vector3.UP, z, Vector3(2.0 * xs + 0.5, 0.15, 0.17))
+		# rumpál s klikou a lano s vědrem
+		var ry := float(sp.get("rumpal_y_m", 1.55)); var rr := float(sp.get("rumpal_r_m", 0.11)); var kl := float(sp.get("klika_m", 0.35))
+		sit.valec("kura", c + x * -(xs + 0.12) + Vector3(0, ry, 0), c + x * (xs + 0.14) + Vector3(0, ry, 0), rr, rr, 10)
+		var ka := c + x * (xs + 0.16) + Vector3(0, ry, 0)
+		sit.kvadr("tram", ka + Vector3(0, -kl / 2, 0), z, Vector3.UP, x, Vector3(0.05, kl + 0.05, 0.05))
+		sit.valec("kura", ka + Vector3(0, -kl, 0), ka + Vector3(0, -kl, 0) + x * 0.22, 0.025, 0.025, 6)
+		var vr := float(sp.get("vedro_r_m", 0.15)); var vh := float(sp.get("vedro_v_m", 0.3))
+		var vd := c + x * 0.28 + z * rm + Vector3(0, h + 0.08, 0)
+		sit.valec("vrata", vd, vd + Vector3(0, vh, 0), vr * 0.88, vr, 10)
+		for yy: float in [0.06, vh - 0.06]: sit.valec("tma", vd + Vector3(0, yy - 0.015, 0), vd + Vector3(0, yy + 0.015, 0), vr * 0.93 + 0.008, vr * 0.95 + 0.008, 10)
+		sit.valec("kura", c + x * 0.28 + Vector3(0, ry - rr, 0), vd + Vector3(0, vh + 0.12, 0), 0.012, 0.012, 4)
+		# sedlová stříška z prken (šindel) nad pražcem
+		var hr := c + Vector3(0, hs + 0.55, 0); var ss := float(sp.get("strisky_sirka_m", 2.4))
 		for su: float in [-1.0, 1.0]:
-			var ok := c + Vector3(0, float(sp["sloupy_m"]) - 0.1, 0) + z * su * 0.75
+			var ok := c + Vector3(0, hs - 0.05, 0) + z * su * 0.85
 			var yv := (hr - ok).normalized(); var zv := x.cross(yv).normalized() * (1.0 if su > 0 else -1.0)
-			sit.kvadr("sindel", (hr + ok) / 2 + zv * 0.03, x, yv, zv, Vector3(2.2, hr.distance_to(ok) + 0.12, 0.05))
+			sit.kvadr("sindel", (hr + ok) / 2 + zv * 0.03, x, yv, zv, Vector3(ss, hr.distance_to(ok) + 0.14, 0.05))
+		sit.kvadr("tram", hr + Vector3(0, -0.06, 0), x, Vector3.UP, z, Vector3(ss + 0.1, 0.12, 0.12))
 		var mi := MeshInstance3D.new(); mi.name = "Studna"; mi.mesh = sit.mesh(); mi.position = c
 		mi.visibility_range_end = _f("ploty_do_m", "ploty_do_m_mobil") * 2.0
 		add_child(mi)
 		var kb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var cy := CylinderShape3D.new()
-		cy.radius = ro; cy.height = h + 0.2; cs.shape = cy; cs.position = Vector3(0, (h - 0.2) / 2, 0); kb.add_child(cs); mi.add_child(kb)
+		cy.radius = ro; cy.height = h + 0.2; cs.shape = cy; cs.position = Vector3(0, (h - 0.2) / 2, 0); kb.add_child(cs)
+		for sx: float in [-1.0, 1.0]:
+			var cp := CollisionShape3D.new(); var bs := BoxShape3D.new(); bs.size = Vector3(0.18, hs, 0.18); cp.shape = bs
+			cp.position = x * sx * xs + Vector3(0, hs / 2, 0); kb.add_child(cp)
+		mi.add_child(kb)
+
+
+## plášť válce (střed paty c, výška h, poloměr r, n stěn); smer +1 normály ven, −1 dovnitř
+func _valec_plast(sit: Sit, k: String, c: Vector3, h: float, r: float, x: Vector3, z: Vector3, n: int, smer: float) -> void:
+	var vm: float = _mat[k][1] if _mat.has(k) else 1.0
+	for i in n:
+		var f0 := TAU * i / n; var f1 := TAU * (i + 1) / n
+		var d0 := x * cos(f0) + z * sin(f0); var d1 := x * cos(f1) + z * sin(f1)
+		var a := c + d0 * r; var b := c + d1 * r; var e := c + d0 * r + Vector3(0, h, 0); var g := c + d1 * r + Vector3(0, h, 0)
+		var u0 := r * f0 / vm; var u1 := r * f1 / vm
+		# quad: normála (b−a)×(e−a) – při chybném směru prohodit pořadí (Godot: přední strana po směru hodinových ručiček)
+		if (b - a).cross(e - a).dot((d0 + d1) * smer) > 0.0: sit.quad(k, a, b, g, e, Vector2(u0, h / vm), Vector2(u1, 0))
+		else: sit.quad(k, b, a, e, g, Vector2(u1, h / vm), Vector2(u0, 0))
+
+
+## ------------------------------------------------------------------ venkovní sezení krčmy (mista.json typy.krcma.sezeni)
+## modely Havrana (stul_hospoda, lavice_selska) jako u hostince Havrana (kraj.py STOLY_VENKU), kolize z rozměru katalogu
+func _sezeni() -> void:
+	if not d.has("sezeni"): return
+	var uzel := Node3D.new(); uzel.name = "Sezeni"; add_child(uzel)
+	var dosah := _f("drobne_do_m") * 2.0
+	for e: Dictionary in d["sezeni"]:
+		var mid := String(e["model"]); var p := PH + mid + ".glb"
+		if not ResourceLoader.exists(p): continue
+		var n: Node3D = (load(p) as PackedScene).instantiate(); n.name = mid
+		n.transform = Transform3D(Basis(Vector3.UP, float(e["yaw"])), Vector3(float(e["x"]), float(e["y"]), float(e["z"])))
+		for g in n.find_children("*", "GeometryInstance3D", true, false): (g as GeometryInstance3D).visibility_range_end = dosah
+		var info: Dictionary = _kat.get(mid, {})
+		if info.has("rozmer"):
+			var r: Array = info["rozmer"]; var kb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var bs := BoxShape3D.new()
+			bs.size = Vector3(float(r[0]) * 0.95, float(r[1]), float(r[2]) * 0.95); cs.shape = bs; cs.position.y = float(r[1]) * 0.5
+			kb.add_child(cs); n.add_child(kb)
+		uzel.add_child(n)
 
 
 ## ------------------------------------------------------------------ drobnosti a proutěné ploty (MultiMesh po buňkách)

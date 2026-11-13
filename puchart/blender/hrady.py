@@ -146,7 +146,7 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
     return out
 
 NAROZI_POKOS = True
-def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None, plynule=False):
+def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None, plynule=False, cimburi_pevne=False):
     """Hradba po lomené čáře (3. 11., Míša: hradby nenavazují): úseky bez přesahů, v každém vrcholu nárožní pilíř t × t
     natočený podle osy úhlu, výška = vyšší z korun sousedních úseků (žádné prolínání kvádrů a světlé čelo v rohu)."""
     if plynule:   # koruna plynule po terénu: konce úseků na pokos (přesah t/2·tg(úhel/2)), nároží bez pilíře
@@ -156,7 +156,7 @@ def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None, plynule=False
             u = p1 - p0; v = p2 - p1; u /= np.linalg.norm(u); v /= np.linalg.norm(v)
             return t / 2 * math.tan(math.acos(max(-1.0, min(1.0, float(u @ v)))) / 2) + 0.02
         return [zed_plynula(P, p, q, t, h, mat=mat, e0=_e(k, 0), e1=_e(k, 1), cimburi=cimburi) for k, (p, q) in enumerate(zip(osa, osa[1:]))]
-    useky = [zed(P, p, q, t, h, mat=mat, cimburi=cimburi and not (koruny and koruny[k] is not None), pilire=True, koruna=(koruny[k] if koruny else None)) for k, (p, q) in enumerate(zip(osa, osa[1:]))]   # úsek s pevnou korunou (pod ochozem u branky) bez stínek – ochoz po něm vede k portálku (povrch_kolize 10. 11.)
+    useky = [zed(P, p, q, t, h, mat=mat, cimburi=cimburi and (cimburi_pevne or not (koruny and koruny[k] is not None)), pilire=True, koruna=(koruny[k] if koruny else None)) for k, (p, q) in enumerate(zip(osa, osa[1:]))]   # úsek s pevnou korunou (pod ochozem u branky) bez stínek – ochoz po něm vede k portálku (povrch_kolize 10. 11.)
     for i, v in enumerate(osa):
         sous = ([useky[i - 1][-1][2]] if i > 0 else []) + ([useky[i][0][2]] if i < len(useky) else [])
         a = Vector((osa[max(i - 1, 0)][0], 0, osa[max(i - 1, 0)][1])); b = Vector((osa[min(i + 1, len(osa) - 1)][0], 0, osa[min(i + 1, len(osa) - 1)][1]))

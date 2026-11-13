@@ -199,5 +199,72 @@ if os.path.exists(_pc):
     print("pás cest: %d buněk třídy cesta" % pas_c.sum())
 else: print("CHYBA: chybí build/cesty_pas.png (nastroje/cesty.py) – cesty zůstanou zarostlé"); sys.exit(1)
 keep &= ~slap_v[r, c]   # ani strom lesa na ulici a cestičkách vsi
+# --- pás trávy a bylin u paty plotů a zdí (Míša 13. 11.: „sem tam kolem plotu a kolem zdí staveb i na hradě by měla nějaká
+# růst – mrkni na KCD“; závazná předloha docs/reference/kcd_ves_predloha: tráva v pruhu 0,3–1 m u paty zdí, plotů, kůlů).
+# Raster stanovišť má 2 m – pruh se zapíše přesně podél hran jako skvrny (pata_zdi.json pas_u_paty) do hra/data/pata_pas.json,
+# trsy rozseje byliny.gd (byliny.json pata_pas). Ne ve stavbě, na cestě, ulici, cestičce, před vstupem, ve vratech a na trasách.
+from shapely.geometry import Polygon as _Pg, LineString as _Ls, Point as _Pt
+from shapely.ops import unary_union as _uu
+PP = PZ["pas_u_paty"]; rg = np.random.default_rng(PP["seminko"]); B_ = float(json.load(open(D + "byliny.json"))["bunka_m"])
+hrany = []   # (a, b, strany: [n...]) – n = jednotková normála ven od hrany
+budovy = []; nogo = []
+def _hrany_poly(q_, zdroj):
+    P_ = _Pg(q_)
+    if not P_.is_valid or P_.area < 0.05: return
+    budovy.append(P_); q_ = list(P_.exterior.coords)
+    for k_ in range(len(q_) - 1):
+        a_, b_ = np.array(q_[k_]), np.array(q_[k_ + 1]); d_ = b_ - a_; L_ = np.hypot(*d_)
+        if L_ < 0.4: continue
+        n_ = np.array([-d_[1], d_[0]]) / L_
+        if P_.contains(_Pt(*((a_ + b_) / 2 + n_ * 0.05))): n_ = -n_
+        hrany.append((a_, b_, [n_], zdroj))
+if os.path.exists(D + "mista_stavby.json"):
+    if PP["zdroje"]["ves_stavby"]:
+        for q_ in MS_["pudorysy"]: _hrany_poly(list(_Pg(q_).buffer(-0.3, join_style=2).exterior.coords), "ves_stavba")
+    if PP["zdroje"]["ves_ploty"]:
+        for p_ in MS_["ploty"]:
+            a_, b_ = np.array(p_["body"][0])[[0, 2]], np.array(p_["body"][-1])[[0, 2]]; d_ = b_ - a_; L_ = np.hypot(*d_)
+            if L_ < 0.4: continue
+            n_ = np.array([-d_[1], d_[0]]) / L_; hrany.append((a_, b_, [n_, -n_], "ves_plot"))
+    VYS_ = MS_.get("vyslapano", {})
+    for c_ in VYS_.get("cary", []):
+        if len(c_["body"]) > 1: nogo.append(_Ls(c_["body"]).buffer(c_["polosirka"]))
+    for e_ in VYS_.get("plochy", []):
+        if e_["druh"] in ("pred_vstupem", "naves", "sezeni"): nogo.append(_Pg(e_["poly"]).buffer(PP["vstup_okraj_m"]))
+    for b_ in MS_["brany"]: nogo.append(_Ls([(b_["a"][0], b_["a"][2]), (b_["b"][0], b_["b"][2])]).buffer(PP["brana_okraj_m"]))
+if PP["zdroje"]["hrad_zdi"]:
+    for q in json.load(open(D + "stavby_clony.json"))["kvadry"]: _hrany_poly(q["rohy"], "hrad_zed")
+if PP["zdroje"]["hrad_budovy"] and os.path.exists(D + "stavby_pudorysy.json"):
+    for q in json.load(open(D + "stavby_pudorysy.json"))["budovy"]: _hrany_poly(q, "hrad_budova")
+BUD_ = _uu(budovy).buffer(0.02) if budovy else _Pg(); NOGO_ = _uu(nogo) if nogo else _Pg()
+from shapely.prepared import prep as _prep
+BUDp, NOGOp = _prep(BUD_), _prep(NOGO_)
+_vyn = [SJ["tridy"].index(t) for t in PP["vynechat_tridy"] if t in SJ["tridy"]]; _uzr = [SJ["tridy"].index(t) for t in PP["uz_roste_tridy"] if t in SJ["tridy"]]
+def _cell(p_):
+    c__ = int((p_[0] - x0) / ks); r__ = int((p_[1] - z0) / ks)
+    return (r__, c__) if 0 <= r__ < st.shape[0] and 0 <= c__ < st.shape[1] else None
+skvrny = {}; pocty = {}; delky = {}
+for a_, b_, strany, zdroj in hrany:
+    d_ = b_ - a_; L_ = float(np.hypot(*d_)); d_ = d_ / L_
+    for n_ in strany:
+        t_ = rg.uniform(0, PP["mezera_m"][1]); delky[zdroj] = delky.get(zdroj, 0.0) + L_
+        while t_ < L_ - 0.3:
+            l_ = min(rg.uniform(*PP["skvrna_m"]), L_ - t_); w_ = rg.uniform(*PP["sirka_m"])
+            p0 = a_ + d_ * t_ + n_ * PP["od_hrany_m"]; p1 = a_ + d_ * (t_ + l_) + n_ * PP["od_hrany_m"]
+            vz = [p0 + n_ * w_ * 0.5, (p0 + p1) / 2 + n_ * w_ * 0.5, p1 + n_ * w_ * 0.5, (p0 + p1) / 2 + n_ * w_]
+            ok_ = l_ >= 0.4
+            for q_ in vz:
+                if not ok_: break
+                rc = _cell(q_)
+                if rc is None or st[rc] in _vyn or st[rc] in _uzr or slap[rc] or pas_c[rc] or BUDp.contains(_Pt(*q_)) or NOGOp.contains(_Pt(*q_)): ok_ = False
+            if ok_:
+                m_ = (p0 + p1) / 2; k_ = "%d,%d" % (int(np.floor(m_[0] / B_)), int(np.floor(m_[1] / B_)))
+                skvrny.setdefault(k_, []).append([round(float(p0[0]), 2), round(float(p0[1]), 2), round(float(p1[0]), 2), round(float(p1[1]), 2), round(float(n_[0]), 3), round(float(n_[1]), 3), round(float(w_), 2), zdroj])
+                pocty[zdroj] = pocty.get(zdroj, 0.0) + l_
+            t_ += l_ + rg.uniform(*PP["mezera_m"])
+json.dump({"popis": "pás trávy u paty plotů a zdí (nastroje/stavby_vegetace.py z pravidla/svet/pata_zdi.json pas_u_paty) – čte byliny.gd; skvrna = [x0, z0, x1, z1, nx, nz, šířka, zdroj] podél hrany, n ven od zdi; klíč = buňka bylin (bunka_m)",
+           "bunka_m": B_, "bunky": skvrny, "pokryti": {k: round(pocty.get(k, 0.0) / max(v, 1e-6), 3) for k, v in delky.items()}},
+          open(D + "pata_pas.json", "w"), ensure_ascii=False)
+print("pás u paty: skvrn %d, pokrytí délky hran %s" % (sum(len(v) for v in skvrny.values()), {k: "%.0f %%" % (100 * pocty.get(k, 0.0) / max(v, 1e-6)) for k, v in delky.items()}))
 A[keep].tofile(D + "stromy.bin")
 print("stavby: %d buněk, nádvoří %d, stromů pryč %d" % (stavba.sum(), nadvori.sum(), (~keep).sum()))
