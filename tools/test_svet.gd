@@ -6384,20 +6384,28 @@ func _lide_chovani() -> void:
 				continue
 			sedi += 1
 			var q: Vector2 = sk["sedak"]
+			# vzdalenost od pudorysu sedaku (kvadr z katalogu otoceny yaw), ne od stredu: 13. 11. krajni misto 4m hodovni
+			# lavice v krcme je 1,50 m od jejiho stredu, ale 1,46 m od stredu vedlejsi 1,8m selske lavice - stred nejblizsiho
+			# sedaku s jeho pul delkou hlasil sed mimo sedak, ktery tam nebyl
 			var nej := INF
 			var vys := 0.0
-			var pul := 0.0                    # pul delky sedaku: krajni misto lavice je (n-1)/2 x sirka_mista od stredu
+			var nej_id := ""
 			for r: Dictionary in vb:
 				if (sd["sedaky"] as Array).has(String(r["id"])):
-					var dq := Vector2(float(r["p"][0]), float(r["p"][2])).distance_to(q)
+					var rzq: Array = kat[String(r["id"])]["rozmer"]
+					var ywq := float(r["yaw"])
+					var dv := q - Vector2(float(r["p"][0]), float(r["p"][2]))
+					var lxq := dv.dot(Vector2(cos(ywq), -sin(ywq)))
+					var lzq := dv.dot(Vector2(sin(ywq), cos(ywq)))
+					var dq := Vector2(maxf(absf(lxq) - float(rzq[0]) * 0.5, 0.0), maxf(absf(lzq) - float(rzq[2]) * 0.5, 0.0)).length()
 					if dq < nej:
 						nej = dq
-						vys = float(r["p"][1]) + float(kat[String(r["id"])]["rozmer"][1])
-						pul = float(kat[String(r["id"])]["rozmer"][0]) * 0.5
+						nej_id = String(r["id"])
+						vys = float(r["p"][1]) + float(rzq[1])
 			var panev_y := float(sk["y"]) + float(sd["vyska_klipu_m"])
-			print("LIDE sed %s %s: sedak %.2f m od mista, panev %.2f / sedak %.2f, koren %s" % [c["id"], bl["kde"], (m[0] as Vector2).distance_to(q), panev_y, vys, (m[0] as Vector2).round()])
-			if nej > maxf(pul, float(sd["sirka_mista_m"])) or absf(panev_y - vys) > 0.02:
-				ch.call("%s sedi mimo sedak (%.2f m, panev %.2f, sedak %.2f)" % [c["id"], nej, panev_y, vys])
+			print("LIDE sed %s %s: sedak %.2f m od mista, %s %.2f m od pudorysu, panev %.2f / sedak %.2f, koren %s" % [c["id"], bl["kde"], (m[0] as Vector2).distance_to(q), nej_id, nej, panev_y, vys, (m[0] as Vector2).round()])
+			if nej > float(sd["sirka_mista_m"]) * 0.5 or absf(panev_y - vys) > 0.02:
+				ch.call("%s sedi mimo sedak (%s %.2f m od pudorysu, panev %.2f, sedak %.2f)" % [c["id"], nej_id, nej, panev_y, vys])
 			# Misa 9. 11. r. 82 (hostinec 09-10: hoste sedi u stolu bokem): sedak do ke_stolu_m od stolu - celem ke stolu
 			var st_nej := INF
 			var st_bod := Vector2.ZERO

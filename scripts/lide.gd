@@ -1004,19 +1004,11 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	_uvolni(c)
 	var kde_b := String(b["kde"])
 	if bool(cn.get("nahodny_start", false)) and not (cn.get("obchuzka", []) as Array).is_empty():
-		# Misa 11. 11. (tri poutnici sli spolu): poutnik zacina nahodnym bodem sve trasy, ne mistem bloku
-		var ob_n := (cn["obchuzka"] as Array).size()
-		for pokus in 8:
-			c["obch_start"] = _rng.randi() % ob_n
-			kde_b = String(cn["obchuzka"][c["obch_start"]])
-			var q0: Vector2 = _misto(c, kde_b)[0]
-			var blizko := false
-			for c2: Dictionary in _lide:
-				if c2 != c and bool((c2["o"] as Dictionary).get("poutnik", false)) and c2.has("misto") \
-						and (c2["misto"] as Vector2).distance_to(q0) < float(P["poutnici"]["od_sebe_m"]):
-					blizko = true
-			if not blizko:
-				break
+		# Misa 11. 11. (tri poutnici sli spolu): poutnik zacina nahodnym bodem sve trasy, ne mistem bloku; od nej
+		# prvni bod trasy volny od ostatnich poutniku (_poutnik_volny - drive 8 nahodnych pokusu, test 13. 11. dva
+		# poutnici se stejnym cilem)
+		c["obch_start"] = _poutnik_volny(c, cn["obchuzka"], _rng.randi() % (cn["obchuzka"] as Array).size())
+		kde_b = String(cn["obchuzka"][c["obch_start"]])
 	c["kde_ted"] = kde_b
 	var m: Array = _misto_cinnosti(c, kde_b, cn)
 	# Misa 11. 11. (spravce stal u lavicky): sed bez volneho sedaku = jina moznost bloku bez sedu (ne stat u mista)
@@ -1203,11 +1195,34 @@ func _prevolit(c: Dictionary, h: float, dt: float) -> bool:
 	return true
 
 
+## Index bodu obchuzky ob od indexu od (dokola): poutnik (Misa 11. 11. tri poutnici sli spolu) bere prvni bod trasy,
+## ktery je aspon poutnici.od_sebe_m od cile (c.misto) kazdeho jineho poutnika - trasy se krizi (cesta_rozcesti), cil
+## jen z nahodneho startu se po case sesel. Neni-li volny zadny, od. Ostatni postavy: od.
+func _poutnik_volny(c: Dictionary, ob: Array, od: int) -> int:
+	var n := ob.size()
+	od = posmod(od, n)
+	if not bool((c["o"] as Dictionary).get("poutnik", false)):
+		return od
+	var od_m := float(P["poutnici"]["od_sebe_m"])
+	for k in n:
+		var i := (od + k) % n
+		var q: Vector2 = _misto(c, String(ob[i]))[0]
+		var volno := true
+		for c2: Dictionary in _lide:
+			if c2 != c and bool((c2["o"] as Dictionary).get("poutnik", false)) and c2.get("misto") is Vector2 \
+					and (c2["misto"] as Vector2).distance_to(q) < od_m:
+				volno = false
+				break
+		if volno:
+			return i
+	return od
+
+
 ## Dalsi misto obchuzky (Misa 10. 11. hostinec: kuchyne -> stul s pivem/jidlem -> zpet, opreny u steny): nese predmet
 ## k mistum obchuzka_nese.k (chuze s nosenim), cesta dvermi jen kdyz misto je v jine budove (_cesta_pruchod).
 func _obchuzka_dalsi(c: Dictionary, cn: Dictionary, p: Vector2) -> void:
 	var ok: Array = cn["obchuzka"]
-	c["obch"] = (int(c["obch"]) + 1) % ok.size()
+	c["obch"] = _poutnik_volny(c, ok, int(c["obch"]) + 1)
 	var kde := String(ok[int(c["obch"])])
 	var ns: Dictionary = cn.get("obchuzka_nese", {})
 	c["nese"] = {}
@@ -2477,7 +2492,7 @@ func _daleko_krok(c: Dictionary, dt: float) -> void:
 		c["obmena"] = float(c.get("obmena", 0.0)) - dt
 		if float(c["obmena"]) > 0.0:
 			return
-		c["obch"] = (int(c["obch"]) + 1) % ob.size()
+		c["obch"] = _poutnik_volny(c, ob, int(c["obch"]) + 1)
 		var m: Array = _misto(c, String(ob[int(c["obch"])]))
 		c["misto"] = m[0]
 		c["yaw_mista"] = m[1]
