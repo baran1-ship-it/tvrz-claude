@@ -21,8 +21,15 @@ půdorysům `hra/data/stavby_pudorysy.json`). Nejsou to měření na tabletu. Co
    26. 10. píše: „nezávisí na rendereru – platí i v Compatibility; předchozí komentáře ‚Compatibility nemá occlusion
    culling‘ byly omyl“. Jeho zápis z 13. 11. (`rozpocty.json` tvrz_drobne) a komentáře v Puchartu (`predmety.gd`
    177/863/948) přesto opakují ten starý omyl. Míša měla pravdu: Havran to umí a sám na to zapomněl. Dokumentace
-   Godotu mu dává za pravdu (kap. 2).
-5. Návrh (kap. 3): v Blenderu dát vnitřek každé budovy a věže do vlastního uzlu `*_Vnitrek_<budova>`, který se kreslí
+   Godotu mu dává za pravdu (kap. 2). **Na tabletu ho ale nikdo nezměřil.** Na PC ušetřil terénem jen 0–46 kreslení
+   a běží na CPU každý snímek. Proto jen jako A/B.
+5. **Havranova data o záseccích (doplnění Míši):** doložené jsou dva zdroje záseků, které se týkají právě skrývání
+   vnitřků. (a) Skript, který při vstupu do budovy prochází strom uzlů a přepíná tisíce uzlů najednou
+   (`predmety._vnitrek`: zásek 93 ms, `predmety` 15–61 ms na tabletu; po opravě rozpočtem 1 ms skripty 3–8 ms).
+   (b) „První vykreslení“: zásek 0,5–4 s, když se poprvé ukáže nový obsah (shader nebo textura). Návrh proto
+   nepoužívá žádný skript, který za běhu skrývá uzly. Používá jen `visibility_range` (počítá engine při ořezu,
+   bez průchodu stromem) a statické rozdělení z Blenderu. Každý nový uzel se musí předehřát.
+6. Návrh (kap. 3): v Blenderu dát vnitřek každé budovy a věže do vlastního uzlu `*_Vnitrek_<budova>`, který se kreslí
    do vzdálenosti „poloměr budovy + 25 m“. Z daleké verze vnitřek úplně vyndat a okna i dveře zevnitř zakrýt tmavou
    zátkou (Warhorse). Stín hradu brát z daleké verze. Occlusion culling vyzkoušet jako A/B. Každý krok hlídat
    hlídačem scén (změna obrazu na hranici dosahu) a snímky do otvorů ze `build/portaly.json`.
@@ -33,38 +40,48 @@ přepíná na dálkovou verzi už u 60 m.
 ## 1. Havranovy techniky a stav v Puchartu
 
 Zdroj: větev `origin/claude/new-session-0dtk58` (čteno přes `git show`). Puchart: `hra/scripts/*.gd`,
-`pravidla/svet/rozpocty.json`, `hra/project.godot`, `blender/`.
+`pravidla/svet/rozpocty.json`, `hra/project.godot`, `blender/`. **Doplnění Míši: Havran má na tabletu záseky, takže
+nic nepřebírat naslepo.** Ke každé technice je proto sloupec, který říká, co z ní je doložené měřením (Havran
+`docs/mereni_verze.md`, `docs/stav_historie.md`, `docs/rozpracovane/misa_28_chyby.md`, `radce.md`, commity) a jestli
+může sama zásek způsobit. Zkratky: **TAB** = změřeno na tabletu, **PC** = změřeno jen na PC (režim mobil),
+**NEOV** = neměřeno.
 
-| # | Technika | Havran soubor | Puchart má? | Doporučení |
-|---|---|---|---|---|
-| 1 | **Místnosti s portály** (okna/dveře jako obdélníky). Předměty místnosti se kreslí, jen když je hráč v ní, v sousední místnosti s otevřenými dveřmi, nebo venku do 12 m a otvor je v zorném poli. Vyhodnocení 5× za sekundu | `scripts/predmety.gd` `_interier`, `scripts/portaly.gd`; `docs/radce.md` 19. 10. 15:30 | **NE.** Kód je zkopírovaný beze změny, ale `portaly.gd` má natvrdo rozměry Havranovy tvrze a `hv_most.gd` říká „portály v Puchartu vypnuto“ (`world = null`). Hrad portály nemá | Převzít, až budou v hradu předměty. Portály plnit z `build/portaly.json` (Blender je už zapisuje: místo, směr ven, rozměr), ne natvrdo |
-| 2 | **Skrývání krajiny, když je hráč uvnitř.** Režim 1 (vidí okno nebo dveře do 10 m): skryje vše dál než 80 m. Režim 2 (zavřená místnost): vše dál než 25 m, i impostory a cizí terén. Průchod stromem 1 ms za snímek, zúžení až po 2 s ustáleného stavu, rozšíření hned | `predmety.gd` `_vnitrek`, `_vnitrek_krok`; `rozpocty.json predmety_vnitrek` (měřeno 15–26 → 1–1,75 ms) | **NE** (kód je, ale vypnutý: `world = null`) | Až budou místnosti hradu jako data. Uvnitř věží a paláce se teď kreslí les i louka za zdmi. Přínos jen uvnitř, NEOVERENO |
-| 3 | **Louka uvnitř budovy jen do 20 m** (`louka.vnitrek`) | `scripts/louka.gd` (soupis skripty.md ř. 58) | NE | Spolu s bodem 2 (byliny.gd, les.gd) |
-| 4 | **Interiér zvenku jen do 12 m** (dřív 25 m). Hostinec: nábytek 0,4 M troj. okny z dálky, „z dálky je okny vidět jen tma“ | `predmety.gd` (0.62), `radce.md` 0.62 | NE | Vzdálenost pro vnitřek hradu (kap. 3.3) |
-| 5 | **Předměty uvnitř domů vsi jen do 12 m** (`svet.v_dome`, `ves_vnitrek.do_m`). Commit c4020a2 | `scripts/svet.gd` `v_dome`, `predmety.gd` spawn | **Částečně.** Dosah předmětů podle velikosti (20/40/80 m) ano, test „uvnitř domu“ ne | Převzít `v_dome` pro domy míst a pro budovy hradu (`stavby_pudorysy.json`) |
-| 6 | **Drobné a vnitřní díly tvrze do 200 m** podle předpony jména (Sklep, KuchyneOhniste, Sin, Pohyb_*, SchodyHradba, Studna…) | `svet.gd` build, `rozpocty.json tvrz_drobne`; c4020a2 | **NE pro hrad**, protože hrad je jedna síť a není co pojmenovat. Pohyblivé díly ano (`rozpocty.json pohyblive_dily`, `dvere.gd`) | Hlavní úkol: rozdělit síť hradu (kap. 3) |
-| 7 | **Dosah předmětu podle velikosti** (20/40/80 m, lomová stěna 160) | `predmety.gd` spawn | ANO (převzato) | – |
-| 8 | **LOD domů ve třech stupních**: podrobný, střední (1 materiál, barva vrcholu), `_Daleko` (konvexní obal, 2 materiály). `lod_bias`, aby automatický LOD nerozpustil šindele | `svet.gd` `_ves_domy`, `blender/ves_domy.py`, `ves_domy_lod.py` | ANO (`hlavni.gd _mista`, `ves.gd`) | – |
-| 9 | **Vnitřek domu (`*Interier`) jen do 35 m, bez stínu. Drobnosti (`*Drobne`) do 70 m** | `svet.gd` `_ves_domy` | ANO u domů míst (`vnitrek_do_m`). **NE u hradu** | Totéž pro hrad (kap. 3) |
-| 10 | **Stín jen z hrubé verze**: kopie `_Daleko` jako `SHADOWS_ONLY`, podrobná verze stín nevrhá (u rybníka ubylo 186 kreslení stínu) | `svet.gd` `_ves_domy` (0.92) | ANO u domů. **NE u hradu**: plná síť vrhá stín se všemi 25+18 povrchy, `rozpocty.json hrad_shadow_meshes: false` | Stín hradu z `puchart_daleko.glb` (kap. 3.5) |
-| 11 | **Occlusion culling**: terén jako `ArrayOccluder3D` (mřížka 12 m, 0,8 m pod terénem), krabice domů (`BoxOccluder3D`, zmenšené, u hráče se vypínají: `okluzory_u_hrace`), remízky, nitro lesa; `use_occlusion_culling = true` | `svet.gd` `_okluzory` (ř. ~8383), `main.gd` 2127, `project.godot` ř. 58; soupis `svet_b.md` 307–312 | **NE.** `hra/project.godot` nastavení nemá. Puchart (a Havran 13. 11.) píše „Compatibility nemá occlusion culling“, to je omyl | A/B test (kap. 3.6). Havran ušetřil terénem 0–46 kreslení (PC), přínos zdí hradu NEOVERENO |
-| 12 | **Velké sloučené sítě rozdělit na čtverce** (> 60 m a > 8000 troj., čtverce 128–640 m), aby je šlo ořezat pohledem. Terén se kvůli dírám nedělí | `svet.gd` `_rozdel_site` (0.60–0.62) | Terén ano (dlaždice z Blenderu). **Hrad NE** (dvě sítě ~70 m) | Hrad dělit podle budov a věží, ne na čtverce (kap. 3.2) |
-| 13 | **Poučení: `ImporterMesh.generate_lods` za běhu vrací 0 úrovní.** LOD jen offline z Blenderu | `radce.md` 0.62 (oprava zápisu 0.60) | ANO (daleká verze se peče v Blenderu) | – |
-| 14 | **Impostory stromů** (hemi-oktaedr 8×8, atlas 1024, od 30–50 m do 900 m, buňka 1024 m) | `blender/impostory.py`, `svet.gd` `_impostory`, `shaders/impostor.gdshader` | ANO (`blender/impostory.py`, `les.gd`) | – |
-| 15 | **Mizení trávy po trsech ditherem a „kupy“ jako impostor trávy** (CryEngine merged meshes) | `louka.gd`, `radce.md` 19. 10. 07:30 | Částečně (`byliny.gd`: buňky, předstih, zánik) | Mimo téma hradu |
-| 16 | **Částice jen do dosahu, dál neviditelné a bez výpočtu** (`PROCESS_MODE_DISABLED`; plamen 60 m, kouř 250 m) | `life.gd` `_castice_lod`, `rozpocty.json castice`; c4020a2 | Částečně: plamen louče `visibility_range_end = 40`, výpočet CPU částic dál běží (NEOVERENO) | Převzít `_castice_lod` (levné, louče jsou ve věžích a ve sklepě) |
-| 17 | **Pohyblivé díly do dosahu** | (Havran podle Míši „maluje celý hrad i s vnitřkem“) | ANO od 13. 11. (`pohyblive_dily`, `dvere.gd`) | – |
-| 18 | **Warhorse KM-A-46: v LOD1 smazat celý vnitřek a místo něj černá výplň** (vrcholová barva 0), aspoň 30 cm za vnější zdí, zakryje okna a dveře, normály dovnitř. Stejně v LOD2 | `docs/rozpracovane/warhorse_do_dat.md` 1.2 | Částečně: materiál `tma` jako „tmavý světlík“ v oknech plných věží (`hrady.py` 406–432, 68–70). Daleká verze vnitřek má | **Převzít** pro dálkovou verzi a pro blízkou verzi bez vnitřku (kap. 3.4) |
-| 19 | **Warhorse KM-A-51: složitý interiér (sklep) jako zvláštní model s malou dohledností.** U nepřístupných domů vnitřek smazat, smazat neviditelné trámy ve zdi | `warhorse_do_dat.md` 1.2 | Neviditelné plochy ano (`hrady.odstran_vnitrni_cela`). Sklep jako zvláštní díl ne | Sklep = vlastní uzel s nejkratším dosahem |
-| 20 | **Warhorse KM-A-47: okluzor co nejlehčí** („blízko jednocifernému počtu trojúhelníků“), z rovin, vnější zdi z obou stran, vnitřní zdi, podlahy a stropy bez okluzoru | `warhorse_do_dat.md` 1.4 | NE | Okluzory zdí hradu z kolizních kvádrů (kap. 3.6) |
-| 21 | **Warhorse KM-A-49: stínová proxy** – jeden materiál, bez alfa dílů, jen pro LOD0 a LOD1 | `warhorse_do_dat.md` 1.3 | NE (hrad) | Kap. 3.5 |
-| 22 | **Warhorse KM-A-46: pořadí cílů LOD** – 1. méně kreslení (materiálů), 2. stejný vzhled bez samostínu, 3. jednodušší shader, 4. až pak trojúhelníky | `warhorse_do_dat.md` 1.2 | Daleká verze: A 18 povrchů, B 10 (z 25/18), tedy jen částečně | Daleká verze bez vnitřku ztratí další materiály (dub, kvadr_schod, kvadr_sedy…) |
-| 23 | **Atlasy a sloučení materiálů staveb** (cíl < 400 kreslení) | `docs/ZAVER_tablet_grafika.md` §3.7; rešerše 10. 11. bod 4 („nezavedeno“) | NE | Až když měření ukáže kreslení jako hrdlo (dnes ne) |
-| 24 | **Bez průhledného prolínání** (`fade` jen Disabled, okraj proti blikání) | PREHLED §6, `svet.gd` | ANO (hrad FADE_DISABLED, `Pravidla.fade_dosahu`) | – |
-| 25 | **Zapečené AO / tmavší vnitřek** | radce K4, ZAVER §3 | ANO (`hrady.zapec_ao`) | – |
-| 26 | **Rozpad, co se kreslí** (`TVRZ_ROZPAD`, `tools/rozbor_tvrze.gd`: síť po síti troj. a kreslení) | `radce.md` 0.59–0.60 | Částečně (hlídač scén: kreslení a troj. na snímek, bez rozpadu po uzlech) | Po rozdělení hradu přidat rozpad po uzlech `Vnejsek` / `Vnitrek_*` |
-| 27 | **Tabulka tříd** (dosah, LOD1, impostor, stín, kolize, načítání, portál: „tvrz – LOD čtverce – portál“) | `docs/navrh_tabulek.md` tab. 3 | Částečně (dosahy v `rozpocty.json`, `mista_stavby.json lod`) | Vnitřek hradu zapsat jako třídu/řádek v datech, ne číslem v kódu |
-| 28 | **Krabicové okluzory domů vypnuté** (`OKL_DOMY = false`), protože kamera uvnitř krabice zakryje vše. Řešení: zmenšit a u hráče vypnout | `svet.gd` 7170, 8431–8433 | NE | Okluzor zdi hradu ležet uvnitř tloušťky zdi, aby kamera nikdy nebyla uvnitř |
+| # | Technika | Havran soubor | Ověřeno měřením? / riziko záseku | Puchart má? | Doporučení |
+|---|---|---|---|---|---|
+| 1 | **Místnosti s portály.** Předměty místnosti se kreslí, jen když je hráč v ní, v sousední místnosti, nebo venku do 12 m s otvorem v zorném poli; vyhodnocení 5× za sekundu | `predmety.gd` `_interier`, `portaly.gd`; `radce.md` 19. 10. 15:30 | **PC:** hostinec −0,33 M troj. (stav_historie ř. 193). Tvrz „v kódu, neměřeny“ (ř. 214). Riziko: přepíná `visible` jen u předmětů (desítky uzlů), malé. Na tabletu nikdy samostatně neměřeno | **NE** (kód zkopírovaný, `portaly.gd` má natvrdo Havranovu tvrz, `world = null`) | Teď nepřebírat. Hrad nemá předměty v místnostech. Až budou, měřit samostatně |
+| 2 | **Skrývání krajiny, když je hráč uvnitř** (režim okno = dál než 80 m pryč, zavřená místnost = dál než 25 m pryč), průchod stromem uzlů po částech, přepočet po 8 m pohybu | `predmety.gd` `_vnitrek`, `_vnitrek_krok`; `rozpocty.json predmety_vnitrek` | **PC:** hostinec síň 839 → 578 kreslení, 1,84 → 1,12 M troj. (radce 0.60). **ZPŮSOBOVALO ZÁSEKY (TAB):** 0.93/0.94 hostinec zásek 93 ms a `predmety` 55–57 ms; 0.99994 `predmety` 15–26 ms každý snímek v síni (misa_28_chyby ř. 75: režim přeskakoval 48× za 48 hodnocení a pokaždé začal procházet 20 000 uzlů). Oprava 07ad712: rozpočet 1 ms, zúžení až po 2 s. **TAB 0.99995: skripty 3–8 ms**, záseky skriptů pryč. Zbylé podezření: po vstupu 2 s kreslí celý svět (misa_28 ř. 130). Každé zobrazení skrytých uzlů může vyvolat první vykreslení (viz č. 29) | **NE** (kód je, vypnutý) | **Nepřebírat** bez vlastního měření. Model „projít strom a přepínat tisíce uzlů“ je u Havrana doložený zdroj záseků. Lepší je dosah ve vlastnostech uzlů (`visibility_range`), který počítá engine sám bez skriptu. Pokud ano, tak až po kap. 3 a s testem `predmety_cas` |
+| 3 | **Louka uvnitř budovy jen do 20 m** | `louka.gd` (soupis skripty ř. 58) | Součást č. 2 (PC). Samostatně NEOV | NE | S č. 2, nepřebírat teď |
+| 4 | **Interiér zvenku jen do 12 m** (dřív 25 m) | `predmety.gd` (0.62) | **PC:** hostinec venku 1,83 → 1,52 M troj., 537 kreslení (radce 0.62). Riziko záseku malé (předměty) | NE | Číslo jako vodítko pro dosah vnitřku hradu (kap. 3.3) |
+| 5 | **Předměty uvnitř domů vsi jen do 12 m** (`svet.v_dome`) | `svet.gd`, `predmety.gd`; c4020a2 | **NEOV.** Commit sám píše „ověřuje se“. Je to `visibility_range` (engine), bez skriptu za běhu. Riziko: první vykreslení při přiblížení (č. 29) | Částečně (dosah podle velikosti ano, `v_dome` ne) | Lze bezpečně měřit (snímek a kreslení u domu). Až po Havranově měření nebo po našem |
+| 6 | **Drobné a vnitřní díly tvrze do 200 m** podle předpony jména | `svet.gd`, `rozpocty.json tvrz_drobne`; c4020a2 | **NEOV** („ověřuje se“). Motivace: rozbor kreslení 13. 11. (tvrz z 900 m 119 kreslení). Mechanismus `visibility_range`, bez skriptu | **NE pro hrad** (jedna síť). Pohyblivé díly ano (13. 11.) | Princip převzít v kap. 3 a změřit u nás |
+| 7 | **Dosah předmětu podle velikosti** 20/40/80 m | `predmety.gd` spawn | Havran 29. 10.: dosah 60 m natvrdo dával u lomu +232 kreslení (predani 382). PC. Riziko malé | ANO | – |
+| 8 | **LOD domů ve třech stupních**, `lod_bias` proti automatickému LOD | `svet.gd` `_ves_domy`, `blender/ves_domy.py` | **TAB:** „ves 47 FPS“ (0.83), domy do 75 m (0.92). PREHLED ř. 188: „úbytek kreslení – zavedeno“. Riziko: přechod LOD = první vykreslení stupně | ANO | – |
+| 9 | **Vnitřek domu (`*Interier`) do 35 m bez stínu, `*Drobne` do 70 m** | `svet.gd` `_ves_domy` | Součást č. 8 (TAB nepřímo) | ANO u domů, **NE u hradu** | Kap. 3 |
+| 10 | **Stín jen z hrubé verze** (`SHADOWS_ONLY` kopie `_Daleko`) | `svet.gd` `_ves_domy` (0.92) | **PC:** stín domů u rybníka 186 kreslení (radce 0.92). Riziko záseku: žádné nové materiály, jen jiná síť | ANO u domů, **NE u hradu** | Převzít pro hrad (kap. 3.5), změřit |
+| 11 | **Occlusion culling** (terén `ArrayOccluder3D`, krabice domů vypínané u hráče, remízky, nitro lesa) | `svet.gd` `_okluzory`, `main.gd` 2127 | **PC:** terén ušetřil jen 0–46 kreslení (stav.md, PREHLED ř. 190: „přínos malý“). Na tabletu nikdy samostatně neměřeno. Riziko: rastr Embree běží na CPU **každý snímek** (stálá cena, NEOV na Adrenu). Okluzor za hry nehýbat. Přepínání `visible` u hráče je levné. Odkrytí uzlu za kopcem = jeho první vykreslení (č. 29) | **NE** (`project.godot` ho nemá; komentáře „Compatibility ho nemá“ jsou omyl) | Jen jako **A/B na měřicí trase** (jedno nastavení), bez dalších okluzorů. Pokud nepřinese ≥ 5 % na úseku hradu/vsi, nezavádět |
+| 12 | **Velké sítě rozdělit na čtverce** kvůli ořezu pohledem | `svet.gd` `_rozdel_site` (0.60–0.62) | **PC:** příkop 2,78 → 2,54 M troj., ale kreslení 1527 → 1762, větší čtverce pak 1621. Dělení terénu dělalo díry a skvrny, zrušeno (0.62). Dělalo se za běhu při startu (2 s) | Terén ano (offline). Hrad NE | Dělit offline v Blenderu podle budov (kap. 3.2), ne za běhu |
+| 13 | **`ImporterMesh.generate_lods` za běhu vrací 0 úrovní**, LOD jen offline | `radce.md` 0.62 | Ověřeno skriptem (PC). Generování „jen zdržovalo start“ | ANO (offline) | – |
+| 14 | **Impostory stromů** | `blender/impostory.py`, `svet.gd` | TAB nepřímo (les jinak 13–16 FPS, radce). Les dál 51–57 ms | ANO | – |
+| 15 | **Mizení trávy po trsech, buňky ve vláknech** | `louka.gd` | **TAB:** špičky při načítání nových buněk (rákosí 86, louka 69 ms – radce 2471). Načítání za běhu je u Havrana doložený zdroj špiček | Částečně (`byliny.gd` ve vláknech, předstih) | Mimo téma hradu |
+| 16 | **Částice jen do dosahu, dál bez výpočtu** | `life.gd` `_castice_lod`; c4020a2 | **NEOV** (motivace: trasa 13. 11. ves-vjezd CPU 95 %, 16 kreslení částic). Riziko: přepnutí `process_mode` znovu spustí částice. Kontrola 2× za sekundu, malé | Částečně (plamen `visibility_range_end = 40`, výpočet dál) | Lze bezpečně změřit (CPU na úseku se loučemi). Až po měření |
+| 17 | **Pohyblivé díly do dosahu** | – | Puchart 13. 11., NEOV na tabletu | ANO | – |
+| 18 | **Warhorse KM-A-46: v LOD1 a LOD2 není vnitřek, okna a dveře kryje černá výplň 30 cm za zdí** | `warhorse_do_dat.md` 1.2 | Pravidlo studia (KCD2), u Havrana nezavedeno. Riziko záseku žádné: méně geometrie, žádný skript | Částečně (`tma` ve světlících plných věží) | **Převzít** (kap. 3.4), bezpečné |
+| 19 | **Warhorse KM-A-51: sklep jako zvláštní model s malou dohledností** | `warhorse_do_dat.md` 1.2 | Pravidlo studia, Havran nezavedl | NE | Kap. 3.3 |
+| 20 | **Warhorse KM-A-47: okluzor s jednotkami trojúhelníků, vnější zdi oboustranně** | `warhorse_do_dat.md` 1.4 | Pravidlo studia. Cena CPU každý snímek | NE | Jen pokud A/B č. 11 vyjde |
+| 21 | **Warhorse KM-A-49: stínová proxy, jeden materiál** | `warhorse_do_dat.md` 1.3 | Pravidlo studia. NEW STATE Mobile: zjednodušené stínové modely −2 % GPU (rešerše 10. 11.) | NE (hrad) | Kap. 3.5 |
+| 22 | **Warhorse KM-A-46: LOD nejdřív ubírá materiály (kreslení)** | `warhorse_do_dat.md` 1.2 | Pravidlo studia | Částečně (daleká verze 18/10 povrchů) | Daleká verze bez vnitřku ubere další |
+| 23 | **Atlasy a sloučení materiálů** | ZAVER §3.7 | Nezavedeno. Kreslení u Havrana 266–528 „přestalo být hrdlem“ (rešerše 10. 11.) | NE | Ne teď |
+| 24 | **Bez průhledného prolínání dosahů** | PREHLED §6 | Zásada (Adreno), riziko žádné | ANO | – |
+| 25 | **Zapečené AO** | radce K4 | Za běhu zdarma | ANO | – |
+| 26 | **Rozpad, co se kreslí** (`TVRZ_ROZPAD`) | `radce.md` 0.59 | Diagnostika | Částečně (hlídač scén) | Přidat rozpad po uzlech hradu |
+| 27 | **Tabulka tříd** | `navrh_tabulek.md` | – | Částečně | Dosahy vnitřku zapsat do dat |
+| 28 | **Krabicové okluzory domů vypnuté** (kamera uvnitř zakryje vše) | `svet.gd` 7170 | Poučení z chyby | NE | Okluzor zdi jen uvnitř tloušťky zdi |
+| 29 | **Poučení o záseku „první vykreslení“**: 0,5–4 s při prvním objevení něčeho nového (kovárna 538 ms, ves 1897 ms, most 4104 ms). Compatibility sestaví shader až při prvním kreslení. Předehřátí shaderů při načtení | `predani.md`, `mereni_verze.md` 0.99995, misa_28 ř. 90; rešerše 10. 11. | **TAB:** opakovaně naměřeno, příčina jen zčásti potvrzena (shader nebo nahrávání textur). Platí pro **každý uzel, který se poprvé objeví** dosahem, skrytím nebo LOD | ANO (`predehrati.gd`). **Pozor:** předehřívá jen uzly `is_visible_in_tree()`, takže skrytý stupeň hradu (`_lod_tick` ho skryje) a budoucí skryté vnitřky se nepředehřejí | Každý nový uzel z kap. 3 (vnitřky, zátky, stínová kopie) předehřát s `mimo_strom = true`. Ověřit: zásek > 40 ms při prvním vstupu na nádvoří a do budovy jen v 1. průchodu = chybí předehřátí |
+
+**Co z Havrana je doložené jako přínos bez záseků:** LOD domů s hrubým stínem (8–10), dosah předmětů podle velikosti
+(7), interiér zvenku jen zblízka (4), offline LOD (13), předehřátí (29, s výhradou). **Doložené jako zdroj záseků:**
+skript, který za běhu prochází strom a přepíná tisíce uzlů (2), načítání a stavba za běhu (12 za startu, 15 buňky),
+první vykreslení nového obsahu (29). **Neověřené:** occlusion culling na tabletu (11), commit c4020a2 (5, 6, 16).
 
 ## 2. Internet: jak to řeší jiné hry a co umí Godot 4.7 Compatibility
 
@@ -126,7 +143,12 @@ Zdroj: větev `origin/claude/new-session-0dtk58` (čteno přes `git show`). Puch
 
 ## 3. Návrh pro Puchart
 
-Seřazeno podle poměru přínos/riziko. Každý krok je samostatný: jedna změna, jedno měření (pravidlo rádce 21. 10.),
+Seřazeno podle poměru přínos/riziko. **Pravidlo proti záseků (z Havranových měření):** (1) žádný skript, který za
+běhu prochází uzly a přepíná `visible`. Jen `visibility_range` a statické uzly z Blenderu. Výjimkou zůstává už
+zavedený `_lod_tick` (dva páry uzlů, ne tisíce). (2) Žádné stavění ani načítání za běhu. (3) Každý nový uzel
+(vnitřky, zátky, stínová kopie) předehřát při načtení. `predehrati.kopie` dnes bere jen `is_visible_in_tree()`, takže
+uzly, které `_lod_tick` při startu skryje, je nutné předat s `mimo_strom = true`. (4) Každá změna se měří
+samostatně: zásek > 40 ms jen v 1. průchodu = chybí předehřátí, v každém průchodu = obsah. Každý krok je samostatný: jedna změna, jedno měření (pravidlo rádce 21. 10.),
 čísla do dat (`hrad_vzhled.json lod`, `rozpocty.json`), zdroj Warhorse KM-A-46/51 a Havran.
 
 ### 3.1 Kritérium „co je vnitřek“ (Blender)
@@ -176,6 +198,8 @@ v datech, ne výjimku v kódu. Havranův portálový test (otvor v zorném poli 
 zapojit později, až budou portály z `build/portaly.json`.
 
 ### 3.4 Daleká verze bez vnitřku a zátky otvorů (nejmenší riziko, převzít jako první)
+Riziko záseku: žádné. Ubírá geometrii i materiály a nepřidává žádný uzel ani skript. Měřitelné bezpečně (rozbor glb,
+hlídač scén, kreslení ze vsi).
 - `stavba("_daleko")`: vnitřní funkce z 3.1 vůbec nevolat (sklep, podlahy, schody, nábytek, vnitřní příčky). Rozbor
   glb: −~10 tis. troj. z 71 tis. a ubude několik materiálů (dub, kvadr_schod, kvadr_sedy…). Kreslení: NEOVERENO.
 - Zátka (Warhorse KM-A-46): obdélník `tma` 0,3 m za vnějším lícem v každém okně a dveřích s normálou ven. V daleké
@@ -185,6 +209,8 @@ zapojit později, až budou portály z `build/portaly.json`.
   funkci.
 
 ### 3.5 Stín hradu z daleké verze
+Riziko záseku: malé. Stínová kopie používá materiály, které se už kreslí, a musí být předehřátá se stínem. U Havrana
+naměřeno jen na PC (domy u rybníka −186 kreslení stínu), u nás změřit na úseku hradu.
 - Jako Havran u domů (`_ves_domy`, „stín vrhá jen hrubý dům“): blízká verze `cast_shadow = OFF`, kopie daleké verze
   `SHADOWS_ONLY` do `stiny.dosah_m` (40 m). Stínový průchod u hradu klesne z 469 tis. troj. a 43 povrchů na 71 tis.
   a 28 povrchů. Po kroku 3.4 bude ještě méně.
@@ -192,7 +218,10 @@ zapojit později, až budou portály z `build/portaly.json`.
   LOD nesmí být větší než LOD0. Ověřit snímkem zdi a nádvoří proti dnešku. Pokud nevyhoví, použít stínovou kopii
   blízkého vnějšku bez vnitřku a bez `zelezo`/`tma`.
 
-### 3.6 Occlusion culling jako A/B (Havran ho má, Puchart ne)
+### 3.6 Occlusion culling jako A/B (Havran ho má, Puchart ne) – jen měřit, nezavádět naslepo
+Riziko záseku: stálá cena CPU (Embree rastr každý snímek, na Adrenu NEOV). Odkryté uzly za kopcem = první vykreslení.
+Havranův přínos jen 0–46 kreslení (PC). Zavést jen tehdy, když A/B na tabletu ukáže zlepšení úseku vsi nebo hradu
+o ≥ 5 % p95 a nepřibudou záseky > 40 ms.
 - `hra/project.godot`: `rendering/occlusion_culling/use_occlusion_culling=true`.
 - Okluzory podle Warhorse KM-A-47 a Havrana `_okluzory`:
   1. terén: `ArrayOccluder3D` z mřížky dlaždic, 0,8 m pod nejnižším bodem buňky (hřbet mezi hrady, svahy nad vsí);
@@ -203,14 +232,17 @@ zapojit později, až budou portály z `build/portaly.json`.
 - Havran ušetřil terénem 0–46 kreslení (PC). Zdi hradu a cena CPU na tabletu: NEOVERENO. Měřit variantou trasy
   (`hra/data/mereni.json`), stejně jako vrstvy lesa.
 
-### 3.7 Další Havranovy techniky k převzetí (pozdější pořadí)
-1. `_castice_lod` (částice za dosahem bez výpočtu): malé, levné, louče ve věžích.
-2. Skrývání krajiny uvnitř (`predmety._vnitrek`, kód v Puchartu už je): zapojit, až budou místnosti hradu jako data.
-   `main.world` = kořen světa, místnosti z VNITRKY (3.1), portály z `build/portaly.json` místo natvrdo psaného
-   `portaly._tvrz`.
-3. Portály předmětů místností (`_interier`): až bude hrad vybavený předměty.
-4. `v_dome` pro domy míst: předměty uvnitř jen do 12 m (Havran c4020a2).
-5. Atlas a sloučení materiálů: až měření ukáže kreslení jako hrdlo.
+### 3.7 Další Havranovy techniky (jen po vlastním měření)
+1. `_castice_lod` (částice za dosahem bez výpočtu): Havran NEOV (c4020a2 „ověřuje se“). U nás lze změřit bezpečně
+   (CPU a skripty na úseku se loučemi, varianta s a bez).
+2. `v_dome` pro domy míst (předměty uvnitř jen do 12 m): Havran NEOV. Je to jen `visibility_range`, bez skriptu.
+   Změřit kreslení u domu.
+3. **Nepřebírat bez samostatného měření:** skrývání krajiny uvnitř (`predmety._vnitrek`, doložený zdroj záseků
+   0.93–0.99994, po opravě v rozpočtu 1 ms, zbývá podezření „2 s celý svět po vstupu“) a portály předmětů
+   (`_interier`, tablet neměřen). Uvnitř hradu by dnešní les a byliny šly omezit spíš dosahem vrstev podle toho, jestli
+   je hráč v budově (jedno přepnutí parametru vrstvy při vstupu, ne průchod stromem). To je NEOV, musí to ukázat
+   měření.
+4. Atlas a sloučení materiálů: až měření ukáže kreslení jako hrdlo.
 
 ### 3.8 Jak to ověřit
 - **Rozbor glb (bez Godotu):** troj. a povrchy po uzlech `Vnejsek`/`Vnitrek_*`/`Zatky`, daleká verze s nulovým
@@ -226,6 +258,8 @@ zapojit později, až budou portály z `build/portaly.json`.
   prohlédnout sám (pravidlo CLAUDE.md).
 - **Test průchodu:** beze změny tras. Kolize zůstávají v `KOLIZE`, ale trasa uvnitř budov ukáže, jestli se vnitřek
   kreslí, když je hráč v budově (dosah ke středu budovy < r).
+- **Záseky (z Havrana):** v měřicí trase úsek „vstup na nádvoří a do paláce“ ve dvou průchodech. Zásek > 40 ms jen
+  v 1. průchodu = chybí předehřátí nového uzlu. V obou = obsah. Panel „záseky > 40 ms“ už existuje.
 - **Tablet:** úsek hradu měřicí trasy (dnes p95 17 ms) a pohled ze vsi na hrad (kreslení, troj.). Jedna změna = jedno
   měření (3.4, 3.2–3.3, 3.5, 3.6 zvlášť).
 
@@ -234,7 +268,8 @@ zapojit později, až budou portály z `build/portaly.json`.
   (19. 10. 15:30–18:30, 0.59–0.62), `docs/PREHLED.md`, `docs/predani.md`, `docs/navrh_tabulek.md`,
   `docs/soupis/{blender,skripty,svet_a,svet_b,svet_c,shadery}.md`, `docs/rozpracovane/warhorse_do_dat.md`,
   `pravidla/svet/rozpocty.json`, `scripts/predmety.gd`, `scripts/portaly.gd`, `scripts/svet.gd` (`_okluzory`,
-  `_ves_domy`, `v_dome`, `_rozdel_site`), `scripts/life.gd` (`_castice_lod`), `blender/ves_domy.py`, commit c4020a2.
+  `_ves_domy`, `v_dome`, `_rozdel_site`), `scripts/life.gd` (`_castice_lod`), `blender/ves_domy.py`, commity c4020a2 a 07ad712; měření a záseky:
+  `docs/mereni_verze.md`, `docs/stav_historie.md`, `docs/rozpracovane/misa_28_chyby.md` (ř. 75, 90, 130).
 - [Godot: Occlusion culling](https://docs.godotengine.org/en/stable/tutorials/3d/occlusion_culling.html)
 - [Godot: Overview of renderers](https://docs.godotengine.org/en/stable/tutorials/rendering/renderers.html)
 - [Godot: modules/raycast/config.py (Embree, arm64)](https://github.com/godotengine/godot/blob/master/modules/raycast/config.py)
