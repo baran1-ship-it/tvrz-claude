@@ -75,6 +75,19 @@ for k, t in TH.items():
     nad.append(float(((o[:, 2] > np.minimum(b1, b2) + KC["voda"]["tolerance_m"]) & dal).mean()))
 TEST("hladina_nestoupa", not stoupa, "toky se stoupající hladinou: %s" % stoupa)
 TEST("voda_v_korytu", max(nad) <= KC["voda"]["podil_nad_brehem_max"], "nejhorší tok: %.1f %% bodů hladiny nad nižším břehem" % (max(nad) * 100))
+# brod (Míša 13. 11.: „brod k hájovně není dobrý“ – příkop s hrbem): od kraje vody napříč tokem pozvolný nájezd
+# (voda_hra.json koryto.brod sklon_najezdu, s rezervou na vyhlazení terénu a profil cesty)
+BRK = json.load(open(K + "/pravidla/svet/voda_hra.json"))["koryto"].get("brod", {}); spatne_br = []
+for k, t in TH.items():
+    o = np.array(t["osa"])
+    for i in t.get("brody", []):
+        d = o[min(i + 1, len(o) - 1), :2] - o[max(i - 1, 0), :2]; d /= np.linalg.norm(d) + 1e-9; n = np.array([-d[1], d[0]])
+        for sg in (1, -1):
+            dd = t["sirka"] / 2 + np.arange(0.0, 9.0, 1.0)
+            y = ter(o[i, 0] + sg * n[0] * dd, o[i, 1] + sg * n[1] * dd)
+            mx = float(np.max(np.diff(y))) if len(y) > 1 else 0
+            if mx > KC["voda"].get("brod_sklon_max", 0.3): spatne_br.append("%s (%.0f, %.0f) %.0f %%" % (t.get("jmeno") or k, o[i, 0], o[i, 1], mx * 100))
+TEST("brod_najezd", not spatne_br, "%d brodů; strmé: %s" % (sum(len(t.get("brody", [])) for t in TH.values()), spatne_br[:6]))
 LV = json.load(open(D + "lavky.json"))
 lv_ok = all(abs(ter(a[0], a[1]) + 0.15 - a[2]) < 0.6 or a[2] > ter(a[0], a[1]) for a, b in LV.values())
 TEST("lavka_na_brehu", lv_ok, "%d lávek" % len(LV))

@@ -339,7 +339,9 @@
   "podil_nad_brehem_max": 0.05,
   "pozn": "hladina smí být nad nižším břehem (1,2 m od kraje vody) jen v ≤ 5 % bodů osy (mělké rovinky); počítá se hladina víc než tolerance_m nad břehem (pod 15 cm okraj pásu vody schová tráva a práh)",
   "soutok_m": 8.0,
-  "tolerance_m": 0.15
+  "tolerance_m": 0.15,
+  "brod_sklon_max": 0.3,
+  "_brod_sklon_max": "smysl:brod_najezd – největší sklon terénu na 1 m napříč tokem u brodu (9 m od kraje vody); nájezd v datech 12 %, rezerva na vyhlazení dlaždic a profil cesty (Míša 13. 11.: příkop s hrbem u brodu k hájovně)"
  },
  "vegetace": {
   "smi_byt_hole": [

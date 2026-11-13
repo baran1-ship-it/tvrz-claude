@@ -12,7 +12,7 @@ var _font: Font
 func zacni(p: Node) -> void:
 	proch = p
 	_font = load("res://fonty/GrenzeGotisch-Medium.ttf")
-	set_anchors_preset(Control.PRESET_FULL_RECT); mouse_filter = Control.MOUSE_FILTER_IGNORE
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); mouse_filter = Control.MOUSE_FILTER_IGNORE   # jen kotvy bez okrajů = 0×0, tlačítka byla mimo obrazovku (chyba louče)
 	for i in 3:
 		var b := Button.new(); b.custom_minimum_size = Vector2(300, 80); Styl.tlacitko_pruh(b, _font, 28, i)
 		b.anchor_left = 0.5; b.anchor_right = 0.5; b.anchor_top = 1.0; b.anchor_bottom = 1.0

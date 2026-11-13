@@ -57,6 +57,20 @@
    "vlna1_sirek": 4.0,
    "vlna2_sirek": 9.0,
    "zdroj": "docs/reference/detaily_hradu_1393.md §9 (střídání tůní a peřejí po 2–5 šířkách koryta) – NEOVERENO rozměrově"
+  },
+  "brod": {
+   "hloubka_m": 0.12,
+   "sklon_najezdu": 0.12,
+   "polosirka_m": 3.0,
+   "nabeh_m": 4.0,
+   "dosah_m": 20.0,
+   "mezera_cest_m": [
+    1.5,
+    32.0
+   ],
+   "od_mostu_m": 25.0,
+   "popis": "Brod (Míša 13. 11.: „brod k hájovně není dobrý“ – cesta přes úzký příkop s hrbem): kde cesta kříží tok bez mostu (konec cesty u toku a protější cesta do mezera_cest_m, spojnice kříží osu toku), je koryto mělké (hloubka_m) a břehy místo prahu a svahu 0,9 sjíždějí k vodě nájezdem sklon_najezdu v pásu ±polosirka_m podél toku (náběh nabeh_m) – úvoz k vodě, cesta vede dnem (nastroje/cesty.py jen_maska).",
+   "zdroj": "Havran blender/kraj.py voda_tvar (brod: brod_hloubka_m 0,12, bez náspu břehu, cesta do vody; cesty.json prechody polomer 10 m), cesty_puchart.json pozn_u_mostu (nájezd nejvýš 10–12 %); KCD brody: cesta sjíždí mělkým zářezem do širokého mělkého toku (docs/reference/kcd_vzhled)"
   }
  },
  "soutok_m": 8.0,
