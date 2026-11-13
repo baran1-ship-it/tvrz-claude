@@ -412,16 +412,37 @@ for us in useds:
         v = stavba_ok(x_, z_, yw, m_, R.get("od_toku_hospodarske_m"))   # stejná pravidla jako při umístění (hospodářské 8 m od toku)
         plosiny.append((x_, z_, yw, m_, v[0]))
         hosp_out.append({"model": m_, "x": x_, "z": z_, "yaw": yw, "misto": us["misto"], "usedlost": us["i"], "plosina": True, "teren_y": v[0]})
-for x_, z_, yw, m_, ty in plosiny:
+MSK_MISTA = np.zeros_like(Y, bool)
+_n_domu = len(stavby)
+for x_, z_, yw, m_, ty in plosiny[_n_domu:] + plosiny[:_n_domu]:   # domy nakonec: plocha před jejich dveřmi má přednost před plošinou stodoly/kůlny vedle
     msk = np.zeros_like(Y, bool); b = body_pudorysu(x_, z_, yw, m_, R["okraj_m"], 0.5)
     for p in b:
         r, c = ij(*p)
         if 0 <= r < ny and 0 <= c < nx: msk[r, c] = True
+    # před vstupy taky rovina ve výšce domu (Míša 13. 11.: „do hájovny nemůžu vstoupit, všechny budovy musí být vstupné“ –
+    # na svahu byl terén před dveřmi 0,3–0,5 m pod domem, se stupněm a prahem přes 0,5 m: postava nevylezla)
+    for v_ in vstupy_stavby(m_, x_, z_, yw):
+        pp_ = v_["pred_poly"]; bx_ = pp_.bounds
+        for zz_ in np.arange(bx_[1], bx_[3] + 0.5, 0.5):
+            for xx_ in np.arange(bx_[0], bx_[2] + 0.5, 0.5):
+                if pp_.buffer(0.3).contains(Point(xx_, zz_)):
+                    r, c = ij(xx_, zz_)
+                    if 0 <= r < ny and 0 <= c < nx: msk[r, c] = True
+    MSK_MISTA[msk] = True   # teren_dlazdice.py tyto buňky nevyhlazuje (vyhlazení σ 1,5 m stáhlo plochu před dveřmi zpět do svahu)
     r0, c0 = ij(x_, z_); w = 30
     sl = (slice(max(r0 - w, 0), r0 + w), slice(max(c0 - w, 0), c0 + w))
     d = distance_transform_edt(~msk[sl]); a = np.clip(1 - d / R["prechod_m"], 0, 1); a = a * a * (3 - 2 * a)
     Y[sl] = Y[sl] * (1 - a) + ty * a
 np.save(out + ".npy", (Y + P["H"]).astype(np.float32)); json.dump(M, open(out + ".json", "w"), ensure_ascii=False, indent=1)
+_rr, _cc = np.nonzero(MSK_MISTA); np.savez(out + "_plosiny_mista.npz", r=_rr, c=_cc)
+# trasy průchodu dovnitř domů (Míša 13. 11.: „všechny budovy musí být vstupné“): hlavní vstup z venku přes práh do síně
+_TRM = {}
+for s__ in stavby:
+    vv_ = vstupy_stavby(s__["model"], s__["x"], s__["z"], s__["yaw"])   # všechny dveře domu (vstup i do dvora)
+    for v_ in vv_:
+        _TRM["dum_%s_%s_%d" % (s__["misto"], s__["model"], len(_TRM))] = [[round(float(q[0]), 2), round(float(q[1]), 2), None] for q in (v_["c"] + v_["n"] * 2.5, v_["c"] + v_["n"] * 0.8, v_["c"] - v_["n"] * 1.2)]
+json.dump({"popis": "trasy průchodu do domů míst (nastroje/mista_rozmisteni.py) – test_pruchod.gd", "trasy": _TRM}, open(K + "/hra/data/pruchody_mista.json", "w"), ensure_ascii=False, indent=1)
+print("trasy do domů", len(_TRM))
 # doprovodné soubory předchozího kroku (jámy sklepa a šachty, koryta, skály) pod novou předponou – teren_dlazdice.py je
 # čte podle předpony (11. 11.: bez nich chyběla díra sklepa, pás koryt a nájezdy k mostům – hlídači)
 import glob, shutil
@@ -498,6 +519,7 @@ pp = lambda poly: [[r3(x_), r3(z_)] for x_, z_ in list(poly.exterior.coords)[:-1
 used_out = [{"i": us["i"], "misto": us["misto"], "typ": us["typ"], "stred": [r3(us["parcela"].centroid.x), r3(us["parcela"].centroid.y)],
              "parcela": pp(us["parcela"])} for us in useds]
 json.dump({"popis": "stavby nových míst (nastroje/mista_rozmisteni.py z pravidla/svet/mista.json) – čte hra (hlavni.gd _mista domy, ves.gd hospodářské stavby, ploty, drobnosti, stromy, studna) a stavby_vegetace.py (půdorysy, dvory, zahrady, sady, pole)",
+           "vstupy_domu": [{"stavba": s__["model"], "misto": s__["misto"], "y": s__["teren_y"], "body": [[r3_(q[0]), r3_(q[1])] for v__ in vstupy_stavby(s__["model"], s__["x"], s__["z"], s__["yaw"]) for q in (v__["c"] + v__["n"] * 0.6, v__["c"] + v__["n"] * 1.2)]} for s__ in stavby],
            "modely": MI["modely"], "stavby": stavby, "lod_ves": U["lod"], "ploty_pravidla": U["ploty"], "studna_pravidla": U["studna"],
            "usedlosti": used_out, "hospodarske": hosp_out, "drobne": drobne_out, "ploty": ploty_out, "brany": brany_out,
            "stromy": stromy_out, "sezeni": sezeni_out, "studny": studny, "vyslapano": {"trida": VY["trida"], "plochy": vy_plochy, "cary": vy_cary},

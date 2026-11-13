@@ -112,7 +112,7 @@ func _start() -> void:
 		mv.set_shader_parameter("normal_tex", load("res://textury/voda_normal.png")); mv.set_shader_parameter("pena_tex", load("res://textury/voda_pena.png"))
 		if FileAccess.file_exists("res://data/voda_hra.json"):   # vzhled vody z dat (voda_hra.json vzhled_13_11: pipeta misa_real, Fresnel, čirost)
 			var vz: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/voda_hra.json")).get("vzhled_13_11", {})
-			for k in ["melka", "hluboka", "odraz", "cirost_m", "hloubka_barvy_m", "fresnel_f0", "drsnost_klid", "drsnost_pena", "specular", "kraj_m"]:
+			for k in ["melka", "hluboka", "odraz", "cirost_m", "hloubka_barvy_m", "fresnel_f0", "drsnost_klid", "drsnost_pena", "specular", "kraj_m", "pena_zaklad", "pena_barva"]:
 				if not vz.has(k): continue
 				var v = vz[k]
 				mv.set_shader_parameter(k if k == "kraj_m" else k.trim_suffix("_m"), Color(v[0], v[1], v[2]) if v is Array else float(v))

@@ -507,6 +507,14 @@ for q_ in json.load(open(K + "/pravidla/svet/hrad_puchart.json"))["teren"]["plos
         dy_ = float(ter(xx_, zz_)) - q_["y"]
         if abs(dy_) > KC.get("plosina_tol_m", 0.12): _pz.append("%s (%.1f, %.1f) %+.2f m" % (q_["id"], xx_, zz_, dy_))
 TEST("plosiny_rovne", not _pz, "nerovné plošiny: %s" % _pz[:5])
+# vstupy domů (Míša 13. 11.: „do hájovny nemůžu vstoupit, všechny budovy musí být vstupné“): terén před dveřmi ve výšce
+# domu (stupeň 0,15 m a podlaha 0,3 m nad základem modelu – víc postava nevyleze)
+_vd = []
+for v_ in json.load(open(D + "mista_stavby.json")).get("vstupy_domu", []):
+    for q_ in v_["body"]:
+        dy_ = float(ter(q_[0], q_[1])) - v_["y"]
+        if abs(dy_) > KC.get("vstup_domu_tol_m", 0.12): _vd.append("%s %s (%.1f, %.1f) %+.2f m" % (v_["misto"], v_["stavba"], q_[0], q_[1], dy_))
+TEST("vstup_domu_teren", not _vd, "terén před vstupy mimo výšku domu: %s" % _vd[:6])
 # padací most zakryje otvor brány (Míša 13. 11.: zvednutý most užší a nižší než oblouk, kolem nebe)
 _mk = json.load(open(D + "mosty_kryti.json"))["mosty"] if os.path.exists(D + "mosty_kryti.json") else []
 _mk_zle = [m_ for m_ in _mk if m_["most"][0] < m_["otvor"][0] + 0.2 or m_["most"][1] < m_["otvor"][1] + 0.03]   # nahoře brána B pod korunou: přesah 3 cm (výklenek nejvýš 0,15 m pod korunou)

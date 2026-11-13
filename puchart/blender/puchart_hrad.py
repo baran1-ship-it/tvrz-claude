@@ -1914,7 +1914,7 @@ def postav_B(P):
                          bod(sa - sdir * 0.5, y0), bod(c + Vector((0, 0, 0.5)), y0)]
     return G
 
-ZAB_MIN_M = 0.9   # nejkratší samostatné zábradlí (kratší nenapojený kus = úlomek)
+ZAB_MIN_M = 0.7   # nejkratší samostatné zábradlí (kratší nenapojený kus = úlomek); 13. 11.: 0,9 smazalo potřebné zábradlí podesty u věže B (hrana 0,9 m, Míša „na levé části spodního hradu něco chybí“)
 def zabradli_stavba():
     """Zábradlí jako celek (Míša 10. 11.: „podívej se, jak zábradlí v KCD a v realitě přirozeně navazuje“): všechny kusy
     (ochozy, podesty, otvory, ramena schodů) se nejdřív sesbírají; konce blíž než 0,45 m (a výškou do 0,25 m) se spojí do

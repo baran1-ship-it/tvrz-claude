@@ -103,6 +103,9 @@ if os.path.exists(vys_pre + "_koryta.npz"):
         _sl = (slice(_r0, _r1), slice(_c0, _c1))
         NAST_M[_sl] |= _m; mkd[_sl] &= ~_m; mL[_sl] &= ~_m
         Y[_sl] = np.where(_m, (H_SUROVY - P["H"])[_sl], Y[_sl])
+    if os.path.exists(vys_pre + "_plosiny_mista.npz"):   # plošiny pod domy vsi a před jejich vstupy (mista_rozmisteni.py) bez vyhlazení
+        _PM = np.load(vys_pre + "_plosiny_mista.npz"); _m = np.zeros(Y.shape, bool); _m[_PM["r"], _PM["c"]] = True
+        NAST_M |= _m; mkd &= ~_m; mL &= ~_m; Y = np.where(_m, (H_SUROVY - P["H"]).astype(Y.dtype), Y)
     for _ in range(12):
         vy = np.where(mL, jako_sit(Y.astype(np.float64), k0) - Yp, -9.0)   # o kolik je síť nad skutečným terénem pásu
         if vy.max() <= -JP["rezerva_m"]: break

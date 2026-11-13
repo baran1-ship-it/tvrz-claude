@@ -24,6 +24,8 @@ uniform float kraj_m = 0.08;         // m hloubky, na kterých krytí u čáry v
 uniform float rychlost = 0.45;        // m/s
 uniform float meritko = 2.2;          // m na dlaždici vln
 uniform float pena_sklon = 0.03;      // sklon hladiny, od kterého je peřej
+uniform float pena_zaklad = 0.0;     // pěna mimo peřeje (13. 11.: 0,08 dělal bílý film)
+uniform vec3 pena_barva : source_color = vec3(0.72, 0.74, 0.70);
 varying float sklon;
 varying vec3 wpos;
 
@@ -52,7 +54,7 @@ void fragment() {
 	float sum = texture(pena_tex, p * 1.7 + vec2(-TIME * rv * 1.2 / meritko, 0.0)).r;
 	float sum2 = texture(pena_tex, p * 3.1 + vec2(-TIME * rv * 2.0 / meritko, 0.5)).r;
 	float perej = smoothstep(pena_sklon, pena_sklon * 3.0, sklon);
-	float pena = smoothstep(0.55, 0.85, sum * 0.6 + sum2 * 0.4) * (perej * 0.8 + 0.08);
+	float pena = smoothstep(0.55, 0.85, sum * 0.6 + sum2 * 0.4) * (perej * 0.8 + pena_zaklad);
 	float pk = 1.0 - COLOR.r;   // pěna za kamenem, který láme hladinu (blender/voda.py, misa_real_01: světlé čárky a vrásky za kameny)
 	pena = max(pena, pk * smoothstep(0.25, 0.65, sum * 0.6 + sum2 * 0.4 + pk * 0.15));
 	NORMAL_MAP_DEPTH = 0.35 + pk * 0.5;   // vrásky za kamenem
@@ -60,7 +62,7 @@ void fragment() {
 	float fr = fresnel_f0 + (1.0 - fresnel_f0) * pow(1.0 - nv, 5.0);      // Schlick
 	float pohl = 1.0 - exp(-h / cirost);
 	vec3 col = mix(melka, hluboka, 1.0 - exp(-h / hloubka_barvy));
-	ALBEDO = mix(mix(col, odraz, fr), vec3(0.86, 0.88, 0.84), pena);   // při šikmém pohledu převáží odraz okolí (les u potoka)
+	ALBEDO = mix(mix(col, odraz, fr), pena_barva, pena);   // při šikmém pohledu převáží odraz okolí (les u potoka)
 	ROUGHNESS = mix(drsnost_klid, drsnost_pena, pena); METALLIC = 0.0; SPECULAR = specular;   // lesk slunce, ne zrcadlo oblohy
 	float kraj = COLOR.a * smoothstep(0.0, kraj_m, h);   // krajní řada a vrcholy nad vodou: 0 (žádná hrana sítě)
 	ALPHA = clamp(max(pohl, fr) + pena * 0.25, 0.0, 1.0) * kraj;

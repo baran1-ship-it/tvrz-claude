@@ -12,16 +12,16 @@
    "vysoka": 0.15
   },
   "breh": {
-   "trava": 1.0,
-   "vysoka": 1.2,
-   "kopriva": 0.15,
-   "ostruzina": 0.06,
+   "trava": 0.5,
+   "vysoka": 0.6,
+   "kopriva": 0.1,
+   "ostruzina": 0.04,
    "kamen": 0.3,
-   "kapradi": 0.9,
-   "mech": 0.6,
+   "kapradi": 0.45,
+   "mech": 0.3,
    "kmen": 0.0025,
-   "ostrice": 0.3,
-   "devetsil": 0.04
+   "ostrice": 0.15,
+   "devetsil": 0.03
   },
   "les_paseka": {
    "trava": 1.5,
@@ -250,16 +250,16 @@
   "popis": "Pás na čáře vody podél všech toků (návrh krok 8 v docs/reference/potoky/README_jak_se_stavi.md; nastroje/stavby_vegetace.py → hra/data/pata_pas.json skvrny voda_louka/voda_les, hra/scripts/byliny.gd): trsy od čáry vody na břeh, u vody nejhustěji, část přes čáru do vody, nakloněné k vodě (převis). Ne na brodu (třída cesta), vyšlapaných pruzích a u mostů.",
   "zdroj": "Míšina předloha docs/reference/potoky/misa_real_01 (tráva a ostřice přepadají přes hranu až do vody), misa_real_04 (převislá tráva v popředí); KCD kcd1_potok_trava_az_k_vode_vrba.jpg (tráva 0,5–0,9 m přes hranu vody), kcd2_potok_previsla_trava_kameny.jpg (tráva 0,6–1 m visí přes kameny); les: misa_real_02/03, kcd1_lesni_potok_kameny_mech.jpg (kapradí, mech, listí až k vodě). Pásma README §2.3: čára vody ±0,3 m, 0–1 m hustá tráva a ostřice; náklon 30–50° a přesah 0,1–0,4 m = odhad z fotky; hustoty NEOVERENO (laděno snímkem).",
   "voda_louka": {
-   "trava": 5.0,
-   "vysoka": 1.6,
-   "ostrice": 0.9
+   "trava": 2.2,
+   "vysoka": 0.8,
+   "ostrice": 0.45
   },
   "voda_les": {
-   "kapradi": 1.2,
-   "mech": 1.0,
-   "trava": 0.8,
-   "ostrice": 0.3,
-   "devetsil": 0.15
+   "kapradi": 0.6,
+   "mech": 0.5,
+   "trava": 0.4,
+   "ostrice": 0.15,
+   "devetsil": 0.08
   },
   "sirka_m": [
    0.5,
@@ -358,5 +358,6 @@
    ]
   }
  },
- "pozn_padle_stromy": "13. 11. (Míša 13. 11.: „není tam těch klád zase moc? a mají to být popadané stromy, ne pokácené“): kmen = padlé stromy s vylomenými konci (Poly Haven dead_tree_trunk_02 a dead_tree_trunk, CC0; build/padle_stromy/skripty/preved.py), staré rovně uříznuté špalky kmen_1/2 jen jako „spalek“ na pasekách u pařezů (stopa těžby, pozn_parezy). Hustoty: břeh 0,05 → 0,0025/m² (≈1 na 400 m² břehu a jen v lese, les_okoli; předtím 1 na 20 m²), les ~1 na 1000 m² (bučiny 0,001, suť 0,0015, dubohabřina 0,0006), paseka špalek 0,001. Vše NEOVERENO (žádné měření mrtvého dřeva 1393; les se tehdy probíral na palivo – docs/reference/potoky/README_jak_se_stavi.md krok 9: „hustota NEOVERENO, první návrh pár míst“); laděno snímkem. Kořenový talíř (vývrat) chybí: Poly Haven nemá CC0 model vývratu."
+ "pozn_padle_stromy": "13. 11. (Míša 13. 11.: „není tam těch klád zase moc? a mají to být popadané stromy, ne pokácené“): kmen = padlé stromy s vylomenými konci (Poly Haven dead_tree_trunk_02 a dead_tree_trunk, CC0; build/padle_stromy/skripty/preved.py), staré rovně uříznuté špalky kmen_1/2 jen jako „spalek“ na pasekách u pařezů (stopa těžby, pozn_parezy). Hustoty: břeh 0,05 → 0,0025/m² (≈1 na 400 m² břehu a jen v lese, les_okoli; předtím 1 na 20 m²), les ~1 na 1000 m² (bučiny 0,001, suť 0,0015, dubohabřina 0,0006), paseka špalek 0,001. Vše NEOVERENO (žádné měření mrtvého dřeva 1393; les se tehdy probíral na palivo – docs/reference/potoky/README_jak_se_stavi.md krok 9: „hustota NEOVERENO, první návrh pár míst“); laděno snímkem. Kořenový talíř (vývrat) chybí: Poly Haven nemá CC0 model vývratu.",
+ "pozn_vykon_13_11": "Míša 13. 11. měření na tabletu (7478176): les p95 21,5 → 55 ms, voda 23,6 → 50 ms („kolem vody se to seká“) – porost břehu (třída breh po opravě, dřív omylem cesta) a pás u vody ~2× snížen; vzhled hlídat snímkem vedle předlohy"
 }

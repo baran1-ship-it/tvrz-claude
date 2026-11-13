@@ -246,9 +246,9 @@
   "zdroj_hloubka_barvy": "od mělké k tůňové barvě (1 − exp(−h/x)) – NEOVERENO, snímek",
   "fresnel_f0": 0.02,
   "zdroj_fresnel": "Schlick: F0 = ((n−1)/(n+1))², voda n ≈ 1,33 → 0,02 (https://en.wikipedia.org/wiki/Schlick%27s_approximation); krytí = max(hloubka, Fresnel) – shora průhledná, do dálky zrcadlí (kcd1_oficial_potok_valouny_pruhlednost.jpg)",
-  "drsnost_klid": 0.15,
+  "drsnost_klid": 0.3,
   "drsnost_pena": 0.5,
-  "specular": 0.12,
+  "specular": 0.05,
   "zdroj_drsnost": "snímek 13. 11. (docs/screens/potok13_*): s drsností 0,08 a specular 0,35 odrážela hladina jen oblohu (Compatibility bez SSR) – šedobílá deska; odraz lesa je proto barva odraz × Fresnel, lesk jen slunce. Hodnoty NEOVERENO, laděno snímkem",
   "mokry_pas_m": 0.3,
   "zdroj_mokry_pas": "mokrý tmavší pás nad čárou vody (výška nad hladinou): KCD snímky 0,2–0,5 m (odhad z fotky, README_jak_se_stavi.md §2.2), Havran voda_toky.md 0,2–0,4 m (NAVRH); na plochém brodu vychází vodorovně 2–4 m jako bahno u mlýna (kcd1_melcina_mlyn_mokre_bahno.jpg)",
@@ -277,6 +277,13 @@
   "pena_kamen_pod_hladinou_m": 0.04,
   "zdroj_pena_kamen": "pěna u kamene, který láme hladinu (README_jak_se_stavi.md krok 4; S. Schreibt, River – Horizon: pěna = vzdálenost k překážce ve vertex color, protažená po proudu; CryEngine „foam soft intersection“): stopa poloměr × šíře kamene napříč a po_proudu × průměr za kamenem; kámen s vrchem do pod_hladinou_m pod hladinou se počítá. Čísla NEOVERENO (Schreibt 1–3× průměr)",
   "pena_kamen_min_hloubka_m": 0.08,
-  "zdroj_pena_kamen_hloubka": "pěna jen u kamenů v proudu (hloubka u kamene nad 8 cm) – kameny na mělkém kraji vody pěnu nedělají (misa_real_01: světlé čárky za kameny v proudnici, kraj klidný); NEOVERENO"
+  "zdroj_pena_kamen_hloubka": "pěna jen u kamenů v proudu (hloubka u kamene nad 8 cm) – kameny na mělkém kraji vody pěnu nedělají (misa_real_01: světlé čárky za kameny v proudnici, kraj klidný); NEOVERENO",
+  "pena_zaklad": 0.0,
+  "pena_barva": [
+   0.72,
+   0.74,
+   0.7
+  ],
+  "pozn_bila_13_11": "Míša 13. 11. (tablet): „voda je nějaká bílá“ – pěna měla všude základ 8 % (bílý film) a hladká hladina (drsnost 0,15, specular 0,12) dávala na tabletu mléčný odlesk; pěna jen na peřejích a za kameny, drsnost 0,3, specular 0,05, pěna tlumenější (0,72)"
  }
 }
