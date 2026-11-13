@@ -800,7 +800,8 @@ func _kresleni_rozbor() -> void:
 			["z_remizek", Vector3(-145, 0, 470), Vector3(-112, 1.6, 480)], ["z_les_lom", Vector3(127, 0, 895), Vector3(127, 1.6, 930)],
 			["z_lom_reka", Vector3(188, 0, 935), Vector3(188, 1.6, 900)], ["z_smrky", Vector3(16, 0, 988), Vector3(-10, 1.6, 980)],
 			# 13. 11. trasa 0.999992: ves-vjezd 560-690 kresleni (tvrz ~330) - rozbor pred sloucenim staveb vsi
-			["ves_vjezd", Vector3(440, 0, 790), Vector3(355, 4.1, 738)], ["ves_dvory", Vector3(421, 0, 900), Vector3(420, 1.6, 869)]]
+			["ves_vjezd", Vector3(355, 0, 738), Vector3(440, 1.6, 790)], ["ves_dvory", Vector3(420, 0, 869), Vector3(421, 1.6, 900)],
+			["ves_k_tvrzi", Vector3(440, 0, 790), Vector3(355, 4.1, 738)]]
 	var jen_m := OS.get_environment("TVRZ_ROZBOR_MISTA").split(",", false)
 	for m: Array in mista:
 		if not jen_m.is_empty() and not jen_m.has(String(m[0])):
