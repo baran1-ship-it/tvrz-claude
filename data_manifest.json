@@ -1,5 +1,5 @@
 {
- "verze": "0.99998",
+ "verze": "0.99999",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -4174,19 +4174,48 @@
    ]
   },
   "z_postavy": {
-   "src": "4f9d2c55b955add0c072c6897d265c06",
-   "md5": "0aa13fb94c14beec36b1baca16003225",
-   "size": 100300864,
+   "src": "1d5324a809eee53b1c5ce2f91387d423",
+   "md5": "b8fcadf563d533e6cac0b6acfc34d0c8",
+   "size": 100675744,
    "parts": [
     {
-     "file": "z_postavy-0aa13fb94c.pck.000",
+     "file": "z_postavy-b8fcadf563.pck.000",
      "size": 94371840,
-     "md5": "f095901e39f2d9c856f5cb23b8625dc0"
+     "md5": "962d2260e0ef634f5c3b5f293480a15a"
     },
     {
-     "file": "z_postavy-0aa13fb94c.pck.001",
-     "size": 5929024,
-     "md5": "7f2966013449cd96a1df7b54d57007b5"
+     "file": "z_postavy-b8fcadf563.pck.001",
+     "size": 6303904,
+     "md5": "154cb68bb55047c67f3263f7d3a9067d"
+    }
+   ]
+  },
+  "z_rostliny": {
+   "src": "d89c31a8368f0e11cde145f17bbe88f5",
+   "md5": "02417d5e291bf1affbbcb9671e69c965",
+   "size": 140806112,
+   "parts": [
+    {
+     "file": "z_rostliny-02417d5e29.pck.000",
+     "size": 94371840,
+     "md5": "6244143831afe85442bdd5cf241bf31d"
+    },
+    {
+     "file": "z_rostliny-02417d5e29.pck.001",
+     "size": 46434272,
+     "md5": "aff8bc9cd2776fe21e38e7b6fbac5f98"
+    }
+   ]
+  },
+  "z_svet": {
+   "src": "3fdd600da54a5c6abcfcad8b8fb9c8bc",
+   "md5": "b81ff4fd6d610293379e23a630b8b19f",
+   "size": 61376960,
+   "parts": [
+    {
+     "file": "z_svet-b81ff4fd6d.pck.000",
+     "size": 61376960,
+     "md5": "b81ff4fd6d610293379e23a630b8b19f"
     }
    ]
   },
@@ -4199,35 +4228,6 @@
      "file": "z_katalog-e65639e43b.pck.000",
      "size": 63840,
      "md5": "e65639e43bb75a66821c2706708b2a1b"
-    }
-   ]
-  },
-  "z_rostliny": {
-   "src": "4a8f76e86858e0a1ca62708ca8184b63",
-   "md5": "de2042cfd07b52ac80339f49910bdf8b",
-   "size": 139415904,
-   "parts": [
-    {
-     "file": "z_rostliny-de2042cfd0.pck.000",
-     "size": 94371840,
-     "md5": "2fbae1516f14b4dc7110df0d6e04e20b"
-    },
-    {
-     "file": "z_rostliny-de2042cfd0.pck.001",
-     "size": 45044064,
-     "md5": "55a85dcd6bd30c0df0561bd1546f2c38"
-    }
-   ]
-  },
-  "z_svet": {
-   "src": "0fd597051b89308158ee91ae7d2be84a",
-   "md5": "ad097b677776bee840a68945ec6b0a04",
-   "size": 60880640,
-   "parts": [
-    {
-     "file": "z_svet-ad097b6777.pck.000",
-     "size": 60880640,
-     "md5": "ad097b677776bee840a68945ec6b0a04"
     }
    ]
   },
@@ -4345,9 +4345,9 @@
    ]
   }
  },
- "otisk_exportu": "7d492cc068ef5c61f8a54072c2e675d5",
- "otisk_vstupu": "22399a3066c208855bf6033c8ee85f38",
- "otisk_sady": "9f7d3888b478bf777ff4bfc768bcfc86",
+ "otisk_exportu": "adf11f27f96f95bf81876daffe558d8a",
+ "otisk_vstupu": "f7378cad59dbfea51ffcfd01d3bc049b",
+ "otisk_sady": "022e2cf0a72022fca095bea3504501b7",
  "testovaci": [
   "POKRYTI_MATICE 44/114 (39 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, voda|voda, voda|cesta, voda|strom",
   "USPESNOST_MATICE 32/44 (73 %); s chybou: teren|predmet, budova|predmet, plot|predmet, predmet|predmet, cesta|kun, cesta|postava, budova|postava, kamen|lod, predmet|postava, predmet|lod, posun|lod, postava|postava"
