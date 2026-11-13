@@ -388,8 +388,7 @@
     "kotle",
     "nohavice",
     "skorne",
-    "opasek",
-    "zastera"
+    "opasek"
    ],
    "rukav": 0.7,
    "spina": {
@@ -405,7 +404,7 @@
     "sila": 0.7,
     "_co": "saze (kovar) - 12. 11. snimek: 0,5 na tmavem odevu neviditelne"
    },
-   "zastera": {
+   "zastera_vypnuto": {
     "druh": "kuze",
     "barva": [
      0.2,
@@ -683,10 +682,9 @@
     "cotte",
     "skorne",
     "opasek",
-    "rouska",
-    "zastera"
+    "rouska"
    ],
-   "zastera": {
+   "zastera_vypnuto": {
     "druh": "len",
     "barva": [
      0.429,
@@ -1593,8 +1591,7 @@
     "nohavice",
     "skorne",
     "opasek",
-    "kape",
-    "zastera"
+    "kape"
    ],
    "kape": true,
    "kape_barva": [
@@ -1614,7 +1611,7 @@
     "sila": 0.3,
     "_co": "mouka (mlynar) - 12. 11. snimek: 0,55 + rukavy = cely odev bily, sila 0,3 jen predek"
    },
-   "zastera": {
+   "zastera_vypnuto": {
     "druh": "len",
     "barva": [
      0.406,
@@ -1694,10 +1691,9 @@
     "kotle",
     "nohavice",
     "skorne",
-    "opasek",
-    "zastera"
+    "opasek"
    ],
-   "zastera": {
+   "zastera_vypnuto": {
     "druh": "kuze",
     "barva": [
      0.26,
@@ -1775,10 +1771,9 @@
     "kotle",
     "nohavice",
     "skorne",
-    "opasek",
-    "zastera"
+    "opasek"
    ],
-   "zastera": {
+   "zastera_vypnuto": {
     "druh": "len",
     "barva": [
      0.367,
@@ -2190,15 +2185,14 @@
     "cotte",
     "skorne",
     "opasek",
-    "rouska",
-    "zastera"
+    "rouska"
    ],
    "rouska_barva": [
     0.3,
     0.27,
     0.2
    ],
-   "zastera": {
+   "zastera_vypnuto": {
     "druh": "len",
     "barva": [
      0.39,
@@ -2273,15 +2267,14 @@
     "cotte",
     "skorne",
     "opasek",
-    "rouska",
-    "zastera"
+    "rouska"
    ],
    "rouska_barva": [
     0.21,
     0.18,
     0.12
    ],
-   "zastera": {
+   "zastera_vypnuto": {
     "druh": "len",
     "barva": [
      0.396,
@@ -2361,15 +2354,14 @@
     "cotte",
     "skorne",
     "opasek",
-    "rouska",
-    "zastera"
+    "rouska"
    ],
    "rouska_barva": [
     0.3,
     0.27,
     0.2
    ],
-   "zastera": {
+   "zastera_vypnuto": {
     "druh": "len",
     "barva": [
      0.434,
@@ -2519,15 +2511,14 @@
     "cotte",
     "skorne",
     "opasek",
-    "rouska",
-    "zastera"
+    "rouska"
    ],
    "rouska_barva": [
     0.3,
     0.27,
     0.2
    ],
-   "zastera": {
+   "zastera_vypnuto": {
     "druh": "len",
     "barva": [
      0.378,
@@ -3080,11 +3071,10 @@
     "kosile",
     "cotte",
     "skorne",
-    "opasek",
-    "zastera"
+    "opasek"
    ],
    "rouska": false,
-   "zastera": {
+   "zastera_vypnuto": {
     "druh": "len",
     "barva": [
      0.468,
@@ -3117,6 +3107,6 @@
  },
  "_spina": "12. 11. (rešerše postavy_vzhled_kcd_reserse.md: KCD maska blata/spiny podle role): kroj.spina = barva (linearni RGB), kde (predek/rukavy/lem/cele), sila - tools/postavy_q/q_export2.py role_weights",
  "_tvar": "12. 11. tvar (q_postava.py, rešerše postavy_vzhled_kcd_reserse.md bod 4: KCD tvář podle postavení a věku): vek 0..1 = vrásky čela, vějíře u očí, nosoretní rýha (odvozeno grey*1,4 - šedivění = věk); kruhy pod očima (ponocný, písař, stráž, staří); opaleni = venkovní práce (sedláci, pastýři, lamači, selky); rumenec = výheň, krčma, kuchyně.",
- "_zastera": "13. 11. (reference docs/reference/kcd_13_11): zástěra kroj.zastera {druh len|kuze, barva, kratsi_m nad lemem šatu, uhel_st půlšířka vpředu, od_pasu_m, odsazeni_m} - kovář a hostinský kožená, kuchařka, hostinská, šenkýřka, selky, mlynář lněná",
+ "_zastera": "13. 11. (reference docs/reference/kcd_13_11): zástěra kroj.zastera {druh len|kuze, barva, kratsi_m nad lemem šatu, uhel_st půlšířka vpředu, od_pasu_m, odsazeni_m} - kovář a hostinský kožená, kuchařka, hostinská, šenkýřka, selky, mlynář lněná | 13. 11. pred vydanim 0.99999 vypnuto (klic zastera_vypnuto): vsede tmavy pruh v ohybu u kolen (prehyb vrstvy), dodelat v dalsi verzi",
  "_cepice": "13. 11. (reference kcd_13_11): čepice kroj.cepice {druh, barva, celo_m nad očima vpředu, tyl_m vzadu, odsazeni_m nad hlavou} - jen bez kápě | Misa 13. 11.: „ne kazdy musi mit cepici“ - nikdo; Misa: fotky z KCD jen inspirace (kod cepice zustava jako moznost)"
 }
