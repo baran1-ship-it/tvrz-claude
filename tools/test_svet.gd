@@ -8688,103 +8688,73 @@ func _tvrz_lavice() -> void:
 ## kazda instance VSECH MultiMeshu a sit rostlin ve scene (jeji AABB, ne pocatek - vetve koruny) proti objemu kazde
 ## mistnosti (info rooms: hostinec, tvrz, domy vsi, chyse, mlyn, krcma). Zdroj = koren uzlu (kdo sazel).
 func _rostliny_v_budovach() -> void:
-	var louka: Node = main.get_node_or_null("Louka")
+	# headless renderer neuklada transformace instanci MultiMeshe (get_instance_transform = identita) - polohy z dat
+	# sveta (data rostliny: 12 cisel bazi + pocatek, jak je sazi svet._xf), velikost z site druhu (uzel Rostliny/<key>_x_z)
 	var rooms: Array = (sv.info as Dictionary).get("rooms", [])
-	var shluky := {}
-	for r: Dictionary in rooms:
+	var mriz := {}                                   # bunka 16 m -> [index mistnosti]
+	var obal: Array = []                             # [inv, vnitrni AABB v ramci mistnosti, svetovy obdelnik]
+	for ri in rooms.size():
+		var r: Dictionary = rooms[ri]
 		var ab: AABB = r["aabb"]
-		var c: Vector3 = (r["inv"] as Transform3D).affine_inverse() * ab.get_center() if r.has("inv") else ab.get_center()
-		var k := Vector2i(int(floor(c.x / 80.0)), int(floor(c.z / 80.0)))
-		if not shluky.has(k):
-			shluky[k] = []
-		(shluky[k] as Array).append(r)
-	var vady := {}
-	var koreny := {}
-	var prikladu: Array = []
-	var inst := 0
-	for k: Vector2i in shluky:
-		var rr: Array = shluky[k]
-		var c0 := Vector3.ZERO
-		for r: Dictionary in rr:
-			var ab: AABB = r["aabb"]
-			c0 += (r["inv"] as Transform3D).affine_inverse() * ab.get_center() if r.has("inv") else ab.get_center()
-		c0 /= rr.size()
-		await main.fast_travel(Vector3(c0.x, 0.0, c0.z), Vector3(c0.x + 3.0, 1.6, c0.z), 0.0, "test")
-		for f in 1800:
-			await get_tree().process_frame
-			if louka == null or louka.okoli_hotove(40.0):
-				break
-		var oblast := AABB(Vector3(c0.x - 70.0, -60.0, c0.z - 70.0), Vector3(140.0, 220.0, 140.0))
-		for g: Node in main.find_children("*", "GeometryInstance3D", true, false):
-			var gi := g as GeometryInstance3D
-			if not gi.is_visible_in_tree():
+		var vn := AABB(ab.position + Vector3(0.15, 0.05, 0.15), ab.size - Vector3(0.3, 0.1, 0.3))
+		var inv: Transform3D = r["inv"] if r.has("inv") else Transform3D()
+		var sw: AABB = inv.affine_inverse() * vn
+		obal.append([inv, vn, sw])
+		for i in range(floori(sw.position.x / 16.0), floori(sw.end.x / 16.0) + 1):
+			for j in range(floori(sw.position.z / 16.0), floori(sw.end.z / 16.0) + 1):
+				var kc := Vector2i(i, j)
+				if not mriz.has(kc):
+					mriz[kc] = []
+				(mriz[kc] as Array).append(ri)
+	var rost := get_tree().root.find_child("Rostliny", true, false)
+	var site := {}
+	if rost:
+		for g: Node in rost.get_children():
+			var mmi := g as MultiMeshInstance3D
+			if mmi == null or mmi.multimesh == null or mmi.multimesh.mesh == null or String(mmi.name).ends_with("_stin"):
 				continue
-			var cesta := str(gi.get_path())
-			var mmi := gi as MultiMeshInstance3D
-			var aabbs: Array = []
-			var jm := ""
-			if mmi:
-				if mmi.multimesh == null or mmi.multimesh.mesh == null or not (mmi.global_transform * mmi.get_aabb()).intersects(oblast):
-					continue
-				var lc0 := (cesta + "/" + String(mmi.multimesh.mesh.resource_name)).to_lower()
-				if not (lc0.contains("/rostliny/") or lc0.contains("/louka") or lc0.contains("trava") or lc0.contains("/les")):
-					continue
-				var mm := mmi.multimesh
-				var n := mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
-				var ma := mm.mesh.get_aabb()
-				jm = mm.mesh.resource_name
-				for i in n:
-					var ti := mm.get_instance_transform(i)
-					# prazdne sloty (identita v pocatku, nulove meritko) - skryte instance, ne rostlina
-					if ti == Transform3D() or absf(ti.basis.determinant()) < 1e-6:
+			var nm := String(mmi.name)
+			var sg := nm.split("_")
+			if sg.size() > 2:
+				var key := "_".join(sg.slice(0, sg.size() - 2))
+				if not site.has(key):
+					site[key] = mmi.multimesh.mesh.get_aabb()
+	var vady := {}
+	var inst := 0
+	var bez_site: Array = []
+	for key: String in sv.data["rostliny"]:
+		if not site.has(key):
+			if not (sv.data["rostliny"][key] as Array).is_empty():
+				bez_site.append(key)
+			continue
+		var ma: AABB = site[key]
+		for t: Array in sv.data["rostliny"][key]:
+			var xf := Transform3D(Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10])), Vector3(t[3], t[7], t[11]))
+			var wa := xf * ma
+			inst += 1
+			var hit := false
+			for i in range(floori(wa.position.x / 16.0), floori(wa.end.x / 16.0) + 1):
+				if hit:
+					break
+				for j in range(floori(wa.position.z / 16.0), floori(wa.end.z / 16.0) + 1):
+					if hit or not mriz.has(Vector2i(i, j)):
 						continue
-					aabbs.append(mmi.global_transform * ti * ma)
-			else:
-				var mi := gi as MeshInstance3D
-				if mi == null or mi.mesh == null:
-					continue
-				# jen site rostlin (stromy, kere, trsy z exportu): jmeno uzlu nebo cesty
-				var lc := (cesta + "/" + mi.mesh.resource_name).to_lower()
-				var rostlina := false
-				for s: String in ["strom", "smrk", "jedle", "borov", "buk", "dub", "lip", "briz", "jablon", "olse", "vrba", "ker", "trav", "trs", "kaprad", "rostlin", "listi", "koruna", "bylin"]:
-					if lc.contains(s):
-						rostlina = true
-						break
-				if not rostlina:
-					continue
-				var wa := mi.global_transform * mi.get_aabb()
-				if not wa.intersects(oblast):
-					continue
-				aabbs.append(wa)
-				jm = mi.mesh.resource_name
-			if not aabbs.is_empty():
-				var sg0 := cesta.split("/")
-				var kor0 := "/".join(sg0.slice(3, mini(5, sg0.size())))
-				koreny[kor0] = int(koreny.get(kor0, 0)) + aabbs.size()
-			for wa: AABB in aabbs:
-				inst += 1
-				for r: Dictionary in rr:
-					var ab: AABB = r["aabb"]
-					var vn := AABB(ab.position + Vector3(0.15, 0.05, 0.15), ab.size - Vector3(0.3, 0.1, 0.3))
-					var la: AABB = wa
-					if r.has("inv"):
-						la = (r["inv"] as Transform3D) * wa
-						vn = AABB(Vector3(ab.position.x + 0.15, ab.position.y + 0.05, ab.position.z + 0.15), Vector3(ab.size.x - 0.3, ab.size.y - 0.1, ab.size.z - 0.3))
-						# mistnost s yaw: pos = stred podlahy, aabb y 0..vyska
-					if la.intersects(vn):
-						var seg := cesta.split("/")
-						var zdroj := "/".join(seg.slice(3, mini(6, seg.size()))) + " [" + jm + "]"
-						var klic := String(r["name"]) + " <- " + zdroj
-						if not vady.has(klic) and prikladu.size() < 12:
-							prikladu.append(klic)
-							print("ROSTLINY_V_BUDOVACH priklad %s: instance %s, mistnost %s (mistni %s)" % [klic, str(wa), str(vn), str(la)])
-						vady[klic] = int(vady.get(klic, 0)) + 1
-						break
+					for ri: int in mriz[Vector2i(i, j)]:
+						var o: Array = obal[ri]
+						if not (o[2] as AABB).intersects(wa):
+							continue
+						if ((o[0] as Transform3D) * wa).intersects(o[1] as AABB):
+							var klic := "%s <- %s" % [rooms[ri]["name"], key]
+							if not vady.has(klic):
+								print("ROSTLINY_V_BUDOVACH priklad %s: rostlina u (%.1f, %.1f, %.1f) obal %s, mistnost %s" % [klic, t[3], t[7], t[11], str(wa.size), str((o[2] as AABB))])
+							vady[klic] = int(vady.get(klic, 0)) + 1
+							hit = true
+							break
 	for kl: String in vady:
 		print("ROSTLINY_V_BUDOVACH %s: %d" % [kl, vady[kl]])
-	print("ROSTLINY_V_BUDOVACH zdroje instanci: ", koreny)
-	_vysledek("rostliny_v_budovach", inst > 0 and vady.is_empty(), "mistnosti %d, shluku %d, instanci %d, vad %d %s" % [rooms.size(), shluky.size(), inst, vady.size(), str(vady.keys().slice(0, 4))])
-
+	if not bez_site.is_empty():
+		print("ROSTLINY_V_BUDOVACH druhy bez site ve scene (nekontrolovano): ", bez_site)
+	_vysledek("rostliny_v_budovach", inst > 1000 and vady.is_empty(), "mistnosti %d, rostlin %d, vad %d %s" % [rooms.size(), inst, vady.size(), str(vady.keys().slice(0, 6))])
 
 ## Misa 14. 11. „plot bylinkarky porad neni a zahonky taky nema“ (lokace ves.zahrady.domy.7: zahon_bylinky, plot_kolem):
 ## v datech i ve scene (predmety.placed s uzlem) aspon jeden zahon bylinek a plot kolem zahrady domu 7.
