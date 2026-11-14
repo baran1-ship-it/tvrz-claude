@@ -21,6 +21,16 @@
   "test_snimek_ms": 2.0,
   "popis": "predmety.gd _vnitrek/_vnitrek_krok (hrac v budove: svet za zdmi se skryva po castech). Misa 6. 11. (0.99994, panel tabletu): skript predmety 15-26 ms kazdy snimek v sini a komnatach. Namereno PC (test predmety_cas, otaceni v komnate): rezim vnitrku (okno v zaberu / zavrena mistnost) se pri otaceni menil 48x za 48 hodnoceni a kazda zmena znovu odkryla vse a zacala pruchod celym stromem (20 000 uzlu); cas se kontroloval jen po 64 uzlech -> 5,6 ms misto 1,5 ms na PC. Ted: cas ms na snimek, kontrola po kontrola_uzlu uzlech; zuzeni (skryt vic) az po zuzeni_s stale zmeny, rozsireni (okno do zaberu, odchod ven) hned. Test predmety_cas (hrac v komnate tvrze se otaci a popojde): nejdelsi snimek _process_vlastni pod test_snimek_ms (PC, Misa: cil < 2 ms). PC pred 4,47 ms (prumer 1,18), po 1,07 / 1,75 ms (prumer 0,29-0,30; jeden beh 5,03 ms - nevysvetleno, pri rozpadu po funkcich uz nenastal)."
  },
+ "louka_nahravani": {
+  "nahrani_b_snimek": 262144,
+  "kvantum_instanci": 256,
+  "rezerva_kvant": 1,
+  "gles3_oblast_instanci": 512,
+  "gles3_oblasti_vse_nad": 32,
+  "gles3_floatu_transform": 12,
+  "gles3_floatu_barva_custom": 4,
+  "_pozn": "14. 11. (docs/rozpracovane/zaseky_rozbor_system.md F4, bod 2 navrhu): louka.gd - nahrani instanci louky do GPU. nahrani_b_snimek = nejvic bajtu instanci louky nahranych do GPU za snimek (plneni skrytych bunek + zvyseni kreslenych poctu v _viditelne); 256 kB je UVAHA (8 oblasti po 32 kB), NEOVERENO NA ZARIZENI - ladit podle radku zaseku (udalosti louka_B). kvantum_instanci: pocet kreslenych instanci se meni jen po celych kvantech (nahoru zaokrouhlit: instance navic shader srazi podle hashe), dolu az o vic nez rezerva_kvant kvant (hystereze proti nahravani dokola). gles3_*: konstanty ovladace Godot 4.4.1 (drivers/gles3/storage/mesh_storage.cpp: MULTIMESH_DIRTY_REGION_SIZE 512, nahrani vseho nad 32 zmenenymi oblastmi nebo nad polovinou kreslenych; stride 12 floatu transformace + 4 (2 barva + 2 custom v half) pri use_custom_data) - jen pro model bajtu v louka._model_b, pri nove verzi Godotu overit ve zdroji. Test louka_nahravani: nejvetsi nahrani za snimek pri prujezdu loukou <= nahrani_b_snimek."
+ },
  "ostatni": {
   "zapojeno": false,
   "louka_ms": 3.0,
