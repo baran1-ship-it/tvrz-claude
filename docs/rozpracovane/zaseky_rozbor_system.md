@@ -110,7 +110,11 @@ ne počet záseků.
   hráč uvnitř budovy: vzdálená buňka se skryje uzlem, počty zůstanou (dřív 0 a po odchodu nahrání všech buněk naráz).
   Čísla: `pravidla/svet/rozpocty.json` `louka_nahravani` (rozpočet 256 kB = úvaha).
 - Test `louka_nahravani` (`tools/test_svet.gd`): jízda cvalem přes louku `pasma.test.louka_nahravani_s`, největší nahrání
-  za snímek ≤ rozpočet a postavila se aspoň jedna buňka. Výsledek viz níže.
+  za snímek ≤ rozpočet a postavila se aspoň jedna buňka. **PC headless 14. 11. 21:12: OK** – 1800 snímků, nejvíc
+  256 kB/snímek (rozpočet 256 kB), průměr 8,9 kB, nejvíc 4000 instancí a 1 buňka za snímek, postaveno 19 buněk.
+  Ve stejném běhu `interier` OK, `louka_bod` OK, `trava_dorust` CHYBA jen v trysku (873/1801 pozdě u (-7, 416)) – **padal
+  už před změnou** (plna_sada 11:26: 570/1793 na tomtéž místě); vypsané pozdní buňky mají „ceka true, stavba 0“ = čekají na
+  rozsev ve vlákně, ne na plnění/rozpočet bajtů. Vliv rozpočtu na trysk tím není vyloučen (NEOVĚŘENO), jen není vidět.
 
 **NEOVĚŘENO NA ZAŘÍZENÍ:** zda tím zmizí záseky 40–110 ms (A1/A2 jsou dál podezření, ne potvrzená příčina); velikost
 rozpočtu 256 kB; cena navíc kreslených (sražených) instancí z kvantování (≤ ~2 kvanta na MultiMesh); kupy (`_mm`,
