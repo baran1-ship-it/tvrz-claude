@@ -3877,7 +3877,9 @@ func _lom_vybaveni() -> void:
 		var t := Vector2(lom_stena_x(z + 3.0) - lom_stena_x(z - 3.0), 6.0).normalized()
 		return Vector2(t.y, -t.x)
 	var n_st: Vector2 = nrm.call(940.0)
-	lom_svacina_bod = Vector2(lom_stena_x(940.0) + 8.5 * n_st.x, 940.0 + 8.5 * n_st.y)   # stred stolu pod 2. pristreskem
+	# u celni strany stolu pod 2. pristreskem (14. 11.: stred stolu zabral selsky stul - zadna pruchozi bunka do 1,2 m);
+	# sedani pak hleda nejblizsi lavici
+	lom_svacina_bod = Vector2(lom_stena_x(941.6) + 8.5 * n_st.x, 941.6 + 8.5 * n_st.y)
 	for it: Array in polozky:
 		if it.size() > 4:
 			# opreny predmet (pasma.predmet): o drive postaveny predmet z katalogu; nejde-li, lezi (test lom_na_zemi)

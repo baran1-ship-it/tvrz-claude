@@ -8699,6 +8699,7 @@ func _rostliny_v_budovach() -> void:
 			shluky[k] = []
 		(shluky[k] as Array).append(r)
 	var vady := {}
+	var koreny := {}
 	var prikladu: Array = []
 	var inst := 0
 	for k: Vector2i in shluky:
@@ -8756,6 +8757,10 @@ func _rostliny_v_budovach() -> void:
 					continue
 				aabbs.append(wa)
 				jm = mi.mesh.resource_name
+			if not aabbs.is_empty():
+				var sg0 := cesta.split("/")
+				var kor0 := "/".join(sg0.slice(3, mini(5, sg0.size())))
+				koreny[kor0] = int(koreny.get(kor0, 0)) + aabbs.size()
 			for wa: AABB in aabbs:
 				inst += 1
 				for r: Dictionary in rr:
@@ -8777,6 +8782,7 @@ func _rostliny_v_budovach() -> void:
 						break
 	for kl: String in vady:
 		print("ROSTLINY_V_BUDOVACH %s: %d" % [kl, vady[kl]])
+	print("ROSTLINY_V_BUDOVACH zdroje instanci: ", koreny)
 	_vysledek("rostliny_v_budovach", inst > 0 and vady.is_empty(), "mistnosti %d, shluku %d, instanci %d, vad %d %s" % [rooms.size(), shluky.size(), inst, vady.size(), str(vady.keys().slice(0, 4))])
 
 
