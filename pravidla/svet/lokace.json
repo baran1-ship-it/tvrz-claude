@@ -1802,7 +1802,32 @@
    "6": "Dum2",
    "7": "Dum1"
   },
-  "_domy_podezdivka": "pudorys podezdivky novych domu (modely/ves/domy.glb, mistni z: +z stit do navsi) - jediny zdroj: Blender placka pod domem (vesnice._pads, ves v novem ramci) i hra (svet.DUM_MER f/b/hw). Soupis rozporu #7: drive placka podle stare chalupy L x W a hra jeste dum_teren podle modelu = dve rovinky vedle sebe. domy_typ: model domu podle usedlosti k (svet.VES_STARE)."
+  "_domy_podezdivka": "pudorys podezdivky novych domu (modely/ves/domy.glb, mistni z: +z stit do navsi) - jediny zdroj: Blender placka pod domem (vesnice._pads, ves v novem ramci) i hra (svet.DUM_MER f/b/hw). Soupis rozporu #7: drive placka podle stare chalupy L x W a hra jeste dum_teren podle modelu = dve rovinky vedle sebe. domy_typ: model domu podle usedlosti k (svet.VES_STARE).",
+  "zahrady": {
+   "plodiny": [
+    "zahon_zeli",
+    "zahon_cibule",
+    "zahon_salat",
+    "zahon_mrkev",
+    "zahon_zeli",
+    "zahon_prazdny",
+    "zahon_cibule"
+   ],
+   "domy": {
+    "7": {
+     "plodiny": [
+      "zahon_bylinky",
+      "zahon_bylinky",
+      "zahon_bylinky",
+      "zahon_prazdny"
+     ],
+     "plot_kolem": true,
+     "_p": "Míša 14. 11.: bylinkářka (postavy.json bylinkarka domov dum 7) – v záhonech bylinky místo zeleniny, kolem zahrady plot (r. 119, 131)"
+    }
+   },
+   "plot_kolem_od_m": 0.4,
+   "_p": "zahrádky u domů (svet.gd _zahrada): plodiny záhonů (dříve konstanta PLODINY v kódu), u vybraných domů jiné plodiny a plot z plůtků kolem celé zahrady (plot_kolem_od_m od kraje záhonů)"
+  }
  },
  "drobne": [
   {

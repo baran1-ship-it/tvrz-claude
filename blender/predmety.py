@@ -319,6 +319,7 @@ KATALOG.update({
     "zahon_cibule": ("@", "Záhon cibule", None, "venku", 300.0, 6, {"troj": 9000}),
     "zahon_mrkev": ("@", "Záhon mrkve", None, "venku", 300.0, 6, {"troj": 9000}),
     "zahon_prazdny": ("@", "Zrytý záhon", None, "venku", 300.0, 2, {"troj": 5000}),
+    "zahon_bylinky": ("@", "Záhon bylinek", None, "venku", 300.0, 10, {"troj": 9000}),   # Misa 14. 11. bylinkarka
     "plutek": ("@", "Proutěný plůtek", None, "venku", 20.0, 3, {"troj": 3000}),
     # Misa 25. 10. "na disku by mohly byt plutky z vetvi": withe_fence.glb (Disk Modely) - pleteny z prutu, 2 m
     "plutek_vetve": ("ext:withe_fence.glb", "Plůtek z větví", None, "venku", 20.0, 3, {"max": 2.0, "troj": 1000, "tex": 1024, "oboustranne": True}),

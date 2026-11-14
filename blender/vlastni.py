@@ -4943,6 +4943,30 @@ def zahon(name, plodina):
                         _natě((x, y, 0.16), R, ml, R.randint(5, 7), 0.2, 0.035, 1.2)
                 x += R.uniform(0.16, 0.22)
                 k += 1
+    elif plodina == "bylinky":
+        # Misa 14. 11. (bylinkarka): ctyri radky bylin - salvej (sedozelene sirsi listy), mata (zelene trsy),
+        # hermanek (jemna nat s bilymi kvitky), levandule (sede stonky s fialovymi klasky)
+        salvej = _list_mat("salvej_list", (0.42, 0.5, 0.38))
+        mata = _list_mat("mata_list", (0.22, 0.46, 0.2))
+        herm = _list_mat("hermanek_nat", (0.32, 0.5, 0.22))
+        herm_k = _list_mat("hermanek_kvet", (0.92, 0.9, 0.82))
+        lev = _list_mat("levandule_stonek", (0.45, 0.5, 0.42))
+        lev_k = _list_mat("levandule_klas", (0.48, 0.36, 0.62))
+        for y, druh in ((-0.36, "salvej"), (-0.12, "mata"), (0.12, "hermanek"), (0.36, "levandule")):
+            x = -L / 2 + 0.25
+            while x < L / 2 - 0.25:
+                c = (x + R.uniform(-0.04, 0.04), y + R.uniform(-0.03, 0.03), 0.15)
+                if druh == "salvej":
+                    _salat(c, R, salvej)
+                elif druh == "mata":
+                    _natě(c, R, mata, R.randint(7, 9), 0.22, 0.03, 0.9)
+                elif druh == "hermanek":
+                    _natě(c, R, herm, R.randint(6, 8), 0.26, 0.012, 1.0)
+                    _natě((c[0], c[1], c[2] + 0.2), R, herm_k, 3, 0.05, 0.02, 1.6)
+                else:
+                    _natě(c, R, lev, R.randint(6, 8), 0.34, 0.01, 0.7)
+                    _natě((c[0], c[1], c[2] + 0.26), R, lev_k, 4, 0.08, 0.018, 0.9)
+                x += R.uniform(0.26, 0.34)
     return None
 
 
@@ -4953,7 +4977,7 @@ def plutek(name, L=2.0, h=0.75):
     return None
 
 
-BUILD.update({"zahon_" + p: (lambda p=p: zahon("zahon_" + p, p)) for p in ("zeli", "salat", "cibule", "mrkev", "prazdny")})
+BUILD.update({"zahon_" + p: (lambda p=p: zahon("zahon_" + p, p)) for p in ("zeli", "salat", "cibule", "mrkev", "prazdny", "bylinky")})
 BUILD.update({"plutek": lambda: plutek("plutek")})
 
 

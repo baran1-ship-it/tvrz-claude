@@ -6932,7 +6932,7 @@ func _chyse_na_sit(root: Node3D) -> void:
 ## Zahradka u domu (Misa 25. 10., fotky KCD): na strane vstupu mezi domem a plotem stare usedlosti vyvysene zahony
 ## s proutenym lemem (zeli, salat, cibule, mrkev, zryty - blender/vlastni.py zahon), od chodnicku oddelene proutenym
 ## plutkem s mezerou; zahony na terenu na 4 body (naklon), plutek svisle. Kvetiny u zdi: _kvetiny_zahrad.
-const PLODINY := ["zahon_zeli", "zahon_cibule", "zahon_salat", "zahon_mrkev", "zahon_zeli", "zahon_prazdny", "zahon_cibule"]
+## Plodiny a plot z dat (lokace.json ves.zahrady; Misa 14. 11.: bylinkarka - bylinky a plot kolem zahrady).
 
 
 func _zahrada(d: Dictionary) -> void:
@@ -6947,13 +6947,16 @@ func _zahrada(d: Dictionary) -> void:
 	var z1 := f - 0.6
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(d["k"]) * 131
+	var zh: Dictionary = Pravidla.cti("lokace", "ves", "zahrady")
+	var zd: Dictionary = (zh["domy"] as Dictionary).get(str(int(d["k"])), {})
+	var plodiny: Array = zd.get("plodiny", zh["plodiny"])
 	var n := 0
 	var zahony: Array = []
 	var x := x0 + 0.62
 	while x + 0.6 <= x1:
 		var z := z0 + 1.55
 		while z + 1.55 <= z1:
-			var id: String = PLODINY[rng.randi() % PLODINY.size()]
+			var id: String = plodiny[rng.randi() % plodiny.size()]
 			var w := xf * Vector3(x, 0.0, z)
 			var yz := yaw + PI / 2.0 + (PI if rng.randf() < 0.5 else 0.0) + rng.randf_range(-0.03, 0.03)
 			var pb := polozit_na_body(w.x, w.z, yz, opory("", 3.07, 1.17))
@@ -6976,6 +6979,21 @@ func _zahrada(d: Dictionary) -> void:
 			var yp := yaw + PI / 2.0
 			data["vybaveni"].append({"id": "plutek", "p": [w2.x, pata_lom(w2.x, w2.z, yp, 2.07, 0.07) - 0.02, w2.z], "yaw": yp})
 		zp += 2.1
+	if bool(zd.get("plot_kolem", false)):
+		# plot kolem cele zahrady (Misa 14. 11. bylinkarka): zadni strana x1 a oba konce z0 / z1 z plutku
+		var od := float(zh["plot_kolem_od_m"])
+		var yp2 := yaw + PI / 2.0
+		zp = z0 - od
+		while zp + 2.07 <= z1 + od + 0.2:
+			var w3 := xf * Vector3(x1 + od, 0.0, zp + 1.03)
+			data["vybaveni"].append({"id": "plutek", "p": [w3.x, pata_lom(w3.x, w3.z, yp2, 2.07, 0.07) - 0.02, w3.z], "yaw": yp2})
+			zp += 2.1
+		for zk: float in [z0 - od, z1 + od]:
+			var xp := x0 - 0.3
+			while xp + 2.07 <= x1 + od + 0.2:
+				var w4 := xf * Vector3(xp + 1.03, 0.0, zk)
+				data["vybaveni"].append({"id": "plutek", "p": [w4.x, pata_lom(w4.x, w4.z, yaw, 2.07, 0.07) - 0.02, w4.z], "yaw": yaw})
+				xp += 2.1
 	_zahrady_kvety.append([d, x0, z0, z1])
 
 
