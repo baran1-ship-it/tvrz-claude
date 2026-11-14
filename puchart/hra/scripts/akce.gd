@@ -2,7 +2,7 @@ extends Control
 ## Nabídka akcí u předmětu na dosah (Míša 12. 11.: „světelné zdroje nejdou pustit, chci, aby předměty měly funkce jako
 ## v Havranovi – louče, svíce, bedny, sudy“). Převzato z Havrana scripts/main.gd _build_acts: předmět, na který se hráč
 ## dívá (predmety.nearest), a jeho akce use / use2 / use3 (zapálit – zhasnout, otevřít – vzít, sednout…) jako tlačítka
-## svitku (styl.gd) dole uprostřed. Dveře a padací mosty mají vlastní tlačítko (dvere.gd) – když jsou na dosah, nabídka mlčí.
+## svitku (styl.gd) dole uprostřed. Dveře a padací mosty mají vlastní tlačítko (dvere.gd), žebříky také (zebriky.gd) – když jsou na dosah, nabídka mlčí.
 var proch: Node
 var _use := {}
 var _tl: Array = []        # tlačítka řádků
@@ -23,7 +23,7 @@ func _process(_d: float) -> void:
 	if Engine.get_process_frames() % 6 != 0: return
 	var hv: Node = proch.get("hv"); var P: Node = hv.get("predmety") if hv else null
 	var cam := get_viewport().get_camera_3d()
-	if P == null or cam == null or String(P.get("placing")) != "" or (proch.get("dvere") != null and String(proch.dvere._blizko) != ""):
+	if P == null or cam == null or String(P.get("placing")) != "" or (proch.get("dvere") != null and String(proch.dvere._blizko) != "") or (proch.get("zebriky") != null and not (proch.zebriky._blizko as Dictionary).is_empty()):
 		_skryj(); return
 	_use = P.nearest(cam)
 	if _use.is_empty(): _skryj(); return

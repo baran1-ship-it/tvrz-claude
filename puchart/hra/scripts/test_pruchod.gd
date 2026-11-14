@@ -302,6 +302,35 @@ func _test_mapa() -> void:
 	vysledek["mapa_cestovani"] = "OK" if spatne.is_empty() and body.size() >= 6 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "málo míst (%d)" % body.size())
 	print("PRUCHOD mapa_cestovani ", vysledek["mapa_cestovani"])
 
+## zebrik_lezeni (Míša 14. 11.: „na půdu hájovny se dá vylézt po žebříku v předsíni“): pro každý žebřík z dat (hlavni.zebriky)
+## postava stojí na nástupu – nabídka žebříku musí být na dosah (zebriky.gd nejblizsi, dole), chytí se, dotyk nahoru – musí
+## vystoupit nahoře na podlaze (±0,5 m od sestupu, na zemi); pak nabídka nahoře, dotyk dolů – zpět na podlahu u nástupu.
+func _test_zebriky() -> void:
+	var Z: GDScript = load("res://scripts/zebriky.gd")
+	var spatne: Array = []
+	var zbs: Array = hlavni.zebriky
+	for zb: Dictionary in zbs:
+		for nahoru: bool in [true, false]:
+			var start: Vector3 = zb["nastup"] if nahoru else zb["sestup"]; var cil: Vector3 = zb["sestup"] if nahoru else zb["nastup"]
+			hlavni.svet.kolize_ihned(start)
+			hrac.autopilot = Vector3.INF; hrac.velocity = Vector3.ZERO; hrac.position = start + Vector3(0, 0.1, 0)
+			for i in 60: await get_tree().physics_frame
+			var u: Dictionary = Z.nejblizsi(zbs, hrac.global_position + Vector3(0, 1.0, 0))
+			var jm := "%s %s" % [zb["nazev"], "nahoru" if nahoru else "dolů"]
+			if u.is_empty() or bool(u["nahore"]) == nahoru:
+				spatne.append("%s: u %s není nabídka (hráč y %.2f)" % [jm, "paty" if nahoru else "vrcholu", hrac.position.y]); continue
+			hrac.chyt_zebrik(u["zb"], bool(u["nahore"]))
+			hrac._pohyb = Vector2(0, -1.0 if nahoru else 1.0)
+			var n := 0
+			while hrac.leze and n < 600: await get_tree().physics_frame; n += 1
+			hrac._pohyb = Vector2.ZERO
+			for i in 60: await get_tree().physics_frame
+			var ok: bool = not hrac.leze and hrac.is_on_floor() and absf(hrac.position.y - cil.y) < 0.5 and Vector2(hrac.position.x - cil.x, hrac.position.z - cil.z).length() < 1.5
+			print("PRUCHOD zebrik %s: %d snímků, konec [%.2f, %.2f, %.2f], cíl [%.2f, %.2f, %.2f], na zemi %s -> %s" % [jm, n, hrac.position.x, hrac.position.z, hrac.position.y, cil.x, cil.z, cil.y, hrac.is_on_floor(), "OK" if ok else "CHYBA"])
+			if not ok: spatne.append("%s: konec y %.2f místo %.2f (leze %s, na zemi %s)" % [jm, hrac.position.y, cil.y, hrac.leze, hrac.is_on_floor()])
+	vysledek["zebrik_lezeni"] = "OK" if spatne.is_empty() and not zbs.is_empty() else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádný žebřík v datech")
+	print("PRUCHOD zebrik_lezeni ", vysledek["zebrik_lezeni"])
+
 func _chyba(t: String) -> void:
 	for i in hrac.get_slide_collision_count():
 		var c := hrac.get_slide_collision(i)
@@ -315,6 +344,7 @@ func _konec() -> void:
 	if jen == "" or "povrch" in jen: await _test_povrch()
 	if jen == "" or "vrata" in jen: await _test_vrata()
 	if jen == "" or "mapa" in jen: await _test_mapa()
+	if jen == "" or "zebrik" in jen: await _test_zebriky()
 	hrac.autopilot = Vector3.INF
 	var f := FileAccess.open(OS.get_environment("PUCHART_VYSTUP") if OS.has_environment("PUCHART_VYSTUP") else "user://pruchod.json", FileAccess.WRITE); f.store_string(JSON.stringify(vysledek, " "))
 	var ok := vysledek.values().all(func(v): return v == "OK")

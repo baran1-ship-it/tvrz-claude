@@ -12,6 +12,7 @@ const Denik := preload("res://scripts/denik.gd")   # deník běhu: poslední kro
 
 var svet: Node3D
 var hrac: CharacterBody3D
+var zebriky: Array = []   # žebříky ve světě {pata, vrchol, nastup, sestup, nazev} (_celek ze záznamu zebrik; zebriky.gd, hrac.chyt_zebrik)
 var _foto := ""
 var _snimek := 0
 var _mereni: Array = []
@@ -746,12 +747,55 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas:
 		kb.add_child(cs)
 	if kb.get_child_count() > 0: n.add_child(kb)
 	else: kb.free()
+	if s.get("puda") != null: _puda(n, s["puda"])
+	if s.get("zebrik") != null:   # žebřík na půdu (Míša 14. 11.): body modelu → svět
+		var z_: Dictionary = s["zebrik"]; var zw := {"nazev": String(z_.get("nazev", "Žebřík"))}
+		for k_ in ["pata", "vrchol", "nastup", "sestup"]: zw[k_] = n.transform * Vector3(float(z_[k_][0]), float(z_[k_][1]), float(z_[k_][2]))
+		zebriky.append(zw)
 	if s.get("lod1") != null and ResourceLoader.exists(String(s["lod1"])):
 		var l1: Node3D = (load(String(s["lod1"])) as PackedScene).instantiate(); l1.name = "LOD1"; n.add_child(l1)
 		for g in l1.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_begin = od1; (g as GeometryInstance3D).visibility_range_end = obal_do   # hrubý stupeň do dálky (dřív za 75 / 130 m nic)
 		Ztmav_daleko(l1, jas)
 		for c in l1.find_children("*", "CollisionObject3D", true, false): c.queue_free()
+
+
+## Kolize půdy celku (mista.json modely.celky.<model>.puda; Míša 14. 11.: „na půdě je trám a hráč ho nepřekročí“): strop modelu
+## (jeden kvádr i nad síní otevřenou do krovu) nahradí kvádry strop_kvadry jen pod viditelnou povalou – otvor nad žebříkem;
+## kolize příček bez viditelného trámu (oriznout) končí na vrchu stropu; přes viditelný trám šikmé nájezdy (najezdy od → do).
+func _puda(n: Node3D, pd: Dictionary) -> void:
+	var st := n.find_child(String(pd["strop_smazat"]), true, false)
+	if st: st.free()
+	var y0 := float(pd["strop_y"][0]); var y1 := float(pd["strop_y"][1])
+	var kb := StaticBody3D.new(); kb.name = "Puda"
+	for q: Array in pd["strop_kvadry"]:
+		var cs := CollisionShape3D.new(); var bx := BoxShape3D.new()
+		bx.size = Vector3(float(q[1]) - float(q[0]), y1 - y0, float(q[3]) - float(q[2])); cs.shape = bx
+		cs.position = Vector3((float(q[0]) + float(q[1])) * 0.5, (y0 + y1) * 0.5, (float(q[2]) + float(q[3])) * 0.5)
+		kb.add_child(cs)
+	for jm in pd.get("oriznout", []):   # kvádr příčky (konvexní tvar z glb) → BoxShape3D s vrchem na y1
+		var u := n.find_child(String(jm), true, false) as Node3D
+		if u == null: continue
+		for cs in u.find_children("*", "CollisionShape3D", true, false):
+			var tv := (cs as CollisionShape3D).shape as ConvexPolygonShape3D
+			if tv == null: continue
+			var ab := AABB(tv.points[0], Vector3.ZERO)
+			for b in tv.points: ab = ab.expand(b)
+			var oy := 0.0; var uz: Node3D = cs   # výška tvaru v souřadnicích modelu (díly glb bez otočení)
+			while uz != n: oy += uz.position.y; uz = uz.get_parent() as Node3D
+			var top := minf(ab.end.y, y1 - oy)   # vrch stropu v místních souřadnicích tvaru
+			if top <= ab.position.y: cs.free(); continue
+			var bx := BoxShape3D.new(); bx.size = Vector3(ab.size.x, top - ab.position.y, ab.size.z)
+			(cs as CollisionShape3D).shape = bx
+			(cs as Node3D).position += Vector3(ab.position.x + ab.size.x * 0.5, (ab.position.y + top) * 0.5, ab.position.z + ab.size.z * 0.5)
+	for r: Dictionary in pd.get("najezdy", []):   # deska tl. 0,12 m, horní plocha na úsečce od → do (jako rampy dveří)
+		var p0 := Vector3(float(r["od"][0]), float(r["od"][1]), float(r["od"][2])); var p1 := Vector3(float(r["do"][0]), float(r["do"][1]), float(r["do"][2]))
+		var dz := (p1 - p0).normalized(); var bok := Vector3(dz.z, 0, -dz.x).normalized(); var nh := dz.cross(bok).normalized()
+		if nh.y < 0.0: nh = -nh; bok = -bok
+		var cs := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(float(r["sirka_m"]), 0.12, (p1 - p0).length()); cs.shape = bx
+		cs.transform = Transform3D(Basis(bok, nh, dz).orthonormalized(), (p0 + p1) * 0.5 - nh * 0.06)
+		kb.add_child(cs)
+	n.add_child(kb)
 
 
 ## Šikmá kolize u vnějších dveří domu (Míša 13. 11.: „do hájovny nemůžu vstoupit, všechny budovy musí být vstupné“): domy
