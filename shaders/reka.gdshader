@@ -245,8 +245,8 @@ void fragment() {
 	// pad kaskady: bila voda plnou barvou (pena_padu x strmost, rozbita sumem) - pres slabou penu proudu
 	ALBEDO = mix(ALBEDO, vec3(0.86, 0.88, 0.85), pad_bila);
 	ALPHA = max(ALPHA, pad_bila);
-	SPECULAR = 0.25;
-	ROUGHNESS = roughness;
+	SPECULAR = mix(0.25, 0.04, pad_bila);            // pena je drsna - pad nezrcadli oblohu
+	ROUGHNESS = mix(roughness, 0.9, pad_bila);
 	NORMAL_MAP = vec3(water_norFBM, 0);
 	NORMAL_MAP_DEPTH = normal_scale;
 }

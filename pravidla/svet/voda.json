@@ -1483,7 +1483,7 @@
       ],
       "seed": 4141,
       "pad_min_m": 0.3,
-      "pena_padu": 0.45
+      "pena_padu": 1.0
      }
     }
    ],
