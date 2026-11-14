@@ -1539,6 +1539,8 @@ func _u_predmetu(c: Dictionary, ri: int, strana: String, rezervovat: bool) -> Ar
 			continue
 		if rezervovat and _cil_obsazen(c, q, float(P["rozestup"]["misto_m"])):
 			continue                                  # (pevne misto z _misto se pamatuje - bez zavislosti na ostatnich)
+		if _na_sedicim(c, q):
+			continue
 		if is_nan(_nav_bunka(_nav_ij(q), float(r["p"][1]))):
 			continue
 		if rezervovat:
@@ -1631,11 +1633,16 @@ func _cil_obsazen(c: Dictionary, q: Vector2, r: float) -> bool:
 	for o: Dictionary in _lide:
 		if o != c and o.get("misto") is Vector2 and (o["misto"] as Vector2).distance_to(q) < r:
 			return true
-		# 14. 11. (Misa: senkyrka pri obsluze se vnoruje do hosta): sedici zabira i sedak (telo nad sedakem), ne jen
-		# bod, odkud usedal
+	return false
+
+
+## Misto u predmetu (obsluha u stolu) nesmi byt na sedicim (Misa 14. 11.: senkyrka se vnoruje do hosta) - sedici
+## zabira i sedak (telo) do rozestup.sedici_m. Jen pro u_predmetu: partner u sediciho (dvojice) stoji blizko schvalne.
+func _na_sedicim(c: Dictionary, q: Vector2) -> bool:
+	for o: Dictionary in _lide:
 		var sk: Variant = o.get("sedak", {})
 		if o != c and sk is Dictionary and (sk as Dictionary).get("sedak") is Vector2 \
-				and ((sk as Dictionary)["sedak"] as Vector2).distance_to(q) < minf(r, float(P["rozestup"]["sedici_m"])):
+				and ((sk as Dictionary)["sedak"] as Vector2).distance_to(q) < float(P["rozestup"]["sedici_m"]):
 			return true
 	return false
 
