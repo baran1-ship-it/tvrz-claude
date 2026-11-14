@@ -231,5 +231,7 @@
  "nohy_nabeh_s": 0.35,
  "svah_max_st": 18.0,
  "_prechody": "manual 2. 11.: nabeh/dobeh kroku nohy_nabeh_s (amplituda nohou plynule), naklon tela podle svahu (chovani delka_m, nejvys svah_max_st)",
- "_spanek": "Misa 0.99994: slepice v noci spi. chovani.<druh>.spanek od_h..do_h: zvire jde na nocleh dvora (svet.gd: kurnik, jinak zed chalupy na strane dvora), u nej zmizi (je uvnitr), rano vyjde. V noci zadny zvuk ani utek."
+ "_spanek": "Misa 0.99994: slepice v noci spi. chovani.<druh>.spanek od_h..do_h: zvire jde na nocleh dvora (svet.gd: kurnik, jinak zed chalupy na strane dvora), u nej zmizi (je uvnitr), rano vyjde. V noci zadny zvuk ani utek.",
+ "ohrada_volno_m": 0.6,
+ "_ohrada_volno_m": "14. 11. (test ohrady: plůtek chlívku narazil na kámen z exportu): rozsev rostlin a kamenů vynechá obdélník ohrady + tento okraj (svet.uzivani_smi)"
 }

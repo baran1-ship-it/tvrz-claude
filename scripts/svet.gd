@@ -7003,6 +7003,9 @@ var _zahrady_kvety: Array = []
 ## Ohrady a zvirata usedlosti ze zaznamu pravidla/svet/zvirata.json (Misa 29. 10.: „z plutku ohrady a do vesnice
 ## zvirata“): obdelnik v ramci domu obehnany plutky (plutek_vetve po plutek_delka_m, rohy bez mezery). Ohrada je predmet
 ## (posledni krok stavby) - rostliny ani nic driv postaveneho nehybe, misto musi byt volne (test ohrady); zvirata (data "zvirata") rozmisti a vodi scripts/zvirata.gd. Dvur: slepice kolem stredu dvora, kurnik u zdi.
+var _ohrady_obd: Array = []          # [inv xf domu, stred v ramci domu, pul x, pul z] (uzivani_smi)
+
+
 func _ohrady(d: Dictionary) -> void:
 	var m: Dictionary = d["m"]
 	var xf: Transform3D = d["xf"]
@@ -7026,6 +7029,9 @@ func _ohrady(d: Dictionary) -> void:
 				var w := xf * Vector3(q.x, 0.0, q.y)
 				data["vybaveni"].append({"id": plutek, "p": [w.x, pata_lom(w.x, w.z, float(st[3]), dl, 0.16) - 0.03, w.z], "yaw": float(st[3]),
 						"ohrada": String(o["id"])})
+		# 14. 11. (test ohrady: plutek chlivek_2 narazi na kamen_maly - kameny a rostliny z exportu uvnitr ohrady): obdelnik
+		# ohrady + okraj pro uzivani_smi (rozsev rostlin a kamenu ohradu vynecha - ohrada je zaznam, nic se neposouva)
+		_ohrady_obd.append([xf.affine_inverse(), s, hx + float(Pravidla.cti("zvirata", "ohrada_volno_m")), hz + float(Pravidla.cti("zvirata", "ohrada_volno_m"))])
 		var c := xf * Vector3(s.x, 0.0, s.y)
 		data["zvirata"].append({"id": String(o["id"]), "zvire": String(o["zvire"]), "kusu": int(o["kusu"]), "stred": [c.x, _vyska(c.x, c.z), c.z],
 				"yaw": yaw, "pul": [hx, hz]})
@@ -12089,6 +12095,10 @@ func druh_smi_hra(key: String, x: float, z: float, y := INF) -> bool:
 func uzivani_smi(key: String, x: float, z: float) -> bool:
 	if v_nove_zahrade(x, z) == 2 or v_zahrade(x, z):
 		return false
+	for oo: Array in _ohrady_obd:
+		var lq: Vector3 = (oo[0] as Transform3D) * Vector3(x, 0.0, z)
+		if absf(lq.x - (oo[1] as Vector2).x) < float(oo[2]) and absf(lq.z - (oo[1] as Vector2).y) < float(oo[3]):
+			return false
 	if v_pruchodu(x, z, key):
 		return false
 	for st: Array in _uvnitr:
