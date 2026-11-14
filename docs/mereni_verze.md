@@ -412,3 +412,15 @@ hostinec 20/17/24/23 (20/17/18/25), věž 27/25/33/36 (19/24/25/23).
 ## 0.999997 (commit e129384d, 14. 11. 19:00) – NEOVĚŘENO NA ZAŘÍZENÍ
 Nové: kovárna (65 tis. troj.) a krčma do L (172 tis.) ve vsi, úsek trasy krcma-kovarna, varianta bez_vnitrku_vsi
 (místo postavy_stoji). Hlášení záseku nově „shadery +N“ (sestavené programy v tom snímku). Čeká na Měřicí trasu.
+
+### 0.999997 – Měřicí trasa 14. 11. 20:20 (sestavení d27f0336) – S TRÁVOU GPU (Míša zapnula v Nastavení, dřív vypnuto)
+p50 vše / bez_vnitrku / déšť / vše znovu: tvrz-cesta 26/28/34/35, louka 25/32/29/25, les 32/28/27/26, skály 29/32/25/25,
+ves 32/24/30/26, mlýn 18/18/17/19, ves-vjezd 37/36/35/36, ves-dvory 22/31/30/31, krcma-kovarna 24/24/25/24,
+hostinec 28/20/25/21, věž 24/26/24/27.
+- **Krčma a kovárna:** úsek krcma-kovarna p50 24 ms (jako ves), p95 33–38, max 69–115 → nové modely ve vsi
+  NAMĚŘENO bez výrazné ceny (s GPU trávou).
+- **Zásek ves-dvory u (421–422, 870–872):** 882 a 2975 ms jen v 1. průjezdu („vše“), skripty 3, fyzika 4–6;
+  ve všech dalších průjezdech (bez_vnitrku, déšť, vše znovu) max 43–46 ms. = jednorázová událost při prvním příchodu
+  (sestavení/nahrání něčeho nového), ne trvalá cena. Varianta bez_vnitrku tedy příčinu nerozliší (běží až po zahřátí).
+  „shadery +N“ je v panelu (diag.log), ne v tabulce trasy – potřeba řádek záseku z panelu nebo diag.log.
+- Nelze srovnat s 0.999996 (jiné nastavení trávy). Míša dělá 2. měření s GPU trávou vypnutou.
