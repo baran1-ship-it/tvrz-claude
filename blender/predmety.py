@@ -281,6 +281,8 @@ KATALOG.update({
     "zebrinak": ("@", "Žebřiňák", None, "venku", 300.0, 600, {"troj": 16000}),
     "pristresek_plachta": ("@", "Plátěný přístřešek", None, "venku", 60.0, 80, {"pruchozi": True, "troj": 10000}),
     "pristresek_maly": ("@", "Malý plátěný přístřešek", None, "venku", 40.0, 60, {"pruchozi": True, "troj": 8000}),
+    # Misa 14. 11.: lom - svacina u nizsiho selskeho stolu (stul_selsky), pristresek bez stolu kamenika
+    "pristresek_lom": ("@", "Malý přístřešek bez stolu", None, "venku", 38.0, 55, {"pruchozi": True, "troj": 8000}),
     "stan_jehlan": ("@", "Jehlanový stan", None, "venku", 50.0, 70, {"pruchozi": True}),
     # trziste pred vsi (Misa 24. 10.: modely z Disku) a jejich veci do katalogu stavitele
     "stanek_trzni": ("ext:village_market_stall.glb", "Tržní stánek", None, "venku", 80.0, 60, {"vyska": 2.0, "vyprazdnit": [0.375, 0.6], "troj": 8000}),

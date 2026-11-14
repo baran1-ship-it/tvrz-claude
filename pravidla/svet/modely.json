@@ -4895,6 +4895,20 @@
    "rozmisteni": "poloha (lokace / data sveta vybaveni)"
   },
   {
+   "model_id": "pristresek_lom",
+   "scena": "modely/predmety/pristresek_lom.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    5.314,
+    3.553,
+    4.841
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
    "model_id": "stan_jehlan",
    "scena": "modely/predmety/stan_jehlan.glb",
    "trida": "predmet_velky",

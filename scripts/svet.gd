@@ -3844,7 +3844,7 @@ func _lom_vybaveni() -> void:
 	# [id, vzdalenost od paty steny (m), z, natoceni (u rovne steny podel z; pridava se odklon steny)]
 	var polozky := [
 			# rada pristresku a stanu (u 8-9)
-			["stan_jehlan", 9.0, 916.0, 0.2], ["pristresek_plachta", 8.0, 928.0, 1.57], ["pristresek_maly", 8.5, 940.0, 1.57],
+			["stan_jehlan", 9.0, 916.0, 0.2], ["pristresek_plachta", 8.0, 928.0, 1.57], ["pristresek_lom", 8.5, 940.0, 1.57],
 			["pristresek_plachta", 8.0, 970.0, 1.65],
 			# pracoviste kamenika pod 1. pristreskem
 			["kovadlina_spalek", 7.6, 927.2, 0.4], ["stolicka", 8.6, 926.6, 0.0], ["palice", 7.0, 928.6, 0.9],
@@ -3852,7 +3852,8 @@ func _lom_vybaveni() -> void:
 			# pracoviste pod 2. pristreskem
 			# Misa 14. 11. (snimek stanu v lomu): u stolu pod 2. pristreskem lavice z kazde strany (stul podel z, stred
 			# u 8,5; lavice 0,7 m od osy stolu) - svacina lamacu (postavy mista lom_svacina); kad a spalek na kraj stanu
-			["lavice_selska", 7.8, 940.0, 1.57], ["lavice_selska", 9.2, 940.0, 1.57],
+			# Misa 14. 11. „stul smaz a dej nizsi“: pristresek bez stolu kamenika (deska 0,83), selsky stul (0,776 - lavice 0,475)
+			["stul_selsky", 8.5, 940.0, 1.57], ["lavice_selska", 7.8, 940.0, 1.57], ["lavice_selska", 9.2, 940.0, 1.57],
 			["spalek", 6.6, 938.3, 0.0], ["kladivo_kamenicke", 6.7, 938.9, 1.2], ["kad", 6.6, 942.3, 0.0], ["krumpac", 9.6, 942.6, 0.6, "kad"],
 			# sklad pod 3. pristreskem: sudy, pytle, kad
 			["sud", 7.2, 969.0, 0.0], ["sud_stary", 7.9, 969.4, 0.6], ["pytel_obili", 8.8, 970.6, 0.4], ["pytel_kupecky", 8.4, 971.4, 1.0],
@@ -6746,6 +6747,14 @@ func _ves_domy(root: Node3D) -> void:
 			continue
 		var dum := vzor.duplicate() as Node3D
 		dum.name = "Dum_ves_%d" % int(d["k"])
+		# Misa 14. 11.: chyse u lomu bez pryčen a podlahy modelu (lokace lom_chyse vynechat_uzly, i kolize)
+		var lch2: Dictionary = Pravidla.cti("lokace", "lom_chyse")
+		if String(d["typ"]) == String(lch2["typ"]):
+			for jv: String in lch2["vynechat_uzly"]:
+				for vn in dum.find_children(jv + "*", "", true, false):
+					if is_instance_valid(vn) and (String(vn.name) == jv or String(vn.name).begins_with(jv + "-") or String(vn.name).begins_with(jv + "_col")):
+						vn.get_parent().remove_child(vn)
+						vn.free()
 		dum.transform = d["xf"]
 		root.add_child(dum)
 		var st_vzor: MeshInstance3D = ssc.find_child(String(d["typ"]) + "_Stredni", true, false) as MeshInstance3D if ssc else null
@@ -6962,6 +6971,14 @@ func _chyse_na_sit(root: Node3D) -> void:
 		var hloubka := pod if pod > 0.2 else 0.29
 		# chyse nema podezdivku pod podlahou: prkenna zidkou na nejnizsim bode (nic nevisi), kurova podlahou nad nejvyssim
 		var y0 := mn - 0.01 if pod > 0.2 else mx + 0.03
+		# Misa 14. 11. (lokace lom_chyse na_terenu): bez podlahy modelu - podlaha = teren. Model niz o pod (podezdivka
+		# v zemi), teren pod chysi a kolem srovnany na prah (t_pas = pod - teren_pod_prahem_m); luzko na zemi (vyska 0)
+		var lch: Dictionary = Pravidla.cti("lokace", "lom_chyse")
+		if bool(lch.get("na_terenu", false)) and String(d["typ"]) == String(lch["typ"]):
+			y0 = (mn + mx) * 0.5 - pod
+			var m2: Dictionary = (d["m"] as Dictionary).duplicate()
+			m2["t_pas"] = pod - float(lch["teren_pod_prahem_m"])
+			d["m"] = m2
 		if mx - mn > hloubka:
 			push_warning("chyse %s_%d: svah %.2f m vetsi nez podezdivka %.2f m - presunout" % [d["typ"], d["k"], mx + 0.05 - mn, hloubka])
 		var xf2: Transform3D = d["xf"]

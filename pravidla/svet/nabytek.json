@@ -294,20 +294,14 @@
   },
   "ChysePrkna": {
    "budova": "chyse_%d",
+   "_p": "Misa 14. 11.: pryčny a podlaha modelu pryc (lokace lom_chyse vynechat_uzly), chyse na udusane hline - nase luzko (2 spaci) u zadni steny, hlavou k ni; podlaha = teren (vyska 0)",
    "kusy": [
     [
-     "slamnik",
-     -0.95,
-     -1.0,
+     "lozko",
      0.0,
-     0.38
-    ],
-    [
-     "slamnik",
-     0.95,
-     -1.0,
+     -1.25,
      0.0,
-     0.38
+     0.0
     ]
    ]
   },

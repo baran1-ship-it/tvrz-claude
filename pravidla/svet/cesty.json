@@ -3831,18 +3831,6 @@
    ],
    "polomer_m": 6.0,
    "stavi": "svet.gd _brody_malych_toku -> _brody (kameny dna a najezdu); tools/krok_b/vetrak_misto.py"
-  },
-  {
-   "id": "brod_k_mlynu",
-   "cesta": "k_mlynu",
-   "tok": "lhota_odtok",
-   "druh": "brod",
-   "stred": [
-    472.0,
-    899.0
-   ],
-   "polomer_m": 6.0,
-   "stavi": "svet.gd _brody_malych_toku -> _brody (kameny dna a najezdu); tools/krok_b/cesta_k.py"
   }
  ]
 }

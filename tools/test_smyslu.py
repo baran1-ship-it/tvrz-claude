@@ -169,6 +169,25 @@ for sid, c, r, _ in stavby:
         if s > smax:
             chyba("stavba", "(%.0f, %.0f)" % (x, z), "%s na svahu %.0f %% (max %.0f %%)" % (sid, s * 100, smax * 100))
 
+# Misa 14. 11. („proc stoji dum kovare na potoce, na co mas 1000 hlidacu“): seznam stavby vyse je rucni - kovarna_ves,
+# jeji dum a krcma_l v nem nebyly. Kazdy zaznam lokace se stredem (a vnoreny dum) = kruh placky (plac_r_m / rovina_r_m)
+# mimo koryto a breh kazdeho toku i Bystrice (jako dvorec nize)
+_pb0 = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["budova"]
+_tt0 = voda["toky_tvar"]
+_vse_vody = toky + [(voda["potok"]["id"], voda["potok"]["pulsirka_vody_m"], [(p[0], p[1]) for p in voda["potok"]["osa"]])]
+for _kl, _zv in lok.items():
+    if not isinstance(_zv, dict) or "stred" not in _zv or "rovina_r_m" not in _zv:
+        continue
+    _zz = [(_kl, _zv)] + ([(_kl + ".dum", _zv["dum"])] if isinstance(_zv.get("dum"), dict) and "stred" in _zv["dum"] else [])
+    for sid, zz in _zz:
+        x, z = zz["stred"]
+        r = max(float(zz.get("plac_r_m", 0.0)), float(zz.get("rovina_r_m", 0.0)) * 0.6)
+        for tid, tw, tp in _vse_vody:
+            mez = tw + max(_tt0["breh_sirka_m"], _tt0["breh_sirka_vnitrni_m"]) + _pb0["placka_prechod_m"]
+            d = d_osa(x, z, tp) - r
+            if d < mez:
+                chyba("stavba", "(%.0f, %.0f)" % (x, z), "%s u toku %s: placka (r %.1f) %.1f m od osy, mez koryto+breh+prechod %.1f" % (sid, tid, r, d, mez))
+
 # ves B (lokace.json ves.dvorec_zaznam, tools/ves_dvorce.py --zapis): stodoly a kulny ne ve vode, na ceste a na svahu;
 # stromy a kere zahumenku a ziveho plotu ne ve vode a na ceste (Astra 29. 10.: kazda zmena projde pravidly)
 _dz = lok["ves"].get("dvorec_zaznam", {})

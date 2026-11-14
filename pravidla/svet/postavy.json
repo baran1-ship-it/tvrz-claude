@@ -175,11 +175,11 @@
    "_p": "Misa 14. 11. (snimek stanu v lomu: lavice z kazde strany stolu, 2 na jedne, 1 na druhe): stred stolu pod 2. pristreskem (svet._lom_vybaveni); svacina lamacu sedi na lavicich (sedani hleda nejblizsi sedak)"
   },
   "lom_spalek": {
-   "p": [
-    126.5,
-    931.0
-   ],
-   "yaw_st": 0.0
+   "u_predmetu": "kovadlina_spalek",
+   "mistnost": "",
+   "poradi": 0,
+   "strana": "dlouha",
+   "_p": "Misa 14. 11. „kamenik tluce kladivem na ceste“ (-21, 903): drive pevne (126,5, 931) 2 m od paty steny v leseni - mrizka chuze cestu nenasla (log 4x), nouze ho nechala pracovat, kde stal. Ted u spalku s kovadlinou pod 1. pristreskem (svet._lom_vybaveni, venku = mistnost \"\")."
   },
   "nadvori_studna": {
    "p": [
@@ -5204,7 +5204,7 @@
    "prace": "lom_stena_1",
    "spanek": {
     "budova": "chyse_22",
-    "postel": "slamnik"
+    "postel": "lozko"
    },
    "pribeh": "Lamač ráno přijde do lomu, kutá ve stěně s krátkými oddechy, v poledne si sedne s ostatními, jí, pije a vykládá, odpoledne zas kutá; večer jde domů a do hospody."
   },
@@ -5220,7 +5220,7 @@
    "prace": "lom_stena_2",
    "spanek": {
     "budova": "chyse_23",
-    "postel": "slamnik"
+    "postel": "lozko"
    },
    "pribeh": "Jako první lamač, u druhé stěny lomu."
   },
@@ -5236,7 +5236,7 @@
    "prace": "lom_spalek",
    "spanek": {
     "budova": "chyse_22",
-    "postel": "slamnik"
+    "postel": "lozko"
    },
    "pribeh": "Kameník tesá u špalku v lomu, v poledne svačí s lamači, večer hostinec."
   },
@@ -5574,7 +5574,7 @@
    "pribeh": "Kupec u stanu na hlavní cestě: od rána nabízí zboží, v poledne jí u stanu, v noci hlídá zboží s lucernou."
   }
  ],
- "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu (ChysePrkna) a uhliru (ChyseKura), 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ.; spanek: misto spanku jako zaznam (budova, postel = id predmetu s lehat; prazdne = dira s popisem); vzhled: sada postavy_vzhled.json (jinak podle id / role); Misa 5. 11. „vytvor i ty ostatni osoby“ a koordinator 5. 11. (jmena a ulohy podle pribeh/postavy.md - pan tvrze je hrac Jan z Havrani, palac patri hraci): tvrz purkrabi Ota Hruska, kucharka a klicnice Ludmila, paze Vitek (zatim na nadvori, za hracem pozdeji), pisar Martin, strazny Vojtech, nocni strazny (bezejmenny), kovar Hroch; Lhota rychtar Matous Bilek, krcmar Kubat (krcma U Kohouta = stara usedlost 0), bylinkarka Bara (dum 7), mlynar Kunes s malym synem; hostinec U Zlateho kola hostinsky Ondrej Safranek a dcera Eliska (senkyrka), pocestni v najemnich luzkach; u miliru uhlir Pivonka (milir ve svete neni - seka drevo u chyse); bezejmenni (sedlaci, selky, ponocny, pastyr, pasacka, pocestni) maji jmena, ktera s pribehem nekoliduji; spanek.sdili = id obyvatele, se kterym postava sdili luzko na smeny (nocni strazny spi ve dne v luzku strazneho); tvrz spanek (Misa 6. 11. „postele ne v sini“): muzi sluzebnictva (purkrabi, pisar, paze, strazni, celedin) v ubytovne (tvrz_ubytovna), kucharka a devecka v kuchyni u ohne (tvrz_kuchyne - kuchyne tvrze byvala i nocistem kuchynske celedi), kovar u vyhne (tvrz_kovarna); kucharka vari v kuchyni (prace tvrz_kuchyne); 9. 11. (Misa r. 84): vsichni sluzebnici tvrze vcetne kovare, kucharky a devecky spi v ubytovne (rozsirene dopredu), kuchyne a kovarna bez luzek; 9. 11. 16:10 (oprava r. 84): ubytovna rozsirena doprava (na zapad) - zeny (kucharka, devecka) v komore celedi (tvrz_ubytovna_zeny, vlastni dvere), muzi vcetne kovare v cheledníku (tvrz_ubytovna)",
+ "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse uhliru (ChyseKura), 22-23 chyse u lomu (ChysePrkna), 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 22-23 ChysePrkna) - domov muze upresnit typ.; spanek: misto spanku jako zaznam (budova, postel = id predmetu s lehat; prazdne = dira s popisem); vzhled: sada postavy_vzhled.json (jinak podle id / role); Misa 5. 11. „vytvor i ty ostatni osoby“ a koordinator 5. 11. (jmena a ulohy podle pribeh/postavy.md - pan tvrze je hrac Jan z Havrani, palac patri hraci): tvrz purkrabi Ota Hruska, kucharka a klicnice Ludmila, paze Vitek (zatim na nadvori, za hracem pozdeji), pisar Martin, strazny Vojtech, nocni strazny (bezejmenny), kovar Hroch; Lhota rychtar Matous Bilek, krcmar Kubat (krcma U Kohouta = stara usedlost 0), bylinkarka Bara (dum 7), mlynar Kunes s malym synem; hostinec U Zlateho kola hostinsky Ondrej Safranek a dcera Eliska (senkyrka), pocestni v najemnich luzkach; u miliru uhlir Pivonka (milir ve svete neni - seka drevo u chyse); bezejmenni (sedlaci, selky, ponocny, pastyr, pasacka, pocestni) maji jmena, ktera s pribehem nekoliduji; spanek.sdili = id obyvatele, se kterym postava sdili luzko na smeny (nocni strazny spi ve dne v luzku strazneho); tvrz spanek (Misa 6. 11. „postele ne v sini“): muzi sluzebnictva (purkrabi, pisar, paze, strazni, celedin) v ubytovne (tvrz_ubytovna), kucharka a devecka v kuchyni u ohne (tvrz_kuchyne - kuchyne tvrze byvala i nocistem kuchynske celedi), kovar u vyhne (tvrz_kovarna); kucharka vari v kuchyni (prace tvrz_kuchyne); 9. 11. (Misa r. 84): vsichni sluzebnici tvrze vcetne kovare, kucharky a devecky spi v ubytovne (rozsirene dopredu), kuchyne a kovarna bez luzek; 9. 11. 16:10 (oprava r. 84): ubytovna rozsirena doprava (na zapad) - zeny (kucharka, devecka) v komore celedi (tvrz_ubytovna_zeny, vlastni dvere), muzi vcetne kovare v cheledníku (tvrz_ubytovna)",
  "prirozenost": {
   "zrychleni_m_s2": 1.5,
   "brzdeni_m_s2": 2.5,

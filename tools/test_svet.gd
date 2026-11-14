@@ -7225,10 +7225,16 @@ func _mista_prace(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> void:
 	var n_ok := 0
 	for k: String in P["mista"]:
 		var z: Dictionary = P["mista"][k]
-		if not (z.has("p") or z.has("lom_stena_z") or z.has("u_predmetu")):
+		if not (z.has("p") or z.has("lom_stena_z") or z.has("u_predmetu") or z.has("svet_bod")):
 			continue
 		var q: Vector2 = lide.call("_misto", ll[0], k)[0]
 		var y0 := float(lide.call("podlaha", q))
+		# Misa 14. 11. „kamenik tluce kladivem na ceste“: lom_spalek (126,5, 931) mel pruchozi bunku do cil_m, ale
+		# mrizka chuze k nemu ze site cest cestu nenasla (ostrov v leseni) - misto venku musi byt dosazitelne ze site
+		if String(lide.call("_mistnost_u", Vector3(q.x, y0, q.y))) == "":
+			lide.call("_nav_k_siti", q, y0, false)
+			if bool(lide.get("_nav_bez")) and not bool(lide.get("_nav_prer")):
+				ch.call("misto %s (%.1f,%.1f): ze site cest nedosazitelne (mrizka chuze)" % [k, q.x, q.y])
 		var volno := false
 		var rr := ceili(cil_m / bb)
 		for dx in range(-rr, rr + 1):
@@ -8719,6 +8725,9 @@ func _rostliny_v_budovach() -> void:
 			if mmi:
 				if mmi.multimesh == null or mmi.multimesh.mesh == null or not (mmi.global_transform * mmi.get_aabb()).intersects(oblast):
 					continue
+				var lc0 := (cesta + "/" + String(mmi.multimesh.mesh.resource_name)).to_lower()
+				if not (lc0.contains("/rostliny/") or lc0.contains("/louka") or lc0.contains("trava") or lc0.contains("/les")):
+					continue
 				var mm := mmi.multimesh
 				var n := mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
 				var ma := mm.mesh.get_aabb()
@@ -8757,6 +8766,9 @@ func _rostliny_v_budovach() -> void:
 						var seg := cesta.split("/")
 						var zdroj := "/".join(seg.slice(3, mini(6, seg.size()))) + " [" + jm + "]"
 						var klic := String(r["name"]) + " <- " + zdroj
+						if not vady.has(klic) and prikladu.size() < 12:
+							prikladu.append(klic)
+							print("ROSTLINY_V_BUDOVACH priklad %s: instance %s, mistnost %s (mistni %s)" % [klic, str(wa), str(vn), str(la)])
 						vady[klic] = int(vady.get(klic, 0)) + 1
 						break
 	for kl: String in vady:

@@ -4063,7 +4063,7 @@ def zebrinak(name):
     return None
 
 
-def pristresek(name, L=4.2, W=3.2, H=3.4):
+def pristresek(name, L=4.2, W=3.2, H=3.4, stul=True):
     """Plateny stanek jako v lomu u Talmberka (KCD, Misa: "drz se fotek, stan je nizky"): ctyri svisle rohove kuly
     a stredni kuly do vysky okapu 2,3 m, na celech vysoke kuly pod hrebenovou tyc (3,4 m), okapove tyce po obvodu;
     svetle lnene platno pres hreben na obe strany, mirne proveseni mezi krokvemi, po obvodu okapu svisly lem
@@ -4132,7 +4132,10 @@ def pristresek(name, L=4.2, W=3.2, H=3.4):
             b = (sx * (hx + 1.0), sy * (hy + 1.0), 0.05)
             _handle(a, b, 0.009, provaz, 0.009, 5)
             _handle((b[0], b[1], -0.15), (b[0] + sx * 0.04, b[1], 0.2), 0.025, jasan, 0.015, 6)
-    # pracovni stul kamenika pod strechou (prkno na kozach)
+    # pracovni stul kamenika pod strechou (prkno na kozach); stul=False: lom - svacina u nizsiho stolu (Misa 14. 11.
+    # „stul kde borci v lomu svaci smaz a dej nizsi“: deska 0,83 m nad lavici 0,475 = 0,36 m, jidelni stul ~0,30)
+    if not stul:
+        return None
     for sx in (-1, 1):
         for sz in (-1, 1):
             _handle((sx * 0.9, sz * 0.25, 0.0), (sx * 0.9, 0, 0.78), 0.035, dub, 0.03, 8)
@@ -4774,6 +4777,7 @@ BUILD.update({
     "zebrinak": lambda: zebrinak("zebrinak"),
     "pristresek_plachta": lambda: pristresek("pristresek_plachta"),
     "pristresek_maly": lambda: pristresek("pristresek_maly", 3.2, 2.8, 3.2),
+    "pristresek_lom": lambda: pristresek("pristresek_lom", 3.2, 2.8, 3.2, stul=False),
     "stan_jehlan": lambda: stan_jehlan("stan_jehlan"),
 })
 

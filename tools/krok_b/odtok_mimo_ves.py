@@ -65,6 +65,14 @@ def od_obalu(x, z):
 
 
 STAVBY = [(s["stred"], s.get("rovina_r_m", 10.0)) for s in L.get("stavby", [])]
+# Misa 14. 11. („proc stoji dum kovare na potoce, na co mas 1000 hlidacu“): kazdy zaznam lokace se stredem (kovarna_ves,
+# krcma_l, vetrak, ...) i jeho vnoreny dum je stavba - drive jen L["stavby"], nove dily z 14. 11. potok neznal
+for _k, _v in L.items():
+    if isinstance(_v, dict) and "stred" in _v and "rovina_r_m" in _v:
+        STAVBY.append((_v["stred"], max(_v["rovina_r_m"], _v.get("plac_r_m", 0.0))))
+        _d = _v.get("dum")
+        if isinstance(_d, dict) and "stred" in _d:
+            STAVBY.append((_d["stred"], _d.get("rovina_r_m", 7.5)))
 
 
 def zakaz(x, z):
@@ -143,7 +151,10 @@ def _main():
     tk = [t for t in V["toky"] if t["id"] == "lhota_odtok"][0]
     o = tk["osa_xzy"]
     # prvni bod za vsi smerem po proudu: posledni bod do obalu + okraj, pak az bod dal nez okraj + 10 m
-    posl = max(i for i, q in enumerate(o) if od_obalu(q[0], q[1]) < OKRAJ)
+    # 14. 11.: i bod ve stavbe (zakaz) - trasa uz obchazi ves, ale nove stavby lezi na ni (kovarna_ves)
+    posl = max((i for i, q in enumerate(o) if i > 0 and zakaz(q[0], q[1])), default=-1)
+    if posl < 0:
+        sys.exit("odtok mimo ves: trasa je mimo ves i stavby - beze zmeny")
     # napojeni: z kandidatu za vsi (az 60 bodu po proudu) ten, kde nova trasa prijde nejmin lomene (bez klicky) a krizi
     # nejmin cest - kazdy kandidat se naplanuje
     def lom(p):
@@ -155,7 +166,7 @@ def _main():
         return s
 
 
-    j0 = next(i for i in range(posl, len(o)) if od_obalu(o[i][0], o[i][1]) > OKRAJ + 10.0)
+    j0 = next(i for i in range(posl, len(o)) if od_obalu(o[i][0], o[i][1]) > OKRAJ + 10.0 and not zakaz(o[i][0], o[i][1]))
     best = None
     # napojeni pred dilem mlyna (dil 40 x 40 m: polouhlopricka + pasma.dil.napojeni_m) - tok v dilu a s_toku zustavaji
     MD = V["mlyn"]["dil"]
