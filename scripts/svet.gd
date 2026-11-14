@@ -1271,6 +1271,8 @@ func _reka(parent: Node3D) -> void:
 	m.set_shader_parameter("normal_scale", 0.6)
 	m.set_shader_parameter("roughness", 0.15)
 	m.set_shader_parameter("foam_amount", 1.2)
+	# bila voda na padech kaskady (Misa 14. 11.: voda z kopce jako perina; resers potok_pereje_resers.md)
+	m.set_shader_parameter("pena_padu", float(((Pravidla.cti("voda", "potok", "raz_toku")["druhy"] as Array).back() as Dictionary)["schody"]["pena_padu"]))
 	m.set_shader_parameter("foam_color", Color(0.7, 0.72, 0.66, 0.6))
 	# barvy v linearnim prostoru (source_color): melka hnedozelena, hluboka tmava; tablet bez HDR = tmavsi nez navrh
 	m.set_shader_parameter("melka", Color(0.24, 0.27, 0.15))

@@ -47,6 +47,7 @@ uniform vec4 foam_color : source_color = vec4(0.9, 0.9, 0.9, 1.0);
 uniform float foam_amount : hint_range(0.0, 4.0) = 2.0;
 uniform float foam_steepness : hint_range(0.0, 8.0) = 2.0;
 uniform float foam_smoothness : hint_range(0.0, 1.0) = 0.3;
+uniform float pena_padu : hint_range(0.0, 2.0) = 0.0;   // bila voda podle strmosti (kaskada), nastavuje svet.gd z voda.json
 
 // Internal uniforms - DO NOT CUSTOMIZE THESE
 uniform float i_lod0_distance : hint_range(5.0, 200.0) = 50.0;
@@ -231,6 +232,8 @@ void fragment() {
 
 	vec3 kk = kolem_kamenu(wpos.xz);
 	combined_foam = max(combined_foam, kk.z * 0.6);
+	// bila voda na padech kaskady (voda.json potok.raz_toku kaskada pena_padu): strma plocha = pena, rozbita sumem
+	combined_foam = max(combined_foam, clamp(steepness_map * pena_padu, 0.0, 0.9) * (0.55 + 0.45 * foam_randomness));
 	water_norFBM += kk.xy * 0.12;
 
 	float t = smoothstep(0.0, hloubka_barvy, hloubka);
