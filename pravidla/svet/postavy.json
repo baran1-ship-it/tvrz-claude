@@ -196,9 +196,10 @@
   },
   "nadvori_palac": {
    "p": [
-    6.0,
-    4.0
-   ]
+    4.0,
+    -8.5
+   ],
+   "_p14_11": "Míša 14. 11. („pořád jsou všichni mezi bránou a stájí na jedné hromadě“): místa nádvoří brana_straz (2,4/8,2), nadvori_brana (0/7,8), nadvori_studna (−2/6) a nadvori_palac (6/4) byla do 8 m od sebe → nadvori_palac před palác (síň z −11)"
   },
   "nadvori_kovarna": {
    "p": [

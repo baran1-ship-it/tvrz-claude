@@ -755,11 +755,11 @@
   {
    "id": "lavice_selska",
    "p": [
-    -4.0,
-    8.5
+    13.0,
+    -3.0
    ],
-   "natoceni_st": 0.0,
-   "popis": "nadvori tvrze u studny"
+   "natoceni_st": 90.0,
+   "popis": "nadvori tvrze u vychodni zdi mezi palacem a celednikem (Misa 14. 11.: lavicka u schodu pryc, k prazdne zdi)"
   },
   {
    "id": "lavice_selska",
