@@ -22,11 +22,22 @@ func setup(p_main: Node) -> void:
 	# physics_frame / process_frame (SceneTree je vysila pred uzly) a konec diag._process (bezi posledni).
 	p_main.get_tree().physics_frame.connect(_na_fyziku)
 	p_main.get_tree().process_frame.connect(_na_process)
+	# 14. 11. (rozbor zaseku, chybejici mereni 1): rozpad „kresleni+cekani“. Godot 4.4.1 rendering_server_default.cpp:
+	# frame_pre_draw vysila draw() na zacatku (hlavni vlakno, po mazani queue_free, casovacich a sync), frame_post_draw
+	# konec _draw (bez vlakna kresleni synchronne): mezi nimi aktualizace sceny vc. nahrani MultiMeshu
+	# (_update_dirty_multimeshes), orez, volani kresleni; na PC i swap (gl_end_frame), na Androidu je eglSwapBuffers az
+	# po kroku enginu (GodotRenderer.java) - tam pada do „swap/GPU“ i se spankem max_fps.
+	RenderingServer.frame_pre_draw.connect(_na_pre_draw)
+	RenderingServer.frame_post_draw.connect(_na_post_draw)
 	main = p_main
 	Engine.set_meta("diag", self)
 	process_priority = 100000              # bezi po vsech ostatnich _process: snimek je zmereny cely
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_start = Time.get_ticks_msec()
+	# hlavicka logu (chybejici mereni 4): obnovovaci frekvence obrazovky a jadra (vsync cil, pocet vlaken)
+	_hlavicka = "HLAVICKA obrazovka %.1f Hz, jader %d, model %s, %s" % [DisplayServer.screen_get_refresh_rate(), OS.get_processor_count(),
+			OS.get_model_name(), sestaveni_text()]
+	_radky.append(_hlavicka)
 	# panel mereni vykonu (zapina se v nastaveni): levy horni roh, aktualizace 2x za sekundu
 	var cl := CanvasLayer.new()
 	cl.layer = 50
@@ -70,7 +81,7 @@ func zkopiruj_log() -> int:
 			nac.append(r.get_slice(" | hrac", 1).strip_edges() if r.contains(" | hrac") else r)
 		elif r.begins_with("[panel"):
 			ab.append(r.get_slice(" | halda", 0))
-	var t := "ZAZNAM MERENI %s\n== nacitani ==\n%s\n== panel / snimek po 2 s ==\n%s\n== zaseky ==\n%s\n" % [sestaveni_text(),
+	var t := _hlavicka + "\nZAZNAM MERENI %s\n== nacitani ==\n%s\n== panel / snimek po 2 s ==\n%s\n== zaseky ==\n%s\n" % [sestaveni_text(),
 			"\n".join(nac), "\n".join(ab.slice(maxi(0, ab.size() - 150))), "\n".join(_zaseky_log.slice(maxi(0, _zaseky_log.size() - 120)))]
 	# posledni vysledek merici trasy (user://mereni_trasa.txt, Misa 2. 11.: tabulka byla jen minutu na obrazovce)
 	if FileAccess.file_exists("user://mereni_trasa.txt"):
@@ -186,11 +197,49 @@ func _na_process() -> void:
 	if not _sn_ted.is_empty():
 		_sn_ted["celkem"] = zac - int(_sn_ted["zac"])
 		_sn_ted["kresleni"] = zac - int(_sn_ted["konec"])
+		# rozpad (razitka frame_pre_draw / frame_post_draw tohoto snimku; bez nich -1 = snimek se nekreslil)
+		var pd := int(_sn_ted.get("pred", 0))
+		var po := int(_sn_ted.get("po", 0))
+		if pd > 0 and po >= pd:
+			_sn_ted["pred_kr"] = pd - int(_sn_ted["konec"])
+			_sn_ted["kr_cpu"] = po - pd
+			_sn_ted["swap"] = zac - po
+		# odebrane uzly (queue_free se maze po _process, pred kreslenim): pocet pred + pridane - pocet ted
+		var nu := int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
+		_sn_ted["odebrano"] = maxi(0, _uzlu_pred + _pridano_uzlu - nu)
+		_uzlu_pred = nu
+		_pridano_uzlu = 0
 		_sn = _sn_ted
 		_detektor()
+		_hist_sn.push_back(int(_sn["celkem"]))
+		if _hist_sn.size() > 3:
+			_hist_sn.pop_front()
 	_sn_ted = {"zac": zac, "fyzika": t - zac if _kroku > 0 else 0, "kroku": _kroku, "konec": t}
 	_kroku = 0
 	_t_proc0 = t
+
+
+func _na_pre_draw() -> void:
+	if not _sn_ted.is_empty():
+		_sn_ted["pred"] = Time.get_ticks_usec()
+
+
+func _na_post_draw() -> void:
+	if not _sn_ted.is_empty():
+		_sn_ted["po"] = Time.get_ticks_usec()
+
+
+## Udalosti snimku (chybejici mereni 2): skripty hlasi, co v tomto snimku odkryly / nahraly (louka: bunky, bajty,
+## instance; svet: bunky rostlin...). Jen soucet do slovniku; vypis v radku zaseku. Klic konci "_B" = bajty (vypis kB).
+func udalost(klic: String, n := 1) -> void:
+	_ud[klic] = int(_ud.get(klic, 0)) + n
+
+
+var _ud := {}
+var _hist_sn: Array[int] = []            # delky 3 predchozich snimku (us) pred prave uzavrenym
+var _uzlu_pred := 0
+var _pridano_uzlu := 0
+var _hlavicka := ""
 
 
 ## Konec snimku (posledni _process): skripty tohoto snimku, planovac, nove uzly.
@@ -199,6 +248,8 @@ func _konec_snimku() -> void:
 		return
 	var t := Time.get_ticks_usec()
 	_sn_ted["konec"] = t
+	_sn_ted["ud"] = _ud
+	_ud = {}
 	_sn_ted["process"] = t - _t_proc0
 	_sn_ted["skripty"] = _skripty_us()
 	var nej := "-"
@@ -246,10 +297,14 @@ func _detektor() -> void:
 		fz = " [hráč %.1f (move_and_slide %.1f, schod %.1f, zbytek %.1f; pod nohama %s), voda %.1f ms; aktivních %d, párů %d, ostrovů %d]" % [hr, ms, sc, hr - ms - sc, _pod_nohama(),
 				float(_cas_minule.get("fyz: voda", 0)) / 1000.0, Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS),
 				Performance.get_monitor(Performance.PHYSICS_3D_COLLISION_PAIRS), Performance.get_monitor(Performance.PHYSICS_3D_ISLAND_COUNT)]
-	var z := "%.0f ms (%s)%s u %s, t %ds: fyzika %.0f (%d kroků), _process %.0f (měřené skripty %.0f, %s %.0f), kreslení+čekání %.0f, nové uzly %d%s%s" % [
+	var z := "%.0f ms (%s)%s u %s, t %ds: fyzika %.0f (%d kroků), _process %.0f (měřené skripty %.0f, %s %.0f), kreslení+čekání %.0f%s, nové uzly %d%s%s" % [
 			cel, pr, fz, poloha_text().get_slice(" (", 0), int(Time.get_ticks_msec() / 1000), fy, int(_sn.get("kroku", 0)), pc,
 			float(_sn.get("skripty", 0)) / 1000.0, String(_sn.get("nej", "-")), float(_sn.get("nej_us", 0)) / 1000.0, kr,
-			int(_sn.get("uzly", 0)), String(_sn.get("plan", "")), ", měřič PSS" if bool(_sn.get("pss", false)) else ""]
+			_rozpad_kresleni(), int(_sn.get("uzly", 0)), String(_sn.get("plan", "")), ", měřič PSS" if bool(_sn.get("pss", false)) else ""]
+	z += ", odebráno uzlů %d, předchozí snímky %s ms, kreslení %d volání / %.2f M prim., události: %s" % [int(_sn.get("odebrano", 0)),
+			_hist_text(),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0, _udalosti_text(_sn.get("ud", {}))]
 	# 13. 11. (zasek main 114 ms na nadvori bez rozpisu): u skriptu main nejdrazsi cast (main: ...)
 	if String(_sn.get("nej", "")) == "main":
 		var nk := ""
@@ -272,6 +327,31 @@ func _detektor() -> void:
 	_zaseky_log.append(Time.get_time_string_from_system() + " ZASEK " + z)
 	if _zaseky_log.size() > MAX_ZASEKU:
 		_zaseky_log = _zaseky_log.slice(_zaseky_log.size() - MAX_ZASEKU)
+
+
+## „kreslení+čekání“ rozdelene razitky frame_pre_draw / frame_post_draw: pred kreslenim (mazani, casovace, sync),
+## kresleni CPU (nahrani bufferu, orez, volani kresleni, na PC i swap), swap/GPU (Android: eglSwapBuffers, max_fps).
+func _rozpad_kresleni() -> String:
+	if not _sn.has("kr_cpu"):
+		return " (rozpad -)"
+	return " (před kreslením %.1f, kreslení CPU %.1f, swap/GPU %.1f)" % [int(_sn["pred_kr"]) / 1000.0, int(_sn["kr_cpu"]) / 1000.0,
+			int(_sn["swap"]) / 1000.0]
+
+
+func _hist_text() -> String:
+	var t := PackedStringArray()
+	for u: int in _hist_sn:
+		t.append("%.0f" % (u / 1000.0))
+	return "/".join(t) if not t.is_empty() else "-"
+
+
+func _udalosti_text(ud: Dictionary) -> String:
+	if ud.is_empty():
+		return "-"
+	var t := PackedStringArray()
+	for k: String in ud:
+		t.append("%s %.0f kB" % [k.trim_suffix("_B"), int(ud[k]) / 1024.0] if k.ends_with("_B") else "%s %d" % [k, int(ud[k])])
+	return ", ".join(t)
 
 
 ## Stav front a I/O v okamziku zaseku (Astra 29. 10. 07:10 bod 4: „kresleni+cekani“ neni dukaz GPU - muze to byt
@@ -316,7 +396,7 @@ func _zapis_zaseky(hned := false) -> void:
 		_zaseky_uloha = -1
 	_zaseky_t = t
 	_zaseky_zapsano = zaseku
-	var text := "\n".join(_zaseky_log) + "\n"
+	var text := _hlavicka + "\n" + "\n".join(_zaseky_log) + "\n"
 	if hned:
 		_zapis_soubor_do(LOG_ZASEKY, text)
 	else:
@@ -719,6 +799,7 @@ func _svetla_text() -> String:
 
 
 func _pridan(n: Node) -> void:
+	_pridano_uzlu += 1
 	if n is GeometryInstance3D:
 		_nove_geom += 1
 		var g := n as GeometryInstance3D

@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "louka_nahravani"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -8940,3 +8940,59 @@ func _krcma_schody() -> void:
 			print("KRCMA_SCHODY dotyk %s / %s @ %s" % [co.name if co else "?", on.name if on else "?", str(on.global_position) if on else ""])
 		print("KRCMA_SCHODY hrac %s, mistne %s" % [str(player.global_position), str(xf.affine_inverse() * player.global_position)])
 	_vysledek("krcma_schody", ok, "%s; konec y %.2f, patro %.2f" % [r[1], y_kon, patro])
+
+
+## 14. 11. (docs/rozpracovane/zaseky_rozbor_system.md F4): louka nesmi nahrat do GPU v jednom snimku vic, nez dovoli
+## rozpocty.json louka_nahravani nahrani_b_snimek (drive cela bunka pri odkryti a opakovane useky v _viditelne). Hrac jede
+## cvalem pres louku (trasa jako trava_dorust) pasma.test.louka_nahravani_s; kazdy snimek louka.nahrano_b (model
+## nahrani podle ovladace GLES3) a odkryte instance. Projde: nejvetsi nahrani za snimek <= rozpocet a postavila se
+## aspon jedna bunka (jinak test nic nemeril).
+func _louka_nahravani() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	if louka == null:
+		_vysledek("louka_nahravani", false, "louka chybi")
+		return
+	var rozp := int(Pravidla.cti("rozpocty", "louka_nahravani", "nahrani_b_snimek"))
+	var trvani := float(sv.pasma()["test"]["louka_nahravani_s"])
+	var a := Vector2(0.0, 170.0)
+	var b := Vector2(-10.0, 540.0)
+	var smer := (b - a).normalized()
+	var v := float(Pravidla.cti("jizda", "kun", "chody")["cval"])
+	player.set_flying(true)
+	var q := a
+	player.global_position = Vector3(q.x, sv._vyska(q.x, q.y) + 1.7, q.y)
+	for f in 1800:                                     # usazeni jako trava_dorust (nacteni okoli po skoku se nemeri)
+		await get_tree().process_frame
+		if louka.okoli_hotove(float(sv.pasma()["test"]["trava_dorust_m"]) + louka.BUNKA):
+			break
+	var post0 := int(louka.postaveno)
+	var nej_b := 0
+	var nej_inst := 0
+	var nej_bunek := 0
+	var sum_b := 0
+	var snimku := 0
+	var nad := 0
+	var t0 := Time.get_ticks_msec()
+	while q.distance_to(a) < minf(a.distance_to(b), v * trvani):
+		var dt := get_process_delta_time()
+		q += smer * v * maxf(dt, 1.0 / 60.0)
+		player.global_position = Vector3(q.x, sv._vyska(q.x, q.y) + 1.7, q.y)
+		player.velocity = Vector3(smer.x * v, 0.0, smer.y * v)
+		player.yaw = atan2(-smer.x, -smer.y)
+		await get_tree().process_frame
+		snimku += 1
+		var nb := int(louka.nahrano_b)
+		sum_b += nb
+		nej_b = maxi(nej_b, nb)
+		nej_inst = maxi(nej_inst, int(louka.odkryto_inst))
+		nej_bunek = maxi(nej_bunek, int(louka.odkryto_bunek))
+		if nb > rozp:
+			nad += 1
+			if nad <= 3:
+				print("LOUKA_NAHRAVANI nad rozpoctem: %d B, instanci %d, bunek %d u (%.0f, %.0f)" % [nb, int(louka.odkryto_inst), int(louka.odkryto_bunek), q.x, q.y])
+	player.set_flying(false)
+	var postaveno := int(louka.postaveno) - post0
+	var txt := "%d snimku, nejvic %.0f kB / snimek (rozpocet %.0f kB), nad rozpoctem %d snimku, prumer %.1f kB, nejvic instanci %d, bunek %d za snimek, postaveno bunek %d, %d ms" % [
+			snimku, nej_b / 1024.0, rozp / 1024.0, nad, sum_b / 1024.0 / maxf(1.0, snimku), nej_inst, nej_bunek, postaveno, Time.get_ticks_msec() - t0]
+	print("LOUKA_NAHRAVANI " + txt)
+	_vysledek("louka_nahravani", nad == 0 and postaveno > 0, txt)

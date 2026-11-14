@@ -86,3 +86,42 @@ Detektor bere jen snímek nad 40 ms, který je zároveň ≥ 1,6× delší než 
 
 Tráva GPU nahrazuje jen vrstvu 0 (`trava_gpu.gd:4`), takže A/B z 0.999997 streamování neizoluje. Navíc se porovnávalo jen p50,
 ne počet záseků.
+
+## 4. Výsledky (14. 11. večer, pomocník – diag, louka, test)
+**Ověřeno ve zdroji Godot 4.4.1-stable [kód]:**
+- `frame_pre_draw` vysílá `RenderingServerDefault::draw()` na začátku (hlavní vlákno; po `_process`, mazání `queue_free`,
+  časovačích, `RenderingServer.sync`), `frame_post_draw` konec `_draw` → `_run_post_draw_steps` (bez vlákna kreslení
+  synchronně, `rendering_server_default.cpp:197,410`). Mezi nimi `RSG::scene->update()` → `update_dirty_resources` →
+  `_update_dirty_multimeshes` (nahrání MultiMeshů), ořez, kreslení; na PC i swap (`gl_end_frame`), na Androidu je
+  `eglSwapBuffers` až po kroku enginu → spadne do „swap/GPU“ spolu se spánkem `max_fps`.
+- Nahrání MultiMeshe (`mesh_storage.cpp:2124-2200`): data jdou do GPU až při kreslení a jen oblasti po 512 instancích do
+  `visible_instance_count`; zvýšení počtu označí nové instance za změněné; nad 32 změněnými oblastmi nebo nad polovinou
+  kreslených se nahraje všech prvních ⌈n/512⌉ oblastí. Snížení nenahrává nic. Každá změna počtu bez `MultiMesh.custom_aabb`
+  přepočítá AABB přes všechny kreslené instance (`_multimesh_re_create_aabb`). Řádek instance = 16 floatů (64 B).
+
+**Změněno:**
+- `scripts/diag.gd`: řádek záseku má rozpad „kreslení+čekání“ (před kreslením / kreslení CPU / swap/GPU), odebrané uzly
+  (počet uzlů před + přidané − teď), 3 předchozí snímky, volání kreslení a primitiva, události snímku (`diag.udalost(klic, n)`,
+  klíč na `_B` = bajty). Hlavička logu (`diag.log`, `zaseky.log`, schránka): obnovovací frekvence obrazovky, jádra, model.
+- `scripts/louka.gd` (commit se dostal do f12c4ca4 souběžné session): při plnění skryté buňky roste `visible_instance_count`
+  s naplněným počtem → nahrání se rozloží do snímků plnění, odkrytí nenahrává nic; `MultiMesh.custom_aabb` (bez přepočtu
+  AABB); `_viditelne` mění počet jen po kvantech (nahoru zaokrouhlit, instance navíc shader srazí podle hashe – vzhled
+  stejný), dolů s hysterezí; každé zvýšení (plnění i `_viditelne`) v rozpočtu bajtů na snímek (model ovladače `_model_b`);
+  hráč uvnitř budovy: vzdálená buňka se skryje uzlem, počty zůstanou (dřív 0 a po odchodu nahrání všech buněk naráz).
+  Čísla: `pravidla/svet/rozpocty.json` `louka_nahravani` (rozpočet 256 kB = úvaha).
+- Test `louka_nahravani` (`tools/test_svet.gd`): jízda cvalem přes louku `pasma.test.louka_nahravani_s`, největší nahrání
+  za snímek ≤ rozpočet a postavila se aspoň jedna buňka. Výsledek viz níže.
+
+**NEOVĚŘENO NA ZAŘÍZENÍ:** zda tím zmizí záseky 40–110 ms (A1/A2 jsou dál podezření, ne potvrzená příčina); velikost
+rozpočtu 256 kB; cena navíc kreslených (sražených) instancí z kvantování (≤ ~2 kvanta na MultiMesh); kupy (`_mm`,
+`mm.buffer` = celé `glBufferData` v jednom snímku) se nezměnily. Ověření: trasa s novým řádkem záseku – u záseků dívat se
+na „kreslení CPU“ a `louka_B`.
+
+**Pro svet.gd (rostliny, nedělal jsem – souběžná session):** v `_rost_krok` (~ř. 3636) hned za smyčkou
+`for m: Node3D in _rost_uzly[bb]: m.visible = true` (odkrytí buňky rostlin):
+```
+var dg_r: Object = Engine.get_meta("diag", null)
+if dg_r:
+	dg_r.udalost("rost_bunek", 1)
+	dg_r.udalost("rost_mmi", (_rost_uzly[bb] as Array).size())
+```
