@@ -2273,7 +2273,14 @@
    "rovina_r_m": 7.5,
    "popis": "dům kováře (selský dům Dum1 jako v usedlostech) v ose konce ulice, štít (+z modelu) do návsi; natoceni = směr osy au (svet._domy_ramce jako chalupa mlynáře)"
   },
-  "plac_r_m": 6.5
+  "plac_r_m": 6.5,
+  "vynechat_uzly": [
+   "Kovarna_Dlazba",
+   "Kovarna_Podlaha",
+   "Kovarna_Kol_Podlaha",
+   "Kovarna_Kol_PodlahaPristresek"
+  ],
+  "_vynechat": "Míša 14. 11. (v Puchartu stejná kovárna: dlažba je součást modelu, nedá se na ni vystoupit, pravidelná jako dlaždice na trávníku): dlažba přístřešku i hliněná podlaha z modelu pryč (i jejich kolize) – na zemi naše udusaná hlína (kraj.PLACKY plac_r_m)"
  },
  "krcma_l": {
   "popis": "Míša 14. 11. (snímek ze hry: „krčma“ zakroužkovaná vlevo od odbočky k rybníku, studnu přesunout na náves; stará krčma U Kohouta zůstane jako obyčejná usedlost): krčma do L (Disk budovy krcma.zip, NAVOD_KRCMA_L.md) u odbočky (stará ulice) k rybníku, uliční stranou (+Z modelu) k odbočce, stájové křídlo (+x modelu) směrem k rybníku. Střed = osa staré ulice (ves.stred_stare_navsi + osa vesnice.AXIS) + 11,5 m stranou (průčelí 6 m od osy).",
@@ -2404,7 +2411,18 @@
   "kridla_spolu": [
    "krcma_vrata"
   ],
-  "_lod": "nezávislá kontrola 14. 11.: LOD1 od konce plného dílu (bez prolínání = bez pásma, kde se kreslí oba); vnitřní dveře jen do interier_do_m; vrata L/P jednou skupinou"
+  "_lod": "nezávislá kontrola 14. 11.: LOD1 od konce plného dílu (bez prolínání = bez pásma, kde se kreslí oba); vnitřní dveře jen do interier_do_m; vrata L/P jednou skupinou",
+  "vynechat_uzly": [
+   "KrcmaL_Dvur"
+  ],
+  "placky_lok": [
+   [
+    8.0,
+    -8.5,
+    9.5
+   ]
+  ],
+  "_vynechat": "Míša 14. 11. (stejně jako kovárna): model dvora (hlína v modelu) pryč, dvůr = naše udusaná hlína: plac_r_m kolem středu + placky_lok [x, z modelu, poloměr] na dvůr za domem a stájí (dvůr x 0…17, z −13…−4 modelu)"
  },
  "kovarna_tvrz": {
   "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",

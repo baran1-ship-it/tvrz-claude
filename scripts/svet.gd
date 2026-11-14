@@ -9980,6 +9980,14 @@ func _kovarna_dil(parent: Node3D) -> void:
 	var xf := Transform3D(Basis(Vector3.UP, float(kv["natoceni"])), Vector3(x, _vyska(x, z), z))
 	var sc := (load(String(kv["model"])) as PackedScene).instantiate() as Node3D
 	sc.name = "Kovarna_dil"
+	# Misa 14. 11.: dlazba / podlaha / dvur z modelu pryc (i kolize) - na zemi udusana hlina sveta (lokace vynechat_uzly)
+	for jv: String in kv.get("vynechat_uzly", []):
+		for vn in sc.find_children(jv + "*", "", true, false):
+			if not is_instance_valid(vn):
+				continue
+			if String(vn.name) == jv or String(vn.name).begins_with(jv + "-") or String(vn.name).begins_with(jv + "_col"):
+				vn.get_parent().remove_child(vn)
+				vn.free()
 	sc.transform = xf
 	parent.add_child(sc)
 	for nd in sc.find_children("*", "GeometryInstance3D", true, false):
@@ -10045,6 +10053,14 @@ func _krcma_dil(root: Node3D, parent: Node3D) -> void:
 	var xf := Transform3D(Basis(Vector3.UP, float(kr["natoceni"])), Vector3(x, _vyska(x, z), z))
 	var sc := (load(String(kr["model"])) as PackedScene).instantiate() as Node3D
 	sc.name = "Krcma_dil"
+	# Misa 14. 11.: dlazba / podlaha / dvur z modelu pryc (i kolize) - na zemi udusana hlina sveta (lokace vynechat_uzly)
+	for jv: String in kr.get("vynechat_uzly", []):
+		for vn in sc.find_children(jv + "*", "", true, false):
+			if not is_instance_valid(vn):
+				continue
+			if String(vn.name) == jv or String(vn.name).begins_with(jv + "-") or String(vn.name).begins_with(jv + "_col"):
+				vn.get_parent().remove_child(vn)
+				vn.free()
 	sc.transform = xf
 	parent.add_child(sc)
 	var interier := sc.find_child(String(kr["interier_skupina"]), true, false)

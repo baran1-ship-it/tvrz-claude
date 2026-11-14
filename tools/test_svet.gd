@@ -8577,6 +8577,9 @@ func _kovarna() -> void:
 		dum = dum or int(d["k"]) == 31
 	if not dum or main.world.find_child("Dum_ves_31", true, false) == null:
 		chyby.append("dum kovare (k 31) chybi")
+	for jv: String in Pravidla.cti("lokace", "kovarna_ves", "vynechat_uzly"):
+		if kd.find_child(jv, true, false) != null:
+			chyby.append("%s z modelu nema byt (Misa 14. 11.: nase hlina)" % jv)
 	_vysledek("kovarna", chyby.is_empty(), "%d chyb %s; u %s" % [chyby.size(), str(chyby), kd.global_position.snapped(Vector3.ONE * 0.1)])
 
 

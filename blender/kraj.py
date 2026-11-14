@@ -300,6 +300,9 @@ _KRC = _LOKACE_J.get("krcma_l", {})
 if _KRC.get("stred"):
     MISTA.append(("krcma_l", _KRC["stred"][0], _KRC["stred"][1], _KRC["natoceni"], _KRC["rovina_r_m"]))
     PLACKY.append((_KRC["stred"][0], _KRC["stred"][1], _KRC["plac_r_m"]))      # vyslapana hlina pred krcmou a ve dvore
+    for _lx, _lz, _lr in _KRC.get("placky_lok", []):      # dvur za domem a staji (v ramci modelu, natoceni jako ve hre)
+        _c, _s = math.cos(_KRC["natoceni"]), math.sin(_KRC["natoceni"])
+        PLACKY.append((_KRC["stred"][0] + _lx * _c + _lz * _s, _KRC["stred"][1] - _lx * _s + _lz * _c, _lr))
 
 
 def mlyn_lok(x, z):
