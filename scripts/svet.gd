@@ -10104,6 +10104,24 @@ func _krcma_dil(root: Node3D, parent: Node3D) -> void:
 				vn.free()
 	sc.transform = xf
 	parent.add_child(sc)
+	# kolize schodu jako rampa (lokace krcma_l kolize_rampy: model ma schodnici a podestu v rozporu - schod 0,5 m)
+	for rp: Dictionary in kr.get("kolize_rampy", []):
+		var tel := sc.find_child(String(rp["uzel"]) + "*", true, false)
+		var csr: CollisionShape3D = null
+		if tel:
+			csr = tel as CollisionShape3D if tel is CollisionShape3D else tel.find_child("*", true, false) as CollisionShape3D
+		if csr == null:
+			push_warning("krcma: kolize_rampy %s nenalezena" % rp["uzel"])
+			continue
+		var a3 := Vector3(float(rp["od"][0]), float(rp["od"][1]), float(rp["od"][2]))
+		var b3 := Vector3(float(rp["do"][0]), float(rp["do"][1]), float(rp["do"][2]))
+		var box := BoxShape3D.new()
+		box.size = Vector3(float(rp["sirka_m"]), float(rp["tloustka_m"]), a3.distance_to(b3))
+		csr.shape = box
+		var osa_r := (b3 - a3).normalized()
+		var bas := Basis(Vector3.UP.cross(osa_r).normalized(), (Vector3.UP - osa_r * osa_r.dot(Vector3.UP)).normalized(), osa_r)   # pravotocive
+		# horni plocha kvadru = spojnice od-do (stred o pul tloustky niz po normale)
+		csr.global_transform = sc.global_transform * Transform3D(bas, (a3 + b3) * 0.5 - bas.y * float(rp["tloustka_m"]) * 0.5)
 	var interier := sc.find_child(String(kr["interier_skupina"]), true, false)
 	for nd in sc.find_children("*", "GeometryInstance3D", true, false):
 		var gi := nd as GeometryInstance3D
