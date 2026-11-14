@@ -647,9 +647,10 @@ if os.path.exists(D + "mista_stavby.json"):
     # každý konec plotu a vrat leží do 0,3 m od stavby (půdorys s okrajem 0,3 m) nebo do 0,3 m od jiného plotu/vrat téže usedlosti
     _seg = [(p_["usedlost"], _Ls([(b_[0], b_[2]) for b_ in p_["body"]])) for p_ in MS["ploty"]] + \
            [(b["usedlost"], _Ls([(b["a"][0], b["a"][2]), (b["b"][0], b["b"][2])])) for b in MS["brany"]]
+    _otev = [bool(p_.get("otevreny_zacatek")) for p_ in MS["ploty"]] + [False] * len(MS["brany"])   # záměrně volný začátek u ulice (bez plotu před kovárnou, Míša 14. 11.)
     _volne = []
     for i_, (u_, l_) in enumerate(_seg):
-        for q_ in (l_.coords[0], l_.coords[-1]):
+        for q_ in ((l_.coords[-1],) if _otev[i_] else (l_.coords[0], l_.coords[-1])):
             P_ = _Pt(q_)
             if any(pp_.buffer(0.01).contains(P_) for pp_ in _pud): continue
             if any(j_ != i_ and s_[0] == u_ and s_[1].distance(P_) < 0.3 for j_, s_ in enumerate(_seg)): continue

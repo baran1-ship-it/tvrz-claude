@@ -241,8 +241,8 @@
     "lod1": "res://modely/stavby_h/krcma_rada_lod1.glb",
     "aabb": [
      -8.59,
-     24.0,
-     -4.9,
+     23.91,
+     -5.1,
      5.9
     ],
     "prichod": [
@@ -257,12 +257,12 @@
      "KrcmaL_Interier_skupina"
     ],
     "lod1_od_m": 65.0,
-    "disk_id": "1W6GXRlqODF67QxnYsyhalHC2UZeRxFh8",
+    "disk_id": "1KtlMeJacV_7XqPwkBOUGlzTkfjv_M8zQ",
     "zip": [
      "krcma_L.glb",
      "krcma_L_lod1.glb"
     ],
-    "zdroj": "Disk Míši krcma_L.zip (14. 11.), docs/reference/krcma_L/NAVOD_KRCMA_L.md – krčma do L: šenkovna, síň s černou kuchyní, jizba, komůrka, komora; křídlo: kamenná stáj, pokojíky, nocležna; dvůr s vraty a plotem; ≈172 tis. troj.",
+    "zdroj": "Disk Míši krcma_L (1).zip (14. 11. noc: „chci nahradit tu část se stájí, byla moc malá“), docs/reference/krcma_L/NAVOD_KRCMA_L.md – krčma do L bez vybavení: šenkovna, síň s černou kuchyní, jizba, komůrka, komora; křídlo 8,4 × 12,4 m: kamenná stáj s dvoukřídlými vraty 2,4 × 2,5 m, pavlač 1,9 m pod střechou, pokoj 1 a 2 (4 × 6 m) a nocležna; ≈163 tis. troj.",
     "od_toku_m": 5.0,
     "max_prevyseni_m": 3.0,
     "pozn_meze": "Míša 14. 11.: „dávám výjimku pro hospodu, že může být blíž vodě, na 5 m“ – od toku 5 m (jinak 15 m); převýšení pod půdorysem do 3 m (plošina srovná); krčma v řadě podél cesty (uprava) – 33 × 11 m",
@@ -276,9 +276,8 @@
       "KrcmaL_Dvere_Noclezna",
       "KrcmaL_Dvere_Pokoj1",
       "KrcmaL_Dvere_Pokoj2",
-      "KrcmaL_Dvere_Pokoj3",
-      "KrcmaL_Vrata_Staj1",
-      "KrcmaL_Vrata_Staj2",
+      "KrcmaL_Vrata_Staj_L",
+      "KrcmaL_Vrata_Staj_P",
       "KrcmaL_Spani_Hrac"
      ],
      "kridlo_od_x": 8.4,
@@ -288,16 +287,16 @@
      ],
      "otoceni_deg": -90.0,
      "posun": [
-      11.6,
-      -11.8
+      11.8,
+      -13.85
      ],
      "smazat": [
       "KrcmaL_Kol_PlotS1-convcolonly",
       "KrcmaL_Kol_PlotS2-convcolonly",
       "KrcmaL_Kol_PlotV-convcolonly",
       "KrcmaL_Kol_PlotZ-convcolonly",
-      "KrcmaL_Kol_Kulna73-convcolonly",
-      "KrcmaL_Kol_Kulna74-convcolonly"
+      "KrcmaL_Kol_Kulna62-convcolonly",
+      "KrcmaL_Kol_Kulna63-convcolonly"
      ],
      "dvur_uzel": "KrcmaL_Dvur",
      "dvur_ponechat": [
@@ -306,7 +305,8 @@
       3.0,
       5.6
      ],
-     "dvur_za_domem_z": 4.6
+     "dvur_za_domem_z": 4.6,
+     "posun_pozn": "nové křídlo (obal x 8,79…18,93, z −12,11…1,84) otočené o −90° a posunuté: x 9,96…23,91 (za vraty do dvora x 7,32…9,77), z −5,06…5,08 (souměrně s domem)"
     },
     "rampy": [
      {

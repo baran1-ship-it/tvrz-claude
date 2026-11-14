@@ -265,7 +265,7 @@ def _usedlost(x, z, yaw, m, typ, rng, zabrano):
     else: brany[:] = [b_ for b_ in brany if b_["druh"] != "branka"]   # bez plotů (krčma): ani branka
     # boky a záda: zahrada proutím (KCD2 ref_kcd2_zahrada_plot), dvůr a humno ohradou
     u_zah = zb + 0.3                            # zadní plot zahrádky u zadního štítu
-    ploty.append([p_za, F.w(uf, vL), F.w(u_zah, vL)])
+    ploty.append([p_za, F.w(uf, vL), F.w(u_zah, vL)] + (["ulice"] if T.get("bez_plotu_pred_kovarnou") else []))   # bez plotu před kovárnou: začátek u ulice volný (otevřený dvůr)
     ploty.append([p_za, F.w(u_zah, vL), F.w(u_zah, -hw - 0.12)])
     ploty.append([p_bok, F.w(u_zah, vL), F.w(ubk, vL)])
     ploty.append([p_bok, F.w(uf, vR), F.w(ubk, vR)])
@@ -571,10 +571,12 @@ drobne_out = []; ploty_out = []; brany_out = []; stromy_out = []; sezeni_out = [
 for us in useds:
     for m_, x_, z_, yw in us["drobne"]:
         drobne_out.append({"model": m_, "x": r3(x_), "y": r3(y_pud(x_, z_, yw, m_) - 0.02), "z": r3(z_), "yaw": r3(yw), "usedlost": us["i"]})
-    for dr, a, b in us["ploty"]:
+    for pl_ in us["ploty"]:
+        dr, a, b = pl_[:3]
         L = math.hypot(b[0] - a[0], b[1] - a[1]); n = max(1, int(math.ceil(L / 1.0)))
         body = [[r3(a[0] + (b[0] - a[0]) * t), r3(vys_b(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)), r3(a[1] + (b[1] - a[1]) * t)] for t in np.linspace(0, 1, n + 1)]
         ploty_out.append({"druh": dr, "body": body, "usedlost": us["i"], "semeno": us["i"] * 31 + len(ploty_out)})
+        if len(pl_) > 3: ploty_out[-1]["otevreny_zacatek"] = pl_[3]   # záměrně volný konec (u ulice před kovárnou) – hlídač ploty_navazuji ho nepočítá
     for b_ in us["brany"]:
         a, b = b_["a"], b_["b"]; ya, yb = vys_b(*a), vys_b(*b)
         brany_out.append({"druh": b_["druh"], "a": [r3(a[0]), r3(ya), r3(a[1])], "b": [r3(b[0]), r3(yb), r3(b[1])], "usedlost": us["i"]})
