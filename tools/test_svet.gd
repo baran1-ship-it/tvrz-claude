@@ -8405,8 +8405,8 @@ func _duplicity() -> void:
 	var n_s := 0
 	for n: Node in get_tree().root.find_children("*", "MeshInstance3D", true, false):
 		var m := n as MeshInstance3D
-		if m.mesh == null or not m.is_visible_in_tree():
-			continue
+		if m.mesh == null or not m.is_visible_in_tree() or m.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
+			continue                                 # stinova kopie (_Stin) je umyslna
 		n_s += 1
 		var k := "%d|%s" % [m.mesh.get_instance_id(), str(m.global_position.snapped(Vector3.ONE * 0.02))]
 		if site.has(k):
@@ -8421,7 +8421,10 @@ func _duplicity() -> void:
 		if cs.shape == null or cs.disabled:
 			continue
 		n_k += 1
-		var k2 := "%s|%s|%s" % [cs.shape.get_class(), str(cs.global_position.snapped(Vector3.ONE * 0.02)), str(cs.shape.get_debug_mesh().get_aabb().size.snapped(Vector3.ONE * 0.02)) if cs.shape.get_debug_mesh() else ""]
+		# stred tvaru ve svete (konvexni/konkavni tvary maji body ve svete, uzel v pocatku - drive falesne shody)
+		var dm := cs.shape.get_debug_mesh()
+		var ab := dm.get_aabb() if dm else AABB()
+		var k2 := "%s|%s|%s" % [cs.shape.get_class(), str((cs.global_transform * ab.get_center()).snapped(Vector3.ONE * 0.02)), str(ab.size.snapped(Vector3.ONE * 0.02))]
 		if tvary.has(k2):
 			if chyby.size() < 60:
 				chyby.append("kolize 2x: %s a %s" % [str(tvary[k2]).right(50), str(cs.get_path()).right(50)])
