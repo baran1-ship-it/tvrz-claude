@@ -2218,6 +2218,53 @@
   ],
   "_pytle": "pytle ve vetrniku (Misa 0.991 „vajicka“): pytle modelu pryc, pytel_mouky z katalogu na miste kolize Vetrak_Kol_Pytle u steny (spodni patro, podlaha y 3,07)"
  },
+ "kovarna_ves": {
+  "popis": "Míša 14. 11. („nový dům a k němu kovárnu do mezery, ať uzavíráme vesnici, ale rozumně“; Disk budovy kovarna.zip, NAVOD_KOVARNA.md): otevřená vesnická kovárna (díl jako větrný mlýn: model, LOD1, kolize -convcolonly z modelu) na konci návsi naproti usedlosti 7, otevřenou stranou (+Z modelu) k ulici; dům kováře (Dum1) v ose konce ulice štítem zpět do návsi – ulice končí u něj. Plán docs/rozpracovane/kovarna_ves.md, build/f_ves/plan_kovarna.png. Stavba v pořadí terén (rovina_r_m, Blender kraj.MISTA) → budovy → vegetace.",
+  "model": "res://modely/kovarna/kovarna.glb",
+  "lod1": "res://modely/kovarna/kovarna_lod1.glb",
+  "stred": [
+   394.0,
+   906.0
+  ],
+  "natoceni": 1.5708,
+  "rovina_r_m": 7.0,
+  "dosah_m": 60.0,
+  "lod1_od_m": 55.0,
+  "ohen": {
+   "bod": "Kovarna_Ohen_bod",
+   "zhar": "Kovarna_Zhar",
+   "kour": "Kovarna_Komin_kour"
+  },
+  "mech": {
+   "paka": "Kovarna_Paka",
+   "mech": "Kovarna_Mech",
+   "osa": [
+    0.469,
+    0.0,
+    0.883
+   ],
+   "uhel_rad": 0.278,
+   "tempo_rad_s": 2.5,
+   "pumpovat_s": 4.0,
+   "uchop": "Kovarna_Paka_uchop",
+   "dosah_m": 2.0
+  },
+  "kovadlina": {
+   "id": "kovarna_kovadlina",
+   "bod": "Kovarna_Kovadlina_misto"
+  },
+  "zdroj": "NAVOD_KOVARNA.md: počátek = střed na terénu, podlaha +0,05, 65 600 troj. (zeď a výheň fotosken Poly Haven Broken Wall CC0), LOD1 116 troj.; měch: Kovarna_Paka kolem osy (0,469; 0; 0,883) o 0,278 rad, Kovarna_Mech blend shape Nadech 0..1, t = 0,5 − 0,5 cos(2,5 t)",
+  "dum": {
+   "model": "Dum1",
+   "stred": [
+    408.0,
+    918.0
+   ],
+   "natoceni": -1.22,
+   "rovina_r_m": 7.5,
+   "popis": "dům kováře (selský dům Dum1 jako v usedlostech) v ose konce ulice, štít (+z modelu) do návsi; natoceni = směr osy au (svet._domy_ramce jako chalupa mlynáře)"
+  }
+ },
  "kovarna_tvrz": {
   "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",
   "pocatek": [

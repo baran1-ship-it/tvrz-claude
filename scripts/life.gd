@@ -804,6 +804,8 @@ func use_label(u: Dictionary, has_bow: bool) -> String:
 			return "Zavřít stavidlo" if not kola.is_empty() and bool(kola[0].get("bezi")) else "Pustit vodu na kolo"
 		"mlyn_mleti":
 			return "Semlít obilí"
+		"kovarna_mech":
+			return "Dmýchat měchem"
 	return "Použít"
 
 

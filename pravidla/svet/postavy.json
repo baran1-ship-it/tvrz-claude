@@ -5201,7 +5201,7 @@
    "role": "lamac",
    "muz": true,
    "domov": {
-    "dum": 20,
+    "dum": 22,
     "typ": "ChysePrkna"
    },
    "prace": "lom_stena_1",
@@ -5217,7 +5217,7 @@
    "role": "lamac",
    "muz": true,
    "domov": {
-    "dum": 21,
+    "dum": 23,
     "typ": "ChysePrkna"
    },
    "prace": "lom_stena_2",
@@ -5233,7 +5233,7 @@
    "role": "kamenik",
    "muz": true,
    "domov": {
-    "dum": 20,
+    "dum": 22,
     "typ": "ChysePrkna"
    },
    "prace": "lom_spalek",

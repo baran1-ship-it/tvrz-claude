@@ -1729,6 +1729,12 @@ func _on_use() -> void:
 			hud.toast("Pustil jsi vodu na kolo" if pustit else "Zavřel jsi stavidlo – kolo se zastaví", 2.0)
 		"mlyn_mleti":
 			_mlyn_mlit()
+		"kovarna_mech":
+			# kovarna na vsi (lokace.json kovarna_ves.mech): par tahu pakou, mech dmychne do vyhne
+			for mn in get_tree().get_nodes_in_group("kovarna_mech"):
+				mn.call("pumpuj", float(Pravidla.cti("lokace", "kovarna_ves", "mech", "pumpovat_s")))
+			if (life.fire_spots as Dictionary).has("vyhen_kovarna_ves"):
+				life.fire_spots["vyhen_kovarna_ves"]["boost"] = 1.0      # rozhoreni ohne jako u vyhne na tvrzi (life.gd boost)
 		"sed":
 			var sp: Array = _use["sit"]
 			player.sit(Vector3(sp[0], sp[1], sp[2]), float(_use.get("h", 0.46)) + 0.78, player.global_position, float(_use.get("yaw", 0.0)))

@@ -288,6 +288,12 @@ if _VET.get("stred"):
     if _VET["chalupa"].get("stred"):
         MISTA.append(("vetrak_chalupa", _VET["chalupa"]["stred"][0], _VET["chalupa"]["stred"][1], _VET["chalupa"]["natoceni"],
                       _VET["chalupa"]["rovina_r_m"]))
+# kovarna a dum kovare na konci navsi (Misa 14. 11., lokace.json kovarna_ves): rovina pod kovarnou a domem (stavba_pad),
+# vegetace pryc (stavba_near); model a dum stavi hra (svet._kovarna_dil, _domy_ramce)
+_KOV = _LOKACE_J.get("kovarna_ves", {})
+if _KOV.get("stred"):
+    MISTA.append(("kovarna_ves", _KOV["stred"][0], _KOV["stred"][1], _KOV["natoceni"], _KOV["rovina_r_m"]))
+    MISTA.append(("kovarna_dum", _KOV["dum"]["stred"][0], _KOV["dum"]["stred"][1], _KOV["dum"]["natoceni"], _KOV["dum"]["rovina_r_m"]))
 
 
 def mlyn_lok(x, z):

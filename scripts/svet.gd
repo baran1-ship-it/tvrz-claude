@@ -764,6 +764,8 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_mlyn_dil")
 	_vetrak_dil(root, parent)
 	_krok_cas("_vetrak_dil")
+	_kovarna_dil(parent)
+	_krok_cas("_kovarna_dil")
 	_staj_kone(parent)
 	_ves_domy(root)
 	_krok_cas("_ves_domy")
@@ -6008,6 +6010,16 @@ func _domy_ramce() -> void:
 		_domy.append({"k": 30, "typ": String(vc["model"]), "m": DUM_MER[vc["model"]], "c": c3, "au": Vector2(cos(a3), sin(a3)),
 				"av": Vector2(-sin(a3), cos(a3)), "L": 0.0, "W": 0.0, "xf": xf3, "inv": xf3.affine_inverse(), "y": INF,
 				"paseka": float(ve["rovina_r_m"]), "k_cili": []})
+	# dum kovare na konci navsi (Misa 14. 11., lokace.json kovarna_ves.dum) - jako chalupa mlynare
+	var kv: Dictionary = Pravidla.cti("lokace", "kovarna_ves")
+	if kv.has("dum"):
+		var kd: Dictionary = kv["dum"]
+		var a4 := float(kd["natoceni"])
+		var c4 := Vector2(float(kd["stred"][0]), float(kd["stred"][1]))
+		var xf4 := Transform3D(Basis(Vector3.UP, PI / 2.0 - a4), Vector3(c4.x, 0.0, c4.y))
+		_domy.append({"k": 31, "typ": String(kd["model"]), "m": DUM_MER[kd["model"]], "c": c4, "au": Vector2(cos(a4), sin(a4)),
+				"av": Vector2(-sin(a4), cos(a4)), "L": 0.0, "W": 0.0, "xf": xf4, "inv": xf4.affine_inverse(), "y": INF,
+				"paseka": float(kd["rovina_r_m"]), "k_cili": []})
 	_pesiny_k_domum()
 
 
@@ -6138,7 +6150,7 @@ func _chyse_k_lomu() -> void:
 		return
 	var dvur := (a + b) * 0.5
 	var dc := 0.0
-	var k := 20
+	var k := 20 + VES_CHYSE.size()          # 14. 11. (test duplicity): chyse uhliru jsou 20, 21 - stejne cislo = stejne jmeno uzlu Dum_ves_20, dvere 2x
 	var lom6: Array = PESINY[6]
 	# Misa 0.88: vchody k lomu; pred chysemi spolecny vyslapany placek (udusana hlina), z nej JEDNA cesticka na cestu
 	# k lomu (ne kazda chyse vlastni)
@@ -9949,6 +9961,71 @@ func _vetrak_dil(root: Node3D, parent: Node3D) -> void:
 	var zv: Array = ve["zebrik"]
 	zebrik_use({"pata": xf * _v3(zv[0]), "vrchol": xf * _v3(zv[1]), "nastup": xf * _v3(zv[2]), "sestup": xf * _v3(zv[3])})
 	print("vetrak: u (%.0f, %.0f) y %.2f, kridla %s" % [x, z, xf.origin.y, kr != null])
+
+
+## Kovarna na konci navsi (Misa 14. 11., lokace.json kovarna_ves, NAVOD_KOVARNA.md): dil z modely/kovarna/kovarna.glb na
+## rovine (Blender kraj.MISTA), LOD1 od lod1_od_m, kolize z uzlu -convcolonly (import), ohen vyhne do ohne (life.gd forge
+## jako vyhen na tvrzi), kour z komina, kovadlina z katalogu na znacce, mech s pakou (scripts/kovarna_mech.gd).
+func _kovarna_dil(parent: Node3D) -> void:
+	var kv: Dictionary = Pravidla.cti("lokace", "kovarna_ves")
+	if not kv.has("stred"):
+		return
+	if not ResourceLoader.exists(String(kv["model"])):
+		print("kovarna: model %s chybi (balik z_kovarna)" % kv["model"])
+		return
+	var x := float(kv["stred"][0])
+	var z := float(kv["stred"][1])
+	var xf := Transform3D(Basis(Vector3.UP, float(kv["natoceni"])), Vector3(x, _vyska(x, z), z))
+	var sc := (load(String(kv["model"])) as PackedScene).instantiate() as Node3D
+	sc.name = "Kovarna_dil"
+	sc.transform = xf
+	parent.add_child(sc)
+	for nd in sc.find_children("*", "GeometryInstance3D", true, false):
+		var gi := nd as GeometryInstance3D
+		gi.visibility_range_end = float(kv["dosah_m"])
+		gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if gi.get_aabb().size.length() < 1.0 else gi.cast_shadow
+	if ResourceLoader.exists(String(kv["lod1"])):
+		var l1 := (load(String(kv["lod1"])) as PackedScene).instantiate() as Node3D
+		l1.name = "Kovarna_lod1"
+		l1.transform = xf
+		parent.add_child(l1)
+		for nd in l1.find_children("*", "GeometryInstance3D", true, false):
+			(nd as GeometryInstance3D).visibility_range_begin = float(kv["lod1_od_m"])
+		for cn in l1.find_children("*", "CollisionObject3D", true, false):
+			(cn as Node).queue_free()
+	var oh: Dictionary = kv["ohen"]
+	var ob := sc.find_child(String(oh["bod"]), true, false) as Node3D
+	if ob:
+		var op := xf * _rel_xf(ob, sc).origin
+		data["ohne"].append({"kind": "forge", "pos": [op.x, op.y, op.z], "name": "vyhen_kovarna_ves"})     # jako vyhen na tvrzi
+	var ko := sc.find_child(String(oh["kour"]), true, false) as Node3D
+	if ko:
+		var kp := xf * _rel_xf(ko, sc).origin
+		data["kour"].append([kp.x, kp.y, kp.z])
+	var kd: Dictionary = kv["kovadlina"]
+	var kb := sc.find_child(String(kd["bod"]), true, false) as Node3D
+	if kb:
+		var kq := xf * _rel_xf(kb, sc).origin
+		data["vybaveni"].append({"id": String(kd["id"]), "p": [kq.x, kq.y, kq.z], "yaw": float(kv["natoceni"])})
+	var me: Dictionary = kv["mech"]
+	var paka := sc.find_child(String(me["paka"]), true, false) as Node3D
+	var mech := sc.find_child(String(me["mech"]), true, false) as MeshInstance3D
+	var uch := sc.find_child(String(me["uchop"]), true, false) as Node3D
+	if paka and mech and uch:
+		var up := xf * _rel_xf(uch, sc).origin
+		data["pouziti"].append({"kind": "kovarna_mech", "pos": [up.x, up.y, up.z], "r": float(me["dosah_m"]) / 0.62, "nazev": "Měch"})
+		var mn := Node.new()
+		mn.name = "Kovarna_mech"
+		mn.set_script(preload("res://scripts/kovarna_mech.gd"))
+		mn.set("paka", paka)
+		mn.set("mech", mech)
+		mn.set("zaklad", paka.transform.basis)
+		mn.set("osa", _v3(me["osa"]))
+		mn.set("uhel", float(me["uhel_rad"]))
+		mn.set("tempo", float(me["tempo_rad_s"]))
+		sc.add_child(mn)
+		mn.add_to_group("kovarna_mech")
+	print("kovarna: u (%.0f, %.0f) y %.2f, ohen %s, kour %s, kovadlina %s, mech %s" % [x, z, xf.origin.y, ob != null, ko != null, kb != null, paka != null and mech != null])
 
 
 ## Pytle ve mlyne (Misa 0.99 „pytle ve mlyne jsou na hovno“ - sit modelu Mlyn_PytleMouka s nataženou texturou): kazdy
