@@ -1441,6 +1441,27 @@ func _sedak(c: Dictionary, kde: Vector2, mistnost := "") -> Dictionary:
 				nd = d2
 				nej = {"klic": klic2, "yaw": yaw2 + deg_to_rad(float(e[2])), "y": float(r2["p"][1]) + float(e[3]) - float(sd["vyska_klipu_m"]),
 						"sedak": q2, "lavice": false, "pevny_yaw": true}
+	# sedatka z Blenderu (svet.json pouziti kind sed, napr. stolicky a lavice u stolu ve stanu kupce): hrac je zna,
+	# postavy dosud ne. yaw hrace je smer kamery (-Z), postava hledi po +Z -> otocit o pul kruhu.
+	var pz: Array = main.svet.data.get("pouziti", [])
+	for ui in pz.size():
+		var u: Dictionary = pz[ui]
+		if String(u.get("kind", "")) != "sed" or not u.has("sit"):
+			continue
+		var klic3 := "sedu:%d" % ui
+		if _obsazeno.has(klic3):
+			continue
+		var s3 := Vector3(float(u["sit"][0]), float(u["sit"][1]), float(u["sit"][2]))
+		if _mistnost_u(s3) != mistnost:
+			continue
+		var q3 := Vector2(s3.x, s3.z)
+		var d3 := q3.distance_to(kde)
+		if mistnost != "" and bool(sd.get("v_mistnosti_nahodne", false)):
+			d3 = _rng.randf() * float(sd["hledat_m"])
+		if d3 < nd:
+			nd = d3
+			nej = {"klic": klic3, "yaw": float(u["yaw"]) + PI, "y": s3.y + float(u["h"]) - float(sd["vyska_klipu_m"]),
+					"sedak": q3, "lavice": false, "pevny_yaw": true}
 	if not nej.is_empty() and bool(nej.get("pevny_yaw", false)):
 		var f2 := Vector2(sin(float(nej["yaw"])), cos(float(nej["yaw"])))
 		nej["stani"] = (nej["sedak"] as Vector2) + f2 * float(sd["pred_m"])

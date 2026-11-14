@@ -379,10 +379,9 @@ func _update_lines() -> void:
 		var n := clampi(int(L / 0.075), 2, mm.instance_count)
 		var sag := 0.04 * L
 		var prev := a
-		for i in mm.instance_count:
-			if i >= n:
-				mm.set_instance_transform(i, Transform3D(Basis().scaled(Vector3.ZERO), a))
-				continue
+		# 14. 11. (test duplicity: nevyuzite clanky v nule 2x na stejnem miste): kresli se jen n clanku
+		mm.visible_instance_count = n
+		for i in n:
 			var s := float(i + 1) / n
 			var p := a.lerp(b, s) - Vector3(0, sag * sin(PI * s), 0)
 			var d := (p - prev).normalized()

@@ -1274,7 +1274,14 @@ func _ohrady() -> void:
 					if dd < nej:
 						nej = dd
 						co = "%s %.1f m" % [key, dd]
-			spatne.append("%s plutek %s narazi na %s/%s (%s)" % [it["ohrada"], p.snapped(Vector3.ONE * 0.1), par, nm, co])
+			var cn := h["collider"] as Node
+			var tv := ""
+			for ch: Node in cn.get_children():
+				if ch is CollisionShape3D and (ch as CollisionShape3D).shape:
+					tv = "%s u %s" % [(ch as CollisionShape3D).shape.get_class(), (ch as Node3D).global_position.snapped(Vector3.ONE * 0.1)]
+			var met := str(cn.get_meta_list()) + " " + str(cn.get_parent().get_meta_list() if cn.get_parent() else [])
+			spatne.append("%s plutek %s narazi na %s/%s [%s %s vrstva %d] (%s)" % [it["ohrada"], p.snapped(Vector3.ONE * 0.1), par, nm, tv, met,
+					(cn as CollisionObject3D).collision_layer if cn is CollisionObject3D else -1, co])
 	# kandidati: za kazdym domem (z za strechou) a na strane dvora - volno pro ohradu 4 x 4 m (cesta, pesina, kolize)
 	for d: Dictionary in sv._domy:
 		if not (d["m"] as Dictionary).has("ix"):
@@ -4779,6 +4786,8 @@ func _interier() -> void:
 				# _v_budove); chyba = hustota > 0 a zaroven bod nevynechany _v_budove
 				if (louka._vzorek(q.x, q.z) as Vector3).x > 0.0 and not louka._v_budove(q.x, q.z):
 					spatne += 1
+					if i == 6 and j == 6 or spatne <= 3:
+						print("INTERIER trava v %.1f,%.1f (stavba %d, dil s terenem %s)" % [q.x, q.z, sv._uvnitr.find(st), st.size() > 2])
 	# tvrz: vstup do veze, kovarna, zbrojnice, prujezd (Misa 0.70)
 	for b: Vector2 in [Vector2(-23.0, -13.0), Vector2(-24.0, -11.0), Vector2(-12.0, 8.5), Vector2(-17.0, 11.5), Vector2(-10.0, 11.0), Vector2(-1.6, 12.0)]:
 		vse += 1
@@ -8427,7 +8436,7 @@ func _duplicity() -> void:
 		var k2 := "%s|%s|%s" % [cs.shape.get_class(), str((cs.global_transform * ab.get_center()).snapped(Vector3.ONE * 0.02)), str(ab.size.snapped(Vector3.ONE * 0.02))]
 		if tvary.has(k2):
 			if chyby.size() < 60:
-				chyby.append("kolize 2x: %s a %s" % [str(tvary[k2]).right(50), str(cs.get_path()).right(50)])
+				chyby.append("kolize 2x: %s a %s" % [str(tvary[k2]).right(120), str(cs.get_path()).right(120)])
 		else:
 			tvary[k2] = cs.get_path()
 	var n_mm := 0
@@ -8441,6 +8450,8 @@ func _duplicity() -> void:
 			continue
 		var vid := {}
 		for i in poc:
+			if absf(mm.get_instance_transform(i).basis.determinant()) < 1e-9:
+				continue                              # nulove meritko = schovana instance (nekresli se nic)
 			var kp := str(mm.get_instance_transform(i).origin.snapped(Vector3.ONE * 0.01))
 			if vid.has(kp):
 				n_mm += 1

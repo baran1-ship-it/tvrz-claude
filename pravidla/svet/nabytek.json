@@ -796,15 +796,6 @@
   {
    "id": "lavice_selska",
    "p": [
-    129.0,
-    933.5
-   ],
-   "natoceni_st": 0.0,
-   "popis": "lom u spalku - poledni svacina lamacu"
-  },
-  {
-   "id": "lavice_selska",
-   "p": [
     -7.0,
     204.6
    ],
@@ -812,7 +803,7 @@
    "popis": "pred stanem kupce - posezeni kupce a kolemjdoucich (Misa 11. 11.)"
   }
  ],
- "_venku": "Misa 10. 11.: venkovni lavice (nadvori tvrze, naves, pred krcmou, lom; pred hostincem uz jsou ve svet.json): p [x, z] nebo ulice (0..1 po ose navsi) + bok_m; misto se hleda podle venku_pravidla (svet.gd _nabytek_venku), vyska z terenu",
+ "_venku": "Misa 10. 11.: venkovni lavice (nadvori tvrze, naves, pred krcmou; lom 14. 11. pryc - Misa: lavicka pod lesenim u kamene, lamaci sedi v taboru u stanu svet._lom_vybaveni; pred hostincem uz jsou ve svet.json): p [x, z] nebo ulice (0..1 po ose navsi) + bok_m; misto se hleda podle venku_pravidla (svet.gd _nabytek_venku), vyska z terenu",
  "venku_pravidla": {
   "hledat_m": 6.0,
   "krok_m": 0.5,
