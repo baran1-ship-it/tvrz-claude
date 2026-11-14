@@ -5901,5 +5901,29 @@
   "rakos",
   "reed"
  ],
- "_rostliny_jmena": "14. 11.: části jména sítě rostliny (test hostinec_trava hledá rostliny i mezi samostatnými sítěmi uvnitř staveb)"
+ "_rostliny_jmena": "14. 11.: části jména sítě rostliny (test hostinec_trava hledá rostliny i mezi samostatnými sítěmi uvnitř staveb)",
+ "ves_jas": {
+  "cil": 0.5,
+  "max_x": 2.6,
+  "sytost": 0.9,
+  "zacouzene": {
+   "pripony": [
+    "tram_c",
+    "mazc",
+    "pecc",
+    "hlc",
+    "povc"
+   ],
+   "cil": 0.16,
+   "max_x": 4.0
+  },
+  "vynechat": [
+   "tram_in",
+   "clay_plaster_pec_",
+   "dirt_floor_hl_",
+   "omitka",
+   "stone_wall"
+  ],
+  "_pozn": "Míša 14. 11. („puchart udělal vesnici světlejší“): textury domů vsi (modely/ves/domy_*_diff/albedo) na průměrný jas cil (sRGB, nejvýš max_x), sytost × sytost; začouzené aspoň zacouzene.cil; vnitřek, pec, podlaha, omítka a kámen beze změny. Stejně barvy vrcholů středního stupně (domy_stredni.glb) a barva _Daleko (domy.glb). Podle Pucharta nastroje/havran/stavby_export.gd (a4239c63). Nástroj tools/zesvetli_ves.py (opakované spuštění nic nemění)."
+ }
 }
