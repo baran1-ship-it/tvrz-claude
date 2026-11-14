@@ -588,7 +588,10 @@ func _cesta(a: Vector2, b: Vector2, ya := INF) -> PackedVector2Array:
 	if _nav_bez:
 		return out                                # usek k siti nebo od site nenalezen - ne rovne
 	out.append_array(za[1])
+	var _tg := Time.get_ticks_usec()
 	var p := _g.get_point_path(int(za[0]), int(zb[0]))
+	if _profil and Time.get_ticks_usec() - _tg > 1000:
+		print("LIDE_PROFIL get_point_path %d bodu %.1f ms" % [p.size(), (Time.get_ticks_usec() - _tg) / 1000.0])
 	out.append_array(p)
 	out.append_array(zb[1])
 	if out.is_empty() or out[out.size() - 1] != b:
@@ -623,6 +626,7 @@ func _nav_k_siti(q: Vector2, yq: float, od: bool) -> Array:
 	# kandidati (pruchod vsemi body site) v pameti pozadavku - opakovany pokus dalsi snimek je nepocita znovu
 	var kk := "k%.2f,%.2f" % [q.x, q.y]
 	var kandidati: Array = _nav_hotove.get(kk, [])
+	var _tk := Time.get_ticks_usec()
 	if kandidati.is_empty():
 		for i in _g.get_point_ids():
 			var d := _g.get_point_position(i).distance_to(q)
