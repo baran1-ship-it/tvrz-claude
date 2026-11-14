@@ -1463,19 +1463,29 @@
      "nazev": "kaskada",
      "sklon_od": 0.12,
      "zahloubeni_m": 1.2,
-     "balvanu_na_m": 1.2,
+     "balvanu_na_m": 2.5,
      "schody": {
-      "rozestup_sirek": 1.5,
       "krok_osy_m": 1.0,
-      "balvanu_na_hrane_m": 1.4,
+      "sirka_podil": 0.5,
+      "rozestup_sirek": [
+       0.8,
+       1.5
+      ],
+      "vychylka_podil": 0.3,
+      "balvanu_na_hrane_m": 1.2,
       "meritko_balvanu_hrany": [
        1.1,
        1.7
-      ]
+      ],
+      "natoceni_hrany_st": [
+       15.0,
+       40.0
+      ],
+      "seed": 4141
      }
     }
    ],
-   "_schody": "Misa 14. 11. „voda by se z kopce nemela flakat, perej az vodopad, pozor na sekani“ (resers docs/rozpracovane/potok_pereje_resers.md): kaskada = tune (vodorovna hladina) a pady. Rozestup tuni rozestup_sirek x sirka vody (stupne a tune 1-4 sirky, strmejsi = kratsi; Abrahams 1995 (H/L)/S 1-2), hladina tune = nejnizsi hladina useku (teren se jen zarizne - stupen je skalni hrana, zadny nasyp), osa se na kaskade zjemni na krok_osy_m (pad = 1 krok). Na hrane kazdeho stupne rada balvanu napric (balvanu_na_hrane_m = rozestup), pena pod padem z ceri u kamenu a strmosti v shaderu. Bez castic a pruhlednych vrstev navic (mobil: overdraw)."
+   "_schody": "Misa 14. 11. noc (snimek kaskady s krouzkem: „schody? to nemyslis vazne“, cikcak cara): kaskada = skalni soutesku s klikatou proudnici, ne terasy pres celou sirku (resers docs/rozpracovane/potok_kaskada_resers2.md: Montgomery & Buffington 1997 kaskada nad 0,065, Finnegan 2005 sirka ~0,37x, Chin 0,43-2,4 sirky, Zimmermann & Church 2001 nepravidelne, Abrahams 1995). sirka_podil = sirka vody kaskady / bezna; rozestup_sirek = nahodny rozestup stupnu [min, max] x sirka kaskady; vychylka_podil = proudnice od osy, strana se stridá na kazdem stupni (tune posunuta k prepadu); hrana stupne = rada balvanu sikmo (natoceni_hrany_st od kolmice, stridave); balvanu_na_m v korytu (30-50 % plochy nad vodou). Tune = nejnizsi hladina useku (teren se jen zarizne). Hodnoty [O] odhad, overit snimkem."
   }
  },
  "rybnik_lhota": {

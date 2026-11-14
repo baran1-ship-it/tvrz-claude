@@ -12822,8 +12822,13 @@ func _krajina() -> void:
 		var kask: Dictionary = (Pravidla.cti("voda", "potok", "raz_toku")["druhy"] as Array).back()
 		if kask.has("schody"):
 			var roz := float(kask["schody"]["balvanu_na_hrane_m"])
+			var nat: Array = kask["schody"]["natoceni_hrany_st"]
+			var si := 0
 			for sch: Dictionary in kr.schody:
-				var nrm2: Vector2 = (sch["smer"] as Vector2).orthogonal()
+				# hrana stupne sikmo k proudu (resers: stupne sikme a zakrivene, stridave vlevo/vpravo)
+				var uh := deg_to_rad(rng.randf_range(float(nat[0]), float(nat[1]))) * (1.0 if si % 2 == 0 else -1.0)
+				si += 1
+				var nrm2: Vector2 = (sch["smer"] as Vector2).orthogonal().rotated(uh)
 				var w2: float = sch["w"]
 				var nb := maxi(2, ceili(2.0 * w2 / roz))
 				for ib in nb + 1:

@@ -32,6 +32,7 @@ var hladiny: PackedFloat32Array = PackedFloat32Array()
 var sirky: PackedFloat32Array = PackedFloat32Array()   # pul sirky vody
 var hloubky: PackedFloat32Array = PackedFloat32Array() # hloubka vody uprostred
 var sklony: PackedFloat32Array = PackedFloat32Array()  # nasobek sklonu svahu podel toku (strida strmejsi a mirnejsi)
+var stupen: PackedInt32Array = PackedInt32Array()      # kaskada: cislo useku x 1000 + cislo stupne, jinak -1
 var schody: Array = []                                 # kaskada: hrany stupnu {p, smer, pad, w, k} (balvany, pena)
 var raz: PackedInt32Array = PackedInt32Array()        # index do voda.json potok.raz_toku.druhy (0 klidny, pereje, kaskada)
 var krivost: PackedFloat32Array = PackedFloat32Array() # se znamenkem: > 0 zatacka doleva (stred zatacky vlevo od smeru osy)
@@ -54,16 +55,64 @@ func priprav(vyska: Callable) -> bool:
 	var b0: PackedVector2Array = PackedVector2Array()
 	for p: Array in osa:
 		b0.append(Vector2(p[0], p[1]))
+	var husta: Array[bool] = []                            # bod zjemneneho strmeho useku (kaskada)
 	for k in b0.size():
+		var strmy := false
 		if k > 0:
 			var a0 := b0[k - 1]
 			var dl0 := a0.distance_to(b0[k])
 			var sk0 := absf(float(vyska.call(a0.x, a0.y)) - float(vyska.call(b0[k].x, b0[k].y))) / maxf(dl0, 0.5)
-			if sk0 >= float(kask["sklon_od"]) and kask.has("schody"):
+			strmy = sk0 >= float(kask["sklon_od"]) and kask.has("schody")
+			if strmy:
 				var nd := maxi(1, ceili(dl0 / float(kask["schody"]["krok_osy_m"])))
 				for q in range(1, nd):
 					body.append(a0.lerp(b0[k], float(q) / nd))
+					husta.append(true)
 		body.append(b0[k])
+		husta.append(strmy)
+	# kaskada (Misa 14. 11. noc, cikcak cara; resers potok_kaskada_resers2.md): na kazdem souvislem strmem useku nahodne
+	# rozestupy stupnu (rozestup_sirek x sirka kaskady) a klikata proudnice - od osy o vychylka_podil x sirka kaskady,
+	# strana se stridá na kazdem stupni (proud prechazi z jedne strany na druhou), na koncich useku plynule do osy
+	stupen.resize(body.size())
+	stupen.fill(-1)
+	if kask.has("schody"):
+		var sch: Dictionary = kask["schody"]
+		var w_k := 2.0 * PULSIRKA * float(sch["sirka_podil"])
+		var rng := RandomNumberGenerator.new()
+		rng.seed = int(sch["seed"])
+		var k0 := 0
+		var cislo := 0
+		while k0 < body.size():
+			if not husta[k0]:
+				k0 += 1
+				continue
+			var k1 := k0
+			while k1 + 1 < body.size() and husta[k1 + 1]:
+				k1 += 1
+			var sd := PackedFloat32Array([0.0])
+			for k in range(k0 + 1, k1 + 1):
+				sd.append(sd[sd.size() - 1] + body[k].distance_to(body[k - 1]))
+			var delka := sd[sd.size() - 1]
+			var hranice := PackedFloat32Array([0.0])
+			while hranice[hranice.size() - 1] < delka:
+				var rs: Array = sch["rozestup_sirek"]
+				hranice.append(hranice[hranice.size() - 1] + rng.randf_range(float(rs[0]), float(rs[1])) * w_k)
+			hranice[hranice.size() - 1] = delka
+			var smer := (body[k1] - body[k0]).normalized()
+			var nrm0 := smer.orthogonal()
+			var amp := float(sch["vychylka_podil"]) * w_k
+			var it := 0
+			for k in range(k0, k1 + 1):
+				var sk := sd[k - k0]
+				while it < hranice.size() - 2 and sk >= hranice[it + 1]:
+					it += 1
+				var f := clampf((sk - hranice[it]) / maxf(hranice[it + 1] - hranice[it], 0.1), 0.0, 1.0)
+				var strana := 1.0 if (it + cislo) % 2 == 0 else -1.0
+				var zuz := smoothstep(0.0, w_k, sk) * smoothstep(0.0, w_k, delka - sk)
+				body[k] += nrm0 * (strana * amp * cos(PI * f) * zuz)
+				stupen[k] = cislo * 1000 + it
+			cislo += 1
+			k0 = k1 + 1
 	var n := body.size()
 	var dno := PackedFloat32Array()
 	dno.resize(n)
@@ -139,6 +188,9 @@ func priprav(vyska: Callable) -> bool:
 		for di in druhy_r.size():
 			if sk >= float(druhy_r[di]["sklon_od"]):
 				raz[k] = di
+		if stupen[k] >= 0:
+			raz[k] = druhy_r.size() - 1                   # zjemneny strmy usek = kaskada (stupne, sirka)
+			sirky[k] *= float(kask["schody"]["sirka_podil"])
 		var zh: Variant = druhy_r[raz[k]]["zahloubeni_m"]
 		if zh != null:
 			hladiny[k] = minf(hladiny[k], dno[k] - float(zh))
@@ -147,38 +199,19 @@ func priprav(vyska: Callable) -> bool:
 	var spad := float(Pravidla.cti("voda", "potok", "min_spad"))
 	for k in range(1, n):
 		hladiny[k] = minf(hladiny[k], hladiny[k - 1] - spad * body[k].distance_to(body[k - 1]))
-	# kaskada: tune a pady (voda.json potok.raz_toku _schody) - kazdy souvisly usek kaskady rozdelen na tune po
-	# rozestup_sirek x sirka vody; hladina tune = nejnizsi hladina v ni (teren se jen zarizne, hrana stupne je skala)
-	var ik := druhy_r.size() - 1
+	# kaskada: tune a pady podle stupnu (stupen[k]) - hladina tune = nejnizsi hladina v ni (teren se jen zarizne,
+	# hrana stupne je skala), na hranici stupnu pad
 	if kask.has("schody"):
-		var k0 := 0
-		while k0 < n:
-			if raz[k0] != ik:
-				k0 += 1
-				continue
-			var k1 := k0
-			while k1 + 1 < n and raz[k1 + 1] == ik:
-				k1 += 1
-			var sd := PackedFloat32Array([0.0])
-			for k in range(k0 + 1, k1 + 1):
-				sd.append(sd[sd.size() - 1] + body[k].distance_to(body[k - 1]))
-			var delka := sd[sd.size() - 1]
-			var cil := float(kask["schody"]["rozestup_sirek"]) * 2.0 * PULSIRKA
-			var nt := maxi(1, roundi(delka / cil))
-			var tune: Array = []
-			tune.resize(nt)
-			tune.fill(INF)
-			for k in range(k0, k1 + 1):
-				var it := mini(nt - 1, floori(sd[k - k0] / delka * nt)) if delka > 0.0 else 0
-				tune[it] = minf(float(tune[it]), hladiny[k])
-			for k in range(k0, k1 + 1):
-				var it := mini(nt - 1, floori(sd[k - k0] / delka * nt)) if delka > 0.0 else 0
-				var it_dal := mini(nt - 1, floori(sd[mini(k + 1, k1) - k0] / delka * nt)) if delka > 0.0 else 0
-				hladiny[k] = float(tune[it])
-				if it_dal != it and k < k1:
+		var tune := {}
+		for k in n:
+			if stupen[k] >= 0:
+				tune[stupen[k]] = minf(float(tune.get(stupen[k], INF)), hladiny[k])
+		for k in n:
+			if stupen[k] >= 0:
+				hladiny[k] = float(tune[stupen[k]])
+				if k + 1 < n and stupen[k + 1] >= 0 and stupen[k + 1] != stupen[k]:
 					var smer := (body[k + 1] - body[k]).normalized()
-					schody.append({"p": body[k], "smer": smer, "pad": float(tune[it]) - float(tune[it_dal]), "w": sirky[k], "k": k})
-			k0 = k1 + 1
+					schody.append({"p": body[k], "smer": smer, "pad": float(tune[stupen[k]]) - float(tune[stupen[k + 1]]), "w": sirky[k], "k": k})
 		for k in range(1, n):
 			hladiny[k] = minf(hladiny[k], hladiny[k - 1] - spad * body[k].distance_to(body[k - 1]))
 	var pocty_r := {}
