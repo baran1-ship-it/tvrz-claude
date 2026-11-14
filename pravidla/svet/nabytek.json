@@ -755,11 +755,11 @@
   {
    "id": "lavice_selska",
    "p": [
-    13.0,
+    16.65,
     -3.0
    ],
    "natoceni_st": 90.0,
-   "popis": "nadvori tvrze u vychodni zdi mezi palacem a celednikem (Misa 14. 11.: lavicka u schodu pryc, k prazdne zdi)"
+   "popis": "nadvori tvrze u vychodni zdi mezi palacem a celednikem (Misa 14. 11.: lavicka u schodu pryc, k prazdne zdi) - u vnitrniho lice vychodni hradby (blender/fort.py IX 17,0; lavice hloubka 0,36 + 0,17 m od zdi)"
   },
   {
    "id": "lavice_selska",
