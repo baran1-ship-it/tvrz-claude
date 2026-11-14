@@ -3635,6 +3635,11 @@ func rostliny_okoli(p: Vector3, vse := false, rozpocet_us := 1500) -> void:
 		if ii >= (_rost_data[bb] as Array).size():
 			for m: Node3D in _rost_uzly[bb]:
 				m.visible = true
+			# radek zaseku (diag.udalost, zaseky_rozbor_system.md): odkryta bunka rostlin = nahrani jejich MultiMeshu
+			var dg_r: Object = Engine.get_meta("diag", null)
+			if dg_r:
+				dg_r.udalost("rost_bunek", 1)
+				dg_r.udalost("rost_mmi", (_rost_uzly[bb] as Array).size())
 			_rost_rozest = []
 			continue
 		_rost_dil(bb, ii)
