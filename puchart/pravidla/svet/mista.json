@@ -57,9 +57,17 @@
     "hranice_dreva": [
      1.81,
      0.51
+    ],
+    "kovarna": [
+     13.0,
+     6.6
     ]
    },
-   "rozmery_pozn": "[délka podél x modelu, hloubka podél z] z AABB modelů (Godot, 12. 11.)"
+   "rozmery_pozn": "[délka podél x modelu, hloubka podél z] z AABB modelů (Godot, 12. 11.)",
+   "pozn_kovarna": "kovárna (hra/modely/stavby_h/kovarna.glb + _lod1): AABB x −3,45…6,34 (přístřešek na +x), z −3,27…3,08; počátek ve středu kovárny, ne půdorysu → rozměr souměrně kolem počátku (13 × 6,6) pro kontrolu místa; LOD1 od lod1_od_m (návod: 0–60 m podrobně, od 55 m LOD1)",
+   "lod1_od_m": 55.0,
+   "kovarna_disk_id": "148Da9sHyjzBWpZO8qnjslZSLliEFsKzn",
+   "kovarna_zdroj": "Míša 14. 11.: Disk složka „budovy“ (1O1VPNjyMNDCDxm4SB3nm64OKGnopwb5x) kovarna.zip – kovarna.glb, kovarna_lod1.glb (nastroje/stavby_z_havrana.sh stáhne)"
   },
   "stromy": {
    "jablon": {
@@ -86,6 +94,7 @@
    ],
    "modely": [
     "Dum2",
+    "Dum1:kovarska",
     "Dum1",
     "Dum2",
     "Rychta",
@@ -99,7 +108,7 @@
    "jistota": "DOLOZENO existence a přibližná poloha; uspořádání usedlostí NAVRH (podle mezí, ulicová ves)",
    "cesta": "z hřebenové / hlavní cesty k hradu A (ne úvozem do údolí – Míša 10. 11.)",
    "typ": "ves",
-   "dosah_m": 110,
+   "dosah_m": 150,
    "pozn_modely": "Míša 11. 11.: chýše (kůra, prkna) „spíš v lese u hávíru nebo v lomu, ne ve vsi“ (jako Havran: u lomu a uhlířů) – ve vsi jen usedlosti",
    "usedlost": "selska",
    "pole": true,
@@ -107,7 +116,9 @@
     "studna": true,
     "lipa_u_studny": true,
     "zdroj": "Havran blender/vesnice.py build: studna na návsi (studna.build), lípa na návsi (lokace.json ves.dvorec.lipa); KCD1 ves_3/ves_6: široká hliněná náves"
-   }
+   },
+   "pozn_kovarna_14_11": "Míša 14. 11.: „tady ti posílám kovárnu, chtěl bych aby byla ve vsi plus jeden nový dům“ (Disk, kovarna.zip – model Odkazu Havrana, docs/reference/kovarna/NAVOD_KOVARNA.md) → nová kovářova usedlost (dům + kovárna, typ kovarska); model:typ v seznamu = jiný typ usedlosti než místa",
+   "pozn_dosah_14_11": "kovářova usedlost s kovárnou (9. usedlost, Míša 14. 11.): do 110 m od středu se ulice nevešla (parcely na cestě / soused) → 150 m"
   },
   {
    "id": "mlyn_velicka",
@@ -414,6 +425,66 @@
     "lipa_vjezd_p": 0.0,
     "pole": false,
     "povinne": false
+   },
+   "kovarska": {
+    "predzahradka_m": [
+     0.0,
+     2.0
+    ],
+    "predzahradka_pozn": "Havran ves.dvorec.zelen.predzahradka pás 2 m; KCD1 ves_2 dům přímo u ulice → 0–2 m",
+    "dvur_m": [
+     8.5,
+     10.5
+    ],
+    "zahrada_m": [
+     17.5,
+     18.5
+    ],
+    "za_domem_m": [
+     4.0,
+     5.5
+    ],
+    "od_boku_m": 0.8,
+    "mezera_m": 0.6,
+    "sad_m": [
+     8.0,
+     13.0
+    ],
+    "stodola": {
+     "stodola": 0.55,
+     "stodola_mala": 0.45
+    },
+    "kolna": {
+     "kovarna_k_ulici": 1.0
+    },
+    "plot_ulice": {
+     "latovy": 0.75,
+     "proutěny": 0.25
+    },
+    "brana": {
+     "krytá": 0.5,
+     "vrata": 0.5
+    },
+    "branka_p": 0.7,
+    "plot_bok": {
+     "zerdovy": 0.55,
+     "proutěny": 0.3,
+     "latovy": 0.15
+    },
+    "plot_zahrada": {
+     "proutěny": 0.8,
+     "latovy": 0.2
+    },
+    "jablone": [
+     1,
+     4
+    ],
+    "strom_dvur_p": 0.35,
+    "lipa_vjezd_p": 0.25,
+    "pole": true,
+    "povinne": false,
+    "odstup_kovarny_m": 4.0,
+    "zdroj": "kovářova usedlost (NAVRH): kovárna stranou od domu otevřenou stranou k ulici (oheň dál od stavení; KCD2 kovárny ve vsi u cesty – Havran docs/rozpracovane/kcd_zivot_postav.md, předloha docs/reference/kovarna/1_celek.png), dům a dvůr jako selská"
    }
   },
   "ploty": {

@@ -181,6 +181,11 @@ def _usedlost(x, z, yaw, m, typ, rng, zabrano):
     elif kol == "misto_zahrady":
         # kůlna na vozy hostů otevřená k cestě, na straně zahrady (krčma: zájezdní dvůr, reserse_mosty_krcma.md)
         hosp.append(["kolna", *F.w(uf - 0.6 - kh / 2, -hw - T.get("odstup_kolny_m", 0.8) - kl / 2), yaw])
+    elif kol == "kovarna_k_ulici":
+        # kovárna na straně zahrady otevřenou stranou (+z modelu) k ulici, přístřešek (+x modelu) k domu, odstup_kovarny_m
+        # od boku domu (Míša 14. 11.); počátek modelu 6,34 m od konce přístřešku (AABB kovarna.glb)
+        kvl, kvh = MI["modely"]["hospodarske"]["rozmery"]["kovarna"]
+        hosp.append(["kovarna", *F.w(uf - 0.6 - kvh / 2, -hw - T["odstup_kovarny_m"] - 6.4), yaw])
     elif kol == "bok_dvora_u_domu":
         # kůlna bokem do dvora, odstup_kolny_m od boku domu, čelo v linii štítu (krčma 13. 11.: za dvorem tok – od_toku_m)
         ks_ = T.get("kolna_strana", 1)   # strana kůlny u domu (krčma: stáj u dvora, kůlna na druhém boku)
@@ -314,15 +319,16 @@ for misto in MI["mista"]:
             t = o[min(i + 2, len(o) - 1)] - o[max(i - 2, 0)]; t = t / (np.linalg.norm(t) or 1.0); n_ = np.array([-t[1], t[0]])
             for strana in (1, -1):
                 if k >= len(modely): break   # počet usedlostí = seznam modelů místa (mista.json)
-                m = modely[k]
+                m = modely[k]; typ_k = typ
+                if ":" in m: m, typ_k = m.split(":")   # model:typ usedlosti (Míša 14. 11.: kovářova usedlost s kovárnou)
                 for od in np.arange(R["odstup_m"], R["odstup_max_m"] + 0.1, 1.5):
                     x, z = o[i] + n_ * strana * od
                     rng = random.Random(U["semeno"] * 100 + n_used)
                     d_ = -n_ * strana; yaw = math.atan2(d_[0], d_[1]) + rng.uniform(-0.07, 0.07)   # štít k ulici, natočení ± 4°
                     v = stavba_ok(x, z, yaw, m)
                     if not v or Point(x, z).distance(zabrano) < 2.0: continue
-                    us = usedlost(x, z, yaw, m, typ, rng, zabrano) if typ else None
-                    if typ and not us: continue
+                    us = usedlost(x, z, yaw, m, typ_k, rng, zabrano) if typ_k else None
+                    if typ_k and not us: continue
                     pridej_dum(misto, m, x, z, yaw, v); k += 1; n_used += 1
                     if us: us["misto"] = misto["id"]; us["i"] = n_used; useds.append(us); zabrano = zabrano.union(us["parcela"])
                     break

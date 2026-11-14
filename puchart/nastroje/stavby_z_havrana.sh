@@ -11,4 +11,7 @@ sed "s#const OUT := .*#const OUT := \"$K/hra/modely/stavby_h/\"#" $K/nastroje/ha
 cd $R; git fetch -q origin claude/new-session-0dtk58 || true
 for f in $(git ls-tree -r --name-only $B data | grep -E "^data/(z_(ves|mlyn|rostliny)|p_(stodola|stodola_mala|kolna|kurnik)|tex_predmety)-"); do git show $B:$f >> $T/$(basename $(basename $f .000) .001); done   # balík po částech .000/.001 = spojit (z_rostliny: jabloň); p_stodola, p_stodola_mala, p_kolna, p_kurnik = hospodářské stavby usedlostí (+ tex_predmety: sdílené textury předmětů, bez nich se model nenačte)
 (cd $T && timeout 1200 $G --headless --path . -s ex.gd -- $T/*.pck 2>&1 | grep -E "^STAVBA|^CHYBI")
+# kovárna (Míša 14. 11., Disk „budovy“ kovarna.zip – model Odkazu Havrana; docs/reference/kovarna/NAVOD_KOVARNA.md): glb + LOD1
+KOV=$(python3 -c "import json;print(json.load(open('$K/pravidla/svet/mista.json'))['modely']['hospodarske']['kovarna_disk_id'])")
+[ -f $K/hra/modely/stavby_h/kovarna.glb ] || (curl -sSL -m 300 -o $T/kovarna.zip "https://drive.usercontent.google.com/download?id=$KOV&export=download&confirm=t" && unzip -oq -j $T/kovarna.zip kovarna.glb kovarna_lod1.glb -d $K/hra/modely/stavby_h/)
 rm -rf $T; ls -la $K/hra/modely/stavby_h/

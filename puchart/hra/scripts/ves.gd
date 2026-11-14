@@ -115,6 +115,13 @@ func _hospodarske() -> void:
 		for g in n.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_end = blizko if ma_st else st_do
 			(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if ma_st else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		var lod1_p := SH + mid + "_lod1.glb"   # vzdálený stupeň z modelu (kovárna, Míša 14. 11.: návod 0–60 m podrobně, od 55 m LOD1)
+		if ResourceLoader.exists(lod1_p):
+			var od1 := float((d["modely"]["hospodarske"] as Dictionary).get("lod1_od_m", 55.0))
+			for g in n.find_children("*", "GeometryInstance3D", true, false): (g as GeometryInstance3D).visibility_range_end = od1 + 5.0
+			var l1: Node3D = (load(lod1_p) as PackedScene).instantiate(); l1.name = mid + "_LOD1"; n.add_child(l1)
+			for g in l1.find_children("*", "GeometryInstance3D", true, false):
+				(g as GeometryInstance3D).visibility_range_begin = od1; (g as GeometryInstance3D).visibility_range_end = st_do
 		if ma_st:
 			var si: Node = (sc[1] as PackedScene).instantiate()
 			for mi in si.find_children("*", "MeshInstance3D", true, false):
