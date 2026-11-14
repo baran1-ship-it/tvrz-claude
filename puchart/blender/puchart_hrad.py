@@ -1230,8 +1230,16 @@ def sklep_A(P, g):
         u2 = S["kobky"][k + 1]["u0"] if k + 1 < len(S["kobky"]) else zs["u0"]
         um = (u1 + u2) / 2; zed2(P, W(um, 0), W(um, pr["v0"]), u2 - u1, strop, du, cimburi=False, parapet=0, ext0=0, ext1=0)
     # okapový chodník u V čela paláce v úrovni nádvoří (kryje hranu výkopu)
-    oc = S["okapovy_chodnik"]; P.box(M(W(-tl - oc["sirka"] / 2, Wi / 2, A["nadvori_y"] - 0.12), basis=frame(du)),
-                                     (Wi + 2 * tl + 0.4, 0.4, oc["sirka"]), "kvadr_sedy")
+    # Míša 14. 11.: „ten blok mezi paláci horního hradu je co? nelíbí se mi tam“ – chodník stál ve výšce nádvoří, terén uličky je
+    # o 0,2–0,3 m níž → vrch chodníku v úrovni terénu uličky (medián podél vnější hrany), dolů přes hranu výkopu
+    oc = S["okapovy_chodnik"]
+    # po kusech podél terénu (terén uličky klesá o 0,5 m – jedna rovná deska z jednoho konce trčela)
+    nk_ = 8; v0_oc, v1_oc = -tl - 0.2, Wi + tl + 0.2
+    for k_ in range(nk_):
+        va_ = v0_oc + (v1_oc - v0_oc) * k_ / nk_; vb_ = v0_oc + (v1_oc - v0_oc) * (k_ + 1) / nk_
+        g_oc = min(ter(*W(-tl - oc["sirka"] - 0.3, vv_).xz) for vv_ in (va_, vb_))
+        top_oc = min(A["nadvori_y"] + 0.08, g_oc + 0.02)
+        P.box(M(W(-tl - oc["sirka"] / 2, (va_ + vb_) / 2, top_oc - 0.6), basis=frame(du)), (vb_ - va_ + 0.01, 1.2, oc["sirka"]), "kvadr_sedy")
     # vyzdívka V čela a S stěny (schová hranu terénní jámy), dveře ze šíje i skrz ni
     ob = S["obklad"]; sj = S["sije"]
     zed2(P, W(ob["u_tl"] / 2, 0), W(ob["u_tl"] / 2, Wi), ob["u_tl"], strop, du, cimburi=False, parapet=0, ext0=0, ext1=0)

@@ -475,6 +475,431 @@
    ],
    "open": 95,
    "dur": 1.6
+  },
+  {
+   "name": "KrcmaL_Dvere_Dvur",
+   "dum": "KrcmaL",
+   "kind": "dvere",
+   "group": "KrcmaL_Dvere_Dvur",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     -0.473,
+     0.986,
+     0.04,
+     0.925,
+     2.01,
+     0.075
+    ]
+   ],
+   "use_mistni": [
+    -0.473,
+    1.0,
+    0.04
+   ],
+   "open": 100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Dvere_Jizba",
+   "dum": "KrcmaL",
+   "kind": "dvere",
+   "group": "KrcmaL_Dvere_Jizba",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     0.04,
+     1.052,
+     -0.447,
+     0.075,
+     2.13,
+     0.884
+    ]
+   ],
+   "use_mistni": [
+    0.04,
+    1.0,
+    -0.447
+   ],
+   "open": -100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Dvere_Komora",
+   "dum": "KrcmaL",
+   "kind": "dvere",
+   "group": "KrcmaL_Dvere_Komora",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     0.396,
+     0.988,
+     0.04,
+     0.782,
+     2.014,
+     0.076
+    ]
+   ],
+   "use_mistni": [
+    0.396,
+    1.0,
+    0.04
+   ],
+   "open": 100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Dvere_Noclezna",
+   "dum": "KrcmaL",
+   "kind": "dvere",
+   "group": "KrcmaL_Dvere_Noclezna",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     -0.04,
+     1.002,
+     -0.442,
+     0.076,
+     2.045,
+     0.87
+    ]
+   ],
+   "use_mistni": [
+    -0.04,
+    1.0,
+    -0.442
+   ],
+   "open": 100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Dvere_Pokoj1",
+   "dum": "KrcmaL",
+   "kind": "dvere",
+   "group": "KrcmaL_Dvere_Pokoj1",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     -0.04,
+     1.003,
+     -0.449,
+     0.076,
+     2.044,
+     0.883
+    ]
+   ],
+   "use_mistni": [
+    -0.04,
+    1.0,
+    -0.449
+   ],
+   "open": 100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Dvere_Pokoj2",
+   "dum": "KrcmaL",
+   "kind": "dvere",
+   "group": "KrcmaL_Dvere_Pokoj2",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     -0.04,
+     1.0,
+     -0.45,
+     0.076,
+     2.036,
+     0.88
+    ]
+   ],
+   "use_mistni": [
+    -0.04,
+    1.0,
+    -0.45
+   ],
+   "open": 100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Dvere_Pokoj3",
+   "dum": "KrcmaL",
+   "kind": "dvere",
+   "group": "KrcmaL_Dvere_Pokoj3",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     -0.04,
+     1.007,
+     -0.447,
+     0.076,
+     2.036,
+     0.887
+    ]
+   ],
+   "use_mistni": [
+    -0.04,
+    1.0,
+    -0.447
+   ],
+   "open": 100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Dvere_Senkovna",
+   "dum": "KrcmaL",
+   "kind": "dvere",
+   "group": "KrcmaL_Dvere_Senkovna",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     -0.04,
+     1.049,
+     -0.495,
+     0.076,
+     2.137,
+     0.985
+    ]
+   ],
+   "use_mistni": [
+    -0.04,
+    1.0,
+    -0.495
+   ],
+   "open": 100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Dvere_Senkyrka",
+   "dum": "KrcmaL",
+   "kind": "dvere",
+   "group": "KrcmaL_Dvere_Senkyrka",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     0.04,
+     1.053,
+     0.398,
+     0.075,
+     2.128,
+     0.769
+    ]
+   ],
+   "use_mistni": [
+    0.04,
+    1.0,
+    0.398
+   ],
+   "open": 100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Dvere_Vchod",
+   "dum": "KrcmaL",
+   "kind": "dvere",
+   "group": "KrcmaL_Dvere_Vchod",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     0.498,
+     0.989,
+     -0.04,
+     0.984,
+     2.01,
+     0.075
+    ]
+   ],
+   "use_mistni": [
+    0.498,
+    1.0,
+    -0.04
+   ],
+   "open": 100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Vrata_L",
+   "dum": "KrcmaL_Vrata_L",
+   "kind": "vrata",
+   "group": "KrcmaL_Vrata",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     0.596,
+     1.188,
+     -0.04,
+     1.188,
+     2.413,
+     0.075
+    ]
+   ],
+   "use_mistni": [
+    1.193,
+    1.0,
+    -0.079
+   ],
+   "open": 100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Vrata_P",
+   "dum": "KrcmaL_Vrata_P",
+   "kind": "vrata",
+   "group": "KrcmaL_Vrata",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     -0.596,
+     1.187,
+     -0.04,
+     1.183,
+     2.412,
+     0.075
+    ]
+   ],
+   "use_mistni": [
+    -1.192,
+    1.0,
+    -0.079
+   ],
+   "open": -100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Vrata_Staj1",
+   "dum": "KrcmaL_Vrata_Staj1",
+   "kind": "vrata",
+   "group": "KrcmaL_Vrata_Staj1",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     0.04,
+     1.143,
+     -0.78,
+     0.076,
+     2.324,
+     1.542
+    ]
+   ],
+   "use_mistni": [
+    0.04,
+    1.0,
+    -0.78
+   ],
+   "open": -100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "KrcmaL_Vrata_Staj2",
+   "dum": "KrcmaL_Vrata_Staj2",
+   "kind": "vrata",
+   "group": "KrcmaL_Vrata_Staj2",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     0.04,
+     1.143,
+     -0.78,
+     0.076,
+     2.324,
+     1.539
+    ]
+   ],
+   "use_mistni": [
+    0.04,
+    1.0,
+    -0.78
+   ],
+   "open": -100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "Hajovna_Dvere_Jizba",
+   "dum": "Hajovna",
+   "kind": "dvere",
+   "group": "Hajovna_Dvere_Jizba",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     -0.04,
+     1.052,
+     -0.424,
+     0.075,
+     2.132,
+     0.829
+    ]
+   ],
+   "use_mistni": [
+    -0.04,
+    1.0,
+    -0.424
+   ],
+   "open": -100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "Hajovna_Dvere_Komora",
+   "dum": "Hajovna",
+   "kind": "dvere",
+   "group": "Hajovna_Dvere_Komora",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     0.424,
+     0.987,
+     -0.04,
+     0.826,
+     2.008,
+     0.075
+    ]
+   ],
+   "use_mistni": [
+    0.424,
+    1.0,
+    -0.04
+   ],
+   "open": 100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "Hajovna_Dvere_Vchod",
+   "dum": "Hajovna",
+   "kind": "dvere",
+   "group": "Hajovna_Dvere_Vchod",
+   "glb_zavreno": true,
+   "koren": "Mista",
+   "cols": [
+    [
+     0.445,
+     0.988,
+     -0.04,
+     0.888,
+     2.013,
+     0.075
+    ]
+   ],
+   "use_mistni": [
+    0.445,
+    1.0,
+    -0.04
+   ],
+   "open": 100.0,
+   "dur": 1.1
   }
  ]
 }

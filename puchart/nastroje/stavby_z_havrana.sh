@@ -14,4 +14,11 @@ for f in $(git ls-tree -r --name-only $B data | grep -E "^data/(z_(ves|mlyn|rost
 # kovárna (Míša 14. 11., Disk „budovy“ kovarna.zip – model Odkazu Havrana; docs/reference/kovarna/NAVOD_KOVARNA.md): glb + LOD1
 KOV=$(python3 -c "import json;print(json.load(open('$K/pravidla/svet/mista.json'))['modely']['hospodarske']['kovarna_disk_id'])")
 [ -f $K/hra/modely/stavby_h/kovarna.glb ] || (curl -sSL -m 300 -o $T/kovarna.zip "https://drive.usercontent.google.com/download?id=$KOV&export=download&confirm=t" && unzip -oq -j $T/kovarna.zip kovarna.glb kovarna_lod1.glb -d $K/hra/modely/stavby_h/)
+# celé stavby z Disku (krčma, hájovna – Míša 14. 11.): stáhnout zip, vybrat glb; krčma do řady upravená blender/celky_upravy.py
+python3 -c "import json;C=json.load(open('$K/pravidla/svet/mista.json'))['modely']['celky'];[print(k,v['disk_id'],' '.join(v['zip'])) for k,v in C.items() if isinstance(v,dict)]" | while read M_ ID_ Z_; do
+  (curl -sSL -m 300 -o $T/$M_.zip "https://drive.usercontent.google.com/download?id=$ID_&export=download&confirm=t" && unzip -oq -j $T/$M_.zip $Z_ -d $T/$M_/) || continue
+  if python3 -c "import json,sys;sys.exit(0 if 'uprava' in json.load(open('$K/pravidla/svet/mista.json'))['modely']['celky']['$M_'] else 1)"; then
+    set -- $Z_; /opt/bl/bin/python $K/blender/celky_upravy.py $K $M_ $T/$M_/$1 $K/hra/modely/stavby_h/krcma_rada.glb $T/$M_/$2 $K/hra/modely/stavby_h/krcma_rada_lod1.glb
+  else cp $T/$M_/*.glb $K/hra/modely/stavby_h/; fi
+done
 rm -rf $T; ls -la $K/hra/modely/stavby_h/

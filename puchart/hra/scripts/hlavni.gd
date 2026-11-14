@@ -646,6 +646,9 @@ func _mista() -> void:
 	var st_mat := StandardMaterial3D.new(); st_mat.vertex_color_use_as_albedo = true; st_mat.roughness = 0.9
 	var uzel := Node3D.new(); uzel.name = "Mista"; add_child(uzel)
 	for s: Dictionary in d["stavby"]:
+		if s.has("soubor"):   # celá stavba z Disku (krčma, hájovna – Míša 14. 11.): vlastní glb, posun počátku, LOD1, vnitřek zblízka
+			_celek(uzel, s, float(lod["vnitrek_do_m"]))
+			continue
 		var vzor := sc.get_node_or_null(String(s["model"])) as Node3D
 		if vzor == null: continue
 		var dum := vzor.duplicate() as Node3D
@@ -678,6 +681,45 @@ func _mista() -> void:
 	sc.queue_free()
 	if ssc: ssc.queue_free()
 	print("MISTA staveb %d" % uzel.get_child_count())
+
+
+## Celek (mista_rozmisteni CELKY): model postavený na střed půdorysu s posunem počátku posun_x podél osy x modelu; podrobný model
+## do lod1_od_m, dál LOD1 (návod modelu), vnitřní skupina jen do vnitrek_do_m (návod: „Interier_skupina jde zvenku vypnout“).
+func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float) -> void:
+	if not ResourceLoader.exists(String(s["soubor"])): return
+	var n: Node3D = (load(String(s["soubor"])) as PackedScene).instantiate()
+	n.name = "%s_%s_%d" % [s["misto"], s["model"], uzel.get_child_count()]   # skupina dveří dvere.gd = dveře@instance
+	var b := Basis(Vector3.UP, float(s["yaw"]))
+	n.transform = Transform3D(b, Vector3(float(s["x"]), float(s["teren_y"]), float(s["z"])) + b * Vector3(float(s.get("posun_x", 0.0)), 0, 0))
+	uzel.add_child(n)
+	var od1 := float(s["lod1_od_m"]) if s.get("lod1_od_m") != null else 60.0
+	var dal := 75.0 if OS.has_feature("mobile") else 130.0
+	for g in n.find_children("*", "GeometryInstance3D", true, false):
+		(g as GeometryInstance3D).visibility_range_end = od1 + 5.0
+	for jm in s.get("vnitrek", []):
+		var vn := n.find_child(String(jm), true, false)
+		if vn:
+			var gs: Array = vn.find_children("*", "GeometryInstance3D", true, false)
+			if vn is GeometryInstance3D: gs.append(vn)
+			for g in gs:
+				(g as GeometryInstance3D).visibility_range_end = vnitrek_do; (g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var kb := StaticBody3D.new(); kb.name = "RampyDveri"   # nájezd na práh vnějších dveří (podlaha_m nad terénem)
+	for r: Dictionary in s.get("rampy", []):
+		var dv := n.find_child(String(r["uzel"]), true, false) as MeshInstance3D
+		if dv == null: continue
+		var ab := dv.get_aabb(); var c := dv.position + ab.position + ab.size * 0.5   # střed křídla v souřadnicích modelu
+		var ven := Vector3(float(r["ven"][0]), 0, float(r["ven"][1])); var bok := Vector3(ven.z, 0, -ven.x)
+		var p0 := Vector3(c.x, -0.02, c.z) + ven * 2.4; var p1 := Vector3(c.x, float(s.get("podlaha_m", 0.45)) + 0.02, c.z) - ven * 0.25
+		var cs := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(1.0, 0.12, (p1 - p0).length()); cs.shape = bx
+		var dz := (p1 - p0).normalized(); cs.transform = Transform3D(Basis(bok, dz.cross(bok).normalized(), dz).orthonormalized(), (p0 + p1) * 0.5 - dz.cross(bok).normalized() * 0.06)
+		kb.add_child(cs)
+	if kb.get_child_count() > 0: n.add_child(kb)
+	else: kb.free()
+	if s.get("lod1") != null and ResourceLoader.exists(String(s["lod1"])):
+		var l1: Node3D = (load(String(s["lod1"])) as PackedScene).instantiate(); l1.name = "LOD1"; n.add_child(l1)
+		for g in l1.find_children("*", "GeometryInstance3D", true, false):
+			(g as GeometryInstance3D).visibility_range_begin = od1; (g as GeometryInstance3D).visibility_range_end = dal
+		for c in l1.find_children("*", "CollisionObject3D", true, false): c.queue_free()
 
 
 ## Šikmá kolize u vnějších dveří domu (Míša 13. 11.: „do hájovny nemůžu vstoupit, všechny budovy musí být vstupné“): domy

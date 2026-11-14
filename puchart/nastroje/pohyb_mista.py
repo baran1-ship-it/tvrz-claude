@@ -14,7 +14,7 @@ K = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else ".")
 PR = json.load(open(K + "/pravidla/svet/pohyb_mista.json"))
 
 
-def uzly_dveri(cesta):
+def uzly_dveri(cesta, vzory=("_Dvere",)):
     """(jméno, translation, min, max obalu sítě – první primitivum) uzlů *_Dvere* se sítí v glb."""
     if not os.path.exists(cesta):
         print("POHYB_MISTA chybí %s" % cesta)
@@ -24,9 +24,9 @@ def uzly_dveri(cesta):
     A = j["accessors"]; out = []
     for n in j["nodes"]:
         jm = n.get("name", "")
-        if "_Dvere" not in jm or "mesh" not in n: continue
+        if not any(v_ in jm for v_ in vzory) or "mesh" not in n or jm.endswith("-convcolonly"): continue
         a = A[j["meshes"][n["mesh"]]["primitives"][0]["attributes"]["POSITION"]]   # první materiál = prkna křídla (bez kování)
-        out.append((jm, n.get("translation", [0, 0, 0]), a["min"], a["max"]))
+        out.append((jm, n.get("translation", [0, 0, 0]), a["min"], a["max"], n.get("extras", {})))
     return out
 
 
@@ -49,13 +49,22 @@ def zaznam(jm, tr, lo, hi, uhel, ven, kind, group, dur, koren, use_zamek=False):
 
 
 dily = []
-for jm, tr, lo, hi in uzly_dveri(K + "/hra/modely/stavby_h/domy.glb"):   # dveře domů: dovnitř (smer)
+for jm, tr, lo, hi, _ex in uzly_dveri(K + "/hra/modely/stavby_h/domy.glb"):   # dveře domů: dovnitř (smer)
     dily.append(zaznam(jm, tr, lo, hi, PR["uhel_deg"], PR["smer"] == "ven", "dvere", jm, PR["doba_s"], PR.get("koren", "Mista")))
 ST = PR["stodoly"]
 for soubor in ST["soubory"]:   # vrata stodol: ven, obě křídla jedna skupina
-    for jm, tr, lo, hi in uzly_dveri(os.path.join(K, soubor)):
+    for jm, tr, lo, hi, _ex in uzly_dveri(os.path.join(K, soubor)):
         dily.append(zaznam(jm, tr, lo, hi, ST["uhel_deg"], ST["smer"] == "ven", ST["kind"], jm.split("_Dvere")[0] + "_Dvere",
                            ST["doba_s"], ST["koren"], use_zamek=True))
+# celé stavby z Disku (krčma, hájovna – Míša 14. 11.): dveře a vrata podle extras modelu (otevreni_deg, otevira_se), kořen Mista;
+# vrata (dvě křídla <X>_Vrata_L/P) jedna skupina
+MI_ = json.load(open(K + "/pravidla/svet/mista.json"))["modely"].get("celky", {})
+for m_, c_ in MI_.items():
+    if not isinstance(c_, dict): continue
+    for jm, tr, lo, hi, ex in uzly_dveri(os.path.join(K, "hra", c_["soubor"][len("res://"):]), ("_Dvere", "_Vrata")):
+        vrata_ = "_Vrata_" in jm and jm.rsplit("_", 1)[-1] in ("L", "P")
+        dily.append(zaznam(jm, tr, lo, hi, float(ex.get("otevreni_deg", PR["uhel_deg"])), ex.get("otevira_se", "dovnitř") == "ven", "vrata" if "_Vrata" in jm else "dvere",
+                           jm.rsplit("_", 1)[0] if vrata_ else jm, PR["doba_s"], PR.get("koren", "Mista"), use_zamek=vrata_))
 json.dump({"popis": "dveře domů a vrata stodol nových míst (nastroje/pohyb_mista.py z pravidla/svet/pohyb_mista.json, domy.glb a predmety_h/stodola*.glb) – čte dvere.gd pod uzlem koren (Mista / Ves); souřadnice uzlu křídla, platí pro každou instanci",
            "dily": dily}, open(K + "/hra/data/pohyb_mista.json", "w"), ensure_ascii=False, indent=1)
 print("POHYB_MISTA dveří %d (%s)" % (len(dily), ", ".join(sorted({d["dum"] for d in dily}))))

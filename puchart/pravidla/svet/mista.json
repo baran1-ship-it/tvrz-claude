@@ -98,6 +98,141 @@
     "daleko": "res://modely/stromy/lipa_stredni_daleko.glb",
     "zdroj": "Havran lokace.json ves.dvorec.zelen u_vjezdu / lipa na návsi (lípa střední 10–12 m)"
    }
+  },
+  "celky": {
+   "popis": "Celé stavby z Disku Míši (model Odkazu Havrana se vším: dům, dvůr, plot, vrata, stáj) – místo se staví jako jeden díl bez usedlosti (Míša 14. 11.: „krčma a hájovna – nahraď novými modely naše původní“). aabb = [x0, x1, z0, z1] modelu (počátek na terénu, ulice/vchod +z); prichod = místo před vchodem v souřadnicích modelu (mapa – rychlé cestování, trasa testu); vnitrek = uzly kreslené jen zblízka; lod1 od lod1_od_m (návod modelu).",
+   "KrcmaL": {
+    "soubor": "res://modely/stavby_h/krcma_rada.glb",
+    "lod1": "res://modely/stavby_h/krcma_rada_lod1.glb",
+    "aabb": [
+     -8.59,
+     24.0,
+     -4.9,
+     5.9
+    ],
+    "prichod": [
+     0.65,
+     7.0
+    ],
+    "pohled": [
+     0.65,
+     3.87
+    ],
+    "vnitrek": [
+     "KrcmaL_Interier_skupina"
+    ],
+    "lod1_od_m": 65.0,
+    "disk_id": "1W6GXRlqODF67QxnYsyhalHC2UZeRxFh8",
+    "zip": [
+     "krcma_L.glb",
+     "krcma_L_lod1.glb"
+    ],
+    "zdroj": "Disk Míši krcma_L.zip (14. 11.), docs/reference/krcma_L/NAVOD_KRCMA_L.md – krčma do L: šenkovna, síň s černou kuchyní, jizba, komůrka, komora; křídlo: kamenná stáj, pokojíky, nocležna; dvůr s vraty a plotem; ≈172 tis. troj.",
+    "od_toku_m": 5.0,
+    "max_prevyseni_m": 3.0,
+    "pozn_meze": "Míša 14. 11.: „dávám výjimku pro hospodu, že může být blíž vodě, na 5 m“ – od toku 5 m (jinak 15 m); převýšení pod půdorysem do 3 m (plošina srovná); krčma v řadě podél cesty (uprava) – 33 × 11 m",
+    "uprava": {
+     "pozn": "Míša 14. 11.: „chci ji na tom místě“, „dát vedle sebe hospodu a stáje“ – křídlo (stáj, pokojíky, nocležna, pavlač) otočené o −90° a posunuté vedle hospody v řadě podél cesty, pavlač vzadu; vrata do dvora mezi domem a křídlem; ohrada a kůlna zadního dvora vypuštěny (mezi silnicí a Veličkou není místo)",
+     "kridlo": [
+      "KrcmaL_Kridlo_Kamen",
+      "KrcmaL_Roubeni_Kridlo",
+      "KrcmaL_Strecha_Kridlo",
+      "KrcmaL_Interier_Kridlo",
+      "KrcmaL_Dvere_Noclezna",
+      "KrcmaL_Dvere_Pokoj1",
+      "KrcmaL_Dvere_Pokoj2",
+      "KrcmaL_Dvere_Pokoj3",
+      "KrcmaL_Vrata_Staj1",
+      "KrcmaL_Vrata_Staj2",
+      "KrcmaL_Spani_Hrac"
+     ],
+     "kridlo_od_x": 8.4,
+     "ne_kridlo": [
+      "KrcmaL_Kol_VrataSloup",
+      "KrcmaL_Kol_Pred"
+     ],
+     "otoceni_deg": -90.0,
+     "posun": [
+      11.6,
+      -11.8
+     ],
+     "smazat": [
+      "KrcmaL_Kol_PlotS1-convcolonly",
+      "KrcmaL_Kol_PlotS2-convcolonly",
+      "KrcmaL_Kol_PlotV-convcolonly",
+      "KrcmaL_Kol_PlotZ-convcolonly",
+      "KrcmaL_Kol_Kulna73-convcolonly",
+      "KrcmaL_Kol_Kulna74-convcolonly"
+     ],
+     "dvur_uzel": "KrcmaL_Dvur",
+     "dvur_ponechat": [
+      6.8,
+      10.2,
+      3.0,
+      5.6
+     ],
+     "dvur_za_domem_z": 4.6
+    },
+    "rampy": [
+     {
+      "uzel": "KrcmaL_Dvere_Vchod",
+      "ven": [
+       0,
+       1
+      ]
+     },
+     {
+      "uzel": "KrcmaL_Dvere_Dvur",
+      "ven": [
+       0,
+       -1
+      ]
+     }
+    ],
+    "podlaha_m": 0.45
+   },
+   "Hajovna": {
+    "soubor": "res://modely/stavby_h/hajovna.glb",
+    "lod1": "res://modely/stavby_h/hajovna_lod1.glb",
+    "aabb": [
+     -7.44,
+     8.05,
+     -3.94,
+     8.5
+    ],
+    "prichod": [
+     2.05,
+     5.2
+    ],
+    "pohled": [
+     2.05,
+     2.87
+    ],
+    "vnitrek": [
+     "Hajovna_Interier_skupina"
+    ],
+    "lod1_od_m": 55.0,
+    "disk_id": "1ucKQFOW7QC-hUHdHy1ingNKUg8v_AQZ2",
+    "zip": [
+     "hajovna.glb",
+     "hajovna_lod1.glb"
+    ],
+    "zdroj": "Disk Míši hajovna.zip (14. 11.), docs/reference/hajovna/NAVOD_HAJOVNA.md – roubená chalupa hajného, přístřešek s kůžemi, šibenice na zvěř, psí kotec, kůlna, proutěný plot; ≈132 tis. troj.",
+    "max_prevyseni_m": 3.5,
+    "pozn_meze": "Míša 14. 11.: „hájovna nemůže být 20 m vedle, má být pod hradem, jinde ne“ – na místě původní hájenky převýšení pod půdorysem ~2,9–3,2 m → mez 3,5 m (plošina srovná)",
+    "rampy": [
+     {
+      "uzel": "Hajovna_Dvere_Vchod",
+      "ven": [
+       0,
+       1
+      ]
+     }
+    ],
+    "podlaha_m": 0.45
+   },
+   "pozn_prichod": "prichod/pohled: střed dveří Vchod (obal křídla v glb) a bod 2–3 m před nimi; trasa testu dum_<místo>_<model> z příchodu přes práh 1,5 m dovnitř",
+   "pozn_rampy": "podlaha domu +0,45 m (návody modelů) – postava nemá krok nahoru: šikmá kolize z terénu 2,4 m před prahem na podlahu 0,25 m za ním u vnějších dveří (jako hlavni.gd _rampy_dveri u domů vsi); test dum_<místo>_<model>"
   }
  },
  "mista": [
@@ -163,13 +298,14 @@
     97
    ],
    "modely": [
-    "Dum2"
+    "KrcmaL"
    ],
    "doklad": "skutečná poloha hostince U Tlustého Jana (Kyžlířov 40, OSM dům 49.61062 N 17.68145 E) pod Puchartem u silnice II/440 na levém břehu Veličky (docs/reference/reserse_tlusty_jan.md); Míša 12. 11.: „podle skutečnosti“ (křížek u silnice); dřív krčma na křižovatce podle pravidla – špatně",
    "jistota": "NAVRH (poloha podle pravidla, ne podle nálezu)",
    "typ": "samota",
-   "dosah_m": 40,
-   "usedlost": "krcma"
+   "dosah_m": 60,
+   "usedlost": null,
+   "pozn_14_11": "Míša 14. 11.: nový model krčmy do L (celek z Disku) místo domu Dum2 s usedlostí (stáj, kůlna, sezení)"
   },
   {
    "id": "hajovna",
@@ -180,13 +316,14 @@
     312
    ],
    "modely": [
-    "Dum1"
+    "Hajovna"
    ],
    "doklad": "skutečný dům Olšovec č. p. 44 (OSM 49.60890 N 17.68510 E) pod dolním hradem u soutoku Veličky a Kouteckého potoka a křižovatky údolních cest; budova je i na vojenské mapě 1:25 000 (Míša 11. 11.); Míša 12. 11. křížek; NE chata Olšovec u silnice 440 (Míša: „chata Olšovec není hájovna“)",
    "jistota": "NAVRH pro 1393 (hájovna jako budova doložena až novověk); poloha DOLOZENO dnešní",
    "typ": "samota",
    "dosah_m": 40,
-   "usedlost": "hajovna"
+   "usedlost": null,
+   "pozn_14_11": "Míša 14. 11.: nový model hájovny (celek z Disku) místo domu Dum1 s usedlostí"
   }
  ],
  "schvaleno": "Míša 11. 11.: „místa, která říkáš, jsou v pořádku“ (mapa docs/screens/mista_kandidati_11_11.png)",

@@ -51,6 +51,9 @@ CESTY_L = unary_union([LineString(o) for _, o, _ in osy]); TOKY_L = unary_union(
 PUD = dict(MI["pudorysy"])   # model -> [hw (x), z_b, z_f, pod] podle Havrana DUM_MER
 for m_, (dl, hl) in MI["modely"]["hospodarske"]["rozmery"].items():
     PUD[m_] = [dl / 2, -hl / 2, hl / 2, 0.0]   # předměty Havrana: počátek ve středu půdorysu na zemi
+CELKY = {k: v for k, v in MI["modely"].get("celky", {}).items() if isinstance(v, dict)}
+for m_, c_ in CELKY.items():   # celé stavby (krčma, hájovna): půdorys souměrně kolem středu obalu; model posunutý o −cx (posun ve stavbě)
+    x0_, x1_, z0_, z1_ = c_["aabb"]; PUD[m_] = [(x1_ - x0_) / 2, z0_, z1_, 0.0]
 # stanoviště (lány jen na nelesní půdě): originál před stavbami (stavby_vegetace.py ho ukládá do build/)
 _st_p = K + "/build/stanoviste_pred_stavbami.png"
 STJ = json.load(open(K + "/hra/data/stanoviste.json"))
@@ -121,8 +124,11 @@ def stavba_ok(x, z, yaw, m, od_toku=None):
     """budova: malé převýšení pod půdorysem, odstup od os cest a toků; vrací (výška plošiny, převýšení) nebo None"""
     b = body_pudorysu(x, z, yaw, m, R["okraj_m"])
     h = np.array([vys(p[0], p[1]) for p in b])
-    if h.max() - h.min() > (R["max_prevyseni_m"] if m in MI["pudorysy"] else R["max_prevyseni_hospodarske_m"]): return None
-    if kc.query(b)[0].min() < R["od_cesty_m"] or kt.query(b)[0].min() < (R["od_toku_m"] if od_toku is None else od_toku): return None
+    if os.environ.get("CELEK_DBG") and m in CELKY:
+        h_ = np.array([vys(p_[0], p_[1]) for p_ in b]); print("CDBG", round(x, 1), round(z, 1), "prev", round(float(h_.max() - h_.min()), 2), "cesta", round(float(kc.query(b)[0].min()), 1), "tok", round(float(kt.query(b)[0].min()), 1))
+    c_ = CELKY.get(m, {})   # celek (krčma, hájovna) může mít vlastní meze (velký půdorys mezi cestou a tokem)
+    if h.max() - h.min() > c_.get("max_prevyseni_m", R["max_prevyseni_m"] if m in MI["pudorysy"] else R["max_prevyseni_hospodarske_m"]): return None
+    if kc.query(b)[0].min() < R["od_cesty_m"] or kt.query(b)[0].min() < c_.get("od_toku_m", R["od_toku_m"] if od_toku is None else od_toku): return None
     return float(np.median(h)), float(h.max() - h.min())
 
 def los(rng, tab):
@@ -306,6 +312,11 @@ stavby = []; useds = []; zabrano = Polygon()
 def pridej_dum(misto, m, x, z, yaw, v):
     stavby.append({"misto": misto["id"], "model": m, "x": round(float(x), 2), "z": round(float(z), 2), "yaw": round(yaw, 4),
                    "y": round(v[0] + PUD[m][3], 3), "teren_y": round(v[0], 3), "prevyseni": round(v[1], 2)})
+    if m in CELKY:   # celek: počátek modelu posunutý od středu půdorysu o −cx; příchod a pohled pro mapu ve světě
+        c_ = CELKY[m]; cx_ = (c_["aabb"][0] + c_["aabb"][1]) / 2; w_ = lambda px, pz: [round(float(x + px * math.cos(yaw) + pz * math.sin(yaw)), 2), round(float(z - px * math.sin(yaw) + pz * math.cos(yaw)), 2)]
+        stavby[-1].update({"soubor": c_["soubor"], "lod1": c_.get("lod1"), "posun_x": round(-cx_, 3), "vnitrek": c_.get("vnitrek", []), "lod1_od_m": c_.get("lod1_od_m"),
+                           "rampy": c_.get("rampy", []), "podlaha_m": c_.get("podlaha_m", 0.0),
+                           "prichod": w_(c_["prichod"][0] - cx_, c_["prichod"][1]), "pohled": w_(c_["pohled"][0] - cx_, c_["pohled"][1])})
 n_used = 0; ULICE = []
 for misto in MI["mista"]:
     if misto.get("stav") not in ("SCHVALENO",) or misto.get("typ") == "mlyn": continue
@@ -451,6 +462,10 @@ for s__ in stavby:
     vv_ = vstupy_stavby(s__["model"], s__["x"], s__["z"], s__["yaw"])   # všechny dveře domu (vstup i do dvora)
     for v_ in vv_:
         _TRM["dum_%s_%s_%d" % (s__["misto"], s__["model"], len(_TRM))] = [[round(float(q[0]), 2), round(float(q[1]), 2), None] for q in (v_["c"] + v_["n"] * 2.5, v_["c"] + v_["n"] * 0.8, v_["c"] - v_["n"] * 1.2)]
+for s__ in stavby:   # celky (krčma, hájovna): z příchodu přes práh dveří Vchod 1,5 m dovnitř (jméno bez pořadí – stálé pro tabulku chyb)
+    if "prichod" not in s__: continue
+    pr_ = np.array(s__["prichod"], float); po_ = np.array(s__["pohled"], float); n_ = (pr_ - po_) / (np.linalg.norm(pr_ - po_) or 1.0)
+    _TRM["dum_%s_%s" % (s__["misto"], s__["model"])] = [[round(float(q[0]), 2), round(float(q[1]), 2), None] for q in (pr_, po_ + n_ * 0.8, po_ - n_ * 1.5)]
 json.dump({"popis": "trasy průchodu do domů míst (nastroje/mista_rozmisteni.py) – test_pruchod.gd", "trasy": _TRM}, open(K + "/hra/data/pruchody_mista.json", "w"), ensure_ascii=False, indent=1)
 print("trasy do domů", len(_TRM))
 # doprovodné soubory předchozího kroku (jámy sklepa a šachty, koryta, skály) pod novou předponou – teren_dlazdice.py je
@@ -468,6 +483,11 @@ def k_ulici(a, smer, w, hl_):
     vy_cary.append({"body": [[r3_(q[0]), r3_(q[1])] for q in body], "polosirka": w, "hlina": hl_, "druh": "chodnik"})
 r3_ = lambda a: round(float(a), 2)
 for o in ULICE: vy_cary.append({"body": [[r3_(q[0]), r3_(q[1])] for q in o[::2]], "polosirka": VY["ulice_polosirka_m"], "hlina": HL["ulice"], "druh": "ulice"})
+for st_ in stavby:   # celky (krčma, hájovna): dvůr a dvorek udusaná hlína terénu (Míša 14. 11.: nevyhovující podlahu nahradit hlínou)
+    if st_["model"] not in CELKY: continue
+    a_ = CELKY[st_["model"]]["aabb"]; cx_ = (a_[0] + a_[1]) / 2; yw_ = st_["yaw"]
+    pts_ = [(st_["x"] + (px - cx_) * math.cos(yw_) + pz * math.sin(yw_), st_["z"] - (px - cx_) * math.sin(yw_) + pz * math.cos(yw_)) for px, pz in ((a_[0], a_[2]), (a_[1], a_[2]), (a_[1], a_[3] + 2.0), (a_[0], a_[3] + 2.0))]
+    vy_plochy.append({"poly": [[round(q[0], 2), round(q[1], 2)] for q in pts_], "hlina": HL["dvur"], "druh": "celek"})
 for s_ in studny:
     vy_plochy.append({"poly": [[r3_(q[0]), r3_(q[1])] for q in Point(s_["x"], s_["z"]).buffer(VY["naves_polomer_m"], 8).exterior.coords[:-1]], "hlina": HL["naves"], "druh": "naves"})
     k_ulici(np.array([s_["x"], s_["z"]]), np.zeros(2), VY["chodnik_polosirka_m"], HL["naves"])

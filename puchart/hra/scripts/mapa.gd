@@ -42,6 +42,10 @@ static func nacti_mista(c: Dictionary) -> Array:
 		if m.has("misto"):
 			var domy: Array = (ms.get("stavby", []) as Array).filter(func(s: Dictionary) -> bool: return s["misto"] == m["misto"])
 			if domy.is_empty(): continue   # místo není postaveno – na mapě není
+			if (domy[0] as Dictionary).has("prichod"):   # celek (krčma, hájovna): příchod před vchod z modelu (mista_rozmisteni)
+				var dc: Dictionary = domy[0]
+				e["p"] = Vector2(float(dc["x"]), float(dc["z"])); e["cil"] = Vector2(dc["prichod"][0], dc["prichod"][1]); e["pohled"] = Vector2(dc["pohled"][0], dc["pohled"][1])
+				out.append(e); continue
 			var st := Vector2.ZERO
 			for s: Dictionary in domy: st += Vector2(float(s["x"]), float(s["z"]))
 			st /= domy.size()
