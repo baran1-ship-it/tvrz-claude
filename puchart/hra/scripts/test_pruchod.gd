@@ -257,6 +257,8 @@ func _test_mapa() -> void:
 	for m: Dictionary in body:
 		var c: Vector2 = m["cil"]
 		M.priprav_kolize(hlavni, c)
+		hlavni.svet._t = 1.0   # jako ve hře: údržba kolizí proběhne ještě se starou polohou hráče (Míša 14. 11.: propad po přesunu)
+		await get_tree().process_frame
 		await get_tree().physics_frame
 		var bez: Array[RID] = [hrac.get_rid()]
 		var p: Vector3 = M.cil_na_zemi(hlavni, cfg, c, bez)

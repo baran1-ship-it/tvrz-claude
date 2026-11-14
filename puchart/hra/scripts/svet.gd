@@ -19,6 +19,8 @@ var vinfo: Dictionary
 var kolize := {}          # "i_j" -> StaticBody3D
 var kolize_do_m := 180.0  # vytvořit do, zrušit za + 60 m
 var _t := 0.0
+var _drz := Vector3.INF   # cíl posledního teleportu: jeho dlaždice se pár sekund neruší (Míša 14. 11.: po přesunu po mapě propad pod svět)
+var _drz_do_ms := 0
 var _lod: Array
 var _hy := 20.0
 var _vysledky := []
@@ -129,7 +131,10 @@ func _process(delta: float) -> void:
 ## Kolize: HeightMapShape3D po dlaždicích, jen kolem hráče (Havran rozpocty kolize bunka 32 m – tady dlaždice 250 m
 ## s krokem 1 m; jedna dlaždice = 63 k výšek, vytvoření ~ms). Max. jedna nová za tick (žádné nárazové práce, PDF kap. 13).
 ## Po teleportu: kolize všech dlaždic kolem cíle hned (jinak hráč propadne pod terén – tablet 30. 10., Cesta od Kyžlířova).
+## Údržba (_process) mohla mezi postavením a přesunem hráče proběhnout se STAROU polohou a dlaždice cíle (> 240 m od ní)
+## zase zrušit → propad, pokaždé jinde podle toho, kdy tik padl (Míša 14. 11.). Cíl se proto 5 s drží.
 func kolize_ihned(p: Vector3) -> void:
+	_drz = p; _drz_do_ms = Time.get_ticks_msec() + 5000
 	for _i in 9:
 		_kolize_okoli(p)
 
@@ -145,8 +150,12 @@ func _kolize_okoli(p: Vector3) -> void:
 			var k := "%d_%d" % [i, j]
 			if d < kolize_do_m and not kolize.has(k) and nove == 0:
 				kolize[k] = _kolize_dlazdice(i, j); nove += 1
-			elif d > kolize_do_m + 60.0 and kolize.has(k):
+			elif d > kolize_do_m + 60.0 and kolize.has(k) and not _drzena(stred, D):
 				kolize[k].queue_free(); kolize.erase(k)
+
+func _drzena(stred: Vector2, D: float) -> bool:
+	if _drz == Vector3.INF or Time.get_ticks_msec() > _drz_do_ms: return false
+	return maxf(absf(_drz.x - stred.x), absf(_drz.z - stred.y)) - D * 0.5 < kolize_do_m + 60.0
 
 func _kolize_dlazdice(i: int, j: int) -> StaticBody3D:
 	var D: int = int(info["dlazdice_m"])
