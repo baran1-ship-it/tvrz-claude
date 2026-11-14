@@ -1344,3 +1344,13 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - **Disk** (14. 11.): `git worktree add` (kopie repa) za běhu testů vyčerpal povolený disk → test retez_t5 spadl „disk došel“, foto bez cesty. Na vedlejší práci žádný worktree; snímky vždy s cestou `build/f_x/jmeno.png` (bez složky se uloží do kořene repa bez přípony).
 - **Časový limit úlohy na pozadí** (14. 11.): `run_in_background` bez `timeout` = 30 min včetně čekání na zámek → export a foto zabity uprostřed (export po Blenderu při importu). Dlouhé řetězy (export, foto ve frontě) vždy s `timeout: 7200000`.
 - **impostory.py padá při ukončení Blenderu (rc 139)** jako export (14. 11.): obrázky už jsou zapsané, ale `set -e` v řetězu zastavil import a testy → fotky ze starého importu. Konec skriptu `os._exit(0)` po zápisu (jako export_game.py).
+
+## Slepí hlídači (14. 11., Míša „na co máš 1000 hlídačů“)
+- **Headless Godot neukládá transformace instancí MultiMeshe** (`get_instance_transform` = identita). Testy, které četly
+  polohy rostlin z MultiMeshe (`visici`, první verze `rostliny_v_budovach`), kontrolovaly jen počátky buněk – vždy OK.
+  Pravidlo: v testech polohy rostlin a předmětů VŽDY z dat světa (`sv.data["rostliny"]` 12 čísel `_xf`, `sv.data["vybaveni"]`),
+  velikost ze sítě druhu (Rostliny/<key>_x_z mesh AABB × měřítko instance). Byliny (kopřiva) mají obal sítě 13–28 m –
+  pro trsy brát půdorys 0,6 m.
+- Ruční seznamy staveb v testech (test_smyslu `stavby`, plánovač odtoku) neznaly nové díly (kovarna_ves, krcma_l) →
+  test i plánovač berou každý záznam `lokace.json` se `stred` (+ vnořený `dum`). Nový díl = záznam, žádný seznam navíc.
+- Test, který porovnává tvrzení louky s ní samou (`interier`: _vzorek × _v_budove), nenahradí měření výsledku.

@@ -3060,59 +3060,49 @@ func _sonda() -> void:
 
 
 func _visici() -> void:
+	# Misa 14. 11. „projdi, co se ve svete vznasi, nekde jsem videl neco levitovat“: drive se cetly polohy z MultiMeshe -
+	# headless renderer transformace instanci neuklada (identita), test hlidal jen pocatky bunek. Ted z dat sveta:
+	# kazda rostlina, kamen a balvan (data rostliny) a kazdy predmet (data vybaveni) - paprsek dolu k nejblizsi kolizi.
 	var space := player.get_world_3d().direct_space_state
-	var rostliny: Node = main.find_child("Rostliny", true, false)
 	var n := 0
 	var zakop := 0
 	var celkem := 0
 	var nejhorsi: Array = []
 	var po_druhu := {}
-	for mmi in rostliny.find_children("*", "MultiMeshInstance3D", true, false):
-		var nm := String(mmi.name)
-		if _je_skala(nm):
+	var tol := 0.3
+	var body: Array = []
+	for key: String in sv.data["rostliny"]:
+		if key.contains("_daleko") or _je_skala(key):
 			continue
-		var mm: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
-		if mm == null:
-			continue
-		var imp := nm.begins_with("impostor_")
-		var tol := 0.3
-		var xf := (mmi as Node3D).global_transform
-		for i in mm.instance_count:
-			var pos: Vector3
-			if imp:
-				var cd := mm.get_instance_custom_data(i)
-				pos = xf.origin + Vector3(cd.r, cd.g, cd.b)
-			else:
-				pos = xf * mm.get_instance_transform(i).origin
-			celkem += 1
-			var q := PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.5, 0), pos - Vector3(0, 60, 0))
-			var h := space.intersect_ray(q)
-			if imp:
-				h = sv.paprsek_imp(space, pos, h)
-			if h.is_empty():
-				# pod nicim nic: zakopane pod terenem (paprsek shora najde povrch nad pate), ne visici
-				var hu := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 80, 0), pos))
-				if not hu.is_empty():
-					zakop += 1
-					continue
-			var gap := 60.0 if h.is_empty() else pos.y - (h["position"] as Vector3).y
-			if gap > tol:
-				n += 1
-				var d := _druh(nm)
-				po_druhu[d] = int(po_druhu.get(d, 0)) + 1
-				nejhorsi.append([gap, d, pos, String(mmi.name) + " " + (String((h["collider"] as Node).name) if not h.is_empty() else "-")])
-				if pos.x > 350.0 and pos.x < 650.0 and pos.z > 700.0 and pos.z < 1000.0 and gap > 0.6:
-					print("VISI ves %s %.1f m @ (%.1f, %.1f, %.1f)" % [mmi.name, gap, pos.x, pos.y, pos.z])     # Misa 0.992 balvan ve vzduchu (420, 819)
-	nejhorsi.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
+		for t: Array in sv.data["rostliny"][key]:
+			body.append([_druh(key), Vector3(float(t[3]), float(t[7]), float(t[11]))])
+	for r: Dictionary in sv.data.get("vybaveni", []):
+		body.append(["predmet:" + String(r["id"]), Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))])
+	for b: Array in body:
+		var pos: Vector3 = b[1]
+		celkem += 1
+		var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.5, 0), pos - Vector3(0, 60, 0)))
+		if h.is_empty():
+			var hu := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 80, 0), pos))
+			if not hu.is_empty():
+				zakop += 1
+				continue
+		var gap := 60.0 if h.is_empty() else pos.y - (h["position"] as Vector3).y
+		if gap > tol:
+			n += 1
+			var d: String = b[0]
+			po_druhu[d] = int(po_druhu.get(d, 0)) + 1
+			nejhorsi.append([gap, d, pos, (String((h["collider"] as Node).name) if not h.is_empty() else "-")])
+	nejhorsi.sort_custom(func(a: Array, c: Array) -> bool: return a[0] > c[0])
 	var s := ""
-	# priklady: po jednom z kazdeho druhu (nejvetsi mezera), at je videt kazda pricina
 	var videno := {}
 	for x: Array in nejhorsi:
-		if videno.has(x[1]) or videno.size() >= 14:
+		if videno.has(x[1]) or videno.size() >= 25:
 			continue
 		videno[x[1]] = true
 		s += " | %s %.1f m @ (%.0f, %.0f, %.0f) %s" % [x[1], x[0], x[2].x, x[2].y, x[2].z, x[3]]
-	_vysledek("visici", n == 0, "%d z %d instanci (zakopanych %d) %s%s" % [n, celkem, zakop, str(po_druhu) if n > 0 else "", s])
+		print("VISI %s %.2f m @ (%.1f, %.1f, %.1f) pod: %s" % [x[1], x[0], x[2].x, x[2].y, x[2].z, x[3]])
+	_vysledek("visici", n == 0, "%d z %d (zakopanych %d) %s%s" % [n, celkem, zakop, str(po_druhu) if n > 0 else "", s])
 
 
 ## Fyzika (Misa 20:10): mekke rostliny (svet.MEKKE) zadnou kolizi; stromy (plne modely) kmen; tvrde veci kolizi maji.
