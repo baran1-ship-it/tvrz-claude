@@ -275,8 +275,12 @@ func blizko(x: float, z: float) -> Array:
 			var strana := signf(ab.x * (p.y - a.y) - ab.y * (p.x - a.x))     # > 0 vlevo od smeru osy
 			var kr := lerpf(krivost[k], krivost[k + 1], t)
 			var hr := lerpf(hrana_l[k], hrana_l[k + 1], t) if strana > 0.0 else lerpf(hrana_p[k], hrana_p[k + 1], t)
-			out = [d, lerpf(hladiny[k], hladiny[k + 1], t), lerpf(sirky[k], sirky[k + 1], t),
-					clampf(strana * kr / KRIVOST, -1.0, 1.0), lerpf(hloubky[k], hloubky[k + 1], t), lerpf(sklony[k], sklony[k + 1], t), hr]
+			var hh := lerpf(hladiny[k], hladiny[k + 1], t)
+			# breh u padu kaskady: hladina vody (Waterways, uchyt bez svisle slozky) drzi horni tun az k padu - breh
+			# podle vyssi z obou tuni, jinak deska horni tune trcela pres snizeny breh (snimek kask_zblizka 14. 11.)
+			var hb := maxf(hladiny[k], hladiny[k + 1]) if stupen.size() > k + 1 and stupen[k] >= 0 and stupen[k + 1] != stupen[k] else hh
+			out = [d, hh, lerpf(sirky[k], sirky[k + 1], t),
+					clampf(strana * kr / KRIVOST, -1.0, 1.0), lerpf(hloubky[k], hloubky[k + 1], t), lerpf(sklony[k], sklony[k + 1], t), hr, hb]
 	return out if best < DOSAH else []
 
 
@@ -293,6 +297,7 @@ func strop(x: float, z: float, sum := true) -> float:
 	var hl: float = b[4]
 	if d <= w:
 		return h - hl * (1.0 - 0.5 * smoothstep(w * 0.6, w, d))
+	h = float(b[7])                                   # breh: u padu podle vyssi tune
 	if d <= w + PRAH:
 		return lerpf(h - hl * 0.5, h + 0.05, (d - w) / PRAH)
 	# vnitrni breh: plochy jesep 0-4 m tesne nad vodou, pak svah
@@ -322,7 +327,7 @@ func podlaha(x: float, z: float) -> float:
 	var e := float(b[0]) - float(b[2])
 	if e < 0.4 or e > 9.0:
 		return -INF
-	var f := float(b[1]) + 0.05 + 0.1 * (e - 0.4)
+	var f := float(b[7]) + 0.05 + 0.1 * (e - 0.4)
 	if e > 5.0:
 		f -= (e - 5.0) * 0.6
 	return f
