@@ -8732,6 +8732,8 @@ func _rostliny_v_budovach() -> void:
 		for t: Array in sv.data["rostliny"][key]:
 			var xf := Transform3D(Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10])), Vector3(t[3], t[7], t[11]))
 			var wa := xf * ma
+			if not (site.has(key) and sv.skupina(key) == "strom"):
+				wa = AABB(xf.origin + ma.position, ma.size)   # trs: pudorys 0,6 m bez meritka instance (meritko nese sit)
 			inst += 1
 			var hit := false
 			for i in range(floori(wa.position.x / 16.0), floori(wa.end.x / 16.0) + 1):

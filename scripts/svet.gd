@@ -12387,7 +12387,7 @@ func koruna_od_zdi(key: String) -> float:
 		return float(_koruna_od_zdi.get(key, 0.0))
 	var r := 0.0
 	var sk := skupina(key)
-	if sk in ["ker", "trava", "bylina"]:
+	if sk in ["ker", "vysoka_bylina", "bylina"]:
 		r = float(pasma()["budova"]["rostlina_od_zdi_m"])
 	elif sk == "strom":
 		var kor_dr: Dictionary = Pravidla.cti("modely", "trava_unshaded")["koruny"]
