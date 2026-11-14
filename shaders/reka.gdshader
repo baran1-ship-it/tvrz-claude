@@ -47,7 +47,8 @@ uniform vec4 foam_color : source_color = vec4(0.9, 0.9, 0.9, 1.0);
 uniform float foam_amount : hint_range(0.0, 4.0) = 2.0;
 uniform float foam_steepness : hint_range(0.0, 8.0) = 2.0;
 uniform float foam_smoothness : hint_range(0.0, 1.0) = 0.3;
-uniform float pena_padu : hint_range(0.0, 2.0) = 0.0;   // bila voda podle strmosti (kaskada), nastavuje svet.gd z voda.json
+uniform float pena_padu : hint_range(0.0, 2.0) = 0.0;
+uniform bool ladeni_strmost = false;   // TVRZ_REKA_LADENI: strmost jako jas (snimek)   // bila voda podle strmosti (kaskada), nastavuje svet.gd z voda.json
 
 // Internal uniforms - DO NOT CUSTOMIZE THESE
 uniform float i_lod0_distance : hint_range(5.0, 200.0) = 50.0;
@@ -249,4 +250,9 @@ void fragment() {
 	ROUGHNESS = mix(roughness, 0.9, pad_bila);
 	NORMAL_MAP = vec3(water_norFBM, 0);
 	NORMAL_MAP_DEPTH = normal_scale;
+	if (ladeni_strmost) {
+		ALBEDO = vec3(0.0);
+		EMISSION = vec3(steepness_map * 0.25, pad_bila, 0.0);
+		ALPHA = 1.0;
+	}
 }
