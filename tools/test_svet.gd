@@ -3087,6 +3087,9 @@ func _visici() -> void:
 		var zem := float(sv._teren_y(pos.x, pos.z))
 		if not h.is_empty():
 			zem = maxf(zem, (h["position"] as Vector3).y)
+		else:
+			# bez kolize (usti Bystrice na kraji mapy - mimo jemnou sit potoka): viditelny teren = mrizka vysek
+			zem = maxf(zem, float(sv._vyska(pos.x, pos.z)))
 		var gap := pos.y - zem
 		if h.is_empty() and int(po_druhu.get("bez_kolize", 0)) < 8:
 			po_druhu["bez_kolize"] = int(po_druhu.get("bez_kolize", 0)) + 1
