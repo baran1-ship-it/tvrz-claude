@@ -188,7 +188,9 @@ void fragment() {
 	vec3 up_viewspace = (VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz;
 	// Misa 14. 11. (kaskada: pady bez bile vody): strmost ze svetove normaly plochy (1 - cos sklonu), ne ze smeru
 	// proudu - tok dolu daval zaporny soucin = 0; tune 0, pad 45 st. ~1,2, svisly 4 (resers potok_pereje_resers.md)
-	float steepness_map = clamp((1.0 - dot(normalize(NORMAL), up_viewspace)) * 4.0, 0.0, 4.0);
+	// normala skutecne plochy z derivaci polohy (sit Waterways ma na padech normaly nahoru - pad zustal tmavy)
+	vec3 n_geo = normalize(cross(dFdx(VERTEX), dFdy(VERTEX)));
+	float steepness_map = clamp((1.0 - abs(dot(n_geo, up_viewspace))) * 4.0, 0.0, 4.0);
 	
 	float flow_force = min(flow_base + steepness_map * flow_steepness + distance_map * flow_distance + pressure_map * flow_pressure, flow_max);
 	flow *= flow_force;
