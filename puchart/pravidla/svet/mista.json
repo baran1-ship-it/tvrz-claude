@@ -348,7 +348,12 @@
      ]
     },
     "cesta_k_ceste": true,
-    "schod_material": "KrcmaL_Podezdivka"
+    "schod_material": "KrcmaL_Podezdivka",
+    "schod": {
+     "vyska_m": 0.15,
+     "hloubka_m": 0.32,
+     "sirka_m": 1.4
+    }
    },
    "Hajovna": {
     "soubor": "res://modely/stavby_h/hajovna.glb",
@@ -535,18 +540,18 @@
      ],
      "zdroj": "Míša 14. 11. (tablet, fotka z půdy: hráč na x 161,9 z 311,3 = model (−0,63; −0,66) nad jizbou): „na půdě je trám a hráč ho nepřekročí“. Geometrie z hajovna.glb (rozbor 14. 11.): viditelná povala Roubeni y 2,55–2,60, kolize Strop vrch 2,61, příčky PricJ6/J7/JN8 a PricK9/K10/KN11 kolizí do 2,9; trám příčky J viditelně do 2,87, příčka K viditelně do 2,51."
     },
-    "schod_material": "Hajovna_Podezdivka"
+    "schod_material": "Hajovna_Podezdivka",
+    "schod": {
+     "vyska_m": 0.15,
+     "hloubka_m": 0.32,
+     "sirka_m": 1.4
+    }
    },
    "pozn_prichod": "prichod/pohled: střed dveří Vchod (obal křídla v glb) a bod 2–3 m před nimi; trasa testu dum_<místo>_<model> z příchodu přes práh 1,5 m dovnitř",
    "pozn_rampy": "podlaha domu +0,45 m (návody modelů) – postava nemá krok nahoru: šikmá kolize z terénu 2,4 m před prahem na podlahu 0,25 m za ním u vnějších dveří (jako hlavni.gd _rampy_dveri u domů vsi); test dum_<místo>_<model>",
    "pozn_stromy": "Míša 14. 11.: „jedna stará jabloň nebo více může být u hájovny a jedna nebo více u hospody“ – mista = kandidáti [x, z] v souřadnicích modelu (jako aabb), použije se prvních pocet, které jsou ≥ od_cesty_m od cesty a ≥ od_toku_m od toku a mimo půdorys; vždy stará jabloň (varianta jablon_1–3)",
    "pozn_dum_aabb": "Míša 14. 11. (foto x 149 z 314 u vchodu hájovny): „tráva ve vstupu a chybí cesta k hlavní cestě“ – půdorys stavby (bez porostu, bez hlíny) byl celý obal modelu včetně dvorku až k plotu, takže dvorek nebyl vyšlapaný; dum_aabb = jen dům s přístřeškem a kůlnou pod střechou (NAVOD_HAJOVNA: jizba x −4,5…0,6, síň …4,5, přístřešek na západě po sloupy −6,8, kůlna za domem po z −5,6) – zbytek obalu je dvorek z udusané hlíny; cesta_k_ceste = cestička z příchodu k nejbližší vozové / hřebenové cestě (k_ulici jako od vrat usedlostí)",
-   "pozn_schod": "Míša 14. 11. (foto x 155 z 311,5, hájovna): „udělej schod do domu, jsou tam výš dveře“ – před vnějšími dveřmi (rampy) kamenné stupně po vyska_m až k prahu (podlaha_m), kámen z podezdívky modelu; nájezdová kolize zůstává (hráč nemá krok nahoru), stupně jsou vidět (Havran domy: kamenný stupeň 0,15 m před prahem)",
-   "schod": {
-    "vyska_m": 0.15,
-    "hloubka_m": 0.32,
-    "sirka_m": 1.4
-   }
+   "pozn_schod": "Míša 14. 11. (foto x 155 z 311,5, hájovna): „udělej schod do domu, jsou tam výš dveře“ – před vnějšími dveřmi (rampy) kamenné stupně po vyska_m až k prahu (podlaha_m), kámen z podezdívky modelu; nájezdová kolize zůstává (hráč nemá krok nahoru), stupně jsou vidět (Havran domy: kamenný stupeň 0,15 m před prahem)"
   }
  },
  "mista": [

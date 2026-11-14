@@ -319,7 +319,7 @@ def pridej_dum(misto, m, x, z, yaw, v):
     if m in CELKY:   # celek: počátek modelu posunutý od středu půdorysu o −cx; příchod a pohled pro mapu ve světě
         c_ = CELKY[m]; cx_ = (c_["aabb"][0] + c_["aabb"][1]) / 2; w_ = lambda px, pz: [round(float(x + px * math.cos(yaw) + pz * math.sin(yaw)), 2), round(float(z - px * math.sin(yaw) + pz * math.cos(yaw)), 2)]
         stavby[-1].update({"soubor": c_["soubor"], "lod1": c_.get("lod1"), "posun_x": round(-cx_, 3), "vnitrek": c_.get("vnitrek", []), "lod1_od_m": c_.get("lod1_od_m"),
-                           "rampy": c_.get("rampy", []), "podlaha_m": c_.get("podlaha_m", 0.0),
+                           "rampy": c_.get("rampy", []), "podlaha_m": c_.get("podlaha_m", 0.0), "schod_material": c_.get("schod_material"), "schod": c_.get("schod", {}),
                            "prichod": w_(c_["prichod"][0] - cx_, c_["prichod"][1]), "pohled": w_(c_["pohled"][0] - cx_, c_["pohled"][1])})
         for k_ in ("zebrik", "puda"):   # žebřík na půdu a kolize půdy (Míša 14. 11., hájovna) – souřadnice modelu, staví hlavni.gd _celek
             if k_ in c_: stavby[-1][k_] = c_[k_]

@@ -647,7 +647,7 @@ func _mista() -> void:
 	var st_mat := StandardMaterial3D.new(); st_mat.vertex_color_use_as_albedo = true; st_mat.roughness = 0.9
 	var uzel := Node3D.new(); uzel.name = "Mista"; add_child(uzel)
 	var obal_do := float((d.get("lod_ves", {}) as Dictionary).get("obal_do_m", 900.0))
-	var dt: Dictionary = md.get("daleko_textury", {}); var dt_cache := {}
+	var dt: Dictionary = md.get("daleko_textury", {}); var dt_cache := {}; var jas_cache := {}
 	for s: Dictionary in d["stavby"]:
 		if s.has("soubor"):   # celá stavba z Disku (krčma, hájovna – Míša 14. 11.): vlastní glb, posun počátku, LOD1, vnitřek zblízka
 			_celek(uzel, s, float(lod["vnitrek_do_m"]), obal_do, dt.get("jas", {}))
@@ -659,6 +659,7 @@ func _mista() -> void:
 		dum.transform = Transform3D(Basis(Vector3.UP, float(s["yaw"])), Vector3(float(s["x"]), float(s["teren_y"]), float(s["z"])))
 		uzel.add_child(dum)
 		_rampy_dveri(dum)
+		_ztlum(dum, float(md.get("jas_podrobny", 1.0)), jas_cache)   # Míša 14. 11.: „domy… až moc vypadají bílé“
 		var st_vzor: MeshInstance3D = ssc.find_child(String(s["model"]) + "_Stredni", true, false) as MeshInstance3D if ssc else null
 		var se_st := st_vzor != null and blizko < st_do
 		if se_st:
@@ -685,6 +686,44 @@ func _mista() -> void:
 	sc.queue_free()
 	if ssc: ssc.queue_free()
 	print("MISTA staveb %d" % uzel.get_child_count())
+
+
+## Podrobný vnějšek domu × jas (textury Havrana zesvětlené při převodu na 0,5 – mista.json modely.domy.jas_podrobny);
+## vnitřek, hrubý obal a střední stupeň ne. Materiál se zkopíruje jednou (cache podle materiálu).
+func _ztlum(dum: Node3D, jas: float, cache: Dictionary) -> void:
+	if jas >= 0.999: return
+	for ch in dum.get_children():
+		if not ch is MeshInstance3D: continue
+		var cn := String(ch.name)
+		if cn.ends_with("_Daleko") or cn.ends_with("Interier") or cn.ends_with("_Stredni"): continue
+		var mi := ch as MeshInstance3D
+		for i in mi.mesh.get_surface_count():
+			var mt := mi.mesh.surface_get_material(i) as BaseMaterial3D
+			if mt == null: continue
+			if not cache.has(mt):
+				var m2 := mt.duplicate() as BaseMaterial3D; m2.albedo_color = mt.albedo_color * Color(jas, jas, jas); cache[mt] = m2
+			mi.set_surface_override_material(i, cache[mt])
+
+
+## Kamenné stupně před vnějšími dveřmi celku (Míša 14. 11.: „udělej schod do domu, jsou tam výš dveře“): po schod.vyska_m
+## až k prahu (podlaha_m), kámen z podezdívky modelu; jen vzhled – chodí se po nájezdové kolizi (rampy), hráč nemá krok nahoru
+func _schody_dveri(n: Node3D, s: Dictionary) -> void:
+	var sd: Dictionary = s.get("schod", {}); var mu := n.find_child(String(s.get("schod_material", "")), true, false) as MeshInstance3D
+	if sd.is_empty() or mu == null or mu.mesh == null: return
+	var mat := mu.get_active_material(0)
+	var v := float(sd["vyska_m"]); var hl := float(sd["hloubka_m"]); var nst := int(round(float(s.get("podlaha_m", 0.45)) / v))
+	for r: Dictionary in s.get("rampy", []):
+		var dv := n.find_child(String(r["uzel"]), true, false) as MeshInstance3D
+		if dv == null: continue
+		var ab := dv.get_aabb(); var c := dv.position + ab.position + ab.size * 0.5
+		var ven := Vector3(float(r["ven"][0]), 0, float(r["ven"][1]))
+		for k in range(1, nst):   # stupeň k: vršek k·v, od líce stěny (n−k) hloubek ven; pod terén 0,3 m
+			var top := k * v; var dl := (nst - k) * hl
+			var mi := MeshInstance3D.new(); var bm := BoxMesh.new()
+			bm.size = Vector3(float(sd["sirka_m"]) if absf(ven.z) > 0.5 else dl, top + 0.3, dl if absf(ven.z) > 0.5 else float(sd["sirka_m"]))
+			mi.mesh = bm; mi.material_override = mat; mi.name = "Schod_%s_%d" % [r["uzel"], k]
+			mi.position = Vector3(c.x, (top - 0.3) / 2, c.z) + ven * (0.12 + dl / 2)
+			n.add_child(mi)
 
 
 ## Hrubý obal domu (_Daleko: plochy *_Sindel, *_Roubeni bez UV) dostane texturu materiálu podrobného modelu promítnutou
@@ -747,6 +786,7 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas:
 		kb.add_child(cs)
 	if kb.get_child_count() > 0: n.add_child(kb)
 	else: kb.free()
+	_schody_dveri(n, s)
 	if s.get("puda") != null: _puda(n, s["puda"])
 	if s.get("zebrik") != null:   # žebřík na půdu (Míša 14. 11.): body modelu → svět
 		var z_: Dictionary = s["zebrik"]; var zw := {"nazev": String(z_.get("nazev", "Žebřík"))}

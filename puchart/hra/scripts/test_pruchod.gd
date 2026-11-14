@@ -310,6 +310,9 @@ func _test_zebriky() -> void:
 	var spatne: Array = []
 	var zbs: Array = hlavni.zebriky
 	for zb: Dictionary in zbs:
+		var pod := Vector3((zb["sestup"] as Vector3).x, (zb["nastup"] as Vector3).y, (zb["sestup"] as Vector3).z)   # místnost pod sestupem (komora): ne „Slézt dolů“
+		var up: Dictionary = Z.nejblizsi(zbs, pod)
+		if not up.is_empty() and bool(up["nahore"]): spatne.append("%s: pod povalou nabízí Slézt dolů" % zb["nazev"])
 		for nahoru: bool in [true, false]:
 			var start: Vector3 = zb["nastup"] if nahoru else zb["sestup"]; var cil: Vector3 = zb["sestup"] if nahoru else zb["nastup"]
 			hlavni.svet.kolize_ihned(start)
