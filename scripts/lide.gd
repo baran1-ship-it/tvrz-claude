@@ -1631,6 +1631,11 @@ func _cil_obsazen(c: Dictionary, q: Vector2, r: float) -> bool:
 	for o: Dictionary in _lide:
 		if o != c and o.get("misto") is Vector2 and (o["misto"] as Vector2).distance_to(q) < r:
 			return true
+		# 14. 11. (Misa: senkyrka pri obsluze se vnoruje do hosta): sedici zabira i sedak (telo nad sedakem), ne jen
+		# bod, odkud usedal
+		var sk: Variant = o.get("sedak", {})
+		if o != c and sk is Dictionary and (sk as Dictionary).get("sedak") is Vector2 and ((sk as Dictionary)["sedak"] as Vector2).distance_to(q) < r:
+			return true
 	return false
 
 

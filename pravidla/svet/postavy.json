@@ -1240,8 +1240,7 @@
     ],
     "hostinec_krb": [
      "Interact",
-     "Truhla_Otevri",
-     "Interact"
+     "Idle_Loop"
     ],
     "hostinec_stul_1": [
      "PickUp_Table",
@@ -1277,16 +1276,16 @@
      35.0
     ],
     "hostinec_krb": [
-     6.0,
-     14.0
+     4.0,
+     8.0
     ],
     "hostinec_opreni_venku": [
      12.0,
      35.0
     ],
     "hostinec_kuchyne_krb": [
-     8.0,
-     16.0
+     5.0,
+     9.0
     ],
     "hostinec_kuchyne_stul": [
      5.0,
@@ -1322,7 +1321,8 @@
     "opreni"
    ],
    "_13_11b": "Misa 13. 11. (hostinsky s hostinskou pleji travu u krbu): Hleda_Loop (predklon k zemi) pryc - u stolu/pultu PickUp_Table, jinde Interact; hlida test lide_chovani (klipy_k_zemi)",
-   "_14_11": "Míša 14. 11. (šenkýřka i hospodský chodí jen mezi 1. stolem a krbem a pořád otvírají truhlu; „hospoda je velká, ať chodí do kuchyně vařit a nosit“): kolo kuchyně (kotlík, stůl) → nese k stolu v síni i v šenku; truhla jen jednou za kolo"
+   "_14_11": "Míša 14. 11. (šenkýřka i hospodský chodí jen mezi 1. stolem a krbem a pořád otvírají truhlu; „hospoda je velká, ať chodí do kuchyně vařit a nosit“): kolo kuchyně (kotlík, stůl) → nese k stolu v síni i v šenku; truhla jen jednou za kolo",
+   "_14_11b": "Míša 14. 11. večer (hostinský pořád čumí do krbu a otvírá virtuální truhlu): u krbu ani u obsluha_2 truhla není → Truhla_Otevri pryč (Interact = přiložit), u krbů kratší obměna 4–9 s"
   },
   "uklid_hostinec": {
    "klipy": [
@@ -1800,14 +1800,13 @@
     ],
     "hostinec_obsluha_2": [
      "PickUp_Table",
-     "Truhla_Otevri",
      "Idle_Loop"
     ]
    },
    "obchuzka_obmena_s": {
     "hostinec_kuchyne_krb": [
-     8.0,
-     16.0
+     5.0,
+     9.0
     ],
     "hostinec_kuchyne_stul": [
      5.0,
