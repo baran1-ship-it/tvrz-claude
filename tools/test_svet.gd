@@ -3082,12 +3082,12 @@ func _visici() -> void:
 		var pos: Vector3 = b[1]
 		celkem += 1
 		var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.5, 0), pos - Vector3(0, 60, 0)))
-		if h.is_empty():
-			var hu := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 80, 0), pos))
-			if not hu.is_empty():
-				zakop += 1
-				continue
-		var gap := 60.0 if h.is_empty() else pos.y - (h["position"] as Vector3).y
+		# zem = vyssi z viditelneho terenu (hotova sit, _teren_y) a kolize pod bodem (skala, dlazba, podlaha) - kolize
+		# obzoru a dily jsou hrubsi nez viditelny teren (kaminky na kraji mapy sedi na terenu, kolize 0,7-3,6 m niz)
+		var zem := float(sv._teren_y(pos.x, pos.z))
+		if not h.is_empty():
+			zem = maxf(zem, (h["position"] as Vector3).y)
+		var gap := pos.y - zem
 		if h.is_empty() and int(po_druhu.get("bez_kolize", 0)) < 8:
 			po_druhu["bez_kolize"] = int(po_druhu.get("bez_kolize", 0)) + 1
 			var hh := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 200, 0), pos - Vector3(0, 200, 0)))
