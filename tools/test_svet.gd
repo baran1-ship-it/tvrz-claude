@@ -7840,10 +7840,28 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 	b_c["cinnost_ted"] = "volno"
 	lide.call("_uvolni", a_c)
 	lide.call("_uvolni", b_c)
-	var ma: Array = lide.call("_misto_cinnosti", a_c, "nadvori_studna", cv)
+	# 14. 11. (Misa: lavice od schodu/studny ke zdi): misto dvojice = misto postav s p, u ktereho je venkovni lavice do
+	# dvojice_m (dřív natvrdo nadvori_studna - lavice u ni uz neni)
+	var misto_dv := ""
+	var nej_dv := INF
+	for mk: String in (P["mista"] as Dictionary):
+		var mz: Variant = P["mista"][mk]
+		if not (mz is Dictionary) or not (mz as Dictionary).has("p") or (mz as Dictionary).has("mistnost"):
+			continue
+		var mpos := Vector2(float(mz["p"][0]), float(mz["p"][1]))
+		for vr: Dictionary in sv.data["vybaveni"]:
+			if bool(vr.get("venku", false)) and String(vr["id"]).begins_with("lavice"):
+				var dl := mpos.distance_to(Vector2(float(vr["p"][0]), float(vr["p"][2])))
+				if dl < float(cv["dvojice_m"]) and dl < nej_dv:
+					nej_dv = dl
+					misto_dv = mk
+	if misto_dv == "":
+		ch.call("dvojice: zadne misto s lavici do dvojice_m")
+		misto_dv = "nadvori_studna"
+	var ma: Array = lide.call("_misto_cinnosti", a_c, misto_dv, cv)
 	var sance0 := float(cv["dvojice_stoji"])
 	cv["dvojice_stoji"] = 1.0
-	var mb: Array = lide.call("_misto_cinnosti", b_c, "nadvori_studna", cv)
+	var mb: Array = lide.call("_misto_cinnosti", b_c, misto_dv, cv)
 	cv["dvojice_stoji"] = sance0
 	if (a_c["sedak"] as Dictionary).is_empty():
 		ch.call("dvojice: prvni u studny nesedi (zadna lavice)")
