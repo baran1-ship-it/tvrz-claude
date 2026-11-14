@@ -8469,6 +8469,8 @@ func _duplicity() -> void:
 		for i in poc:
 			if absf(mm.get_instance_transform(i).basis.determinant()) < 1e-9:
 				continue                              # nulove meritko = schovana instance (nekresli se nic)
+			if mm.get_instance_transform(i) == Transform3D.IDENTITY:
+				continue                              # bez grafiky (--headless) MultiMesh polohy neuklada - jednotkova = neznama
 			var kp := str(mm.get_instance_transform(i).origin.snapped(Vector3.ONE * 0.01))
 			if vid.has(kp):
 				n_mm += 1
