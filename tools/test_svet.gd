@@ -6824,8 +6824,15 @@ func _jdi_poschodi(body: Array, podlaha: float, vyska_nad: float) -> Array:
 				player.move_input = Vector2.ZERO
 				var kdo := ""
 				for si in player.get_slide_collision_count():
-					var ow := player.get_slide_collision(si).get_collider() as Node
-					kdo += " %s" % (str(ow.get_parent().name) if ow else "?")
+					var kc := player.get_slide_collision(si)
+					var ow := kc.get_collider() as Node
+					var tvar := ""
+					var co := ow as CollisionObject3D
+					if co:
+						var sid := co.shape_find_owner(kc.get_collider_shape_index())
+						var on := co.shape_owner_get_owner(sid) as Node
+						tvar = "/" + (String(on.name) if on else "?")
+					kdo += " %s%s @%.2f (n %.2f)" % [(str(ow.get_parent().name) if ow else "?"), tvar, kc.get_position().y, kc.get_normal().y]
 				return [false, "uvazl u bodu %d (%.1f, %.1f) y %.2f, cil (%.1f, %.1f), narazil na%s" % [j, player.global_position.x, player.global_position.z, player.global_position.y, wp.x, wp.y, kdo]]
 	player.move_input = Vector2.ZERO
 	return [true, "ok"]
