@@ -97,13 +97,16 @@ BRANY = []   # (práh vnějšího líce průjezdu, výška podlahy) – mosty se
 
 # ------------------------------------------------------------------ zdi
 CIMB = json.load(open(os.path.join(K, "pravidla/svet/hrad_vzhled.json")))["cimburi"]
-def zed_plynula(P, a, b, t, h, mat="zdivo", pata=2.0, krok=1.5, e0=0.0, e1=0.0, cimburi=False):
+def zed_plynula(P, a, b, t, h, mat="zdivo", pata=2.0, krok=1.5, e0=0.0, e1=0.0, cimburi=False, rovne=False):
     """Hradba s korunou plynule po terénu (vlnka nahoru a dolů, bez stupňů – Míša 5. 11., kresba misa_04): kusy po krok m
     se šikmou korunou, sousední kusy sdílejí čela (odstran_vnitrni_cela je smaže), pata pod nejnižším terénem úseku."""
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); L = (b - a).length; d = (b - a) / L; s = d.cross(UP).normalized()
     n = max(1, int(math.ceil((L + e0 + e1) / krok))); ss = np.linspace(-e0, L + e1, n + 1)
     tr = [max(ter(*(a + d * q + s * o).xz) for o in (-t / 2, 0, t / 2)) for q in ss]
     tr = np.convolve(np.pad(tr, 2, mode="edge"), np.ones(5) / 5, mode="valid")   # vyhlazená koruna (vlnka, ne kopie každé nerovnosti)
+    if rovne:   # Míša 14. 11.: „hradba zbytečně kopíruje příkop, udělej ji rovně“ – koruna rovně mezi konci úseku, přes příkop
+        # nad ním (zeď tam vyšší); jen kde terén čáru přečnívá, jde koruna s ním
+        tr = np.maximum(np.linspace(tr[0], tr[-1], len(tr)), tr)
     yt = [float(v) + h for v in tr]; y0 = min(ter(*(a + d * q).xz) for q in ss) - pata
     out = []
     for k in range(n):
@@ -122,18 +125,22 @@ def zed_plynula(P, a, b, t, h, mat="zdivo", pata=2.0, krok=1.5, e0=0.0, e1=0.0, 
             P.box(M((p.x, yk + CIMB["vyska_m"] / 2 - 0.04, p.z), basis=frame(d) @ Matrix.Rotation(-math.atan(sk_), 3, "X")), (t * 0.4, CIMB["vyska_m"] + 0.08, sw), mat + "_koruna" if mat == "zdivo" else mat, collide=True)   # stínka má kolizi (povrch_kolize 12. 11.: „projde viditelným“)
     return out
 
-def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=None, okna=0, pilire=False, bez_stinek=None):
+def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=None, okna=0, pilire=False, bez_stinek=None, rovne=False):
     """Hradba a->b (x, z). Koruna = terén + h po stupních (zaokrouhleno na stupen_po_m), nebo pevně koruna (y).
     Úseky mají délku násobku rytmu cimbuří (hrad_vzhled.json cimburi) – stupeň koruny je vždy v proluce mezi stínkami,
     stínky jdou v pravidelném rytmu po celé hradbě (Míša 4. 11.). Vrací seznam (s0, s1, y_koruny) úseků pro ochoz."""
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); L = (b - a).length; d = (b - a) / L
     R = CIMB["rytmus_m"]; nr = max(1, round(L / R)); Rl = L / nr          # rytmus přizpůsobený délce (celý počet)
     kr = max(1, round(krok / Rl)); hr_ = list(range(0, nr, kr)) + [nr]; out = []; st_ = CIMB["stupen_po_m"]
-    for i0, i1 in zip(hr_, hr_[1:]):
+    kor_ = [round((max(ter(*(a + d * s).xz) for s in np.linspace(i0 * Rl, i1 * Rl, 5)) + h) / st_) * st_ for i0, i1 in zip(hr_, hr_[1:])]
+    if rovne and koruna is None and len(kor_) > 1:   # Míša 14. 11.: „hradba zbytečně kopíruje příkop, udělej ji rovně“ – koruna
+        # bez propadu: od nižšího konce jen stoupá (stupně jen nahoru k výššímu konci), přes příkop rovně nad ním
+        kor_ = list(np.maximum.accumulate(kor_)) if kor_[0] <= kor_[-1] else list(np.maximum.accumulate(kor_[::-1]))[::-1]
+    for j_, (i0, i1) in enumerate(zip(hr_, hr_[1:])):
         s0, s1 = i0 * Rl, i1 * Rl
         vz = [ter(*(a + d * s).xz) for s in np.linspace(s0, s1, 5)]
         y0 = min(vz) - pata
-        y1 = koruna if koruna is not None else round((max(vz) + h) / st_) * st_
+        y1 = koruna if koruna is not None else float(kor_[j_])
         e0 = t * 0.45 if (i0 == 0 and not pilire) else 0.01; e1 = t * 0.45 if (i1 == nr and not pilire) else 0.01   # uvnitř hradby přesah 1 cm (stupeň koruny přesně v proluce)
         c = a + d * ((s0 - e0 + s1 + e1) / 2)
         P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t, y1 - y0, s1 - s0 + e0 + e1), mat)
@@ -148,7 +155,7 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
     return out
 
 NAROZI_POKOS = True
-def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None, plynule=False, cimburi_pevne=False, volno_u_konce=None):
+def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None, plynule=False, cimburi_pevne=False, volno_u_konce=None, rovne=False):
     """Hradba po lomené čáře (3. 11., Míša: hradby nenavazují): úseky bez přesahů, v každém vrcholu nárožní pilíř t × t
     natočený podle osy úhlu, výška = vyšší z korun sousedních úseků (žádné prolínání kvádrů a světlé čelo v rohu)."""
     if plynule:   # koruna plynule po terénu: konce úseků na pokos (přesah t/2·tg(úhel/2)), nároží bez pilíře
@@ -157,14 +164,14 @@ def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None, plynule=False
             p0 = np.array(osa[i_ - 1 if kon == 0 else i_], float); p1 = np.array(osa[i_ if kon == 0 else i_ + 1], float); p2 = np.array(osa[i_ + 1 if kon == 0 else i_ + 2], float)
             u = p1 - p0; v = p2 - p1; u /= np.linalg.norm(u); v /= np.linalg.norm(v)
             return t / 2 * math.tan(math.acos(max(-1.0, min(1.0, float(u @ v)))) / 2) + 0.02
-        return [zed_plynula(P, p, q, t, h, mat=mat, e0=_e(k, 0), e1=_e(k, 1), cimburi=cimburi) for k, (p, q) in enumerate(zip(osa, osa[1:]))]
+        return [zed_plynula(P, p, q, t, h, mat=mat, e0=_e(k, 0), e1=_e(k, 1), cimburi=cimburi, rovne=rovne) for k, (p, q) in enumerate(zip(osa, osa[1:]))]
     def _volno(k, p, q):   # volno_u_konce = (1 = konec osy | 0 = začátek, metry bez stínek od toho konce)
         if not volno_u_konce: return None
         L_ = math.hypot(q[0] - p[0], q[1] - p[1]); kon_, m_ = volno_u_konce
         if kon_ == 1 and k == len(osa) - 2: return (L_ - m_, L_ + 1)
         if kon_ == 0 and k == 0: return (-1, m_)
         return None
-    useky = [zed(P, p, q, t, h, mat=mat, cimburi=cimburi and (cimburi_pevne or not (koruny and koruny[k] is not None)), pilire=True, koruna=(koruny[k] if koruny else None), bez_stinek=_volno(k, p, q)) for k, (p, q) in enumerate(zip(osa, osa[1:]))]   # úsek s pevnou korunou (pod ochozem u branky) bez stínek – ochoz po něm vede k portálku (povrch_kolize 10. 11.)
+    useky = [zed(P, p, q, t, h, mat=mat, cimburi=cimburi and (cimburi_pevne or not (koruny and koruny[k] is not None)), pilire=True, koruna=(koruny[k] if koruny else None), bez_stinek=_volno(k, p, q), rovne=rovne) for k, (p, q) in enumerate(zip(osa, osa[1:]))]   # úsek s pevnou korunou (pod ochozem u branky) bez stínek – ochoz po něm vede k portálku (povrch_kolize 10. 11.)
     for i, v in enumerate(osa):
         sous = ([useky[i - 1][-1][2]] if i > 0 else []) + ([useky[i][0][2]] if i < len(useky) else [])
         a = Vector((osa[max(i - 1, 0)][0], 0, osa[max(i - 1, 0)][1])); b = Vector((osa[min(i + 1, len(osa) - 1)][0], 0, osa[min(i + 1, len(osa) - 1)][1]))
@@ -674,6 +681,12 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
             sg = 1 if vstup[0] == 0 else -1
             f = A + d * vstup[1] + s * sg * (hloubka / 2 + t / 2 + 0.02)
             kit.doorway(P, M(f + UP * podl, basis=Matrix((d * sg, UP, s * sg)).transposed()), kind="hlavni", w=vstup[2], h=vstup[3], depth=t, top="lomeny", proud_max=0.045)
+    if typ == "palac" and not OMITKA and vstup is not None:   # kamenný palác (bez omítky) – vstup s kamenným ostěním a dveřmi
+        # (Míša 14. 11.: „na spoustě míst obou hradů nám chybí dveře, chci je stejné s tím kamenným ostěním, jak je vstup na
+        # vstupní branku“ – ostění se stavělo jen ve větvi omítky, všechny tři paláce jsou kamenné → holý otvor)
+        sg = 1 if vstup[0] == 0 else -1
+        f = A + d * vstup[1] + s * sg * (hloubka / 2 + t / 2 + 0.02)
+        kit.doorway(P, M(f + UP * podl, basis=Matrix((d * sg, UP, s * sg)).transposed()), kind="hlavni", w=vstup[2], h=vstup[3], depth=t, top="lomeny")
     # okna paláce (rám, výplň, okenice) na všech stranách – dřív jen uvnitř větve omítky: palác B (kamenný) a strany v hradbě
     # měly holé díry (Míša 9. 11.: „nemáš okna dodělaná“)
     for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):

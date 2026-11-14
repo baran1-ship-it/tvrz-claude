@@ -18,7 +18,8 @@
   "pozn_rychlost": "rychlost figurky na mapě (skutečné sekundy): 140 m trasy za s, cesta 3–14 s (KCD: figurka jede pár sekund)",
   "test_max_trasa_m": 3000.0,
   "pozn_test": "test mapa_cestovani: trasa po cestách mezi místy mapy nesmí být delší (výsek 2×2 km – delší = rozpadlá síť); oklika krčma ↔ hřbet 1,5 km je skutečná (z hřbetu nevede cesta dolů k Veličce blíž)",
-  "figurka_px": 64,
+  "figurka_px": 62,
+  "pozn_figurka_14_11": "Míša 14. 11.: „panáček může být menší“ – dřív 64 × 1,6 = 102 px na výšku mapy 900 px, teď 62",
   "figurka_zdroj": "game-icons.net (CC BY 3.0): skoll/mounted-knight (na koni), delapouite/pikeman (pěšky) – obarveno nastroje/mapa_figurka.py"
  },
  "oklika_pozn": "Havran _dist_km: po cestách zhruba o třetinu dál než vzdušnou čarou",

@@ -1025,11 +1025,15 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
             P.box(M(q + UP * (yb - (yb - y0 + 0.3) / 2), basis=frame(d)), (w, yb - y0 + 0.3, r + 0.02), "kvadr_schod")
         else:   # Havran stairs: stupeň ze dvou ošlapaných prken (kit.plank), ne holý kvádr
             base = a + UP * (y0 + h * (k + 1) - 0.055)
-            for a0, a1 in ((0.0, 0.52), (0.5, 1.0)):
-                c0 = base + d * (r * k + (r + 0.05) * a0); c1 = base + d * (r * k + (r + 0.05) * a1); cm = (c0 + c1) / 2
+            # Míša 14. 11.: „schody do věží a paláců vypadají jako z kostiček, chceme nepravidelná prkna“ – nášlap z prken
+            # atlasu jednotlivých prken (prkno_ven jako mostovka, dřív fotka celé podlahy prkna_ven = rastr malých prkýnek),
+            # dělení a výška každého stupně trochu jinak
+            dl_ = kit.RND.uniform(0.4, 0.62)
+            for a0, a1 in ((0.0, dl_ + 0.01), (dl_, 1.0)):
+                c0 = base + d * (r * k + (r + 0.05) * a0) + UP * kit.J(0.004); c1 = base + d * (r * k + (r + 0.05) * a1); cm = (c0 + c1) / 2
                 u0_, u1_ = volno_u_zdi(P, cm + UP * 0.03, s, w / 2)   # stupeň končí 1 cm před lícem zdi (Míša 4. 11.: „schody zapuštěné ve stěně“)
                 kit.plank(P, cm + s * (u0_ - (kit.J(0.02) if u0_ <= -w / 2 + 1e-3 else 0.0)), cm + s * (u1_ + (kit.J(0.02) if u1_ >= w / 2 - 1e-3 else 0.0)),
-                          (c1 - c0).length - 0.008, 0.05, "prkna_ven", up=(0, 1, 0), wear=0.7, seg_len=0.3)
+                          (c1 - c0).length - 0.008, 0.05, "prkno_ven", up=(0, 1, 0), wear=0.7, seg_len=0.3)
                 STUPNE.append((cm + s * u0_, cm + s * u1_))
     if not kamenne:   # dvě šikmé schodnice (Havran); podpěry jen pod podestami – sloupky v půli ramene byly „mrda podpěr“ (tablet 3. 11.)
         for o in (-w / 2 + 0.06, w / 2 - 0.06):
@@ -1312,9 +1316,12 @@ def _pricka(P, W, d, s, u, v0, v1, y0, y1, dvere_v=None, sirka_dv=0.9):
     for a_, b_ in useky:
         if b_ - a_ < 0.05: continue
         P.box(M(W(u, (a_ + b_) / 2, (y0 + y1) / 2), basis=frame(d)), (b_ - a_, y1 - y0, 0.12), "dub", collide=True)
-    if dvere_v is not None:
-        P.box(M(W(u, dvere_v, (y0 + 2.1 + y1) / 2), basis=frame(d)), (sirka_dv, y1 - y0 - 2.1, 0.12), "dub", collide=True)
-        for sg in (-1, 1): P.box(M(W(u, dvere_v + sg * (sirka_dv / 2 + 0.06), (y0 + y0 + 2.15) / 2), basis=frame(d)), (0.12, 2.15, 0.16), "dub")   # zárubeň
+    if dvere_v is not None:   # Míša 14. 11.: dveře všude – dřevěná příčka: dveře s rámem a křídlem (Havran vnitřní dveře; dřív jen
+        # dva sloupky zárubně bez křídla, nadpraží 2,1 m pod výškou postavy 2,3 m)
+        hd_ = 2.3
+        P.box(M(W(u, dvere_v, (y0 + hd_ + y1) / 2), basis=frame(d)), (sirka_dv, y1 - y0 - hd_, 0.12), "dub", collide=True)
+        kit.doorway(P, M(W(u, dvere_v, y0) + d * 0.06, basis=Matrix((-s, UP, d)).transposed()), kind="vnitrni", w=sirka_dv - 0.1, h=hd_ - 0.05,
+                    depth=0.12, top="rovny", leaf=True, open_deg=75, inner=False)
 
 def _lavice(P, q, d, delka=1.8):
     if not VYBAVENI: return   # Míša 12. 11.: vybavení si dá sám z pískoviště
@@ -1367,9 +1374,14 @@ def palac_A(P, p0, p1, bd, PI):
     # přízemí: příčka (kuchyně | síň) s dveřmi
     pu = PI["pricka_u"]
     dv_ = PI["pricka_dvere_v"]
-    for v0_, v1_ in ((-vi, dv_ - 0.48), (dv_ + 0.48, vi)):
+    # Míša 14. 11.: „na spoustě míst obou hradů chybí dveře, chci je stejné s kamenným ostěním jako vstup na branku“ – dřív
+    # holá mezera 0,96 × 2,1 m (nadpraží pod výškou postavy); teď otvor pro portálek s ostěním a křídlem (dvere_sirka/vyska)
+    Wp_, Hp_ = portaly.otvor(DS["dvere_sirka"], DS["dvere_vyska"], "segment")
+    for v0_, v1_ in ((-vi, dv_ - Wp_ / 2), (dv_ + Wp_ / 2, vi)):
         P.box(M(W(pu, (v0_ + v1_) / 2, (F0 + F1 - 0.25) / 2), basis=frame(s)), (0.5, F1 - 0.25 - F0, v1_ - v0_), "zdivo")
-    P.box(M(W(pu, dv_, (F0 + 2.1 + F1 - 0.25) / 2), basis=frame(s)), (0.5, F1 - 0.25 - F0 - 2.1, 0.96), "zdivo")
+    P.box(M(W(pu, dv_, (F0 + Hp_ + F1 - 0.25) / 2), basis=frame(s)), (0.5, F1 - 0.25 - F0 - Hp_, Wp_), "zdivo")
+    kit.doorway(P, M(W(pu, dv_, F0) + d * 0.25, basis=Matrix((-s, UP, d)).transposed()), kind="obycejne", w=DS["dvere_sirka"], h=DS["dvere_vyska"],
+                depth=0.5, top="segment", leaf=True)
     # černá kuchyně: zvýšené ohniště u jižního čela, nad ním dýmník – omítnutý plášť jehlanu na trámcích, kouř do podkroví
     # (Žebrák), kotel na trojnožce, polena; pracovní stůl, sudy
     oh_ = W(1.45, 0, F0)
@@ -1626,7 +1638,7 @@ def postav_A(P):
             kor_[j_] = round((max(ter(*(a_.lerp(b_, k / 12)).xz) for k in range(13)) + hd["vyska"]) * 2) / 2
             if hd.get("koruna_rohu_v_ochozu"): kor_[j_] = max(kor_[j_], yp_b)   # Míša 13. 11.: „na hradbách budou hradbičky, zábradlí jen
             # tam, kde není hradba“ – za rohem koruna ve výšce ochozu: podesta u věže dojde ke koruně, ven chrání cimbuří (dřív o stupeň níž → rám zábradlí)
-        uk = H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=A.get("cimburi_vnejsi", A.get("cimburi", True)), koruny=kor_, cimburi_pevne=hd.get("cimburi_u_branky", False), volno_u_konce=((u_v, hd.get("bez_stinek_u_veze_m", 2.5)) if hd.get("cimburi_u_branky") else None), plynule=hd.get("plynula_koruna", False) and not any(k_ is not None for k_ in kor_))
+        uk = H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=A.get("cimburi_vnejsi", A.get("cimburi", True)), koruny=kor_, cimburi_pevne=hd.get("cimburi_u_branky", False), volno_u_konce=((u_v, hd.get("bez_stinek_u_veze_m", 2.5)) if hd.get("cimburi_u_branky") else None), plynule=hd.get("plynula_koruna", False) and not any(k_ is not None for k_ in kor_), rovne=hd.get("rovna_koruna", False))
         HRADBY.append((osa, uk, hd))
     H.VEZ_PATRO.clear()
     # portálky strážnice: kde osa pavlače ochozu narazí do věže (hradba přiléhá k věži šikmo – pevná boční stěna nestačila, test průchodu)

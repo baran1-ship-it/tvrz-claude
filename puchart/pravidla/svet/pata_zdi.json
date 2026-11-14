@@ -25,6 +25,10 @@
   "pozn": "kouty (zeď ve ≥ 2 směrech): hustší porost, keř, suť"
  },
  "slap_sirka_m": 2.5,
+ "vyslapane_plochy": [
+  {"id": "A_branka_schody", "poly": [[9.8, -44.5], [14.2, -44.5], [14.2, -27.0], [9.8, -27.0]], "pozn_14_11b": "Míša 14. 11. (2. foto): „ještě tady je tráva“ – trs u paty věže branky za koncem plochy (−39) → plocha až k věži (−44,5)",
+   "zdroj": "Míša 14. 11. (foto x 11,7 z −29,7 u schodů na ochoz u vstupní branky): „vedle schodů by neměla růst tráva, chodí se tam, udělej tam udusanou hlínu, sem tam kamínek“ – pata schodů A_schody_vychod_pata a cesta k průchodu branky; KCD1 18_brana_zvenku (k bráně vyšlapaná hlína)"}
+ ],
  "nesahat": [
   "cesta",
   "koryto_kamenite",

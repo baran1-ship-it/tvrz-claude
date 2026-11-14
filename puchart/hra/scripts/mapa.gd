@@ -268,11 +268,15 @@ func _draw_jizda(r: Rect2, u: float, s: Vector2) -> void:
 	if zbyva.size() > 1:
 		for i in zbyva.size() - 1: _c.draw_dashed_line(zbyva[i], zbyva[i + 1], Color(0.2, 0.12, 0.06, 0.9), 3.0 * u, 10.0 * u, false)
 	var t: Texture2D = _fig.get("kun" if bool(_jizda["kun"]) else "pesky")
-	var fs := float(cfg["cestovani"]["figurka_px"]) * u * 1.6
+	var fs := float(cfg["cestovani"]["figurka_px"]) * u
 	var dalsi := _bod_trasy(minf(sj + 15.0, float(_jizda["L"])))
 	var vlevo := dalsi.x < poz.x - 0.01
 	var fr := Rect2(ps - Vector2(fs * 0.5, fs * 0.86), Vector2(fs, fs))
-	if t: _c.draw_texture_rect(t, Rect2(fr.position + (Vector2(fs, 0) if vlevo else Vector2.ZERO), Vector2(-fs if vlevo else fs, fs)), false)
+	# zrcadlení kolem bodu trasy (Míša 14. 11.: figurka „odskakovala z linie doprava do lesa“ – záporná šířka obdélníku
+	# kreslila o celou šířku vedle); podstavec figurky stojí na čáře trasy
+	_c.draw_set_transform(ps, 0.0, Vector2(-1.0 if vlevo else 1.0, 1.0))
+	if t: _c.draw_texture_rect(t, Rect2(-Vector2(fs * 0.5, fs * 0.86), Vector2(fs, fs)), false)
+	_c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_rects.append([fr.grow(10), "zastavit", 0])
 	var hod := fposmod(float(_jizda["hod0"]) + sj / 1000.0 / float(_jizda["km_h"]), 24.0)
 	var min_ := int(round(sj / 1000.0 / float(_jizda["km_h"]) * 60.0))

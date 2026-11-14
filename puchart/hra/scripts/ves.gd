@@ -458,7 +458,11 @@ func _studny() -> void:
 		for k in 12:   # koruna: ploché kameny přes celou tloušťku
 			var f := TAU * (k + rng.randf_range(-0.1, 0.1)) / 12.0
 			var dr := x * cos(f) + z * sin(f); var tg := Vector3.UP.cross(dr).normalized()
-			sit.kvadr("valoun", Vector3(c.x, c.y + h + 0.04, c.z) + dr * rm, tg.rotated(Vector3.UP, rng.randf_range(-0.12, 0.12)), Vector3.UP, Vector3.ZERO, Vector3(0.48 * rng.randf_range(0.9, 1.1), 0.1, tl + 0.08))
+			# Míša 14. 11.: „studna ve vsi – blikají jí horní kameny“: sousední kameny koruny se překrývaly (0,48 m na rozteč 0,41 m)
+			# se svrchní plochou v téže výšce → blikání; střídavě o 2,5 cm výš/níž a mírně nakloněné, překryv jen v té nižší
+			var dy := 0.0125 if k % 2 == 0 else -0.0125
+			var tgk := tg.rotated(Vector3.UP, rng.randf_range(-0.12, 0.12))
+			sit.kvadr("valoun", Vector3(c.x, c.y + h + 0.04 + dy, c.z) + dr * rm, tgk, Vector3.UP.rotated(tgk, rng.randf_range(-0.04, 0.04)), Vector3.ZERO, Vector3(0.46 * rng.randf_range(0.92, 1.05), 0.1, tl + 0.08))
 		var t := sit.s("tma")   # hladina hluboko dole: tma
 		for i in 16:
 			var f0 := TAU * i / 16.0; var f1 := TAU * (i + 1) / 16.0

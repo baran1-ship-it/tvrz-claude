@@ -66,6 +66,8 @@ if os.path.exists(K + "/build/portaly.json"):   # před a za každou bránou a d
         for z0_, z1_ in ((0.0, pp_["delka_m"]), (-po["hloubka"] - pp_["delka_m"], -po["hloubka"])):
             q_ = [(x_ + vx_ * zz + sx_ * ss, z_ + vz_ * zz + sz_ * ss) for zz, ss in ((z0_, -hw_), (z1_, -hw_), (z1_, hw_), (z0_, hw_))]
             dt_.polygon([pix(qq) for qq in q_], fill=1)
+for vp_ in PZ.get("vyslapane_plochy", []):   # plochy, kudy se chodí mimo trasy testu (Míša 14. 11.: u schodů u branky)
+    dt_.polygon([pix(qq) for qq in vp_["poly"]], fill=1)
 slap = np.array(trasy).astype(bool)
 chran = np.isin(st, [SJ["tridy"].index(t) for t in PZ["nesahat"] if t in SJ["tridy"]])   # cesty, voda, skály zůstanou
 for t in ("pata_zdi_vne", "pata_zdi_uvnitr", "kout_zdi", "nadvori_slap"):
@@ -95,6 +97,10 @@ hl = np.zeros(st.shape, np.float32)
 hl[jadra] = H_["nadvori"]; hl[jadra & (uvn | ko)] = H_["u_zdi"]
 hl[predhradi & (sum_(H_["predhradi_skvrny_m"]) > H_["predhradi_prah"])] = H_["predhradi"]
 hl[slap & (jadra | predhradi)] = H_["slap"]
+if PZ.get("vyslapane_plochy"):   # vyšlapané plochy z dat (Míša 14. 11.: „udusaná hlína, sem tam kamínek“) – hlína i mimo předhradí
+    _vp = Image.new("L", ms.size, 0); _dv = ImageDraw.Draw(_vp)
+    for vp_ in PZ["vyslapane_plochy"]: _dv.polygon([pix(qq) for qq in vp_["poly"]], fill=1)
+    hl[np.array(_vp).astype(bool)] = H_["slap"]
 hl = gaussian_filter(hl, H_["mekkost_m"] / ks)   # měkký přechod (hlína není pravítko)
 mk[..., 0] = np.maximum(mk[..., 0], hl)
 # kamenitost (Míša 3. 11.: „není to nic, co jde plošně kopírovat“): úlomky droby nejsou všude stejně – víc na svahu (eroze
