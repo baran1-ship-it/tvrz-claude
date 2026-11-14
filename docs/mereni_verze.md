@@ -379,3 +379,8 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
   po aktualizaci neplatí, tablet sestavuje znovu. Ověřit: 2. spuštění téže verze. NEOVĚŘENO.
 - Špička ves-vjezd 206 ms (fyzika 34) u (374, 749) = u krčmy (r. 125, cesty ke krčmě selhávají).
 - Teplo: panel 50 → 30 FPS během trasy (stejně jako dřív).
+
+## 0.999996 (commit 4f6de2ba, 14. 11. 14:50) – NEOVĚŘENO NA ZAŘÍZENÍ
+Změny proti 0.999995: změna činnosti postav 1/snímek (PC lide_zasek 10,8 ms, dřív 13–14), řetěz mříže jen použité články,
+déšť: sběr materiálů po částech (PC; tablet měřil 357 ms zásek na začátku deště v 0.999995), ves zesvětlená (textury, bez vlivu na výkon – NEOVĚŘENO).
+Čeká na Měřicí trasu (varianta dest).
