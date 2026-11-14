@@ -315,7 +315,7 @@ func _test_zebriky() -> void:
 			hlavni.svet.kolize_ihned(start)
 			hrac.autopilot = Vector3.INF; hrac.velocity = Vector3.ZERO; hrac.position = start + Vector3(0, 0.1, 0)
 			for i in 60: await get_tree().physics_frame
-			var u: Dictionary = Z.nejblizsi(zbs, hrac.global_position + Vector3(0, 1.0, 0))
+			var u: Dictionary = Z.nejblizsi(zbs, hrac.global_position)
 			var jm := "%s %s" % [zb["nazev"], "nahoru" if nahoru else "dolů"]
 			if u.is_empty() or bool(u["nahore"]) == nahoru:
 				spatne.append("%s: u %s není nabídka (hráč y %.2f)" % [jm, "paty" if nahoru else "vrcholu", hrac.position.y]); continue
