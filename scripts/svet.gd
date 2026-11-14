@@ -12501,14 +12501,15 @@ func _vstup_druhu() -> void:
 
 
 ## Dosednuti v datech (pasma dosednuti): kazda instance z exportu, ktera visi nad hotovym terenem (_teren_y) vic nez
-## visi_m a nestoji na skale, dosedne na teren - ponor_m. Skaly = pudorys site skaly x meritko (mrizka 16 m).
+## visi_m a nestoji na skale ani balvanu, dosedne na teren - ponor_m. Skaly a balvany = pudorys site x meritko (mrizka 16 m);
+## mech vynechan (lezi na kamenech, _mech_na_zem).
 func _dosednuti_dat() -> void:
 	var pd: Dictionary = pasma()["dosednuti"]
 	var visi := float(pd["visi_m"])
 	var ponor := float(pd["ponor_m"])
 	var skaly := {}
 	for key: String in data["rostliny"]:
-		if not key.begins_with("skala_") or key.contains("_daleko"):
+		if not (key.begins_with("skala_") or key.begins_with("balvan_")) or key.contains("_daleko"):
 			continue
 		var me := _skala_sit(key)
 		if me == null:
@@ -12527,7 +12528,8 @@ func _dosednuti_dat() -> void:
 	var n := 0
 	var po := {}
 	for key: String in data["rostliny"]:
-		if key.begins_with("skala_"):
+		# skaly a balvany samy, mech (lezi na kamenech a zdech - _mech_na_zem) vynechat
+		if key.begins_with("skala_") or key.begins_with("balvan_") or key.begins_with("mech_") or key.begins_with("moss_"):
 			continue
 		for t: Array in data["rostliny"][key]:
 			var x := float(t[3])
