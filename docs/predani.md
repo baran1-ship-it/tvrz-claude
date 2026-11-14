@@ -1341,3 +1341,4 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   (nebo jen .bin) balík nepřestavěla – i po reimportu by APK neslo starou síť. Teď otisk zahrnuje .bin vedle .gltf
   a `.godot/imported/<jmeno>-*.md5` (13. 11., 0.999995: přestavěno z_postavy, z_rostliny, z_svet).
 - **Úprava výstupů po exportu = vydání stojí na otisku** (14. 11.): `tools/zesvetli_ves.py` změnil `modely/ves` až po exportu → `otisk_exportu.py` „N rozdílů – nevydávat“. Každá úprava modelů/textur patří jako krok do `tools/export.sh` (krok 16 zesvětlení vsi), ne ručně za export; pak export znovu.
+- **Disk** (14. 11.): `git worktree add` (kopie repa) za běhu testů vyčerpal povolený disk → test retez_t5 spadl „disk došel“, foto bez cesty. Na vedlejší práci žádný worktree; snímky vždy s cestou `build/f_x/jmeno.png` (bez složky se uloží do kořene repa bez přípony).
