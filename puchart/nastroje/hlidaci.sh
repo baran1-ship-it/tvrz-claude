@@ -7,6 +7,11 @@
 set -o pipefail
 K=$(cd "$(dirname "$0")/.." && pwd); G=${GODOT:-/opt/godot47/Godot_v4.7.2-stable_linux.x86_64}
 mkdir -p $K/build; S=$K/build/hlidaci.txt; : > $S; rc=0
+# výšky pro hru (vysek.r16z, kolize a výška terénu ve hře) musí být z aktuální vysek.r16 (14. 11.: po přestavbě vsi zůstala
+# r16z z minulého dne – hra stála na starém terénu, domy na nových plošinách nešly vstoupit; test průchodu to chytil)
+for _r in vysek vysek_sit; do
+  if [ $K/hra/data/$_r.r16 -nt $K/hra/data/$_r.r16z ]; then cp $K/nastroje/godot/r16_zstd.gd $K/hra/_r16z.gd && $G --headless --path $K/hra -s res://_r16z.gd | tee -a $S; rm -f $K/hra/_r16z.gd $K/hra/_r16z.gd.uid; break; fi
+done
 # staré výsledky pryč (QA 2. 11.: když Godot/Blender spadne, nesmí projít výsledky minulého běhu)
 rm -f $K/build/kontrola_geometrie.json $K/build/test_smyslu.json $K/build/hlidaci_beh_godot.log $K/build/hlidaci_otisk
 [ "$1" != "--rychle" ] && rm -f $K/build/pruchod.json $K/build/sceny.json $K/build/kontrola_scen.json
