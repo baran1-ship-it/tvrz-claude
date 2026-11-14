@@ -202,6 +202,22 @@
    ]
   },
   {
+   "jmeno": "krcma-kovarna",
+   "od": [
+    440.0,
+    800.0
+   ],
+   "do": [
+    420.0,
+    895.0
+   ],
+   "cil": [
+    394.0,
+    906.0,
+    2.0
+   ]
+  },
+  {
    "jmeno": "hostinec",
    "od": [
     -62.0,
@@ -260,5 +276,6 @@
  "_varianty_13_11": "regrese 0.99999 (postavy +8-10 ms p50 proti bez_postav): izolovany test skupin postav - modifikatory kostry vsechny (sukne, uchop, nohy IK, hlava), jen ridic sukne, jen uchopy; rozdil bez_postav - bez_modifikatoru = animace + skinning (+24 kosti sukne)",
  "_varianty_13_11b": "0.999991 (13. 11. 14:56): bez sukne / bez uchopu / bez modifikatoru = vse (modifikatory nejsou cena); bez postav -8..-11 ms. Dalsi izolace: bez_animace (AnimationPlayer postav stoji, kostra se neprepocitava) a chuze_lod (jdouci postavy opet usporna animace, pred fe4e4039)",
  "_varianty_13_11c": "0.999993: bez postav -7..-9 ms (3/4 behy), bez animace/modifikatoru nepomaha; PC: stare modely z 0.99998 stoji stejne jako nove. Rozdeleni: postavy_skryte (neviditelne, logika bezi) x postavy_stoji (viditelne, Lide bez zpracovani)",
- "_varianty_14_11": "14. 11. (0.999996: ves-dvory 2,4 s u usedlosti 6, skripty 11, fyzika 2): postavy_stoji → bez_vnitrku_vsi (izolovaný test podezření „první vykreslení vnitřku domů“; postavy ve vsi ověřeny 0.999995)"
+ "_varianty_14_11": "14. 11. (0.999996: ves-dvory 2,4 s u usedlosti 6, skripty 11, fyzika 2): postavy_stoji → bez_vnitrku_vsi (izolovaný test podezření „první vykreslení vnitřku domů“; postavy ve vsi ověřeny 0.999995)",
+ "_useky_14_11": "Míša 14. 11. („všechny modely jsou těžké, bude to v pohodě se sekáním?“): úsek krcma-kovarna – od zatáčky návsi podél krčmy do L (172 tis. troj.) ke kovárně na konci ulice"
 }
