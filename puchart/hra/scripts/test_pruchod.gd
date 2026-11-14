@@ -72,6 +72,11 @@ func _test_kmene() -> void:
 		vysledek["strom_kolize"] = "CHYBA: les bez kolizí kmenů"; return
 	var p0 := Vector3(-60, 0, -150)
 	var k: Vector4 = les.nejblizsi_kmen(p0)
+	for r_ in [40.0, 80.0, 120.0]:   # 14. 11.: u startu stojí kovářova usedlost (stromy pryč) – nejbližší strom v okolí
+		for a_ in 8:
+			if k.x != INF: break
+			p0 = Vector3(-60, 0, -150) + Vector3(cos(a_ * TAU / 8.0), 0, sin(a_ * TAU / 8.0)) * r_
+			k = les.nejblizsi_kmen(p0)
 	if k.x == INF:
 		vysledek["strom_kolize"] = "CHYBA: žádný strom u startu"; return
 	var smer := Vector3(1, 0, 0)
