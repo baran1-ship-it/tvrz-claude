@@ -7406,7 +7406,10 @@ func _lide_zasek() -> void:
 						ceka += 1
 					elif not hotove.has(c["id"]) and not (c["cesta"] as PackedVector2Array).is_empty():
 						hotove[c["id"]] = [c["misto"], (c["cesta"] as PackedVector2Array).duplicate(), f + 1, Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z)]
-				if ceka == 0 and hotovo_s < 0:
+				# 14. 11.: rozpocet zmen cinnosti (graf.zmena_bloku_snimek) odklada cast postav - hotovo az kdyz vsechny
+				# zmenily blok a zadna neceka na cestu
+				var vsechny := ll.all(func(c9: Dictionary) -> bool: return int(c9["blok"]) == int(lide.call("_blok", c9, hh[1])))
+				if ceka == 0 and vsechny and hotovo_s < 0:
 					hotovo_s = f + 1
 					break
 			vysl.append("%.2f->%.2f %s: nejdelsi snimek %.1f ms, cest %d, sond %d, dopocitano za %d snimku" % [hh[0], hh[1], "bez rozpoctu" if bez else "s rozpoctem", max_us / 1000.0, hotove.size(), int(lide.get("_nav_sond_n")), hotovo_s])
@@ -7682,6 +7685,26 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 			var ut: Array = lide.call("u_stromu", mt[0])
 			if ut.is_empty() or (ut[0] as Vector2).distance_to(mt[0]) > float(ust["od_kmene_m"]) * 0.5:
 				ch.call("%s %s@%s: trha ovoce mimo strom %s" % [c["id"], bl["cinnost"], bl["kde"], (mt[0] as Vector2).round()])
+	# Misa 14. 11. (hospodsky se opira o vzduch, tram je dal za nim): kazde misto u_steny - za zady do od_m + rezerva
+	# pevna plocha (ne dvere Pohyb_*), paprsek ve vysce u_steny.vyska_m
+	var us9: Dictionary = Pravidla.cti("postavy", "u_steny")
+	var sp9 := get_tree().root.get_world_3d().direct_space_state
+	for k9: String in (P["mista"] as Dictionary):
+		if not (P["mista"][k9] as Dictionary).has("u_steny"):
+			continue
+		var m9: Array = lide.call("_misto", ll[0], k9)
+		if float(m9[1]) == INF:
+			ch.call("%s: stena k opreni nenalezena" % k9)
+			continue
+		var q9: Vector2 = m9[0]
+		var y9: float = float(lide.call("podlaha", q9)) + float(us9["vyska_m"])
+		var za9 := -Vector2(sin(float(m9[1])), cos(float(m9[1])))
+		var o9 := Vector3(q9.x, y9, q9.y)
+		var r9 := sp9.intersect_ray(PhysicsRayQueryParameters3D.create(o9, o9 + Vector3(za9.x, 0.0, za9.y) * (float(us9["od_m"]) + 0.15), 1))
+		if r9.is_empty():
+			ch.call("%s: oprena postava (%.1f, %.1f) - za zady do %.2f m nic (opira se o vzduch)" % [k9, q9.x, q9.y, float(us9["od_m"]) + 0.15])
+		elif lide.call("_je_pohyblive", r9.get("collider")):
+			ch.call("%s: oprena o dvere (%.1f, %.1f)" % [k9, q9.x, q9.y])
 	# Misa 13. 11. (hostinsky s hostinskou pleji travu u krbu): predklon k zemi jen u prace na zemi (k_zemi_cinnosti)
 	var kz: Array = Pravidla.cti("postavy", "klipy_k_zemi")
 	var kz_ok: Array = Pravidla.cti("postavy", "k_zemi_cinnosti")

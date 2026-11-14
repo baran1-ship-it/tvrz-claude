@@ -535,6 +535,9 @@ func _misto(c: Dictionary, kde: String) -> Array:
 			var o3 := Vector3(q0.x, y0 + float(us["vyska_m"]), q0.y)
 			# jen vrstva zdi (1): ne hrac, postavy ani drobnosti na vrstve 2 (kontrola pred 0.99997)
 			var r := sp.intersect_ray(PhysicsRayQueryParameters3D.create(o3, o3 + Vector3(cos(a), 0.0, sin(a)) * float(z.get("hledat_m", us["hledat_m"])), 1))
+			# 14. 11. (Misa: hospodsky se opira o vzduch): ne o dvere (Pohyb_*) - otevrou se a postava zustane oprena do prazdna
+			if not r.is_empty() and _je_pohyblive(r.get("collider")):
+				continue
 			if not r.is_empty() and (r["position"] as Vector3).distance_to(o3) < nej:
 				nej = (r["position"] as Vector3).distance_to(o3)
 				hit = r
@@ -2617,3 +2620,13 @@ func _modif_vyp(c: Dictionary) -> void:
 			la.active = false
 	if (c["ruce"] as Dictionary).has("mod"):
 		(c["ruce"]["mod"] as Node).call("zapni", false)
+
+
+## Kolize pohyblive casti (dvere, vrata, okenice - uzly Pohyb_*): neni o co se oprit natrvalo.
+static func _je_pohyblive(o: Variant) -> bool:
+	var n: Node = o as Node
+	while n != null:
+		if String(n.name).begins_with("Pohyb"):
+			return true
+		n = n.get_parent()
+	return false
