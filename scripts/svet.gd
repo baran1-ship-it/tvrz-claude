@@ -7055,6 +7055,7 @@ func _zahrada(d: Dictionary) -> void:
 				data["vybaveni"].append({"id": "plutek", "p": [w4.x, pata_lom(w4.x, w4.z, yaw, 2.07, 0.07) - 0.02, w4.z], "yaw": yaw})
 				xp += 2.1
 	_zahrady_kvety.append([d, x0, z0, z1])
+	print("zahrada dum %d: %d zahonu (%s), plot kolem %s" % [int(d["k"]), n, str(plodiny), bool(zd.get("plot_kolem", false))])
 
 
 var _zahrady_kvety: Array = []

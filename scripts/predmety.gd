@@ -14,6 +14,7 @@ var inv: Dictionary = {}            # id -> pocet (brasna hrace)
 var grose := 0
 var obchody: Dictionary = {}         # kupec id -> {"mesec": int, "zbozi": {id: n}, "den": int}
 var vybava: Dictionary = {}         # slot -> id oblecene / vzate veci (zustava v brasne; pravidla/svet/hrac.json vybava)
+var _chybi := {}
 var placed: Array = []              # [{id, p: Vector3, yaw: float, obsah: {id: pocet}, node: Node3D}]
 var _scenes: Dictionary = {}
 var _icons: Dictionary = {}
@@ -110,7 +111,12 @@ func spawn_on_wall(id: String, from: Vector3, dir: Vector3, extra := {}) -> void
 func spawn(rec: Dictionary) -> void:
 	var id: String = rec["id"]
 	if not kat.has(id) or scene(id) == null:
-		return                              # predmet ze starsiho ulozeni, ktery uz neexistuje
+		# predmet ze starsiho ulozeni, ktery uz neexistuje - nebo chybi v katalogu/baliku (Misa 14. 11. „plot bylinkarky
+		# porad neni“: tichy return skryl, ze se nic nepolozilo) - jednou za id do logu
+		if not _chybi.has(id):
+			_chybi[id] = true
+			push_warning("predmety: %s nepolozen (katalog %s, scena %s)" % [id, kat.has(id), scene(id) != null if kat.has(id) else false])
+		return
 	var info: Dictionary = kat.get(id, {})
 	var n := Node3D.new()
 	n.position = rec["p"]

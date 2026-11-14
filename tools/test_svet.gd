@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -8733,7 +8733,11 @@ func _rostliny_v_budovach() -> void:
 				var ma := mm.mesh.get_aabb()
 				jm = mm.mesh.resource_name
 				for i in n:
-					aabbs.append(mmi.global_transform * mm.get_instance_transform(i) * ma)
+					var ti := mm.get_instance_transform(i)
+					# prazdne sloty (identita v pocatku, nulove meritko) - skryte instance, ne rostlina
+					if ti == Transform3D() or absf(ti.basis.determinant()) < 1e-6:
+						continue
+					aabbs.append(mmi.global_transform * ti * ma)
 			else:
 				var mi := gi as MeshInstance3D
 				if mi == null or mi.mesh == null:
@@ -8774,3 +8778,41 @@ func _rostliny_v_budovach() -> void:
 	for kl: String in vady:
 		print("ROSTLINY_V_BUDOVACH %s: %d" % [kl, vady[kl]])
 	_vysledek("rostliny_v_budovach", inst > 0 and vady.is_empty(), "mistnosti %d, shluku %d, instanci %d, vad %d %s" % [rooms.size(), shluky.size(), inst, vady.size(), str(vady.keys().slice(0, 4))])
+
+
+## Misa 14. 11. „plot bylinkarky porad neni a zahonky taky nema“ (lokace ves.zahrady.domy.7: zahon_bylinky, plot_kolem):
+## v datech i ve scene (predmety.placed s uzlem) aspon jeden zahon bylinek a plot kolem zahrady domu 7.
+func _zahrada_bylinkarky() -> void:
+	var d7: Dictionary = {}
+	for d: Dictionary in sv._domy:
+		if int(d["k"]) == 7:
+			d7 = d
+	if d7.is_empty():
+		_vysledek("zahrada_bylinkarky", false, "dum 7 v _domy neni")
+		return
+	var c: Vector2 = d7["c"]
+	var zah := 0
+	var plot := 0
+	var cizi: Array = []
+	for r: Dictionary in sv.data["vybaveni"]:
+		var p := Vector2(float(r["p"][0]), float(r["p"][2]))
+		if p.distance_to(c) > 16.0:
+			continue
+		var id := String(r["id"])
+		if id == "zahon_bylinky":
+			zah += 1
+		elif id.begins_with("zahon"):
+			cizi.append(id)
+		elif id == "plutek":
+			plot += 1
+	var pr: Node = main.get("predmety")
+	if pr == null:
+		pr = get_tree().root.find_child("Predmety", true, false)
+	var ve_scene := 0
+	if pr:
+		for r2: Dictionary in pr.placed:
+			if (String(r2["id"]) == "zahon_bylinky" or String(r2["id"]) == "plutek") and Vector2((r2["p"] as Vector3).x, (r2["p"] as Vector3).z).distance_to(c) < 16.0 \
+					and r2.get("node") != null and is_instance_valid(r2["node"]):
+				ve_scene += 1
+	_vysledek("zahrada_bylinkarky", zah > 0 and plot >= 6 and cizi.is_empty() and ve_scene >= zah + plot,
+			"dum 7 (%.0f, %.0f): zahonu bylinek %d, plutku %d, jinych zahonu %s, ve scene %d" % [c.x, c.y, zah, plot, str(cizi), ve_scene])
