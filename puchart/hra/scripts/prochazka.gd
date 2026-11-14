@@ -143,6 +143,7 @@ func _akce(co: String, arg: Variant) -> void:
 			var cf := ConfigFile.new(); cf.load("user://nastaveni.cfg"); cf.set_value("test", "pri_startu", true); cf.save("user://nastaveni.cfg")
 			if menu.can_save: _uloz()
 			get_tree().paused = false
+			Engine.max_fps = 0   # nabídka drží 10 snímků – nesmí přejít do měření (hlavni.gd limit nastaví znovu)
 			get_tree().reload_current_scene()
 		"save_quit":
 			if menu.can_save: _uloz()

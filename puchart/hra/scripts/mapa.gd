@@ -27,6 +27,10 @@ var _opened_ms := 0
 var _stick := false
 var _cur := Vector2(-1, -1)
 var _hover := -1
+# rychlé cestování jako KCD (Míša 14. 11.): figurka jede po mapě po cestách, čas ubíhá podle chůze nebo jízdy, jde zastavit
+var _astar := AStar2D.new()
+var _fig := {}                  # "kun" / "pesky" -> Texture2D (nastroje/mapa_figurka.py)
+var _jizda := {}                # běžící cesta: body, kum (kumulativní délky), L, s, rychlost_m_s (mapa), km_h, cil, pohled, hod0
 
 
 ## Místa mapy z dat: pevná (cil/pohled) i odvozená ze staveb nových míst (misto + prichod).
@@ -112,6 +116,14 @@ func _ready() -> void:
 	_fb = load("res://fonty/GrenzeGotisch-Bold.ttf"); _fm = load("res://fonty/GrenzeGotisch-Medium.ttf")
 	for m: Dictionary in mista:
 		if not _erby.has(m["erb"]): _erby[m["erb"]] = load("res://obrazky/erby/%s.png" % m["erb"])
+	if FileAccess.file_exists("res://data/cesty_graf.json"):   # síť cest (nastroje/cesty_graf.py)
+		var g: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/cesty_graf.json"))
+		var uz: Array = g["uzly"]
+		_astar.reserve_space(uz.size())
+		for i in uz.size(): _astar.add_point(i, Vector2(uz[i][0], uz[i][1]))
+		for h: Array in g["hrany"]: _astar.connect_points(int(h[0]), int(h[1]))
+	for k in ["kun", "pesky"]:
+		if ResourceLoader.exists("res://textury/ui/figurka_%s.png" % k): _fig[k] = load("res://textury/ui/figurka_%s.png" % k)
 	_c = Control.new(); _c.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_c.mouse_filter = Control.MOUSE_FILTER_IGNORE   # dotyky čte _input jen při otevřené mapě (tlačítka dveří pod ní nesmí blokovat)
 	_c.draw.connect(_draw_all); add_child(_c)
@@ -135,6 +147,7 @@ func show_map() -> void:
 
 func close() -> void:
 	if not otevrena: return
+	_jizda = {}
 	otevrena = false; visible = false
 	get_tree().paused = false
 	if proch and proch.has_method("_fps_menu"): proch._fps_menu(false)
@@ -149,6 +162,11 @@ func _here() -> int:
 
 
 func _process(_d: float) -> void:
+	if otevrena and not _jizda.is_empty():
+		_jizda["s"] = minf(float(_jizda["s"]) + float(_jizda["rychlost_m_s"]) * _d, float(_jizda["L"]))
+		_c.queue_redraw()
+		if float(_jizda["s"]) >= float(_jizda["L"]): _dorazit(true)
+		return
 	if not otevrena or asking: return
 	var v := Vector2(Input.get_joy_axis(0, JOY_AXIS_LEFT_X), Input.get_joy_axis(0, JOY_AXIS_LEFT_Y))
 	if v.length() > 0.2:
@@ -211,6 +229,8 @@ func _draw_all() -> void:
 		if i == sel: _c.draw_circle(er.get_center(), es * 0.7, Color(1.0, 0.85, 0.45, 0.45))
 		_c.draw_texture_rect(_erby[m["erb"]], er, false)
 		_rects.append([er.grow(12), "misto", i])
+	if not _jizda.is_empty():
+		_draw_jizda(r, u, s); return
 	# hráč: šipka ve směru pohledu (Havran)
 	var pp := hrac.global_position
 	var pc := _to_screen(r, Vector2(pp.x, pp.z))
@@ -234,6 +254,35 @@ func _draw_all() -> void:
 	if asking: _draw_ask(s, u)
 
 
+## Jízda po mapě: ujetá část trasy plnou čarou, zbytek čárkovaně, figurka (zrcadlí se podle směru), hodina dne, Zastavit.
+func _draw_jizda(r: Rect2, u: float, s: Vector2) -> void:
+	var b: PackedVector2Array = _jizda["body"]; var kum: PackedFloat32Array = _jizda["kum"]; var sj: float = _jizda["s"]
+	var poz := _bod_trasy(sj)
+	var hotovo := PackedVector2Array(); var zbyva := PackedVector2Array()
+	for i in b.size():
+		if kum[i] <= sj: hotovo.append(_to_screen(r, b[i]))
+		else: zbyva.append(_to_screen(r, b[i]))
+	var ps := _to_screen(r, poz)
+	hotovo.append(ps); zbyva.insert(0, ps)
+	if hotovo.size() > 1: _c.draw_polyline(hotovo, Color(0.45, 0.08, 0.05, 0.85), 4.0 * u, true)
+	if zbyva.size() > 1:
+		for i in zbyva.size() - 1: _c.draw_dashed_line(zbyva[i], zbyva[i + 1], Color(0.2, 0.12, 0.06, 0.9), 3.0 * u, 10.0 * u, false)
+	var t: Texture2D = _fig.get("kun" if bool(_jizda["kun"]) else "pesky")
+	var fs := float(cfg["cestovani"]["figurka_px"]) * u * 1.6
+	var dalsi := _bod_trasy(minf(sj + 15.0, float(_jizda["L"])))
+	var vlevo := dalsi.x < poz.x - 0.01
+	var fr := Rect2(ps - Vector2(fs * 0.5, fs * 0.86), Vector2(fs, fs))
+	if t: _c.draw_texture_rect(t, Rect2(fr.position + (Vector2(fs, 0) if vlevo else Vector2.ZERO), Vector2(-fs if vlevo else fs, fs)), false)
+	_rects.append([fr.grow(10), "zastavit", 0])
+	var hod := fposmod(float(_jizda["hod0"]) + sj / 1000.0 / float(_jizda["km_h"]), 24.0)
+	var min_ := int(round(sj / 1000.0 / float(_jizda["km_h"]) * 60.0))
+	_text(Vector2(s.x * 0.5, 64 * u), "%s  ·  %02d:%02d  ·  %d min %s" % [String(_jizda["nazev"]), int(hod), int(fmod(hod, 1.0) * 60.0), min_, "jízdy" if bool(_jizda["kun"]) else "chůze"], int(28 * u), INK, Color(1, 1, 1, 0.92), _fb)
+	var br := Rect2(Vector2(s.x * 0.5 - 130 * u, s.y - 96 * u), Vector2(260 * u, 64 * u))
+	Styl.kresli_tlacitko(_c, br, 0, true, br.size.y / 76.0)
+	_text(br.get_center() + Vector2(0, 12 * u), "Zastavit", int(34 * u), Styl.RED, Color(0, 0, 0, 0), _fb)
+	_rects.append([br, "zastavit", 0])
+
+
 func _draw_ask(s: Vector2, u: float) -> void:
 	_rects.clear()
 	var m: Dictionary = mista[sel]
@@ -242,7 +291,8 @@ func _draw_ask(s: Vector2, u: float) -> void:
 	Styl.kresli_list(_c, box, 0.45 * u)
 	_text(box.position + Vector2(w * 0.5, 86 * u), "Rychlé cestování", int(40 * u), INK, Color(0, 0, 0, 0), _fb)
 	Styl.kresli_linku(_c, box.position + Vector2(w * 0.5, 104 * u), w * 0.5, u)
-	_text(box.position + Vector2(w * 0.5, 150 * u), "do: %s  (asi %d minut chůze)" % [m["nazev"], int(round(_dist_km() / float(cfg["chuze_km_h"]) * 60.0))], int(26 * u), INK, Color(0, 0, 0, 0))
+	var kun := na_koni()
+	_text(box.position + Vector2(w * 0.5, 150 * u), "do: %s  (asi %d minut %s)" % [m["nazev"], int(round(_dist_km() / _km_h(kun) * 60.0)), "jízdy" if kun else "chůze"], int(26 * u), INK, Color(0, 0, 0, 0))
 	for k in 2:
 		var br := Rect2(box.position + Vector2(w * (0.12 + 0.44 * k), h - 108 * u), Vector2(w * 0.32, 60 * u))
 		var on := (k == 0) == ano
@@ -267,6 +317,16 @@ func _unhandled_input(e: InputEvent) -> void:   # otevření, když je mapa zav�
 
 func _input(event: InputEvent) -> void:
 	if not otevrena: return
+	if not _jizda.is_empty():   # během jízdy: klepnutí na figurku / Zastavit, B, Esc = zastavit
+		var stop := false
+		if (event is InputEventScreenTouch and event.pressed) or (event is InputEventMouseButton and event.pressed):
+			for rr: Array in _rects:
+				if String(rr[1]) == "zastavit" and (rr[0] as Rect2).has_point(event.position): stop = true
+		elif event is InputEventJoypadButton and event.pressed and (event as InputEventJoypadButton).button_index in [JOY_BUTTON_A, JOY_BUTTON_B]: stop = true
+		elif event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).keycode in [KEY_ESCAPE, KEY_SPACE]: stop = true
+		if event is InputEventScreenTouch or event is InputEventMouseButton or event is InputEventJoypadButton or event is InputEventKey: get_viewport().set_input_as_handled()
+		if stop: _dorazit(false)
+		return
 	if event is InputEventJoypadButton and event.pressed:
 		get_viewport().set_input_as_handled()
 		if Time.get_ticks_msec() - _opened_ms < 250: return
@@ -316,7 +376,74 @@ func _input(event: InputEvent) -> void:
 
 func _dist_km() -> float:
 	var pp := hrac.global_position
-	return Vector2(pp.x, pp.z).distance_to(mista[sel]["p"]) * float(cfg["oklika"]) / 1000.0
+	return _delka(trasa(Vector2(pp.x, pp.z), mista[sel]["cil"])) / 1000.0
+
+
+## Sedí hráč na koni? Mapa to pozná sama (Míša 14. 11.: „žádný přepínač“); kůň zatím v Puchartu není → pěšky.
+func na_koni() -> bool:
+	return hrac != null and hrac.get("na_koni") == true
+
+
+func _km_h(kun: bool) -> float:
+	return float(cfg["kun_km_h"]) if kun else float(cfg["chuze_km_h"])
+
+
+## Trasa po cestách: od hráče na nejbližší bod sítě, po síti (A*), z nejbližšího bodu k cíli. Když je to vzdušnou čarou
+## kratší než jen dojít na cestu a z ní (oba konce mimo cesty blízko u sebe), rovnou.
+func trasa(od: Vector2, do_: Vector2) -> PackedVector2Array:
+	var p := PackedVector2Array([od])
+	if _astar.get_point_count() > 0:
+		var a := _astar.get_closest_point(od); var b := _astar.get_closest_point(do_)
+		if od.distance_to(do_) > od.distance_to(_astar.get_point_position(a)) + do_.distance_to(_astar.get_point_position(b)):
+			p.append_array(_astar.get_point_path(a, b))
+	p.append(do_)
+	return p
+
+
+static func _delka(p: PackedVector2Array) -> float:
+	var d := 0.0
+	for i in p.size() - 1: d += p[i].distance_to(p[i + 1])
+	return d
+
+
+func _bod_trasy(sj: float) -> Vector2:
+	var b: PackedVector2Array = _jizda["body"]; var kum: PackedFloat32Array = _jizda["kum"]
+	for i in b.size() - 1:
+		if kum[i + 1] >= sj:
+			var t := (sj - kum[i]) / maxf(kum[i + 1] - kum[i], 0.001)
+			return b[i].lerp(b[i + 1], t)
+	return b[b.size() - 1]
+
+
+func _zacni_jizdu(m: Dictionary) -> void:
+	var pp := hrac.global_position
+	var b := trasa(Vector2(pp.x, pp.z), m["cil"])
+	var kum := PackedFloat32Array([0.0])
+	for i in b.size() - 1: kum.append(kum[i] + b[i].distance_to(b[i + 1]))
+	var L := kum[kum.size() - 1]
+	var c: Dictionary = cfg["cestovani"]
+	var dur := clampf(L / float(c["mapa_m_za_s"]), float(c["min_s"]), float(c["max_s"]))
+	var kun := na_koni()
+	var hl: Node = proch.hlavni if proch else null
+	_jizda = {"body": b, "kum": kum, "L": L, "s": 0.0, "rychlost_m_s": L / dur, "kun": kun, "km_h": _km_h(kun),
+		"cil": m["cil"], "pohled": m["pohled"], "nazev": m["nazev"], "hod0": float(hl.den.hour) if hl and hl.den else 12.0}
+	if proch and proch.has_method("_fps_menu"): proch._fps_menu(false)   # figurka jede plynule (otevřená mapa jinak drží 10 snímků)
+	_c.queue_redraw()
+
+
+## Konec jízdy: v cíli (místo z mapy), nebo zastaveno – hráč na cestě v bodě figurky, pohled dál po trase.
+## Čas = ujetá vzdálenost / rychlost chůze nebo jízdy.
+func _dorazit(v_cili: bool) -> void:
+	if _jizda.is_empty(): return
+	var sj: float = _jizda["s"]
+	var hodin := sj / 1000.0 / float(_jizda["km_h"])
+	var cil: Vector2 = _jizda["cil"]; var pohled: Vector2 = _jizda["pohled"]
+	if not v_cili:
+		cil = _bod_trasy(sj); pohled = _bod_trasy(minf(sj + 20.0, float(_jizda["L"])))
+		if pohled.distance_to(cil) < 1.0: pohled = cil + Vector2(0, -10)
+	_jizda = {}
+	close()
+	cestuj(cil, pohled, hodin, true)
 
 
 func _ask() -> void:
@@ -330,14 +457,11 @@ func _answer(yes: bool) -> void:
 	asking = false
 	if not yes:
 		_c.queue_redraw(); return
-	var m: Dictionary = mista[sel]
-	var hodin := _dist_km() / float(cfg["chuze_km_h"])
-	close()
-	cestuj(m["cil"], m["pohled"], hodin)
+	_zacni_jizdu(mista[sel])
 
 
 ## Rychlé cestování (Havran main.gd fast_travel): zatmít, posunout čas o dobu chůze, kolize v cíli, hráč na zem, rozednít.
-func cestuj(cil: Vector2, pohled: Vector2, hodin: float) -> void:
+func cestuj(cil: Vector2, pohled: Vector2, hodin: float, z_mapy := false) -> void:
 	var hl: Node = proch.hlavni
 	var cl := CanvasLayer.new(); cl.layer = 30; cl.process_mode = Node.PROCESS_MODE_ALWAYS
 	var fade := ColorRect.new(); fade.color = Color(0, 0, 0, 0); fade.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -349,9 +473,11 @@ func cestuj(cil: Vector2, pohled: Vector2, hodin: float) -> void:
 		if x != null:
 			get_tree().paused = false; (x as Node).queue_free())
 	get_tree().paused = true
-	var tw := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	tw.tween_property(fade, "color:a", 1.0, 0.7)
-	await tw.finished
+	if z_mapy: fade.color.a = 1.0   # z mapy rovnou do černé (jinak by bliklo staré místo)
+	else:
+		var tw := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tw.tween_property(fade, "color:a", 1.0, 0.7)
+		await tw.finished
 	if hrac.leti and proch.has_method("_akce"): proch._akce("set:let", null)
 	if hodin > 0.0 and hl.den: hl.den.set_hour(hl.den.hour + hodin, 0.01)
 	priprav_kolize(hl, cil)

@@ -15,6 +15,7 @@ const CREDITS := [
 	"Úvodní obraz: erb pánů z Kunštátu (stříbrný štít, v horní polovině tři černá břevna) podle Siebmacherova erbovníku – Wikimedia Commons „Kunstadt-Wappen1 Sm.png“ (Dorado), volné dílo",
 	"Hudba nabídky: „Medieval: Exploration“ – RandomMind (opengameart.org), CC0",
 	"Textury, rostliny a předměty: Poly Haven, CC0",
+	"Figurka na mapě: „Mounted knight“ (Skoll) a „Pikeman“ (Delapouite) – game-icons.net, CC BY 3.0, obarveno",
 	"Padlé kmeny: „Dead Tree Trunk“ (Rob Tuytel) a „Dead Tree Trunk 02“ (Jenelle van Heerden, Rico Cilliers) – Poly Haven, CC0",
 	"Ostřice a vrby: fotoskeny listů ambientCG, CC0; devětsil: list z „Dim's Arboretum“ – Dim (opengameart.org), CC-BY 3.0",
 	"Terén: DMR 5G, ČÚZK; vodní síť a cesty: ZABAGED, OpenStreetMap (ODbL)",

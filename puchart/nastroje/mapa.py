@@ -82,8 +82,13 @@ for c in J("pravidla/svet/cesty_puchart.json")["cesty"]:
     if c["typ"] == "vozova":
         d.line(pts, fill=INK + (255,), width=7); d.line(pts, fill=(222, 200, 150, 255), width=4)
     else:
+        acc = 0.0   # čárky podle ujeté délky (body os po ~4 m = pod 1 px – dřív čárky podle souřadnic, stezka skoro zmizela)
         for a, b in zip(pts[:-1], pts[1:]):
-            if (int(a[0] + a[1]) // 7) % 2 == 0: d.line([a, b], fill=INK + (230,), width=2)
+            ln = math.hypot(b[0] - a[0], b[1] - a[1]); n_ = max(1, int(ln))
+            for k in range(n_):
+                q0 = (a[0] + (b[0] - a[0]) * k / n_, a[1] + (b[1] - a[1]) * k / n_); q1 = (a[0] + (b[0] - a[0]) * (k + 1) / n_, a[1] + (b[1] - a[1]) * (k + 1) / n_)
+                if int((acc + k * ln / n_) // 7) % 2 == 0: d.line([q0, q1], fill=INK + (230,), width=3)
+            acc += ln
 # hrady podle zdrojů (hrad_puchart.json): zeď na valu, obrysy jader, kreslené hrádky
 N = J("pravidla/svet/hrad_puchart.json")
 pts = [P(*p) for p in N["A"]["hradba_val"]["osa"]]; d.line(pts, fill=(110, 80, 50, 230), width=5)

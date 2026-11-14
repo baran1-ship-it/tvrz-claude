@@ -271,6 +271,29 @@ func _test_mapa() -> void:
 		var ok: bool = hrac.is_on_floor() and not h.is_empty() and absf(nad) <= 0.5 and hrac.position.y > teren - 0.5
 		print("PRUCHOD mapa %s [%.1f, %.1f] y %.2f, teren %.2f, nad podlahou %.2f, na zemi %s -> %s" % [m["nazev"], hrac.position.x, hrac.position.z, hrac.position.y, teren, nad, hrac.is_on_floor(), "OK" if ok else "CHYBA"])
 		if not ok: spatne.append("%s (y %.2f, terén %.2f, nad %.2f, na zemi %s)" % [m["nazev"], hrac.position.y, teren, nad, hrac.is_on_floor()])
+	# Míša 14. 11.: jízda po mapě po cestách a zastavení kdekoli – bod v 40 % každé trasy (od posledního místa), hráč na zemi
+	var mp: Node = M.new(); add_child(mp); mp.hrac = hrac
+	for m: Dictionary in body:
+		if not m.has("pohled"): continue
+		var od := Vector2(hrac.position.x, hrac.position.z)
+		var tr: PackedVector2Array = mp.trasa(od, m["cil"])
+		var L: float = mp._delka(tr)
+		mp._zacni_jizdu(m); mp._jizda["s"] = L * 0.4
+		var c2: Vector2 = mp._bod_trasy(L * 0.4)
+		M.priprav_kolize(hlavni, c2)
+		hlavni.svet._t = 1.0
+		await get_tree().process_frame
+		await get_tree().physics_frame
+		var bez2: Array[RID] = [hrac.get_rid()]
+		var p2: Vector3 = M.cil_na_zemi(hlavni, cfg, c2, bez2)
+		hrac.velocity = Vector3.ZERO; hrac.position = p2 + Vector3(0, 0.1, 0)
+		for i in 120: await get_tree().physics_frame
+		var teren2: float = hlavni.svet.vyska(hrac.position.x, hrac.position.z)
+		var ok2: bool = hrac.is_on_floor() and hrac.position.y > teren2 - 0.5 and L > 0.0 and L < float(cfg["cestovani"]["test_max_trasa_m"])
+		print("PRUCHOD mapa_jizda -> %s: trasa %.0f m (vzdušně %.0f), zastaveno [%.1f, %.1f] y %.2f terén %.2f na zemi %s -> %s" % [m["nazev"], L, od.distance_to(m["cil"]), hrac.position.x, hrac.position.z, hrac.position.y, teren2, hrac.is_on_floor(), "OK" if ok2 else "CHYBA"])
+		if not ok2: spatne.append("jízda %s zastavena v [%.1f, %.1f] (y %.2f, terén %.2f, trasa %.0f m)" % [m["nazev"], c2.x, c2.y, hrac.position.y, teren2, L])
+		mp._jizda = {}
+	mp.queue_free()
 	vysledek["mapa_cestovani"] = "OK" if spatne.is_empty() and body.size() >= 6 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "málo míst (%d)" % body.size())
 	print("PRUCHOD mapa_cestovani ", vysledek["mapa_cestovani"])
 
