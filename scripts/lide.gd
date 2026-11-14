@@ -468,6 +468,12 @@ func _misto(c: Dictionary, kde: String) -> Array:
 			var w := xf * Vector3(float(z["lok"][0]), 0.0, float(z["lok"][1]))
 			var kk := xf * Vector3(float(z["k_lok"][0]), 0.0, float(z["k_lok"][1]))
 			out = [Vector2(w.x, w.z), atan2(kk.x - w.x, kk.z - w.z)]
+	elif z.has("svet_bod") and main.svet != null:
+		# bod spocteny stavbou sveta (Misa 14. 11.: stul s lavicemi pod stanem v lomu - svet.lom_svacina_bod)
+		var sb: Vector2 = main.svet.get(String(z["svet_bod"]))
+		if sb == Vector2.ZERO:
+			return [Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z), INF]
+		out = [sb, deg_to_rad(float(z.get("yaw_st", 0.0)))]
 	elif z.has("lom_stena_z") and main.svet != null:
 		# u skalni steny lomu (Misa r. 48): pata ze svet.lom_stena_x (od zapadu sraz, pak dno), lic steny paprskem,
 		# volna bunka mrizky (leseni, kameny) dal po bunce do max_m; celem ke stene

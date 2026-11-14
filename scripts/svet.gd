@@ -3846,7 +3846,10 @@ func _lom_vybaveni() -> void:
 			["kovadlina_spalek", 7.6, 927.2, 0.4], ["stolicka", 8.6, 926.6, 0.0], ["palice", 7.0, 928.6, 0.9],
 			["kladivo_kamenicke", 8.2, 928.4, 0.2], ["bedna", 9.4, 929.6, 0.1], ["vedro", 6.8, 926.4, 0.0],
 			# pracoviste pod 2. pristreskem
-			["spalek", 8.2, 939.3, 0.0], ["kladivo_kamenicke", 8.0, 940.6, 1.2], ["kad", 7.4, 941.4, 0.0], ["krumpac", 9.6, 941.2, 0.6, "kad"],
+			# Misa 14. 11. (snimek stanu v lomu): u stolu pod 2. pristreskem lavice z kazde strany (stul podel z, stred
+			# u 8,5; lavice 0,7 m od osy stolu) - svacina lamacu (postavy mista lom_svacina); kad a spalek na kraj stanu
+			["lavice_selska", 7.8, 940.0, 1.57], ["lavice_selska", 9.2, 940.0, 1.57],
+			["spalek", 6.6, 938.3, 0.0], ["kladivo_kamenicke", 6.7, 938.9, 1.2], ["kad", 6.6, 942.3, 0.0], ["krumpac", 9.6, 942.6, 0.6, "kad"],
 			# sklad pod 3. pristreskem: sudy, pytle, kad
 			["sud", 7.2, 969.0, 0.0], ["sud_stary", 7.9, 969.4, 0.6], ["pytel_obili", 8.8, 970.6, 0.4], ["pytel_kupecky", 8.4, 971.4, 1.0],
 			["bedna", 7.0, 971.2, 0.0],
@@ -3868,6 +3871,8 @@ func _lom_vybaveni() -> void:
 	var nrm := func(z: float) -> Vector2:
 		var t := Vector2(lom_stena_x(z + 3.0) - lom_stena_x(z - 3.0), 6.0).normalized()
 		return Vector2(t.y, -t.x)
+	var n_st: Vector2 = nrm.call(940.0)
+	lom_svacina_bod = Vector2(lom_stena_x(940.0) + 8.5 * n_st.x, 940.0 + 8.5 * n_st.y)   # stred stolu pod 2. pristreskem
 	for it: Array in polozky:
 		if it.size() > 4:
 			# opreny predmet (pasma.predmet): o drive postaveny predmet z katalogu; nejde-li, lezi (test lom_na_zemi)
@@ -11692,6 +11697,7 @@ func _lom_stena_svisla(root: Node3D, parent: Node3D) -> void:
 ## Misa 0.75 "v lomu predmety levituji" (kvadr (144,937) 10-30 cm): mrizka vysek 2 m je jina nez kreslena sit terenu
 ## (body po 5 m) - v lomu se predmety pokladaji na skutecne trojuhelniky site (bunky 2 m, jen vodorovnejsi plochy).
 var _lom_tri := {}
+var lom_svacina_bod := Vector2.ZERO       # stul s lavicemi pod 2. pristreskem lomu (_lom_vybaveni, postavy lom_svacina)
 var _lom_zabrano: Array = []          # [x, z, polomer] polozenych veci lomu - rozsev a kvadry se jim vyhnou
 
 

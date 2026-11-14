@@ -170,6 +170,10 @@
    "yaw_st": -90.0,
    "_p": "jako lom_stena_1"
   },
+  "lom_svacina": {
+   "svet_bod": "lom_svacina_bod",
+   "_p": "Misa 14. 11. (snimek stanu v lomu: lavice z kazde strany stolu, 2 na jedne, 1 na druhe): stred stolu pod 2. pristreskem (svet._lom_vybaveni); svacina lamacu sedi na lavicich (sedani hleda nejblizsi sedak)"
+  },
   "lom_spalek": {
    "p": [
     126.5,
@@ -2673,7 +2677,7 @@
     {
      "od": 12.0,
      "cinnost": "svacina",
-     "kde": "lom_spalek"
+     "kde": "lom_svacina"
     },
     {
      "od": 13.0,
@@ -4354,7 +4358,7 @@
     {
      "od": 12.0,
      "cinnost": "svacina",
-     "kde": "lom_spalek"
+     "kde": "lom_svacina"
     },
     {
      "od": 13.0,
