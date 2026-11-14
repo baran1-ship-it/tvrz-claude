@@ -12777,7 +12777,8 @@ func _krajina() -> void:
 				var nb := maxi(2, ceili(2.0 * w2 / roz))
 				for ib in nb + 1:
 					var q3: Vector2 = (sch["p"] as Vector2) + nrm2 * lerpf(-w2, w2, float(ib) / nb) + (sch["smer"] as Vector2) * rng.randf_range(-0.3, 0.3)
-					var sb3 := rng.randf_range(0.7, 1.2)
+					var mh: Array = kask["schody"]["meritko_balvanu_hrany"]          # vycnivaji nad hladinu tune
+					var sb3 := rng.randf_range(float(mh[0]), float(mh[1]))
 					pridej.call(balv[rng.randi() % 2], q3.x, q3.y, sb3, 0.25, 0.3)
 					kameny_toku.append(Vector4(q3.x, q3.y, 0.55 * sb3, atan2((sch["smer"] as Vector2).y, (sch["smer"] as Vector2).x)))
 					nk += 1

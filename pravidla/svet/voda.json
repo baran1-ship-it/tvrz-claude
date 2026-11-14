@@ -1467,7 +1467,11 @@
      "schody": {
       "rozestup_sirek": 1.5,
       "krok_osy_m": 1.0,
-      "balvanu_na_hrane_m": 1.4
+      "balvanu_na_hrane_m": 1.4,
+      "meritko_balvanu_hrany": [
+       1.1,
+       1.7
+      ]
      }
     }
    ],

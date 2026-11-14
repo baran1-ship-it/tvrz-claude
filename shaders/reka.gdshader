@@ -185,7 +185,9 @@ void fragment() {
 	// Calculate the steepness map
 	vec3 flow_viewspace = flow.x * TANGENT + flow.y * BINORMAL;
 	vec3 up_viewspace = (VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz;
-	float steepness_map = max(0.0, dot(flow_viewspace, up_viewspace)) * 4.0;
+	// Misa 14. 11. (kaskada: pady bez bile vody): strmost ze svetove normaly plochy (1 - cos sklonu), ne ze smeru
+	// proudu - tok dolu daval zaporny soucin = 0; tune 0, pad 45 st. ~1,2, svisly 4 (resers potok_pereje_resers.md)
+	float steepness_map = clamp((1.0 - dot(normalize(NORMAL), up_viewspace)) * 4.0, 0.0, 4.0);
 	
 	float flow_force = min(flow_base + steepness_map * flow_steepness + distance_map * flow_distance + pressure_map * flow_pressure, flow_max);
 	flow *= flow_force;
