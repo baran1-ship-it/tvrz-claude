@@ -140,8 +140,8 @@
    "_rozpocet": "Misa 6. 11. (panel tabletu: skript lide 692/868/957 ms v jednom snimku pri zmene rozvrhu): hledani cesty mrizkou nejvys sondy_snimek novych bunek (paprsek + kvadr) a cas_ms_snimek ms za snimek, zbytek dalsi snimky (postava zatim stoji, nikdy rovne pres zed); test lide_zasek: nejdelsi snimek skriptu lide pri prepnuti rozvrhu vsech postav pod test_snimek_ms (PC). Namereno 9. 11. PC: pred 843-974 ms (purkrabi k nadvori_brana: A* 14 463 sond, cesta neexistuje -> nouze), po 9,2 ms; z toho 5-8 ms je zmena bloku vsech 32 postav v jednom snimku bez hledani (18:01: 15 sond, 5,1-8,0 ms) - ve hre se postavy stridaji po minutach (rozvrh_rozptyl). Neprochozi dvojice bunek se pamatuje trvale (_nav_nelze), cekajici se stridaji (_nav_fronta).",
    "nelze_platnost_s": 90.0
   },
-  "zmena_bloku_snimek": 4,
-  "_zmena_bloku_snimek": "14. 11.: v jedné hodině (6:00, 18:00) mění činnost až 30 postav v jednom snímku, každá 1–10 ms (místo, cesta) = zásek ~20 ms; nejvýš 4 změny za snímek, zbytek další snímky (test lide_zasek)"
+  "zmena_bloku_snimek": 2,
+  "_zmena_bloku_snimek": "14. 11.: v jedné hodině (6:00, 18:00) mění činnost až 30 postav v jednom snímku, každá 1–10 ms (místo, cesta) = zásek ~20 ms; nejvýš 4 změny za snímek, zbytek další snímky (test lide_zasek) | 14. 11. 4 → 2: test 9,5 a 13,4 ms (rozptyl na hraně 12 ms); rešerše (docs/rozpracovane/reserse_frekvence_npc.md): 1–2 nové činnosti za snímek"
  },
  "mista": {
   "naves_1": {
