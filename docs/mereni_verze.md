@@ -435,3 +435,16 @@ hostinec 22/21/31/22, věž 29/26/24/28. Špičky > 200 ms jen 2 (206, 209), zá
 - **Zásek ves-dvory 2,9 s:** při 1. trase po instalaci ano, při 2. trase téže verze ne → silnější PODEZŘENÍ na první
   sestavení shaderů (keš ovladače/Godotu po 1. běhu platí). Stále nepotvrzeno „shadery +N“.
 - Krčma a kovárna: krcma-kovarna 24–25 ms p50 v obou měřeních = OVĚŘENO bez výrazné ceny.
+
+### 0.999997 – řádky záseků z panelu (Míša 14. 11. ~20:50, 18 snímků, tablet stále horký)
+- **Míša: „kecy, že se tablet zahřál nebo schladil, jsou blbost, pořád je horký“** → rozdíly ±5 ms mezi měřeními
+  0.999997 s/bez GPU trávy jsou šum, ne teplota. Tepelné vysvětlení se nepoužívá.
+- **Všech 18 řádků záseku má „shadery +0“** → podezření „záseky = první kompilace shaderů“ je pro tyto záseky
+  **vyvráceno (naměřeno)**. Zbývá jen pro 2,9 s ves-dvory při 1. průjezdu po instalaci (nezachyceno).
+- Záseky 40–113 ms: skoro vždy „kreslení+čekání“ 30–102 ms (GPU nestíhá snímek), skripty 5–15 ms,
+  nové uzly 0, paměť grafiky ±0 MB. Místa: ves (391,841) 99 ms, (429,782) 110 ms, kovárna (402,905) 103 ms,
+  lom (136,938) 113 ms, potok z kopce (281,1126) 102 ms, stan (-21,903) 75 ms. = podezření: drahé pohledy
+  (počet kreslení/trojúhelníků v záběru), NEOVĚŘENO – chybí počty draw calls v řádku záseku.
+- Fyzika 46 ms v hostinci: hráč 28,3 ms (move_and_slide 16,5 + schod 11,7) na `hostinec_kolize` ConcavePolygon =
+  **naměřená příčina** jednoho druhu záseku: trojúhelníková kolize hostince je pro hráče drahá (řádek 17 K2 plánu).
+- `_process` 26 ms s „předměty 20“ v hostinci (1238 s) – skript předmětů občas 8–20 ms = naměřený vliv, příčina NEZNÁMÁ.

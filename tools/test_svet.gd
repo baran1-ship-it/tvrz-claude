@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -8675,3 +8675,90 @@ func _tvrz_lavice() -> void:
 	if nasel == 0:
 		chyby.append("lavice u vychodni hradby chybi")
 	_vysledek("tvrz_lavice", chyby.is_empty(), "%d chyb %s" % [chyby.size(), str(chyby)])
+
+
+## Misa 14. 11. (0.999997, 18 snimku): trava a vetve stromu v hostinci a v chysich lomu, test interier/interier_trsy
+## presto OK - hlidaly jen tvrzeni louky (_vzorek) a pocatek instance pod tremi koreny. Tento test meri vysledek:
+## kazda instance VSECH MultiMeshu a sit rostlin ve scene (jeji AABB, ne pocatek - vetve koruny) proti objemu kazde
+## mistnosti (info rooms: hostinec, tvrz, domy vsi, chyse, mlyn, krcma). Zdroj = koren uzlu (kdo sazel).
+func _rostliny_v_budovach() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	var rooms: Array = (sv.info as Dictionary).get("rooms", [])
+	var shluky := {}
+	for r: Dictionary in rooms:
+		var ab: AABB = r["aabb"]
+		var c: Vector3 = (r["inv"] as Transform3D).affine_inverse() * ab.get_center() if r.has("inv") else ab.get_center()
+		var k := Vector2i(int(floor(c.x / 80.0)), int(floor(c.z / 80.0)))
+		if not shluky.has(k):
+			shluky[k] = []
+		(shluky[k] as Array).append(r)
+	var vady := {}
+	var prikladu: Array = []
+	var inst := 0
+	for k: Vector2i in shluky:
+		var rr: Array = shluky[k]
+		var c0 := Vector3.ZERO
+		for r: Dictionary in rr:
+			var ab: AABB = r["aabb"]
+			c0 += (r["inv"] as Transform3D).affine_inverse() * ab.get_center() if r.has("inv") else ab.get_center()
+		c0 /= rr.size()
+		await main.fast_travel(Vector3(c0.x, 0.0, c0.z), Vector3(c0.x + 3.0, 1.6, c0.z), 0.0, "test")
+		for f in 1800:
+			await get_tree().process_frame
+			if louka == null or louka.okoli_hotove(40.0):
+				break
+		var oblast := AABB(Vector3(c0.x - 70.0, -60.0, c0.z - 70.0), Vector3(140.0, 220.0, 140.0))
+		for g: Node in main.find_children("*", "GeometryInstance3D", true, false):
+			var gi := g as GeometryInstance3D
+			if not gi.is_visible_in_tree():
+				continue
+			var cesta := str(gi.get_path())
+			var mmi := gi as MultiMeshInstance3D
+			var aabbs: Array = []
+			var jm := ""
+			if mmi:
+				if mmi.multimesh == null or mmi.multimesh.mesh == null or not (mmi.global_transform * mmi.get_aabb()).intersects(oblast):
+					continue
+				var mm := mmi.multimesh
+				var n := mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
+				var ma := mm.mesh.get_aabb()
+				jm = mm.mesh.resource_name
+				for i in n:
+					aabbs.append(mmi.global_transform * mm.get_instance_transform(i) * ma)
+			else:
+				var mi := gi as MeshInstance3D
+				if mi == null or mi.mesh == null:
+					continue
+				# jen site rostlin (stromy, kere, trsy z exportu): jmeno uzlu nebo cesty
+				var lc := (cesta + "/" + mi.mesh.resource_name).to_lower()
+				var rostlina := false
+				for s: String in ["strom", "smrk", "jedle", "borov", "buk", "dub", "lip", "briz", "jablon", "olse", "vrba", "ker", "trav", "trs", "kaprad", "rostlin", "listi", "koruna", "bylin"]:
+					if lc.contains(s):
+						rostlina = true
+						break
+				if not rostlina:
+					continue
+				var wa := mi.global_transform * mi.get_aabb()
+				if not wa.intersects(oblast):
+					continue
+				aabbs.append(wa)
+				jm = mi.mesh.resource_name
+			for wa: AABB in aabbs:
+				inst += 1
+				for r: Dictionary in rr:
+					var ab: AABB = r["aabb"]
+					var vn := AABB(ab.position + Vector3(0.15, 0.05, 0.15), ab.size - Vector3(0.3, 0.1, 0.3))
+					var la: AABB = wa
+					if r.has("inv"):
+						la = (r["inv"] as Transform3D) * wa
+						vn = AABB(Vector3(ab.position.x + 0.15, ab.position.y + 0.05, ab.position.z + 0.15), Vector3(ab.size.x - 0.3, ab.size.y - 0.1, ab.size.z - 0.3))
+						# mistnost s yaw: pos = stred podlahy, aabb y 0..vyska
+					if la.intersects(vn):
+						var seg := cesta.split("/")
+						var zdroj := "/".join(seg.slice(3, mini(6, seg.size()))) + " [" + jm + "]"
+						var klic := String(r["name"]) + " <- " + zdroj
+						vady[klic] = int(vady.get(klic, 0)) + 1
+						break
+	for kl: String in vady:
+		print("ROSTLINY_V_BUDOVACH %s: %d" % [kl, vady[kl]])
+	_vysledek("rostliny_v_budovach", inst > 0 and vady.is_empty(), "mistnosti %d, shluku %d, instanci %d, vad %d %s" % [rooms.size(), shluky.size(), inst, vady.size(), str(vady.keys().slice(0, 4))])
