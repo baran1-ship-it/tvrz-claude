@@ -6626,7 +6626,9 @@ func _lide_chovani() -> void:
 			lide.call("_process_vlastni", 0.1)
 		var pohyb := absf(ap6.current_animation_position - t0) > 0.01
 		var stin := (c6["geo"][0] as GeometryInstance3D).cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		vysl6.append("%.0f m: animace %s, stin %s" % [d6, "bezi" if pohyb else "STOJI", "ano" if stin else "ne"])
+		vysl6.append("%.0f m: animace %s, stin %s (%s %s klip %s dl %.2f hraje %s, cinnost %s)" % [d6, "bezi" if pohyb else "STOJI", "ano" if stin else "ne",
+				c6["id"], (c6["uzel"] as Node3D).visible, ap6.current_animation, ap6.current_animation_length if ap6.current_animation != "" else 0.0,
+				ap6.is_playing(), (c6["cn"] as Dictionary).get("klipy", [])])
 		if not pohyb:
 			ch.call("LOD: postava v %.0f m ma ztuhlou pozu" % d6)
 		if stin != (d6 < stin_m):

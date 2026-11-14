@@ -6779,6 +6779,13 @@ func _ves_domy(root: Node3D) -> void:
 				var dv := ch as MeshInstance3D
 				var dk := cn.split("_Dvere")[1].trim_prefix("_")
 				var jm := "Pohyb_dum_%d_%s" % [int(d["k"]), dk]
+				# 14. 11. (test duplicity: chyse 20, 21 - dvoje dvere bez pripony = stejne jmeno, pohyb nasel prvni 2x a dal
+				# mu 2 kolize, druhe dvere bez kolize): jmeno jedinecne v domu
+				var jm0 := jm
+				var ix := 2
+				while dum.find_child(jm, false, false) != null:
+					jm = "%s%d" % [jm0, ix]
+					ix += 1
 				dv.name = jm
 				var ab := dv.mesh.get_aabb()
 				var cl := ab.get_center()
@@ -6791,7 +6798,7 @@ func _ves_domy(root: Node3D) -> void:
 					otev = -otev
 				var use := xf * (dv.position + cl + Vector3(0, 0.95 - cl.y, 0))
 				var vstup := cn.ends_with("Vstup")
-				data["pohyb"].append({"name": jm, "kind": "dvere", "group": "dum_%d_%s" % [int(d["k"]), dk],
+				data["pohyb"].append({"name": jm, "kind": "dvere", "group": jm.trim_prefix("Pohyb_"),
 						"cols": [[cl.x, cl.y, cl.z, ab.size.x, ab.size.y, maxf(ab.size.z, 0.06)]],
 						"pos": [use.x, use.y, use.z], "use": [use.x, use.y, use.z], "open": otev, "init": otev if vstup else 0.0, "dur": 1.0})
 		# mistnosti (otocene jako stare chalupy: stred podlahy, rozmery v ramci domu)
