@@ -353,7 +353,60 @@
      "vyska_m": 0.15,
      "hloubka_m": 0.32,
      "sirka_m": 1.4
-    }
+    },
+    "hlina_vzadu_m": 6.0,
+    "hlina_vzadu_pozn": "nové křídlo (14. 11. noc): vrata stáje a schody na pavlač jsou po otočení na zadní straně (−z) – udusaná hlína 6 m za celou řadou (vyjíždí se koňmi, chodí se na pavlač); snímek k_dv: tráva až k vratům",
+    "trasy": {
+     "pavlac": [
+      [
+       25.2,
+       0.0,
+       -4.55
+      ],
+      [
+       23.6,
+       0.1,
+       -4.55
+      ],
+      [
+       19.45,
+       2.85,
+       -4.55
+      ],
+      [
+       19.45,
+       2.85,
+       -2.95
+      ],
+      [
+       19.62,
+       2.85,
+       -1.9
+      ],
+      [
+       20.8,
+       2.85,
+       -0.35
+      ]
+     ]
+    },
+    "trasy_pozn": "test průchodu po patře křídla (Míša 14. 11. noc, nové křídlo): ze země po venkovních schodech (Kol_Schody) na podestu, mezerou v zábradlí na pavlač a dveřmi do nocležny; [x, y, z] v souřadnicích upraveného modelu (krcma_rada: x' = −z + 11,8, z' = x − 13,85 z NAVOD), y nad terénem; nastroje/mista_rozmisteni.py → pruchody_mista.json <nazev>_<misto>_<model>",
+    "najezdy": [
+     {
+      "od": [
+       23.88,
+       -0.05,
+       -4.55
+      ],
+      "do": [
+       20.05,
+       2.9,
+       -4.55
+      ],
+      "sirka_m": 0.9
+     }
+    ],
+    "najezdy_pozn": "nové křídlo (14. 11. noc): podesta schodů na pavlač je v modelu tenká deska (Kol_Podesta y 2,77–2,85, x' 18,95–19,95), která visí nad horním koncem šikmé kolize schodů (Kol_Schody 31°, výšky 2,85 dosáhne až na x' 18,97) – postava do hrany desky narazila (test pavlac_ uvízl ve výšce 2,2–2,7 m); nájezd od paty schodů na vrch podesty před její hranou (≈38°, postava zvládne 50°), souřadnice upraveného modelu"
    },
    "Hajovna": {
     "soubor": "res://modely/stavby_h/hajovna.glb",

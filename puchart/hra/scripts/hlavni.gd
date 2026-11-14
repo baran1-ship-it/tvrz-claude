@@ -788,6 +788,7 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas:
 	else: kb.free()
 	_schody_dveri(n, s)
 	if s.get("puda") != null: _puda(n, s["puda"])
+	if s.get("najezdy") != null: _puda(n, {"najezdy": s["najezdy"]})   # jen nájezdy (schody na pavlač krčmy)
 	if s.get("zebrik") != null:   # žebřík na půdu (Míša 14. 11.): body modelu → svět
 		var z_: Dictionary = s["zebrik"]; var zw := {"nazev": String(z_.get("nazev", "Žebřík"))}
 		for k_ in ["pata", "vrchol", "nastup", "sestup"]: zw[k_] = n.transform * Vector3(float(z_[k_][0]), float(z_[k_][1]), float(z_[k_][2]))
@@ -804,11 +805,11 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas:
 ## (jeden kvádr i nad síní otevřenou do krovu) nahradí kvádry strop_kvadry jen pod viditelnou povalou – otvor nad žebříkem;
 ## kolize příček bez viditelného trámu (oriznout) končí na vrchu stropu; přes viditelný trám šikmé nájezdy (najezdy od → do).
 func _puda(n: Node3D, pd: Dictionary) -> void:
-	var st := n.find_child(String(pd["strop_smazat"]), true, false)
+	var st := n.find_child(String(pd.get("strop_smazat", "")), true, false) if pd.has("strop_smazat") else null
 	if st: st.free()
-	var y0 := float(pd["strop_y"][0]); var y1 := float(pd["strop_y"][1])
-	var kb := StaticBody3D.new(); kb.name = "Puda"
-	for q: Array in pd["strop_kvadry"]:
+	var y0 := float(pd["strop_y"][0]) if pd.has("strop_y") else 0.0; var y1 := float(pd["strop_y"][1]) if pd.has("strop_y") else 0.0
+	var kb := StaticBody3D.new(); kb.name = "Puda" if pd.has("strop_y") else "Najezdy"
+	for q: Array in pd.get("strop_kvadry", []):
 		var cs := CollisionShape3D.new(); var bx := BoxShape3D.new()
 		bx.size = Vector3(float(q[1]) - float(q[0]), y1 - y0, float(q[3]) - float(q[2])); cs.shape = bx
 		cs.position = Vector3((float(q[0]) + float(q[1])) * 0.5, (y0 + y1) * 0.5, (float(q[2]) + float(q[3])) * 0.5)

@@ -494,8 +494,8 @@
     "lod1": "res://modely/stavby_h/krcma_rada_lod1.glb",
     "aabb": [
      -8.59,
-     24.0,
-     -4.9,
+     23.91,
+     -5.1,
      5.9
     ],
     "prichod": [
@@ -510,12 +510,12 @@
      "KrcmaL_Interier_skupina"
     ],
     "lod1_od_m": 65.0,
-    "disk_id": "1W6GXRlqODF67QxnYsyhalHC2UZeRxFh8",
+    "disk_id": "1KtlMeJacV_7XqPwkBOUGlzTkfjv_M8zQ",
     "zip": [
      "krcma_L.glb",
      "krcma_L_lod1.glb"
     ],
-    "zdroj": "Disk Míši krcma_L.zip (14. 11.), docs/reference/krcma_L/NAVOD_KRCMA_L.md – krčma do L: šenkovna, síň s černou kuchyní, jizba, komůrka, komora; křídlo: kamenná stáj, pokojíky, nocležna; dvůr s vraty a plotem; ≈172 tis. troj.",
+    "zdroj": "Disk Míši krcma_L (1).zip (14. 11. noc: „chci nahradit tu část se stájí, byla moc malá“), docs/reference/krcma_L/NAVOD_KRCMA_L.md – krčma do L bez vybavení: šenkovna, síň s černou kuchyní, jizba, komůrka, komora; křídlo 8,4 × 12,4 m: kamenná stáj s dvoukřídlými vraty 2,4 × 2,5 m, pavlač 1,9 m pod střechou, pokoj 1 a 2 (4 × 6 m) a nocležna; ≈163 tis. troj.",
     "od_toku_m": 5.0,
     "max_prevyseni_m": 3.0,
     "pozn_meze": "Míša 14. 11.: „dávám výjimku pro hospodu, že může být blíž vodě, na 5 m“ – od toku 5 m (jinak 15 m); převýšení pod půdorysem do 3 m (plošina srovná); krčma v řadě podél cesty (uprava) – 33 × 11 m",
@@ -529,9 +529,8 @@
       "KrcmaL_Dvere_Noclezna",
       "KrcmaL_Dvere_Pokoj1",
       "KrcmaL_Dvere_Pokoj2",
-      "KrcmaL_Dvere_Pokoj3",
-      "KrcmaL_Vrata_Staj1",
-      "KrcmaL_Vrata_Staj2",
+      "KrcmaL_Vrata_Staj_L",
+      "KrcmaL_Vrata_Staj_P",
       "KrcmaL_Spani_Hrac"
      ],
      "kridlo_od_x": 8.4,
@@ -541,16 +540,16 @@
      ],
      "otoceni_deg": -90.0,
      "posun": [
-      11.6,
-      -11.8
+      11.8,
+      -13.85
      ],
      "smazat": [
       "KrcmaL_Kol_PlotS1-convcolonly",
       "KrcmaL_Kol_PlotS2-convcolonly",
       "KrcmaL_Kol_PlotV-convcolonly",
       "KrcmaL_Kol_PlotZ-convcolonly",
-      "KrcmaL_Kol_Kulna73-convcolonly",
-      "KrcmaL_Kol_Kulna74-convcolonly"
+      "KrcmaL_Kol_Kulna62-convcolonly",
+      "KrcmaL_Kol_Kulna63-convcolonly"
      ],
      "dvur_uzel": "KrcmaL_Dvur",
      "dvur_ponechat": [
@@ -559,7 +558,8 @@
       3.0,
       5.6
      ],
-     "dvur_za_domem_z": 4.6
+     "dvur_za_domem_z": 4.6,
+     "posun_pozn": "nové křídlo (obal x 8,79…18,93, z −12,11…1,84) otočené o −90° a posunuté: x 9,96…23,91 (za vraty do dvora x 7,32…9,77), z −5,06…5,08 (souměrně s domem)"
     },
     "rampy": [
      {
@@ -606,7 +606,60 @@
      "vyska_m": 0.15,
      "hloubka_m": 0.32,
      "sirka_m": 1.4
-    }
+    },
+    "hlina_vzadu_m": 6.0,
+    "hlina_vzadu_pozn": "nové křídlo (14. 11. noc): vrata stáje a schody na pavlač jsou po otočení na zadní straně (−z) – udusaná hlína 6 m za celou řadou (vyjíždí se koňmi, chodí se na pavlač); snímek k_dv: tráva až k vratům",
+    "trasy": {
+     "pavlac": [
+      [
+       25.2,
+       0.0,
+       -4.55
+      ],
+      [
+       23.6,
+       0.1,
+       -4.55
+      ],
+      [
+       19.45,
+       2.85,
+       -4.55
+      ],
+      [
+       19.45,
+       2.85,
+       -2.95
+      ],
+      [
+       19.62,
+       2.85,
+       -1.9
+      ],
+      [
+       20.8,
+       2.85,
+       -0.35
+      ]
+     ]
+    },
+    "trasy_pozn": "test průchodu po patře křídla (Míša 14. 11. noc, nové křídlo): ze země po venkovních schodech (Kol_Schody) na podestu, mezerou v zábradlí na pavlač a dveřmi do nocležny; [x, y, z] v souřadnicích upraveného modelu (krcma_rada: x' = −z + 11,8, z' = x − 13,85 z NAVOD), y nad terénem; nastroje/mista_rozmisteni.py → pruchody_mista.json <nazev>_<misto>_<model>",
+    "najezdy": [
+     {
+      "od": [
+       23.88,
+       -0.05,
+       -4.55
+      ],
+      "do": [
+       20.05,
+       2.9,
+       -4.55
+      ],
+      "sirka_m": 0.9
+     }
+    ],
+    "najezdy_pozn": "nové křídlo (14. 11. noc): podesta schodů na pavlač je v modelu tenká deska (Kol_Podesta y 2,77–2,85, x' 18,95–19,95), která visí nad horním koncem šikmé kolize schodů (Kol_Schody 31°, výšky 2,85 dosáhne až na x' 18,97) – postava do hrany desky narazila (test pavlac_ uvízl ve výšce 2,2–2,7 m); nájezd od paty schodů na vrch podesty před její hranou (≈38°, postava zvládne 50°), souřadnice upraveného modelu"
    },
    "Hajovna": {
     "soubor": "res://modely/stavby_h/hajovna.glb",
@@ -906,10 +959,10 @@
    "yaw": -0.4525,
    "y": -35.254,
    "teren_y": -35.254,
-   "prevyseni": 1.44,
+   "prevyseni": 1.49,
    "soubor": "res://modely/stavby_h/krcma_rada.glb",
    "lod1": "res://modely/stavby_h/krcma_rada_lod1.glb",
-   "posun_x": -7.705,
+   "posun_x": -7.66,
    "vnitrek": [
     "KrcmaL_Interier_skupina"
    ],
@@ -938,12 +991,27 @@
     "sirka_m": 1.4
    },
    "prichod": [
-    -93.41,
-    98.48
+    -93.36,
+    98.5
    ],
    "pohled": [
-    -92.04,
-    95.66
+    -92.0,
+    95.68
+   ],
+   "najezdy": [
+    {
+     "od": [
+      23.88,
+      -0.05,
+      -4.55
+     ],
+     "do": [
+      20.05,
+      2.9,
+      -4.55
+     ],
+     "sirka_m": 0.9
+    }
    ]
   },
   {
@@ -7331,7 +7399,8 @@
     ]
    ],
    "usedlost": 9,
-   "semeno": 364
+   "semeno": 364,
+   "otevreny_zacatek": "ulice"
   },
   {
    "druh": "proutěny",
@@ -8336,20 +8405,20 @@
   },
   {
    "druh": "jablon",
-   "x": -103.93,
-   "y": -35.065,
-   "z": 88.91,
-   "yaw": 5.475,
-   "meritko": 0.907,
+   "x": -103.89,
+   "y": -35.07,
+   "z": 88.93,
+   "yaw": 3.422,
+   "meritko": 1.072,
    "stara": true
   },
   {
    "druh": "jablon",
-   "x": -66.17,
-   "y": -35.863,
-   "z": 106.16,
-   "yaw": 0.473,
-   "meritko": 1.039,
+   "x": -66.13,
+   "y": -35.87,
+   "z": 106.18,
+   "yaw": 3.34,
+   "meritko": 0.988,
    "stara": true
   },
   {
@@ -8386,20 +8455,20 @@
    {
     "poly": [
      [
-      -96.51,
-      83.74
+      -93.76,
+      78.18
      ],
      [
-      -67.2,
-      97.99
+      -64.53,
+      92.39
      ],
      [
-      -72.8,
-      109.5
+      -72.84,
+      109.48
      ],
      [
-      -102.11,
-      95.25
+      -102.07,
+      95.27
      ]
     ],
     "hlina": 0.85,
@@ -11021,52 +11090,52 @@
    {
     "body": [
      [
-      -93.41,
-      98.48
+      -93.36,
+      98.5
      ],
      [
-      -93.76,
-      99.2
+      -93.71,
+      99.22
      ],
      [
-      -94.08,
-      99.87
+      -94.03,
+      99.89
      ],
      [
-      -94.38,
-      100.49
+      -94.33,
+      100.51
      ],
      [
-      -94.65,
-      101.05
+      -94.6,
+      101.07
      ],
      [
-      -94.89,
-      101.56
+      -94.84,
+      101.58
      ],
      [
-      -95.1,
-      102.02
+      -95.06,
+      102.03
      ],
      [
-      -95.28,
-      102.42
+      -95.25,
+      102.43
      ],
      [
-      -95.44,
-      102.77
+      -95.41,
+      102.78
      ],
      [
-      -95.57,
-      103.06
+      -95.55,
+      103.07
      ],
      [
-      -95.67,
-      103.3
+      -95.66,
+      103.31
      ],
      [
-      -95.75,
-      103.49
+      -95.74,
+      103.5
      ],
      [
       -95.79,
@@ -13725,20 +13794,20 @@
   ],
   [
    [
-    -96.65130784381495,
-    83.33775650428527
+    -96.52339372635487,
+    83.1775598171959
    ],
    [
-    -66.80165313752667,
-    97.84893198786904
+    -66.75468113888451,
+    97.64938592465667
    ],
    [
-    -71.78590744644066,
-    108.10160037146912
+    -71.82637850584962,
+    108.0819256834076
    ],
    [
-    -101.63556215272894,
-    93.59042488788535
+    -101.59509109331998,
+    93.61009957594683
    ]
   ],
   [
