@@ -6,6 +6,7 @@ const Pravidla := preload("res://scripts/pravidla.gd")
 ## „varianty“: cela trasa znovu s jednou vypnutou skupinou (main._ab_skupiny: stiny, louka, rostliny...) - z jedne tabulky
 ## je videt, co sekani zpusobuje, na kazdem useku. Na konci tabulka na obrazovce (vyfotit) + user://mereni_trasa.txt.
 
+var _vnitrek: Array = []            # bez_vnitrku_vsi: skryte site vnitrku domu vsi
 var main: Node
 var cfg: Dictionary
 var useky: Array = []
@@ -111,6 +112,22 @@ func _varianta(zap: bool) -> void:
 			main.kvalita.nastav(zap)
 	elif v.begins_with("3d_"):                 # rozliseni 3D v % soucasneho: roste-li FPS, brzdi vyplnovani pixelu (GPU)
 		get_viewport().scaling_3d_scale = _sc0 * float(v.substr(3)) / 100.0 if zap else _sc0
+	elif v == "bez_vnitrku_vsi":               # 14. 11. (0.999996: zasek 2,4 s ve dvorech u usedlosti 6): vnitrek domu vsi
+		# (site *Interier* domu a predmety s dosahem ves_vnitrek) skryte - prvni vykresleni vnitrku = podezreni
+		if zap:
+			_vnitrek = []
+			var do_m := float(Pravidla.cti("rozpocty", "ves_vnitrek", "do_m"))
+			for n in main.world.find_children("*", "GeometryInstance3D", true, false):
+				var gi := n as GeometryInstance3D
+				var vnitrni := String(gi.name).contains("Interier") and String(gi.get_parent().name).begins_with("Dum_ves_")
+				if gi.visible and (vnitrni or (gi.visibility_range_end > 0.0 and gi.visibility_range_end <= do_m + 0.01)):
+					gi.visible = false
+					_vnitrek.append(gi)
+		else:
+			for gi: GeometryInstance3D in _vnitrek:
+				if is_instance_valid(gi):
+					gi.visible = true
+			_vnitrek = []
 	elif v == "dest":                          # 13. 11.: cena deste (pocasi.gd z Pucharta) - plny dest po celou variantu
 		if main.pocasi:
 			main.pocasi.vynuceno = 1.0 if zap else -1.0
