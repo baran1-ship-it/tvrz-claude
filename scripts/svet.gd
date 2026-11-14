@@ -766,6 +766,8 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_vetrak_dil")
 	_kovarna_dil(parent)
 	_krok_cas("_kovarna_dil")
+	_krcma_dil(root, parent)
+	_krok_cas("_krcma_dil")
 	_staj_kone(parent)
 	_ves_domy(root)
 	_krok_cas("_ves_domy")
@@ -10026,6 +10028,56 @@ func _kovarna_dil(parent: Node3D) -> void:
 		sc.add_child(mn)
 		mn.add_to_group("kovarna_mech")
 	print("kovarna: u (%.0f, %.0f) y %.2f, ohen %s, kour %s, kovadlina %s, mech %s" % [x, z, xf.origin.y, ob != null, ko != null, kb != null, paka != null and mech != null])
+
+
+## Krcma do L u odbocky k rybniku (Misa 14. 11., lokace.json krcma_l, NAVOD_KRCMA_L.md): dil z modely/krcma/krcma_L.glb na
+## rovine (Blender kraj.MISTA), LOD1 od lod1_od_m, interier (KrcmaL_Interier_skupina) jen do interier_do_m, kolize z uzlu
+## -convcolonly (import), dvere jako u mlyna (_mlyn_dvere), ohne a kour ze znacek modelu, spani hrace v pokojiku 1.
+func _krcma_dil(root: Node3D, parent: Node3D) -> void:
+	var kr: Dictionary = Pravidla.cti("lokace", "krcma_l")
+	if not kr.has("stred"):
+		return
+	if not ResourceLoader.exists(String(kr["model"])):
+		print("krcma: model %s chybi (balik z_krcma)" % kr["model"])
+		return
+	var x := float(kr["stred"][0])
+	var z := float(kr["stred"][1])
+	var xf := Transform3D(Basis(Vector3.UP, float(kr["natoceni"])), Vector3(x, _vyska(x, z), z))
+	var sc := (load(String(kr["model"])) as PackedScene).instantiate() as Node3D
+	sc.name = "Krcma_dil"
+	sc.transform = xf
+	parent.add_child(sc)
+	var interier := sc.find_child(String(kr["interier_skupina"]), true, false)
+	for nd in sc.find_children("*", "GeometryInstance3D", true, false):
+		var gi := nd as GeometryInstance3D
+		gi.visibility_range_end = float(kr["interier_do_m"]) if interier and interier.is_ancestor_of(gi) else float(kr["dosah_m"])
+	if ResourceLoader.exists(String(kr["lod1"])):
+		var l1 := (load(String(kr["lod1"])) as PackedScene).instantiate() as Node3D
+		l1.name = "Krcma_lod1"
+		l1.transform = xf
+		parent.add_child(l1)
+		for nd in l1.find_children("*", "GeometryInstance3D", true, false):
+			(nd as GeometryInstance3D).visibility_range_begin = float(kr["lod1_od_m"])
+		for cn in l1.find_children("*", "CollisionObject3D", true, false):
+			(cn as Node).queue_free()
+	for dp: Array in kr["dvere_prefixy"]:
+		_mlyn_dvere(sc, root, xf, kr, String(dp[0]), String(dp[1]))
+	for oh: Array in kr["ohne"]:
+		var ob := sc.find_child(String(oh[0]), true, false) as Node3D
+		if ob:
+			var op := xf * _rel_xf(ob, sc).origin
+			data["ohne"].append({"kind": String(oh[1]), "pos": [op.x, op.y, op.z], "name": String(oh[2]), "size": 0.35, "zap": true,
+					"svetlo": [0.0, 0.3, 0.0]})
+	for kn: String in kr["kour"]:
+		var ko := sc.find_child(kn, true, false) as Node3D
+		if ko:
+			var kp := xf * _rel_xf(ko, sc).origin
+			data["kour"].append([kp.x, kp.y, kp.z])
+	var sp := sc.find_child(String(kr["spani_hrac"]), true, false) as Node3D
+	if sp:
+		var spp := xf * _rel_xf(sp, sc).origin
+		data["pouziti"].append({"kind": "bed", "pos": [spp.x, spp.y + 0.25, spp.z], "r": 2.2})
+	print("krcma: u (%.0f, %.0f) y %.2f, interier %s, postel %s" % [x, z, xf.origin.y, interier != null, sp != null])
 
 
 ## Pytle ve mlyne (Misa 0.99 „pytle ve mlyne jsou na hovno“ - sit modelu Mlyn_PytleMouka s nataženou texturou): kazdy

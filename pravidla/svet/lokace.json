@@ -1824,6 +1824,13 @@
    },
    "plot_kolem_od_m": 0.4,
    "_p": "zahrádky u domů (svet.gd _zahrada): plodiny záhonů (dříve konstanta PLODINY v kódu), u vybraných domů jiné plodiny a plot z plůtků kolem celé zahrady (plot_kolem_od_m od kraje záhonů)"
+  },
+  "studna": {
+   "stred": [
+    432.0,
+    811.0
+   ],
+   "_p": "Míša 14. 11. („studnu přesuň na náves“ – stála v místě nové krčmy u staré návsi): na návsi uvnitř zatáčky vedle lípy (dvorec_zaznam lipa_navsi 429,7 / 819); dřív vesnice.py c + au·(−6) + av·(−11) = (472,5; 817,7)"
   }
  },
  "drobne": [
@@ -2264,6 +2271,48 @@
    "rovina_r_m": 7.5,
    "popis": "dům kováře (selský dům Dum1 jako v usedlostech) v ose konce ulice, štít (+z modelu) do návsi; natoceni = směr osy au (svet._domy_ramce jako chalupa mlynáře)"
   }
+ },
+ "krcma_l": {
+  "popis": "Míša 14. 11. (snímek ze hry: „krčma“ zakroužkovaná vlevo od odbočky k rybníku, studnu přesunout na náves; stará krčma U Kohouta zůstane jako obyčejná usedlost): krčma do L (Disk budovy krcma.zip, NAVOD_KRCMA_L.md) u odbočky (stará ulice) k rybníku, uliční stranou (+Z modelu) k odbočce, stájové křídlo (+x modelu) směrem k rybníku. Střed = osa staré ulice (ves.stred_stare_navsi + osa vesnice.AXIS) + 11,5 m stranou (průčelí 6 m od osy).",
+  "model": "res://modely/krcma/krcma_L.glb",
+  "lod1": "res://modely/krcma/krcma_L_lod1.glb",
+  "stred": [
+   468.3,
+   813.4
+  ],
+  "natoceni": -0.7044,
+  "rovina_r_m": 14.0,
+  "dosah_m": 70.0,
+  "lod1_od_m": 65.0,
+  "interier_skupina": "KrcmaL_Interier_skupina",
+  "interier_do_m": 25.0,
+  "ohne": [
+   [
+    "KrcmaL_Ohen_Kuchyne",
+    "hearth",
+    "ohen_krcma_kuchyne"
+   ],
+   [
+    "KrcmaL_Pec_Senkovna",
+    "hearth",
+    "pec_krcma_senkovna"
+   ]
+  ],
+  "kour": [
+   "KrcmaL_Kour_Dymnik"
+  ],
+  "spani_hrac": "KrcmaL_Spani_Hrac",
+  "dvere_prefixy": [
+   [
+    "KrcmaL_Dvere_",
+    "krcma"
+   ],
+   [
+    "KrcmaL_Vrata_",
+    "krcma_vrata"
+   ]
+  ],
+  "zdroj": "NAVOD_KRCMA_L.md: počátek na terénu, ulice +Z, podlaha domu +0,45, patro křídla +2,85; ≈172 000 troj. (interiér zvlášť – vypínat zvenku), LOD1; kolize 80 kvádrů -convcolonly; dveře s pantem v počátku uzlu, extras otevreni_deg 100"
  },
  "kovarna_tvrz": {
   "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",

@@ -243,6 +243,9 @@ if JEN and "z_vetrak" in JEN:
 if JEN and "z_rybnik" in JEN:
     # navesni rybnik Lhota (Misa, rybnik_lhota_v3.zip -> modely/rybnik/rybnik.glb bez textur terenu)
     groups["z_rybnik"] = sorted(f for f in glob.glob("modely/rybnik/*") if not f.endswith(".import"))
+if JEN and "z_krcma" in JEN:
+    # krcma do L u odbocky k rybniku (Misa 14. 11., Disk budovy krcma.zip, lokace.json krcma_l)
+    groups["z_krcma"] = sorted(f for f in glob.glob("modely/krcma/*") if not f.endswith(".import"))
 if JEN and "z_kovarna" in JEN:
     # kovarna na konci navsi (Misa 14. 11., Disk budovy kovarna.zip, lokace.json kovarna_ves)
     groups["z_kovarna"] = sorted(f for f in glob.glob("modely/kovarna/*") if not f.endswith(".import"))

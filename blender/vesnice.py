@@ -1182,6 +1182,9 @@ def build(coll):
             PR.barrel(P, M(bv + Vector((0, _land(bv.x, bv.z), 0))), r=0.3, h=0.85)
     # naves: studna a rybnicek (rybnicek stranou od cesty), krtince v trave
     wc = c + au * (-6.0) + av * (-11.0)
+    _st = kraj._LOKACE_J["ves"].get("studna")
+    if _st:      # Misa 14. 11.: studna na navsi vedle lipy (lokace.json ves.studna) - na stare navsi stoji krcma
+        wc = Vector((_st["stred"][0], 0.0, _st["stred"][1]))
     import studna
     studna.build(coll, (wc.x, _land(wc.x, wc.z) + 0.1, wc.z), name="Studna_ves", dynamic=False, seed=1393)
     pond(P, c)

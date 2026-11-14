@@ -3709,6 +3709,66 @@
      1200.0
     ]
    ]
+  },
+  {
+   "id": "k_rybniku",
+   "typ": "pesina",
+   "pulsirka_m": 1.4,
+   "popis": "Míša 14. 11. („dodělej tu cestu až k rybníku“, snímek: odbočka z návsi k rybníku končí v trávě): po ose staré ulice (ves.stred_stare_navsi + osa vesnice.AXIS, kudy vedla) od zatáčky návsi kolem průčelí krčmy do L (lokace krcma_l, průčelí 6 m od osy) k břehu rybníka (voda rybnik_lhota, osa u 58 m = břeh na konci rybníka).",
+   "osa": [
+    [
+     441.05,
+     805.39
+    ],
+    [
+     447.14,
+     810.57
+    ],
+    [
+     453.24,
+     815.75
+    ],
+    [
+     459.33,
+     820.93
+    ],
+    [
+     465.43,
+     826.11
+    ],
+    [
+     471.52,
+     831.3
+    ],
+    [
+     477.62,
+     836.48
+    ],
+    [
+     483.71,
+     841.66
+    ],
+    [
+     489.81,
+     846.84
+    ],
+    [
+     495.91,
+     852.02
+    ],
+    [
+     502.0,
+     857.2
+    ],
+    [
+     508.1,
+     862.38
+    ],
+    [
+     514.19,
+     867.56
+    ]
+   ]
   }
  ],
  "pesina_zaklad_m": 0.55,

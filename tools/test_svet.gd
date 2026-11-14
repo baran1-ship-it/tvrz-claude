@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -8576,3 +8576,36 @@ func _kovarna() -> void:
 	if not dum or main.world.find_child("Dum_ves_31", true, false) == null:
 		chyby.append("dum kovare (k 31) chybi")
 	_vysledek("kovarna", chyby.is_empty(), "%d chyb %s; u %s" % [chyby.size(), str(chyby), kd.global_position.snapped(Vector3.ONE * 0.1)])
+
+
+## Misa 14. 11. (krcma do L u odbocky k rybniku, lokace.json krcma_l): dil na zemi (rohy pudorysu domu do 0,35 m od terenu),
+## dvere s pohybem, ohne a kour, postel hrace; vedle zadna stavba (paprsek shora na rohy jen do strechy krcmy).
+func _krcma_l() -> void:
+	var chyby: Array = []
+	var kd := main.world.find_child("Krcma_dil", true, false) as Node3D
+	if kd == null:
+		_vysledek("krcma_l", false, "Krcma_dil chybi")
+		return
+	for o: Vector2 in [Vector2(-8.0, -3.5), Vector2(7.0, -3.5), Vector2(-8.0, 4.0), Vector2(7.0, 4.0), Vector2(15.0, -10.0)]:
+		var w := kd.global_transform * Vector3(o.x, 0.0, o.y)
+		var y_t: float = sv.call("_vyska", w.x, w.z)
+		if absf(kd.global_position.y - y_t) > 0.35:
+			chyby.append("roh %s: teren %.2f, krcma %.2f" % [o, y_t, kd.global_position.y])
+	var dv := 0
+	for e: Dictionary in sv.data["pohyb"]:
+		if String(e["name"]).begins_with("Pohyb_krcma"):
+			dv += 1
+	if dv < 10:
+		chyby.append("dveri s pohybem jen %d" % dv)
+	var oh := 0
+	for f: Dictionary in sv.data["ohne"]:
+		if String(f.get("name", "")).contains("krcma"):
+			oh += 1
+	if oh < 2:
+		chyby.append("ohnu %d" % oh)
+	var post := false
+	for u: Dictionary in sv.data["pouziti"]:
+		post = post or (String(u.get("kind", "")) == "bed" and Vector2(float(u["pos"][0]), float(u["pos"][2])).distance_to(Vector2(kd.global_position.x, kd.global_position.z)) < 20.0)
+	if not post:
+		chyby.append("postel hrace chybi")
+	_vysledek("krcma_l", chyby.is_empty(), "%d chyb %s; u %s, dveri %d" % [chyby.size(), str(chyby), kd.global_position.snapped(Vector3.ONE * 0.1), dv])
