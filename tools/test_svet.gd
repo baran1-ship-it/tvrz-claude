@@ -7685,6 +7685,30 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 			var ut: Array = lide.call("u_stromu", mt[0])
 			if ut.is_empty() or (ut[0] as Vector2).distance_to(mt[0]) > float(ust["od_kmene_m"]) * 0.5:
 				ch.call("%s %s@%s: trha ovoce mimo strom %s" % [c["id"], bl["cinnost"], bl["kde"], (mt[0] as Vector2).round()])
+	# Misa 14. 11. (senkyrka i hospodsky jen mezi 1. stolem a krbem, porad truhla): obchuzka obsluhy hostince
+	var ohp: Dictionary = Pravidla.cti("postavy", "obsluha_hostinec_pravidla")
+	for kc: String in ohp["cinnosti"]:
+		var cc: Dictionary = P["cinnosti"][kc]
+		var obz: Array = cc.get("obchuzka", [])
+		var ruzne := {}
+		for kk: String in obz:
+			ruzne[kk] = true
+		if ruzne.size() < int(ohp["min_mist"]):
+			ch.call("%s: obchuzka jen %d mist (min %d)" % [kc, ruzne.size(), int(ohp["min_mist"])])
+		if not (ohp["kuchyne"] as Array).any(func(k: String) -> bool: return ruzne.has(k)):
+			ch.call("%s: obchuzka bez kuchyne" % kc)
+		var vse_k := 0
+		var truhla := 0
+		for kk: String in obz:
+			for kl: String in (cc.get("obchuzka_klipy", {}) as Dictionary).get(kk, []):
+				vse_k += 1
+				truhla += 1 if kl == "Truhla_Otevri" else 0
+		if vse_k > 0 and float(truhla) / vse_k > float(ohp["truhla_podil_max"]):
+			ch.call("%s: truhla %d z %d klipu obchuzky" % [kc, truhla, vse_k])
+		for kk: String in ruzne:
+			var mz: Array = lide.call("_misto", ll[0], kk)
+			if (mz[0] as Vector2) == Vector2.ZERO or float(mz[1]) == INF and not (P["mista"].get(kk, {}) as Dictionary).has("p"):
+				ch.call("%s: misto %s nenalezeno" % [kc, kk])
 	# Misa 14. 11. (hospodsky se opira o vzduch, tram je dal za nim): kazde misto u_steny - za zady do od_m + rezerva
 	# pevna plocha (ne dvere Pohyb_*), paprsek ve vysce u_steny.vyska_m
 	var us9: Dictionary = Pravidla.cti("postavy", "u_steny")
