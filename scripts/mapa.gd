@@ -52,6 +52,7 @@ var _objev_t := 0.0
 # rychle cestovani jako KCD (Misa 14. 11., prevzato od Pucharta 771eae78): figurka jede po mape po cestach (sit chuze
 # postav lide._g), cas ubiha podle chuze nebo jizdy (kun pozna sam), jde zastavit klepnutim na figurku / Zastavit
 var _fig := {}                  # "kun" / "pesky" -> Texture2D (game-icons.net CC BY 3.0, obarveno u Pucharta)
+var _km_ask := -1.0             # delka trasy pro dotaz (spoctena v _ask)
 var _jizda := {}                # bezici cesta: body, kum, L, s, rychlost_m_s (mapa), kun, km_h, cil, pohled, nazev, hod0
 
 
@@ -321,7 +322,7 @@ func _draw_ask(s: Vector2, u: float) -> void:
 	Styl.kresli_list(_c, box, 0.45 * u)
 	_text(box.position + Vector2(w * 0.5, 86 * u), "Rychlé cestování", int(40 * u), INK, Color(0, 0, 0, 0), _fb)
 	Styl.kresli_linku(_c, box.position + Vector2(w * 0.5, 104 * u), w * 0.5, u)
-	var km := _dist_km()
+	var km := _km_ask if _km_ask >= 0.0 else _dist_km()       # trasa spoctena jednou v _ask (ne pri kazdem prekresleni)
 	var kun := na_koni()
 	_text(box.position + Vector2(w * 0.5, 150 * u), "do: %s  (asi %d minut %s)" % [m["nazev"], int(round(km / _km_h(kun) * 60.0)), "jízdy" if kun else "chůze"],
 			int(26 * u), INK, Color(0, 0, 0, 0))
@@ -533,6 +534,7 @@ func _ask() -> void:
 		return
 	asking = true
 	ano = true
+	_km_ask = _dist_km()
 	main.life.sfx("menu_vyber", -8.0)
 
 

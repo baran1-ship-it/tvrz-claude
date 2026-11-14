@@ -10050,7 +10050,11 @@ func _krcma_dil(root: Node3D, parent: Node3D) -> void:
 	var interier := sc.find_child(String(kr["interier_skupina"]), true, false)
 	for nd in sc.find_children("*", "GeometryInstance3D", true, false):
 		var gi := nd as GeometryInstance3D
-		gi.visibility_range_end = float(kr["interier_do_m"]) if interier and interier.is_ancestor_of(gi) else float(kr["dosah_m"])
+		var vnitr := interier != null and interier.is_ancestor_of(gi)
+		gi.visibility_range_end = float(kr["interier_do_m"]) if vnitr else float(kr["dosah_m"])
+		# nezavisla kontrola 14. 11. (172 tis. troj. krcmy do 70 m se stiny): vnitrek a drobnosti bez stinu
+		if vnitr or gi.get_aabb().size.length() < 1.0:
+			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	if ResourceLoader.exists(String(kr["lod1"])):
 		var l1 := (load(String(kr["lod1"])) as PackedScene).instantiate() as Node3D
 		l1.name = "Krcma_lod1"
@@ -10228,6 +10232,7 @@ func _mlyn_dvere(sc: Node3D, root: Node3D, xf: Transform3D, d: Dictionary, prefi
 		if dk == "":
 			dk = "dvere"
 		var lok := _rel_xf(dv, sc)
+		var puvodni := String(dv.name)
 		dv.get_parent().remove_child(dv)
 		drz.add_child(dv)
 		dv.transform = lok
@@ -10242,8 +10247,14 @@ func _mlyn_dvere(sc: Node3D, root: Node3D, xf: Transform3D, d: Dictionary, prefi
 		if Vector2(p_minus.x, p_minus.z).distance_to(Vector2(cil.x, cil.z)) < Vector2(p_plus.x, p_plus.z).distance_to(Vector2(cil.x, cil.z)):
 			otev = -otev
 		var use := xf * (dv.position + cl + Vector3(0, 0.95 - cl.y, 0))
-		var otevrene := (d.get("dvere_otevrene", []) as Array).has(String(nd.name)) or (d.get("dvere_otevrene", []) as Array).has("Mlyn_Dvere_" + dk)
-		data["pohyb"].append({"name": jm, "kind": "dvere", "group": jm_dilu + "_" + dk,
+		var otevrene := (d.get("dvere_otevrene", []) as Array).has(puvodni) or (d.get("dvere_otevrene", []) as Array).has("Mlyn_Dvere_" + dk)
+		# krcma (nezavisla kontrola 14. 11.): vnitrni dvere (d.dvere_vnitrni) jen zblizka jako interier
+		if (d.get("dvere_vnitrni", []) as Array).has(puvodni):
+			dv.visibility_range_end = float(d.get("interier_do_m", d.get("dil_do_m", 70.0)))
+		var skup := jm_dilu + "_" + dk
+		if (d.get("kridla_spolu", []) as Array).has(jm_dilu):
+			skup = jm_dilu                                # obe kridla vrat (L/P) jednim pouzitim
+		data["pohyb"].append({"name": jm, "kind": "dvere", "group": skup,
 				"cols": [[cl.x, cl.y, cl.z, maxf(ab.size.x, 0.06), ab.size.y, maxf(ab.size.z, 0.06)]],
 				"pos": [use.x, use.y, use.z], "use": [use.x, use.y, use.z], "open": otev, "init": otev if otevrene else 0.0, "dur": 1.0})
 

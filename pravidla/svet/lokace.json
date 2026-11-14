@@ -2238,7 +2238,7 @@
   "natoceni": 1.5708,
   "rovina_r_m": 7.0,
   "dosah_m": 60.0,
-  "lod1_od_m": 55.0,
+  "lod1_od_m": 60.0,
   "ohen": {
    "bod": "Kovarna_Ohen_bod",
    "zhar": "Kovarna_Zhar",
@@ -2286,7 +2286,7 @@
   "natoceni": -0.7044,
   "rovina_r_m": 18.0,
   "dosah_m": 70.0,
-  "lod1_od_m": 65.0,
+  "lod1_od_m": 70.0,
   "interier_skupina": "KrcmaL_Interier_skupina",
   "interier_do_m": 25.0,
   "ohne": [
@@ -2390,7 +2390,21 @@
   "_mistnosti": "[name, titulek, x, z, šířka x, délka z, ambient] v rámci modelu podle NAVOD_KRCMA_L.md dispozice; výška 2,4 m od podlahy",
   "dvere_otevrene": [
    "KrcmaL_Dvere_Senkovna"
-  ]
+  ],
+  "dvere_vnitrni": [
+   "KrcmaL_Dvere_Jizba",
+   "KrcmaL_Dvere_Komora",
+   "KrcmaL_Dvere_Senkyrka",
+   "KrcmaL_Dvere_Senkovna",
+   "KrcmaL_Dvere_Pokoj1",
+   "KrcmaL_Dvere_Pokoj2",
+   "KrcmaL_Dvere_Pokoj3",
+   "KrcmaL_Dvere_Noclezna"
+  ],
+  "kridla_spolu": [
+   "krcma_vrata"
+  ],
+  "_lod": "nezávislá kontrola 14. 11.: LOD1 od konce plného dílu (bez prolínání = bez pásma, kde se kreslí oba); vnitřní dveře jen do interier_do_m; vrata L/P jednou skupinou"
  },
  "kovarna_tvrz": {
   "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",
