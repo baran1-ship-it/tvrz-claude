@@ -7057,7 +7057,8 @@ func _ohrady(d: Dictionary) -> void:
 			var rzk: Array = (_kat_p.get("kurnik", {}) as Dictionary).get("rozmer", [2.0, 2.2, 1.8])
 			var pk := maxf(float(rzk[0]), float(rzk[2])) * 0.5
 			var kl := Vector3(-(float(m["hw"]) + float(Pravidla.cti("zvirata", "kurnik_od_zdi_m"))), 0.0, float(m["b"]) + float(Pravidla.cti("zvirata", "kurnik_od_rohu_m")))
-			for _i in 30:
+			var volny := false
+			while kl.z < float(m["f"]):              # nejdal k prednimu stitu domu
 				var kw := xf * kl
 				var volno := true
 				for oo: Array in _ohrady_obd:
@@ -7065,11 +7066,15 @@ func _ohrady(d: Dictionary) -> void:
 					if absf(lq.x - (oo[1] as Vector2).x) < float(oo[2]) + pk and absf(lq.z - (oo[1] as Vector2).y) < float(oo[3]) + pk:
 						volno = false
 				if volno:
+					volny = true
 					break
 				kl.z += float(Pravidla.cti("zvirata", "kurnik_krok_m"))
-			var kp := xf * kl
-			data["vybaveni"].append({"id": "kurnik", "p": [kp.x, _vyska_min(kp.x, kp.z, 1.0) - 0.03, kp.z], "yaw": yaw - PI / 2.0})
-			noc = kp
+			if not volny:
+				push_warning("kurnik domu %d: podel zdi neni misto mimo ohradu - nestavi se (slepice spi u zdi)" % int(d["k"]))
+			else:
+				var kp := xf * kl
+				data["vybaveni"].append({"id": "kurnik", "p": [kp.x, _vyska_min(kp.x, kp.z, 1.0) - 0.03, kp.z], "yaw": yaw - PI / 2.0})
+				noc = kp
 		data["zvirata"].append({"id": "dvur_%d" % int(d["k"]), "zvire": String(dv["zvire"]), "kusu": int(dv["kusu"]),
 				"stred": [c2.x, _vyska(c2.x, c2.z), c2.z], "yaw": yaw, "polomer": float(dv["polomer_m"]), "nocleh": [noc.x, noc.z]})
 

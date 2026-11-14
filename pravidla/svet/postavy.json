@@ -6297,6 +6297,11 @@
    "Rozhlizi"
   ],
   "_stoji_sam": "Misa 11. 11.: sedaci cinnost bez sedaku a bez moznosti jine cinnosti v bloku - postava stoji sama: jen stani a rozhlizeni (klipy_bez_sedu s hovorem jen pro partnera u sediciho, stoji_u)",
+  "pouziti_nazvy": [
+   "Stolička",
+   "Lavice"
+  ],
+  "_pouziti_nazvy": "Misa 14. 11. (kupec a poutnici sedi venku, ve stanu je stul se sezenim): sedatka z Blenderu (svet.json pouziti kind sed) smi postavy jen s timto nazvem (stan kupce, blender/hostinec.py STAN_SEDY); vyklenky oken palace nazev nemaji - jsou ve zdi mimo mistnosti (nezavisla kontrola 14. 11.)",
   "v_mistnosti_nahodne": true,
   "_v_mistnosti_nahodne": "Misa 11. 11. (hostinec je velky, vsichni sedeli u dveri - nejblizsi sedak k bodu sine): uvnitr mistnosti (mista.mistnost) nahodny volny sedak v mistnosti, venku nejblizsi"
  },

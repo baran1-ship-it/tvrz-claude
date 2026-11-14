@@ -127,10 +127,11 @@ func _sber_krok() -> void:
 	var pv: Array = (P["mokro"] as Dictionary)["povrch"]
 	var n := 0
 	while n < n_max and not _sber_fronta.is_empty():
-		var u: Node = _sber_fronta.pop_back()
+		var uv: Variant = _sber_fronta.pop_back()      # fronta zije desitky snimku - uzel mohl byt mezitim uvolnen
 		n += 1
-		if not is_instance_valid(u):
+		if not is_instance_valid(uv):
 			continue
+		var u := uv as Node
 		for ch: Node in u.get_children():
 			_sber_fronta.append(ch)
 		if not (u is GeometryInstance3D):

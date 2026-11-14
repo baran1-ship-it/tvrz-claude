@@ -1428,7 +1428,7 @@ func _sedak(c: Dictionary, kde: Vector2, mistnost := "") -> Dictionary:
 	# Misa 14. 11. (kupec a poutnici sedi venku na lavici, pod stanem jsou 3 stoly se sezenim; v lomu stany se stoly):
 	# sedaky soucasti slouceneho modelu (sedani.sedaky_v_modelech: model -> [x, z, yaw_st, vyska_m] v ramci modelu)
 	var svm: Dictionary = sd.get("sedaky_v_modelech", {})
-	for ri in vb.size():
+	for ri in (vb.size() if not svm.is_empty() else 0):
 		var r2: Dictionary = vb[ri]
 		var sm: Array = svm.get(String(r2["id"]), [])
 		if sm.is_empty() or mistnost != "":
@@ -1453,6 +1453,12 @@ func _sedak(c: Dictionary, kde: Vector2, mistnost := "") -> Dictionary:
 	for ui in pz.size():
 		var u: Dictionary = pz[ui]
 		if String(u.get("kind", "")) != "sed" or not u.has("sit"):
+			continue
+		# jen sedatka pro postavy (sedani.pouziti_nazvy): vyklenky oken palace (bez nazvu, ve zdi mimo mistnost)
+		# by vzaly postavy z nadvori (nezavisla kontrola 14. 11.)
+		if not (sd.get("pouziti_nazvy", []) as Array).has(String(u.get("nazev", ""))):
+			continue
+		if absf(float(u["h"]) - float(sd["vyska_klipu_m"])) > float(sd["tolerance_m"]):
 			continue
 		var klic3 := "sedu:%d" % ui
 		if _obsazeno.has(klic3):
@@ -2291,7 +2297,8 @@ func _process_vlastni(dt: float) -> void:
 		c["h"] = h
 		# 14. 11. (lide_zasek 18:01: 30 postav meni cinnost v jednom snimku, kazda 1-10 ms): nejvys zmena_bloku_snimek zmen
 		# za snimek, ostatni o snimek pozdeji (rozpocet jako u cest)
-		if (bi != int(c["blok"]) or _prevolit(c, h, dt)) and n_zmen < int(P["graf"]["zmena_bloku_snimek"]):
+		# rozpocet napred: _prevolit ma vedlejsi ucinky (volba_k, volba_nova) - bez rozpoctu se volba nesmi zahodit
+		if n_zmen < int(P["graf"]["zmena_bloku_snimek"]) and (bi != int(c["blok"]) or _prevolit(c, h, dt)):
 			n_zmen += 1
 			# z domu (skryta u dveri) vychazi dvermi - ne objeveni v poli (postavy_plan 1.6)
 			var doma := bool((c["cn"] as Dictionary).get("skryty", false)) and bool(c["na_miste"])

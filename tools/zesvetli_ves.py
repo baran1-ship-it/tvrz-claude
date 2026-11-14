@@ -215,6 +215,9 @@ for f in sorted(glob.glob("modely/ves/domy_*_diff*.jpg") + glob.glob("modely/ves
     print("HNEDA %-42s B/R %.2f" % (jm, a.reshape(-1, 3).mean(0)[2] / a.reshape(-1, 3).mean(0)[0]))
     if not VYPIS:
         Image.fromarray((b * 255 + 0.5).astype(np.uint8)).save(f, quality=92)
+        zn[jm] = md5(f)          # znacka kroku 1 na novy obsah (jinak by krok 1 pri dalsim behu zesvetlil znovu)
+if not VYPIS:
+    json.dump(zn, open(ZN, "w"), indent=1)
 p = "modely/ves/domy.glb"
 if os.path.exists(p):
     js, bb = glb_cti(p)
