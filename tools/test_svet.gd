@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -8499,3 +8499,38 @@ func _menu_posun() -> void:
 	var po := sc.scroll_vertical
 	mn.call("hide_menu")
 	_vysledek("menu_posun", pred > 0 and po == pred, "posun pred %d, po obnove %d (0 = obsah se vejde, test neplatny)" % [pred, po])
+
+
+## Misa 14. 11. (mapa od Pucharta 771eae78): rychle cestovani po cestach - trasa od tvrze ke kazdemu mistu mapy po siti
+## chuze postav (lide._g): existuje, neni kratsi nez vzdusnou carou a neni nesmyslne dlouha (rozpadla sit), jizda
+## jde zastavit (bod trasy v polovine lezi na trase).
+func _mapa_jizda() -> void:
+	var mp: Node = main.mapa
+	var chyby: Array = []
+	var od := Vector2(2.5, 40.0)
+	var delky: Array = []
+	for m: Dictionary in mp.MISTA:
+		var c: Vector3 = m["cil"]
+		var t: PackedVector2Array = mp.call("trasa", od, Vector2(c.x, c.z))
+		var L: float = mp.call("_delka", t)
+		var vz := od.distance_to(Vector2(c.x, c.z))
+		delky.append("%s %.0f/%.0f m" % [m["id"], L, vz])
+		if t.size() < 2 or L < vz - 0.5:
+			chyby.append("%s: trasa %d bodu, %.0f m < vzdusnou %.0f m" % [m["id"], t.size(), L, vz])
+		elif vz > 60.0 and L > vz * 3.0:
+			chyby.append("%s: trasa %.0f m je vic nez 3x vzdusna %.0f m (rozpadla sit?)" % [m["id"], L, vz])
+	# zastaveni: polovina trasy do vsi
+	var cv: Vector3 = mp.MISTA[1]["cil"]
+	var tv: PackedVector2Array = mp.call("trasa", od, Vector2(cv.x, cv.z))
+	var kum := PackedFloat32Array([0.0])
+	for i in tv.size() - 1:
+		kum.append(kum[i] + tv[i].distance_to(tv[i + 1]))
+	mp.set("_jizda", {"body": tv, "kum": kum, "L": kum[kum.size() - 1]})
+	var pul: Vector2 = mp.call("_bod_trasy", kum[kum.size() - 1] * 0.5)
+	mp.set("_jizda", {})
+	var nej := INF
+	for i in tv.size() - 1:
+		nej = minf(nej, Geometry2D.get_closest_point_to_segment(pul, tv[i], tv[i + 1]).distance_to(pul))
+	if nej > 0.1:
+		chyby.append("bod zastaveni %.1f m od trasy" % nej)
+	_vysledek("mapa_jizda", chyby.is_empty(), "%d chyb %s; %s" % [chyby.size(), str(chyby), str(delky)])

@@ -49,6 +49,10 @@ var _stick := false
 var _cur := Vector2(-1, -1)     # kurzor na mape (ovladac: leva packa, mys)
 var _hover := -1               # misto pod kurzorem
 var _objev_t := 0.0
+# rychle cestovani jako KCD (Misa 14. 11., prevzato od Pucharta 771eae78): figurka jede po mape po cestach (sit chuze
+# postav lide._g), cas ubiha podle chuze nebo jizdy (kun pozna sam), jde zastavit klepnutim na figurku / Zastavit
+var _fig := {}                  # "kun" / "pesky" -> Texture2D (game-icons.net CC BY 3.0, obarveno u Pucharta)
+var _jizda := {}                # bezici cesta: body, kum, L, s, rychlost_m_s (mapa), kun, km_h, cil, pohled, nazev, hod0
 
 
 static func _stavba(id: String) -> Vector2:
@@ -74,6 +78,9 @@ func _ready() -> void:
 	_fm = load("res://fonts/GrenzeGotisch-Medium.ttf")
 	for m: Dictionary in MISTA:
 		_erby[m["erb"]] = load("res://obrazky/erby/%s.png" % m["erb"])
+	for k in ["kun", "pesky"]:
+		if ResourceLoader.exists("res://obrazky/figurka_%s.png" % k):
+			_fig[k] = load("res://obrazky/figurka_%s.png" % k)
 	_c = Control.new()
 	_c.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_c.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -100,6 +107,12 @@ func _process(delta: float) -> void:
 
 func _process_vlastni(delta: float) -> void:
 	if main == null or main.player == null:
+		return
+	if open and not _jizda.is_empty():
+		_jizda["s"] = minf(float(_jizda["s"]) + float(_jizda["rychlost_m_s"]) * delta, float(_jizda["L"]))
+		_c.queue_redraw()
+		if float(_jizda["s"]) >= float(_jizda["L"]):
+			_dorazit(true)
 		return
 	# objevovani ruin chuzi (kontrola jednou za sekundu, i kdyz je mapa zavrena)
 	_objev_t -= delta
@@ -173,6 +186,7 @@ func show_map() -> void:
 func close() -> void:
 	if not open:
 		return
+	_jizda = {}
 	open = false
 	visible = false
 	main.hud.visible = true
@@ -224,6 +238,9 @@ func _draw_all() -> void:
 			_c.draw_circle(er.get_center(), es * 0.7, Color(1.0, 0.85, 0.45, 0.45))
 		_c.draw_texture_rect(_erby[m["erb"]], er, false)
 		_rects.append([er.grow(12), "misto", i])
+	if not _jizda.is_empty():
+		_draw_jizda(r, u, s)
+		return
 	# hrac: sipka ve smeru pohledu
 	var pp: Vector3 = main.player.global_position
 	var pc := _to_screen(r, pp.x, pp.z)
@@ -254,6 +271,47 @@ func _draw_all() -> void:
 		_draw_ask(s, u)
 
 
+## Jizda po mape: ujeta cast trasy plnou carou, zbytek carkovane, figurka (zrcadli se podle smeru), hodina dne, Zastavit.
+func _draw_jizda(r: Rect2, u: float, s: Vector2) -> void:
+	var b: PackedVector2Array = _jizda["body"]
+	var kum: PackedFloat32Array = _jizda["kum"]
+	var sj: float = _jizda["s"]
+	var poz := _bod_trasy(sj)
+	var hotovo := PackedVector2Array()
+	var zbyva := PackedVector2Array()
+	for i in b.size():
+		if kum[i] <= sj:
+			hotovo.append(_to_screen(r, b[i].x, b[i].y))
+		else:
+			zbyva.append(_to_screen(r, b[i].x, b[i].y))
+	var ps := _to_screen(r, poz.x, poz.y)
+	hotovo.append(ps)
+	zbyva.insert(0, ps)
+	if hotovo.size() > 1:
+		_c.draw_polyline(hotovo, Color(0.45, 0.08, 0.05, 0.85), 4.0 * u, true)
+	for i in zbyva.size() - 1:
+		_c.draw_dashed_line(zbyva[i], zbyva[i + 1], Color(0.2, 0.12, 0.06, 0.9), 3.0 * u, 10.0 * u, false)
+	var cf: Dictionary = Pravidla.cti("jizda", "rychle_cestovani")
+	var t: Texture2D = _fig.get("kun" if bool(_jizda["kun"]) else "pesky")
+	var fs := float(cf["figurka_px"]) * u * 1.6
+	var dalsi := _bod_trasy(minf(sj + 15.0, float(_jizda["L"])))
+	var vlevo := dalsi.x < poz.x - 0.01
+	var fr := Rect2(ps - Vector2(fs * 0.5, fs * 0.86), Vector2(fs, fs))
+	if t:
+		_c.draw_texture_rect(t, Rect2(fr.position + (Vector2(fs, 0) if vlevo else Vector2.ZERO), Vector2(-fs if vlevo else fs, fs)), false)
+	else:
+		_c.draw_circle(ps, 10.0 * u, Color(0.7, 0.08, 0.05))
+	_rects.append([fr.grow(10), "zastavit", 0])
+	var hod := fposmod(float(_jizda["hod0"]) + sj / 1000.0 / float(_jizda["km_h"]), 24.0)
+	var min_ := int(round(sj / 1000.0 / float(_jizda["km_h"]) * 60.0))
+	_text(Vector2(s.x * 0.5, 64 * u), "%s  ·  %02d:%02d  ·  %d min %s" % [String(_jizda["nazev"]), int(hod), int(fmod(hod, 1.0) * 60.0), min_,
+			"jízdy" if bool(_jizda["kun"]) else "chůze"], int(28 * u), INK, Color(1, 1, 1, 0.92), _fb)
+	var br := Rect2(Vector2(s.x * 0.5 - 130 * u, s.y - 96 * u), Vector2(260 * u, 64 * u))
+	Styl.kresli_tlacitko(_c, br, 0, true, br.size.y / 76.0)
+	_text(br.get_center() + Vector2(0, 12 * u), "Zastavit", int(34 * u), Styl.RED, Color(0, 0, 0, 0), _fb)
+	_rects.append([br, "zastavit", 0])
+
+
 func _draw_ask(s: Vector2, u: float) -> void:
 	_rects.clear()
 	var m: Dictionary = MISTA[sel]
@@ -264,7 +322,9 @@ func _draw_ask(s: Vector2, u: float) -> void:
 	_text(box.position + Vector2(w * 0.5, 86 * u), "Rychlé cestování", int(40 * u), INK, Color(0, 0, 0, 0), _fb)
 	Styl.kresli_linku(_c, box.position + Vector2(w * 0.5, 104 * u), w * 0.5, u)
 	var km := _dist_km()
-	_text(box.position + Vector2(w * 0.5, 150 * u), "do: %s  (asi %d minut chůze)" % [m["nazev"], int(round(km / 4.5 * 60.0))], int(26 * u), INK, Color(0, 0, 0, 0))
+	var kun := na_koni()
+	_text(box.position + Vector2(w * 0.5, 150 * u), "do: %s  (asi %d minut %s)" % [m["nazev"], int(round(km / _km_h(kun) * 60.0)), "jízdy" if kun else "chůze"],
+			int(26 * u), INK, Color(0, 0, 0, 0))
 	for k in 2:
 		var br := Rect2(box.position + Vector2(w * (0.12 + 0.44 * k), h - 108 * u), Vector2(w * 0.32, 60 * u))
 		var on := (k == 0) == ano
@@ -288,6 +348,22 @@ func _text(p: Vector2, t: String, size: int, col: Color, bg: Color, f: Font = nu
 
 func _input(event: InputEvent) -> void:
 	if not open:
+		return
+	if not _jizda.is_empty():
+		# behem jizdy: klepnuti na figurku nebo Zastavit, A/B, Esc/mezernik = zastavit
+		var stop := false
+		if (event is InputEventScreenTouch and event.pressed) or (event is InputEventMouseButton and event.pressed):
+			for rr: Array in _rects:
+				if String(rr[1]) == "zastavit" and (rr[0] as Rect2).has_point(event.position):
+					stop = true
+		elif event is InputEventJoypadButton and event.pressed and (event as InputEventJoypadButton).button_index in [JOY_BUTTON_A, JOY_BUTTON_B]:
+			stop = true
+		elif event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).keycode in [KEY_ESCAPE, KEY_SPACE]:
+			stop = true
+		if event is InputEventScreenTouch or event is InputEventMouseButton or event is InputEventJoypadButton or event is InputEventKey:
+			get_viewport().set_input_as_handled()
+		if stop:
+			_dorazit(false)
 		return
 	if event is InputEventJoypadButton and event.pressed:
 		get_viewport().set_input_as_handled()
@@ -366,9 +442,88 @@ func _input(event: InputEvent) -> void:
 
 func _dist_km() -> float:
 	var pp: Vector3 = main.player.global_position
-	var m: Dictionary = MISTA[sel]
-	# po cestach je to zhruba o polovinu dal nez vzdusnou carou
-	return Vector2(pp.x, pp.z).distance_to(m["p"]) * 1.35 / 1000.0
+	var c: Vector3 = MISTA[sel]["cil"]
+	return _delka(trasa(Vector2(pp.x, pp.z), Vector2(c.x, c.z))) / 1000.0
+
+
+## Sedi hrac na koni? Mapa to pozna sama (Misa 14. 11.: zadny prepinac).
+func na_koni() -> bool:
+	return main.player.get("na_koni") != null
+
+
+func _km_h(kun: bool) -> float:
+	var cf: Dictionary = Pravidla.cti("jizda", "rychle_cestovani")
+	return float(cf["kun_km_h"]) if kun else float(cf["chuze_km_h"])
+
+
+## Trasa po cestach (sit chuze postav lide._g z os cest sveta): od hrace na nejblizsi bod site, po siti (A*), z nejblizsiho
+## bodu k cili; kdyz je to vzdusnou carou kratsi nez jen dojit na cestu a z ni, rovnou.
+func trasa(od: Vector2, do_: Vector2) -> PackedVector2Array:
+	var p := PackedVector2Array([od])
+	var lide: Node = main.world.get_node_or_null("Lide") if main.world else null
+	var g: AStar2D = lide.get("_g") if lide else null
+	if g != null and g.get_point_count() > 0:
+		var a := g.get_closest_point(od)
+		var b := g.get_closest_point(do_)
+		if od.distance_to(do_) > od.distance_to(g.get_point_position(a)) + do_.distance_to(g.get_point_position(b)):
+			p.append_array(g.get_point_path(a, b))
+	p.append(do_)
+	return p
+
+
+static func _delka(p: PackedVector2Array) -> float:
+	var d := 0.0
+	for i in p.size() - 1:
+		d += p[i].distance_to(p[i + 1])
+	return d
+
+
+func _bod_trasy(sj: float) -> Vector2:
+	var b: PackedVector2Array = _jizda["body"]
+	var kum: PackedFloat32Array = _jizda["kum"]
+	for i in b.size() - 1:
+		if kum[i + 1] >= sj:
+			return b[i].lerp(b[i + 1], (sj - kum[i]) / maxf(kum[i + 1] - kum[i], 0.001))
+	return b[b.size() - 1]
+
+
+func _zacni_jizdu(m: Dictionary) -> void:
+	var pp: Vector3 = main.player.global_position
+	var c3: Vector3 = m["cil"]
+	var b := trasa(Vector2(pp.x, pp.z), Vector2(c3.x, c3.z))
+	var kum := PackedFloat32Array([0.0])
+	for i in b.size() - 1:
+		kum.append(kum[i] + b[i].distance_to(b[i + 1]))
+	var L := kum[kum.size() - 1]
+	var cf: Dictionary = Pravidla.cti("jizda", "rychle_cestovani")
+	var dur := clampf(L / float(cf["mapa_m_za_s"]), float(cf["min_s"]), float(cf["max_s"]))
+	var kun := na_koni()
+	_jizda = {"body": b, "kum": kum, "L": L, "s": 0.0, "rychlost_m_s": L / dur, "kun": kun, "km_h": _km_h(kun),
+		"cil": c3, "pohled": m["pohled"], "nazev": String(m["nazev"]), "hod0": float(main.day.hour) if main.day else 12.0}
+	_c.queue_redraw()
+
+
+## Konec jizdy: v cili (misto z mapy), nebo zastaveno - hrac na ceste v bode figurky, pohled dal po trase.
+## Cas = ujeta vzdalenost / rychlost chuze nebo jizdy.
+func _dorazit(v_cili: bool) -> void:
+	if _jizda.is_empty():
+		return
+	var sj: float = _jizda["s"]
+	var hodin := sj / 1000.0 / float(_jizda["km_h"])
+	var cil: Vector3 = _jizda["cil"]
+	var pohled: Vector3 = _jizda["pohled"]
+	var nazev := String(_jizda["nazev"])
+	if not v_cili:
+		var c2 := _bod_trasy(sj)
+		var p2 := _bod_trasy(minf(sj + 20.0, float(_jizda["L"])))
+		if p2.distance_to(c2) < 1.0:
+			p2 = c2 + Vector2(0, -10)
+		cil = Vector3(c2.x, 0.0, c2.y)
+		pohled = Vector3(p2.x, 2.0, p2.y)
+		nazev = "cesta"
+	_jizda = {}
+	close()
+	main.fast_travel(cil, pohled, hodin, nazev)
 
 
 func _ask() -> void:
@@ -386,7 +541,4 @@ func _answer(yes: bool) -> void:
 	if not yes:
 		_c.queue_redraw()
 		return
-	var m: Dictionary = MISTA[sel]
-	var hours := _dist_km() / 4.5
-	close()
-	main.fast_travel(m["cil"], m["pohled"], hours, String(m["nazev"]))
+	_zacni_jizdu(MISTA[sel])

@@ -71,7 +71,13 @@ func setup(root: Node3D, list: Array, info: Dictionary) -> void:
 		_snd[n] = load(SND + n + ".ogg")
 	(_snd["retez"] as AudioStreamOggVorbis).loop = true
 	(_snd["vrata_smycka"] as AudioStreamOggVorbis).loop = true
+	var videno := {}
 	for e: Dictionary in list:
+		if videno.has(String(e["name"])):
+			# 14. 11. (test duplicity: dvere chysi 20/21 se 2 kolizemi): stejny zaznam 2x = 2 telesa na jednom kridle
+			push_warning("pohyb: %s 2x v seznamu (%s / %s)" % [e["name"], str(videno[String(e["name"])]), str(e.get("pos", []))])
+			continue
+		videno[String(e["name"])] = e.get("pos", [])
 		var node := root.find_child(String(e["name"]), true, false) as Node3D
 		if node == null:
 			push_warning("pohyb: chybi uzel " + String(e["name"]))
