@@ -1354,3 +1354,22 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - Ruční seznamy staveb v testech (test_smyslu `stavby`, plánovač odtoku) neznaly nové díly (kovarna_ves, krcma_l) →
   test i plánovač berou každý záznam `lokace.json` se `stred` (+ vnořený `dum`). Nový díl = záznam, žádný seznam navíc.
 - Test, který porovnává tvrzení louky s ní samou (`interier`: _vzorek × _v_budove), nenahradí měření výsledku.
+
+## Stav 14. 11. noc (Míša spí; „vydej až bude vše dokonale opravené“) – NEVYDÁNO
+Hotovo v kódu a datech (testy u každého):
+- Rostliny v budovách: pravidlo koruna od zdi + měřítko + místnosti (`uzivani_smi`, `pasma.budova koruna_od_zdi_podil`,
+  `rostlina_od_zdi_m`), kamínky u cest přes uzivani_smi; test `rostliny_v_budovach` OK (z dat světa).
+- Levitace: dosednutí v datech na hotový terén (`_dosednuti_dat`, `pasma.dosednuti`), test `visici` z dat; zbývá
+  borovice (-144, 711) 15 m (asi na skále bez kolize – ověřit snímkem), kamínky u ústí Bystřice.
+- Lom: kameník u špalku (lom_spalek u_predmetu), přístřešek bez stolu + selský stůl, chýše bez pryčen/podlahy na hlíně
+  s lůžkem; ZBÝVÁ: chýše 22 – postava k lůžku nedojde (lide_chovani), test stavby_na_zemi čeká úpravu na chýši na terénu.
+- Kovářův dům na potoce: odtok přeplánován (odtok_mimo_ves.py zná všechny záznamy lokace), test smyslu hlídá každý
+  záznam × tok. ZBÝVÁ: export světa (Blender) – disk ~940 MB < export_volno_mb 1000 (git 1,3 GB loose, nelze gc).
+- Krčma L nová verze (širší křídlo, stáj, pavlač, pokoje, nocležna, bez vybavení → náš nábytek); schody: model má
+  na konci schodnice 0,5 m schod do podesty → kolize rampa (`kolize_rampy`), test `krcma_schody` OK.
+- Kaskáda (Míša „schody? ne“ + cikcak): voda.json raz_toku kaskada schody (šířka 0,5, klikatá proudnice, náhodné
+  stupně 0,5–3,3 m, šikmé hrany, balvany 2,5/m); test `potok_kaskada` OK. ZBÝVÁ: bílá voda na pádech (shader
+  pena_padu – ověřit snímkem), deska hladiny přečnívá přes břeh u pádů, test `breh` 145 bodů pod hladinou u (290,1250).
+- Záseky: rozbor `docs/rozpracovane/zaseky_rozbor_system.md` („shadery +0“ v GL Compatibility nic nedokazuje!),
+  měřiče v řádku záseku (pre/draw/swap, události, draw calls), louka nahrává po dávkách (rozpočet bajtů) – NEOVĚŘENO
+  NA ZAŘÍZENÍ. ZBÝVÁ: kupy (celý buffer najednou), plánovač snímku pro rostliny/kolize, hostinec kolize konvexní.
