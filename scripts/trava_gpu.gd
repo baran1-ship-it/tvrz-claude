@@ -39,7 +39,9 @@ func _pec() -> void:
 				var pz := r.position.y + (j + 0.5) * k
 				var v: Vector3 = louka._vzorek(px, pz)
 				var d := 0.0
-				if v.x >= louka._prah(px, pz) and not louka._nizka(px, pz):
+				# 14. 11. (test interier 107 bodu s travou, Misa: trava v hostinci u dveri a u stolu): vnitrek staveb a domu
+				# vynechat jako louka.gd (_v_budove) - _vzorek resi jen pas u zdi, vnitrek louka resi az pri sazeni
+				if v.x >= louka._prah(px, pz) and not louka._nizka(px, pz) and not louka._v_budove(px, pz):
 					d = clampf(v.x * 1.6 * (1.0 + 0.5 * louka.Svet.divokost(px, pz)), 0.0, 1.0)
 				hi.set_pixel(i, j, Color(d, 0, 0))
 				vi.set_pixel(i, j, Color(v.y, 0, 0))

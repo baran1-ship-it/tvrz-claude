@@ -4775,12 +4775,14 @@ func _interier() -> void:
 			for j in 12:
 				var q := xf * Vector3(lerpf(b.position.x + 0.3, b.end.x - 0.3, i / 11.0), 0.0, lerpf(b.position.z + 0.3, b.end.z - 0.3, j / 11.0))
 				vse += 1
-				if (louka._vzorek(q.x, q.z) as Vector3).x > 0.0:
+				# 14. 11.: vnitrek vynechava sazeni (louka._v_budove) - _vzorek je jen hustota (GPU trava ji pece, proto i tam
+				# _v_budove); chyba = hustota > 0 a zaroven bod nevynechany _v_budove
+				if (louka._vzorek(q.x, q.z) as Vector3).x > 0.0 and not louka._v_budove(q.x, q.z):
 					spatne += 1
 	# tvrz: vstup do veze, kovarna, zbrojnice, prujezd (Misa 0.70)
 	for b: Vector2 in [Vector2(-23.0, -13.0), Vector2(-24.0, -11.0), Vector2(-12.0, 8.5), Vector2(-17.0, 11.5), Vector2(-10.0, 11.0), Vector2(-1.6, 12.0)]:
 		vse += 1
-		if (louka._vzorek(b.x, b.y) as Vector3).x > 0.0:
+		if (louka._vzorek(b.x, b.y) as Vector3).x > 0.0 and not louka._v_budove(b.x, b.y):
 			spatne += 1
 			print("INTERIER trava v %.0f,%.0f" % [b.x, b.y])
 	_vysledek("interier", vse > 0 and spatne == 0, "staveb %d, bodu %d, s travou %d" % [sv._uvnitr.size(), vse, spatne])
@@ -6878,6 +6880,32 @@ func _hostinec_trava() -> void:
 		if sl_rostl.any(func(w: String) -> bool: return jm.contains(w)):
 			print("HOSTINEC_TRAVA sit %s (%.1f, %.1f, %.1f) uzel %s" % [jm, p3.x, p3.y, p3.z, str(m3.get_path()).right(70)])
 			spatne.append(p3)
+	# 14. 11.: GPU trava (prototyp z Nastaveni) pece hustotu z louka._vzorek - v obrysu hostince musi byt 0
+	var tg: Node = main.get_node_or_null("TravaGPU")
+	var gpu_spatne := 0
+	if tg:
+		for f9 in 1800:
+			if bool(tg.get("_hotovo")):
+				break
+			await get_tree().process_frame
+		if not bool(tg.get("_hotovo")):
+			spatne.append("GPU trava se nedopekla")
+		for o: Dictionary in tg.get("_obl"):
+			var rr: Rect2 = o["rect"]
+			var hi: Image = o["hi"]
+			for i9 in 24:
+				for j9 in 24:
+					var lq := Vector3(lerpf(bb.position.x + 0.3, bb.end.x - 0.3, i9 / 23.0), 0.0, lerpf(bb.position.z + 0.3, bb.end.z - 0.3, j9 / 23.0))
+					var wq: Vector3 = inv.affine_inverse() * lq
+					if not rr.has_point(Vector2(wq.x, wq.z)):
+						continue
+					var pxi := clampi(int((wq.x - rr.position.x) / rr.size.x * hi.get_width()), 0, hi.get_width() - 1)
+					var pzi := clampi(int((wq.z - rr.position.y) / rr.size.y * hi.get_height()), 0, hi.get_height() - 1)
+					if hi.get_pixel(pxi, pzi).r > 0.0:
+						gpu_spatne += 1
+	if gpu_spatne > 0:
+		spatne.append("GPU trava v obrysu %d bodu" % gpu_spatne)
+	print("HOSTINEC_TRAVA GPU trava v obrysu: %d bodu" % gpu_spatne)
 	_vysledek("hostinec_trava", inst > 0 and spatne.is_empty(), "instanci v okoli %d, v obrysu stavby nebo u dveri %d, dveri %d" % [inst, spatne.size(), dvere.size()])
 
 
