@@ -7812,7 +7812,8 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 	# Misa 11. 11. (tri poutnici sli spolu): cile poutniku (c.misto) od sebe aspon poutnici_od_m
 	var pt_m: Array = []
 	for c: Dictionary in ll:
-		if bool((c["o"] as Dictionary).get("poutnik", false)) and c.has("misto"):
+		# cil (0, 0) = zatim zadny (zmena cinnosti ceka na rozpocet graf.zmena_bloku_snimek) - neni misto
+		if bool((c["o"] as Dictionary).get("poutnik", false)) and c.has("misto") and c["misto"] is Vector2 and c["misto"] != Vector2.ZERO:
 			pt_m.append([c["id"], c["misto"]])
 	for i in pt_m.size():
 		for j in range(i + 1, pt_m.size()):
