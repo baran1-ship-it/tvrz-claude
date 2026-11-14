@@ -56,13 +56,35 @@ func priprav(vyska: Callable) -> bool:
 	for p: Array in osa:
 		b0.append(Vector2(p[0], p[1]))
 	var husta: Array[bool] = []                            # bod zjemneneho strmeho useku (kaskada)
+	# sklon osy jako u razu toku: nejnizsi teren napric osou (+-3 m), pres okno sklon_okno_m po proudu i proti -
+	# bod po bodu byl hrbolaty teren u osy (kaskada na 3/4 toku, stupne 0,0 m)
+	var dno0 := PackedFloat32Array()
+	for k in b0.size():
+		var nrm0 := (b0[mini(k + 1, b0.size() - 1)] - b0[maxi(k - 1, 0)]).normalized().orthogonal()
+		var m0 := INF
+		for o: float in [-3.0, -1.5, 0.0, 1.5, 3.0]:
+			var q0 := b0[k] + nrm0 * o
+			m0 = minf(m0, float(vyska.call(q0.x, q0.y)))
+		dno0.append(m0)
+	var sk_b := PackedFloat32Array()
+	for k in b0.size():
+		var i0 := k
+		var i1 := k
+		var d0 := 0.0
+		var d1 := 0.0
+		while i0 > 0 and d0 < okno:
+			d0 += b0[i0].distance_to(b0[i0 - 1])
+			i0 -= 1
+		while i1 < b0.size() - 1 and d1 < okno:
+			d1 += b0[i1].distance_to(b0[i1 + 1])
+			i1 += 1
+		sk_b.append(absf(dno0[i0] - dno0[i1]) / maxf(d0 + d1, 0.5))
 	for k in b0.size():
 		var strmy := false
 		if k > 0:
 			var a0 := b0[k - 1]
 			var dl0 := a0.distance_to(b0[k])
-			var sk0 := absf(float(vyska.call(a0.x, a0.y)) - float(vyska.call(b0[k].x, b0[k].y))) / maxf(dl0, 0.5)
-			strmy = sk0 >= float(kask["sklon_od"]) and kask.has("schody")
+			strmy = minf(sk_b[k - 1], sk_b[k]) >= float(kask["sklon_od"]) and kask.has("schody")
 			if strmy:
 				var nd := maxi(1, ceili(dl0 / float(kask["schody"]["krok_osy_m"])))
 				for q in range(1, nd):
@@ -209,7 +231,8 @@ func priprav(vyska: Callable) -> bool:
 		for k in n:
 			if stupen[k] >= 0:
 				hladiny[k] = float(tune[stupen[k]])
-				if k + 1 < n and stupen[k + 1] >= 0 and stupen[k + 1] != stupen[k]:
+				if k + 1 < n and stupen[k + 1] >= 0 and stupen[k + 1] != stupen[k] \
+						and float(tune[stupen[k]]) - float(tune[stupen[k + 1]]) >= float(kask["schody"]["pad_min_m"]):
 					var smer := (body[k + 1] - body[k]).normalized()
 					schody.append({"p": body[k], "smer": smer, "pad": float(tune[stupen[k]]) - float(tune[stupen[k + 1]]), "w": sirky[k], "k": k})
 		for k in range(1, n):
