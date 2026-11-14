@@ -711,6 +711,17 @@ for _h in {h["model"] for h in json.load(open(K + "/hra/data/mista_stavby.json")
 if float(_lv.get("obal_do_m", 0)) < float(_lv["strom_daleko_do_m"]): _dal_ch.append("obal_do_m < strom_daleko_do_m (stavby zmizí dřív než les)")
 TEST("stavby_z_dalky", not _dal_ch, "; ".join(_dal_ch) if _dal_ch else "všechny stavby mají texturovaný hrubý stupeň do %s m" % _lv.get("obal_do_m"))
 
+# Míša 14. 11.: „tři druhy jabloní, ty naše stávající se mi nelíbí“ + „stará jabloň u hájovny a u hospody“
+_jb = _md["stromy"]["jablon"]; _jb_ch = []
+for _v in _jb.get("varianty", []):
+    for _k in ("soubor", "lod1", "daleko"):
+        if _k in _v and not os.path.exists(K + "/hra/" + _v[_k][6:]): _jb_ch.append("chybí " + _v[_k])
+if len([_v for _v in _jb.get("varianty", []) if not _v.get("mlada")]) < 3: _jb_ch.append("méně než 3 staré jabloně")
+_ms2 = json.load(open(K + "/hra/data/mista_stavby.json"))
+for _st in [s for s in _ms2["stavby"] if s.get("soubor")]:
+    if not any(t.get("stara") and math.hypot(t["x"] - _st["x"], t["z"] - _st["z"]) < 35 for t in _ms2["stromy"]): _jb_ch.append("u %s není stará jabloň" % _st["misto"])
+TEST("jablone", not _jb_ch, "; ".join(_jb_ch) if _jb_ch else "varianty jabloní z Disku, stará jabloň u krčmy i hájovny")
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

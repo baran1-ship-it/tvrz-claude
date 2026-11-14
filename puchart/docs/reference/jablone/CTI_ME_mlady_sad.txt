@@ -1,0 +1,61 @@
+# Mladý jabloňový sad — tři plodící varianty
+
+Tři skutečné upravitelné modely mladých jabloní. Každý má vlastní stavbu větví a koruny; nejde o zmenšené kopie předchozí dospělé jabloně.
+Stromky mají tenké kmeny, hladší olivově hnědou kůru s drobnými lenticelami, středový výhon, mladé větve, řapíky, jednotlivé tvarované listy a jablka.
+Vzhled odpovídá mladým stromkům, které už plodí. Nejde o právě vysazené jednoleté sazenice ani o doložené konkrétní historické odrůdy. Přesný věk modelům není přiřazen.
+
+## Soubory
+
+- `Young_Apple_Orchard.blend` — hlavní Blender soubor. Všechny tři varianty vedle sebe, každá se třemi úrovněmi detailu. Textury jsou zabalené uvnitř. Vytvořeno v Blenderu 4.3.2.
+- `Young_Apple_01_LOD0.glb` až `Young_Apple_03_LOD2.glb` — devět samostatných herních exportů. Každý soubor obsahuje model i textury. Strom je exportovaný samostatně, základnou u počátku souřadnic; rozestavení z Blenderu se do GLB nepřenáší.
+- `Young_Apple_01_Collision.glb` až `Young_Apple_03_Collision.glb` — samostatné jednoduché kolize kmenů. Importuj je jako pomocné tvary, nikoli jako viditelné stromy.
+- `Preview_Young_Apple_Variants.png` — render tří skutečných modelů.
+- `Preview_Young_Orchard.png` — render ukázkového sadu z dvanácti stromků sestaveného z těchto tří variant.
+- `textures` — samostatné kopie procedurálních textur.
+
+## Rozměry a počet trojúhelníků
+
+| Varianta | Výška | Šířka koruny | Jablka | LOD0 | LOD1 | LOD2 |
+| --- | ---: | --- | ---: | ---: | ---: | ---: |
+| 01 | 2.46 m | 1.76 × 1.70 m | 8 | 48,566 | 11,730 | 4,122 |
+| 02 | 2.75 m | 1.77 × 1.92 m | 12 | 61,795 | 15,128 | 5,322 |
+| 03 | 2.95 m | 1.97 × 1.77 m | 18 | 75,606 | 18,771 | 6,681 |
+
+Jablka mají stejnou běžnou velikost přibližně 5–7,6 cm jako u dospělé jabloně. Nejsou úměrně zmenšená s celým stromem. Počet jablek je zachován ve všech třech LOD každé varianty; vzdálenější verze mají jednodušší tvary ovoce.
+Měřítko: 1 jednotka v Blenderu = 1 metr. Kořenový krček zasahuje několik centimetrů pod terén.
+
+## Otevření a úpravy
+
+1. Otevři `Young_Apple_Orchard.blend`.
+2. Kolekce `YOUNG_01_LOD0`, `YOUNG_02_LOD0` a `YOUNG_03_LOD0` jsou zobrazené vedle sebe. Jejich nadřazené prázdné objekty ovládají celý příslušný strom.
+3. LOD1 a LOD2 jsou skryté. Pro stejný strom zobrazuj vždy pouze jednu úroveň detailu.
+4. Kmen a hlavní větve, jemné větve, listy, řapíky, jablka a stopky jsou oddělené objekty.
+5. Pro změnu množství ovoce uprav objekt `05_Apples` a odpovídající objekt stopek `06_Fruit_stems_calyx`.
+6. Kolekce `ORCHARD_DEMO | linked copies | hidden by default` obsahuje dvanáct propojených kopií. Když ji zapneš, pro přehlednost skryj tři základní kolekce LOD0.
+7. Kolekce `PRESENTATION | excluded from GLB` obsahuje jen ukázkovou louku, světlo a kameru. Není součástí herních exportů.
+
+## Použití ve hře
+
+Importuj požadovaný GLB do svého enginu. LOD0 je pro nejbližší pohledy, LOD1 pro běžnou herní scénu, LOD2 pro vzdálenější stromy. Přepínání vzdáleností nastav v enginu podle měření.
+Listy používají oboustranný materiál s výřezem průhlednosti MASK a prahem 0,5. GLB obsahuje barvy, normálové mapy a materiály. Po importu zkontroluj oboustrannost listů a průhlednost.
+Střídej tři varianty a jejich natočení. Pro sad používej instance; předváděcí louku nemusíš přebírat.
+Tyto modely jsou statické. Neobsahují hotovou animaci větru, sklizeň, padání ovoce ani simulaci růstu. Výkon a FPS na konkrétním Android zařízení nebyly měřeny.
+
+## Kontroly
+
+GLB jsou kontrolovány na platné indexy, konečné souřadnice, nulové trojúhelníky a vložené obrázky. Všechny devět exportů se zpětně importuje do Blenderu; výsledky jsou v `export_validation.json` a `blender_roundtrip.json`.
+Náhledy jsou rendery skutečných modelů z tohoto balíčku. Nejsou samostatné konceptové obrázky.
+
+## Původ a zdrojové skripty
+
+Geometrie i všechny dodané textury jsou vytvořené pro tento projekt. Textury listů a slupky jablek navazují na předchozí dospělou jabloň; hladší kůra je nově procedurálně vytvořená pro mladé stromky. Nejsou použity herní soubory KCD ani fotografie převzaté z jiné hry.
+`build_young_orchard.py` sestaví všechny modely, exporty, ukázkový sad a rendery. `make_young_bark.py` vytvoří mapy mladé kůry pomocí Pillow a NumPy. Listové a ovocné textury jsou již přiložené.
+Po novém sestavení spusť `validate_glb.py` v Pythonu s NumPy, který nastaví výřez listů a zkontroluje exporty. `roundtrip_check.py` se spouští v Blenderu na pozadí.
+
+```bash
+blender -b --python build_young_orchard.py
+python3 validate_glb.py
+blender -b --python roundtrip_check.py
+```
+
+Generátor přepisuje své výstupy ve stejné složce. Před vlastními úpravami si vytvoř kopii souboru.

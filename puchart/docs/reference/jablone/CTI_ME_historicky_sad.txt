@@ -1,0 +1,79 @@
+# Jabloň pro historický sad — APPLE 01
+
+Skutečný upravitelný 3D model v Blenderu, vytvořený pro použití v historické hře.
+Rozložitá dospělá jabloň na konci léta, nepravidelný kmen, rozsochy, olistěné výhony a zelenožlutá jablka s červeným líčkem.
+Vytvořeno v Blenderu 4.3.2. Model není převzatý z Kingdom Come: Deliverance.
+
+## Co otevřít
+
+- `Apple_01.blend` — hlavní soubor. Obsahuje model, všechny tři úrovně detailu, materiály, zabalené textury, kameru a osvětlení. Textury se nemusejí dohledávat zvlášť.
+- `Apple_01_LOD0.glb` — nejpodrobnější verze pro blízký pohled. GLB obsahuje geometrii i textury.
+- `Apple_01_LOD1.glb` — odlehčená varianta pro herní scénu.
+- `Apple_01_LOD2.glb` — vzdálenější stromy v sadu.
+- `Apple_01_Collision.glb` — samostatný jednoduchý model pro kolizi kmene. V enginu jej použij jako kolizní tvar, nikoli jako viditelný strom.
+- `Preview_Apple_01.png`, `Preview_Apple_01_back.png`, `Preview_Apple_01_detail.png`, `Preview_Apple_01_foliage.png` — rendery skutečného modelu.
+
+## Rozměry a geometrie
+
+Měřítko v Blenderu: 1 jednotka = 1 metr. Základna kmene je u počátku souřadnic; spodní kořenové náběhy sahají přibližně 5 cm pod terén.
+Výška modelu včetně kořenů: 4.98 m. Šířka koruny: 6.13 × 5.69 m.
+Hlavní model: 24,760 jednotlivých tvarovaných listů, 144 jablek.
+
+| Verze | Trojúhelníky | Použití |
+| --- | ---: | --- |
+| LOD0 | 423,261 | detailní strom u hráče / desktop / úpravy |
+| LOD1 | 56,337 | odlehčená herní varianta |
+| LOD2 | 12,405 | vzdálenější stromy |
+
+V BLEND souboru je zapnutá kolekce `APPLE_01_LOD0`. LOD1, LOD2 a kolize jsou skryté. Nikdy nezobrazuj několik LOD současně na stejném místě.
+Kolekce `PRESENTATION | not exported` obsahuje pouze předváděcí půdu, trávu, světlo, kameru a několik spadlých jablek. Není součástí herních GLB.
+
+## Úpravy v Blenderu
+
+1. Otevři `Apple_01.blend`.
+2. Ve stromu objektů rozbal `APPLE_01_LOD0`.
+3. Kmen, drobné větve, listy, řapíky, jablka a stopky jsou samostatné objekty.
+4. Pro strom bez ovoce skryj objekty `05_Apples` a `06_Fruit_stems_calyx`.
+5. Celý strom přesouvej a otáčej přes nadřazený prázdný objekt `APPLE_01 | origin at ground | meters`.
+6. Pro herní export vyber pouze objekty stromu a použij glTF/GLB. Vyřaď předváděcí scénu a kolizi.
+
+## Použití ve hře
+
+Importuj jednu požadovanou variantu GLB. V Godotu se importuje jako 3D scéna. V Unreal Engine použij importer podporující glTF/GLB a zkontroluj materiály po importu.
+GLB listy používají oboustranný materiál s výřezem průhlednosti (MASK, práh 0,5), aby se omezily problémy s řazením průhledných ploch. Barvy, normály a drsnost kůry jsou součástí souboru.
+LOD se v enginu nepřepínají samy; jejich vzdálenosti nastav podle velikosti stromu na obrazovce a měření scény.
+Pro první test na Androidu začni LOD1; LOD0 je výrazně náročnější. FPS, přehřívání ani výkon na konkrétním tabletu nebyly měřeny.
+Pro sad používej instance a různé otočení stromu. Tento balíček obsahuje jednu základní podobu stromu; otáčení nevytváří nové botanické varianty.
+Model je statický. Nemá hotový vítr, roční období, padání ovoce ani sklizeň.
+
+## Co bylo ověřeno
+
+Geometrie GLB prošla kontrolou číselných hodnot, indexů, degenerovaných trojúhelníků a vložených obrázků. Proveden byl také zpětný import všech tří GLB do Blenderu. Konkrétní výsledky jsou v `export_validation.json` a `blender_roundtrip.json`.
+Vzhled byl kontrolován v renderech z přední i zadní strany a v detailech.
+Hlavní rozsochy jsou geometricky spojené. Jemné větvičky a řapíky jsou samostatné připojené plochy; celý strom není jednolitý vodotěsný objekt pro 3D tisk.
+
+## Podklady a textury
+
+- Botanický popis jabloně: https://www.rhs.org.uk/plants/60558/malus-domestica-f/details
+- Listy a plody: https://www.treesandshrubsonline.org/articles/malus/malus-domestica/
+- Referenční tvar starého stromu: https://agresearch.montana.edu/warc/guides/apples/heritage_orchard_management_guide/caring-for-heritage-trees/re-establishing-heritage-orchard.html
+- Fotografická textura kůry **ambientCG Bark007**, CC0: https://ambientcg.com/view?id=Bark007
+- Kopie těchto CC0 map: https://github.com/dgreenheck/ez-tree/tree/main/src/app/public/textures/bark/Bark007_1K-JPG
+- Potvrzení licence map: https://github.com/dgreenheck/ez-tree/blob/main/src/app/public/textures/LICENSE.md
+
+Fotografie stromu sloužila k orientaci při modelování; její obraz není součástí dodaných materiálů. Kůra je obecná fotografická textura, nikoli doložený sken konkrétní jabloně. Textury listů a jablek jsou vlastní procedurální textury s žilnatinou, zubatým okrajem a barevnými odchylkami. Nejde o skeny skutečných listů ani o fotogrammetrický model celého stromu.
+Podoba je výtvarná rekonstrukce stromu vhodného pro historickou scénu. Není doložena konkrétní odrůda z roku 1393 ani shoda s assety KCD.
+
+## Zdrojové skripty
+
+`build_apple.py` sestaví celý model a rendery v Blenderu. `make_textures.py` vytvoří procedurální textury listů a ovoce (Python, Pillow a NumPy). Dodané fotografické mapy kůry ponech ve složce `textures`.
+Po novém exportu spusť `validate_glb.py` standardním Pythonem s NumPy: nastaví herní výřez listů a ověří exporty. `roundtrip_check.py` provede zpětný import v Blenderu.
+Ukázka příkazů:
+
+```bash
+blender -b --python build_apple.py
+python3 validate_glb.py
+blender -b --python roundtrip_check.py
+```
+
+Generátor přepíše soubory `Apple_01*` ve stejné složce; před vlastními úpravami si vytvoř kopii.

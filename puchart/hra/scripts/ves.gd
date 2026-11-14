@@ -696,12 +696,19 @@ func _stromy() -> void:
 	for s: Dictionary in d["stromy"]:
 		var dr := String(s["druh"])
 		if not md.has(dr): continue
-		if not sceny.has(dr):
-			var e: Dictionary = md[dr]; var a := []
+		var e: Dictionary = md[dr]; var klic := dr
+		if e.has("varianty"):   # varianty z Disku (jabloně Míši 14. 11.): stálá volba z polohy, podil_mladych mladých stromků
+			var hv := absi(hash(Vector2i(roundi(float(s["x"]) * 10.0), roundi(float(s["z"]) * 10.0))))
+			var ml := float(hv % 1000) / 1000.0 < float(e.get("podil_mladych", 0.0)) and not bool(s.get("stara", false))
+			var vs: Array = (e["varianty"] as Array).filter(func(v: Dictionary) -> bool: return bool(v.get("mlada", false)) == ml)
+			if vs.is_empty(): vs = e["varianty"]
+			var vi := (hv / 1000) % vs.size(); e = vs[vi]; klic = "%s_%s_%d" % [dr, "m" if ml else "s", vi]
+		if not sceny.has(klic):
+			var a := []
 			for k in ["soubor", "lod1", "daleko"]:
 				a.append(load(String(e[k])) if e.has(k) and ResourceLoader.exists(String(e[k])) else null)
-			sceny[dr] = a
-		var sc: Array = sceny[dr]
+			sceny[klic] = a
+		var sc: Array = sceny[klic]
 		var xf := Transform3D(Basis(Vector3.UP, float(s["yaw"])).scaled(Vector3.ONE * float(s["meritko"])), Vector3(float(s["x"]), float(s["y"]), float(s["z"])))
 		var rozsahy := [[0.0, b1], [b1, b2], [b2 if sc[1] else b1, b3]]
 		for k in 3:

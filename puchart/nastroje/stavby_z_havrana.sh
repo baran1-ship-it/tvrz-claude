@@ -21,4 +21,8 @@ python3 -c "import json;C=json.load(open('$K/pravidla/svet/mista.json'))['modely
     set -- $Z_; /opt/bl/bin/python $K/blender/celky_upravy.py $K $M_ $T/$M_/$1 $K/hra/modely/stavby_h/krcma_rada.glb $T/$M_/$2 $K/hra/modely/stavby_h/krcma_rada_lod1.glb
   else cp $T/$M_/*.glb $K/hra/modely/stavby_h/; fi
 done
+# jabloně z Disku (Míša 14. 11.: „ty naše stávající se mi nelíbí“): varianty starých a mladých jabloní (mista.json modely.stromy.jablon.disk)
+python3 -c "import json;D=json.load(open('$K/pravidla/svet/mista.json'))['modely']['stromy']['jablon']['disk'];[print(v['id'],' '.join(v['soubory'])) for v in D.values()]" | while read ID_ Z_; do
+  curl -sSL -m 600 -o $T/j.zip "https://drive.usercontent.google.com/download?id=$ID_&export=download&confirm=t" && unzip -oq -j $T/j.zip $Z_ -d $K/hra/modely/stavby_h/; rm -f $T/j.zip
+done
 rm -rf $T; ls -la $K/hra/modely/stavby_h/

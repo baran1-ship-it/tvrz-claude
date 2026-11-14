@@ -317,6 +317,18 @@ def pridej_dum(misto, m, x, z, yaw, v):
         stavby[-1].update({"soubor": c_["soubor"], "lod1": c_.get("lod1"), "posun_x": round(-cx_, 3), "vnitrek": c_.get("vnitrek", []), "lod1_od_m": c_.get("lod1_od_m"),
                            "rampy": c_.get("rampy", []), "podlaha_m": c_.get("podlaha_m", 0.0),
                            "prichod": w_(c_["prichod"][0] - cx_, c_["prichod"][1]), "pohled": w_(c_["pohled"][0] - cx_, c_["pohled"][1])})
+        st_ = c_.get("stromy")   # staré jabloně u celku (Míša 14. 11.): kandidáti v souřadnicích modelu, první vyhovující
+        if st_:
+            ab_ = Polygon([w_(c_["aabb"][0] - cx_ - 1.5, c_["aabb"][2] - 1.5), w_(c_["aabb"][1] - cx_ + 1.5, c_["aabb"][2] - 1.5),
+                           w_(c_["aabb"][1] - cx_ + 1.5, c_["aabb"][3] + 1.5), w_(c_["aabb"][0] - cx_ - 1.5, c_["aabb"][3] + 1.5)])
+            k_ = 0
+            for px_, pz_ in st_["mista"]:
+                q_ = w_(px_ - cx_, pz_); pq_ = Point(*q_)
+                if k_ >= st_["pocet"] or pq_.within(ab_) or pq_.distance(CESTY_L) < PL["od_cesty_m"] + 1.0 or pq_.distance(TOKY_L) < PL["od_toku_m"]: continue
+                rs_ = random.Random(int(q_[0] * 100) * 7919 + int(q_[1] * 100))   # vlastní náhoda – sdílená rng0 by posunula zbytek vsi
+                celky_stromy.append([st_["druh"], q_[0], q_[1], rs_.uniform(0, 6.28), rs_.uniform(0.9, 1.1)]); k_ += 1
+            print("CELEK_STROMY", misto["id"], m, k_)
+celky_stromy = []
 n_used = 0; ULICE = []
 for misto in MI["mista"]:
     if misto.get("stav") not in ("SCHVALENO",) or misto.get("typ") == "mlyn": continue
@@ -550,6 +562,8 @@ for us in useds:
         stromy_out.append({"druh": s_[0], "x": r3(s_[1]), "y": r3(vys_b(s_[1], s_[2]) - 0.1), "z": r3(s_[2]), "yaw": r3(s_[3]), "meritko": r3(s_[4])})
 for s_ in navesni_stromy:
     stromy_out.append({"druh": s_[0], "x": r3(s_[1]), "y": r3(vys_b(s_[1], s_[2]) - 0.1), "z": r3(s_[2]), "yaw": r3(s_[3]), "meritko": r3(s_[4])})
+for s_ in celky_stromy:   # u krčmy a hájovny vždy stará jabloň
+    stromy_out.append({"druh": s_[0], "x": r3(s_[1]), "y": r3(vys_b(s_[1], s_[2]) - 0.1), "z": r3(s_[2]), "yaw": r3(s_[3]), "meritko": r3(s_[4]), "stara": True})
 pp = lambda poly: [[r3(x_), r3(z_)] for x_, z_ in list(poly.exterior.coords)[:-1]]
 used_out = [{"i": us["i"], "misto": us["misto"], "typ": us["typ"], "stred": [r3(us["parcela"].centroid.x), r3(us["parcela"].centroid.y)],
              "parcela": pp(us["parcela"])} for us in useds]

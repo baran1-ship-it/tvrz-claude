@@ -421,7 +421,62 @@
    "jablon": {
     "soubor": "res://modely/stavby_h/jablon.glb",
     "daleko": "res://modely/stavby_h/jablon_daleko.glb",
-    "zdroj": "Havran z_rostliny jablon (sad za humny, lokace.json ves.dvorec.sad: výška 6 m, poloměr 2,6 m)"
+    "zdroj": "Havran z_rostliny jablon (sad za humny, lokace.json ves.dvorec.sad: výška 6 m, poloměr 2,6 m)",
+    "varianty": [
+     {
+      "soubor": "res://modely/stavby_h/jablon_1.glb",
+      "daleko": "res://modely/stavby_h/jablon_1_daleko.glb"
+     },
+     {
+      "soubor": "res://modely/stavby_h/jablon_2.glb",
+      "daleko": "res://modely/stavby_h/jablon_2_daleko.glb"
+     },
+     {
+      "soubor": "res://modely/stavby_h/jablon_3.glb",
+      "daleko": "res://modely/stavby_h/jablon_3_daleko.glb"
+     },
+     {
+      "soubor": "res://modely/stavby_h/Young_Apple_01_LOD1.glb",
+      "lod1": "res://modely/stavby_h/Young_Apple_01_LOD2.glb",
+      "mlada": true
+     },
+     {
+      "soubor": "res://modely/stavby_h/Young_Apple_02_LOD1.glb",
+      "lod1": "res://modely/stavby_h/Young_Apple_02_LOD2.glb",
+      "mlada": true
+     },
+     {
+      "soubor": "res://modely/stavby_h/Young_Apple_03_LOD1.glb",
+      "lod1": "res://modely/stavby_h/Young_Apple_03_LOD2.glb",
+      "mlada": true
+     }
+    ],
+    "podil_mladych": 0.25,
+    "disk": {
+     "jablone.zip": {
+      "id": "1_csWRWSsi_EvQgWbzA4zKeejrXMfI2kY",
+      "soubory": [
+       "out/jablon_1.glb",
+       "out/jablon_2.glb",
+       "out/jablon_3.glb",
+       "out/jablon_1_daleko.glb",
+       "out/jablon_2_daleko.glb",
+       "out/jablon_3_daleko.glb"
+      ]
+     },
+     "Mlady_jablonovy_sad.zip": {
+      "id": "1gvuDVAalAmd4GPDxrgkOujusOwH6ItaP",
+      "soubory": [
+       "Mlady_jablonovy_sad/Young_Apple_01_LOD1.glb",
+       "Mlady_jablonovy_sad/Young_Apple_01_LOD2.glb",
+       "Mlady_jablonovy_sad/Young_Apple_02_LOD1.glb",
+       "Mlady_jablonovy_sad/Young_Apple_02_LOD2.glb",
+       "Mlady_jablonovy_sad/Young_Apple_03_LOD1.glb",
+       "Mlady_jablonovy_sad/Young_Apple_03_LOD2.glb"
+      ]
+     }
+    },
+    "varianty_zdroj": "Míša 14. 11.: „tři druhy jabloní, ty naše stávající se mi nelíbí, vyber dle uvážení“ (Disk 1LIf8…: jablone.zip, Jablon_historicky_sad.zip, Mlady_jablonovy_sad.zip). Vybráno: staré vysokokmenné jabloně jablon_1–3 (jablone.zip, NAVOD_JABLONE.md: 24–26 tis. troj., dálka 3 karty 6 troj., různé tvary – rozložitá s dutinou, vzpřímená, nakloněná s ulomenou větví) jako hlavní strom sadů a dvorů; mladé plodící Young_Apple_01–03 (Mlady_jablonovy_sad.zip: LOD1 12–19 tis. zblízka, LOD2 4–7 tis. do strom_lod1_do_m, výška 2,5–3 m) jako podil_mladych stromů – sad různého stáří. Historická Apple_01 (Jablon_historicky_sad.zip) nepoužita: jeden tvar, LOD1 56 tis. troj. (tablet). Varianta stromu z polohy (stálá), natočení a měřítko z rozmístění."
    },
    "lipa": {
     "soubor": "res://modely/stromy/lipa_stredni.glb",
@@ -520,7 +575,29 @@
       ]
      }
     ],
-    "podlaha_m": 0.45
+    "podlaha_m": 0.45,
+    "stromy": {
+     "druh": "jablon",
+     "pocet": 2,
+     "mista": [
+      [
+       -13.0,
+       3.0
+      ],
+      [
+       28.5,
+       2.0
+      ],
+      [
+       -12.0,
+       -3.0
+      ],
+      [
+       28.0,
+       -4.0
+      ]
+     ]
+    }
    },
    "Hajovna": {
     "soubor": "res://modely/stavby_h/hajovna.glb",
@@ -560,10 +637,33 @@
       ]
      }
     ],
-    "podlaha_m": 0.45
+    "podlaha_m": 0.45,
+    "stromy": {
+     "druh": "jablon",
+     "pocet": 2,
+     "mista": [
+      [
+       -11.0,
+       6.0
+      ],
+      [
+       -3.0,
+       -8.5
+      ],
+      [
+       12.5,
+       -1.0
+      ],
+      [
+       11.5,
+       8.0
+      ]
+     ]
+    }
    },
    "pozn_prichod": "prichod/pohled: střed dveří Vchod (obal křídla v glb) a bod 2–3 m před nimi; trasa testu dum_<místo>_<model> z příchodu přes práh 1,5 m dovnitř",
-   "pozn_rampy": "podlaha domu +0,45 m (návody modelů) – postava nemá krok nahoru: šikmá kolize z terénu 2,4 m před prahem na podlahu 0,25 m za ním u vnějších dveří (jako hlavni.gd _rampy_dveri u domů vsi); test dum_<místo>_<model>"
+   "pozn_rampy": "podlaha domu +0,45 m (návody modelů) – postava nemá krok nahoru: šikmá kolize z terénu 2,4 m před prahem na podlahu 0,25 m za ním u vnějších dveří (jako hlavni.gd _rampy_dveri u domů vsi); test dum_<místo>_<model>",
+   "pozn_stromy": "Míša 14. 11.: „jedna stará jabloň nebo více může být u hájovny a jedna nebo více u hospody“ – mista = kandidáti [x, z] v souřadnicích modelu (jako aabb), použije se prvních pocet, které jsou ≥ od_cesty_m od cesty a ≥ od_toku_m od toku a mimo půdorys; vždy stará jabloň (varianta jablon_1–3)"
   }
  },
  "stavby": [
@@ -8106,6 +8206,42 @@
    "z": -234.924,
    "yaw": 2.176,
    "meritko": 1.15
+  },
+  {
+   "druh": "jablon",
+   "x": -103.93,
+   "y": -35.065,
+   "z": 88.91,
+   "yaw": 5.475,
+   "meritko": 0.907,
+   "stara": true
+  },
+  {
+   "druh": "jablon",
+   "x": -66.17,
+   "y": -35.863,
+   "z": 106.16,
+   "yaw": 0.473,
+   "meritko": 1.039,
+   "stara": true
+  },
+  {
+   "druh": "jablon",
+   "x": 158.54,
+   "y": -34.966,
+   "z": 299.44,
+   "yaw": 4.92,
+   "meritko": 1.091,
+   "stara": true
+  },
+  {
+   "druh": "jablon",
+   "x": 170.09,
+   "y": -33.033,
+   "z": 311.3,
+   "yaw": 4.917,
+   "meritko": 1.064,
+   "stara": true
   }
  ],
  "sezeni": [],
