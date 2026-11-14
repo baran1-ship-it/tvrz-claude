@@ -1816,13 +1816,10 @@
    "domy": {
     "7": {
      "plodiny": [
-      "zahon_bylinky",
-      "zahon_bylinky",
-      "zahon_bylinky",
-      "zahon_prazdny"
+      "zahon_bylinky"
      ],
      "plot_kolem": true,
-     "_p": "Míša 14. 11.: bylinkářka (postavy.json bylinkarka domov dum 7) – v záhonech bylinky místo zeleniny, kolem zahrady plot (r. 119, 131)"
+     "_p": "Míša 14. 11.: bylinkářka (postavy.json bylinkarka domov dum 7) – v záhonech bylinky místo zeleniny, kolem zahrady plot (r. 119, 131) | Míša 14. 11.: „bylinkářka nebude mít zeleninu, jen byliny“ – jen zahon_bylinky"
     }
    },
    "plot_kolem_od_m": 0.4,
