@@ -157,3 +157,7 @@ if __name__ == "__main__":
     old = json.load(open(mp)) if os.path.exists(mp) else {}
     old.update(meta)
     json.dump(old, open(mp, "w"), indent=1)
+    # Blender pri ukonceni s nactenymi modely pada (rc 139, 14. 11.) - vse zapsane, konec bez uklidu (jako export_game.py)
+    import sys as _s
+    _s.stdout.flush()
+    os._exit(0)
