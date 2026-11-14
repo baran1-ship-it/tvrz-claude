@@ -698,6 +698,19 @@ for _src in ("hra/data/mista_stavby.json",):
                 if _e.get(_a) and not os.path.exists(K + "/hra/" + _e[_a][len("res://"):]): _tx_ch.append("%s.%s" % (_k, _a))
 TEST("textury_vsi", not _tx_ch, "chybí %s" % _tx_ch if _tx_ch else "všechny textury plotů a vrat existují")
 
+# Míša 14. 11.: „z dálky jsou to bílé kostky… chybí tam něco okolo, alespoň hmota“ – každá stavba má hrubý stupeň
+# s texturou kreslený do dálky: domy _Daleko (daleko_textury pro každou plochu), celky a kovárna LOD1, stodoly a kůlny obal
+_ms = json.load(open(K + "/pravidla/svet/mista.json")); _md = _ms["modely"]; _lv = _ms["usedlosti"]["lod"]; _dal_ch = []
+for _m in _md["domy"]["koreny"]:
+    if _m not in _md["domy"].get("daleko_textury", {}): _dal_ch.append("dům %s bez daleko_textury" % _m)
+for _c, _e in _md.get("celky", {}).items():
+    if isinstance(_e, dict) and not _e.get("lod1"): _dal_ch.append("celek %s bez lod1" % _c)
+_ob = _md["hospodarske"].get("obal", {})
+for _h in {h["model"] for h in json.load(open(K + "/hra/data/mista_stavby.json"))["hospodarske"]}:
+    if _h not in _ob and not os.path.exists(K + "/hra/modely/stavby_h/%s_lod1.glb" % _h): _dal_ch.append("hospodářská %s bez obalu i LOD1" % _h)
+if float(_lv.get("obal_do_m", 0)) < float(_lv["strom_daleko_do_m"]): _dal_ch.append("obal_do_m < strom_daleko_do_m (stavby zmizí dřív než les)")
+TEST("stavby_z_dalky", not _dal_ch, "; ".join(_dal_ch) if _dal_ch else "všechny stavby mají texturovaný hrubý stupeň do %s m" % _lv.get("obal_do_m"))
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

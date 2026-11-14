@@ -645,9 +645,11 @@ func _mista() -> void:
 	var ssc: Node = (load(String(md["stredni"])) as PackedScene).instantiate() if ResourceLoader.exists(String(md["stredni"])) else null
 	var st_mat := StandardMaterial3D.new(); st_mat.vertex_color_use_as_albedo = true; st_mat.roughness = 0.9
 	var uzel := Node3D.new(); uzel.name = "Mista"; add_child(uzel)
+	var obal_do := float((d.get("lod_ves", {}) as Dictionary).get("obal_do_m", 900.0))
+	var dt: Dictionary = md.get("daleko_textury", {}); var dt_cache := {}
 	for s: Dictionary in d["stavby"]:
 		if s.has("soubor"):   # celá stavba z Disku (krčma, hájovna – Míša 14. 11.): vlastní glb, posun počátku, LOD1, vnitřek zblízka
-			_celek(uzel, s, float(lod["vnitrek_do_m"]))
+			_celek(uzel, s, float(lod["vnitrek_do_m"]), obal_do, dt.get("jas", {}))
 			continue
 		var vzor := sc.get_node_or_null(String(s["model"])) as Node3D
 		if vzor == null: continue
@@ -668,7 +670,8 @@ func _mista() -> void:
 			if not ch is MeshInstance3D or String(ch.name).ends_with("_Stredni"): continue
 			var mi := ch as MeshInstance3D; var cn := String(ch.name)
 			if cn.ends_with("_Daleko"):
-				mi.visibility_range_begin = dal
+				mi.visibility_range_begin = dal; mi.visibility_range_end = obal_do
+				_daleko_textury(mi, vzor, String(s["model"]), dt, dt_cache)   # Míša 14. 11.: „z dálky jsou to bílé kostky“
 				var sd := MeshInstance3D.new(); sd.name = cn + "_Stin"; sd.mesh = mi.mesh; sd.transform = mi.transform
 				sd.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY; sd.visibility_range_end = dal
 				dum.add_child.call_deferred(sd)
@@ -683,9 +686,38 @@ func _mista() -> void:
 	print("MISTA staveb %d" % uzel.get_child_count())
 
 
+## Hrubý obal domu (_Daleko: plochy *_Sindel, *_Roubeni bez UV) dostane texturu materiálu podrobného modelu promítnutou
+## trojrozměrně (mista.json modely.domy.daleko_textury; KCD/HLOD: vzdálená stavba = zjednodušený tvar se skutečnou texturou)
+func _daleko_textury(mi: MeshInstance3D, vzor: Node3D, model: String, dt: Dictionary, cache: Dictionary) -> void:
+	if not dt.has(model): return
+	for i in mi.mesh.get_surface_count():
+		var mt := mi.mesh.surface_get_material(i)
+		var cast := String(mt.resource_name).get_slice("_", String(mt.resource_name).get_slice_count("_") - 1) if mt else ""
+		if not (dt[model] as Dictionary).has(cast): continue
+		var jm := String(dt[model][cast])
+		if not cache.has(jm):
+			var V_ := preload("res://scripts/ves.gd")
+			cache[jm] = V_._triplanar(V_._textura_materialu(vzor, jm), float(dt.get("velikost_m", 2.0)), float((dt.get("jas", {}) as Dictionary).get(cast, 1.0)))
+		mi.set_surface_override_material(i, cache[jm])
+
+
+## Hrubý stupeň (LOD1 z Disku) nemá normálové mapy podrobného modelu → šindel z dálky skoro bílý (snímek 14. 11.); materiál,
+## jehož jméno obsahuje klíč z mista.json modely.domy.daleko_textury.jas (Sindel, Roubeni), dostane násobek barvy
+static func Ztmav_daleko(koren: Node, jas: Dictionary) -> void:
+	for mi in koren.find_children("*", "MeshInstance3D", true, false):
+		var me := (mi as MeshInstance3D).mesh
+		for i in me.get_surface_count():
+			var mt := me.surface_get_material(i) as BaseMaterial3D
+			if mt == null: continue
+			for k: String in jas:
+				if String(mt.resource_name).contains(k):
+					var m2 := mt.duplicate() as BaseMaterial3D; m2.albedo_color = mt.albedo_color * Color(float(jas[k]), float(jas[k]), float(jas[k]))
+					(mi as MeshInstance3D).set_surface_override_material(i, m2); break
+
+
 ## Celek (mista_rozmisteni CELKY): model postavený na střed půdorysu s posunem počátku posun_x podél osy x modelu; podrobný model
 ## do lod1_od_m, dál LOD1 (návod modelu), vnitřní skupina jen do vnitrek_do_m (návod: „Interier_skupina jde zvenku vypnout“).
-func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float) -> void:
+func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas: Dictionary) -> void:
 	if not ResourceLoader.exists(String(s["soubor"])): return
 	var n: Node3D = (load(String(s["soubor"])) as PackedScene).instantiate()
 	n.name = "%s_%s_%d" % [s["misto"], s["model"], uzel.get_child_count()]   # skupina dveří dvere.gd = dveře@instance
@@ -693,7 +725,6 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float) -> void:
 	n.transform = Transform3D(b, Vector3(float(s["x"]), float(s["teren_y"]), float(s["z"])) + b * Vector3(float(s.get("posun_x", 0.0)), 0, 0))
 	uzel.add_child(n)
 	var od1 := float(s["lod1_od_m"]) if s.get("lod1_od_m") != null else 60.0
-	var dal := 75.0 if OS.has_feature("mobile") else 130.0
 	for g in n.find_children("*", "GeometryInstance3D", true, false):
 		(g as GeometryInstance3D).visibility_range_end = od1 + 5.0
 	for jm in s.get("vnitrek", []):
@@ -718,7 +749,8 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float) -> void:
 	if s.get("lod1") != null and ResourceLoader.exists(String(s["lod1"])):
 		var l1: Node3D = (load(String(s["lod1"])) as PackedScene).instantiate(); l1.name = "LOD1"; n.add_child(l1)
 		for g in l1.find_children("*", "GeometryInstance3D", true, false):
-			(g as GeometryInstance3D).visibility_range_begin = od1; (g as GeometryInstance3D).visibility_range_end = dal
+			(g as GeometryInstance3D).visibility_range_begin = od1; (g as GeometryInstance3D).visibility_range_end = obal_do   # hrubý stupeň do dálky (dřív za 75 / 130 m nic)
+		Ztmav_daleko(l1, jas)
 		for c in l1.find_children("*", "CollisionObject3D", true, false): c.queue_free()
 
 

@@ -94,6 +94,7 @@ static func _zesvetli(t: Texture2D, cil: float) -> Texture2D:
 func _hospodarske() -> void:
 	var blizko := _f("podrobny_do_m"); var st_do := _f("stredni_do_m", "stredni_do_m_mobil")
 	var sceny := {}
+	var obaly: Dictionary = (d["modely"]["hospodarske"] as Dictionary).get("obal", {})
 	var uzel := Node3D.new(); uzel.name = "Hospodarske"; add_child(uzel)
 	for h: Dictionary in d["hospodarske"]:
 		var mid := String(h["model"])
@@ -123,8 +124,14 @@ func _hospodarske() -> void:
 			var od1 := float((d["modely"]["hospodarske"] as Dictionary).get("lod1_od_m", 55.0))
 			for g in n.find_children("*", "GeometryInstance3D", true, false): (g as GeometryInstance3D).visibility_range_end = od1 + 5.0
 			var l1: Node3D = (load(lod1_p) as PackedScene).instantiate(); l1.name = mid + "_LOD1"; n.add_child(l1)
-			for g in l1.find_children("*", "GeometryInstance3D", true, false):
-				(g as GeometryInstance3D).visibility_range_begin = od1; (g as GeometryInstance3D).visibility_range_end = st_do
+			preload("res://scripts/hlavni.gd").Ztmav_daleko(l1, (d["modely"]["domy"] as Dictionary).get("daleko_textury", {}).get("jas", {}))
+			for g in l1.find_children("*", "GeometryInstance3D", true, false):   # hrubý stupeň do dálky (Míša 14. 11.: „alespoň hmota“)
+				(g as GeometryInstance3D).visibility_range_begin = od1; (g as GeometryInstance3D).visibility_range_end = _f("obal_do_m")
+		elif obaly.has(mid):   # stodola, kůlna: od stredni_do_m levný texturovaný obal (dřív za 180 / 120 m zmizely)
+			if not sceny.has(mid + "_obal"): sceny[mid + "_obal"] = _obal(n, obaly[mid], float(obaly["velikost_m"]), obaly.get("jas", {}))
+			var ob := MeshInstance3D.new(); ob.name = mid + "_Obal"; ob.mesh = sceny[mid + "_obal"]
+			ob.visibility_range_begin = st_do; ob.visibility_range_end = _f("obal_do_m"); ob.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			n.add_child(ob)
 		if ma_st:
 			var si: Node = (sc[1] as PackedScene).instantiate()
 			for mi in si.find_children("*", "MeshInstance3D", true, false):
@@ -155,6 +162,80 @@ func _hospodarske() -> void:
 			kb.add_child(cs)
 		if kb.get_child_count() > 0: n.add_child(kb)
 		else: kb.free()
+
+
+## Hrubý obal stavby pro dálku (mista.json modely.hospodarske.obal; KCD/HLOD – zjednodušený tvar se skutečnou texturou):
+## stěny L × D do okapu, sedlová střecha (hřeben podél x) nebo pultová (předek +z) až po obal modelu (přesah), textury
+## materiálů podrobného modelu promítnuté trojrozměrně (obal nemá UV).
+func _obal(n: Node3D, o: Dictionary, vel: float, obal_jas: Dictionary) -> ArrayMesh:
+	var ab := AABB(); var prvni := true
+	for mi in n.find_children("*", "MeshInstance3D", true, false):
+		var b := _xf_ve_scene(mi, n) * (mi as MeshInstance3D).get_aabb()
+		ab = b if prvni else ab.merge(b); prvni = false
+	var hx := float(o["L"]) / 2; var hz := float(o["D"]) / 2
+	var cx := ab.get_center().x; var cz := ab.get_center().z
+	var ax := ab.size.x / 2; var az := ab.size.z / 2; var top := ab.end.y
+	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var kr := SurfaceTool.new(); kr.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var tri := func(t: SurfaceTool, a: Vector3, b: Vector3, c: Vector3) -> void:
+		var nn := (c - a).cross(b - a).normalized()
+		for v: Vector3 in [a, b, c]: t.set_normal(nn); t.add_vertex(v)
+	var ctyr := func(t: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, e: Vector3) -> void:
+		tri.call(t, a, b, c); tri.call(t, a, c, e)
+	var P := func(x: float, y: float, z: float) -> Vector3: return Vector3(cx + x, y, cz + z)
+	var sedl := String(o["strecha"]) == "sedlova"
+	# výška stěny v místě z (vršek stěny pod střechou), střecha v místě z
+	var hp := float(o.get("predek_m", o.get("okap_m", 3.0))); var hzad := float(o.get("zadek_m", o.get("okap_m", 3.0)))
+	var stena_y := func(z: float) -> float:
+		if sedl: return float(o["okap_m"]) + (top - float(o["okap_m"])) * (1.0 - absf(z) / hz) if absf(z) < hz else float(o["okap_m"])
+		return lerpf(hzad, hp, (z + hz) / (2 * hz))
+	# stěny (vnější strana, normála ven): přední +z, zadní −z, boky ±x (štíty u sedlové až k hřebeni)
+	var zz: Array = [-hz, 0.0, hz] if sedl else [-hz, hz]
+	ctyr.call(st, P.call(-hx, 0, hz), P.call(hx, 0, hz), P.call(hx, stena_y.call(hz), hz), P.call(-hx, stena_y.call(hz), hz))
+	ctyr.call(st, P.call(hx, 0, -hz), P.call(-hx, 0, -hz), P.call(-hx, stena_y.call(-hz), -hz), P.call(hx, stena_y.call(-hz), -hz))
+	for sx: float in [-1.0, 1.0]:
+		for i in zz.size() - 1:
+			var z0: float = zz[i]; var z1: float = zz[i + 1]
+			if sx > 0: ctyr.call(st, P.call(hx, 0, z1), P.call(hx, 0, z0), P.call(hx, stena_y.call(z0), z0), P.call(hx, stena_y.call(z1), z1))
+			else: ctyr.call(st, P.call(-hx, 0, z0), P.call(-hx, 0, z1), P.call(-hx, stena_y.call(z1), z1), P.call(-hx, stena_y.call(z0), z0))
+	# střecha po obal modelu (přesah), spodní strana přesahu jen jako tmavší krytina (z dálky nevidět)
+	if sedl:
+		var ok := float(o["okap_m"]); var sk := (top - ok) / hz; var ye := ok - (az - hz) * sk
+		for sz: float in [-1.0, 1.0]:
+			var a: Vector3 = P.call(-ax, ye, az * sz); var b: Vector3 = P.call(ax, ye, az * sz)
+			var c: Vector3 = P.call(ax, top, 0.0); var e: Vector3 = P.call(-ax, top, 0.0)
+			if sz > 0: ctyr.call(kr, a, b, c, e)
+			else: ctyr.call(kr, b, a, e, c)
+	else:
+		var sk := (hp - hzad) / (2 * hz)
+		var yp := hp + (az - hz) * sk; var yz := hzad - (az - hz) * sk
+		ctyr.call(kr, P.call(-ax, yp, az), P.call(ax, yp, az), P.call(ax, yz, -az), P.call(-ax, yz, -az))
+	var m := ArrayMesh.new()
+	for k in 2:
+		var t: SurfaceTool = st if k == 0 else kr
+		var arr := t.commit_to_arrays(); m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		var kl := "steny" if k == 0 else "krytina"
+		m.surface_set_material(k, _triplanar(_textura_materialu(n, String(o[kl])), vel, float((obal_jas as Dictionary).get(kl, 1.0))))
+	return m
+
+
+## albedo textura materiálu daného jména v modelu (pro obaly z dálky)
+static func _textura_materialu(n: Node, jm: String) -> Texture2D:
+	for mi in n.find_children("*", "MeshInstance3D", true, false):
+		var me := (mi as MeshInstance3D).mesh
+		if me == null: continue
+		for i in me.get_surface_count():
+			var mt := me.surface_get_material(i) as BaseMaterial3D
+			if mt and mt.resource_name == jm: return mt.albedo_texture
+	return null
+
+
+static func _triplanar(t: Texture2D, vel: float, jas := 1.0) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new(); m.roughness = 1.0; m.albedo_color = Color(jas, jas, jas)
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	if t: m.albedo_texture = t; m.uv1_triplanar = true; m.uv1_scale = Vector3.ONE / vel
+	else: m.albedo_color = Color(0.35, 0.28, 0.2) * jas
+	return m
 
 
 static func _xf_ve_scene(n: Node, koren: Node) -> Transform3D:

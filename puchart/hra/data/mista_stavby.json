@@ -264,7 +264,35 @@
     "ChyseKura",
     "ChysePrkna"
    ],
-   "zdroj": "Havran blender/ves_domy.py (modelář 25. 10., Disk „budovy“): Dum1 roubený se šindelem a hrázděným štítem, Dum2 omítnutý s doškovou valbou, Rychta s kamennou patrovou komorou, chýše s kůrou / prkny"
+   "zdroj": "Havran blender/ves_domy.py (modelář 25. 10., Disk „budovy“): Dum1 roubený se šindelem a hrázděným štítem, Dum2 omítnutý s doškovou valbou, Rychta s kamennou patrovou komorou, chýše s kůrou / prkny",
+   "daleko_textury": {
+    "popis": "Míša 14. 11.: „detail z dálky – jsou to bílé kostky, buď změnit barvu, nebo najít, jak to dělají v KCD“ – hrubý obal domu (_Daleko) měl jen barvu bez textury (na slunci a v oparu světlá hladká kostka); KCD/HLOD: vzdálená budova = zjednodušený tvar se skutečnými texturami stavby. Obal dostane texturu materiálu podrobného modelu (střecha: plocha Sindel, stěny: plocha Roubeni), promítnutou trojrozměrně (obal nemá UV), velikost_m = rozteč textury",
+    "velikost_m": 2.0,
+    "Dum1": {
+     "Sindel": "M_Sindel",
+     "Roubeni": "M_Roubeni"
+    },
+    "Dum2": {
+     "Sindel": "M_DoskyPecene",
+     "Roubeni": "M_OmitkaPecena"
+    },
+    "Rychta": {
+     "Sindel": "M_Sindel_001",
+     "Roubeni": "M_Roubeni_002"
+    },
+    "ChyseKura": {
+     "Sindel": "M_Kura_003"
+    },
+    "ChysePrkna": {
+     "Sindel": "M_Kura_004",
+     "Roubeni": "M_KamenSuchy"
+    },
+    "jas": {
+     "Sindel": 0.62,
+     "Roubeni": 0.85
+    },
+    "jas_pozn": "obal nemá normálovou mapu podrobného materiálu (ta plochu stíní) – bez ztmavení byl šindel z dálky skoro bílý (snímek 14. 11. d2_srov); násobek barvy textury"
+   }
   },
   "mlyn": {
    "soubor": "res://modely/stavby_h/mlyn.glb",
@@ -337,7 +365,41 @@
     "Kovarna_Dlazba",
     "Kovarna_Podlaha"
    ],
-   "kovarna_skryt_pozn": "dlažba přístřešku a hliněná podlaha modelu se ve hře nekreslí (kolize podlahy zůstává 5 cm nad terénem plošiny) – je vidět udusaná hlína terénu"
+   "kovarna_skryt_pozn": "dlažba přístřešku a hliněná podlaha modelu se ve hře nekreslí (kolize podlahy zůstává 5 cm nad terénem plošiny) – je vidět udusaná hlína terénu",
+   "obal": {
+    "popis": "hrubý obal stodol a kůlen pro dálku (ves.gd _obal): stěny = obal modelu zmenšený o přesah střechy, sedlová střecha (hřeben podél x modelu) nebo pultová (předek +z); textura materiálu podrobného modelu promítnutá trojrozměrně (velikost_m); od stredni_do_m do obal_do_m, ~20 trojúhelníků",
+    "zdroj": "pravidla/svet/stodoly.json (L × D, Hw, Hp, Hz) – stejné modely jako blender/stodoly.py; přesah = (obal modelu − L × D) / 2",
+    "velikost_m": 2.0,
+    "stodola": {
+     "strecha": "sedlova",
+     "L": 9.0,
+     "D": 6.5,
+     "okap_m": 3.0,
+     "steny": "prkno_stodoly",
+     "krytina": "sindel_stodoly"
+    },
+    "stodola_mala": {
+     "strecha": "sedlova",
+     "L": 7.0,
+     "D": 5.5,
+     "okap_m": 2.8,
+     "steny": "prkno_stodoly",
+     "krytina": "sindel_stodoly"
+    },
+    "kolna": {
+     "strecha": "pultova",
+     "L": 7.0,
+     "D": 3.6,
+     "predek_m": 2.6,
+     "zadek_m": 1.9,
+     "steny": "prkno_stodoly",
+     "krytina": "sindel_stodoly"
+    },
+    "jas": {
+     "steny": 0.85,
+     "krytina": 0.62
+    }
+   }
   },
   "stromy": {
    "jablon": {
@@ -663,8 +725,8 @@
   "stredni_do_m": 180.0,
   "stredni_do_m_mobil": 120.0,
   "lod_bias": 50.0,
-  "ploty_do_m": 140.0,
-  "ploty_do_m_mobil": 80.0,
+  "ploty_do_m": 200.0,
+  "ploty_do_m_mobil": 140.0,
   "drobne_do_m": 40.0,
   "zahony_do_m": 60.0,
   "strom_podrobny_do_m": 45.0,
@@ -675,7 +737,10 @@
   "ploty_pozn": "KCD2 ref_kcd2_ves_shora: ploty jsou z výšky vidět přes celou ves (~150 m); tablet kratší",
   "stredni_zapnuto": false,
   "stredni_pozn": "12. 11.: střední stupeň stodol/kůlen (stavby_h *_stredni.glb, barva vrcholů) se kreslí černě (snímky docs/screens/ves_kcd_*; s jednobarevným materiálem osvětlený) – příčina NEOVERENA, stejné černé domy z dálky v _mista. Podrobný model má stejně trojúhelníků (stodola 17,8 tis.), střední šetří jen volání kreslení → vypnuto, podrobný do stredni_do_m.",
-  "dosah_pozn_12_11": "hlídač scén 12. 11.: stodoly a kůlny v plném detailu do 450 m přetáhly rozpočet trojúhelníků (scény 300–800 m od vsi 2,1–2,4 M) → 180 m (tablet 120 m), dokud střední stupeň kreslí černě"
+  "dosah_pozn_12_11": "hlídač scén 12. 11.: stodoly a kůlny v plném detailu do 450 m přetáhly rozpočet trojúhelníků (scény 300–800 m od vsi 2,1–2,4 M) → 180 m (tablet 120 m), dokud střední stupeň kreslí černě",
+  "obal_do_m": 900.0,
+  "obal_pozn": "Míša 14. 11.: „bílá strašně razí a chybí tam něco okolo – ploty, stromy, keře, nemusí se vykreslovat, ale alespoň hmota by tam být měla“, „jde o všechny stavby“. KCD/HLOD: stavba z dálky nemizí, kreslí se hrubým tvarem se skutečnými texturami. Hrubé stupně (domy _Daleko, LOD1 celků a kovárny, obal stodol a kůlen) do obal_do_m = strom_daleko_do_m (stavby mizí spolu s lesem)",
+  "ploty_pozn_14_11": "Míša 14. 11.: „chybí tam něco okolo – ploty… alespoň hmota“: ploty celé vsi mají dohromady ~42 tis. trojúhelníků (měřeno 14. 11.) → 140 m tablet (dřív 80), 200 m PC (dřív 140)"
  },
  "ploty_pravidla": {
   "zdroj": "Havran vesnice.py picket_fence (sloupky po 2 m, 2 žerdě, latě 5,5–10 cm, výška 1,15 m, 4 % chybí, špice/šikmo/rovně), rail_fence (kůly po 2,8 m, 2–3 žerdě s kůrou, výška 1,1 m, 5 % spadlá), roofed_gate (sloupy 24 cm, 2,7 m, stříška šindel, křídla z prken 1,75 m), wicket (branka 0,9 m, 7 latí 1,05 m); proutěný = předmět plutek (2,07 m díl). KCD1 ves_1 (laťový + krytá vrata), ves_4 (proutěný), KCD2 ref_kcd2_zahrada_plot (proutí a kůly)",
