@@ -408,3 +408,7 @@ hostinec 20/17/24/23 (20/17/18/25), věž 27/25/33/36 (19/24/25/23).
   trasy s vypnutým vnitřkem domů + zastavení u (421, 871).
 - **Teplo:** konec trasy (vše znovu) 19–25 FPS, průměr snímku 43–51 ms (1. část 26–40) – tablet se zahřál.
 - 1. průjezd (vše) tvrz-cesta p95 72, max 525 (louka 979 ms zahřátí) – stejně jako 0.999995 (keš shaderů?).
+
+## 0.999997 (commit e129384d, 14. 11. 19:00) – NEOVĚŘENO NA ZAŘÍZENÍ
+Nové: kovárna (65 tis. troj.) a krčma do L (172 tis.) ve vsi, úsek trasy krcma-kovarna, varianta bez_vnitrku_vsi
+(místo postavy_stoji). Hlášení záseku nově „shadery +N“ (sestavené programy v tom snímku). Čeká na Měřicí trasu.
