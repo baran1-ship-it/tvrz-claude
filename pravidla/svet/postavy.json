@@ -487,7 +487,6 @@
     814.54
    ],
    "hledat_m": 1.5,
-   "dvere": "Pohyb_krcma_Vchod",
    "_p": "Míša 14. 11.: krčmář a hosté v nové krčmě do L (lokace krcma_l, NAVOD_KRCMA_L.md); dřív stará krčma U Kohouta (usedlost 0, teď obyčejná). Body z rámce modelu (střed 468,3/813,4, natočení −0,7044): venku u průčelí (uliční stěna z +4, opření 0,9 m před ní), ne u dveří"
   },
   "mlyn_dvur": {
@@ -5204,7 +5203,7 @@
    },
    "prace": "lom_stena_1",
    "spanek": {
-    "budova": "chyse_20",
+    "budova": "chyse_22",
     "postel": "slamnik"
    },
    "pribeh": "Lamač ráno přijde do lomu, kutá ve stěně s krátkými oddechy, v poledne si sedne s ostatními, jí, pije a vykládá, odpoledne zas kutá; večer jde domů a do hospody."
@@ -5220,7 +5219,7 @@
    },
    "prace": "lom_stena_2",
    "spanek": {
-    "budova": "chyse_21",
+    "budova": "chyse_23",
     "postel": "slamnik"
    },
    "pribeh": "Jako první lamač, u druhé stěny lomu."
@@ -5236,7 +5235,7 @@
    },
    "prace": "lom_spalek",
    "spanek": {
-    "budova": "chyse_20",
+    "budova": "chyse_22",
     "postel": "slamnik"
    },
    "pribeh": "Kameník tesá u špalku v lomu, v poledne svačí s lamači, večer hostinec."
