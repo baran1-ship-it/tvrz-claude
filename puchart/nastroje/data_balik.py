@@ -86,7 +86,8 @@ for sk in ["zaklad"] + [s_[0] for s_ in SKUPINY]:
     parts = []
     for i in range(0, len(b), PART):
         kus = b[i:i + PART]; jm = "%s-%s.pck.%03d" % (jm0, md5[:10], i // PART)
-        if not os.path.exists(K + "/data/" + jm): open(K + "/data/" + jm, "wb").write(kus); nove.append(jm)
+        if not os.path.exists(K + "/data/" + jm):   # 14. 11.: při plném disku zůstala napůl zapsaná část a další běh ji bral za hotovou
+        open(K + "/data/" + jm + ".tmp", "wb").write(kus); os.replace(K + "/data/" + jm + ".tmp", K + "/data/" + jm); nove.append(jm)
         parts.append({"file": jm, "size": len(kus), "md5": hashlib.md5(kus).hexdigest()})
     packs[jm0] = {"md5": md5, "size": len(b), "parts": parts}
     print("  %-16s %7.1f MB  %s" % (jm0, len(b) / 1048576, md5[:10]))
