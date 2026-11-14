@@ -32,7 +32,7 @@ func setup(m: Node, d: Node) -> void:
 	main = m
 	day = d
 	P = Pravidla.soubor("pocasi")
-	for k: String in ["rozestup_dni", "start_hodina", "trvani_h", "sila", "zatahovani_h", "doznivani_h", "osychani_h", "mokro", "prechod_uvnitr_s", "strecha_m", "strecha_kontrola_s"]:
+	for k: String in ["rozestup_dni", "start_hodina", "trvani_h", "sila", "zatahovani_h", "doznivani_h", "osychani_h", "mokro", "prechod_uvnitr_s", "strecha_m", "strecha_kontrola_s", "sber_uzlu_snimek"]:
 		Pravidla.cti("pocasi", k)                   # zapis cteni (test pravidla_cteni); dal z P
 	if OS.has_environment("TVRZ_DEST"):
 		vynuceno = float(OS.get_environment("TVRZ_DEST"))
@@ -107,22 +107,45 @@ func _smycka(cesta: String) -> AudioStreamPlayer:
 	return p
 
 
-## Materialy s parametrem „mokro“ - pri zacatku mokra (bunky kolem hrace se mezitim mohly pridat).
-func _sber_materialu() -> void:
+## Materialy s parametrem „dest_mokro“ (trasa 0.999995: sber pres celou scenu najednou = zasek 357 ms na zacatku deste):
+## pruchod stromu po castech - nejvys sber_uzlu_snimek uzlu za snimek, zacina pri zatahovani (pred kapkami), nalezeny
+## material dostane hned aktualni mokro. Po dokonceni znovu pri dalsim destu (bunky kolem hrace se mohly pridat).
+var _sber_fronta: Array = []          # uzly k prohledani (zasobnik)
+var _sber_videno := {}
+var _sber_hotov := false
+
+
+func _sber_zacni() -> void:
 	_mat_mokro.clear()
-	var videno := {}
-	for n: Node in main.find_children("*", "GeometryInstance3D", true, false):
-		var g := n as GeometryInstance3D
+	_sber_videno.clear()
+	_sber_fronta = [main]
+	_sber_hotov = false
+
+
+func _sber_krok() -> void:
+	var n_max := int(P["sber_uzlu_snimek"])
+	var pv: Array = (P["mokro"] as Dictionary)["povrch"]
+	var n := 0
+	while n < n_max and not _sber_fronta.is_empty():
+		var u: Node = _sber_fronta.pop_back()
+		n += 1
+		if not is_instance_valid(u):
+			continue
+		for ch: Node in u.get_children():
+			_sber_fronta.append(ch)
+		if not (u is GeometryInstance3D):
+			continue
+		var g := u as GeometryInstance3D
 		var ms: Array = [g.material_override]
 		if g is MeshInstance3D and (g as MeshInstance3D).mesh:
-			for s in (g as MeshInstance3D).get_surface_override_material_count():
-				ms.append((g as MeshInstance3D).get_surface_override_material(s))
-			for s in (g as MeshInstance3D).mesh.get_surface_count():
-				ms.append((g as MeshInstance3D).mesh.surface_get_material(s))
+			for si in (g as MeshInstance3D).get_surface_override_material_count():
+				ms.append((g as MeshInstance3D).get_surface_override_material(si))
+			for si in (g as MeshInstance3D).mesh.get_surface_count():
+				ms.append((g as MeshInstance3D).mesh.surface_get_material(si))
 		for m: Variant in ms:
-			if not (m is ShaderMaterial) or videno.has(m):
+			if not (m is ShaderMaterial) or _sber_videno.has(m):
 				continue
-			videno[m] = true                         # kazdy material jednou (kontrola: kod shaderu jen jednou na shader)
+			_sber_videno[m] = true
 			var sh: Shader = (m as ShaderMaterial).shader
 			if sh == null:
 				continue
@@ -130,9 +153,14 @@ func _sber_materialu() -> void:
 				_sh_mokro[sh] = "uniform float dest_mokro" in sh.code
 			if _sh_mokro[sh]:
 				_mat_mokro.append(m)
-				var pv: Array = (P["mokro"] as Dictionary)["povrch"]
 				(m as ShaderMaterial).set_shader_parameter("dest_povrch", Vector3(float(pv[0]), float(pv[1]), float(pv[2])))
-	_posl_mokro = -1.0
+				(m as ShaderMaterial).set_shader_parameter("dest_mokro", _mokro_pro(m as ShaderMaterial))
+	if _sber_fronta.is_empty():
+		_sber_hotov = true
+
+
+func _mokro_pro(m: ShaderMaterial) -> float:
+	return maxf(_posl_st, 0.0) if (P["mokro"]["stavby_shadery"] as Array).has(m.shader.resource_path) else maxf(_posl_mokro, 0.0)
 
 
 ## Den d je destivy, kdyz na nej padne rada rozestupu (rozestup_dni); zacatek, delka a sila ze semínka dne.
@@ -225,8 +253,13 @@ func _krok(dt: float) -> void:
 	var db0 := float((P["zvuk"] as Dictionary)["db_max"])
 	_hlas(_zv_venku, clampf(sila * 2.0, 0.0, 1.0) * (1.0 - _uvnitr), db0)
 	_hlas(_zv_strecha, clampf(sila * 2.0, 0.0, 1.0) * _uvnitr, db0)
-	if mokro > 0.001 and _posl_mokro <= 0.001:
-		_sber_materialu()
+	# sber materialu po castech: zacne se zatahovanim (pred kapkami a mokrem), skonci, az projde cely strom
+	if (zatazeni > 0.001 or mokro > 0.001) and _sber_fronta.is_empty() and not _sber_hotov:
+		_sber_zacni()
+	if not _sber_fronta.is_empty():
+		_sber_krok()
+	if zatazeni <= 0.0 and mokro <= 0.0 and _sber_hotov:
+		_sber_hotov = false                  # pristi dest sbira znovu
 	var mk_st := mokro * (1.0 - float((P["mokro"] as Dictionary)["stavby_uvnitr"]) * _uvnitr)
 	if absf(mokro - _posl_mokro) > 0.02 or absf(mk_st - _posl_st) > 0.02 or (mokro <= 0.0 and _posl_mokro > 0.0) or (mk_st <= 0.0 and _posl_st > 0.0):
 		_posl_mokro = mokro

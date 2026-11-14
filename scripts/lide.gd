@@ -50,6 +50,7 @@ var _ves_replika := -1000.0            # cas posledni repliky ve vsi (odstup ves
 var DOSAH: float = P["dosah"]
 
 var main: Node
+var _profil := OS.has_environment("TVRZ_LIDE_PROFIL")
 var trasa_vypni := {}                 # merici trasa (izolovany test 13. 11.): "sukne", "uchop", "modifikatory" vypnute
 var anim_kroku := 0                   # pocet advance() animaci (test_vykon postavy_mimo_zaber)
 var _lide: Array = []                  # obyvatel: {id, uzel, kostra, ap, cil_hlavy, role, blok, cesta, i, misto...}
@@ -2204,6 +2205,7 @@ func _process_vlastni(dt: float) -> void:
 	var mm: Dictionary = P["modif_max"]
 	var mez_sukne: float = serazene[mini(int(mm["sukne"]), serazene.size()) - 1] if not serazene.is_empty() else 0.0
 	var mez_hlava: float = serazene[mini(int(mm["hlava"]), serazene.size()) - 1] if not serazene.is_empty() else 0.0
+	var _tp0 := Time.get_ticks_usec()          # TVRZ_LIDE_PROFIL (14. 11., zasek 18:01 v lide_zasek): kde je cas
 	var n_sukne := 0                          # pocitadlo: shodne vzdalenosti nesmi prekrocit modif_max (test postavy_modif)
 	var n_hlava := 0
 	for c: Dictionary in _lide:
@@ -2215,7 +2217,10 @@ func _process_vlastni(dt: float) -> void:
 		if bi != int(c["blok"]) or _prevolit(c, h, dt):
 			# z domu (skryta u dveri) vychazi dvermi - ne objeveni v poli (postavy_plan 1.6)
 			var doma := bool((c["cn"] as Dictionary).get("skryty", false)) and bool(c["na_miste"])
+			var _tp := Time.get_ticks_usec()
 			_novy_blok(c, bi, blizko and (u.visible or doma) and u.position != Vector3.ZERO)
+			if _profil and Time.get_ticks_usec() - _tp > 1000:
+				print("LIDE_PROFIL novy_blok %s %s %.1f ms" % [c["id"], (c["role"]["rozvrh"][bi] as Dictionary).get("cinnost", "?"), (Time.get_ticks_usec() - _tp) / 1000.0])
 		if c.has("ceka"):
 			ceka_n += 1
 			if blizko and not bool(c.get("ve_fronte", false)):
@@ -2475,6 +2480,9 @@ func _process_vlastni(dt: float) -> void:
 				anim_kroku += 1
 				(c["ap"] as AnimationPlayer).advance(float(c["anim_t"]))
 				c["anim_t"] = 0.0
+	if _profil and Time.get_ticks_usec() - _tp0 > 8000:
+		print("LIDE_PROFIL smycka postav %.1f ms" % ((Time.get_ticks_usec() - _tp0) / 1000.0))
+	_tp0 = Time.get_ticks_usec()
 	# fronta cekajicich: kazdy snimek zacina dalsi v poradi, pocita se, dokud staci rozpocet (_nav_prer)
 	var kolo := _nav_fronta.size()
 	while kolo > 0 and not _nav_fronta.is_empty():

@@ -119,5 +119,7 @@
  "prechod_uvnitr_s": 0.5,
  "strecha_m": 30.0,
  "_strecha_m": "paprsek nad kamerou (Puchart): pod střechou / uvnitř bez kapek a dopadů, zvuk ze střechy (KCD hotfix 1.5.2)",
- "strecha_kontrola_s": 0.25
+ "strecha_kontrola_s": 0.25,
+ "sber_uzlu_snimek": 600,
+ "_sber_uzlu_snimek": "trasa 0.999995: sběr materiálů s dest_mokro přes celou scénu najednou = zásek 357 ms (skripty 109) na začátku deště; teď nejvýš 600 uzlů za snímek od začátku zatahování (26 tis. uzlů ≈ 45 snímků)"
 }

@@ -366,3 +366,16 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
 
 ### 0.999995 – vydáno 13. 11. (postavy bez fleků = nový import, hnědé dřevo, déšť, obloha jen při změně, sukně/hlava jen u nejbližších)
 - Trasa: varianty vše / postavy stojí / déšť / vše. Rozdíl vše × stojí = co postavy ještě stojí po omezení modif_max. NEOVĚŘENO NA ZAŘÍZENÍ.
+- **Měřeno 14. 11. 09:49 (Míša, tablet, 3D 75 %).** p50 vše / post. stojí / déšť / vše znovu: tvrz-cesta 27/19/32/30, louka 26/17/31/30,
+  les 32/19/28/28, skály 27/27/30/27, ves 19/19/25/22, mlýn 20/20/20/21, ves-vjezd 26/30/35/33, ves-dvory 37/26/30/30,
+  hostinec 20/17/18/25, věž 19/24/25/23.
+- **Naměřený vliv – postavy:** ve vsi, mlýně, hostinci vše ≈ stojí (dřív +9–12 ms). Proti 0.999994 (vše): ves 27→19, mlýn 32→20,
+  hostinec 27→20, věž 26→19. Omezení modif_max (řidič sukně 4, hlava 6) + skryté postavy bez modifikátorů = OVĚŘENÁ OPRAVA
+  ceny postav na tabletu (aspoň ve vsi; tvrz-cesta/louka/les v 1. průjezdu ještě vše > stojí – viz níže).
+- **Déšť:** +0–3 ms p50 (déšť × vše znovu). Začátek deště: zásek 357 ms, skripty 109 ms (`zahrati dest/tvrz-cesta`) = sběr
+  materiálů přes celou scénu (pocasi._sber_materialu, find_children 26 tis. uzlů) → rozložit do snímků.
+- **1. průjezd horší než v 0.999994** (vše p95 tvrz-cesta 70, louka 56, les 68, skály 58; >40 ms 55–67 snímků; 0.999994: 31–43),
+  2. průjezd (vše znovu) p95 37–49. PODEZŘENÍ: změněný kód shaderů zem/zdivo/skála/textura (dest_mokro, AO) = keš shaderů
+  po aktualizaci neplatí, tablet sestavuje znovu. Ověřit: 2. spuštění téže verze. NEOVĚŘENO.
+- Špička ves-vjezd 206 ms (fyzika 34) u (374, 749) = u krčmy (r. 125, cesty ke krčmě selhávají).
+- Teplo: panel 50 → 30 FPS během trasy (stejně jako dřív).

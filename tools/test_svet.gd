@@ -8246,8 +8246,19 @@ func _pocasi() -> void:
 	# venku za deste zavoj kapek, v hostinci (pod strechou, paprsek vzhuru) zadny
 	pc.vynuceno = 1.0
 	await main.fast_travel(Vector3(-40.0, 0.0, 905.0), Vector3(-45.0, 1.6, 910.0), 0.0, "test")
+	# trasa 0.999995: zacatek deste zasek 357 ms (sber materialu najednou) - sber po castech, nejdelsi krok pocasi < limit
+	var krok_max := 0.0
 	for i in 90:
+		var t0 := Time.get_ticks_usec()
+		pc.call("_krok", 0.0)
+		krok_max = maxf(krok_max, (Time.get_ticks_usec() - t0) / 1000.0)
 		await get_tree().process_frame
+	if not bool(pc.get("_sber_hotov")):
+		chyby.append("sber mokrych materialu nedobehl za 90 snimku")
+	if (pc.get("_mat_mokro") as Array).is_empty():
+		chyby.append("zadny material s dest_mokro (zem, zdivo, skala, drevo)")
+	if krok_max > float(Pravidla.cti("postavy", "graf")["mrizka"]["test_snimek_ms"]):
+		chyby.append("krok pocasi %.1f ms" % krok_max)
 	var venku := 0
 	for c: Node in pc.get_children():
 		if c is MeshInstance3D and (c as MeshInstance3D).visible:
@@ -8264,7 +8275,7 @@ func _pocasi() -> void:
 	if vidno > 0:
 		chyby.append("v hostinci viditelne vrstvy kapek %d" % vidno)
 	pc.vynuceno = -1.0
-	_vysledek("pocasi", chyby.is_empty(), "%d chyb %s; destu za 60 dni %d, nejdelsi %.1f h" % [chyby.size(), str(chyby), dni, nejdelsi])
+	_vysledek("pocasi", chyby.is_empty(), "%d chyb %s; destu za 60 dni %d, nejdelsi %.1f h, mokrych materialu %d" % [chyby.size(), str(chyby), dni, nejdelsi, (pc.get("_mat_mokro") as Array).size()])
 
 
 ## 13. 11. (trasa 0.999994: postavy stoji -9..-12 ms; PC: ridic sukne +18 ms, hlava +13 ms na 20 postav): aktivnich ridicu
