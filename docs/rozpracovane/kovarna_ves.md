@@ -22,3 +22,13 @@ ať to neopravujeme 60×“. Zdroj: Disk složka budovy `1O1VPNjyMNDCDxm4SB3nm64
 4. Testy: zasazeni, test_smyslu (stavba ne na cestě/svahu/ve vodě), interier (tráva), duplicity, kolize_troj;
    snímky z ulice a shora před vydáním.
 5. Postavy: kovář vsi (nová role) až po ověření stavby – ne v tomto kroku.
+
+## Krčma do L (Míša 14. 11. odpoledne)
+- Místo podle snímku Míši (zakroužkováno vlevo od odbočky k rybníku): `lokace.json krcma_l` střed (468,3; 813,4),
+  natočení −0,7044 (+Z modelu = uliční strana k odbočce), stájové křídlo k rybníku. Studna odtud na náves vedle lípy
+  (`ves.studna` 432/811). Odbočka = stará ulice, dotažena k břehu rybníka (`cesty.json pesiny k_rybniku`).
+- Stará krčma U Kohouta (usedlost 0) zůstává jako obyčejná usedlost bez štítu (`ves.stara_krcma_obycejna`).
+- Přestěhování postav (po ověření stavby snímkem): místa krcma_senk / krcma_obsluha / krcma_opreni / krcma →
+  šenkovna (464,9; 810,5), hospodský u výčepu (465,4; 811,3), šenkýřka za výčepem (466,9; 811,8), opření venku
+  u průčelí (461,4; 815,4); dveře `Pohyb_krcma_Vchod` (síň) a `Pohyb_krcma_Senkovna`; místnosti krčmy do dat
+  mistnosti (šenkovna, síň, kuchyně, jizba, pokojíky); stoly a lavice z katalogu do šenkovny (nabytek.json).
