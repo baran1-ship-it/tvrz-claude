@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -8806,3 +8806,27 @@ func _zahrada_bylinkarky() -> void:
 				ve_scene += 1
 	_vysledek("zahrada_bylinkarky", zah > 0 and plot >= 6 and cizi.is_empty() and ve_scene >= zah + plot,
 			"dum 7 (%.0f, %.0f): zahonu bylinek %d, plutku %d, jinych zahonu %s, ve scene %d" % [c.x, c.y, zah, plot, str(cizi), ve_scene])
+
+
+## Misa 14. 11. (snimek chysi u lomu, krouzek „trava?“): pred dvermi chyse vysoka trava - kde se chodi, nic neroste.
+## Kazde dvere a vrata (data pohyb): louka v pruchodu (pasma budova pruchod_m od stredu) venku nesazi (_vzorek 0).
+func _vstupy_bez_travy() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	var r := float(sv.pasma()["budova"]["pruchod_m"])
+	var spatne: Array = []
+	var n := 0
+	for e: Dictionary in sv.data.get("pohyb", []):
+		var nm := String(e.get("name", ""))
+		if not (String(e.get("kind", "")) in ["dvere", "vrata"] or nm.contains("dvere") or nm.contains("vrata")):
+			continue
+		var p3: Array = e.get("use", e["pos"])
+		var c := Vector2(float(p3[0]), float(p3[2]))
+		n += 1
+		for a in 8:
+			var q := c + Vector2(r * 0.8, 0.0).rotated(a * TAU / 8.0)
+			if louka and (louka._vzorek(q.x, q.y) as Vector3).x > 0.0 and not louka._v_budove(q.x, q.y):
+				spatne.append("%s (%.1f, %.1f)" % [nm, q.x, q.y])
+				break
+	for s: String in spatne.slice(0, 20):
+		print("VSTUPY trava v pruchodu ", s)
+	_vysledek("vstupy_bez_travy", n > 0 and spatne.is_empty(), "dveri a vrat %d, s travou v pruchodu %d %s" % [n, spatne.size(), str(spatne.slice(0, 4))])
