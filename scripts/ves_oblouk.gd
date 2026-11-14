@@ -106,7 +106,18 @@ func xf(i: int) -> Transform3D:
 ## Body osy ulice po 1 m od vjezdu. Zaklad je plan4.py (rovne - zatacka 70 st. - rovne), ulice se ale mezi domy
 ## klikati (Misa 27. 10.: „neni dalnice, klikati se mezi domy smysluplne“): u kazdeho domu se stoci k jeho stitu, kdyz
 ## stoji dal (vyjezdeno ke dverim), od blizkeho odhne; mezi tim pomala vlna. Do pudorysu usedlosti nevjede.
+## 14. 11. (zasek 18:01, profil postav: misto hovoru na navsi 9-17 ms = osa_ulice pri kazdem volani znovu pres vsechny
+## domy): osa je pevna (ul, u se po stavbe nemeni) - spocita se jednou
+var _osa_kes := PackedVector2Array()
+
+
 func osa_ulice() -> PackedVector2Array:
+	if _osa_kes.is_empty():
+		_osa_kes = _osa_ulice_spocti()
+	return _osa_kes
+
+
+func _osa_ulice_spocti() -> PackedVector2Array:
 	var p := Vector2(ul["vjezd"][0], ul["vjezd"][1])
 	var zak := PackedVector2Array([p])
 	var h := float(ul["smer"])
