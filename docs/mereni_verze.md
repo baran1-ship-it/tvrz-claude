@@ -384,3 +384,12 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
 Změny proti 0.999995: změna činnosti postav 1/snímek (PC lide_zasek 10,8 ms, dřív 13–14), řetěz mříže jen použité články,
 déšť: sběr materiálů po částech (PC; tablet měřil 357 ms zásek na začátku deště v 0.999995), ves zesvětlená (textury, bez vlivu na výkon – NEOVĚŘENO).
 Čeká na Měřicí trasu (varianta dest).
+
+### 0.999996 – test záseků u hostince (−62, 969), Míša 14. 11. (zrušen po 2 variantách)
+| varianta | p50 | p95 | p99 | max | > 50 ms |
+|---|---|---|---|---|---|
+| fyzika 60 Hz (výchozí), volně | 32 | 41 | 45 | 48 | 0× |
+| fyzika 30 Hz, volně | 33 | 69 | 80 | 91 | 204× (91 ms u −63/962) |
+
+Naměřený vliv (ne příčina): fyzika 30 Hz při snímku ~33 ms střídá 0 a 2 kroky fyziky v jednom snímku → špičky 69–91 ms;
+60 Hz dělá rovnoměrně 2 kroky. Výchozí zůstává 60 Hz (main.gd fyzika_i 1). Hostinec 32 ms p50 = kolem 31 FPS.
