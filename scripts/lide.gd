@@ -2219,6 +2219,7 @@ func _process_vlastni(dt: float) -> void:
 	var mez_sukne: float = serazene[mini(int(mm["sukne"]), serazene.size()) - 1] if not serazene.is_empty() else 0.0
 	var mez_hlava: float = serazene[mini(int(mm["hlava"]), serazene.size()) - 1] if not serazene.is_empty() else 0.0
 	var _tp0 := Time.get_ticks_usec()          # TVRZ_LIDE_PROFIL (14. 11., zasek 18:01 v lide_zasek): kde je cas
+	var n_zmen := 0                           # zmeny bloku v tomto snimku (graf.zmena_bloku_snimek)
 	var n_sukne := 0                          # pocitadlo: shodne vzdalenosti nesmi prekrocit modif_max (test postavy_modif)
 	var n_hlava := 0
 	for c: Dictionary in _lide:
@@ -2227,7 +2228,10 @@ func _process_vlastni(dt: float) -> void:
 		var blizko := d < DOSAH + 20.0
 		var bi := _blok(c, h)
 		c["h"] = h
-		if bi != int(c["blok"]) or _prevolit(c, h, dt):
+		# 14. 11. (lide_zasek 18:01: 30 postav meni cinnost v jednom snimku, kazda 1-10 ms): nejvys zmena_bloku_snimek zmen
+		# za snimek, ostatni o snimek pozdeji (rozpocet jako u cest)
+		if (bi != int(c["blok"]) or _prevolit(c, h, dt)) and n_zmen < int(P["graf"]["zmena_bloku_snimek"]):
+			n_zmen += 1
 			# z domu (skryta u dveri) vychazi dvermi - ne objeveni v poli (postavy_plan 1.6)
 			var doma := bool((c["cn"] as Dictionary).get("skryty", false)) and bool(c["na_miste"])
 			var _tp := Time.get_ticks_usec()

@@ -6837,10 +6837,10 @@ func _hostinec_trava() -> void:
 	var oblast := AABB(Vector3(stred.x - 20.0, -50.0, stred.y - 20.0), Vector3(40.0, 200.0, 40.0))
 	var inst := 0
 	var spatne: Array = []
-	for kor: String in ["Louka", "Rostliny", "TravaGPU"]:
-		var uz := get_tree().root.find_child(kor, true, false)
-		if uz == null:
-			continue
+	# 14. 11. (snimek Misy: trava u dveri a u stolu v hostinci, test hlasil 0 - hlidal jen Louka/Rostliny/TravaGPU):
+	# vsechny MultiMesh ve scene
+	for kor: String in ["*"]:
+		var uz: Node = get_tree().root
 		for g: Node in uz.find_children("*", "MultiMeshInstance3D", true, false):
 			var mmi := g as MultiMeshInstance3D
 			if not mmi.is_visible_in_tree() or mmi.multimesh == null or not (mmi.global_transform * mmi.get_aabb()).intersects(oblast):
@@ -6862,6 +6862,22 @@ func _hostinec_trava() -> void:
 						print("HOSTINEC_TRAVA %s (%.2f, %.2f, %.2f) misto (%.1f, %.1f) %s uzel %s" % [mm.mesh.resource_name if mm.mesh else "?", p.x, p.y, p.z, l.x, l.z,
 								"v obrysu" if v_obrysu else "u dveri", str(mmi.get_path()).right(50)])
 					spatne.append(p)
+	# 14. 11.: i samostatne site rostlin (MeshInstance3D: trs, trava, kapradi, ker) uvnitr obrysu - Misa videla travu u dveri a u stolu
+	var sl_rostl: Array = Pravidla.cti("modely", "rostliny_jmena")
+	for mi: Node in get_tree().root.find_children("*", "MeshInstance3D", true, false):
+		var m3 := mi as MeshInstance3D
+		if not m3.is_visible_in_tree() or m3.mesh == null:
+			continue
+		var p3 := m3.global_transform * m3.get_aabb().get_center()
+		if not oblast.has_point(p3):
+			continue
+		var l3: Vector3 = inv * p3
+		if not (l3.x > bb.position.x and l3.x < bb.end.x and l3.z > bb.position.z and l3.z < bb.end.z and p3.y < 37.5):
+			continue
+		var jm := (String(m3.name) + " " + m3.mesh.resource_name + " " + m3.mesh.resource_path).to_lower()
+		if sl_rostl.any(func(w: String) -> bool: return jm.contains(w)):
+			print("HOSTINEC_TRAVA sit %s (%.1f, %.1f, %.1f) uzel %s" % [jm, p3.x, p3.y, p3.z, str(m3.get_path()).right(70)])
+			spatne.append(p3)
 	_vysledek("hostinec_trava", inst > 0 and spatne.is_empty(), "instanci v okoli %d, v obrysu stavby nebo u dveri %d, dveri %d" % [inst, spatne.size(), dvere.size()])
 
 

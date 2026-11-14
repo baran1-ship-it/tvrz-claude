@@ -5885,5 +5885,21 @@
    "dvere_hostinec"
   ],
   "_pozn": "Míša 13. 11. „máme všechno dřevo černé, přirozeně by bylo hnědé ošoupané“: jas (0,3 R + 0,59 G + 0,11 B) průměru textury × tint materiálu dřeva ≥ min; kontrola tools/export_kontroly.py drevo (krok exportu). Puchart 79e7cba8 ton prken 118/90/62 (jas ~0,37)"
- }
+ },
+ "rostliny_jmena": [
+  "trav",
+  "grass",
+  "trs",
+  "fern",
+  "kapr",
+  "shrub",
+  "ker_",
+  "bylin",
+  "plant",
+  "nettle",
+  "kopriv",
+  "rakos",
+  "reed"
+ ],
+ "_rostliny_jmena": "14. 11.: části jména sítě rostliny (test hostinec_trava hledá rostliny i mezi samostatnými sítěmi uvnitř staveb)"
 }
