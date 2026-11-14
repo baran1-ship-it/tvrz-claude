@@ -7050,7 +7050,24 @@ func _ohrady(d: Dictionary) -> void:
 		var noc := xf * Vector3(-(float(m["hw"]) + float(Pravidla.cti("zvirata", "nocleh_od_zdi_m"))), 0.0, lc.z)
 		if bool(dv.get("kurnik", false)):
 			# kurnik u zdi na strane dvora, vchodem do dvora
-			var kp := xf * Vector3(-(float(m["hw"]) + 1.3), 0.0, float(m["b"]) + 1.6)
+			# 14. 11. (test ohrady: kurnik domu 2 v ohrade chlivku): od zadniho rohu podel zdi po kurnik_krok_m, dokud
+			# pudorys kurniku (katalog) i s ohrada_volno_m nezasahuje do ohrady (ohrady jsou zaznam, kurnik se jim vyhne)
+			if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
+				_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
+			var rzk: Array = (_kat_p.get("kurnik", {}) as Dictionary).get("rozmer", [2.0, 2.2, 1.8])
+			var pk := maxf(float(rzk[0]), float(rzk[2])) * 0.5
+			var kl := Vector3(-(float(m["hw"]) + float(Pravidla.cti("zvirata", "kurnik_od_zdi_m"))), 0.0, float(m["b"]) + float(Pravidla.cti("zvirata", "kurnik_od_rohu_m")))
+			for _i in 30:
+				var kw := xf * kl
+				var volno := true
+				for oo: Array in _ohrady_obd:
+					var lq: Vector3 = (oo[0] as Transform3D) * kw
+					if absf(lq.x - (oo[1] as Vector2).x) < float(oo[2]) + pk and absf(lq.z - (oo[1] as Vector2).y) < float(oo[3]) + pk:
+						volno = false
+				if volno:
+					break
+				kl.z += float(Pravidla.cti("zvirata", "kurnik_krok_m"))
+			var kp := xf * kl
 			data["vybaveni"].append({"id": "kurnik", "p": [kp.x, _vyska_min(kp.x, kp.z, 1.0) - 0.03, kp.z], "yaw": yaw - PI / 2.0})
 			noc = kp
 		data["zvirata"].append({"id": "dvur_%d" % int(d["k"]), "zvire": String(dv["zvire"]), "kusu": int(dv["kusu"]),

@@ -2090,6 +2090,10 @@ func ruce(c: Dictionary, spec: Dictionary) -> void:
 			continue
 		var stary: Node = drzi.get(ruka + "_uzel")
 		if stary:
+			# 14. 11. (test duplicity: sekera 2x v ruce): odebrat hned - queue_free az na konci snimku, novy
+			# predmet by do te doby visel v ruce s nim (a dostal jmeno @Node3D)
+			if stary.get_parent():
+				stary.get_parent().remove_child(stary)
 			stary.queue_free()
 			drzi.erase(ruka + "_uzel")
 		drzi[ruka + "_id"] = id
