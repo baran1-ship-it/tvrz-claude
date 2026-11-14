@@ -236,7 +236,10 @@ void fragment() {
 	vec3 kk = kolem_kamenu(wpos.xz);
 	combined_foam = max(combined_foam, kk.z * 0.6);
 	// bila voda na padech kaskady (voda.json potok.raz_toku kaskada pena_padu): strma plocha = pena, rozbita sumem
-	float pad_bila = clamp(steepness_map * pena_padu, 0.0, 1.0) * (0.6 + 0.4 * foam_randomness);
+	// pruhy ve smeru proudu, rychle dolu (UV.y podel toku) - pad jako tekouci voda, ne plocha s mraky sumu
+	float pruh = texture(i_texture_foam_noise, vec2(UV.x * 7.0, UV.y * 0.6 - TIME * 1.6)).r;
+	float pruh2 = texture(i_texture_foam_noise, vec2(UV.x * 13.0 + 0.37, UV.y * 1.1 - TIME * 2.3)).r;
+	float pad_bila = clamp(steepness_map * pena_padu, 0.0, 1.0) * clamp(0.35 + 0.9 * pruh * pruh2 + 0.3 * pruh, 0.0, 1.0);
 	water_norFBM += kk.xy * 0.12;
 
 	float t = smoothstep(0.0, hloubka_barvy, hloubka);
@@ -244,7 +247,7 @@ void fragment() {
 	ALBEDO = mix(barva, foam_color.rgb, combined_foam * foam_color.a);
 	ALPHA = clamp(smoothstep(0.0, cirost, hloubka) * 0.92 + combined_foam, 0.0, 1.0);
 	// pad kaskady: bila voda plnou barvou (pena_padu x strmost, rozbita sumem) - pres slabou penu proudu
-	ALBEDO = mix(ALBEDO, vec3(0.86, 0.88, 0.85), pad_bila);
+	ALBEDO = mix(ALBEDO, vec3(0.93, 0.95, 0.93), pad_bila);
 	ALPHA = max(ALPHA, pad_bila);
 	SPECULAR = mix(0.25, 0.04, pad_bila);            // pena je drsna - pad nezrcadli oblohu
 	ROUGHNESS = mix(roughness, 0.9, pad_bila);
