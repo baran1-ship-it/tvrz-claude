@@ -6832,7 +6832,7 @@ func _jdi_poschodi(body: Array, podlaha: float, vyska_nad: float) -> Array:
 						var sid := co.shape_find_owner(kc.get_collider_shape_index())
 						var on := co.shape_owner_get_owner(sid) as Node
 						tvar = "/" + (String(on.name) if on else "?")
-					kdo += " %s%s @%.2f (n %.2f)" % [(str(ow.get_parent().name) if ow else "?"), tvar, kc.get_position().y, kc.get_normal().y]
+					kdo += " %s/%s%s @%.2f (n %.2f)" % [(str(ow.get_parent().name) if ow else "?"), (str(ow.name) if ow else "?"), tvar, kc.get_position().y, kc.get_normal().y]
 				return [false, "uvazl u bodu %d (%.1f, %.1f) y %.2f, cil (%.1f, %.1f), narazil na%s" % [j, player.global_position.x, player.global_position.z, player.global_position.y, wp.x, wp.y, kdo]]
 	player.move_input = Vector2.ZERO
 	return [true, "ok"]
@@ -8923,4 +8923,17 @@ func _krcma_schody() -> void:
 	var y_kon := player.global_position.y
 	var patro := (xf * Vector3(0.0, 2.85, 0.0)).y
 	var ok := bool(r[0]) and y_kon > patro - 0.3
+	if not ok:
+		var sq := PhysicsShapeQueryParameters3D.new()
+		var cap := CapsuleShape3D.new()
+		cap.radius = 0.45
+		cap.height = 2.0
+		sq.shape = cap
+		sq.transform = Transform3D(Basis(), player.global_position + Vector3(0, 1.0, 0))
+		sq.exclude = [player.get_rid()]
+		for hh: Dictionary in player.get_world_3d().direct_space_state.intersect_shape(sq, 16):
+			var co := hh["collider"] as CollisionObject3D
+			var on := co.shape_owner_get_owner(co.shape_find_owner(int(hh["shape"]))) as Node3D if co else null
+			print("KRCMA_SCHODY dotyk %s / %s @ %s" % [co.name if co else "?", on.name if on else "?", str(on.global_position) if on else ""])
+		print("KRCMA_SCHODY hrac %s, mistne %s" % [str(player.global_position), str(xf.affine_inverse() * player.global_position)])
 	_vysledek("krcma_schody", ok, "%s; konec y %.2f, patro %.2f" % [r[1], y_kon, patro])

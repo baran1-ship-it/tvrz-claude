@@ -439,8 +439,9 @@ hostinec 22/21/31/22, věž 29/26/24/28. Špičky > 200 ms jen 2 (206, 209), zá
 ### 0.999997 – řádky záseků z panelu (Míša 14. 11. ~20:50, 18 snímků, tablet stále horký)
 - **Míša: „kecy, že se tablet zahřál nebo schladil, jsou blbost, pořád je horký“** → rozdíly ±5 ms mezi měřeními
   0.999997 s/bez GPU trávy jsou šum, ne teplota. Tepelné vysvětlení se nepoužívá.
-- **Všech 18 řádků záseku má „shadery +0“** → podezření „záseky = první kompilace shaderů“ je pro tyto záseky
-  **vyvráceno (naměřeno)**. Zbývá jen pro 2,9 s ves-dvory při 1. průjezdu po instalaci (nezachyceno).
+- Všech 18 řádků záseku má „shadery +0“ – **OPRAVA 14. 11. noc (rozbor docs/rozpracovane/zaseky_rozbor_system.md):
+  v rendereru Compatibility vrací čítač sestavených pipeline vždy 0 (drivers/gles3), takže „shadery +0“ NIC
+  nedokazuje. Kompilace shaderů jako příčina = NEZMĚŘENO (ne vyvráceno).** Můj dřívější zápis „vyvráceno“ byl chybný.
 - Záseky 40–113 ms: skoro vždy „kreslení+čekání“ 30–102 ms (GPU nestíhá snímek), skripty 5–15 ms,
   nové uzly 0, paměť grafiky ±0 MB. Místa: ves (391,841) 99 ms, (429,782) 110 ms, kovárna (402,905) 103 ms,
   lom (136,938) 113 ms, potok z kopce (281,1126) 102 ms, stan (-21,903) 75 ms. = podezření: drahé pohledy
