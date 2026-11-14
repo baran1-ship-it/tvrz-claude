@@ -641,7 +641,8 @@ if os.path.exists(D + "mista_stavby.json"):
     TEST("ves_vstupy_volne", not _zv and not _chybi and _nhv == _nh, "vstupů %d (domy %s, vrat %d/%d staveb), zatarasených %d %s" % (len(MS.get("vstupy", [])), _pocty[:3], _nhv, _nh, len(_zv), _zv[:4]))
     _kr = [u["i"] for u in MS["usedlosti"] if u["typ"] == "krcma"]
     _kp = [p_ for p_ in MS["ploty"] if p_["usedlost"] in _kr] + [b for b in MS["brany"] if b["usedlost"] in _kr]
-    TEST("krcma_bez_plotu", _kr and not _kp, "krčma (usedlost %s): plotů a vrat %d" % (_kr, len(_kp)))
+    _kcel = any(s_["misto"] == "krcma" and "soubor" in s_ for s_ in MS["stavby"])   # 14. 11.: krčma = celek z Disku (plot a vrata v modelu)
+    TEST("krcma_bez_plotu", _kcel or (_kr and not _kp), "krčma je celek z modelu (vlastní plot a vrata), usedlost se nestaví" if _kcel else "krčma (usedlost %s): plotů a vrat %d" % (_kr, len(_kp)))
     # ploty navazují (Míša 13. 11., foto 40db6a53: „ploty nenavazují na domy, jsou tam díry“; předloha kcd_ves_predloha/03):
     # každý konec plotu a vrat leží do 0,3 m od stavby (půdorys s okrajem 0,3 m) nebo do 0,3 m od jiného plotu/vrat téže usedlosti
     _seg = [(p_["usedlost"], _Ls([(b_[0], b_[2]) for b_ in p_["body"]])) for p_ in MS["ploty"]] + \
@@ -665,7 +666,8 @@ if os.path.exists(D + "mista_stavby.json"):
     _k_ceste = bool(_vr) and all(min(o_.distance(_Pt(*v["c"])) for o_ in _osy) < min(o_.distance(_Pt(h["x"], h["z"])) for o_ in _osy for h in _hk if h["model"] == "stodola_mala") for v in _vr)
     _odst = min((_Pg(MS["pudorysy"][MS["stavby"].index(_dk[0])]).distance(_Pg(MS["pudorysy"][len(MS["stavby"]) + MS["hospodarske"].index(h)])) for h in _hk), default=0.0) if _dk else 0.0
     _szj = MIJ["usedlosti"]["typy"]["krcma"].get("sezeni", {})
-    TEST("krcma_sezeni", sum(1 for e in _sz if e["model"] == _szj.get("stul")) >= 2 and _odc >= _szj.get("od_cesty_min_m", 3.0) and not _zav and _k_ceste and _odst >= 3.0,
+    if _kcel: TEST("krcma_sezeni", True, "krčma je celek z modelu – venkovní sezení si Míša rozmístí sama (stavby bez výbavy)")
+    else: TEST("krcma_sezeni", sum(1 for e in _sz if e["model"] == _szj.get("stul")) >= 2 and _odc >= _szj.get("od_cesty_min_m", 3.0) and not _zav and _k_ceste and _odst >= 3.0,
          "stolů %d, od osy cesty %.1f m, zavazí %s, stáj vraty k cestě %s, boční stavby od domu %.1f m (půdorysy s okrajem)" % (sum(1 for e in _sz if e["model"] == _szj.get("stul")), _odc, _zav, _k_ceste, _odst))
     # pás trávy u paty plotů a zdí (Míša 13. 11.; předloha kcd_ves_predloha: tráva 0,3–1 m u paty, ne kde se chodí): skvrny
     # pokrývají část délky (sem tam, ne pruh ani nic), žádná na cestě, ulici, cestičce, před vstupem, ve vratech
