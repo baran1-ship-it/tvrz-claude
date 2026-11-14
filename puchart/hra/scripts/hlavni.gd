@@ -697,7 +697,7 @@ func _daleko_textury(mi: MeshInstance3D, vzor: Node3D, model: String, dt: Dictio
 		var jm := String(dt[model][cast])
 		if not cache.has(jm):
 			var V_ := preload("res://scripts/ves.gd")
-			cache[jm] = V_._triplanar(V_._textura_materialu(vzor, jm), float(dt.get("velikost_m", 2.0)), float((dt.get("jas", {}) as Dictionary).get(cast, 1.0)))
+			cache[jm] = V_._triplanar(V_._textura_materialu(vzor, jm), float(dt.get("velikost_m", 2.0)), (dt.get("jas", {}) as Dictionary).get(cast, 1.0))
 		mi.set_surface_override_material(i, cache[jm])
 
 
@@ -711,7 +711,7 @@ static func Ztmav_daleko(koren: Node, jas: Dictionary) -> void:
 			if mt == null: continue
 			for k: String in jas:
 				if String(mt.resource_name).contains(k):
-					var m2 := mt.duplicate() as BaseMaterial3D; m2.albedo_color = mt.albedo_color * Color(float(jas[k]), float(jas[k]), float(jas[k]))
+					var m2 := mt.duplicate() as BaseMaterial3D; m2.albedo_color = mt.albedo_color * preload("res://scripts/ves.gd").Barva_jas(jas[k])
 					(mi as MeshInstance3D).set_surface_override_material(i, m2); break
 
 

@@ -288,10 +288,18 @@
      "Roubeni": "M_KamenSuchy"
     },
     "jas": {
-     "Sindel": 0.62,
-     "Roubeni": 0.85
+     "Sindel": [
+      0.66,
+      0.5,
+      0.36
+     ],
+     "Roubeni": [
+      0.85,
+      0.66,
+      0.48
+     ]
     },
-    "jas_pozn": "obal nemá normálovou mapu podrobného materiálu (ta plochu stíní) – bez ztmavení byl šindel z dálky skoro bílý (snímek 14. 11. d2_srov); násobek barvy textury"
+    "jas_pozn": "násobek barvy textury [R, G, B] hrubých stupňů (obal nemá normálovou mapu – bez ztmavení byl šindel skoro bílý, snímek 14. 11. d2_srov); Míša 14. 11.: „jsou šedé, nemohly by být hnědé? míň to razí“ → teplý hnědý tón jako ztmavlé dřevo (KCD: střechy a roubení z dálky hnědé)"
    }
   },
   "mlyn": {
@@ -396,8 +404,16 @@
      "krytina": "sindel_stodoly"
     },
     "jas": {
-     "steny": 0.85,
-     "krytina": 0.62
+     "steny": [
+      0.85,
+      0.66,
+      0.48
+     ],
+     "krytina": [
+      0.66,
+      0.5,
+      0.36
+     ]
     }
    }
   },

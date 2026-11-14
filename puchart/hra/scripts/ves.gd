@@ -215,7 +215,7 @@ func _obal(n: Node3D, o: Dictionary, vel: float, obal_jas: Dictionary) -> ArrayM
 		var t: SurfaceTool = st if k == 0 else kr
 		var arr := t.commit_to_arrays(); m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 		var kl := "steny" if k == 0 else "krytina"
-		m.surface_set_material(k, _triplanar(_textura_materialu(n, String(o[kl])), vel, float((obal_jas as Dictionary).get(kl, 1.0))))
+		m.surface_set_material(k, _triplanar(_textura_materialu(n, String(o[kl])), vel, (obal_jas as Dictionary).get(kl, 1.0)))
 	return m
 
 
@@ -230,11 +230,17 @@ static func _textura_materialu(n: Node, jm: String) -> Texture2D:
 	return null
 
 
-static func _triplanar(t: Texture2D, vel: float, jas := 1.0) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new(); m.roughness = 1.0; m.albedo_color = Color(jas, jas, jas)
+## jas: číslo, nebo [R, G, B] (teplý tón hrubých stupňů – Míša 14. 11.: „nemohly by být hnědé?“)
+static func Barva_jas(j: Variant) -> Color:
+	if j is Array: return Color(float(j[0]), float(j[1]), float(j[2]))
+	return Color(float(j), float(j), float(j))
+
+
+static func _triplanar(t: Texture2D, vel: float, jas: Variant = 1.0) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new(); m.roughness = 1.0; m.albedo_color = Barva_jas(jas)
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	if t: m.albedo_texture = t; m.uv1_triplanar = true; m.uv1_scale = Vector3.ONE / vel
-	else: m.albedo_color = Color(0.35, 0.28, 0.2) * jas
+	else: m.albedo_color = Color(0.35, 0.28, 0.2) * Barva_jas(jas)
 	return m
 
 
