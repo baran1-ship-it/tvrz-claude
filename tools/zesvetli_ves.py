@@ -27,11 +27,21 @@ def uprav(rgb, k):
     return np.clip(g + (rgb - g) * R["sytost"], 0, 1)
 
 
+# znacka zpracovani (14. 11.: textury zastropene max_x zustanou pod cilem - druhe spusteni by je zesvetlilo znovu)
+import hashlib
+ZN = "modely/ves/zesvetleno.json"
+zn = json.load(open(ZN)) if os.path.exists(ZN) else {}
+
+
+def md5(p):
+    return hashlib.md5(open(p, "rb").read()).hexdigest()
+
+
 # 1) textury
 for f in sorted(glob.glob("modely/ves/domy_*_diff*.jpg") + glob.glob("modely/ves/domy_*albedo*.jpg")):
     jm = os.path.basename(f)
     cil, mx = cil_pro(jm)
-    if cil is None:
+    if cil is None or zn.get(jm) == md5(f):
         continue
     im = Image.open(f).convert("RGB")
     a = np.asarray(im).astype(float) / 255
@@ -43,6 +53,7 @@ for f in sorted(glob.glob("modely/ves/domy_*_diff*.jpg") + glob.glob("modely/ves
     if not VYPIS:
         b = uprav(a.reshape(-1, 3), k).reshape(a.shape)
         Image.fromarray((b * 255 + 0.5).astype(np.uint8)).save(f, quality=92)
+        zn[jm] = md5(f)
 
 
 # 2) glb: barvy vrcholu (stredni) a barva materialu _Daleko
@@ -83,6 +94,10 @@ for p, druh in (("modely/ves/domy_stredni.glb", "stredni"), ("modely/ves/domy.gl
     if not os.path.exists(p):
         continue
     js, b = glb_cti(p)
+    if js.get("asset", {}).get("extras", {}).get("zesvetleno"):
+        print("GLB %s: uz zesvetleno" % p)
+        continue
+    js.setdefault("asset", {}).setdefault("extras", {})["zesvetleno"] = True
     zmen = 0
     if druh == "stredni":
         hot = set()
@@ -164,3 +179,6 @@ for p, druh in (("modely/ves/domy_stredni.glb", "stredni"), ("modely/ves/domy.gl
     print("GLB %s: zmeneno %d" % (p, zmen))
     if zmen and not VYPIS:
         glb_zapis(p, js, b)
+
+if not VYPIS:
+    json.dump(zn, open(ZN, "w"), indent=1)
