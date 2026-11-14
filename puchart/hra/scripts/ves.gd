@@ -115,6 +115,9 @@ func _hospodarske() -> void:
 		for g in n.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_end = blizko if ma_st else st_do
 			(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if ma_st else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		for sk_ in (d["modely"]["hospodarske"] as Dictionary).get(mid + "_skryt", []):   # části modelu, které se nekreslí (kovárna: dlažba, podlaha)
+			var u_ := n.find_child(String(sk_), true, false)
+			if u_: u_.queue_free()
 		var lod1_p := SH + mid + "_lod1.glb"   # vzdálený stupeň z modelu (kovárna, Míša 14. 11.: návod 0–60 m podrobně, od 55 m LOD1)
 		if ResourceLoader.exists(lod1_p):
 			var od1 := float((d["modely"]["hospodarske"] as Dictionary).get("lod1_od_m", 55.0))

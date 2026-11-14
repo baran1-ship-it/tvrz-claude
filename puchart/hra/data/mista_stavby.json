@@ -362,7 +362,24 @@
    "pozn_kovarna": "kovárna (hra/modely/stavby_h/kovarna.glb + _lod1): AABB x −3,45…6,34 (přístřešek na +x), z −3,27…3,08; počátek ve středu kovárny, ne půdorysu → rozměr souměrně kolem počátku (13 × 6,6) pro kontrolu místa; LOD1 od lod1_od_m (návod: 0–60 m podrobně, od 55 m LOD1)",
    "lod1_od_m": 55.0,
    "kovarna_disk_id": "148Da9sHyjzBWpZO8qnjslZSLliEFsKzn",
-   "kovarna_zdroj": "Míša 14. 11.: Disk složka „budovy“ (1O1VPNjyMNDCDxm4SB3nm64OKGnopwb5x) kovarna.zip – kovarna.glb, kovarna_lod1.glb (nastroje/stavby_z_havrana.sh stáhne)"
+   "kovarna_zdroj": "Míša 14. 11.: Disk složka „budovy“ (1O1VPNjyMNDCDxm4SB3nm64OKGnopwb5x) kovarna.zip – kovarna.glb, kovarna_lod1.glb (nastroje/stavby_z_havrana.sh stáhne)",
+   "kovarna_hlina": {
+    "x": [
+     -3.6,
+     6.5
+    ],
+    "z": [
+     -3.3,
+     5.0
+    ],
+    "hlina": 0.95,
+    "pozn": "Míša 14. 11.: „v kovárně smaž tu dlažbu a podlahu a dej tam jen udusanou hlínu“ – plocha hlíny pod kovárnou a přístřeškem (AABB modelu) a 2 m před otevřenou stranou (+z)"
+   },
+   "kovarna_skryt": [
+    "Kovarna_Dlazba",
+    "Kovarna_Podlaha"
+   ],
+   "kovarna_skryt_pozn": "dlažba přístřešku a hliněná podlaha modelu se ve hře nekreslí (kolize podlahy zůstává 5 cm nad terénem plošiny) – je vidět udusaná hlína terénu"
   },
   "stromy": {
    "jablon": {
@@ -557,14 +574,14 @@
    "zdroj": "textury předmětů Havrana (predmety_h): prkna stodoly = latě a vrata, kůra kůlů plůtku, šindel a kamenné patky kůlny; při načtení zesvětlené na jas_cil jako domy a stodoly (nastroje/havran/stavby_export.gd JAS_CIL, KCD1 ves_2: ohlazené dřevo 0,42–0,55; ploty a stodoly 0,42 jako stavby_export.gd JAS_PREDMETY – při 0,5 vyšla prkna růžová, snímek 12. 11.)",
    "jas_cil": 0.42,
    "lata": {
-    "albedo": "res://modely/predmety_h/kolna_prkna_stodola_albedo.jpg",
-    "normal": "res://modely/predmety_h/kolna_prkna_stodola_normal.jpg",
-    "velikost_m": 1.2
+    "albedo": "res://modely/hrady/puchart_rough_wood_sedy_Diffuse.jpg",
+    "normal": "res://modely/hrady/puchart_rough_wood_sedy_nor_gl.jpg",
+    "velikost_m": 1.0
    },
    "vrata": {
-    "albedo": "res://modely/predmety_h/stodola_prkna_vrata_albedo.jpg",
-    "normal": "res://modely/predmety_h/stodola_prkna_vrata_normal.jpg",
-    "velikost_m": 1.5
+    "albedo": "res://modely/hrady/puchart_rough_wood_sedy_Diffuse.jpg",
+    "normal": "res://modely/hrady/puchart_rough_wood_sedy_nor_gl.jpg",
+    "velikost_m": 1.2
    },
    "kura": {
     "albedo": "res://modely/predmety_h/plutek_kura_kul_albedo.jpg",
@@ -572,18 +589,18 @@
     "velikost_m": 1.0
    },
    "tram": {
-    "albedo": "res://modely/predmety_h/stodola_tram_stodola_albedo.jpg",
-    "normal": "res://modely/predmety_h/stodola_tram_stodola_normal.jpg",
+    "albedo": "res://modely/hrady/puchart_rough_wood_sedy_Diffuse.jpg",
+    "normal": "res://modely/hrady/puchart_rough_wood_sedy_nor_gl.jpg",
     "velikost_m": 1.5
    },
    "sindel": {
-    "albedo": "res://modely/predmety_h/kolna_sindel_stodola_albedo.jpg",
-    "normal": "res://modely/predmety_h/kolna_sindel_stodola_normal.jpg",
+    "albedo": "res://modely/hrady/puchart_sindel_Diffuse.jpg",
+    "normal": "res://modely/hrady/puchart_sindel_nor_gl.jpg",
     "velikost_m": 1.5
    },
    "kamen": {
-    "albedo": "res://modely/predmety_h/kolna_kamen_patky_albedo.jpg",
-    "normal": "res://modely/predmety_h/kolna_kamen_patky_normal.jpg",
+    "albedo": "res://modely/hrady/puchart_kamen_teseny_Diffuse.jpg",
+    "normal": "res://modely/hrady/puchart_kamen_teseny_nor_gl.jpg",
     "velikost_m": 1.2
    },
    "tma": {
@@ -600,7 +617,8 @@
     "barva": "#5a5248",
     "velikost_m": 0.8,
     "pozn": "jádro za kameny roubení (zemina a drť droby ve spárách), tmavší než kámen – KCD1 kcd1/11_nadvori_studna: tmavé spáry mezi valouny"
-   }
+   },
+   "pozn_14_11": "Míša 14. 11.: „všude ve vsi i u hajného máš bílé ploty a brány“ – textury plotů ukazovaly na staré textury stodol Havrana (predmety_h), které přestavba stodol (blender/stodoly.py) smazala → textury hradu (hra/modely/hrady/puchart_*: rough_wood_sedy = jedno prkno hnědé jako hrad, šindel, tesaný kámen); latě a vrata jedno prkno (ne atlas – na úzké lati by byla mřížka)"
   },
   "k_narozi_m": 0.05,
   "k_narozi_pozn": "Míša 13. 11. (foto z tabletu: „ploty nenavazují na domy, jsou tam díry“): konec plotu u stavby končí u nároží – uliční plot před předzahrádkou se vrací podél boku domu až k nároží štítu (+k_narozi_m); test smysl:ploty_navazuji (každý konec plotu do 0,3 m od stavby nebo od jiného plotu/vrat téže usedlosti). Zdroj: KCD2 Havran docs/screens/ref_kcd2_ves_ulice.jpg, ref_kcd2_ves_plot_cesta.jpg (plot navazuje na roh stavení)",
@@ -10212,6 +10230,28 @@
     ],
     "hlina": 0.7,
     "druh": "okap"
+   },
+   {
+    "poly": [
+     [
+      -54.15,
+      -165.73
+     ],
+     [
+      -54.63,
+      -155.64
+     ],
+     [
+      -62.92,
+      -156.04
+     ],
+     [
+      -62.44,
+      -166.13
+     ]
+    ],
+    "hlina": 0.95,
+    "druh": "kovarna"
    },
    {
     "poly": [

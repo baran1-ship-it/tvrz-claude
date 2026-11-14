@@ -146,7 +146,8 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
     kor_ = [round((max(ter(*(a + d * s).xz) for s in np.linspace(i0 * Rl, i1 * Rl, 5)) + h) / st_) * st_ for i0, i1 in zip(hr_, hr_[1:])]
     if rovne and koruna is None and len(kor_) > 1:   # Míša 14. 11.: „hradba zbytečně kopíruje příkop, udělej ji rovně“ – koruna
         # bez propadu: od nižšího konce jen stoupá (stupně jen nahoru k výššímu konci), přes příkop rovně nad ním
-        kor_ = list(np.maximum.accumulate(kor_)) if kor_[0] <= kor_[-1] else list(np.maximum.accumulate(kor_[::-1]))[::-1]
+        if rovne == "max": kor_ = [max(kor_)] * len(kor_)   # Míša 14. 11. (2. foto): celá koruna rovně ve výšce vyššího konce
+        else: kor_ = list(np.maximum.accumulate(kor_)) if kor_[0] <= kor_[-1] else list(np.maximum.accumulate(kor_[::-1]))[::-1]
     for j_, (i0, i1) in enumerate(zip(hr_, hr_[1:])):
         s0, s1 = i0 * Rl, i1 * Rl
         vz = [ter(*(a + d * s).xz) for s in np.linspace(s0, s1, 5)]

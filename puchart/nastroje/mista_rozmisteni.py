@@ -476,6 +476,11 @@ for us in useds:
     x_, z_, yw_ = us["ramec"]; m_ = [s for s in stavby if abs(s["x"] - x_) < 0.01 and abs(s["z"] - z_) < 0.01][0]["model"]
     for o_ in [(m_, x_, z_, yw_)] + [tuple(h_) for h_ in us["hosp"]]:
         vy_plochy.append({"poly": [[r3_(q[0]), r3_(q[1])] for q in Polygon(rohy(o_[1], o_[2], o_[3], o_[0], VY["okap_m"])).exterior.coords[:-1]], "hlina": HL["okap"], "druh": "okap"})
+    for h_ in us["hosp"]:   # kovárna: udusaná hlína pod ní a před ní (Míša 14. 11.: „smaž dlažbu a podlahu, jen udusaná hlína“)
+        if h_[0] != "kovarna": continue
+        KV_ = MI["modely"]["hospodarske"]["kovarna_hlina"]; au_ = np.array([math.sin(h_[3]), math.cos(h_[3])]); av_ = np.array([math.cos(h_[3]), -math.sin(h_[3])])
+        vy_plochy.append({"poly": [[r3_(q_[0]), r3_(q_[1])] for q_ in (np.array(h_[1:3]) + av_ * lx_ + au_ * lz_ for lx_, lz_ in ((KV_["x"][0], KV_["z"][0]), (KV_["x"][1], KV_["z"][0]), (KV_["x"][1], KV_["z"][1]), (KV_["x"][0], KV_["z"][1])))],
+                          "hlina": KV_["hlina"], "druh": "kovarna"})
     for v_ in us["vstupy"]:
         vy_plochy.append({"poly": [[r3_(q[0]), r3_(q[1])] for q in v_["pred_poly"].exterior.coords[:-1]], "hlina": HL["pred_vstupem"], "druh": "pred_vstupem"})
     if us.get("sezeni"):   # pod stoly a kolem nich udusaná hlína (KCD1 web_kcd1_broken_wheel_hostinec)

@@ -685,6 +685,17 @@ if os.path.exists(D + "mista_stavby.json"):
     TEST("ves_bez_vybaveni", not MS["drobne"] and not any(h["model"] == "kurnik" for h in MS["hospodarske"]),
          "drobností %d, kurníků %d (Míša 12. 11. večer: vybavení si udělá sama)" % (len(MS["drobne"]), sum(1 for h in MS["hospodarske"] if h["model"] == "kurnik")))
 
+# textury staveb, plotů a vrat vsi existují (Míša 14. 11.: „všude ve vsi bílé ploty a brány“ – přestavba stodol smazala textury,
+# na které ukazovaly ploty; chybějící textura = bílá plocha)
+_tx_ch = []
+for _src in ("hra/data/mista_stavby.json",):
+    _d = json.load(open(K + "/" + _src)) if os.path.exists(K + "/" + _src) else {}
+    for _k, _e in (_d.get("ploty_pravidla", {}).get("textury", {}) or {}).items():
+        if isinstance(_e, dict):
+            for _a in ("albedo", "normal"):
+                if _e.get(_a) and not os.path.exists(K + "/hra/" + _e[_a][len("res://"):]): _tx_ch.append("%s.%s" % (_k, _a))
+TEST("textury_vsi", not _tx_ch, "chybí %s" % _tx_ch if _tx_ch else "všechny textury plotů a vrat existují")
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)
