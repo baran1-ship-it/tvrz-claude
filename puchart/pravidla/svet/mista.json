@@ -11,7 +11,30 @@
     "ChyseKura",
     "ChysePrkna"
    ],
-   "zdroj": "Havran blender/ves_domy.py (modelář 25. 10., Disk „budovy“): Dum1 roubený se šindelem a hrázděným štítem, Dum2 omítnutý s doškovou valbou, Rychta s kamennou patrovou komorou, chýše s kůrou / prkny"
+   "zdroj": "Havran blender/ves_domy.py (modelář 25. 10., Disk „budovy“): Dum1 roubený se šindelem a hrázděným štítem, Dum2 omítnutý s doškovou valbou, Rychta s kamennou patrovou komorou, chýše s kůrou / prkny",
+   "daleko_textury": {
+    "popis": "Míša 14. 11.: „detail z dálky – jsou to bílé kostky, buď změnit barvu, nebo najít, jak to dělají v KCD“ – hrubý obal domu (_Daleko) měl jen barvu bez textury (na slunci a v oparu světlá hladká kostka); KCD/HLOD: vzdálená budova = zjednodušený tvar se skutečnými texturami stavby. Obal dostane texturu materiálu podrobného modelu (střecha: plocha Sindel, stěny: plocha Roubeni), promítnutou trojrozměrně (obal nemá UV), velikost_m = rozteč textury",
+    "velikost_m": 2.0,
+    "Dum1": {
+     "Sindel": "M_Sindel",
+     "Roubeni": "M_Roubeni"
+    },
+    "Dum2": {
+     "Sindel": "M_DoskyPecene",
+     "Roubeni": "M_OmitkaPecena"
+    },
+    "Rychta": {
+     "Sindel": "M_Sindel_001",
+     "Roubeni": "M_Roubeni_002"
+    },
+    "ChyseKura": {
+     "Sindel": "M_Kura_003"
+    },
+    "ChysePrkna": {
+     "Sindel": "M_Kura_004",
+     "Roubeni": "M_KamenSuchy"
+    }
+   }
   },
   "mlyn": {
    "soubor": "res://modely/stavby_h/mlyn.glb",
