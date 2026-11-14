@@ -1,16 +1,16 @@
 {
  "popis": "hern\u00ed data mimo APK po skupin\u00e1ch (nastroje/data_balik.py, scripts/data.gd) \u2013 stahuj\u00ed se jen zm\u011bn\u011bn\u00e9",
  "vetev": "ccr-f2d32673-9fi7m5",
- "zdroj": "9904bfd6ff6c9bd5c9ca2bf2175f1f07",
+ "zdroj": "f477b3ec03821d2d81e9963c6ffe0164",
  "packs": {
   "puchart_zaklad": {
-   "md5": "7debb3310305ace24cb185f10a8bb979",
-   "size": 19505576,
+   "md5": "47b8bfdc8fca078582888b10f603fae5",
+   "size": 20575756,
    "parts": [
     {
-     "file": "puchart_zaklad-7debb33103.pck.000",
-     "size": 19505576,
-     "md5": "7debb3310305ace24cb185f10a8bb979"
+     "file": "puchart_zaklad-47b8bfdc8f.pck.000",
+     "size": 20575756,
+     "md5": "47b8bfdc8fca078582888b10f603fae5"
     }
    ]
   },
@@ -31,13 +31,13 @@
    ]
   },
   "puchart_hrady": {
-   "md5": "b6076aaf89f0d8d2940a0e93b0867815",
-   "size": 50328520,
+   "md5": "eaed422a7f4bc0aecc45fb14d8f4a9a5",
+   "size": 49545272,
    "parts": [
     {
-     "file": "puchart_hrady-b6076aaf89.pck.000",
-     "size": 50328520,
-     "md5": "b6076aaf89f0d8d2940a0e93b0867815"
+     "file": "puchart_hrady-eaed422a7f.pck.000",
+     "size": 49545272,
+     "md5": "eaed422a7f4bc0aecc45fb14d8f4a9a5"
     }
    ]
   },
