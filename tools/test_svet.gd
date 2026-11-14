@@ -3092,6 +3092,9 @@ func _visici() -> void:
 			po_druhu["bez_kolize"] = int(po_druhu.get("bez_kolize", 0)) + 1
 			var hh := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 200, 0), pos - Vector3(0, 200, 0)))
 			print("VISI bez kolize %s (%.1f, %.2f, %.1f): teren_y %.2f, paprsek +-200 %s" % [b[0], pos.x, pos.y, pos.z, float(sv._teren_y(pos.x, pos.z)), str(hh.get("position", "nic")) + " " + (String((hh["collider"] as Node).name) if not hh.is_empty() else "")])
+		if gap > tol and String(b[0]) == "kamen_maly" and int(po_druhu.get("kamen_vzorek", 0)) < 8:
+			po_druhu["kamen_vzorek"] = int(po_druhu.get("kamen_vzorek", 0)) + 1
+			print("VISI kamen_maly vzorek (%.1f, %.2f, %.1f) mezera %.2f nad %s, teren_y %.2f" % [pos.x, pos.y, pos.z, gap, String((h["collider"] as Node).name) if not h.is_empty() else "-", float(sv._teren_y(pos.x, pos.z))])
 		if gap > tol:
 			n += 1
 			var d: String = b[0]
@@ -8809,6 +8812,15 @@ func _vstupy_bez_travy() -> void:
 	var r := float(sv.pasma()["budova"]["pruchod_m"])
 	var spatne: Array = []
 	var n := 0
+	var mriz := {}
+	for key: String in sv.data["rostliny"]:
+		if key.contains("_daleko") or key.begins_with("kamen") or key.begins_with("balvan") or key.begins_with("skala"):
+			continue
+		for t: Array in sv.data["rostliny"][key]:
+			var kc := Vector2i(floori(float(t[3]) / 8.0), floori(float(t[11]) / 8.0))
+			if not mriz.has(kc):
+				mriz[kc] = []
+			(mriz[kc] as Array).append([key, float(t[3]), float(t[11])])
 	for e: Dictionary in sv.data.get("pohyb", []):
 		var nm := String(e.get("name", ""))
 		if not (String(e.get("kind", "")) in ["dvere", "vrata"] or nm.contains("dvere") or nm.contains("vrata")):
@@ -8821,6 +8833,12 @@ func _vstupy_bez_travy() -> void:
 			if louka and (louka._vzorek(q.x, q.y) as Vector3).x > 0.0 and not louka._v_budove(q.x, q.y):
 				spatne.append("%s (%.1f, %.1f)" % [nm, q.x, q.y])
 				break
+		# i rostliny z dat (export, rozsev): trava, byliny a kere v pruchodu (Misa: trava pred dvermi chyse)
+		var cc := Vector2i(floori(c.x / 8.0), floori(c.y / 8.0))
+		for kk: Vector2i in [cc, cc + Vector2i(1, 0), cc + Vector2i(-1, 0), cc + Vector2i(0, 1), cc + Vector2i(0, -1), cc + Vector2i(1, 1), cc + Vector2i(-1, -1), cc + Vector2i(1, -1), cc + Vector2i(-1, 1)]:
+			for t: Array in mriz.get(kk, []):
+				if Vector2(float(t[1]), float(t[2])).distance_to(c) < r:
+					spatne.append("%s: %s (%.1f, %.1f)" % [nm, t[0], t[1], t[2]])
 	for s: String in spatne.slice(0, 20):
 		print("VSTUPY trava v pruchodu ", s)
 	_vysledek("vstupy_bez_travy", n > 0 and spatne.is_empty(), "dveri a vrat %d, s travou v pruchodu %d %s" % [n, spatne.size(), str(spatne.slice(0, 4))])
