@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -8366,3 +8366,57 @@ func _postavy_modif() -> void:
 	var ok: bool = nejvic[0] <= int(mm["sukne"]) and nejvic[1] <= int(mm["sukne"]) and nejvic[2] <= 2 * int(mm["hlava"])
 	_vysledek("postavy_modif", ok, "nejvic aktivnich: ridic sukne %d, pruzina %d, LookAt %d (meze %d / %d / %d), postav %d" % [nejvic[0], nejvic[1], nejvic[2],
 			int(mm["sukne"]), int(mm["sukne"]), 2 * int(mm["hlava"]), (li.get("_lide") as Array).size()])
+
+
+## Generalni kontrola sveta (Misa 14. 11.: „jestli nemame nekde neco, co spolu koliduje a dela zbytecne zaseky nebo
+## chyby“): (1) zdvojene site - stejna sit na stejnem miste dvakrat (2x kresleni, z-fighting); (2) zdvojene kolize -
+## dva staticke tvary stejneho typu a velikosti na stejnem miste (2x fyzika); (3) MultiMesh se zdvojenymi instancemi.
+func _duplicity() -> void:
+	var chyby: Array = []
+	var site := {}
+	var n_s := 0
+	for n: Node in get_tree().root.find_children("*", "MeshInstance3D", true, false):
+		var m := n as MeshInstance3D
+		if m.mesh == null or not m.is_visible_in_tree():
+			continue
+		n_s += 1
+		var k := "%d|%s" % [m.mesh.get_instance_id(), str(m.global_position.snapped(Vector3.ONE * 0.02))]
+		if site.has(k):
+			if chyby.size() < 30:
+				chyby.append("sit 2x: %s a %s u %s" % [str(site[k]).right(50), str(m.get_path()).right(50), m.global_position.snapped(Vector3.ONE * 0.1)])
+		else:
+			site[k] = m.get_path()
+	var tvary := {}
+	var n_k := 0
+	for n: Node in get_tree().root.find_children("*", "CollisionShape3D", true, false):
+		var cs := n as CollisionShape3D
+		if cs.shape == null or cs.disabled:
+			continue
+		n_k += 1
+		var k2 := "%s|%s|%s" % [cs.shape.get_class(), str(cs.global_position.snapped(Vector3.ONE * 0.02)), str(cs.shape.get_debug_mesh().get_aabb().size.snapped(Vector3.ONE * 0.02)) if cs.shape.get_debug_mesh() else ""]
+		if tvary.has(k2):
+			if chyby.size() < 60:
+				chyby.append("kolize 2x: %s a %s" % [str(tvary[k2]).right(50), str(cs.get_path()).right(50)])
+		else:
+			tvary[k2] = cs.get_path()
+	var n_mm := 0
+	for n: Node in get_tree().root.find_children("*", "MultiMeshInstance3D", true, false):
+		var mmi := n as MultiMeshInstance3D
+		if mmi.multimesh == null:
+			continue
+		var mm := mmi.multimesh
+		var poc := mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
+		if poc > 20000:
+			continue
+		var vid := {}
+		for i in poc:
+			var kp := str(mm.get_instance_transform(i).origin.snapped(Vector3.ONE * 0.01))
+			if vid.has(kp):
+				n_mm += 1
+				if n_mm <= 10:
+					chyby.append("MultiMesh %s: instance 2x u %s" % [str(mmi.get_path()).right(50), kp])
+			vid[kp] = true
+	print("DUPLICITY sit %d, kolizi %d, zdvojenych instanci MultiMesh %d" % [n_s, n_k, n_mm])
+	for ch9: String in chyby:
+		print("DUPLICITA ", ch9)
+	_vysledek("duplicity", chyby.is_empty(), "%d nalezu (sit %d, kolize %d) %s" % [chyby.size(), n_s, n_k, str(chyby.slice(0, 5))])
