@@ -1442,7 +1442,31 @@
   "udoli_zlom_m": 40.0,
   "pulsirka_vody_m": 4.8,
   "dosah_m": 50.0,
-  "predloha": "Misa 16:35 / radce 18:20: Bystrice 2x dnesni sirky = ~9,6 m vody (pulsirka 4,8 +-50 %), odpovida hornimu toku Sazavy (Zdar - H. Brod 8-10 m, raft.cz; prutok 1,0-3,4 m3/s, cs.wikipedia). Tvar udoli ze Sazavy u Rataji-Talmberka (meandry v uzke nive, strme zalesnene strane se skalnimi vychozy, mlyny na nahonech, brody v melkych rozsirenich). Hloubka 0,6 m +-33 %, v brodu a peřeji melci a sirsi (kraj.perej), kameny v perejich."
+  "predloha": "Misa 16:35 / radce 18:20: Bystrice 2x dnesni sirky = ~9,6 m vody (pulsirka 4,8 +-50 %), odpovida hornimu toku Sazavy (Zdar - H. Brod 8-10 m, raft.cz; prutok 1,0-3,4 m3/s, cs.wikipedia). Tvar udoli ze Sazavy u Rataji-Talmberka (meandry v uzke nive, strme zalesnene strane se skalnimi vychozy, mlyny na nahonech, brody v melkych rozsirenich). Hloubka 0,6 m +-33 %, v brodu a peřeji melci a sirsi (kraj.perej), kameny v perejich.",
+  "raz_toku": {
+   "popis": "Misa 14. 11. (0.999997, potok z kopce (281,1126) 'perina vody v trave, zahloubit, pereje az vodopad, hodne kameni'): raz toku podle sklonu osy (prumer sklon_okno_m po proudu i proti). Hladina na peřeji a kaskade nikdy nad puvodnim terenem: hladina <= nejnizsi teren u osy - zahloubeni_m (koryto se zarizne, breh nikdy nesype nasep). balvanu_na_m = balvany v korytu navic (vycnivaji, pena v shaderu kolem kamenu). Prahy sklonu: Montgomery & Buffington 1997 (step-pool nad 3-4 %, kaskada nad 8-10 %); zahloubeni a hustota = odhad, overit snimkem. Rozbor docs/rozpracovane/potok_strmy.md.",
+   "sklon_okno_m": 7.5,
+   "druhy": [
+    {
+     "nazev": "klidny",
+     "sklon_od": 0.0,
+     "zahloubeni_m": null,
+     "balvanu_na_m": 0.0
+    },
+    {
+     "nazev": "pereje",
+     "sklon_od": 0.03,
+     "zahloubeni_m": 0.5,
+     "balvanu_na_m": 0.6
+    },
+    {
+     "nazev": "kaskada",
+     "sklon_od": 0.12,
+     "zahloubeni_m": 1.2,
+     "balvanu_na_m": 1.2
+    }
+   ]
+  }
  },
  "rybnik_lhota": {
   "stred": [

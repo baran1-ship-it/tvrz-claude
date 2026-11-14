@@ -12635,6 +12635,17 @@ func _krajina() -> void:
 					pridej.call(balv[rng.randi() % 2], q.x, q.y, sb, 0.25, 0.3)
 					kameny_toku.append(Vector4(q.x, q.y, 0.55 * sb, atan2((b - a).y, (b - a).x)))
 				nk += 1
+			# pereje a kaskada (voda.json potok.raz_toku, Misa 14. 11. „hodne kameni ve vode“): balvany v korytu navic
+			# podle hustoty druhu toku - vycnivaji nad hladinu, shader kolem nich ceri a peni
+			var bnm := float((Pravidla.cti("voda", "potok", "raz_toku")["druhy"] as Array)[kr.raz[k]]["balvanu_na_m"])
+			if bnm > 0.0:
+				for _ib in int(round(bnm * dl)):
+					var o2 := a.lerp(b, rng.randf())
+					var q2 := o2 + nrm * rng.randf_range(-w * 0.9, w * 0.9)
+					var sb2 := rng.randf_range(0.5, 1.1)
+					pridej.call(balv[rng.randi() % 2], q2.x, q2.y, sb2, 0.25, 0.3)
+					kameny_toku.append(Vector4(q2.x, q2.y, 0.55 * sb2, atan2((b - a).y, (b - a).x)))
+					nk += 1
 			# zarez: kazdych ~3 m na kazde strane podle sirky zarezu (kde svah potka teren)
 			t = 0.0
 			while t < dl:

@@ -32,6 +32,7 @@ var hladiny: PackedFloat32Array = PackedFloat32Array()
 var sirky: PackedFloat32Array = PackedFloat32Array()   # pul sirky vody
 var hloubky: PackedFloat32Array = PackedFloat32Array() # hloubka vody uprostred
 var sklony: PackedFloat32Array = PackedFloat32Array()  # nasobek sklonu svahu podel toku (strida strmejsi a mirnejsi)
+var raz: PackedInt32Array = PackedInt32Array()        # index do voda.json potok.raz_toku.druhy (0 klidny, pereje, kaskada)
 var krivost: PackedFloat32Array = PackedFloat32Array() # se znamenkem: > 0 zatacka doleva (stred zatacky vlevo od smeru osy)
 var _mriz := {}                                        # bunka 16 m -> [indexy useku]
 var _sum := FastNoiseLite.new()                        # zvlneni svahu
@@ -101,6 +102,32 @@ func priprav(vyska: Callable) -> bool:
 			s += dno[j]
 			c += 1
 		hladiny[k] = s / c + 0.35
+	# raz toku podle sklonu (Misa 14. 11.: potok z kopce 0,39 = „perina vody v trave“, hladina az +1,46 m nad puvodnim
+	# terenem - prumer 9 bodu zvedl hladinu a podlaha pod ni nasypala breh). Na pereji a kaskade hladina nejvys
+	# nejnizsi teren u osy - zahloubeni (pravidla/svet/voda.json potok.raz_toku): koryto se zarizne, nesype.
+	var rt: Dictionary = Pravidla.cti("voda", "potok", "raz_toku")
+	var okno := float(rt["sklon_okno_m"])
+	var druhy_r: Array = rt["druhy"]
+	raz.resize(n)
+	for k in n:
+		var i0 := k
+		var i1 := k
+		var d0 := 0.0
+		var d1 := 0.0
+		while i0 > 0 and d0 < okno:
+			d0 += body[i0].distance_to(body[i0 - 1])
+			i0 -= 1
+		while i1 < n - 1 and d1 < okno:
+			d1 += body[i1].distance_to(body[i1 + 1])
+			i1 += 1
+		var sk := absf(dno[i0] - dno[i1]) / maxf(d0 + d1, 0.5)
+		raz[k] = 0
+		for di in druhy_r.size():
+			if sk >= float(druhy_r[di]["sklon_od"]):
+				raz[k] = di
+		var zh: Variant = druhy_r[raz[k]]["zahloubeni_m"]
+		if zh != null:
+			hladiny[k] = minf(hladiny[k], dno[k] - float(zh))
 	# smer toku = poradi osy v pravidla/svet/voda.json (od pramene k usti; drive podle nizsiho konce - Blender a proudeni
 	# sly proti terenu); hladina po proudu nikdy nestoupa a klesa aspon o min_spad na metr (logika 1, soupis logika.md)
 	var spad := float(Pravidla.cti("voda", "potok", "min_spad"))
