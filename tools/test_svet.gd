@@ -8996,3 +8996,44 @@ func _louka_nahravani() -> void:
 			snimku, nej_b / 1024.0, rozp / 1024.0, nad, sum_b / 1024.0 / maxf(1.0, snimku), nej_inst, nej_bunek, postaveno, Time.get_ticks_msec() - t0]
 	print("LOUKA_NAHRAVANI " + txt)
 	_vysledek("louka_nahravani", nad == 0 and postaveno > 0, txt)
+
+
+## Misa 14. 11. (potok z kopce „perina“, pak „schody? to nemyslis vazne“): strmy usek je klikata kaskada podle
+## voda.json potok.raz_toku - aspon jeden stupen, pady v mezich (pad_min_m .. 6 m, resers: 0,5-3 m, hlavni skok 4-6),
+## balvany v korytu kaskady aspon 80 % balvanu_na_m, sirka vody kaskady = sirka_podil x bezna (+-60 % sum).
+func _potok_kaskada() -> void:
+	var kr = sv.koryto
+	if kr == null:
+		_vysledek("potok_kaskada", false, "koryto neni")
+		return
+	var dr: Array = Pravidla.cti("voda", "potok", "raz_toku")["druhy"]
+	var kask: Dictionary = dr.back()
+	var ik := dr.size() - 1
+	var chyby: Array = []
+	if (kr.schody as Array).is_empty():
+		chyby.append("zadny stupen kaskady")
+	for sc: Dictionary in kr.schody:
+		if float(sc["pad"]) < float(kask["schody"]["pad_min_m"]) - 0.01 or float(sc["pad"]) > 6.0:
+			chyby.append("pad %.1f m u %s" % [float(sc["pad"]), str(sc["p"])])
+	var delka := 0.0
+	var obd := Rect2()
+	var prvni := true
+	for k in range(1, (kr.body as PackedVector2Array).size()):
+		if kr.raz[k] == ik and kr.raz[k - 1] == ik:
+			delka += (kr.body[k] as Vector2).distance_to(kr.body[k - 1])
+			obd = Rect2(kr.body[k], Vector2.ZERO) if prvni else obd.expand(kr.body[k])
+			prvni = false
+			if float(kr.sirky[k]) > float(Pravidla.cti("voda", "potok", "pulsirka_vody_m")) * float(kask["schody"]["sirka_podil"]) * 1.6:
+				chyby.append("sirka %.1f u %s" % [float(kr.sirky[k]), str(kr.body[k])])
+				break
+	var balv := 0
+	for v: Vector4 in sv.kameny_toku:
+		var b := kr.blizko(v.x, v.y) as Array
+		if not b.is_empty() and float(b[0]) < float(b[2]) + 0.5:
+			# v korytu kaskady (bod osy nejblize)
+			if obd.grow(2.0).has_point(Vector2(v.x, v.y)):
+				balv += 1
+	var nutno := 0.8 * float(kask["balvanu_na_m"]) * delka
+	if float(balv) < nutno:
+		chyby.append("balvanu v korytu kaskady %d < %.0f" % [balv, nutno])
+	_vysledek("potok_kaskada", chyby.is_empty(), "stupnu %d, kaskada %.0f m, balvanu %d; %s" % [(kr.schody as Array).size(), delka, balv, str(chyby.slice(0, 4))])
