@@ -8723,11 +8723,12 @@ func _rostliny_v_budovach() -> void:
 	var inst := 0
 	var bez_site: Array = []
 	for key: String in sv.data["rostliny"]:
-		if not site.has(key):
-			if not (sv.data["rostliny"][key] as Array).is_empty():
-				bez_site.append(key)
-			continue
-		var ma: AABB = site[key]
+		# druhy bez vlastniho uzlu (trsy travy a byliny kresli louka): trs 0,6 x 0,6 m
+		var ma := AABB(Vector3(-0.3, 0.0, -0.3), Vector3(0.6, 0.6, 0.6))
+		if site.has(key):
+			ma = site[key]
+		elif not (sv.data["rostliny"][key] as Array).is_empty():
+			bez_site.append(key)
 		for t: Array in sv.data["rostliny"][key]:
 			var xf := Transform3D(Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10])), Vector3(t[3], t[7], t[11]))
 			var wa := xf * ma
@@ -8753,7 +8754,7 @@ func _rostliny_v_budovach() -> void:
 	for kl: String in vady:
 		print("ROSTLINY_V_BUDOVACH %s: %d" % [kl, vady[kl]])
 	if not bez_site.is_empty():
-		print("ROSTLINY_V_BUDOVACH druhy bez site ve scene (nekontrolovano): ", bez_site)
+		print("ROSTLINY_V_BUDOVACH druhy bez site (trs 0,6 m): %d" % bez_site.size())
 	_vysledek("rostliny_v_budovach", inst > 1000 and vady.is_empty(), "mistnosti %d, rostlin %d, vad %d %s" % [rooms.size(), inst, vady.size(), str(vady.keys().slice(0, 6))])
 
 ## Misa 14. 11. „plot bylinkarky porad neni a zahonky taky nema“ (lokace ves.zahrady.domy.7: zahon_bylinky, plot_kolem):

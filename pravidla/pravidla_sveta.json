@@ -1544,17 +1544,62 @@
  "statika": {
   "popis": "Hlidac statiky (Misa 9. 11., r. 87: „nesmysly typu tram podpira kamen“): nese[druh] = druhy dilu, na kterych dil smi lezet nebo v nich byt vetknuty (blender/statika.py, export spadne s chybou a jmenem dilu). zem = rostly teren (ne nad sklepem). Druhy: zdivo (zed, pilir, zasyp, pas), zaklad, skala, klenba (kamenna klenba), kamenna_podlaha (dlazba na klenbe nebo zemi), drevo (tram, sloup, schodiste, krakorec), lehka_podlaha (prkna na tramech), krov (krokve, vaznice), strecha (sindel, prkna). Pokryto: tvrz (vez, sklep, hradby a ochozy, schodiste na hradbu, ubytovna); zbyva ves, mlyn, hostinec, palac, kovarna a zbrojnice, staj.",
   "nese": {
-   "zdivo": ["zdivo", "zaklad", "skala", "klenba", "zem"],
-   "zaklad": ["zaklad", "skala", "zem"],
-   "klenba": ["zdivo", "zaklad", "skala"],
-   "kamenna_podlaha": ["zdivo", "zaklad", "klenba", "skala", "zem"],
-   "drevo": ["drevo", "lehka_podlaha", "zdivo", "zaklad", "klenba", "kamenna_podlaha", "skala", "zem"],
-   "lehka_podlaha": ["drevo", "zdivo", "kamenna_podlaha", "zem"],
-   "krov": ["drevo", "zdivo"],
-   "strecha": ["krov", "drevo"]
+   "zdivo": [
+    "zdivo",
+    "zaklad",
+    "skala",
+    "klenba",
+    "zem"
+   ],
+   "zaklad": [
+    "zaklad",
+    "skala",
+    "zem"
+   ],
+   "klenba": [
+    "zdivo",
+    "zaklad",
+    "skala"
+   ],
+   "kamenna_podlaha": [
+    "zdivo",
+    "zaklad",
+    "klenba",
+    "skala",
+    "zem"
+   ],
+   "drevo": [
+    "drevo",
+    "lehka_podlaha",
+    "zdivo",
+    "zaklad",
+    "klenba",
+    "kamenna_podlaha",
+    "skala",
+    "zem"
+   ],
+   "lehka_podlaha": [
+    "drevo",
+    "zdivo",
+    "kamenna_podlaha",
+    "zem"
+   ],
+   "krov": [
+    "drevo",
+    "zdivo"
+   ],
+   "strecha": [
+    "krov",
+    "drevo"
+   ]
   },
   "tolerance_m": 0.06,
-  "stity": {"kamen_jen_do_okapu": true, "stit_nad_okapem": "drevo", "narozi": "narozni_kameny", "popis": "Puchart 9. 11. (predani.md Postrehy z Puchartu bod 7, KCD): kamenna zed jen do vysky okapu, stit nad okapem prkenny (s kolizi), narozi z naroznich kamenu (fort.quoins), ne rovna hrana. ZATIM SE NEKONTROLUJE: ubytovna, zbrojnice a kovarna maji pultove bocni zdi kamenne az pod strechu - predelat na kamen do okapu + prkenny stit a pak zapnout kontrolu ve statika.py (druh stit, vyska nad okapem)."}
+  "stity": {
+   "kamen_jen_do_okapu": true,
+   "stit_nad_okapem": "drevo",
+   "narozi": "narozni_kameny",
+   "popis": "Puchart 9. 11. (predani.md Postrehy z Puchartu bod 7, KCD): kamenna zed jen do vysky okapu, stit nad okapem prkenny (s kolizi), narozi z naroznich kamenu (fort.quoins), ne rovna hrana. ZATIM SE NEKONTROLUJE: ubytovna, zbrojnice a kovarna maji pultove bocni zdi kamenne az pod strechu - predelat na kamen do okapu + prkenny stit a pak zapnout kontrolu ve statika.py (druh stit, vyska nad okapem)."
+  }
  },
  "pasma": {
   "kolize_kamene": {
@@ -1566,7 +1611,10 @@
   "bylina": {
    "popis": "Misa 3. 11.: podsit skenu byliny (semenacek, ulomek listu) nizsi nez podsit_min_podil vysky nejvyssi podsite tehoz skenu se do sveta nesazi - kopriva nettle_plant_3 (6 x 2 cm) byla zvetsena na hnede placky 1 m na pesinach",
    "podsit_min_podil": 0.4,
-   "sirka_max_m": {"kapradi_": 1.5, "fern_": 1.5},
+   "sirka_max_m": {
+    "kapradi_": 1.5,
+    "fern_": 1.5
+   },
    "_sirka_max_m": "nejvetsi sirka trsu byliny (m): kapradi ma model 2,8x sirsi nez vyssi - s vyskou z tabulky 0,8 m bylo 2,3 m siroke (test bylina_velikost 3. 11.); trs kaprade (Dryopteris) ma pruměr do ~1,5 m. Meritko = min(vyska / nejvyssi podsit, sirka_max / nejsirsi podsit). Druhy bez zaznamu: test hlida sirku do pasma.test.bylina_sirka_nasobek x vyska"
   },
   "popis": "radce 27. 10. 09:55 PRAVIDLA ZASAZENI: ochranna pasma, jedna tabulka pro generovane i importovane dily. Kod cte jen odsud (svet.pasmo, louka.gd, ves_oblouk.gd, test zasazeni). Vzdalenosti v m od kraje hliny cesty / od zdi / od brehu. Poradi stavby: teren -> cesty (profil do terenu) -> budovy -> voda -> vegetace -> predmety; pozdejsi krok nehybe vysledkem drivejsiho.",
@@ -1620,7 +1668,9 @@
    "schody_m": 1.0,
    "prah_m": 0.4,
    "prah_popis": "trava ani bylina do tolika za obrysem zdi (prah a ostenni dveri; Misa 0.991 trsy ve dverich hostince a chalupy mlynare - pudorys domu bez okraje)",
-   "podjezd_m": 2.4, "svetla_vyska_m": 2.0, "_svetla_vyska_m": "svetla vyska pruchodu nad stupnem schodu a podlahou (sklep tvrze pod ramenem schodu, Misa 9. 11. - hrac se nebouchne hlavou; postava 1,8 m + rezerva)",
+   "podjezd_m": 2.4,
+   "svetla_vyska_m": 2.0,
+   "_svetla_vyska_m": "svetla vyska pruchodu nad stupnem schodu a podlahou (sklep tvrze pod ramenem schodu, Misa 9. 11. - hrac se nebouchne hlavou; postava 1,8 m + rezerva)",
    "podjezd_popis": "svetla vyska pruchodu brany od paty sloupku (blender/vesnice.py roofed_gate: prah 2,75 m nad terenem, sloupek zapusten 0,4 m): kus plotu cely nad ni (strisa, prah) cestu neblokuje; kus plotu u domu se pro cestu maze jen nizkymi trojuhelniky (zerd, laty), pruchod brany vlastni plot nemaze (Misa 0.99: brany ve dvorech bez futer, plotu a strisky)",
    "okluzor_zmenseni": 0.85,
    "okluzor_vyska_m": 2.4,
@@ -1631,7 +1681,9 @@
    "podezdivka_sirka_m": 0.4,
    "_podezdivka": "Misa 9. 11. r. 77 (snimek 06, 459,907): stodola a kulna stoji na kamennych patkach, pod prahem mezera 0,25 m i na rovine (model blender/vlastni.py stodola, kolna) - vypada jako stavba nad terenem. Stodoly a kulny vsi stavely prah na kamenne podezdivce (KCD2 stodoly a chlevy taky): souvisla podezdivka pod prahem a pod uzavrenymi stenami (kulna: zadni a bocni, vpredu otevrena pole na patkach), zapustena podezdivka_zapust_m pod nulu modelu, siroka podezdivka_sirka_m. Test stavby_vse_na_zemi (spodek) + snimek.",
    "_placka": "Misa 6. 11. r. 60 a 9. 11. r. 77 (445,914): stodola usedlosti 7 na patkach 0,3-1,9 m nad terenem. Placka stavby (blender/vesnice.py _pads: pudorys + placka_okraj_m, prechod placka_prechod_m) je krok budovy; dolina toku (krok voda, kraj.voda_tvar a svet.koryto_toku_y) ji uz nesmi podkopat - vaha doliny 0 v placce, k 1 na konci prechodu (kraj.stavba_dolina_vaha, svet.stavba_dolina_vaha). Placka i s prechodem nesmi zasahnout do koryta a brehu toku (tools/ves_dvorce.py volba stodoly, test smyslu dvorec). na_zemi_m: spodek stavby (patky, prah) nejvys tolik nad terenem - test stavby_vse_na_zemi (tools/test_stavby.gd), vsechny stavby katalogu i stodoly a kulny.",
-   "_okluzor": "okluzor domu vsi (svet._okluzory): krabice zdi z ramce domu zmensena o okluzor_zmenseni (pruchody, presah strechy), vyska okluzor_vyska_m nad podezdivkou; u hrace se vypne (pasma test okluzor_vypnout_m)"
+   "_okluzor": "okluzor domu vsi (svet._okluzory): krabice zdi z ramce domu zmensena o okluzor_zmenseni (pruchody, presah strechy), vyska okluzor_vyska_m nad podezdivkou; u hrace se vypne (pasma test okluzor_vypnout_m)",
+   "koruna_od_zdi_podil": 0.9,
+   "_koruna_od_zdi_podil": "Misa 14. 11. (vetve smrku v hostinci a v chysich, test rostliny_v_budovach: smrky 5-7 m od zdi hostince, duby u domu 0, 4, 5, 7): strom stoji od pudorysu kazde stavby (_uvnitr: hostinec, stan, kovarna, krcma; domy vsi a chyse _dum_zabira) aspon polomer koruny druhu (modely.json trava_unshaded.koruny) x tento podil - vetve nad strechou smi, do zdi a mistnosti ne. kmen_od_zdi_m zustava jako spodni mez."
   },
   "voda": {
    "popis": "breh = vlhka zem bez trsu; rakos jen ve skupinach; dno_toku_m: od kraje vody maleho toku oblazky dna a holy breh (Misa 28. 10.: jako Bystrice); breh_m 0,3 (Misa 0.99: lemy svetle zelene holiny 1,5 m podel kazdeho potoka) - reserse_potok_1osoba_kun.md: na loukach trava az k vode, mokry tmavy okraj 0,2-0,5 m, ostrice a devetsil do 2 m; holy breh jen dno_toku_m | 3. 11. (soupis rozporu #19, jeden zdroj): holy_breh_m = jedina sirka holeho brehu od kraje vody maleho toku a rybniku - barva hliny a sterku (Blender kraj.ground_attrs), oblazky dna a brehu (hra _dno_toku), bez travy a rostlin (louka, svet, kraj). Drive tri cisla: breh_m 0,3 / dno_toku_m 0,6 / toky_tvar.breh_hlina_m 0,9.",
@@ -1665,7 +1717,9 @@
    "rastr_max_podil": 0.01,
    "krtinec_max_m": 2.0,
    "krtinec_vyska_m": 0.1,
-   "krtinec_materialy": ["hlina"],
+   "krtinec_materialy": [
+    "hlina"
+   ],
    "_krtinec": "test_smyslu --po krtinec (Misa 6. a 9. 11. r. 67/78 hnede klobouky / cerna placka v trave): souvisly kus site materialu hliny ve vysledku exportu do krtinec_max_m vodorovne a aspon krtinec_vyska_m vysoky = samostatna kupka v trave (chyba, nerovnosti patri terenu)",
    "hladina_max_pena": 0.3,
    "_hladina_max_pena": "Misa 28. 10.: tekouci hladina s prumernou penou nad 0,3 je v shaderu bila plocha; Bystrice ma ~0,02",
@@ -1828,7 +1882,12 @@
    "napojeni_m": 10.0,
    "hrana_max_m": 2.0,
    "okraj_schod_m": 0.15,
-   "teren_site": ["Teren", "Nadvori", "Rybnik_Teren", "Mlyn_Teren"],
+   "teren_site": [
+    "Teren",
+    "Nadvori",
+    "Rybnik_Teren",
+    "Mlyn_Teren"
+   ],
    "_teren_site": "zacatky jmen siti terenu (svet i teren dilu): paprsek offline kryti louky (louka._zasah, kryti.bin) do nich neni strecha. Misa 0.99993 r. 54 (snimek misa_6_11/23): Mlyn_Teren chybel - cely dil mlyna 40 x 40 m v kryti.bin zakryty = hladka zem bez trsu (stejne jako Rybnik_Teren 0.78). Test dil_kryti."
   },
   "plot": {
@@ -1844,7 +1903,10 @@
   "predmet": {
    "popis": "Misa 0.9998 (lom 129-133, 952): „v lomu zase lezi naradi na zemi, to uz jsme resili“ - dlouhe naradi a zebrik (nejdelsi rozmer >= opreny_delka_m) v lomu nelezi na zemi, ale je opreny (KCD lom, reserse_vztahy_kcd2.md: naradi opreny o zed/kmen/plot, zebrik opreny). Opora = predmet z katalogu se znamym rozmerem (svet._opreny_o_predmet: hranice dreva, trakar, kad), ne stena lomu - viditelna skalni stena neodpovida siti terenu (4. 11. dva pokusy: naklon 62 st., pak naradi na skale). Dotyk na horni hrane opory v opreni_podil_delky delky naradi, naklon od svisle omezen na opreny_uhel_st. Test lom_na_zemi: dlouhe naradi na zemi v lomu bez naklonu v mezich = chyba.",
    "opreny_delka_m": 1.0,
-   "opreny_uhel_st": [8.0, 35.0],
+   "opreny_uhel_st": [
+    8.0,
+    35.0
+   ],
    "opreni_podil_delky": 0.85,
    "o_zed_uhel_st": 14.0,
    "_o_zed_uhel_st": "Misa 0.99994 r. 68 „metla v kazde chalupe lezi na zemi“: naradi v domech (nabytek.json domy, kus s 6. polem o_zed) opreny o nejblizsi zed mistnosti, naklon od svisle (metla, lopata o zed 10-20 st.; KCD2 interiery - naradi u zdi). Test opreny_o_zed (tools/test_stavby.gd)."

@@ -12339,19 +12339,44 @@ func uzivani_smi(key: String, x: float, z: float) -> bool:
 			return false
 	if v_pruchodu(x, z, key):
 		return false
+	# strom: koruna nesmi do zdi a mistnosti (pasma.budova koruna_od_zdi_podil; Misa 14. 11. vetve smrku v hostinci)
+	var rk := koruna_od_zdi(key)
 	for st: Array in _uvnitr:
 		if st.size() > 2:
 			continue                                  # dil mlyna: vlastni pravidla (teren dilu)
 		var q: Vector3 = (st[0] as Transform3D) * Vector3(x, 0.0, z)
-		var b: AABB = st[1]
+		var b: AABB = (st[1] as AABB).grow(rk)
 		if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
 			return false
+	if rk > 0.0 and _dum_zabira(x, z, rk, false):
+		return false
 	if key != "" and not (key.begins_with("kamen") or key.begins_with("balvan")):
 		# odstup 0 (byliny) = ne na hline cesty; vetsi odstup = dal od kraje (0.98: bylina na ceste)
 		var ck := cesta_kraj_osa(x, z)
 		if ck.y >= 0.0 and ck.x < odstup_cesty(key, int(ck.y)):
 			return false
 	return true
+
+
+var _koruna_od_zdi := {}
+
+
+## Odstup kmene od pudorysu stavby pro druh: stromy max(kmen_od_zdi_m, polomer koruny x koruna_od_zdi_podil), jine 0.
+## Polomer koruny = nejdelsi shoda zacatku jmena v modely.json trava_unshaded.koruny (jako stin korun na trave).
+func koruna_od_zdi(key: String) -> float:
+	if key == "" or _koruna_od_zdi.has(key):
+		return float(_koruna_od_zdi.get(key, 0.0))
+	var r := 0.0
+	if skupina(key) == "strom":
+		var kor_dr: Dictionary = Pravidla.cti("modely", "trava_unshaded")["koruny"]
+		var kd := ""
+		for dk: String in kor_dr:
+			if key.begins_with(dk) and dk.length() > kd.length():
+				kd = dk
+		var pb: Dictionary = pasma()["budova"]
+		r = maxf(float(pb["kmen_od_zdi_m"]), float(kor_dr[kd][0]) * float(pb["koruna_od_zdi_podil"]) if kd != "" else 0.0)
+	_koruna_od_zdi[key] = r
+	return r
 
 
 var _pruchody := {}                   # bunka 8 m -> [Vector2 stred pruchodu]
