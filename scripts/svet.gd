@@ -10136,11 +10136,16 @@ func _krcma_dil(root: Node3D, parent: Node3D) -> void:
 			data["kour"].append([kp.x, kp.y, kp.z])
 	# nabytek z katalogu a mistnosti (lokace.json krcma_l nabytek / mistnosti, v ramci modelu, podlaha podlaha_m)
 	var pod := float(kr["podlaha_m"])
+	# kus: [id, x, z, natoceni_st, (vyska podlahy - jinak podlaha_m), (budova pro spanek u luzek)]
 	for nb: Array in kr.get("nabytek", []):
-		var np := xf * Vector3(float(nb[1]), pod, float(nb[2]))
-		data["vybaveni"].append({"id": String(nb[0]), "p": [np.x, np.y, np.z], "yaw": float(kr["natoceni"]) + deg_to_rad(float(nb[3]))})
+		var np := xf * Vector3(float(nb[1]), float(nb[4]) if nb.size() > 4 else pod, float(nb[2]))
+		var yaw_n := float(kr["natoceni"]) + deg_to_rad(float(nb[3]))
+		data["vybaveni"].append({"id": String(nb[0]), "p": [np.x, np.y, np.z], "yaw": yaw_n})
+		if nb.size() > 5:
+			_postel_zapis(String(nb[0]), String(nb[5]), np, yaw_n, 0)
+	# mistnost: [name, titulek, x, z, sirka, delka, ambient, (vyska podlahy - patro kridla)]
 	for ms: Array in kr.get("mistnosti", []):
-		var mp := xf * Vector3(float(ms[2]), pod, float(ms[3]))
+		var mp := xf * Vector3(float(ms[2]), float(ms[7]) if ms.size() > 7 else pod, float(ms[3]))
 		var am := float(ms[6])
 		data["mistnosti"].append({"name": String(ms[0]), "title": String(ms[1]), "pos": [mp.x, mp.y, mp.z],
 				"size": [float(ms[4]), 2.4, float(ms[5])], "yaw": float(kr["natoceni"]), "ambient": [am, am * 0.92, am * 0.8]})
@@ -10298,11 +10303,16 @@ func _mlyn_dvere(sc: Node3D, root: Node3D, xf: Transform3D, d: Dictionary, prefi
 		var ab := dv.mesh.get_aabb()
 		var cl := ab.get_center()
 		var otev := 100.0
-		var cil := Vector3.ZERO                                  # stred budovy (model: budova kolem pocatku)
-		var p_plus := dv.position + Basis(Vector3.UP, deg_to_rad(otev)) * cl
-		var p_minus := dv.position + Basis(Vector3.UP, deg_to_rad(-otev)) * cl
-		if Vector2(p_minus.x, p_minus.z).distance_to(Vector2(cil.x, cil.z)) < Vector2(p_plus.x, p_plus.z).distance_to(Vector2(cil.x, cil.z)):
-			otev = -otev
+		var ex: Variant = dv.get_meta("extras", {})
+		if ex is Dictionary and (ex as Dictionary).has("otevreni_deg"):
+			# model udava smer otevreni se znamenkem (krcma 14. 11.: pokoje a vrata staje ven na pavlac/dvur)
+			otev = float(ex["otevreni_deg"])
+		else:
+			var cil := Vector3.ZERO                              # stred budovy (model: budova kolem pocatku)
+			var p_plus := dv.position + Basis(Vector3.UP, deg_to_rad(otev)) * cl
+			var p_minus := dv.position + Basis(Vector3.UP, deg_to_rad(-otev)) * cl
+			if Vector2(p_minus.x, p_minus.z).distance_to(Vector2(cil.x, cil.z)) < Vector2(p_plus.x, p_plus.z).distance_to(Vector2(cil.x, cil.z)):
+				otev = -otev
 		var use := xf * (dv.position + cl + Vector3(0, 0.95 - cl.y, 0))
 		var otevrene := (d.get("dvere_otevrene", []) as Array).has(puvodni) or (d.get("dvere_otevrene", []) as Array).has("Mlyn_Dvere_" + dk)
 		# krcma (nezavisla kontrola 14. 11.): vnitrni dvere (d.dvere_vnitrni) jen zblizka jako interier
@@ -10310,7 +10320,8 @@ func _mlyn_dvere(sc: Node3D, root: Node3D, xf: Transform3D, d: Dictionary, prefi
 			dv.visibility_range_end = float(d.get("interier_do_m", d.get("dil_do_m", 70.0)))
 		var skup := jm_dilu + "_" + dk
 		if (d.get("kridla_spolu", []) as Array).has(jm_dilu):
-			skup = jm_dilu                                # obe kridla vrat (L/P) jednim pouzitim
+			# obe kridla vrat (L/P) jednim pouzitim; dalsi dvojice krídel (Staj_L/Staj_P) vlastni skupina
+			skup = jm_dilu if dk in ["L", "P"] else jm_dilu + "_" + dk.trim_suffix("_L").trim_suffix("_P")
 		data["pohyb"].append({"name": jm, "kind": "dvere", "group": skup,
 				"cols": [[cl.x, cl.y, cl.z, maxf(ab.size.x, 0.06), ab.size.y, maxf(ab.size.z, 0.06)]],
 				"pos": [use.x, use.y, use.z], "use": [use.x, use.y, use.z], "open": otev, "init": otev if otevrene else 0.0, "dur": 1.0})

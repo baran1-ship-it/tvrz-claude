@@ -3088,6 +3088,10 @@ func _visici() -> void:
 				zakop += 1
 				continue
 		var gap := 60.0 if h.is_empty() else pos.y - (h["position"] as Vector3).y
+		if h.is_empty() and int(po_druhu.get("bez_kolize", 0)) < 8:
+			po_druhu["bez_kolize"] = int(po_druhu.get("bez_kolize", 0)) + 1
+			var hh := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 200, 0), pos - Vector3(0, 200, 0)))
+			print("VISI bez kolize %s (%.1f, %.2f, %.1f): teren_y %.2f, paprsek +-200 %s" % [b[0], pos.x, pos.y, pos.z, float(sv._teren_y(pos.x, pos.z)), str(hh.get("position", "nic")) + " " + (String((hh["collider"] as Node).name) if not hh.is_empty() else "")])
 		if gap > tol:
 			n += 1
 			var d: String = b[0]

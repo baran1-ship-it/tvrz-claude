@@ -5525,8 +5525,9 @@
     "misto": "krcma"
    },
    "spanek": {
-    "budova": "krcma",
-    "postel": "lozko_uzke"
+    "budova": "krcma_jizba",
+    "postel": "lozko",
+    "_p": "Misa 14. 11.: nova krcma do L - krcmar spi v jizbe hospodskeho (lokace krcma_l nabytek), stara krcma U Kohouta je obycejna usedlost"
    },
    "pribeh": "Krčmář Kubát v krčmě U Kohouta: s hosty obsluhuje (opřený u trámu pozoruje, nese ke stolům, zpět k pultu), bez hostů uklízí a vaří; odpočine si jen bez hostů."
   },

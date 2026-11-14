@@ -2314,7 +2314,7 @@
   "_vynechat": "Míša 14. 11. (v Puchartu stejná kovárna: dlažba je součást modelu, nedá se na ni vystoupit, pravidelná jako dlaždice na trávníku): dlažba přístřešku i hliněná podlaha z modelu pryč (i jejich kolize) – na zemi naše udusaná hlína (kraj.PLACKY plac_r_m)"
  },
  "krcma_l": {
-  "popis": "Míša 14. 11. (snímek ze hry: „krčma“ zakroužkovaná vlevo od odbočky k rybníku, studnu přesunout na náves; stará krčma U Kohouta zůstane jako obyčejná usedlost): krčma do L (Disk budovy krcma.zip, NAVOD_KRCMA_L.md) u odbočky (stará ulice) k rybníku, uliční stranou (+Z modelu) k odbočce, stájové křídlo (+x modelu) směrem k rybníku. Střed = osa staré ulice (ves.stred_stare_navsi + osa vesnice.AXIS) + 11,5 m stranou (průčelí 6 m od osy).",
+  "popis": "Míša 14. 11. (snímek ze hry: „krčma“ zakroužkovaná vlevo od odbočky k rybníku, studnu přesunout na náves; stará krčma U Kohouta zůstane jako obyčejná usedlost): krčma do L (Disk budovy krcma.zip, NAVOD_KRCMA_L.md) u odbočky (stará ulice) k rybníku, uliční stranou (+Z modelu) k odbočce, stájové křídlo (+x modelu) směrem k rybníku. Střed = osa staré ulice (ves.stred_stare_navsi + osa vesnice.AXIS) + 11,5 m stranou (průčelí 6 m od osy). Míša 14. 11. večer: nová verze modelu (krcma_L (1).zip) – širší křídlo (kamenná stáj 8,4 × 12,4 m dole, pavlač, pokoj 1 a 2, nocležna nahoře), model BEZ vybavení – lůžka, sudy, koryta a stoly z naší hry (nabytek).",
   "model": "res://modely/krcma/krcma_L.glb",
   "lod1": "res://modely/krcma/krcma_L_lod1.glb",
   "stred": [
@@ -2353,7 +2353,7 @@
     "krcma_vrata"
    ]
   ],
-  "zdroj": "NAVOD_KRCMA_L.md: počátek na terénu, ulice +Z, podlaha domu +0,45, patro křídla +2,85; ≈172 000 troj. (interiér zvlášť – vypínat zvenku), LOD1; kolize 80 kvádrů -convcolonly; dveře s pantem v počátku uzlu, extras otevreni_deg 100",
+  "zdroj": "NAVOD_KRCMA_L.md (verze 14. 11. večer): počátek na terénu, ulice +Z, podlaha domu +0,45, patro křídla +2,85; ≈163 000 troj. bez vybavení, LOD1; kolize -convcolonly; dveře s pantem v počátku uzlu, extras otevreni_deg se znaménkem (hra ho čte)",
   "plac_r_m": 12.0,
   "_rovina": "14. 11.: rovina 14 m nestačila – zadní konec stájového křídla (x 15, z −10 modelu) 0,49 m pod terénem (test krcma_l) → 18 m; plac_r_m = vyšlapaná hlína (kraj.PLACKY)",
   "podlaha_m": 0.45,
@@ -2393,9 +2393,129 @@
     -6.5,
     1.85,
     90.0
+   ],
+   [
+    "sud",
+    5.2,
+    -3.3,
+    0.0,
+    0.45
+   ],
+   [
+    "sud",
+    6.2,
+    -3.3,
+    30.0,
+    0.45
+   ],
+   [
+    "sud_stary",
+    6.3,
+    -2.2,
+    0.0,
+    0.45
+   ],
+   [
+    "lozko",
+    6.0,
+    2.7,
+    0.0,
+    0.45,
+    "krcma_jizba"
+   ],
+   [
+    "truhla",
+    3.1,
+    3.4,
+    0.0,
+    0.45
+   ],
+   [
+    "lozko_uzke",
+    3.5,
+    -3.0,
+    0.0,
+    0.45,
+    "krcma_komurka"
+   ],
+   [
+    "koryto_kone",
+    16.4,
+    -3.5,
+    90.0,
+    0.05
+   ],
+   [
+    "koryto_kone",
+    16.4,
+    -8.5,
+    90.0,
+    0.05
+   ],
+   [
+    "lozko",
+    16.85,
+    -0.1,
+    0.0,
+    2.85
+   ],
+   [
+    "lozko",
+    16.85,
+    -4.2,
+    0.0,
+    2.85,
+    "krcma_pokoj2"
+   ],
+   [
+    "stolicka",
+    13.0,
+    -5.8,
+    0.0,
+    2.85
+   ],
+   [
+    "slamnik",
+    13.0,
+    -9.6,
+    0.0,
+    2.85,
+    "krcma_noclezna"
+   ],
+   [
+    "slamnik",
+    14.0,
+    -9.6,
+    0.0,
+    2.85,
+    "krcma_noclezna"
+   ],
+   [
+    "slamnik",
+    15.0,
+    -9.6,
+    0.0,
+    2.85,
+    "krcma_noclezna"
+   ],
+   [
+    "slamnik",
+    16.0,
+    -9.6,
+    0.0,
+    2.85,
+    "krcma_noclezna"
+   ],
+   [
+    "slamnik",
+    17.0,
+    -9.6,
+    0.0,
+    2.85,
+    "krcma_noclezna"
    ]
   ],
-  "_nabytek": "Míša 14. 11.: NAVOD – stoly, židle, sudy a nádobí z naší hry: šenkovna x −8…−1, z −4…4 (modelu), výčep a pec u x −2 → stoly s lavicemi ve volné části x −7…−4 (stul_hospoda delší osou podél z, lavice otočené o 90° podél stolu); [id, x, z, natoceni_st v rámci modelu], výška = podlaha_m",
+  "_nabytek": "Míša 14. 11.: model bez vybavení – vše z katalogu: [id, x, z, natočení_st v rámci modelu, (výška podlahy; jinak podlaha_m), (budova pro spánek u lůžek)]. Šenkovna stoly s lavicemi (x −7…−4), komora sudy (x 4,4…7, z −0,5…−4), jizba hospodského lůžko a truhla, komůrka šenkýřky úzké lůžko, stáj koryta u východní zdi (podlaha stáje 0,05), patro křídla (2,85): pokoj 1 lůžko hráče u značky KrcmaL_Spani_Hrac, pokoj 2 lůžko, nocležna 5 slamníků pro formany. Polohy = odhad z dispozice NAVOD, ověřit snímkem.",
   "mistnosti": [
    [
     "krcma_l_senkovna",
@@ -2423,9 +2543,76 @@
     3.2,
     4.0,
     0.12
+   ],
+   [
+    "krcma_l_jizba",
+    "Krčma – jizba hospodského",
+    4.6,
+    1.75,
+    4.8,
+    4.5,
+    0.18
+   ],
+   [
+    "krcma_l_komurka",
+    "Krčma – komůrka šenkýřky",
+    3.3,
+    -2.25,
+    2.2,
+    3.5,
+    0.15
+   ],
+   [
+    "krcma_l_komora",
+    "Krčma – komora",
+    5.7,
+    -2.25,
+    2.6,
+    3.5,
+    0.12
+   ],
+   [
+    "krcma_l_staj",
+    "Krčma – stáj",
+    14.0,
+    -5.0,
+    7.0,
+    11.8,
+    0.12,
+    0.05
+   ],
+   [
+    "krcma_l_pokoj1",
+    "Krčma – pokoj 1",
+    14.75,
+    -1.0,
+    5.6,
+    3.8,
+    0.18,
+    2.85
+   ],
+   [
+    "krcma_l_pokoj2",
+    "Krčma – pokoj 2",
+    14.75,
+    -5.0,
+    5.6,
+    3.8,
+    0.18,
+    2.85
+   ],
+   [
+    "krcma_l_noclezna",
+    "Krčma – nocležna",
+    14.75,
+    -9.0,
+    5.6,
+    3.8,
+    0.16,
+    2.85
    ]
   ],
-  "_mistnosti": "[name, titulek, x, z, šířka x, délka z, ambient] v rámci modelu podle NAVOD_KRCMA_L.md dispozice; výška 2,4 m od podlahy",
+  "_mistnosti": "[name, titulek, x, z, šířka x, délka z, ambient, (výška podlahy – patro 2,85, stáj 0,05)] v rámci modelu podle NAVOD_KRCMA_L.md (verze 14. 11. večer); výška 2,4 m od podlahy",
   "dvere_otevrene": [
    "KrcmaL_Dvere_Senkovna"
   ],
@@ -2433,11 +2620,7 @@
    "KrcmaL_Dvere_Jizba",
    "KrcmaL_Dvere_Komora",
    "KrcmaL_Dvere_Senkyrka",
-   "KrcmaL_Dvere_Senkovna",
-   "KrcmaL_Dvere_Pokoj1",
-   "KrcmaL_Dvere_Pokoj2",
-   "KrcmaL_Dvere_Pokoj3",
-   "KrcmaL_Dvere_Noclezna"
+   "KrcmaL_Dvere_Senkovna"
   ],
   "kridla_spolu": [
    "krcma_vrata"
@@ -2453,7 +2636,8 @@
     9.5
    ]
   ],
-  "_vynechat": "Míša 14. 11. (stejně jako kovárna): model dvora (hlína v modelu) pryč, dvůr = naše udusaná hlína: plac_r_m kolem středu + placky_lok [x, z modelu, poloměr] na dvůr za domem a stájí (dvůr x 0…17, z −13…−4 modelu)"
+  "_vynechat": "Míša 14. 11. (stejně jako kovárna): model dvora (hlína v modelu) pryč, dvůr = naše udusaná hlína: plac_r_m kolem středu + placky_lok [x, z modelu, poloměr] na dvůr za domem a stájí (dvůr x 0…17, z −13…−4 modelu)",
+  "_dvere_vnitrni": "pokoje a nocležna mají dveře na pavlač (venku pod střechou) – viditelné ze dvora, proto ne mezi vnitřními"
  },
  "kovarna_tvrz": {
   "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",
