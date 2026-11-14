@@ -216,7 +216,7 @@ func show_page(page: String) -> void:
 	_panel.visible = true
 	_scroll.scroll_vertical = 0
 	if stejna:
-		_vrat_posun(posun)
+		_vrat_posun(posun, _page)
 	_credits.visible = false
 	_help.visible = page == "help"
 	_title.visible = page != "help"
@@ -269,10 +269,11 @@ func show_page(page: String) -> void:
 
 
 ## Posun stranky az po rozvrzeni noveho obsahu (driv by se orezal na 0).
-func _vrat_posun(posun: int) -> void:
+func _vrat_posun(posun: int, stranka: Variant) -> void:
 	for i in 2:
 		await get_tree().process_frame
-	_scroll.scroll_vertical = posun
+	if _page == stranka:                    # mezitim jina stranka - nechat ji nahore
+		_scroll.scroll_vertical = posun
 
 
 func refresh_settings(texts: Dictionary) -> void:
