@@ -206,12 +206,17 @@ func hide_menu() -> void:
 
 
 func show_page(page: String) -> void:
+	# Misa 14. 11. (nastaveni: po prepnuti denni doby skok nahoru, znovu scrolovat): obnova tyz stranky drzi posun a fokus
+	var stejna := page == _page and _panel.visible
+	var posun := _scroll.scroll_vertical
 	_page = page
 	for c in _box.get_children():
 		_box.remove_child(c)
 		c.queue_free()
 	_panel.visible = true
 	_scroll.scroll_vertical = 0
+	if stejna:
+		_vrat_posun(posun)
 	_credits.visible = false
 	_help.visible = page == "help"
 	_title.visible = page != "help"
@@ -259,7 +264,15 @@ func show_page(page: String) -> void:
 				first = _maybe(first, bb2)
 			_btn("Zpět", "page:main", true)
 	if first:
-		first.call_deferred("grab_focus")
+		if not stejna:
+			first.call_deferred("grab_focus")
+
+
+## Posun stranky az po rozvrzeni noveho obsahu (driv by se orezal na 0).
+func _vrat_posun(posun: int) -> void:
+	for i in 2:
+		await get_tree().process_frame
+	_scroll.scroll_vertical = posun
 
 
 func refresh_settings(texts: Dictionary) -> void:
