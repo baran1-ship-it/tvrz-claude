@@ -76,6 +76,10 @@ func _run() -> void:
 		var a := body[maxi(0, k - 1)]
 		var c := body[mini(body.size() - 1, k + 1)]
 		var tan := (c - a) * 0.25
+		# kaskada (tune a pady): uchyt bez svisle slozky - jinak krivka pred padem klesla a za nim se vyboulila
+		# (deska hladiny trcela pres breh, snimek kask_zblizka 14. 11.); pad pak plynule mezi dvema body
+		if absf(c.y - a.y) > 0.25:
+			tan.y = 0.0
 		curve.add_point(body[k], -tan, tan)
 	var w: Array[float] = []
 	for s in sirky:
