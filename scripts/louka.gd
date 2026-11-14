@@ -75,6 +75,28 @@ var _vejir: Mesh                      # drn-vejir: 4 karty sklonene 50 st do str
 var _snimek := 0
 var _player: Node3D
 var _cas := OS.has_environment("TVRZ_LOUKA_CAS")      # mereni: cas stavby kazde bunky
+# 14. 11. (docs/rozpracovane/zaseky_rozbor_system.md F4, overeno ve zdroji Godot 4.4.1 drivers/gles3/storage/
+# mesh_storage.cpp): data MultiMeshe jdou do GPU az pri kresleni (_update_dirty_multimeshes, glBufferSubData) a jen
+# po oblastech do visible_instance_count; zvyseni visible_instance_count oznaci nove instance jako zmenene a nahraje je
+# znovu. Proto: (1) pri plneni skryte bunky visible_instance_count roste s naplnenym poctem - nahrani se rozlozi do
+# snimku plneni a odkryti nenahrava nic; (2) _viditelne meni pocet jen po kvantech s hysterezi (hustotu podle
+# vzdalenosti dela shader podle hashe); (3) kazde zvyseni ma rozpocet bajtu na snimek. Cisla rozpocty.json louka_nahravani.
+var _nah_rozp := int(Pravidla.cti("rozpocty", "louka_nahravani", "nahrani_b_snimek"))
+var _nah_kv := int(Pravidla.cti("rozpocty", "louka_nahravani", "kvantum_instanci"))
+var _nah_rez := int(Pravidla.cti("rozpocty", "louka_nahravani", "rezerva_kvant"))
+var _gl_obl := int(Pravidla.cti("rozpocty", "louka_nahravani", "gles3_oblast_instanci"))
+var _gl_vse := int(Pravidla.cti("rozpocty", "louka_nahravani", "gles3_oblasti_vse_nad"))
+var _gl_xf := int(Pravidla.cti("rozpocty", "louka_nahravani", "gles3_floatu_transform"))
+var _gl_cust := int(Pravidla.cti("rozpocty", "louka_nahravani", "gles3_floatu_barva_custom"))
+var _nah_b := 0                       # bajty nahrane do GPU v tomto snimku (model _model_b)
+var _nah_inst := 0                    # instance nove kreslene/nahrane v tomto snimku (prirustky visible_instance_count)
+var _nah_bunek := 0                   # bunky odkryte v tomto snimku
+var _nah_vid := 0                     # z toho prirustek instanci z _viditelne (hustota podle vzdalenosti)
+var _nah_mm := {}                     # MultiMesh -> [visible na zacatku snimku, uz zapocitane bajty]
+var _nah_plno := false                # rozpocet bajtu snimku vycerpan (plneni ceka na dalsi snimek)
+var nahrano_b := 0                    # posledni uzavreny snimek (diag, test louka_nahravani)
+var odkryto_inst := 0
+var odkryto_bunek := 0
 
 
 func setup(p_main: Node) -> void:
@@ -496,7 +518,9 @@ func _process_vlastni(_dt: float) -> void:
 	if _player == null or _mriz.is_empty() or not main.ready_done:
 		return
 	var tp := Time.get_ticks_usec()
+	_nah_zacni()
 	_krok()
+	_nah_konec()
 	if _cas:
 		var ms := (Time.get_ticks_usec() - tp) / 1000.0
 		if ms > 1.0:
@@ -531,8 +555,10 @@ func _krok() -> void:
 		var st: Array = _stavba[0]
 		var sh: Dictionary = st[0]
 		var sb: Dictionary = st[1]
-		while Time.get_ticks_usec() - t0 < ROZPOCET_US:
-			if not _plnit(sb, PLNIT):
+		while Time.get_ticks_usec() - t0 < ROZPOCET_US and not _nah_plno:
+			if not _plnit(sb, PLNIT, true):
+				if _nah_plno:
+					break
 				var dalsi := false
 				while int(st[2]) < 8:
 					st[2] = int(st[2]) + 1
@@ -552,7 +578,8 @@ func _krok() -> void:
 			sb["lvl"] = sh.get("lvl", 0)
 			_bunky[c] = sb
 			postaveno += 1
-			_viditelne(c, sb, q)
+			_nah_bunek += 1
+			_viditelne(c, sb, q)          # pocty jen klesnou (data uz v GPU z plneni) - nic se nenahrava
 		if _cas:
 			print("LOUKA stavba %.2f ms" % ((Time.get_ticks_usec() - t0) / 1000.0))
 	# 2) chybejici bunky do dosahu a bunky na spatne urovni (nejblizsi prvni) do vlaken
@@ -695,19 +722,26 @@ func nacti_okoli() -> void:
 		elif not _bunky.has(hot["c"]):
 			_bunky[hot["c"]] = _postav(hot)
 			_bunky[hot["c"]]["lvl"] = hot.get("lvl", 0)
-			_viditelne(hot["c"], _bunky[hot["c"]], q)
+			_viditelne(hot["c"], _bunky[hot["c"]], q, false)      # nacteni okoli (mereni, snimky): hned vse, bez rozpoctu
 	_hotove = zbyle
 	_zamek.unlock()
 
 
-func _viditelne(c: Vector2i, b: Dictionary, q: Vector2) -> void:
+func _viditelne(c: Vector2i, b: Dictionary, q: Vector2, rozpocet := true) -> void:
 	if not b.has("mm"):
 		return
 	var d := _vzdal_bunky(c, q)
+	# hrac uvnitr budovy: vzdalena bunka se skryje cela (uzel), pocty zustanou - po odchodu se nic nenahrava (drive
+	# pocet 0 a pri odchodu nahrani vsech bunek v jednom snimku)
+	var skryt := _vnitrek_skryje(d)
+	if b.has("uzel"):
+		(b["uzel"] as Node3D).visible = not skryt
+	if skryt:
+		return
 	for k in VRSTVY:
 		var mm: MultiMesh = b["mm"][k]
 		if mm:
-			mm.visible_instance_count = mini(_pocet(b["hash"][k], _podil(k, d)), mm.instance_count)
+			_vid_nastav(mm, mini(_pocet(b["hash"][k], _podil(k, d, false)), mm.instance_count), rozpocet)
 	# vejir: pasma 0-25 m plne, 25-60 m na 25 %, 60-90 m pryc (radce 10:50) - podle nejblizsiho bodu ctvrtiny
 	for e: int in range((b.get("mm4", []) as Array).size()):
 		var mm: MultiMesh = b["mm4"][e][0]
@@ -717,12 +751,117 @@ func _viditelne(c: Vector2i, b: Dictionary, q: Vector2) -> void:
 		var dx := maxf(maxf(x0 - q.x, q.x - (x0 + BUNKA * 0.5)), 0.0)
 		var dz := maxf(maxf(z0 - q.y, q.y - (z0 + BUNKA * 0.5)), 0.0)
 		var dq := sqrt(dx * dx + dz * dz)
-		mm.visible_instance_count = mini(_pocet(b["hash4"][e], _podil(4, dq)), mm.instance_count)
+		_vid_nastav(mm, mini(_pocet(b["hash4"][e], _podil(4, dq)), mm.instance_count), rozpocet)
+
+
+## Kreslenych instanci MultiMeshe pro potrebu `need` (prvnich need podle hashe): nahoru na cele kvantum (instance navic
+## shader srazi podle hashe - vzhled stejny), dolu az o vic nez rezerva_kvant kvant (hystereze: pocet nekolisa a
+## nenahrava se dokola), zvyseni jen v rozpoctu bajtu snimku (zbytek pri dalsim volani).
+func _vid_nastav(mm: MultiMesh, need: int, rozpocet: bool) -> void:
+	var cur := mm.visible_instance_count
+	if cur < 0:
+		cur = mm.instance_count
+	if need <= 0:
+		if cur != 0:
+			mm.visible_instance_count = 0
+		return
+	var cil := mini(ceili(float(need) / _nah_kv) * _nah_kv, mm.instance_count)
+	if cil == cur:
+		return
+	if cil < cur:
+		if cur - cil > _nah_kv * _nah_rez:
+			mm.visible_instance_count = cil          # snizeni nic nenahrava (mesh_storage.cpp _multimesh_set_visible_instances)
+		return
+	var k := cil
+	if rozpocet:
+		while k > cur and not _nah_vejde(mm, k, false):
+			k -= _nah_kv
+		if k <= cur and _nah_b == 0:
+			k = mini(cur + _nah_kv, cil)             # postup zaruceny: jedno kvantum, kdyz se v snimku jeste nic nenahralo
+	if k > cur:
+		var pred := _nah_inst
+		_nah_zvys(mm, k)
+		_nah_vid += _nah_inst - pred
+
+
+## Hrac uvnitr budovy s portaly: louku kreslit jen do 20 m (predmety._vnitrek).
+func _vnitrek_skryje(d: float) -> bool:
+	return vnitrek and d > 20.0
+
+
+## Model nahrani do GPU podle Godot 4.4.1 drivers/gles3/storage/mesh_storage.cpp (_multimesh_set_visible_instances +
+## _update_dirty_multimeshes): zvyseni visible_instance_count z `od` na `do_` oznaci oblasti (gles3_oblast_instanci)
+## pres [od, do_) jako zmenene; je-li jich vic nez gles3_oblasti_vse_nad nebo vic nez polovina kreslenych oblasti, nahraje
+## se vsech prvnich ceil(do_/oblast) oblasti, jinak jen zmenene. Bajty instance: transformace 3D + (barva/custom).
+func _model_b(mm: MultiMesh, od: int, do_: int) -> int:
+	if do_ <= od:
+		return 0
+	var st := (_gl_xf + (_gl_cust if mm.use_custom_data or mm.use_colors else 0)) * 4
+	var obl_b := _gl_obl * st
+	var celk := mm.instance_count * st
+	var vis_obl := (do_ + _gl_obl - 1) / _gl_obl
+	var o0 := od / _gl_obl
+	var o1 := (do_ - 1) / _gl_obl
+	var zmen := o1 - o0 + 1
+	if zmen > _gl_vse or zmen > vis_obl / 2:
+		return mini(vis_obl * obl_b, celk)
+	var b := 0
+	for o in range(o0, o1 + 1):
+		b += mini(obl_b, celk - o * obl_b)
+	return b
+
+
+## Vejde se zvyseni kreslenych instanci mm na do_ do rozpoctu bajtu snimku? prvni = prvni nahrani snimku projde vzdy.
+func _nah_vejde(mm: MultiMesh, do_: int, prvni: bool) -> bool:
+	var z: Array = _nah_mm.get(mm, [maxi(mm.visible_instance_count, 0), 0])
+	var b := _model_b(mm, mini(int(z[0]), maxi(mm.visible_instance_count, 0)), do_) - int(z[1])
+	return (prvni and _nah_b == 0) or _nah_b + maxi(b, 0) <= _nah_rozp
+
+
+## visible_instance_count = do_ a zapocitat nahrani (bajty podle modelu od zacatku snimku, instance).
+func _nah_zvys(mm: MultiMesh, do_: int) -> void:
+	var cur := mm.visible_instance_count
+	if cur < 0:
+		cur = mm.instance_count
+	if do_ == cur:
+		return
+	if do_ > cur:
+		if not _nah_mm.has(mm):
+			_nah_mm[mm] = [cur, 0]
+		var z: Array = _nah_mm[mm]
+		z[0] = mini(int(z[0]), cur)
+		var nb := _model_b(mm, int(z[0]), do_)
+		_nah_b += maxi(nb - int(z[1]), 0)
+		z[1] = maxi(nb, int(z[1]))
+		_nah_inst += do_ - cur
+	mm.visible_instance_count = do_
+
+
+func _nah_zacni() -> void:
+	_nah_b = 0
+	_nah_inst = 0
+	_nah_bunek = 0
+	_nah_vid = 0
+	_nah_mm.clear()
+	_nah_plno = false
+
+
+## Uzavreni snimku: pocitadla pro test a pro diag (radek zaseku: udalosti snimku).
+func _nah_konec() -> void:
+	nahrano_b = _nah_b
+	odkryto_inst = _nah_inst
+	odkryto_bunek = _nah_bunek
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg and (_nah_b > 0 or _nah_bunek > 0):
+		dg.udalost("louka_B", _nah_b)
+		dg.udalost("louka_inst", _nah_inst)
+		dg.udalost("louka_vid_inst", _nah_vid)
+		dg.udalost("louka_bunek", _nah_bunek)
 
 
 ## Podil instanci vrstvy k (hash <= podil) kreslenych ve vzdalenosti d - stejny pro kresleni i orez bufferu.
 func _podil(k: int, d: float, kresleni := true) -> float:
-	if kresleni and vnitrek and d > 20.0:
+	if kresleni and _vnitrek_skryje(d):
 		return 0.0                            # hrac uvnitr budovy: ven jen okny a dvermi (predmety._vnitrek)
 	if k == 4:
 		# tablet 0.57: louka se sekala (prekryv karet) - plny vejir jen do 15 m, 15-40 m na 25 %, za 60 m nic
@@ -959,7 +1098,10 @@ const ROZPOCET_US := 4000               # cas stavby louky za snimek (us); 4 ms 
 
 
 ## Naplni nejvys n instanci rozestavenych MultiMeshu bunky; true = v tomto snimku se plnilo (dalsi krok stavby az priste).
-func _plnit(b: Dictionary, n: int) -> bool:
+## rozpocet: davka jen v rozpoctu bajtu snimku (jinak _nah_plno a false). visible_instance_count roste s naplnenym
+## poctem (uzel bunky je skryty): ovladac nahraje do GPU jen nove davky v tomto snimku (14. 11., F4 - drive 0 az do
+## odkryti, pak cela bunka v jednom snimku).
+func _plnit(b: Dictionary, n: int, rozpocet := false) -> bool:
 	var fr: Array = b.get("plnit", [])
 	if fr.is_empty():
 		return false
@@ -968,11 +1110,15 @@ func _plnit(b: Dictionary, n: int) -> bool:
 	var buf: PackedFloat32Array = e[1]
 	var i0: int = e[2]
 	var i1 := mini(i0 + n, mm.instance_count)
+	if rozpocet and not _nah_vejde(mm, i1, true):
+		_nah_plno = true
+		return false
 	for i in range(i0, i1):
 		var j := i * 16
 		mm.set_instance_transform(i, Transform3D.IDENTITY)
 		mm.set_instance_custom_data(i, Color(buf[j + 12], buf[j + 13], buf[j + 14], buf[j + 15]))
 	e[2] = i1
+	_nah_zvys(mm, i1)
 	if i1 >= mm.instance_count:
 		fr.pop_front()
 	return true
@@ -1001,9 +1147,12 @@ func _postav_cast(hot: Dictionary, b: Dictionary, krok: int) -> bool:
 	mm.mesh = meshe[k]
 	mm.instance_count = n
 	# radce 18:35 (panel: spicky 60-84 ms "zbytek" pri nacteni bunky vysoke travy): buffer cele vrstvy najednou =
-	# nahrani do GPU v jednom snimku. Plni se po PLNIT instancich za snimek (_plnit; ovladac nahraje jen zmenene
-	# useky), bunka je videt az naplnena.
+	# nahrani do GPU v jednom snimku. Plni se po PLNIT instancich za snimek (_plnit); visible_instance_count roste
+	# s plnenim (14. 11.: pri 0 ovladac nenahral nic a celou bunku az pri odkryti), bunka je videt az naplnena.
 	mm.visible_instance_count = 0
+	# vlastni AABB i v MultiMeshi: jinak ovladac po kazde zmene visible_instance_count prepocita AABB pres vsechny
+	# kreslene instance (mesh_storage.cpp _update_dirty_multimeshes -> _multimesh_re_create_aabb)
+	mm.custom_aabb = aabb
 	(b["plnit"] as Array).append([mm, hot["buf%d" % k] if k < 4 else hot["buf4_%d" % qi], 0])
 	var mmi := MultiMeshInstance3D.new()
 	mmi.multimesh = mm

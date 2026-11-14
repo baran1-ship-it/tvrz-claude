@@ -294,13 +294,13 @@
   },
   "ChysePrkna": {
    "budova": "chyse_%d",
-   "_p": "Misa 14. 11.: pryčny a podlaha modelu pryc (lokace lom_chyse vynechat_uzly), chyse na udusane hline - nase luzko (2 spaci) u zadni steny, hlavou k ni; podlaha = teren (vyska 0)",
+   "_p": "Misa 14. 11.: pryčny a podlaha modelu pryc (lokace lom_chyse vynechat_uzly), chyse na udusane hline - nase luzko (2 spaci) napric u zadni steny (natoceni 90 - podel steny bylo v ceste ode dveri, test lide_chovani), podlaha = teren (vyska 0)",
    "kusy": [
     [
      "lozko",
      0.0,
-     -0.95,
-     0.0,
+     -1.25,
+     90.0,
      0.0
     ]
    ]
