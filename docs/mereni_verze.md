@@ -424,3 +424,14 @@ hostinec 28/20/25/21, věž 24/26/24/27.
   (sestavení/nahrání něčeho nového), ne trvalá cena. Varianta bez_vnitrku tedy příčinu nerozliší (běží až po zahřátí).
   „shadery +N“ je v panelu (diag.log), ne v tabulce trasy – potřeba řádek záseku z panelu nebo diag.log.
 - Nelze srovnat s 0.999996 (jiné nastavení trávy). Míša dělá 2. měření s GPU trávou vypnutou.
+
+### 0.999997 – Měřicí trasa 14. 11. 20:37 (BEZ trávy GPU, hned po měření s GPU trávou)
+p50 vše / bez_vnitrku / déšť / vše znovu: tvrz-cesta 18/31/35/30, louka 27/32/31/33, les 20/29/29/30, skály 23/28/31/30,
+ves 28/22/26/24, mlýn 18/22/26/18, ves-vjezd 31/30/23/29, ves-dvory 32/33/30/31, krcma-kovarna 24/24/25/25,
+hostinec 22/21/31/22, věž 29/26/24/28. Špičky > 200 ms jen 2 (206, 209), zásek ves-dvory 2,9 s se NEOPAKOVAL.
+- **Tráva GPU × bez:** „vše znovu“ (oba zahřáté) p50 s GPU 35/25/26/25/20/21/26/25/26/19/36/31/24/21/27, bez
+  30/33/30/30/23/29/32/27/24/18/29/31/25/22/28 → rozdíl v šumu (±5 ms podle úseku oběma směry), NAMĚŘENÝ PŘÍNOS ŽÁDNÝ.
+  Výchozí zůstává bez GPU trávy (prototyp).
+- **Zásek ves-dvory 2,9 s:** při 1. trase po instalaci ano, při 2. trase téže verze ne → silnější PODEZŘENÍ na první
+  sestavení shaderů (keš ovladače/Godotu po 1. běhu platí). Stále nepotvrzeno „shadery +N“.
+- Krčma a kovárna: krcma-kovarna 24–25 ms p50 v obou měřeních = OVĚŘENO bez výrazné ceny.
