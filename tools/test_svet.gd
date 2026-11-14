@@ -4778,6 +4778,10 @@ func _interier() -> void:
 	var spatne := 0
 	var vse := 0
 	for st: Array in sv._uvnitr:
+		# 14. 11.: dil s vlastnim terenem (mlyn, st[2]) - obdelnik dilu je i dvur a nahon venku; trava podle terenu dilu
+		# (stejne jako louka._v_budove a svet.uzivani_smi) - vsech 107 "chyb" bylo tady (627, 915)
+		if st.size() > 2:
+			continue
 		var inv: Transform3D = st[0]
 		var b: AABB = st[1]
 		var xf := inv.affine_inverse()
