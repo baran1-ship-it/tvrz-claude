@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -4780,10 +4780,12 @@ func _interier() -> void:
 	for st: Array in sv._uvnitr:
 		# 14. 11.: dil s vlastnim terenem (mlyn, st[2]) - obdelnik dilu je i dvur a nahon venku; trava podle terenu dilu
 		# (stejne jako louka._v_budove a svet.uzivani_smi) - vsech 107 "chyb" bylo tady (627, 915)
-		if st.size() > 2:
-			continue
 		var inv: Transform3D = st[0]
 		var b: AABB = st[1]
+		if st.size() > 2:
+			b = sv.get("_mlyn_budova")                # dil mlyna: jen pudorys budovy (dvur a nahon venku smi mit travu)
+			if b.size.x <= 0.0:
+				continue
 		var xf := inv.affine_inverse()
 		for i in 12:
 			for j in 12:
@@ -8633,3 +8635,24 @@ func _mista_dvere() -> void:
 		if not ph.has(String(z["dvere"])):
 			chyby.append("%s: dvere %s ve svete nejsou" % [k, z["dvere"]])
 	_vysledek("mista_dvere", chyby.is_empty(), "%d chyb %s" % [chyby.size(), str(chyby.slice(0, 8))])
+
+
+## Misa 14. 11. (lavicka u schodu -> k prazdne zdi mezi palacem a celednikem): lavice u_zdi lezi u vnitrniho lice hradby
+## (lokace.json tvrz_hradby), zadem do 0,3 m od lice a ne ve zdi.
+func _tvrz_lavice() -> void:
+	var hr: Dictionary = Pravidla.cti("lokace", "tvrz_hradby")
+	var ix := float(hr["vnitrni_lic"][0])
+	var chyby: Array = []
+	var nasel := 0
+	for r: Dictionary in Pravidla.cti("nabytek", "venku"):
+		if String(r.get("u_zdi", "")) != "vychod":
+			continue
+		for v: Dictionary in sv.data["vybaveni"]:
+			if String(v["id"]) == String(r["id"]) and absf(float(v["p"][2]) - float(r["z"])) < 1.5 and float(v["p"][0]) > ix - 3.0:
+				nasel += 1
+				var zada := float(v["p"][0]) + 0.18
+				if zada > ix or ix - zada > 0.3:
+					chyby.append("lavice u (%.2f, %.2f): zada %.2f od lice %.2f" % [float(v["p"][0]), float(v["p"][2]), zada, ix])
+	if nasel == 0:
+		chyby.append("lavice u vychodni hradby chybi")
+	_vysledek("tvrz_lavice", chyby.is_empty(), "%d chyb %s" % [chyby.size(), str(chyby)])

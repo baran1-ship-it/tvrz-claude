@@ -13,12 +13,14 @@ import props as PR
 import lib
 from lib import M, Part, R, jit, rot, shingle_roof, wall_x, wall_z
 
-IX, IZ = 17.0, 14.0      # vnitrni lic hradeb
-OX, OZ = 18.8, 15.8      # vnejsi lic
+# hradby z dat (pravidla/svet/lokace.json tvrz_hradby - cte i hra: lavice u zdi), Misa 14. 11. „nedelas zaplaty?“
+_HR = kraj._LOKACE_J["tvrz_hradby"]
+IX, IZ = _HR["vnitrni_lic"]      # vnitrni lic hradeb
+OX, OZ = _HR["vnejsi_lic"]       # vnejsi lic
 WALK = 6.5
 BASE = -4.5
 # rozsireni hradu na zapad (vic mista pro kovarnu, zbrojnici a staj)
-EXT = 8.0
+EXT = _HR["rozsireni_zapad_m"]
 WIX, WOX = -(IX + EXT), -(OX + EXT)       # vnitrni a vnejsi lic zapadni hradby
 CX = -EXT / 2                             # stred pudorysu v ose X
 HX, HIX = OX + EXT / 2, IX + EXT / 2      # polovicni sirka (vnejsi, vnitrni)

@@ -754,12 +754,11 @@
  "venku": [
   {
    "id": "lavice_selska",
-   "p": [
-    16.65,
-    -3.0
-   ],
    "natoceni_st": 90.0,
-   "popis": "nadvori tvrze u vychodni zdi mezi palacem a celednikem (Misa 14. 11.: lavicka u schodu pryc, k prazdne zdi) - u vnitrniho lice vychodni hradby (blender/fort.py IX 17,0; lavice hloubka 0,36 + 0,17 m od zdi)"
+   "popis": "nadvori tvrze u vychodni hradby mezi palacem a celednikem (Misa 14. 11.: lavicka u schodu pryc, k prazdne zdi); poloha z lokace tvrz_hradby (u_zdi, od_zdi_m od lice + pul hloubky lavice)",
+   "u_zdi": "vychod",
+   "z": -3.0,
+   "od_zdi_m": 0.17
   },
   {
    "id": "lavice_selska",

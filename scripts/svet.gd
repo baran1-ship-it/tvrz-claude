@@ -5909,6 +5909,23 @@ func _nabytek_venku() -> void:
 			var i := clampi(int(float(r["ulice"]) * (osa.size() - 1)), 0, osa.size() - 2)
 			var sm := (osa[i + 1] - osa[i]).normalized()
 			q = osa[i] + sm.orthogonal() * float(r["bok_m"])
+		elif r.has("u_zdi"):
+			# Misa 14. 11.: lavice u vnitrniho lice hradby tvrze (lokace.json tvrz_hradby - stejny zaznam cte Blender fort.py)
+			var hr: Dictionary = Pravidla.cti("lokace", "tvrz_hradby")
+			var rzz: Array = (_kat_p.get(String(r["id"]), {}) as Dictionary).get("rozmer", [1.5, 0.45, 0.4])
+			var od := float(r["od_zdi_m"]) + float(rzz[2]) * 0.5
+			var ix := float(hr["vnitrni_lic"][0])
+			var iz := float(hr["vnitrni_lic"][1])
+			var wx := -(ix + float(hr["rozsireni_zapad_m"]))
+			match String(r["u_zdi"]):
+				"vychod":
+					q = Vector2(ix - od, float(r["z"]))
+				"zapad":
+					q = Vector2(wx + od, float(r["z"]))
+				"sever":
+					q = Vector2(float(r["x"]), -iz + od)
+				"jih":
+					q = Vector2(float(r["x"]), iz - od)
 		if q == Vector2.INF:
 			continue
 		var rz2: Array = (_kat_p.get(String(r["id"]), {}) as Dictionary).get("rozmer", [1.5, 0.45, 0.4])

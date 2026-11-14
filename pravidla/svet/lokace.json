@@ -2572,6 +2572,18 @@
   ],
   "_mistnosti": "mistnosti od zapadu: x vnitrni lice, dvere_x stred dveri ven v predni zdi, okna [x stredu, parapet] (kit.stone_window 0,6 x 0,85 s mrizi), louc [vyska, z] na zapadni zdi mistnosti; vyska mistnosti 4,2, hloubka od zf + t k hradbe"
  },
+ "tvrz_hradby": {
+  "vnitrni_lic": [
+   17.0,
+   14.0
+  ],
+  "vnejsi_lic": [
+   18.8,
+   15.8
+  ],
+  "rozsireni_zapad_m": 8.0,
+  "popis": "Míša 14. 11. („neděláš záplaty?“): rozměry hradeb tvrze – jediný zdroj pro Blender (fort.py IX/IZ, OX/OZ, EXT) i hru (lavice u zdi, nabytek.json venku u_zdi). Půdorys: střed x = −rozsireni/2, vnitřní líc východní hradby x = −rozsireni/2 + vnitrni_lic[0] + rozsireni/2 = vnitrni_lic[0], západní −(vnitrni_lic[0] + rozsireni), sever/jih z = ∓vnitrni_lic[1]."
+ },
  "kuchyne_tvrz": {
   "popis": "Kuchyne v prizemi palace (byvala spiz, Misa 6. 11. snimek 45: „mistnost vedle hodovni sine postavit kuchyn a uzavrit dvermi“). Ohniste s chlebovou peci (blender/vesnice.py hearth, stejne jako v chalupach) v severozapadnim rohu pod omitnutou kapuci (digestor) s prudnikem v rohu pres komnatu nad strechu - dobova kuchyne tvrze (cerna kuchyne s otevrenym ohnistem a dymnikem, KCD2 Trosky/Rataje). Dvere do sine v pricce (palace.py, x 2,8..3,2, z -11,2..-10,0) jsou pohyblive (kit.doorway vnitrni). Cte blender/palace.py (kitchen, shell); nabytek a luzko kucharky = nabytek.json svet (budova tvrz_kuchyne).",
   "ohniste": [

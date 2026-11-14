@@ -467,7 +467,14 @@ func _v_budove(px: float, pz: float) -> bool:
 		return true
 	for st: Array in main.svet._uvnitr:
 		if st.size() > 2:
-			continue                                 # dil s vlastnim terenem (mlyn): trava podle terenu dilu (_vzorek)
+			# dil s vlastnim terenem (mlyn): trava podle terenu dilu, ale v pudorysu budovy (podezdivka modelu,
+			# svet._mlyn_budova) zadna - Misa 14. 11. „nedelas zaplaty?“ (test interier hlida i mlynici)
+			var bm: AABB = main.svet.get("_mlyn_budova")
+			if bm.size.x > 0.0:
+				var qm: Vector3 = (st[0] as Transform3D) * Vector3(px, 0.0, pz)
+				if qm.x > bm.position.x and qm.x < bm.end.x and qm.z > bm.position.z and qm.z < bm.end.z:
+					return true
+			continue
 		var q: Vector3 = (st[0] as Transform3D) * Vector3(px, 0.0, pz)
 		var b: AABB = (st[1] as AABB).grow(float(main.svet.pasma()["budova"]["prah_m"]) + 0.1)   # vcetne prahu dveri
 		if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
