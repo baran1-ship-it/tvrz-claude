@@ -1013,7 +1013,10 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 		c["obch_start"] = _poutnik_volny(c, cn["obchuzka"], _rng.randi() % (cn["obchuzka"] as Array).size())
 		kde_b = String(cn["obchuzka"][c["obch_start"]])
 	c["kde_ted"] = kde_b
+	var _tm := Time.get_ticks_usec()
 	var m: Array = _misto_cinnosti(c, kde_b, cn)
+	if _profil and Time.get_ticks_usec() - _tm > 1000:
+		print("LIDE_PROFIL misto_cinnosti %s %s %.1f ms" % [c["id"], kde_b, (Time.get_ticks_usec() - _tm) / 1000.0])
 	# Misa 11. 11. (spravce stal u lavicky): sed bez volneho sedaku = jina moznost bloku bez sedu (ne stat u mista)
 	if bool(cn.get("sed", false)) and (c["sedak"] as Dictionary).is_empty() and not c.has("stoji_u") \
 			and not bool(c.get("bez_sedu_znovu", false)):
@@ -1026,7 +1029,10 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 				c.erase("bez_sedu_znovu")
 				return
 	if (c["sedak"] as Dictionary).is_empty() and not bool(cn.get("skupina", false)) and not bool(cn.get("skryty", false)):
+		var _tr := Time.get_ticks_usec()
 		m = [_rozestup(c, m[0]), m[1]]
+		if _profil and Time.get_ticks_usec() - _tr > 1000:
+			print("LIDE_PROFIL rozestup %s %.1f ms" % [c["id"], (Time.get_ticks_usec() - _tr) / 1000.0])
 	c["misto"] = m[0]
 	c["yaw_mista"] = m[1]
 	c["cn"] = cn
@@ -1103,7 +1109,10 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 			cs.append(m[0])
 			c["cesta"] = cs
 		else:
+			var _tq := Time.get_ticks_usec()
 			_pozadej(c, [p, m[0], INF, pr_cil, true])
+			if _profil and Time.get_ticks_usec() - _tq > 1000:
+				print("LIDE_PROFIL pozadej %s %s -> %s %.1f ms" % [c["id"], p.round(), (m[0] as Vector2).round(), (Time.get_ticks_usec() - _tq) / 1000.0])
 		c["uvnitr_cil"] = pr_cil
 		c["i"] = 0
 		c["na_miste"] = false
