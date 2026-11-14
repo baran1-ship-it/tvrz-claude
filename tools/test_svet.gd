@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -8820,3 +8820,52 @@ func _vstupy_bez_travy() -> void:
 	for s: String in spatne.slice(0, 20):
 		print("VSTUPY trava v pruchodu ", s)
 	_vysledek("vstupy_bez_travy", n > 0 and spatne.is_empty(), "dveri a vrat %d, s travou v pruchodu %d %s" % [n, spatne.size(), str(spatne.slice(0, 4))])
+
+
+## Misa 14. 11. „kdyz vybehnu z tvrze lehce nalevo pres louku, jak zacina merici trasa, neco blikne pred kamerou“:
+## podel prvnich useku merici trasy (a pasu +-6 m do stran) kazda rostlina z dat, jejiz obal (sit x meritko) zasahuje do
+## kamery (vyska oci nad terenem, polomer 0,4 m). Vypis = podezreni, kde kamera projizdi korunou/kerem.
+func _kamera_prekazky() -> void:
+	var tr: Array = Pravidla.cti("mereni_trasa", "useky")
+	var rost := get_tree().root.find_child("Rostliny", true, false)
+	var site := {}
+	if rost:
+		for g: Node in rost.get_children():
+			var mmi := g as MultiMeshInstance3D
+			if mmi and mmi.multimesh and mmi.multimesh.mesh and not String(mmi.name).ends_with("_stin"):
+				var sg := String(mmi.name).split("_")
+				if sg.size() > 2:
+					var key := "_".join(sg.slice(0, sg.size() - 2))
+					if not site.has(key):
+						site[key] = mmi.multimesh.mesh.get_aabb()
+	var body: Array = []
+	for u: Dictionary in tr.slice(0, 2):
+		var a := Vector2(float(u["od"][0]), float(u["od"][1]))
+		var b := Vector2(float(u["do"][0]), float(u["do"][1]))
+		var nrm := (b - a).normalized().orthogonal()
+		var dl := a.distance_to(b)
+		var t := 0.0
+		while t <= dl:
+			for bok: float in [-6.0, -3.0, 0.0, 3.0, 6.0]:
+				var q := a.lerp(b, t / dl) + nrm * bok
+				body.append(Vector3(q.x, float(sv._teren_y(q.x, q.y)) + 1.7, q.y))
+			t += 0.5
+	var nalez := {}
+	for key: String in sv.data["rostliny"]:
+		if key.contains("_daleko") or not site.has(key):
+			continue
+		var ma: AABB = site[key]
+		for t2: Array in sv.data["rostliny"][key]:
+			var p := Vector3(float(t2[3]), float(t2[7]), float(t2[11]))
+			if p.x < -20.0 or p.x > 90.0 or p.z < 20.0 or p.z > 215.0:
+				continue
+			var xf := Transform3D(Basis(Vector3(t2[0], t2[4], t2[8]), Vector3(t2[1], t2[5], t2[9]), Vector3(t2[2], t2[6], t2[10])), p)
+			var wa := (xf * ma).grow(0.4)
+			for c: Vector3 in body:
+				if wa.has_point(c):
+					var kl := "%s (%.1f, %.1f, %.1f) obal %s" % [key, p.x, p.y, p.z, str(wa.size.snapped(Vector3.ONE * 0.1))]
+					nalez[kl] = true
+					break
+	for kl: String in nalez:
+		print("KAMERA_PREKAZKY ", kl)
+	_vysledek("kamera_prekazky", true, "na zacatku merici trasy %d rostlin v drase kamery (podezreni, ne chyba)" % nalez.size())
