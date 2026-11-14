@@ -20,7 +20,7 @@ PX = 128              # pixelu na pohled (8 x 128 = 1024)
 DRUHY = {
     "smrk": ("smrk", "smrk_0"), "briza": ("briza", "briza_0"), "borovice": ("borovice", "borovice_0"),
     "dub_stredni": ("dub_stredni", "dub_stredni_0"), "dub_stary": ("dub_stary", "dub_stary_0"),
-    "lipa_stredni": ("lipa_stredni", "lipa_stredni_0"), "jablon": ("jablon", "jablon_0"), "lipa_stara": ("lipa_stara", "lipa_stara_0"),
+    "lipa_stredni": ("lipa_stredni", "lipa_stredni_0"), "jablon": ("jablon_1", "jablon_1_0"), "lipa_stara": ("lipa_stara", "lipa_stara_0"),
     "olse_stredni": ("olse_stredni", "olse_stredni_0"), "olse_mlada": ("olse_mlada", "olse_mlada_0"),
     "buk_stredni": ("buk_stredni", "buk_stredni_0"), "vrba": ("vrba", "vrba_0"),
 }

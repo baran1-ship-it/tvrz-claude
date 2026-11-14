@@ -324,7 +324,38 @@
     "vyska_m": 6.0,
     "polomer_m": 2.6,
     "od_ulice_m": 8.0,
-    "duvod": "lanova ves: za stodolou zahumenek (sad, zahrada) az k zahumenni ceste - zavre vyhled ze vsi do polí"
+    "duvod": "lanova ves: za stodolou zahumenek (sad, zahrada) az k zahumenni ceste - zavre vyhled ze vsi do polí",
+    "modely": [
+     [
+      "jablon_1",
+      0.27
+     ],
+     [
+      "jablon_2",
+      0.27
+     ],
+     [
+      "jablon_3",
+      0.26
+     ],
+     [
+      "jablon_4",
+      0.07
+     ],
+     [
+      "jablon_5",
+      0.07
+     ],
+     [
+      "jablon_6",
+      0.06
+     ]
+    ],
+    "meritko": [
+     0.85,
+     1.15
+    ],
+    "_modely": "Míša 14. 11. (Disk Modely: jablone.zip, Mlady_jablonovy_sad.zip – „tři druhy jabloní, naše se mi nelíbí, použij dle uvážení“): staré vysokokmeny jablon_1..3 (24–28 tis. troj., *_daleko 3 karty) střídavě, sem tam mladý stromek jablon_4..6 (mladé; jméno jablon_N = druh jablon v druhy.json) (LOD1 12–19 tis. troj. zblízka, LOD2 4–7 tis. dál) – sad nestejně starý jako skutečný. Váhy = podíl; výběr podle polohy (stejný při každém exportu), měřítko výšky meritko × vlastní výška modelu (NAVOD: škála 0,85–1,15, natočení náhodné). Historický strom (Jablon_historicky_sad, LOD0 423 tis. troj.) nepoužit – na tablet těžký."
    },
    "lipa": {
     "strom": "lipa_stara",

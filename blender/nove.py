@@ -29,6 +29,9 @@ STROMY = {
     "olse_mlada": (4.19, 7.69, 4.15), "vrba_hlavata_1": (6.05, 6.60, 6.40), "vrba_hlavata_2": (9.21, 7.65, 9.43),
     # jablon v3 (blender/strom2.py, modely/nove/jablon.glb - sady vsi, lokace.json ves.dvorec)
     "jablon": (5.82, 6.11, 6.13),
+    # jablone od modelare (Misa 14. 11., blender/zdroje: jablone.zip a Mlady_jablonovy_sad.zip; lokace ves.dvorec.sad.modely)
+    "jablon_1": (8.8, 6.52, 8.45), "jablon_2": (7.27, 7.15, 8.36), "jablon_3": (7.99, 6.06, 9.09),
+    "jablon_4": (1.74, 2.4, 1.73), "jablon_5": (1.77, 2.71, 1.95), "jablon_6": (2.01, 2.92, 1.75),   # 4-6 mlade stromky
 }
 DIM.update(STROMY)
 LOD = set(STROMY)            # ke kazdemu stromu vzdalena verze <model>_daleko (zblizka plny strom, dal nez ~60 m karta)
@@ -98,7 +101,9 @@ def _extract(pid):
     if pid == "psenice_2":
         pid = "psenice"                    # tataz sit, textura se prebarvi v add_to_library
     f = os.path.join(DIR, pid + ".glb")
-    zdroj = os.path.join(HERE, "zdroje", pid + ".glb")        # modely od Misi v repu (psenice; licence docs/modely_misa.md)
+    zdroj = os.path.join(HERE, "zdroje", pid + ".glb")        # modely od Misi v repu (psenice, jablone; licence docs/modely_misa.md)
+    if os.path.exists(zdroj) and os.path.exists(f) and os.path.getmtime(zdroj) > os.path.getmtime(f):
+        os.remove(f)                                          # novejsi zdroj v repu nez kes
     mistni = os.path.join(HERE, "..", "modely", "nove", pid + ".glb")    # stromy v3 z blender/strom2.py (jablon)
     if not os.path.exists(f) and not os.path.exists(zdroj) and os.path.exists(mistni):
         os.makedirs(DIR, exist_ok=True)
