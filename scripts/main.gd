@@ -962,10 +962,21 @@ func _pred_dohrivej() -> void:
 		world.add_child(_pred_dohrev)
 	var cam: Camera3D = player.cam
 	_pred_dohrev.global_transform = Transform3D(cam.global_basis, cam.global_position - cam.global_basis.z * 3.0)
+	var pred_n := _pred_dohrev.get_child_count()
 	for _i in mini(20, _pred_fronta.size()):
 		var g: Variant = _pred_fronta.pop_back()
 		if is_instance_valid(g):
 			_pred_kopie(g as GeometryInstance3D, _pred_dohrev)
+	# 14. 11. (Misa: zaseky 2-6 s „kdyz se neco objevi“): kopie i s bodovym svetlem bez stinu a se stinem jako
+	# predehrati za nacitanim (_predehrej_shadery) - pruchod s ohnem/louci se jinak sestavi az u ohne. Svetla jen
+	# s kopiemi (3 snimky, pak pryc s nimi) - jinak by svitila na skutecnou scenu
+	if pred_n == 0 and _pred_dohrev.get_child_count() > 0:
+		for st: bool in [false, true]:
+			var lo := OmniLight3D.new()
+			lo.omni_range = 4.0
+			lo.light_energy = 0.01
+			lo.shadow_enabled = st
+			_pred_dohrev.add_child(lo)
 
 
 ## Predehrati shaderu za nacitaci obrazovkou (0.62 bod 8, sekani pri vstupu do lesa/skal): renderer Compatibility

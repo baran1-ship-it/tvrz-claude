@@ -223,6 +223,10 @@ func _detektor() -> void:
 	# ne zasek. Zasek = > 40 ms A zaroven 1,6x delsi nez prumer posledni ~1 s; ostatni > 40 ms = pomaly snimek.
 	var prumer := _sn_prumer
 	_sn_prumer = cel if _sn_prumer <= 0.0 else lerpf(_sn_prumer, cel, 0.05)
+	var _pk_ted := _pipeline_soucet()
+	var _pk_pred := _pipe_minule
+	_pipe_minule = _pk_ted
+	_pipe_pred_snimku = _pk_pred
 	if cel <= ZASEK * 1000.0 or not main or not main.get("ready_done"):
 		return
 	if cel < prumer * 1.6:
@@ -256,6 +260,10 @@ func _detektor() -> void:
 				nk = k
 		if nk != "":
 			z += " [%s %.0f ms]" % [nk, nv / 1000.0]
+	# 14. 11. (Misa: zaseky 2-6 s plosne, kreslení+čekání, „neco se najednou objevi“): sestavene programy shaderu od minula
+	# (RenderingServer PIPELINE_COMPILATIONS_*; v Compatibility nemusi ovladac hlasit - 0 = nevime, ne „nic“)
+	var pk := _pipe_minule
+	z += ", shadery +%d" % (pk - _pipe_pred_snimku)
 	if main.player and bool(main.player.get("flying")):
 		z += ", LET"                      # rychly pohyb = rychlejsi nacitani okoli (Misa 26. 10.)
 	z += " | " + _fronty_zasek()
@@ -876,4 +884,15 @@ func _troj_skupiny() -> void:
 	_sk_i = konec
 
 
+var _pipe_minule := 0
+var _pipe_pred_snimku := 0
 
+
+## Soucet sestavenych pipeline (shaderu) od startu: canvas, mesh, surface, draw, specialization.
+func _pipeline_soucet() -> int:
+	var n := 0
+	for k in [RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_CANVAS, RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_MESH,
+			RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SURFACE, RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW,
+			RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SPECIALIZATION]:
+		n += int(RenderingServer.get_rendering_info(k))
+	return n
