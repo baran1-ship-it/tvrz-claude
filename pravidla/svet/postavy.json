@@ -338,50 +338,62 @@
   },
   "krcma_obsluha": {
    "p": [
-    373.23,
-    760.31
+    465.36,
+    811.3
    ],
-   "yaw_st": -136.1,
-   "dvere": "Pohyb_ves_dvere_1",
+   "yaw_st": -130.4,
+   "mistnost": "krcma_l_senkovna",
+   "dvere": "Pohyb_krcma_Vchod",
    "venku": [
-    371.21,
-    765.72
+    465.26,
+    817.9
    ],
    "vnitrek": [
-    369.59,
-    763.6
+    466.88,
+    816.0
    ],
    "uvnitr": [
     [
-     371.32,
-     761.94
+     467.46,
+     815.31
+    ],
+    [
+     465.48,
+     813.63
     ]
-   ]
+   ],
+   "_p": "Míša 14. 11.: krčmář a hosté v nové krčmě do L (lokace krcma_l, NAVOD_KRCMA_L.md); dřív stará krčma U Kohouta (usedlost 0, teď obyčejná). Body z rámce modelu (střed 468,3/813,4, natočení −0,7044): KrcmaL_Hospodsky_stani u výčepu, čelem do šenkovny (−x modelu)"
   },
   "krcma_senk": {
    "p": [
-    371.94,
-    760.99
+    464.03,
+    809.77
    ],
-   "mistnost": "ves_0_jizba",
-   "dvere": "Pohyb_ves_dvere_1",
+   "mistnost": "krcma_l_senkovna",
+   "dvere": "Pohyb_krcma_Vchod",
    "venku": [
-    371.21,
-    765.72
+    465.26,
+    817.9
    ],
    "vnitrek": [
-    369.59,
-    763.6
+    466.88,
+    816.0
    ],
    "uvnitr": [
     [
-     371.32,
-     761.94
+     467.46,
+     815.31
+    ],
+    [
+     465.48,
+     813.63
     ]
-   ]
+   ],
+   "_p": "Míša 14. 11.: krčmář a hosté v nové krčmě do L (lokace krcma_l, NAVOD_KRCMA_L.md); dřív stará krčma U Kohouta (usedlost 0, teď obyčejná). Body z rámce modelu (střed 468,3/813,4, natočení −0,7044): šenkovna mezi stoly (−5,6; 0); dveře Vchod do síně, do šenkovny otevřené (dvere_otevrene)"
   },
   "krcma": {
-   "pohyb": "Pohyb_ves_dvere_1"
+   "pohyb": "Pohyb_krcma_Vchod",
+   "_p": "Míša 14. 11.: krčmář a hosté v nové krčmě do L (lokace krcma_l, NAVOD_KRCMA_L.md); dřív stará krčma U Kohouta (usedlost 0, teď obyčejná). Body z rámce modelu (střed 468,3/813,4, natočení −0,7044): vchodové dveře"
   },
   "tvrz_ubytovna": {
    "p": [
@@ -471,26 +483,12 @@
   },
   "krcma_opreni": {
    "u_steny": [
-    373.23,
-    760.31
+    462.08,
+    814.54
    ],
-   "hledat_m": 3.0,
-   "dvere": "Pohyb_ves_dvere_1",
-   "venku": [
-    371.21,
-    765.72
-   ],
-   "vnitrek": [
-    369.59,
-    763.6
-   ],
-   "uvnitr": [
-    [
-     371.32,
-     761.94
-    ]
-   ],
-   "_p": "Misa 10. 11.: krcmar oprety u steny u pultu"
+   "hledat_m": 1.5,
+   "dvere": "Pohyb_krcma_Vchod",
+   "_p": "Míša 14. 11.: krčmář a hosté v nové krčmě do L (lokace krcma_l, NAVOD_KRCMA_L.md); dřív stará krčma U Kohouta (usedlost 0, teď obyčejná). Body z rámce modelu (střed 468,3/813,4, natočení −0,7044): venku u průčelí (uliční stěna z +4, opření 0,9 m před ní), ne u dveří"
   },
   "mlyn_dvur": {
    "pohyb": "Pohyb_mlyn_",

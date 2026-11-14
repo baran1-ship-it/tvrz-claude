@@ -2317,7 +2317,80 @@
   ],
   "zdroj": "NAVOD_KRCMA_L.md: počátek na terénu, ulice +Z, podlaha domu +0,45, patro křídla +2,85; ≈172 000 troj. (interiér zvlášť – vypínat zvenku), LOD1; kolize 80 kvádrů -convcolonly; dveře s pantem v počátku uzlu, extras otevreni_deg 100",
   "plac_r_m": 12.0,
-  "_rovina": "14. 11.: rovina 14 m nestačila – zadní konec stájového křídla (x 15, z −10 modelu) 0,49 m pod terénem (test krcma_l) → 18 m; plac_r_m = vyšlapaná hlína (kraj.PLACKY)"
+  "_rovina": "14. 11.: rovina 14 m nestačila – zadní konec stájového křídla (x 15, z −10 modelu) 0,49 m pod terénem (test krcma_l) → 18 m; plac_r_m = vyšlapaná hlína (kraj.PLACKY)",
+  "podlaha_m": 0.45,
+  "nabytek": [
+   [
+    "stul_hospoda",
+    -5.6,
+    -1.85,
+    0.0
+   ],
+   [
+    "stul_hospoda",
+    -5.6,
+    1.85,
+    0.0
+   ],
+   [
+    "lavice_selska",
+    -4.7,
+    -1.85,
+    90.0
+   ],
+   [
+    "lavice_selska",
+    -6.5,
+    -1.85,
+    90.0
+   ],
+   [
+    "lavice_selska",
+    -4.7,
+    1.85,
+    90.0
+   ],
+   [
+    "lavice_selska",
+    -6.5,
+    1.85,
+    90.0
+   ]
+  ],
+  "_nabytek": "Míša 14. 11.: NAVOD – stoly, židle, sudy a nádobí z naší hry: šenkovna x −8…−1, z −4…4 (modelu), výčep a pec u x −2 → stoly s lavicemi ve volné části x −7…−4 (stul_hospoda delší osou podél z, lavice otočené o 90° podél stolu); [id, x, z, natoceni_st v rámci modelu], výška = podlaha_m",
+  "mistnosti": [
+   [
+    "krcma_l_senkovna",
+    "Krčma – šenkovna",
+    -4.5,
+    0.0,
+    7.0,
+    8.0,
+    0.2
+   ],
+   [
+    "krcma_l_sin",
+    "Krčma – síň",
+    0.6,
+    2.0,
+    3.2,
+    4.0,
+    0.16
+   ],
+   [
+    "krcma_l_kuchyne",
+    "Krčma – černá kuchyně",
+    0.6,
+    -2.0,
+    3.2,
+    4.0,
+    0.12
+   ]
+  ],
+  "_mistnosti": "[name, titulek, x, z, šířka x, délka z, ambient] v rámci modelu podle NAVOD_KRCMA_L.md dispozice; výška 2,4 m od podlahy",
+  "dvere_otevrene": [
+   "KrcmaL_Dvere_Senkovna"
+  ]
  },
  "kovarna_tvrz": {
   "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",

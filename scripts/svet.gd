@@ -10073,6 +10073,16 @@ func _krcma_dil(root: Node3D, parent: Node3D) -> void:
 		if ko:
 			var kp := xf * _rel_xf(ko, sc).origin
 			data["kour"].append([kp.x, kp.y, kp.z])
+	# nabytek z katalogu a mistnosti (lokace.json krcma_l nabytek / mistnosti, v ramci modelu, podlaha podlaha_m)
+	var pod := float(kr["podlaha_m"])
+	for nb: Array in kr.get("nabytek", []):
+		var np := xf * Vector3(float(nb[1]), pod, float(nb[2]))
+		data["vybaveni"].append({"id": String(nb[0]), "p": [np.x, np.y, np.z], "yaw": float(kr["natoceni"]) + deg_to_rad(float(nb[3]))})
+	for ms: Array in kr.get("mistnosti", []):
+		var mp := xf * Vector3(float(ms[2]), pod, float(ms[3]))
+		var am := float(ms[6])
+		data["mistnosti"].append({"name": String(ms[0]), "title": String(ms[1]), "pos": [mp.x, mp.y, mp.z],
+				"size": [float(ms[4]), 2.4, float(ms[5])], "yaw": float(kr["natoceni"]), "ambient": [am, am * 0.92, am * 0.8]})
 	var sp := sc.find_child(String(kr["spani_hrac"]), true, false) as Node3D
 	if sp:
 		var spp := xf * _rel_xf(sp, sc).origin
