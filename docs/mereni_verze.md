@@ -380,7 +380,7 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
 - Špička ves-vjezd 206 ms (fyzika 34) u (374, 749) = u krčmy (r. 125, cesty ke krčmě selhávají).
 - Teplo: panel 50 → 30 FPS během trasy (stejně jako dřív).
 
-## 0.999996 (commit 4f6de2ba, 14. 11. 14:50) – NEOVĚŘENO NA ZAŘÍZENÍ
+## 0.999996 (commit 4f6de2ba, 14. 11. 14:50) – měřeno 14. 11. 15:53 (Míša, tablet, 3D 75 %)
 Změny proti 0.999995: změna činnosti postav 1/snímek (PC lide_zasek 10,8 ms, dřív 13–14), řetěz mříže jen použité články,
 déšť: sběr materiálů po částech (PC; tablet měřil 357 ms zásek na začátku deště v 0.999995), ves zesvětlená (textury, bez vlivu na výkon – NEOVĚŘENO).
 Čeká na Měřicí trasu (varianta dest).
@@ -393,3 +393,18 @@ déšť: sběr materiálů po částech (PC; tablet měřil 357 ms zásek na za�
 
 Naměřený vliv (ne příčina): fyzika 30 Hz při snímku ~33 ms střídá 0 a 2 kroky fyziky v jednom snímku → špičky 69–91 ms;
 60 Hz dělá rovnoměrně 2 kroky. Výchozí zůstává 60 Hz (main.gd fyzika_i 1). Hostinec 32 ms p50 = kolem 31 FPS.
+
+### 0.999996 – Měřicí trasa 14. 11. 15:53 (sestavení fc315402, manifest fd569111)
+p50 vše / post. stojí / déšť / vše znovu (v závorce 0.999995): tvrz-cesta 32/30/40/29 (27/19/32/30), louka 24/28/29/31
+(26/17/31/30), les 21/27/30/29 (32/19/28/28), skály 23/26/32/34 (27/27/30/27), ves 22/23/21/20 (19/19/25/22),
+mlýn 20/21/23/23 (20/20/20/21), ves-vjezd 23/21/33/35 (26/30/35/33), ves-dvory 27/38/29/23 (37/26/30/30),
+hostinec 20/17/24/23 (20/17/18/25), věž 27/25/33/36 (19/24/25/23).
+- **Ověřená oprava:** začátek deště bez záseku (déšť/tvrz-cesta max 86 ms; 0.999995: 357 ms, skripty 109) – sběr po částech.
+- **Ověřená oprava:** ves-vjezd bez špičky (max 33 ms; 0.999995: 206 ms u krčmy).
+- **Nová špička (naměřeno, příčina NEZNÁMÁ):** ves-dvory u (421–423, 871–874), 8,8 m od domu usedlosti 6: 329 ms
+  (1. průjezd) a 2 431 ms (vše znovu), skripty 4/11, fyzika 3/2, kreslení 337/422 → čas mimo skripty a fyziku (GPU/ovladač
+  nebo načítání). PODEZŘENÍ 1: první vykreslení vnitřku domu (rozpocty ves_vnitrek, předměty jen zblízka) = sestavení
+  shaderů v ovladači. PODEZŘENÍ 2: něco nového v okolí usedlosti 6 (kurník posunutý podél zdi, ohrady). Test: varianta
+  trasy s vypnutým vnitřkem domů + zastavení u (421, 871).
+- **Teplo:** konec trasy (vše znovu) 19–25 FPS, průměr snímku 43–51 ms (1. část 26–40) – tablet se zahřál.
+- 1. průjezd (vše) tvrz-cesta p95 72, max 525 (louka 979 ms zahřátí) – stejně jako 0.999995 (keš shaderů?).
