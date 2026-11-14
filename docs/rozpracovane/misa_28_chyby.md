@@ -193,3 +193,5 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 | 130 | Míša 14. 11.: poutník prakticky nemá zápěstí | model postavy (rukáv × ruka) | model / řez rukávu | snímek | ČEKÁ |
 | 131 | Míša 14. 11.: bylinkářka nemá plot (r. 119), v záhoně má zeleninu místo bylinek | záznam zahrady dům 7 | plot + byliny v záhonu (data, export) | zasazeni | ČEKÁ |
 | 132 | snímek Míši 14. 11.: tráva v hostinci u dveří a u stolů (test hostinec_trava hlásí 0) | test hlídá jen Louka/Rostliny/TravaGPU – tráva je jinde | najít uzel, opravit zdroj i test | hostinec_trava | ČEKÁ |
+| 133 | Míša 14. 11.: v Nastavení po přepnutí denní doby menu skočí nahoru, znovu scrolovat | menu.show_page při obnově stránky nastavení posun na 0 + fokus na 1. tlačítko | obnova téže stránky drží posun (po rozvržení) a fokus | menu_posun | OPRAVENO 14. 11. (test v plné sadě) |
+| 134 | Míša 14. 11.: Puchart má ves světlejší | textury domů vsi jas 0,14–0,31, začouzené 0,02–0,06 | tools/zesvetli_ves.py (modely.json ves_jas: cíl 0,5, ×2,6, začouzené 0,16) jako Puchart stavby_export.gd | snímek | ROZPRACOVÁNO |
