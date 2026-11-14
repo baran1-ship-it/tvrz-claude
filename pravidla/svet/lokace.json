@@ -2272,7 +2272,8 @@
    "natoceni": -1.22,
    "rovina_r_m": 7.5,
    "popis": "dům kováře (selský dům Dum1 jako v usedlostech) v ose konce ulice, štít (+z modelu) do návsi; natoceni = směr osy au (svet._domy_ramce jako chalupa mlynáře)"
-  }
+  },
+  "plac_r_m": 6.5
  },
  "krcma_l": {
   "popis": "Míša 14. 11. (snímek ze hry: „krčma“ zakroužkovaná vlevo od odbočky k rybníku, studnu přesunout na náves; stará krčma U Kohouta zůstane jako obyčejná usedlost): krčma do L (Disk budovy krcma.zip, NAVOD_KRCMA_L.md) u odbočky (stará ulice) k rybníku, uliční stranou (+Z modelu) k odbočce, stájové křídlo (+x modelu) směrem k rybníku. Střed = osa staré ulice (ves.stred_stare_navsi + osa vesnice.AXIS) + 11,5 m stranou (průčelí 6 m od osy).",
@@ -2283,7 +2284,7 @@
    813.4
   ],
   "natoceni": -0.7044,
-  "rovina_r_m": 14.0,
+  "rovina_r_m": 18.0,
   "dosah_m": 70.0,
   "lod1_od_m": 65.0,
   "interier_skupina": "KrcmaL_Interier_skupina",
@@ -2314,7 +2315,9 @@
     "krcma_vrata"
    ]
   ],
-  "zdroj": "NAVOD_KRCMA_L.md: počátek na terénu, ulice +Z, podlaha domu +0,45, patro křídla +2,85; ≈172 000 troj. (interiér zvlášť – vypínat zvenku), LOD1; kolize 80 kvádrů -convcolonly; dveře s pantem v počátku uzlu, extras otevreni_deg 100"
+  "zdroj": "NAVOD_KRCMA_L.md: počátek na terénu, ulice +Z, podlaha domu +0,45, patro křídla +2,85; ≈172 000 troj. (interiér zvlášť – vypínat zvenku), LOD1; kolize 80 kvádrů -convcolonly; dveře s pantem v počátku uzlu, extras otevreni_deg 100",
+  "plac_r_m": 12.0,
+  "_rovina": "14. 11.: rovina 14 m nestačila – zadní konec stájového křídla (x 15, z −10 modelu) 0,49 m pod terénem (test krcma_l) → 18 m; plac_r_m = vyšlapaná hlína (kraj.PLACKY)"
  },
  "kovarna_tvrz": {
   "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",

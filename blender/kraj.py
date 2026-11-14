@@ -293,11 +293,13 @@ if _VET.get("stred"):
 _KOV = _LOKACE_J.get("kovarna_ves", {})
 if _KOV.get("stred"):
     MISTA.append(("kovarna_ves", _KOV["stred"][0], _KOV["stred"][1], _KOV["natoceni"], _KOV["rovina_r_m"]))
+    PLACKY.append((_KOV["stred"][0], _KOV["stred"][1], _KOV["plac_r_m"]))      # vyslapana hlina kolem kovarny
     MISTA.append(("kovarna_dum", _KOV["dum"]["stred"][0], _KOV["dum"]["stred"][1], _KOV["dum"]["natoceni"], _KOV["dum"]["rovina_r_m"]))
 # krcma do L u odbocky k rybniku (Misa 14. 11., lokace.json krcma_l): rovina a vegetace pryc, model stavi hra (svet._krcma_dil)
 _KRC = _LOKACE_J.get("krcma_l", {})
 if _KRC.get("stred"):
     MISTA.append(("krcma_l", _KRC["stred"][0], _KRC["stred"][1], _KRC["natoceni"], _KRC["rovina_r_m"]))
+    PLACKY.append((_KRC["stred"][0], _KRC["stred"][1], _KRC["plac_r_m"]))      # vyslapana hlina pred krcmou a ve dvore
 
 
 def mlyn_lok(x, z):

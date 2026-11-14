@@ -13213,7 +13213,13 @@ func _plants(parent: Node3D, quality: int) -> void:
 	var uvnitr: Array = []
 	_nacti_kryti()
 	_cesta_do_kryti()
-	for n in parent.find_children("Staticky_*", "Node3D", true, false):
+	# Misa 14. 11.: kovarna a krcma do L (dily z Disku) - pudorys modelu jako staticke stavby (krcma i s dvorem)
+	var dily_staveb: Array = parent.find_children("Staticky_*", "Node3D", true, false)
+	for jd: String in ["Kovarna_dil", "Krcma_dil"]:
+		var nd0 := parent.find_child(jd, true, false)
+		if nd0:
+			dily_staveb.append(nd0)
+	for n in dily_staveb:
 		var bb := AABB()
 		var prvni := true
 		for mi in n.find_children("*", "MeshInstance3D", true, false):
