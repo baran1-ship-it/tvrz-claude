@@ -235,13 +235,16 @@ void fragment() {
 	vec3 kk = kolem_kamenu(wpos.xz);
 	combined_foam = max(combined_foam, kk.z * 0.6);
 	// bila voda na padech kaskady (voda.json potok.raz_toku kaskada pena_padu): strma plocha = pena, rozbita sumem
-	combined_foam = max(combined_foam, clamp(steepness_map * pena_padu, 0.0, 0.9) * (0.55 + 0.45 * foam_randomness));
+	float pad_bila = clamp(steepness_map * pena_padu, 0.0, 1.0) * (0.6 + 0.4 * foam_randomness);
 	water_norFBM += kk.xy * 0.12;
 
 	float t = smoothstep(0.0, hloubka_barvy, hloubka);
 	vec3 barva = mix(melka, hluboka, t);
 	ALBEDO = mix(barva, foam_color.rgb, combined_foam * foam_color.a);
 	ALPHA = clamp(smoothstep(0.0, cirost, hloubka) * 0.92 + combined_foam, 0.0, 1.0);
+	// pad kaskady: bila voda plnou barvou (pena_padu x strmost, rozbita sumem) - pres slabou penu proudu
+	ALBEDO = mix(ALBEDO, vec3(0.86, 0.88, 0.85), pad_bila);
+	ALPHA = max(ALPHA, pad_bila);
 	SPECULAR = 0.25;
 	ROUGHNESS = roughness;
 	NORMAL_MAP = vec3(water_norFBM, 0);
