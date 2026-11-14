@@ -524,6 +524,9 @@ for st_ in stavby:   # celky (krčma, hájovna): dvůr a dvorek udusaná hlína 
     a_ = CELKY[st_["model"]]["aabb"]; cx_ = (a_[0] + a_[1]) / 2; yw_ = st_["yaw"]
     pts_ = [(st_["x"] + (px - cx_) * math.cos(yw_) + pz * math.sin(yw_), st_["z"] - (px - cx_) * math.sin(yw_) + pz * math.cos(yw_)) for px, pz in ((a_[0], a_[2] - CELKY[st_["model"]].get("hlina_vzadu_m", 0.0)), (a_[1], a_[2] - CELKY[st_["model"]].get("hlina_vzadu_m", 0.0)), (a_[1], a_[3] + 2.0), (a_[0], a_[3] + 2.0))]
     vy_plochy.append({"poly": [[round(q[0], 2), round(q[1], 2)] for q in pts_], "hlina": HL["dvur"], "druh": "celek"})
+    if st_.get("prichod") and st_.get("pohled"):   # před vchodem celku bez porostu a pásu u paty (Míša 14. 11.: rostliny přímo před dveřmi hájovny)
+        vy_plochy.append({"poly": [[r3_(q[0]), r3_(q[1])] for q in LineString([st_["prichod"], st_["pohled"]]).buffer(VY["chodnik_polosirka_m"] + 0.3, 4).exterior.coords[:-1]],
+                          "hlina": HL["pred_vstupem"], "druh": "pred_vstupem"})
     if CELKY[st_["model"]].get("cesta_k_ceste") and st_.get("prichod"):   # cestička od vchodu k hlavní cestě (Míša 14. 11.: „chybí cesta k hlavní cestě“)
         k_ulici(np.array(st_["prichod"], float), np.array([math.sin(yw_), math.cos(yw_)]), VY["chodnik_polosirka_m"], HL.get("chodnik", HL["dvur"]))
 for s_ in studny:

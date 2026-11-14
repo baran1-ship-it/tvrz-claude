@@ -723,6 +723,25 @@ for _st in [s for s in _ms2["stavby"] if s.get("soubor")]:
     if not any(t.get("stara") and math.hypot(t["x"] - _st["x"], t["z"] - _st["z"]) < 35 for t in _ms2["stromy"]): _jb_ch.append("u %s není stará jabloň" % _st["misto"])
 TEST("jablone", not _jb_ch, "; ".join(_jb_ch) if _jb_ch else "varianty jabloní z Disku, stará jabloň u krčmy i hájovny")
 
+# Míša 14. 11. noc: „plot před kovárnou zruš“, „domy … až moc vypadají bílé“ (#261)
+_kv_ch = []
+_kus = {h["usedlost"] for h in _ms2["hospodarske"] if h["model"] == "kovarna"}
+for _u in _kus:
+    if not any(p_.get("otevreny_zacatek") for p_ in _ms2["ploty"] if p_["usedlost"] == _u): _kv_ch.append("usedlost %d: uliční plot před kovárnou" % _u)
+    if any(b_["druh"] == "branka" for b_ in _ms2["brany"] if b_.get("usedlost") == _u): _kv_ch.append("usedlost %d: branka před kovárnou" % _u)
+if float(_md["domy"].get("jas_podrobny", 1.0)) >= 1.0: _kv_ch.append("domy bez ztlumení (jas_podrobny)")
+if float(_ms["usedlosti"]["ploty"]["textury"]["kura"].get("nasob", 1.0)) >= 1.0: _kv_ch.append("kůly z kůry bez ztmavení")
+TEST("kovarna_domy_jas", _kus and not _kv_ch, "; ".join(_kv_ch) if _kv_ch else "kovárna bez plotu do ulice, domy × %s, kůra × %s" % (_md["domy"]["jas_podrobny"], _ms["usedlosti"]["ploty"]["textury"]["kura"]["nasob"]))
+
+# Míša 14. 11. noc: rostliny pásu u paty zdi přímo před dveřmi hájovny a před otevřenou kovárnou (#263)
+from shapely.geometry import Polygon as _Pg2, LineString as _Ls2
+_pp = json.load(open(K + "/hra/data/pata_pas.json")); _vyp = [_Pg2(e["poly"]) for e in _ms2["vyslapano"]["plochy"] if e["druh"] in ("pred_vstupem", "kovarna")]
+_pv = 0
+for _sk in (s_ for b_ in _pp["bunky"].values() for s_ in b_):
+    _l = _Ls2([(_sk[0], _sk[1]), (_sk[2], _sk[3])])
+    if any(_l.intersects(v_) for v_ in _vyp): _pv += 1
+TEST("pred_vstupem_bez_rostlin", _vyp and _pv == 0, "skvrn pásu u paty v plochách před vstupy a před kovárnou: %d (ploch %d)" % (_pv, len(_vyp)))
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

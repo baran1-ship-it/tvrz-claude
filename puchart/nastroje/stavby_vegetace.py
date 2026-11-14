@@ -236,7 +236,7 @@ if os.path.exists(D + "mista_stavby.json"):
     for c_ in VYS_.get("cary", []):
         if len(c_["body"]) > 1: nogo.append(_Ls(c_["body"]).buffer(c_["polosirka"]))
     for e_ in VYS_.get("plochy", []):
-        if e_["druh"] in ("pred_vstupem", "naves", "sezeni"): nogo.append(_Pg(e_["poly"]).buffer(PP["vstup_okraj_m"]))
+        if e_["druh"] in ("pred_vstupem", "naves", "sezeni", "kovarna"): nogo.append(_Pg(e_["poly"]).buffer(PP["vstup_okraj_m"]))
     for b_ in MS_["brany"]: nogo.append(_Ls([(b_["a"][0], b_["a"][2]), (b_["b"][0], b_["b"][2])]).buffer(PP["brana_okraj_m"]))
 if PP["zdroje"]["hrad_zdi"]:
     for q in json.load(open(D + "stavby_clony.json"))["kvadry"]: _hrany_poly(q["rohy"], "hrad_zed")
