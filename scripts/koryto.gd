@@ -33,7 +33,8 @@ var sirky: PackedFloat32Array = PackedFloat32Array()   # pul sirky vody
 var hloubky: PackedFloat32Array = PackedFloat32Array() # hloubka vody uprostred
 var sklony: PackedFloat32Array = PackedFloat32Array()  # nasobek sklonu svahu podel toku (strida strmejsi a mirnejsi)
 var stupen: PackedInt32Array = PackedInt32Array()      # kaskada: cislo useku x 1000 + cislo stupne, jinak -1
-var schody: Array = []                                 # kaskada: hrany stupnu {p, smer, pad, w, k} (balvany, pena)
+var schody: Array = []
+var breh_nad: PackedFloat32Array = PackedFloat32Array()  # vyska brehu nad hladinou podle razu toku (voda.json breh_nad_m)                                 # kaskada: hrany stupnu {p, smer, pad, w, k} (balvany, pena)
 var raz: PackedInt32Array = PackedInt32Array()        # index do voda.json potok.raz_toku.druhy (0 klidny, pereje, kaskada)
 var krivost: PackedFloat32Array = PackedFloat32Array() # se znamenkem: > 0 zatacka doleva (stred zatacky vlevo od smeru osy)
 var _mriz := {}                                        # bunka 16 m -> [indexy useku]
@@ -194,6 +195,9 @@ func priprav(vyska: Callable) -> bool:
 	# terenem - prumer 9 bodu zvedl hladinu a podlaha pod ni nasypala breh). Na pereji a kaskade hladina nejvys
 	# nejnizsi teren u osy - zahloubeni (pravidla/svet/voda.json potok.raz_toku): koryto se zarizne, nesype.
 	raz.resize(n)
+	breh_nad.clear()
+	for dr0: Dictionary in druhy_r:
+		breh_nad.append(float(dr0["breh_nad_m"]))
 	for k in n:
 		var i0 := k
 		var i1 := k
@@ -280,7 +284,8 @@ func blizko(x: float, z: float) -> Array:
 			# podle vyssi z obou tuni, jinak deska horni tune trcela pres snizeny breh (snimek kask_zblizka 14. 11.)
 			var hb := maxf(hladiny[k], hladiny[k + 1]) if stupen.size() > k + 1 and stupen[k] >= 0 and stupen[k + 1] != stupen[k] else hh
 			out = [d, hh, lerpf(sirky[k], sirky[k + 1], t),
-					clampf(strana * kr / KRIVOST, -1.0, 1.0), lerpf(hloubky[k], hloubky[k + 1], t), lerpf(sklony[k], sklony[k + 1], t), hr, hb]
+					clampf(strana * kr / KRIVOST, -1.0, 1.0), lerpf(hloubky[k], hloubky[k + 1], t), lerpf(sklony[k], sklony[k + 1], t), hr, hb,
+					maxf(breh_nad[raz[k]], breh_nad[raz[k + 1]]) if raz.size() > k + 1 else 0.05]
 	return out if best < DOSAH else []
 
 
@@ -298,19 +303,20 @@ func strop(x: float, z: float, sum := true) -> float:
 	if d <= w:
 		return h - hl * (1.0 - 0.5 * smoothstep(w * 0.6, w, d))
 	h = float(b[7])                                   # breh: u padu podle vyssi tune
+	var bn := float(b[8])                             # breh nad hladinou podle razu (kaskada = skalni stena)
 	if d <= w + PRAH:
-		return lerpf(h - hl * 0.5, h + 0.05, (d - w) / PRAH)
+		return lerpf(h - hl * 0.5, h + bn, (d - w) / PRAH)
 	# vnitrni breh: plochy jesep 0-4 m tesne nad vodou, pak svah
 	var e := d - w - PRAH
 	var jesep := 4.0 * maxf(vn, 0.0)
-	var y := h + 0.05 + 0.03 * minf(e, jesep)
+	var y := h + bn + 0.03 * minf(e, jesep)
 	e = maxf(e - jesep, 0.0)
 	var s: float = b[5] * (lerpf(S_ROVNY, S_VNITRNI, vn) if vn > 0.0 else lerpf(S_ROVNY, S_VNEJSI, -vn))
 	y += s * e + ROZEVRENI * e * e
 	y += (_sum.get_noise_2d(x, z) * 0.45 * smoothstep(0.0, 2.0, e) if sum else 0.0)
 	# do PAS musi zarez potkat puvodni teren: primka od kraje vody k terenu na hranici pasu (strmejsi = skalnata stena)
 	var e_pas := maxf(PAS - w - PRAH - jesep, 1.0)
-	var rampa := h + 0.05 + (float(b[6]) - h - 0.05) * clampf((d - w - PRAH - jesep) / e_pas, 0.0, 1.0)
+	var rampa := h + bn + (float(b[6]) - h - bn) * clampf((d - w - PRAH - jesep) / e_pas, 0.0, 1.0)
 	return maxf(y, rampa) if d < PAS else INF
 
 
@@ -327,7 +333,7 @@ func podlaha(x: float, z: float) -> float:
 	var e := float(b[0]) - float(b[2])
 	if e < 0.4 or e > 9.0:
 		return -INF
-	var f := float(b[7]) + 0.05 + 0.1 * (e - 0.4)
+	var f := float(b[7]) + float(b[8]) + 0.1 * (e - 0.4)
 	if e > 5.0:
 		f -= (e - 5.0) * 0.6
 	return f

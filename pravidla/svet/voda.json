@@ -1451,13 +1451,15 @@
      "nazev": "klidny",
      "sklon_od": 0.0,
      "zahloubeni_m": null,
-     "balvanu_na_m": 0.0
+     "balvanu_na_m": 0.0,
+     "breh_nad_m": 0.05
     },
     {
      "nazev": "pereje",
      "sklon_od": 0.03,
      "zahloubeni_m": 0.5,
-     "balvanu_na_m": 0.6
+     "balvanu_na_m": 0.6,
+     "breh_nad_m": 0.05
     },
     {
      "nazev": "kaskada",
@@ -1484,10 +1486,12 @@
       "seed": 4141,
       "pad_min_m": 0.3,
       "pena_padu": 1.0
-     }
+     },
+     "breh_nad_m": 0.8
     }
    ],
-   "_schody": "Misa 14. 11. noc (snimek kaskady s krouzkem: „schody? to nemyslis vazne“, cikcak cara): kaskada = skalni soutesku s klikatou proudnici, ne terasy pres celou sirku (resers docs/rozpracovane/potok_kaskada_resers2.md: Montgomery & Buffington 1997 kaskada nad 0,065, Finnegan 2005 sirka ~0,37x, Chin 0,43-2,4 sirky, Zimmermann & Church 2001 nepravidelne, Abrahams 1995). sirka_podil = sirka vody kaskady / bezna; rozestup_sirek = nahodny rozestup stupnu [min, max] x sirka kaskady; vychylka_podil = proudnice od osy, strana se stridá na kazdem stupni (tune posunuta k prepadu); hrana stupne = rada balvanu sikmo (natoceni_hrany_st od kolmice, stridave); balvanu_na_m v korytu (30-50 % plochy nad vodou). Tune = nejnizsi hladina useku (teren se jen zarizne). Hodnoty [O] odhad, overit snimkem."
+   "_schody": "Misa 14. 11. noc (snimek kaskady s krouzkem: „schody? to nemyslis vazne“, cikcak cara): kaskada = skalni soutesku s klikatou proudnici, ne terasy pres celou sirku (resers docs/rozpracovane/potok_kaskada_resers2.md: Montgomery & Buffington 1997 kaskada nad 0,065, Finnegan 2005 sirka ~0,37x, Chin 0,43-2,4 sirky, Zimmermann & Church 2001 nepravidelne, Abrahams 1995). sirka_podil = sirka vody kaskady / bezna; rozestup_sirek = nahodny rozestup stupnu [min, max] x sirka kaskady; vychylka_podil = proudnice od osy, strana se stridá na kazdem stupni (tune posunuta k prepadu); hrana stupne = rada balvanu sikmo (natoceni_hrany_st od kolmice, stridave); balvanu_na_m v korytu (30-50 % plochy nad vodou). Tune = nejnizsi hladina useku (teren se jen zarizne). Hodnoty [O] odhad, overit snimkem.",
+   "_breh_nad_m": "vyska brehu nad hladinou u kraje vody (koryto.strop/podlaha): klidny a pereje 0,05 (drive natvrdo), kaskada 0,8 - skalni stena souteska (resers potok_kaskada_resers2.md); sit vody Waterways je v zakrutu o kus sirsi - nizky breh ji ukazal jako desku nad travou"
   }
  },
  "rybnik_lhota": {
