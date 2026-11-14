@@ -181,6 +181,11 @@ func priprav(vyska: Callable) -> bool:
 			k0 = k1 + 1
 		for k in range(1, n):
 			hladiny[k] = minf(hladiny[k], hladiny[k - 1] - spad * body[k].distance_to(body[k - 1]))
+	var pocty_r := {}
+	for k in n:
+		pocty_r[String(druhy_r[raz[k]]["nazev"])] = int(pocty_r.get(String(druhy_r[raz[k]]["nazev"]), 0)) + 1
+	print("koryto: bodu osy %d (z %d), raz toku %s, stupnu kaskady %d %s" % [n, b0.size(), str(pocty_r), schody.size(),
+			str(schody.map(func(sc: Dictionary) -> String: return "(%.0f, %.0f) %.1f m" % [(sc["p"] as Vector2).x, (sc["p"] as Vector2).y, float(sc["pad"])]))])
 	var r := ceili(DOSAH / 16.0)
 	for k in n - 1:
 		var lo := Vector2i(floori(minf(body[k].x, body[k + 1].x) / 16.0) - r, floori(minf(body[k].y, body[k + 1].y) / 16.0) - r)

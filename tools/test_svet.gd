@@ -8725,8 +8725,8 @@ func _rostliny_v_budovach() -> void:
 	for key: String in sv.data["rostliny"]:
 		# druhy bez vlastniho uzlu (trsy travy a byliny kresli louka): trs 0,6 x 0,6 m
 		var ma := AABB(Vector3(-0.3, 0.0, -0.3), Vector3(0.6, 0.6, 0.6))
-		if site.has(key):
-			ma = site[key]
+		if site.has(key) and sv.skupina(key) == "strom":
+			ma = site[key]                       # sit stromu; byliny (kopriva) maji obal site 13-28 m - trs
 		elif not (sv.data["rostliny"][key] as Array).is_empty():
 			bez_site.append(key)
 		for t: Array in sv.data["rostliny"][key]:
@@ -8752,11 +8752,13 @@ func _rostliny_v_budovach() -> void:
 							var q := (o[0] as Transform3D) * Vector3(t[3], t[7], t[11])
 							var dx := maxf(maxf(vn2.position.x - q.x, q.x - vn2.end.x), 0.0)
 							var dz := maxf(maxf(vn2.position.z - q.z, q.z - vn2.end.z), 0.0)
-							zasah = Vector2(dx, dz).length() < (la.size.x + la.size.z) * 0.25 * float(sv.pasma()["budova"]["koruna_od_zdi_podil"])
+							# polomer ze site bez natoceni (obal natocene site je az o 41 % vetsi) x meritko instance
+							var sc_t := Vector3(float(t[0]), float(t[4]), float(t[8])).length()
+							zasah = Vector2(dx, dz).length() < (ma.size.x + ma.size.z) * 0.25 * sc_t * float(sv.pasma()["budova"]["koruna_od_zdi_podil"])
 						if zasah:
 							var klic := "%s <- %s" % [rooms[ri]["name"], key]
 							if not vady.has(klic):
-								print("ROSTLINY_V_BUDOVACH priklad %s: rostlina u (%.1f, %.1f, %.1f) obal %s, mistnost %s, uzivani_smi %s, koruna_od_zdi %.1f" % [klic, t[3], t[7], t[11], str(wa.size), str((o[2] as AABB)), sv.uzivani_smi(key, float(t[3]), float(t[11])), sv.koruna_od_zdi(key)])
+								print("ROSTLINY_V_BUDOVACH priklad %s: rostlina u (%.1f, %.1f, %.1f) obal %s, mistnost %s, uzivani_smi %s, koruna_od_zdi %.1f" % [klic, t[3], t[7], t[11], str(wa.size), str((o[2] as AABB)), sv.uzivani_smi(key, float(t[3]), float(t[11]), Vector3(float(t[0]), float(t[4]), float(t[8])).length()), sv.koruna_od_zdi(key)])
 							vady[klic] = int(vady.get(klic, 0)) + 1
 							hit = true
 							break

@@ -12304,14 +12304,14 @@ const VODNI_DRUHY := ["rakos", "orobinec", "leknin", "okreh"]
 
 ## Smi druh klice key rust na (x, z)? Nezname klice (predmety, karty) ano - test smyslu hlida katalog zvlast. Nic
 ## suchozemskeho ve vode malych toku a rybniku ani na brehovem pasu (pasma voda breh_m; kameny ano).
-func druh_smi_hra(key: String, x: float, z: float, y := INF) -> bool:
+func druh_smi_hra(key: String, x: float, z: float, y := INF, sc := 1.0) -> bool:
 	if not (key.begins_with("kamen") or key.begins_with("balvan") or key.begins_with("skala_")):
 		var vodni := false
 		for v: String in VODNI_DRUHY:
 			vodni = vodni or key.contains(v)
 		if not vodni and od_vody(x, z, y) < float(pasma()["voda"]["holy_breh_m"]):
 			return false
-	if not uzivani_smi(key, x, z):
+	if not uzivani_smi(key, x, z, sc):
 		return false                                  # uzivani: zahon, pruchod, vnitrek stavby, cesta
 	var d: Dictionary = _druhy_hra.get(druh_klice(key), {})
 	if d.is_empty():
@@ -12330,7 +12330,7 @@ func druh_smi_hra(key: String, x: float, z: float, y := INF) -> bool:
 ## cesty“): nic nesazet do zahonu (obdelavany), do pruchodu (vrata, branky, dvere: pasma budova pruchod_m od stredu
 ## pruchodu), dovnitr pudorysu staveb (_uvnitr) a strom/ker/trs na hlinu cesty (odstup_cesty). Jedno misto pro rozsev,
 ## vstup exportu (_vstup_druhu) i louku (v_pruchodu).
-func uzivani_smi(key: String, x: float, z: float) -> bool:
+func uzivani_smi(key: String, x: float, z: float, sc := 1.0) -> bool:
 	if v_nove_zahrade(x, z) == 2 or v_zahrade(x, z):
 		return false
 	for oo: Array in _ohrady_obd:
@@ -12341,6 +12341,11 @@ func uzivani_smi(key: String, x: float, z: float) -> bool:
 		return false
 	# strom: koruna nesmi do zdi a mistnosti (pasma.budova koruna_od_zdi_podil; Misa 14. 11. vetve smrku v hostinci)
 	var rk := koruna_od_zdi(key)
+	if rk > float(pasma()["budova"]["rostlina_od_zdi_m"]):
+		rk *= sc                                      # strom: koruna podle meritka instance
+	# mistnosti (i patro hostince a krcma - pudorys statickych staveb je nepokryva cele; Misa 14. 11. vetve v loznici)
+	if rk > 0.0 and _od_mistnosti(x, z) < rk:
+		return false
 	for st: Array in _uvnitr:
 		if st.size() > 2:
 			continue                                  # dil mlyna: vlastni pravidla (teren dilu)
@@ -12359,6 +12364,19 @@ func uzivani_smi(key: String, x: float, z: float) -> bool:
 
 
 var _koruna_od_zdi := {}
+var _mist_obd: Array = []                      # [inv, AABB] mistnosti (data mistnosti) pro uzivani_smi; plni _plants
+
+
+## Vodorovna vzdalenost bodu od nejblizsi mistnosti (data mistnosti jako _v_mistnosti), 0 uvnitr, INF bez mistnosti.
+func _od_mistnosti(x: float, z: float) -> float:
+	var best := INF
+	for mo: Array in _mist_obd:
+		var q: Vector3 = (mo[0] as Transform3D) * Vector3(x, 0.0, z)
+		var ab: AABB = mo[1]
+		var dx := maxf(maxf(ab.position.x - q.x, q.x - ab.end.x), 0.0)
+		var dz := maxf(maxf(ab.position.z - q.z, q.z - ab.end.z), 0.0)
+		best = minf(best, sqrt(dx * dx + dz * dz))
+	return best
 
 
 ## Odstup od pudorysu stavby pro druh: stromy max(kmen_od_zdi_m, polomer koruny x koruna_od_zdi_podil), ker/trava/bylina
@@ -12457,7 +12475,7 @@ func _vstup_druhu() -> void:
 	for k: String in data["rostliny"].keys():
 		var zust: Array = []
 		for t: Array in data["rostliny"][k]:
-			if druh_smi_hra(k, float(t[3]), float(t[11]), float(t[7])):
+			if druh_smi_hra(k, float(t[3]), float(t[11]), float(t[7]), Vector3(float(t[0]), float(t[4]), float(t[8])).length()):
 				zust.append(t)
 		var n := (data["rostliny"][k] as Array).size() - zust.size()
 		if n > 0:
@@ -13362,6 +13380,13 @@ func _plants(parent: Node3D, quality: int) -> void:
 	if _mlyn_inv != Transform3D():
 		uvnitr.append([_mlyn_inv, AABB(Vector3(-22.0, -30.0, -25.0), Vector3(40.0, 60.0, 40.0)), "dil"])     # louka: trava z terenu dilu
 	_uvnitr = uvnitr
+	_mist_obd.clear()
+	for r: Dictionary in data.get("mistnosti", []):
+		if r.has("yaw"):
+			var sz: Vector3 = _v3(r["size"])
+			_mist_obd.append([Transform3D(Basis(Vector3.UP, float(r["yaw"])), _v3(r["pos"])).affine_inverse(), AABB(Vector3(-sz.x / 2, 0, -sz.z / 2), sz)])
+		else:
+			_mist_obd.append([Transform3D(), AABB(_v3(r["pos"]), _v3(r["size"]))])
 	_pruchody = {}                           # znovu: vrata stodol a dvere novych domu pribyly az po prvnim dotazu (0.98)
 	v_pruchodu(0.0, 0.0)                     # mrizka pruchodu v hlavnim vlakne (louka ve vlaknech jen cte)
 	# Poradi podle kontraktu (docs/pipeline.md, Astra 22:00 bod 3): krok cte jen vystupy drivejsich kroku, druh se nesazi
