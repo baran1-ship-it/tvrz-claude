@@ -1463,9 +1463,15 @@
      "nazev": "kaskada",
      "sklon_od": 0.12,
      "zahloubeni_m": 1.2,
-     "balvanu_na_m": 1.2
+     "balvanu_na_m": 1.2,
+     "schody": {
+      "rozestup_sirek": 1.5,
+      "krok_osy_m": 1.0,
+      "balvanu_na_hrane_m": 1.4
+     }
     }
-   ]
+   ],
+   "_schody": "Misa 14. 11. „voda by se z kopce nemela flakat, perej az vodopad, pozor na sekani“ (resers docs/rozpracovane/potok_pereje_resers.md): kaskada = tune (vodorovna hladina) a pady. Rozestup tuni rozestup_sirek x sirka vody (stupne a tune 1-4 sirky, strmejsi = kratsi; Abrahams 1995 (H/L)/S 1-2), hladina tune = nejnizsi hladina useku (teren se jen zarizne - stupen je skalni hrana, zadny nasyp), osa se na kaskade zjemni na krok_osy_m (pad = 1 krok). Na hrane kazdeho stupne rada balvanu napric (balvanu_na_hrane_m = rozestup), pena pod padem z ceri u kamenu a strmosti v shaderu. Bez castic a pruhlednych vrstev navic (mobil: overdraw)."
   }
  },
  "rybnik_lhota": {

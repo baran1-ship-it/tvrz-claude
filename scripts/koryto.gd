@@ -32,6 +32,7 @@ var hladiny: PackedFloat32Array = PackedFloat32Array()
 var sirky: PackedFloat32Array = PackedFloat32Array()   # pul sirky vody
 var hloubky: PackedFloat32Array = PackedFloat32Array() # hloubka vody uprostred
 var sklony: PackedFloat32Array = PackedFloat32Array()  # nasobek sklonu svahu podel toku (strida strmejsi a mirnejsi)
+var schody: Array = []                                 # kaskada: hrany stupnu {p, smer, pad, w, k} (balvany, pena)
 var raz: PackedInt32Array = PackedInt32Array()        # index do voda.json potok.raz_toku.druhy (0 klidny, pereje, kaskada)
 var krivost: PackedFloat32Array = PackedFloat32Array() # se znamenkem: > 0 zatacka doleva (stred zatacky vlevo od smeru osy)
 var _mriz := {}                                        # bunka 16 m -> [indexy useku]
@@ -45,8 +46,24 @@ func priprav(vyska: Callable) -> bool:
 	var osa: Array = Pravidla.cti("voda", "potok", "osa")         # pravidla/svet/voda.json (jediny zdroj s Blenderem)
 	if osa.is_empty():
 		return false
+	var rt: Dictionary = Pravidla.cti("voda", "potok", "raz_toku")
+	var okno := float(rt["sklon_okno_m"])
+	var druhy_r: Array = rt["druhy"]
+	var kask: Dictionary = druhy_r[druhy_r.size() - 1]
+	# kaskada (Misa 14. 11.: pereje az vodopad): osa se na strmem useku zjemni na krok_osy_m, aby pad byl kratky
+	var b0: PackedVector2Array = PackedVector2Array()
 	for p: Array in osa:
-		body.append(Vector2(p[0], p[1]))
+		b0.append(Vector2(p[0], p[1]))
+	for k in b0.size():
+		if k > 0:
+			var a0 := b0[k - 1]
+			var dl0 := a0.distance_to(b0[k])
+			var sk0 := absf(float(vyska.call(a0.x, a0.y)) - float(vyska.call(b0[k].x, b0[k].y))) / maxf(dl0, 0.5)
+			if sk0 >= float(kask["sklon_od"]) and kask.has("schody"):
+				var nd := maxi(1, ceili(dl0 / float(kask["schody"]["krok_osy_m"])))
+				for q in range(1, nd):
+					body.append(a0.lerp(b0[k], float(q) / nd))
+		body.append(b0[k])
 	var n := body.size()
 	var dno := PackedFloat32Array()
 	dno.resize(n)
@@ -105,9 +122,6 @@ func priprav(vyska: Callable) -> bool:
 	# raz toku podle sklonu (Misa 14. 11.: potok z kopce 0,39 = „perina vody v trave“, hladina az +1,46 m nad puvodnim
 	# terenem - prumer 9 bodu zvedl hladinu a podlaha pod ni nasypala breh). Na pereji a kaskade hladina nejvys
 	# nejnizsi teren u osy - zahloubeni (pravidla/svet/voda.json potok.raz_toku): koryto se zarizne, nesype.
-	var rt: Dictionary = Pravidla.cti("voda", "potok", "raz_toku")
-	var okno := float(rt["sklon_okno_m"])
-	var druhy_r: Array = rt["druhy"]
 	raz.resize(n)
 	for k in n:
 		var i0 := k
@@ -133,6 +147,40 @@ func priprav(vyska: Callable) -> bool:
 	var spad := float(Pravidla.cti("voda", "potok", "min_spad"))
 	for k in range(1, n):
 		hladiny[k] = minf(hladiny[k], hladiny[k - 1] - spad * body[k].distance_to(body[k - 1]))
+	# kaskada: tune a pady (voda.json potok.raz_toku _schody) - kazdy souvisly usek kaskady rozdelen na tune po
+	# rozestup_sirek x sirka vody; hladina tune = nejnizsi hladina v ni (teren se jen zarizne, hrana stupne je skala)
+	var ik := druhy_r.size() - 1
+	if kask.has("schody"):
+		var k0 := 0
+		while k0 < n:
+			if raz[k0] != ik:
+				k0 += 1
+				continue
+			var k1 := k0
+			while k1 + 1 < n and raz[k1 + 1] == ik:
+				k1 += 1
+			var sd := PackedFloat32Array([0.0])
+			for k in range(k0 + 1, k1 + 1):
+				sd.append(sd[sd.size() - 1] + body[k].distance_to(body[k - 1]))
+			var delka := sd[sd.size() - 1]
+			var cil := float(kask["schody"]["rozestup_sirek"]) * 2.0 * PULSIRKA
+			var nt := maxi(1, roundi(delka / cil))
+			var tune: Array = []
+			tune.resize(nt)
+			tune.fill(INF)
+			for k in range(k0, k1 + 1):
+				var it := mini(nt - 1, floori(sd[k - k0] / delka * nt)) if delka > 0.0 else 0
+				tune[it] = minf(float(tune[it]), hladiny[k])
+			for k in range(k0, k1 + 1):
+				var it := mini(nt - 1, floori(sd[k - k0] / delka * nt)) if delka > 0.0 else 0
+				var it_dal := mini(nt - 1, floori(sd[mini(k + 1, k1) - k0] / delka * nt)) if delka > 0.0 else 0
+				hladiny[k] = float(tune[it])
+				if it_dal != it and k < k1:
+					var smer := (body[k + 1] - body[k]).normalized()
+					schody.append({"p": body[k], "smer": smer, "pad": float(tune[it]) - float(tune[it_dal]), "w": sirky[k], "k": k})
+			k0 = k1 + 1
+		for k in range(1, n):
+			hladiny[k] = minf(hladiny[k], hladiny[k - 1] - spad * body[k].distance_to(body[k - 1]))
 	var r := ceili(DOSAH / 16.0)
 	for k in n - 1:
 		var lo := Vector2i(floori(minf(body[k].x, body[k + 1].x) / 16.0) - r, floori(minf(body[k].y, body[k + 1].y) / 16.0) - r)

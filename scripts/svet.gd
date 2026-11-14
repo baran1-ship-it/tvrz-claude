@@ -12361,13 +12361,17 @@ func uzivani_smi(key: String, x: float, z: float) -> bool:
 var _koruna_od_zdi := {}
 
 
-## Odstup kmene od pudorysu stavby pro druh: stromy max(kmen_od_zdi_m, polomer koruny x koruna_od_zdi_podil), jine 0.
+## Odstup od pudorysu stavby pro druh: stromy max(kmen_od_zdi_m, polomer koruny x koruna_od_zdi_podil), ker/trava/bylina
+## rostlina_od_zdi_m (pul trsu), jine 0.
 ## Polomer koruny = nejdelsi shoda zacatku jmena v modely.json trava_unshaded.koruny (jako stin korun na trave).
 func koruna_od_zdi(key: String) -> float:
 	if key == "" or _koruna_od_zdi.has(key):
 		return float(_koruna_od_zdi.get(key, 0.0))
 	var r := 0.0
-	if skupina(key) == "strom":
+	var sk := skupina(key)
+	if sk in ["ker", "trava", "bylina"]:
+		r = float(pasma()["budova"]["rostlina_od_zdi_m"])
+	elif sk == "strom":
 		var kor_dr: Dictionary = Pravidla.cti("modely", "trava_unshaded")["koruny"]
 		var kd := ""
 		for dk: String in kor_dr:
@@ -12729,6 +12733,22 @@ func _krajina() -> void:
 		pocty["kameny v potoce"] = nk
 		pocty["vychozy v zarezu"] = nv
 		pocty["kere v zarezu"] = nkr
+		# hrany stupnu kaskady (koryto.schody; voda.json potok.raz_toku _schody): rada balvanu napric korytem - prah
+		# stupne, voda pres nej pada do tune (cereni a pena kolem kamenu v shaderu)
+		var kask: Dictionary = (Pravidla.cti("voda", "potok", "raz_toku")["druhy"] as Array).back()
+		if kask.has("schody"):
+			var roz := float(kask["schody"]["balvanu_na_hrane_m"])
+			for sch: Dictionary in kr.schody:
+				var nrm2: Vector2 = (sch["smer"] as Vector2).orthogonal()
+				var w2: float = sch["w"]
+				var nb := maxi(2, ceili(2.0 * w2 / roz))
+				for ib in nb + 1:
+					var q3: Vector2 = (sch["p"] as Vector2) + nrm2 * lerpf(-w2, w2, float(ib) / nb) + (sch["smer"] as Vector2) * rng.randf_range(-0.3, 0.3)
+					var sb3 := rng.randf_range(0.7, 1.2)
+					pridej.call(balv[rng.randi() % 2], q3.x, q3.y, sb3, 0.25, 0.3)
+					kameny_toku.append(Vector4(q3.x, q3.y, 0.55 * sb3, atan2((sch["smer"] as Vector2).y, (sch["smer"] as Vector2).x)))
+					nk += 1
+			pocty["stupne kaskady"] = kr.schody.size()
 		pocty["kameny ve vode (cereni)"] = kameny_toku.size()
 		_stromy_u_potoka(r, rng)
 	# Misa 0.68 (513,870): rakosi z exportu na suchu kolem rybnika. Rakos a orobinec jen 0-1,5 m od hladiny

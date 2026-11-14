@@ -8744,10 +8744,19 @@ func _rostliny_v_budovach() -> void:
 						var o: Array = obal[ri]
 						if not (o[2] as AABB).intersects(wa):
 							continue
-						if ((o[0] as Transform3D) * wa).intersects(o[1] as AABB):
+						var la: AABB = (o[0] as Transform3D) * wa
+						var vn2: AABB = o[1]
+						var zasah := la.intersects(vn2)
+						if zasah and site.has(key) and sv.skupina(key) == "strom":
+							# koruna je kruh, ne ctverec obalu: kmen od obdelniku mistnosti < polomer x podil (jako pravidlo)
+							var q := (o[0] as Transform3D) * Vector3(t[3], t[7], t[11])
+							var dx := maxf(maxf(vn2.position.x - q.x, q.x - vn2.end.x), 0.0)
+							var dz := maxf(maxf(vn2.position.z - q.z, q.z - vn2.end.z), 0.0)
+							zasah = Vector2(dx, dz).length() < (la.size.x + la.size.z) * 0.25 * float(sv.pasma()["budova"]["koruna_od_zdi_podil"])
+						if zasah:
 							var klic := "%s <- %s" % [rooms[ri]["name"], key]
 							if not vady.has(klic):
-								print("ROSTLINY_V_BUDOVACH priklad %s: rostlina u (%.1f, %.1f, %.1f) obal %s, mistnost %s" % [klic, t[3], t[7], t[11], str(wa.size), str((o[2] as AABB))])
+								print("ROSTLINY_V_BUDOVACH priklad %s: rostlina u (%.1f, %.1f, %.1f) obal %s, mistnost %s, uzivani_smi %s, koruna_od_zdi %.1f" % [klic, t[3], t[7], t[11], str(wa.size), str((o[2] as AABB)), sv.uzivani_smi(key, float(t[3]), float(t[11])), sv.koruna_od_zdi(key)])
 							vady[klic] = int(vady.get(klic, 0)) + 1
 							hit = true
 							break
