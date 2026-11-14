@@ -265,9 +265,10 @@
    "koruna_rohu_v_ochozu": true,
    "bez_stinek_u_veze_m": 0.6,
    "pozn_stinky_14_11": "Míša 14. 11. (foto x 13,3 z −41 u věže branky): „nahoře u věžičky chybí hradbičky“, „ať do dveří vejde jen dřevěný ochoz“ – ochoz vede do portálku po vnitřní straně zdi (půdorys or1), překážela jen trasa testu, která zkracovala roh přes korunu (opraveno v puchart_hrad TR A_branka_patro); stínky až k líci věže (0,6 m = konec osy 0,3 m uvnitř věže)",
-   "rovna_koruna": "max",
+   "rovna_koruna": "ochoz",
    "pozn_rovna_14_11": "Míša 14. 11. (foto x 7 z −33): „hradba nám zbytečně kopíruje příkop k hornímu hradu, udělej ji rovně“ – koruna úseku rovně mezi konci (příkop z −26 na −22: terén 33,2 → 30,9 → 33,3 m), zeď nad příkopem vyšší",
-   "pozn_rovna_14_11b": "Míša 14. 11. večer (foto x 6,4 z −19, náčrt): „tu hradbu před vstupem do horního hradu jsem chtěl zarovnat, pořád je propadlá“ – koruna bez propadu nestačila (nízko přes příkop, pak stupeň nahoru) → celý úsek rovně ve výšce vyššího konce (rovna_koruna \"max\")"
+   "pozn_rovna_14_11b": "Míša 14. 11. večer (foto x 6,4 z −19, náčrt): „tu hradbu před vstupem do horního hradu jsem chtěl zarovnat, pořád je propadlá“ – koruna bez propadu nestačila (nízko přes příkop, pak stupeň nahoru) → celý úsek rovně ve výšce vyššího konce (rovna_koruna \"max\")",
+   "pozn_rovna_14_11c": "Míša 14. 11. noc (foto x −6,8 z −24, čára a křížky): „hradba zase dokola má být rovná“ – úsek za rohem byl rovně ve výšce svého vyššího konce, ale výš než koruna u branky (ochoz) → schod; celá hradba v jedné výšce koruny u branky (rovna_koruna \"ochoz\", puchart_hrad.py vypíše výšku zdi nad terénem)"
   },
   "sklep": {
    "jistota": "NAVRH (Míša 30. 10.: sklepení a vězení s klenbami a kobkami) – podle běžné skladby českých hradů 14. st.: valeně zaklenutý sklep pod palácem, přístup ze dvora sklepní šíjí, kobky u hradby bez oken",

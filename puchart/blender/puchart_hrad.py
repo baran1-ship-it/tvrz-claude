@@ -1646,6 +1646,13 @@ def postav_A(P):
             kor_[j_] = round((max(ter(*(a_.lerp(b_, k / 12)).xz) for k in range(13)) + hd["vyska"]) * 2) / 2
             if hd.get("koruna_rohu_v_ochozu"): kor_[j_] = max(kor_[j_], yp_b)   # Míša 13. 11.: „na hradbách budou hradbičky, zábradlí jen
             # tam, kde není hradba“ – za rohem koruna ve výšce ochozu: podesta u věže dojde ke koruně, ven chrání cimbuří (dřív o stupeň níž → rám zábradlí)
+        if hd.get("rovna_koruna") == "ochoz" and any(k_ is not None for k_ in kor_):   # Míša 14. 11. (foto x −6,8 z −24, čára): „hradba
+            # zase dokola má být rovná“ – celá hradba v jedné výšce = výška koruny u branky (ochoz), žádný stupeň mezi úseky
+            yk_ = max(k_ for k_ in kor_ if k_ is not None)
+            for k in range(len(kor_)):
+                vy_ = [ter(*(V(osa[k]).lerp(V(osa[k + 1]), t_ / 12)).xz) for t_ in range(13)]
+                print("HRADBA_KORUNA úsek %d koruna %s → %.2f, zeď nad terénem %.2f–%.2f m" % (k, kor_[k], yk_, yk_ - max(vy_), yk_ - min(vy_)))
+                kor_[k] = yk_
         uk = H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=A.get("cimburi_vnejsi", A.get("cimburi", True)), koruny=kor_, cimburi_pevne=hd.get("cimburi_u_branky", False), volno_u_konce=((u_v, hd.get("bez_stinek_u_veze_m", 2.5)) if hd.get("cimburi_u_branky") else None), plynule=hd.get("plynula_koruna", False) and not any(k_ is not None for k_ in kor_), rovne=hd.get("rovna_koruna", False))
         HRADBY.append((osa, uk, hd))
     H.VEZ_PATRO.clear()

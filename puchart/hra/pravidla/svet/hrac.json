@@ -212,5 +212,18 @@
  "_cestovani_cekat_max_s": "rychle cestovani: pod zatmenim se ceka, az je louka kolem cile hotova (louka.okoli_hotove), nejvys tolik s",
  "cestovani_okoli_m": 48.0,
  "cestovani_pojistka_s": 20.0,
- "_cestovani": "Misa 0.995: po cestovani cerna obrazovka - pod zatmenim se ceka jen na bezne nacitani louky do cestovani_okoli_m (nejdele cestovani_cekat_max_s), zatmeni zmizi vzdy nejpozdeji po cestovani_pojistka_s"
+ "_cestovani": "Misa 0.995: po cestovani cerna obrazovka - pod zatmenim se ceka jen na bezne nacitani louky do cestovani_okoli_m (nejdele cestovani_cekat_max_s), zatmeni zmizi vzdy nejpozdeji po cestovani_pojistka_s",
+ "lezeni": {
+  "popis": "Lezení po žebříku (Havran player.gd LEZENI, climb/_lez/_zb_pos, svet.gd zebrik_use; Míša 14. 11.: „vem si z Havrana funkci lezení po žebříku“): postava na ose žebříku před ním (odstup_m na stranu nástupu, nohy oci_pod_m pod osou), páčka/dotyk nahoru a dolů rychlost_m_s; nahoře vystoupí na sestup, dole na nástup (postav_na_volne, volne_misto); páčka do strany nad bok = sestoupit (dole nástup, nahoře sestup, uprostřed pustit). Shora začíná na shora_t (Havran 0.82: na 1,0 hned vystoupil zpět). Nabídka „Lézt nahoru“ u paty (střed nástup–pata, nad_paty_m) a „Slézt dolů“ u vrcholu (sestup–vrchol v podílu u_vrcholu, nad_vrcholu_m) do dosah_m od hráče (+1 m).",
+  "rychlost_m_s": 1.1,
+  "odstup_m": 0.32,
+  "oci_pod_m": 0.15,
+  "shora_t": 0.96,
+  "bok": 0.6,
+  "dosah_m": 2.2,
+  "nad_paty_m": 1.0,
+  "u_vrcholu": 0.4,
+  "nad_vrcholu_m": 0.6,
+  "zdroj": "Havran větev claude/new-session-0dtk58: scripts/player.gd (LEZENI 1,1 m/s, 0,32 m, 0,15 m, 0,96, 0,6), scripts/svet.gd zebrik_use (r 2,2 m, +1,0 / +0,6 m, 0,5 / 0,4)"
+ }
 }

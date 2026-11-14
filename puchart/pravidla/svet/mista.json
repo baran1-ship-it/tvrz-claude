@@ -47,7 +47,9 @@
      ]
     },
     "jas_pozn": "násobek barvy textury [R, G, B] hrubých stupňů (obal nemá normálovou mapu – bez ztmavení byl šindel skoro bílý, snímek 14. 11. d2_srov); Míša 14. 11.: „jsou šedé, nemohly by být hnědé? míň to razí“ → teplý hnědý tón jako ztmavlé dřevo (KCD: střechy a roubení z dálky hnědé)"
-   }
+   },
+   "jas_podrobny": 0.8,
+   "jas_podrobny_pozn": "Míša 14. 11. (foto x −65 z −141, Dum1): „domy jsou hezké světlé, ale až moc vypadají bílé“ – textury domů Havrana jsou při převodu zesvětlené na průměrný jas 0,5 (nastroje/havran/stavby_export.gd JAS_CIL, KCD1 ves_2); ve hře násobek barvy podrobného modelu (vnějšek, ne vnitřek) – ~0,4 jako hospodářské stavby (JAS_PREDMETY 0,42); hrubé stupně mají vlastní daleko_textury.jas"
   },
   "mlyn": {
    "soubor": "res://modely/stavby_h/mlyn.glb",
@@ -344,7 +346,9 @@
        -4.0
       ]
      ]
-    }
+    },
+    "cesta_k_ceste": true,
+    "schod_material": "KrcmaL_Podezdivka"
    },
    "Hajovna": {
     "soubor": "res://modely/stavby_h/hajovna.glb",
@@ -406,11 +410,143 @@
        8.0
       ]
      ]
-    }
+    },
+    "dum_aabb": [
+     -7.2,
+     4.8,
+     -6.2,
+     3.4
+    ],
+    "cesta_k_ceste": true,
+    "zebrik": {
+     "pata": [
+      3.9,
+      0.45,
+      0.63
+     ],
+     "vrchol": [
+      3.9,
+      2.81,
+      -0.21
+     ],
+     "nastup": [
+      3.9,
+      0.45,
+      1.35
+     ],
+     "sestup": [
+      3.9,
+      2.61,
+      -1.05
+     ],
+     "nazev": "Žebřík na půdu",
+     "zdroj": "Míša 14. 11. (tablet): „na půdu hájovny se dá vylézt po žebříku v předsíni – vem si z Havrana funkci lezení po žebříku“. Poloha ze sítě Hajovna_Interier (hajovna.glb, NAVOD_HAJOVNA.md: žebřík v síni): štěřiny x 3,64–3,71 a 4,09–4,16 (osa x 3,9), pata y 0,44 z 0,63 na podlaze síně, horní konec y 3,01 z −0,28 opřený o příčku síň/komora (z −0,29…−0,51), 8 příčlí po 0,29 m. Formát a význam jako Havran svet.gd DUM_ZEBRIK (souřadnice modelu): pata a vrchol na ose žebříku (vrchol 0,2 m nad podlahou půdy 2,61), nástup na podlaze síně před žebříkem, sestup na povale komory za horním koncem."
+    },
+    "puda": {
+     "popis": "Kolize půdy (hlavni.gd _puda): v modelu je strop jeden kvádr přes celý dům (Hajovna_Kol_Strop y 2,55–2,61), ale viditelná povala je jen nad jizbou (x −4,2…0,6) a komorou (x 0,6…4,4, z −2,7…−0,4) – síň je otevřená do krovu (dým k dymníku) a do ní vede žebřík. strop_smazat = uzel kolize modelu (jméno po importu Godotu, bez -convcolonly), místo něj kvádry strop_kvadry [x0, x1, z0, z1] v souřadnicích modelu ve výšce strop_y [spodek, vrch]; otvor nad síní = tam, kde kvádr není. oriznout = kolize příček, které končí na podlaze půdy bez viditelného trámu (příčka síň/komora: viditelně končí y 2,51 pod povalou, kolize do 2,9 = neviditelný práh 0,29 m), oříznou se na vrch stropu. najezdy = šikmé desky přes viditelný trám příčky jizba/síň (Roubeni x 0,47–0,72, vrch y 2,87 po celé délce domu – postava nemá krok nahoru, jako rampy dveří): od (na podlaze) → do (na hraně trámu), sirka_m napříč. trasa = test průchodu po půdě [x, y, z] modelu (nastroje/mista_rozmisteni.py → hra/data/pruchody_mista.json puda_<misto>_<model>).",
+     "strop_smazat": "Hajovna_Kol_Strop",
+     "strop_y": [
+      2.55,
+      2.61
+     ],
+     "strop_kvadry": [
+      [
+       -4.5,
+       0.6,
+       -3.0,
+       3.0
+      ],
+      [
+       0.6,
+       4.5,
+       -3.0,
+       -0.29
+      ]
+     ],
+     "oriznout": [
+      "Hajovna_Kol_PricK9",
+      "Hajovna_Kol_PricK10",
+      "Hajovna_Kol_PricKN11"
+     ],
+     "najezdy": [
+      {
+       "od": [
+        -0.05,
+        2.61,
+        0.0
+       ],
+       "do": [
+        0.49,
+        2.9,
+        0.0
+       ],
+       "sirka_m": 5.78
+      },
+      {
+       "od": [
+        1.25,
+        2.61,
+        -1.59
+       ],
+       "do": [
+        0.71,
+        2.9,
+        -1.59
+       ],
+       "sirka_m": 2.6
+      }
+     ],
+     "trasa": [
+      [
+       3.9,
+       2.61,
+       -1.3
+      ],
+      [
+       2.0,
+       2.61,
+       -1.6
+      ],
+      [
+       0.6,
+       2.9,
+       -1.6
+      ],
+      [
+       -0.63,
+       2.61,
+       -0.66
+      ],
+      [
+       -2.5,
+       2.61,
+       1.0
+      ],
+      [
+       -0.6,
+       2.61,
+       -1.8
+      ],
+      [
+       2.5,
+       2.61,
+       -1.8
+      ]
+     ],
+     "zdroj": "Míša 14. 11. (tablet, fotka z půdy: hráč na x 161,9 z 311,3 = model (−0,63; −0,66) nad jizbou): „na půdě je trám a hráč ho nepřekročí“. Geometrie z hajovna.glb (rozbor 14. 11.): viditelná povala Roubeni y 2,55–2,60, kolize Strop vrch 2,61, příčky PricJ6/J7/JN8 a PricK9/K10/KN11 kolizí do 2,9; trám příčky J viditelně do 2,87, příčka K viditelně do 2,51."
+    },
+    "schod_material": "Hajovna_Podezdivka"
    },
    "pozn_prichod": "prichod/pohled: střed dveří Vchod (obal křídla v glb) a bod 2–3 m před nimi; trasa testu dum_<místo>_<model> z příchodu přes práh 1,5 m dovnitř",
    "pozn_rampy": "podlaha domu +0,45 m (návody modelů) – postava nemá krok nahoru: šikmá kolize z terénu 2,4 m před prahem na podlahu 0,25 m za ním u vnějších dveří (jako hlavni.gd _rampy_dveri u domů vsi); test dum_<místo>_<model>",
-   "pozn_stromy": "Míša 14. 11.: „jedna stará jabloň nebo více může být u hájovny a jedna nebo více u hospody“ – mista = kandidáti [x, z] v souřadnicích modelu (jako aabb), použije se prvních pocet, které jsou ≥ od_cesty_m od cesty a ≥ od_toku_m od toku a mimo půdorys; vždy stará jabloň (varianta jablon_1–3)"
+   "pozn_stromy": "Míša 14. 11.: „jedna stará jabloň nebo více může být u hájovny a jedna nebo více u hospody“ – mista = kandidáti [x, z] v souřadnicích modelu (jako aabb), použije se prvních pocet, které jsou ≥ od_cesty_m od cesty a ≥ od_toku_m od toku a mimo půdorys; vždy stará jabloň (varianta jablon_1–3)",
+   "pozn_dum_aabb": "Míša 14. 11. (foto x 149 z 314 u vchodu hájovny): „tráva ve vstupu a chybí cesta k hlavní cestě“ – půdorys stavby (bez porostu, bez hlíny) byl celý obal modelu včetně dvorku až k plotu, takže dvorek nebyl vyšlapaný; dum_aabb = jen dům s přístřeškem a kůlnou pod střechou (NAVOD_HAJOVNA: jizba x −4,5…0,6, síň …4,5, přístřešek na západě po sloupy −6,8, kůlna za domem po z −5,6) – zbytek obalu je dvorek z udusané hlíny; cesta_k_ceste = cestička z příchodu k nejbližší vozové / hřebenové cestě (k_ulici jako od vrat usedlostí)",
+   "pozn_schod": "Míša 14. 11. (foto x 155 z 311,5, hájovna): „udělej schod do domu, jsou tam výš dveře“ – před vnějšími dveřmi (rampy) kamenné stupně po vyska_m až k prahu (podlaha_m), kámen z podezdívky modelu; nájezdová kolize zůstává (hráč nemá krok nahoru), stupně jsou vidět (Havran domy: kamenný stupeň 0,15 m před prahem)",
+   "schod": {
+    "vyska_m": 0.15,
+    "hloubka_m": 0.32,
+    "sirka_m": 1.4
+   }
   }
  },
  "mista": [
@@ -816,7 +952,9 @@
     "pole": true,
     "povinne": false,
     "odstup_kovarny_m": 4.0,
-    "zdroj": "kovářova usedlost (NAVRH): kovárna stranou od domu otevřenou stranou k ulici (oheň dál od stavení; KCD2 kovárny ve vsi u cesty – Havran docs/rozpracovane/kcd_zivot_postav.md, předloha docs/reference/kovarna/1_celek.png), dům a dvůr jako selská"
+    "zdroj": "kovářova usedlost (NAVRH): kovárna stranou od domu otevřenou stranou k ulici (oheň dál od stavení; KCD2 kovárny ve vsi u cesty – Havran docs/rozpracovane/kcd_zivot_postav.md, předloha docs/reference/kovarna/1_celek.png), dům a dvůr jako selská",
+    "bez_plotu_pred_kovarnou": true,
+    "bez_plotu_pozn": "Míša 14. 11. (foto x −69 z −162, křížky): „plot před kovárnou zruš“ – kovárna je otevřenou stranou k ulici, kovář pracuje do cesty; uliční plot jen na dvorní straně s vraty"
    }
   },
   "ploty": {
@@ -878,7 +1016,9 @@
     "kura": {
      "albedo": "res://modely/predmety_h/plutek_kura_kul_albedo.jpg",
      "normal": "res://modely/predmety_h/plutek_kura_kul_normal.jpg",
-     "velikost_m": 1.0
+     "velikost_m": 1.0,
+     "jas_pozn": "Míša 14. 11. (foto Dum1): kůly z kůry vypadaly jako bílá bříza (textura kůry má jas 0,5, zesvětlení se jí netýká) – barva × nasob",
+     "nasob": 0.6
     },
     "tram": {
      "albedo": "res://modely/hrady/puchart_rough_wood_sedy_Diffuse.jpg",

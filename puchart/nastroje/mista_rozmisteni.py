@@ -246,6 +246,9 @@ def _usedlost(x, z, yaw, m, typ, rng, zabrano):
         a0, a1 = ul_za[0]; bv = a1 - 0.7 - PL["branka"]["sirka_m"]
         seg_za = [(a0, bv), (bv + PL["branka"]["sirka_m"], a1)]
         brany.append({"druh": "branka", "a": list(F.w(u_ul, bv)), "b": list(F.w(u_ul, bv + PL["branka"]["sirka_m"]))})
+    if T.get("bez_plotu_pred_kovarnou"):   # Míša 14. 11. (foto x −69 z −162): „plot před kovárnou zruš“ – kovárna otevřená do ulice,
+        # zahradní část uličního plotu (před kovárnou až k nároží domu) a branka v ní se nestaví (náhoda losovaná stejně – zbytek vsi beze změny)
+        seg_za = []; brany[:] = [b_ for b_ in brany if b_["druh"] != "branka"]
     for v0, v1 in ul_dv + (seg_za if pz < 0.3 else []):
         if v1 - v0 > 0.3: ploty.append([p_ul, F.w(u_ul, v0), F.w(u_ul, v1)])
     if pz >= 0.3:
@@ -256,6 +259,7 @@ def _usedlost(x, z, yaw, m, typ, rng, zabrano):
         # boku k nároží domu (Havran vesnice.py build: plot „od rohu chalupy“; KCD2 ref_kcd2_ves_ulice, ref_kcd2_ves_plot_cesta:
         # plot navazuje na roh stavení, žádná mezera)
         for sv_ in (-1.0, 1.0):
+            if T.get("bez_plotu_pred_kovarnou") and sv_ < 0: continue   # zahradní strana (před kovárnou) bez plotu
             ploty.append([p_ul, F.w(u_ul, sv_ * (hw + 0.12)), F.w(zf + PL["k_narozi_m"], sv_ * (hw + 0.12))])
     if br: brany.append({"druh": "kryta_vrata" if br == "krytá" else "vrata", "a": list(F.w(u_ul, v_br - bw / 2)), "b": list(F.w(u_ul, v_br + bw / 2))})
     else: brany[:] = [b_ for b_ in brany if b_["druh"] != "branka"]   # bez plotů (krčma): ani branka
@@ -317,6 +321,8 @@ def pridej_dum(misto, m, x, z, yaw, v):
         stavby[-1].update({"soubor": c_["soubor"], "lod1": c_.get("lod1"), "posun_x": round(-cx_, 3), "vnitrek": c_.get("vnitrek", []), "lod1_od_m": c_.get("lod1_od_m"),
                            "rampy": c_.get("rampy", []), "podlaha_m": c_.get("podlaha_m", 0.0),
                            "prichod": w_(c_["prichod"][0] - cx_, c_["prichod"][1]), "pohled": w_(c_["pohled"][0] - cx_, c_["pohled"][1])})
+        for k_ in ("zebrik", "puda"):   # žebřík na půdu a kolize půdy (Míša 14. 11., hájovna) – souřadnice modelu, staví hlavni.gd _celek
+            if k_ in c_: stavby[-1][k_] = c_[k_]
         st_ = c_.get("stromy")   # staré jabloně u celku (Míša 14. 11.): kandidáti v souřadnicích modelu, první vyhovující
         if st_:
             ab_ = Polygon([w_(c_["aabb"][0] - cx_ - 1.5, c_["aabb"][2] - 1.5), w_(c_["aabb"][1] - cx_ + 1.5, c_["aabb"][2] - 1.5),
@@ -478,6 +484,12 @@ for s__ in stavby:   # celky (krčma, hájovna): z příchodu přes práh dveř�
     if "prichod" not in s__: continue
     pr_ = np.array(s__["prichod"], float); po_ = np.array(s__["pohled"], float); n_ = (pr_ - po_) / (np.linalg.norm(pr_ - po_) or 1.0)
     _TRM["dum_%s_%s" % (s__["misto"], s__["model"])] = [[round(float(q[0]), 2), round(float(q[1]), 2), None] for q in (pr_, po_ + n_ * 0.8, po_ - n_ * 1.5)]
+for s__ in stavby:   # půda celku (Míša 14. 11.: „na půdě je trám a hráč ho nepřekročí“): trasa puda.trasa [x, y, z] modelu → svět
+    tp_ = (s__.get("puda") or {}).get("trasa")
+    if not tp_: continue
+    co_, si_ = math.cos(s__["yaw"]), math.sin(s__["yaw"]); px_ = s__.get("posun_x", 0.0)
+    _TRM["puda_%s_%s" % (s__["misto"], s__["model"])] = [[round(float(s__["x"] + (q[0] + px_) * co_ + q[2] * si_), 2), round(float(s__["z"] - (q[0] + px_) * si_ + q[2] * co_), 2),
+                                                        round(float(s__["teren_y"] + q[1]), 2)] for q in tp_]
 json.dump({"popis": "trasy průchodu do domů míst (nastroje/mista_rozmisteni.py) – test_pruchod.gd", "trasy": _TRM}, open(K + "/hra/data/pruchody_mista.json", "w"), ensure_ascii=False, indent=1)
 print("trasy do domů", len(_TRM))
 # doprovodné soubory předchozího kroku (jámy sklepa a šachty, koryta, skály) pod novou předponou – teren_dlazdice.py je
@@ -494,12 +506,22 @@ def k_ulici(a, smer, w, hl_):
     body = [a * (1 - t) ** 2 + g1 * 2 * t * (1 - t) + j * t * t for t in np.linspace(0, 1, 13)]
     vy_cary.append({"body": [[r3_(q[0]), r3_(q[1])] for q in body], "polosirka": w, "hlina": hl_, "druh": "chodnik"})
 r3_ = lambda a: round(float(a), 2)
+def _w_celku(st_, px, pz):   # bod v souřadnicích modelu celku → svět (model posunutý o −cx obalu)
+    a_ = CELKY[st_["model"]]["aabb"]; cx_ = (a_[0] + a_[1]) / 2; yw_ = st_["yaw"]
+    return (st_["x"] + (px - cx_) * math.cos(yw_) + pz * math.sin(yw_), st_["z"] - (px - cx_) * math.sin(yw_) + pz * math.cos(yw_))
+def pudorys_stavby(s):   # celek s dum_aabb: půdorys jen domu (dvorek je vyšlapaný – Míša 14. 11.: „tráva ve vstupu“)
+    if s["model"] in CELKY and CELKY[s["model"]].get("dum_aabb"):
+        x0_, x1_, z0_, z1_ = CELKY[s["model"]]["dum_aabb"]
+        return [[r3_(q[0]), r3_(q[1])] for q in (_w_celku(s, px, pz) for px, pz in ((x0_ - 0.3, z0_ - 0.3), (x1_ + 0.3, z0_ - 0.3), (x1_ + 0.3, z1_ + 0.3), (x0_ - 0.3, z1_ + 0.3)))]
+    return rohy(s["x"], s["z"], s["yaw"], s["model"], 0.3)
 for o in ULICE: vy_cary.append({"body": [[r3_(q[0]), r3_(q[1])] for q in o[::2]], "polosirka": VY["ulice_polosirka_m"], "hlina": HL["ulice"], "druh": "ulice"})
 for st_ in stavby:   # celky (krčma, hájovna): dvůr a dvorek udusaná hlína terénu (Míša 14. 11.: nevyhovující podlahu nahradit hlínou)
     if st_["model"] not in CELKY: continue
     a_ = CELKY[st_["model"]]["aabb"]; cx_ = (a_[0] + a_[1]) / 2; yw_ = st_["yaw"]
     pts_ = [(st_["x"] + (px - cx_) * math.cos(yw_) + pz * math.sin(yw_), st_["z"] - (px - cx_) * math.sin(yw_) + pz * math.cos(yw_)) for px, pz in ((a_[0], a_[2]), (a_[1], a_[2]), (a_[1], a_[3] + 2.0), (a_[0], a_[3] + 2.0))]
     vy_plochy.append({"poly": [[round(q[0], 2), round(q[1], 2)] for q in pts_], "hlina": HL["dvur"], "druh": "celek"})
+    if CELKY[st_["model"]].get("cesta_k_ceste") and st_.get("prichod"):   # cestička od vchodu k hlavní cestě (Míša 14. 11.: „chybí cesta k hlavní cestě“)
+        k_ulici(np.array(st_["prichod"], float), np.array([math.sin(yw_), math.cos(yw_)]), VY["chodnik_polosirka_m"], HL.get("chodnik", HL["dvur"]))
 for s_ in studny:
     vy_plochy.append({"poly": [[r3_(q[0]), r3_(q[1])] for q in Point(s_["x"], s_["z"]).buffer(VY["naves_polomer_m"], 8).exterior.coords[:-1]], "hlina": HL["naves"], "druh": "naves"})
     k_ulici(np.array([s_["x"], s_["z"]]), np.zeros(2), VY["chodnik_polosirka_m"], HL["naves"])
@@ -574,7 +596,7 @@ json.dump({"popis": "stavby nových míst (nastroje/mista_rozmisteni.py z pravid
            "stromy": stromy_out, "sezeni": sezeni_out, "studny": studny, "vyslapano": {"trida": VY["trida"], "plochy": vy_plochy, "cary": vy_cary},
            "vstupy": [{"usedlost": us["i"], "stavba": v_["stavba"], "druh": v_["druh"], "c": [r3(v_["c"][0]), r3(v_["c"][1])], "n": [r3(v_["n"][0]), r3(v_["n"][1])], "sirka": r3(v_["w"]),
                        "pred": pp(v_["pred_poly"])} for us in useds for v_ in us["vstupy"]],
-           "pudorysy": [rohy(s["x"], s["z"], s["yaw"], s["model"], 0.3) for s in stavby] + [rohy(h["x"], h["z"], h["yaw"], h["model"], 0.3) for h in hosp_out],
+           "pudorysy": [pudorys_stavby(s) for s in stavby] + [rohy(h["x"], h["z"], h["yaw"], h["model"], 0.3) for h in hosp_out],
            "dvory": [pp(us["dvur"]) for us in useds], "zahrady": [pp(us["zahrada"]) for us in useds], "sady": [pp(us["sad"]) for us in useds],
            "pole": [{"plodina": p["plodina"], "poly": pp(p["poly"])} for p in pole]},
           open(K + "/hra/data/mista_stavby.json", "w"), ensure_ascii=False, indent=1)

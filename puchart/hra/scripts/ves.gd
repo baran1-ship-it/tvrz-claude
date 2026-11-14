@@ -71,6 +71,7 @@ func _materialy() -> void:
 		if e.has("normal") and ResourceLoader.exists(String(e["normal"])):
 			m.normal_enabled = true; m.normal_texture = load(String(e["normal"]))
 		if e.has("barva"): m.albedo_color = Color(String(e["barva"]))
+		if e.has("nasob"): m.albedo_color = m.albedo_color * Color(float(e["nasob"]), float(e["nasob"]), float(e["nasob"]))   # ztmavit světlou texturu (kůra kůlů)
 		m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 		_mat[k] = [m, float(e.get("velikost_m", 1.0))]
 
