@@ -1831,7 +1831,9 @@
     811.0
    ],
    "_p": "Míša 14. 11. („studnu přesuň na náves“ – stála v místě nové krčmy u staré návsi): na návsi uvnitř zatáčky vedle lípy (dvorec_zaznam lipa_navsi 429,7 / 819); dřív vesnice.py c + au·(−6) + av·(−11) = (472,5; 817,7)"
-  }
+  },
+  "stara_krcma_obycejna": true,
+  "_stara_krcma_obycejna": "Míša 14. 11. („nebude se mazat současná krčma, upraví se zpět jako obyčejná usedlost“): usedlost 0 u vjezdu bez vývěsního štítu (blender/vesnice.py sign); stavení, dvůr a rozměry zůstávají. Krčmář a hosté → krčma do L (lokace krcma_l)."
  },
  "drobne": [
   {

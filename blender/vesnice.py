@@ -1138,7 +1138,7 @@ def build(coll):
     for k, h in enumerate(layout()):
         p, yaw, L, W = h["p"], h["yaw"], h["L"], h["W"]
         hip = h["hip"] and h["var"]["podsin"] == 0.0
-        F = cottage(P, (p.x, p.z), yaw, L, W, h["roof"], white=h["white"] and not h["var"]["bile_spary"], sign=h["tavern"], hip=hip,
+        F = cottage(P, (p.x, p.z), yaw, L, W, h["roof"], white=h["white"] and not h["var"]["bile_spary"], sign=h["tavern"] and not kraj._LOKACE_J["ves"].get("stara_krcma_obycejna", False), hip=hip,
                     ypad=pad_y(p, yaw, L, W), var=h["var"], idx=k)
         bp, byaw, bL, bW = h["barn"]
         if "dvorec" in h:
