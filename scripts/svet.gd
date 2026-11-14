@@ -8741,6 +8741,10 @@ func _cesty_kameny() -> void:
 				# osa na krizovatce daly kaminky 0,1-0,2 m na hlinu (1 080 chyb v_pasmu, testy J 27. 10.)
 				if cesta_kraj_osa(q.x, q.y).x < 0.0:
 					continue
+				# Misa 14. 11. (test rostliny_v_budovach: kaminek v sini hostince a chalupy u vetrneho mlyna - cesta konci
+				# u vchodu): jedno misto pravidla uzivani (vnitrek staveb, mistnosti, pruchody, zahony)
+				if not uzivani_smi("kamen_maly", q.x, q.y):
+					continue
 				# krajnice jen pod sirym nebem: ne na mostovce ani pod strechou (kryti shora 1; Misa 5. 11. most, test most)
 				var kc := Vector2i(floori(q.x / 32.0), floori(q.y / 32.0))
 				if kryti_tab.has(kc) and int(kryti_tab[kc][clampi(floori((q.y - kc.y * 32.0) / 0.5), 0, 63) * 64 + clampi(floori((q.x - kc.x * 32.0) / 0.5), 0, 63)]) == 1:
