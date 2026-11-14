@@ -182,3 +182,65 @@ for p, druh in (("modely/ves/domy_stredni.glb", "stredni"), ("modely/ves/domy.gl
 
 if not VYPIS:
     json.dump(zn, open(ZN, "w"), indent=1)
+
+
+# 3) hnede drevo (ves_jas.hneda): sede drevo na hnedy pomer pri stejnem jasu; idempotentni (po uprave B/R pod prahem)
+H = R["hneda"]
+
+
+def je_drevo(jm):
+    return any(k in jm for k in H["pripony"]) and not any(k in jm for k in R["vynechat"]) \
+        and not any(k in jm for k in R["zacouzene"]["pripony"])
+
+
+def hneda(a):
+    """a sRGB 0..1 (H,W,3) -> (nove, nebo None kdyz netreba)."""
+    m = a.reshape(-1, 3).mean(0)
+    if m[0] <= 0.01 or m[2] / m[0] <= H["prah_br"]:
+        return None
+    po = np.array(H["pomer"], float)
+    cil = po * (m @ LUM) / (po @ LUM)
+    return np.clip(a * (cil / np.maximum(m, 1e-4)), 0, 1)
+
+
+import io
+for f in sorted(glob.glob("modely/ves/domy_*_diff*.jpg") + glob.glob("modely/ves/domy_*albedo*.jpg")):
+    jm = os.path.basename(f)
+    if not je_drevo(jm):
+        continue
+    a = np.asarray(Image.open(f).convert("RGB")).astype(float) / 255
+    b = hneda(a)
+    if b is None:
+        continue
+    print("HNEDA %-42s B/R %.2f" % (jm, a.reshape(-1, 3).mean(0)[2] / a.reshape(-1, 3).mean(0)[0]))
+    if not VYPIS:
+        Image.fromarray((b * 255 + 0.5).astype(np.uint8)).save(f, quality=92)
+p = "modely/ves/domy.glb"
+if os.path.exists(p):
+    js, bb = glb_cti(p)
+    vys = [bytes(bb[v.get("byteOffset", 0):v.get("byteOffset", 0) + v["byteLength"]]) for v in js["bufferViews"]]
+    zmen = 0
+    for im_ in js.get("images", []):
+        jm = "domy_" + im_.get("name", "")
+        if "bufferView" not in im_ or not je_drevo(jm) or not ("diff" in jm or "albedo" in jm):
+            continue
+        a = np.asarray(Image.open(io.BytesIO(vys[im_["bufferView"]])).convert("RGB")).astype(float) / 255
+        b = hneda(a)
+        if b is None:
+            continue
+        print("HNEDA GLB %-36s" % im_["name"])
+        out = io.BytesIO()
+        Image.fromarray((b * 255 + 0.5).astype(np.uint8)).save(out, "JPEG", quality=92)
+        vys[im_["bufferView"]] = out.getvalue()
+        im_["mimeType"] = "image/jpeg"
+        zmen += 1
+    if zmen and not VYPIS:
+        nb = bytearray()
+        for i, v in enumerate(vys):
+            nb += b"\0" * ((4 - len(nb) % 4) % 4)
+            js["bufferViews"][i]["byteOffset"] = len(nb)
+            js["bufferViews"][i]["byteLength"] = len(v)
+            nb += v
+        js["buffers"][0]["byteLength"] = len(nb)
+        glb_zapis(p, js, nb)
+    print("HNEDA GLB zmeneno %d" % zmen)

@@ -1278,7 +1278,10 @@ func _ohrady() -> void:
 			var tv := ""
 			for ch: Node in cn.get_children():
 				if ch is CollisionShape3D and (ch as CollisionShape3D).shape:
-					tv = "%s u %s" % [(ch as CollisionShape3D).shape.get_class(), (ch as Node3D).global_position.snapped(Vector3.ONE * 0.1)]
+					tv = "%s %s u %s, uzel %s" % [(ch as CollisionShape3D).shape.get_class(), str((ch as CollisionShape3D).shape.get("size")), (ch as Node3D).global_position.snapped(Vector3.ONE * 0.1), str(cn.get_parent().get_path()).right(80)]
+					for sb: Node in cn.get_parent().get_children():
+						if sb is MeshInstance3D:
+							tv += " sit " + String(sb.name) + " " + str((sb as MeshInstance3D).mesh.resource_path if (sb as MeshInstance3D).mesh else "")
 			var met := str(cn.get_meta_list()) + " " + str(cn.get_parent().get_meta_list() if cn.get_parent() else [])
 			spatne.append("%s plutek %s narazi na %s/%s [%s %s vrstva %d] (%s)" % [it["ohrada"], p.snapped(Vector3.ONE * 0.1), par, nm, tv, met,
 					(cn as CollisionObject3D).collision_layer if cn is CollisionObject3D else -1, co])
@@ -6455,6 +6458,14 @@ func _lide_chovani() -> void:
 						nej = dq
 						nej_id = String(r["id"])
 						vys = float(r["p"][1]) + float(rzq[1])
+			# 14. 11.: i sedatka z Blenderu (svet.json pouziti kind sed - stan kupce, tvrz), na ktera postavy sedaji
+			for u9: Dictionary in sv.data.get("pouziti", []):
+				if String(u9.get("kind", "")) == "sed" and u9.has("sit"):
+					var dq9 := q.distance_to(Vector2(float(u9["sit"][0]), float(u9["sit"][2])))
+					if dq9 < nej:
+						nej = dq9
+						nej_id = "pouziti " + String(u9.get("nazev", "sed"))
+						vys = float(u9["sit"][1]) + float(u9["h"])
 			var panev_y := float(sk["y"]) + float(sd["vyska_klipu_m"])
 			print("LIDE sed %s %s: sedak %.2f m od mista, %s %.2f m od pudorysu, panev %.2f / sedak %.2f, koren %s" % [c["id"], bl["kde"], (m[0] as Vector2).distance_to(q), nej_id, nej, panev_y, vys, (m[0] as Vector2).round()])
 			if nej > float(sd["sirka_mista_m"]) * 0.5 or absf(panev_y - vys) > 0.02:
