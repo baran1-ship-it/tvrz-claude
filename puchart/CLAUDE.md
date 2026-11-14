@@ -9,6 +9,7 @@ a kluk ze vsi“ 1.0 (shrnutí `docs/NAVRH_HRA_A_GRAFIKA.md`). Předání a stav
 - Pracovat **detailně s ohledem na zkušenosti z tvrze (Havran) a KCD**.
 - **Hrady: nejdřív návrhy ke schválení**, styl KCD, reálné, ale neortodoxní (přesnou podobu neznáme) – **propojené a krásné**.
 - Postavy později, **realističtěji** než Quaternius v Havranovi.
+- **Stavby bez výbavy** (Míša 12. a 14. 11.): nábytek, sudy, truhly, lože, louče si Míša rozmisťuje sama (pískoviště, nábytek z Havrana); generátor staví jen stavbu a pevné díly (pec, krb, kamna, schody, dveře) – `hrad_puchart.json vybaveni.stavet false`. Postavy převzít z Havrana (větev `claude/new-session-0dtk58`: `scripts/lide.gd`, místa činností se sloty na nábytku, `docs/rozpracovane/postavy_plan.md`, `kcd_zivot_postav.md`, `choreografie_postav.md`); v patrech hradu navíc síť chůze (navmesh) z kolizí staveb.
 
 ## Pořadí (PDF kap. 12): KRÁSA → FUNKCE → POSTAVY, kroky A–F
 A podklady → B hmoty světa → C podoba krajiny → D dálka a načítání → E funkce → F lidé. Každý krok končí snímkem
