@@ -222,8 +222,8 @@
    "pozn_vyska": "Míša 6. 11.: vnější hradba vlevo od vstupu moc nízká (3,2 m) → 4,5 m nad valem, koruna blízko podlahy strážnice branky (NAVRH)",
    "cimburi_u_branky": true,
    "koruna_rohu_v_ochozu": true,
-   "bez_stinek_u_veze_m": 3.8,
-   "pozn_stinky_14_11": "Míša 14. 11. (foto x 13,3 z −41 u věže branky): „nahoře u věžičky chybí hradbičky“ – zkoušeno 1,6 m: stínka stála přímo před portálkem do věže (test A_branka_patro uvízl v [12,55; −45,2]); mezera 1,5 m mezi rohem hradby a portálkem je cesta z ochozu do věže – stínka se tam nevejde, dokud se portálek nepřesune (otázka pro Míšu)"
+   "bez_stinek_u_veze_m": 0.6,
+   "pozn_stinky_14_11": "Míša 14. 11. (foto x 13,3 z −41 u věže branky): „nahoře u věžičky chybí hradbičky“, „ať do dveří vejde jen dřevěný ochoz“ – ochoz vede do portálku po vnitřní straně zdi (půdorys or1), překážela jen trasa testu, která zkracovala roh přes korunu (opraveno v puchart_hrad TR A_branka_patro); stínky až k líci věže (0,6 m = konec osy 0,3 m uvnitř věže)"
   },
   "hradba_vychod": {
    "osa": [
@@ -263,8 +263,8 @@
    "schody_v_ose": true,
    "cimburi_u_branky": true,
    "koruna_rohu_v_ochozu": true,
-   "bez_stinek_u_veze_m": 3.8,
-   "pozn_stinky_14_11": "Míša 14. 11. (foto x 13,3 z −41 u věže branky): „nahoře u věžičky chybí hradbičky“ – zkoušeno 1,6 m: stínka stála přímo před portálkem do věže (test A_branka_patro uvízl v [12,55; −45,2]); mezera 1,5 m mezi rohem hradby a portálkem je cesta z ochozu do věže – stínka se tam nevejde, dokud se portálek nepřesune (otázka pro Míšu)",
+   "bez_stinek_u_veze_m": 0.6,
+   "pozn_stinky_14_11": "Míša 14. 11. (foto x 13,3 z −41 u věže branky): „nahoře u věžičky chybí hradbičky“, „ať do dveří vejde jen dřevěný ochoz“ – ochoz vede do portálku po vnitřní straně zdi (půdorys or1), překážela jen trasa testu, která zkracovala roh přes korunu (opraveno v puchart_hrad TR A_branka_patro); stínky až k líci věže (0,6 m = konec osy 0,3 m uvnitř věže)",
    "rovna_koruna": true,
    "pozn_rovna_14_11": "Míša 14. 11. (foto x 7 z −33): „hradba nám zbytečně kopíruje příkop k hornímu hradu, udělej ji rovně“ – koruna úseku rovně mezi konci (příkop z −26 na −22: terén 33,2 → 30,9 → 33,3 m), zeď nad příkopem vyšší"
   },

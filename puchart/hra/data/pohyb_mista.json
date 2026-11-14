@@ -1,5 +1,5 @@
 {
- "popis": "dveře domů nových míst (nastroje/pohyb_mista.py z pravidla/svet/pohyb_mista.json a domy.glb) – čte dvere.gd pod uzlem Mista; souřadnice uzlu dveří, platí pro každou instanci",
+ "popis": "dveře domů a vrata stodol nových míst (nastroje/pohyb_mista.py z pravidla/svet/pohyb_mista.json, domy.glb a predmety_h/stodola*.glb) – čte dvere.gd pod uzlem koren (Mista / Ves); souřadnice uzlu křídla, platí pro každou instanci",
  "dily": [
   {
    "name": "Dum1_Dvere_Dvur",
@@ -7,6 +7,7 @@
    "kind": "dvere",
    "group": "Dum1_Dvere_Dvur",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      0.039,
@@ -31,6 +32,7 @@
    "kind": "dvere",
    "group": "Dum1_Dvere_Jizba",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      0.445,
@@ -55,6 +57,7 @@
    "kind": "dvere",
    "group": "Dum1_Dvere_Komora",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      -0.42,
@@ -79,6 +82,7 @@
    "kind": "dvere",
    "group": "Dum1_Dvere_Vstup",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      -0.039,
@@ -103,6 +107,7 @@
    "kind": "dvere",
    "group": "Dum2_Dvere_Chlev",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      -0.445,
@@ -127,6 +132,7 @@
    "kind": "dvere",
    "group": "Dum2_Dvere_ChlevVen",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      -0.039,
@@ -151,6 +157,7 @@
    "kind": "dvere",
    "group": "Dum2_Dvere_Dvur",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      0.039,
@@ -175,6 +182,7 @@
    "kind": "dvere",
    "group": "Dum2_Dvere_Jizba",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      0.42,
@@ -199,6 +207,7 @@
    "kind": "dvere",
    "group": "Dum2_Dvere_Vstup",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      -0.039,
@@ -223,6 +232,7 @@
    "kind": "dvere",
    "group": "Rychta_Dvere_Dvur",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      0.039,
@@ -247,6 +257,7 @@
    "kind": "dvere",
    "group": "Rychta_Dvere_Jizba",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      0.445,
@@ -271,6 +282,7 @@
    "kind": "dvere",
    "group": "Rychta_Dvere_Komora",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      -0.42,
@@ -295,6 +307,7 @@
    "kind": "dvere",
    "group": "Rychta_Dvere_Vstup",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      -0.039,
@@ -319,6 +332,7 @@
    "kind": "dvere",
    "group": "ChyseKura_Dvere",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      0.405,
@@ -343,6 +357,7 @@
    "kind": "dvere",
    "group": "ChysePrkna_Dvere",
    "glb_zavreno": true,
+   "koren": "Mista",
    "cols": [
     [
      0.405,
@@ -360,6 +375,106 @@
    ],
    "open": 88,
    "dur": 1.1
+  },
+  {
+   "name": "Stodola_Dvere_L",
+   "dum": "Stodola",
+   "kind": "vrata",
+   "group": "Stodola_Dvere",
+   "glb_zavreno": true,
+   "koren": "Ves",
+   "cols": [
+    [
+     0.722,
+     1.29,
+     -0.052,
+     1.462,
+     2.48,
+     0.084
+    ]
+   ],
+   "use_mistni": [
+    1.443,
+    1.0,
+    -0.104
+   ],
+   "open": -95,
+   "dur": 1.6
+  },
+  {
+   "name": "Stodola_Dvere_P",
+   "dum": "Stodola",
+   "kind": "vrata",
+   "group": "Stodola_Dvere",
+   "glb_zavreno": true,
+   "koren": "Ves",
+   "cols": [
+    [
+     -0.73,
+     1.289,
+     -0.051,
+     1.46,
+     2.482,
+     0.082
+    ]
+   ],
+   "use_mistni": [
+    -1.46,
+    1.0,
+    -0.102
+   ],
+   "open": 95,
+   "dur": 1.6
+  },
+  {
+   "name": "StodolaMala_Dvere_L",
+   "dum": "StodolaMala",
+   "kind": "vrata",
+   "group": "StodolaMala_Dvere",
+   "glb_zavreno": true,
+   "koren": "Ves",
+   "cols": [
+    [
+     0.724,
+     1.188,
+     -0.05,
+     1.472,
+     2.285,
+     0.08
+    ]
+   ],
+   "use_mistni": [
+    1.448,
+    1.0,
+    -0.1
+   ],
+   "open": -95,
+   "dur": 1.6
+  },
+  {
+   "name": "StodolaMala_Dvere_P",
+   "dum": "StodolaMala",
+   "kind": "vrata",
+   "group": "StodolaMala_Dvere",
+   "glb_zavreno": true,
+   "koren": "Ves",
+   "cols": [
+    [
+     -0.733,
+     1.188,
+     -0.051,
+     1.455,
+     2.284,
+     0.081
+    ]
+   ],
+   "use_mistni": [
+    -1.466,
+    1.0,
+    -0.101
+   ],
+   "open": 95,
+   "dur": 1.6
   }
  ]
 }

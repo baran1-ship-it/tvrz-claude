@@ -117,6 +117,17 @@ def zed_plynula(P, a, b, t, h, mat="zdivo", pata=2.0, krok=1.5, e0=0.0, e1=0.0, 
         ym = (yt[k] + yt[k + 1]) / 2; c = (q0 + q1) / 2
         P.cols.append((M((c.x, (y0 + ym) / 2, c.z), basis=frame(d)), (t, ym - y0, ss[k + 1] - ss[k])))
         out.append((float(ss[k]), float(ss[k + 1]), ym))
+    hp_ = CIMB.get("predprsen_m", 0.0) if cimburi else 0.0
+    if hp_ > 0:   # předprseň (poprsní zeď) po celé délce na vnější polovině koruny, stínky na ní (Míša 14. 11.: „zeď do pasu a na ní zuby“)
+        on_ = d.cross(UP).normalized()
+        for k in range(n):
+            q0, q1 = a + d * ss[k] + on_ * (t * 0.3), a + d * ss[k + 1] + on_ * (t * 0.3); w_ = t * 0.2
+            vs = [q0 - on_ * w_ + UP * (yt[k] - 0.04), q1 - on_ * w_ + UP * (yt[k + 1] - 0.04), q1 + on_ * w_ + UP * (yt[k + 1] - 0.04), q0 + on_ * w_ + UP * (yt[k] - 0.04),
+                  q0 - on_ * w_ + UP * (yt[k] + hp_), q1 - on_ * w_ + UP * (yt[k + 1] + hp_), q1 + on_ * w_ + UP * (yt[k + 1] + hp_), q0 + on_ * w_ + UP * (yt[k] + hp_)]
+            P.mesh([tuple(v) for v in vs], [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (2, 3, 7, 6), (1, 2, 6, 5), (3, 0, 4, 7)], mat + "_koruna" if mat == "zdivo" else mat)
+            ym_ = (yt[k] + yt[k + 1]) / 2; c_ = (q0 + q1) / 2
+            P.cols.append((M((c_.x, ym_ + hp_ / 2, c_.z), basis=frame(d)), (t * 0.4, hp_, ss[k + 1] - ss[k])))
+        yt = [y_ + hp_ for y_ in yt]
     if cimburi:   # stínky po rytmu cimbuří i na plynulé koruně (Míša 5. a 12. 11.: „vracíme se k hradbičkám všude“ – vnější hradba A byla
         out_n = d.cross(UP).normalized(); R = CIMB["rytmus_m"]; nr = max(1, round(L / R)); Rl = L / nr; sw = min(CIMB["stinka_m"], Rl - 0.5)   # hladká)
         for k in range(nr):
@@ -145,13 +156,22 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
         c = a + d * ((s0 - e0 + s1 + e1) / 2)
         P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t, y1 - y0, s1 - s0 + e0 + e1), mat)
         out.append((s0, s1, y1))
+        hp_ = CIMB.get("predprsen_m", 0.0) if cimburi else 0.0
+        if hp_ > 0:   # předprseň po celé délce úseku na vnější polovině koruny, stínky na ní (Míša 14. 11.: „zeď do pasu a na ní zuby“);
+            # ne v portálku do věže (bez_stinek)
+            on_ = d.cross(UP).normalized()
+            kusy_ = [(s0 - e0, s1 + e1)]
+            if bez_stinek: kusy_ = [(u0_, u1_) for u0_, u1_ in ((s0 - e0, min(s1 + e1, bez_stinek[0])), (max(s0 - e0, bez_stinek[1]), s1 + e1)) if u1_ - u0_ > 0.05]
+            for u0_, u1_ in kusy_:
+                c_ = a + d * ((u0_ + u1_) / 2) + on_ * (t * 0.3)
+                P.box(M((c_.x, y1 + hp_ / 2, c_.z), basis=frame(d)), (t * 0.4, hp_, u1_ - u0_), mat + "_koruna" if mat == "zdivo" else mat, collide=True)
         if cimburi:   # stínky na vnější polovině koruny (+strana = vpravo od směru), uprostřed každého rytmu – proluky na hranách úseků
             out_n = d.cross(UP).normalized(); sw = min(CIMB["stinka_m"], Rl - 0.5)
             for k in range(i0, i1):
                 if bez_stinek and bez_stinek[0] <= (k + 0.5) * Rl <= bez_stinek[1]: continue   # vstup ochozu do věže (13. 11. povrch_kolize: stínka v cestě k portálku)
                 p = a + d * ((k + 0.5) * Rl) + out_n * (t * 0.3)
                 if os.environ.get("PUCHART_DBGS") and (p - Vector((12.45, 0, -45.45))).length < 1.5: print("DBGSTINKA", [round(p.x, 2), round(p.z, 2)], "s", round((k + 0.5) * Rl, 2), "L", round(L, 2), "a", [round(a.x, 2), round(a.z, 2)], "b", [round(b.x, 2), round(b.z, 2)], "volno", bez_stinek, flush=True)
-                P.box(M((p.x, y1 + CIMB["vyska_m"] / 2, p.z), basis=frame(d)), (t * 0.4, CIMB["vyska_m"], sw), mat + "_koruna" if mat == "zdivo" else mat, collide=True)   # stínka holý kámen (Míša 10. 11.); kolize jako u plynulé koruny (13. 11.: stínky byly průchozí)
+                P.box(M((p.x, y1 + hp_ + CIMB["vyska_m"] / 2, p.z), basis=frame(d)), (t * 0.4, CIMB["vyska_m"], sw), mat + "_koruna" if mat == "zdivo" else mat, collide=True)   # stínka holý kámen (Míša 10. 11.); kolize jako u plynulé koruny (13. 11.: stínky byly průchozí)
     return out
 
 NAROZI_POKOS = True

@@ -1710,6 +1710,14 @@ def postav_A(P):
         sm_ = 1 if ut == 1 else -1   # směr k věži v pořadí bodů
         if ((Vector((bb[k0][0], 0, bb[k0][1])) - a).dot(d) - (sT + 0.6)) * sm_ < 0: k0 += sm_   # první bod za podestou
         po_k_vezi = bb[k0:] if ut == 1 else bb[:k0 + 1][::-1]
+        # Míša 14. 11.: do věže jen po dřevěném ochozu – trasa testu zkracovala roh přes korunu zdi (bod ochozu za vnější stranou
+        # posledního úseku); roh = průsečík osy ochozu podél schodového úseku a osy ochozu ke portálku (směr dB)
+        if len(po_k_vezi) >= 2:
+            pe_ = Vector((po_k_vezi[-1][0], 0, po_k_vezi[-1][1])); p1_ = a + vn * (tt / 2 + SW / 2)
+            den_ = d.x * dB.z - d.z * dB.x
+            if abs(den_) > 1e-6:
+                t_ = ((pe_.x - p1_.x) * dB.z - (pe_.z - p1_.z) * dB.x) / den_; q_ = p1_ + d * t_
+                po_k_vezi = [[round(q_.x, 2), round(q_.z, 2)] + list(po_k_vezi[-1][2:3]) + [0.2], po_k_vezi[-1]]   # roh přesně (sloupek zábradlí v koutě)
         STAVBY.append({"ochoz_hradby_mezera": [i, round(sT, 2), round(sT + 1.2, 2)]})
         if hw.get("schody_v_ose"):
             TR["A_branka_patro"] = [bod(f_ - dS * 1.2), bod(f_ - dS * 0.4), bod(a + d * sT + vn * st_o, y_k, 0.25)] + po_k_vezi   # pata schodů na plošině A_schody_vychod_pata (13. 11.: za ní prohlubeň valu)

@@ -1,0 +1,167 @@
+{
+ "popis": "Stodoly a kůlna usedlostí (blender/stodoly.py → hra/modely/predmety_h/<id>.glb + <id>_kolize.glb). Míša 14. 11.: „projdi všechny kůlny a stodoly ve hře, chci v nich mít funkční vrata a ať nejsou ze čtverečků jako ty schody“. Model Havrana (blender/vlastni.py stodola(), kolna()) měl stěny a vrata z fotky celé podlahy z prken (prkna_ven) na každém prkně → mřížka drobných čtverečků; vrata byla slitá se stodolou. Teď: každé prkno je jeden kus dřeva z atlasu jednotlivých prken (jako mostovka hradu, hrad_vzhled.json drevo.deska), vrata stodol jsou samostatné uzly <Uzel>_Dvere_L/P s počátkem v pantu (nastroje/pohyb_mista.py → dvere.gd), kolize nechává průjezd vrat volný.",
+ "zdroj": "Havran blender/vlastni.py stodola() a kolna() (větev claude/new-session-0dtk58: rozměry, kostra, střecha, hlídač střechy _hlidac_strechy) – rozměry, počátek a natočení zůstávají (umístění ve vsi nastroje/mista_rozmisteni.py se nemění, katalog hra/modely/predmety_h.json: pivot kolize = střed obalu)",
+ "modely": {
+  "stodola": {
+   "druh": "stodola",
+   "uzel": "Stodola",
+   "L": 9.0,
+   "D": 6.5,
+   "Hw": 3.0,
+   "sklon_deg": 45.0,
+   "seed": 71
+  },
+  "stodola_mala": {
+   "druh": "stodola",
+   "uzel": "StodolaMala",
+   "L": 7.0,
+   "D": 5.5,
+   "Hw": 2.8,
+   "sklon_deg": 45.0,
+   "seed": 79
+  },
+  "kolna": {
+   "druh": "kolna",
+   "uzel": "Kolna",
+   "L": 7.0,
+   "D": 3.6,
+   "Hp": 2.6,
+   "Hz": 1.9,
+   "seed": 73
+  },
+  "pozn": "L délka (x), D hloubka (y Blenderu; předek = −y = +z hry, vrata k domu – mista.json hospodarske), Hw výška stěny, Hp/Hz kůlna vpředu/vzadu; čísla a semena z Havrana vlastni.py BUILD"
+ },
+ "stodola": {
+  "z0_m": 0.25,
+  "odsazeni_prken_m": 0.12,
+  "presah_okap_m": 0.55,
+  "presah_stit_m": 0.4,
+  "tram_m": 0.18,
+  "prah_m": [
+   0.2,
+   0.16
+  ],
+  "pozednice_m": [
+   0.2,
+   0.16
+  ],
+  "vrata_sirka_m": 3.0,
+  "vrata_pod_pozednici_m": 0.02,
+  "zdroj": "Havran vlastni.py stodola(): sloupy 0,18 m, práh a pozednice 0,2 × 0,16, vrata 3 m pod pozednicí (Míša 0.9998 „vrata od stodoly ve střeše“), přesah okap 0,55 / štít 0,4",
+  "vrata_veje_m": 0.04,
+  "vrata_nad_zemi_m": 0.04,
+  "vrata_mezera_stred_m": 0.04,
+  "vrata_pozn": "Průjezd vrat bez prahu a podezdívky – mlat stodoly je udusaná hlína v úrovni dvora, vozy vjíždějí (KCD1/KCD2 stodoly; postava nemá krok nahoru – hlavni.gd _rampy_dveri). Veřeje (sloupy vrat) stojí po stranách průjezdu – Havran měl sloupy L/6, u malé stodoly (L 7 m) stály uvnitř 3m vrat. Křídla: svislá prkna, dvě vodorovné svlaky, šikmá vzpěra od pantu nahoru k zámku (tlačená, Z), pásové závěsy",
+  "svlak_od_kraje_m": 0.35,
+  "svlak_m": [
+   0.14,
+   0.05
+  ],
+  "vzpera_m": [
+   0.13,
+   0.05
+  ],
+  "zaves_m": [
+   0.55,
+   0.05,
+   0.01
+  ],
+  "krokve_rozestup_m": 1.1,
+  "krokve_pozn": "krokve a vazné trámy pod šindelem (Havran stodola je nemá – deska střechy byla zevnitř vidět otevřenými vraty); tesařsky: krokev na pozednici s osedláním (výška krokve = od pozednice ke spodku šindele), svisle seříznutá u hřebene a u okapu, vazný trám na pozednicích nad sloupy; krokev se vazného trámu nedotýká (posun o pul šířky)",
+  "padlo_vyska": 0.5,
+  "padlo_pozn": "paždík (vodorovný trám, na který jsou prkna přibitá) uvnitř stěny v půli výšky",
+  "dvirka_seno_m": [
+   0.9,
+   1.0,
+   0.9
+  ],
+  "dvirka_pozn": "dvířka na seno v levém štítu (Havran: šířka 0,9, výška 1,0, střed 0,9 m nad pozednicí)",
+  "krokev_sirka_m": 0.12,
+  "vrata_pod_okapem_m": 0.06,
+  "vrata_okap_pozn": "horní hrana průjezdu nejvýš 6 cm pod spodkem okapu: křídlo otevřené ven kolmo od stěny (pohyb_mista.json stodoly uhel_deg) jinak prošlo přesahem střechy (snímek 14. 11.); nad vraty nadpraží mezi veřejemi a prkna do spodku krokví. Hlídač střechy kontroluje vrata zavřená i otevřená"
+ },
+ "kolna": {
+  "z0_m": 0.2,
+  "presah_m": 0.5,
+  "tram_m": 0.17,
+  "zdroj": "Havran vlastni.py kolna(): otevřená kůlna na sloupech, 3 pole, pultová střecha spadající dozadu, pásky u předních sloupů"
+ },
+ "podezdivka": {
+  "zapust_m": 0.35,
+  "sirka_m": 0.4,
+  "zdroj": "Havran pravidla/pravidla_sveta.json pasma.budova podezdivka_zapust_m, podezdivka_sirka_m (Míša 9. 11. r. 77: stodola na patkách nad terénem → souvislá podezdívka zapuštěná pod nulu modelu)"
+ },
+ "prkna": {
+  "sirka_m": [
+   0.2,
+   0.3
+  ],
+  "mezera_m": [
+   0.0,
+   0.01
+  ],
+  "tloustka_m": 0.03,
+  "zdroj": "Havran vlastni._desky_stena: svislá prkna 0,2–0,3 m, mezery 0–1 cm, tloušťka 3 cm",
+  "latka_m": [
+   0.07,
+   0.02
+  ],
+  "latka_kazda": 2,
+  "latka_pozn": "lať přes spáru každého druhého prkna (Havran _desky_stena popis „přes ně latka na spáře každého druhého prkna“ – v kódu chyběla); stodoly svisle bedněné s laťováním (KCD1 ves_1 kůlna, KCD2 stodoly)",
+  "naklon_deg": 0.35,
+  "odchylka_m": 0.004,
+  "pata_zkraceni_m": [
+   0.0,
+   0.03
+  ],
+  "nerovnost_pozn": "prkna nejsou strojová: náklon do 0,35°, vystoupení ±4 mm, upraveným koncem dole kratší (opotřebení u země – KCD: opotřebení ukazuje používání)",
+  "atlas_radku": 8,
+  "atlas_okraj": 0.03,
+  "atlas_pozn": "prkno = jeden řádek atlasu prkna_atlas (nastroje/drevo_tex.py: 8 různých prken 2,56 × 0,32 m, tmavé hrany) přes celou šířku prkna, posun po délce náhodný; vlákna podél prkna, jako mostovka hradu (blender/hrady.py TEX prkno_ven, kit.plank)"
+ },
+ "materialy": {
+  "prkno": [
+   "prkna_atlas",
+   2.56,
+   1.0
+  ],
+  "prkno_vrata": [
+   "prkna_atlas",
+   2.56,
+   0.84
+  ],
+  "tram": [
+   "rough_wood_sedy",
+   0.5,
+   0.8
+  ],
+  "rez": [
+   "letokruhy",
+   1.0,
+   0.85
+  ],
+  "sindel": [
+   "sindel",
+   1.5,
+   1.35
+  ],
+  "kamen": [
+   "castle_wall_slates",
+   2.5,
+   0.8
+  ],
+  "zelezo": [
+   0.05,
+   0.048,
+   0.045
+  ],
+  "pozn": "(fotka v blender/tex, velikost v m, jas) jako hrad (blender/hrady.py TEX: prkno_ven, dub, rez_drevo, sindel, zdivo; železo kování) – hnědé opotřebované dřevo hrad_vzhled.json drevo (Míša 13. 11.); vrata o něco tmavší jako dveře hradu (TEX dvere 0,78 / prkna_ven 1,0)"
+ },
+ "textury": {
+  "atlas_px": 1024,
+  "atlas_normala_px": 512,
+  "albedo_px": 512,
+  "normala_px": 256,
+  "zdroj": "nastroje/predmety_z_havrana.sh (Havran 0.59: 2k textury předmětů = záseky a pád): albedo 512, ostatní 256; atlas prken 1024 – jedno prkno 0,32 m má mít aspoň 128 px na šířku (drevo_tex.py)"
+ }
+}

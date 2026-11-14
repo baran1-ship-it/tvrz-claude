@@ -1,10 +1,26 @@
 {
- "popis": "Funkční dveře domů nových míst (ves Předhradí, krčma, hájovna) – Míša 13. 11.: „jako na hradě tak i ves, hospoda, hájovna – funkční dveře, vrata, vrátka, prostě co jde, bude funkční“. nastroje/pohyb_mista.py čte uzly <Dům>_Dvere_* z hra/modely/stavby_h/domy.glb (pant = počátek uzlu, křídlo podle obalu sítě) a zapíše hra/data/pohyb_mista.json ve formátu pohyb.json; dvere.gd je najde v každé instanci domu (uzel Mista) – skupina = dveře@instance. V modelu Havrana jsou dveře zavřené (glb_zavreno), ve hře výchozí stav otevřeno jako na hradě; zavřené křídlo má kolizi.",
+ "popis": "Funkční dveře domů nových míst (ves Předhradí, krčma, hájovna) – Míša 13. 11.: „jako na hradě tak i ves, hospoda, hájovna – funkční dveře, vrata, vrátka, prostě co jde, bude funkční“. nastroje/pohyb_mista.py čte uzly <Dům>_Dvere_* z hra/modely/stavby_h/domy.glb (pant = počátek uzlu, křídlo podle obalu sítě) a zapíše hra/data/pohyb_mista.json ve formátu pohyb.json; dvere.gd je najde v každé instanci domu (uzel Mista) – skupina = dveře@instance. V modelu Havrana jsou dveře zavřené (glb_zavreno), ve hře výchozí stav otevřeno jako na hradě; zavřené křídlo má kolizi. Vrata stodol (Míša 14. 11.): uzly <Stodola>_Dvere_L/P z hra/modely/predmety_h (blender/stodoly.py) – stodoly stojí pod uzlem Ves (ves.gd _hospodarske), proto záznam nese koren.",
  "zdroj": "Havran kit.movable + scripts/pohyb.gd (dveře na pantu, úhel 88°, doba 1,1 s jako hrad pohyb.json); dveře venkovských domů se otvírají dovnitř (KCD1/KCD2: dveře chalup dovnitř, předloha docs/reference/kcd_ves_predloha/01, 02)",
  "uhel_deg": 88,
  "doba_s": 1.1,
  "tloustka_min_m": 0.06,
  "ovladani_y_m": 1.0,
  "smer": "dovnitr",
- "smer_pozn": "křídlo se otočí ke středu domu (vnější dveře dovnitř, vnitřní ke středu půdorysu)"
+ "smer_pozn": "křídlo se otočí ke středu domu (vnější dveře dovnitř, vnitřní ke středu půdorysu)",
+ "koren": "Mista",
+ "stodoly": {
+  "soubory": [
+   "hra/modely/predmety_h/stodola.glb",
+   "hra/modely/predmety_h/stodola_mala.glb",
+   "hra/modely/predmety_h/kolna.glb"
+  ],
+  "koren": "Ves",
+  "kind": "vrata",
+  "smer": "ven",
+  "uhel_deg": 95,
+  "doba_s": 1.6,
+  "skupina_pozn": "obě křídla jedna skupina <Uzel>_Dvere@instance (jedno tlačítko otevře obě, jako vrata plotů ves_vrata_*); místo ovládání = střed průjezdu (zámková hrana křídla)",
+  "zdroj": "vrata stodol se otvírají VEN (zadání 14. 11.: vrata stodol ven): uvnitř je mlat a sklizeň (snopy, vůz) – křídla dovnitř by narážela; KCD1/KCD2 stodoly a Havran vlastni.stodola mají svlaky a vzpěru na vnější straně, závěsy vně; úhel 95° (křídlo kolmo od stěny, ne přes sousední prkna), doba 1,6 s jako vrata plotů (ves.gd _kridlo)",
+  "kolna_pozn": "kůlna je otevřená (Havran kolna: 3 pole bez vrat) – v souboru se hledá jen pro úplnost, uzly vrat nemá"
+ }
 }

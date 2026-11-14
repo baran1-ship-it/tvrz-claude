@@ -35,11 +35,13 @@ func zacni(h: Node, vrstva: CanvasLayer, jen_mosty := false) -> void:
 			_pridej(u, e, e.get("group", e["name"]))
 	# ves, krčma, hájovna (Míša 13. 11.: „jako na hradě tak i ves, hospoda, hájovna – funkční dveře, vrata, vrátka“):
 	# dveře domů z data/pohyb_mista.json (nastroje/pohyb_mista.py, souřadnice uzlu dveří – stejné pro každou instanci domu,
-	# skupina dveře@dům), vrata a vrátka plotů zapisuje ves.gd (pohyb_dily, souřadnice světa)
+	# skupina dveře@dům), vrata a vrátka plotů zapisuje ves.gd (pohyb_dily, souřadnice světa). Vrata stodol (Míša 14. 11.,
+	# blender/stodoly.py): instance stodol jsou pod uzlem Ves/Hospodarske (ves.gd), záznam nese koren "Ves" (domy "Mista")
 	if not jen_mosty:
-		var mi: Node = h.get_node_or_null("Mista")
-		if mi != null and FileAccess.file_exists("res://data/pohyb_mista.json"):
+		if FileAccess.file_exists("res://data/pohyb_mista.json"):
 			for e: Dictionary in JSON.parse_string(FileAccess.get_file_as_string("res://data/pohyb_mista.json"))["dily"]:
+				var mi: Node = h.get_node_or_null(String(e.get("koren", "Mista")))
+				if mi == null: continue
 				for u: Node in mi.find_children(String(e["name"]), "Node3D", true, false):
 					_pridej(u as Node3D, e, "%s@%s" % [e.get("group", e["name"]), u.get_parent().name])
 		var ves: Node = h.get_node_or_null("Ves")

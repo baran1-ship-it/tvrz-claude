@@ -55,3 +55,6 @@ echo "postav_vse OK"
 python3 $K/nastroje/import_velikost.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)
 python3 $K/nastroje/import_stromy.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)
 [ -d $K/hra/modely/predmety_h ] || bash $K/nastroje/predmety_z_havrana.sh   # předměty, menu hráče a pískoviště z Havrana (Míša 10. 11.)
+# stodoly a kůlna usedlostí (Míša 14. 11.: funkční vrata, prkna bez čtverečků): přepíše modely Havrana v predmety_h,
+# pak znovu vrata do hra/data/pohyb_mista.json (uzly *_Dvere_* stodol) a import
+[ -x /opt/bl/bin/python ] && /opt/bl/bin/python $K/blender/stodoly.py $K && python3 $K/nastroje/pohyb_mista.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)

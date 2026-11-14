@@ -5,9 +5,9 @@ const OUT := "OUT/"
 const SOUBORY := ["res://modely/ves/domy.glb", "res://modely/ves/domy_stredni.glb", "res://modely/mlyn/mlyn.glb", "res://modely/mlyn/mlyn_lod1.glb",
 	"res://modely/rostliny/jablon.glb", "res://modely/rostliny/jablon_daleko.glb",
 	# hospodářské stavby usedlostí (Havran katalog předmětů, blender/vlastni.py) – zesvětlené jako domy (KCD ves_2, Havran
-	# svet.gd „Míša 0.83: stodola téměř černá – zvětralá prkna šedohnědá, světlejší“ tint × 1,7); kolize z predmety_h
-	"res://modely/predmety/stodola.glb", "res://modely/predmety/stodola_stredni.glb", "res://modely/predmety/stodola_mala.glb",
-	"res://modely/predmety/stodola_mala_stredni.glb", "res://modely/predmety/kolna.glb", "res://modely/predmety/kolna_stredni.glb",
+	# svet.gd „Míša 0.83: stodola téměř černá – zvětralá prkna šedohnědá, světlejší“ tint × 1,7); kolize z predmety_h.
+	# Stodola, malá stodola a kůlna už ne (Míša 14. 11.: funkční vrata, prkna bez čtverečků) – staví je blender/stodoly.py
+	# do modely/predmety_h; kopie zde by měla v ves.gd přednost a vrátila starý model
 	"res://modely/predmety/kurnik.glb"]   # jabloň sadů a dvorů Havrana (vesnice.py dvorec_stromy, lokace.json ves.dvorec.sad)
 const BEZ_JASU := ["jablon"]   # listí a kůra stromu: barvy jsou z fotek (Havran sad), nezesvětlovat jako dřevo staveb
 var _alfa := false
