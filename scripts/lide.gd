@@ -1634,7 +1634,8 @@ func _cil_obsazen(c: Dictionary, q: Vector2, r: float) -> bool:
 		# 14. 11. (Misa: senkyrka pri obsluze se vnoruje do hosta): sedici zabira i sedak (telo nad sedakem), ne jen
 		# bod, odkud usedal
 		var sk: Variant = o.get("sedak", {})
-		if o != c and sk is Dictionary and (sk as Dictionary).get("sedak") is Vector2 and ((sk as Dictionary)["sedak"] as Vector2).distance_to(q) < r:
+		if o != c and sk is Dictionary and (sk as Dictionary).get("sedak") is Vector2 \
+				and ((sk as Dictionary)["sedak"] as Vector2).distance_to(q) < minf(r, float(P["rozestup"]["sedici_m"])):
 			return true
 	return false
 

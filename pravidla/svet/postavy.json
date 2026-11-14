@@ -6405,7 +6405,9 @@
   "smeru": 8,
   "chuze_m": 0.85,
   "cekani_max_s": 2.5,
-  "kontrola_s": 0.2
+  "kontrola_s": 0.2,
+  "sedici_m": 0.5,
+  "_sedici_m": "14. 11. (Míša: šenkýřka se noří do hosta): sedící zabírá i sedák v tomto okruhu (tělo); menší než misto_m, aby partner mohl stát u sedícího (test lide_chovani dvojice)"
  },
  "test_chuze": {
   "popis": "tools/test_klipy_chuze.gd (Misa 9. 11. KCD kvalita: kroky bez klouzani): rychlost klipu = median rychlosti nizsi spicky na zemi (do dotyk_m nad minimem) podel smeru chuze vuci koreni; data (chuze_klip_m_s postav, jizda.json telo.klipy_m_s) se smi lisit nejvys klouzani_podil",
