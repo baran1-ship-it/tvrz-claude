@@ -12486,6 +12486,7 @@ func _druhy_mimo_katalog() -> void:
 
 ## Vstup kroku 8: kazdy kus z Blenderu a z kroku 6 na stanovisti podle masek kroku 7 (druhy.json vyjma).
 func _vstup_druhu() -> void:
+	_dosednuti_dat()
 	var pocty := {}
 	for k: String in data["rostliny"].keys():
 		var zust: Array = []
@@ -12497,6 +12498,54 @@ func _vstup_druhu() -> void:
 			pocty[druh_klice(k)] = int(pocty.get(druh_klice(k), 0)) + n
 		data["rostliny"][k] = zust
 	print("vstup druhu (stanoviste z masek kroku 7, druhy.json vyjma, voda): mimo stanoviste %s" % str(pocty))
+
+
+## Dosednuti v datech (pasma dosednuti): kazda instance z exportu, ktera visi nad hotovym terenem (_teren_y) vic nez
+## visi_m a nestoji na skale, dosedne na teren - ponor_m. Skaly = pudorys site skaly x meritko (mrizka 16 m).
+func _dosednuti_dat() -> void:
+	var pd: Dictionary = pasma()["dosednuti"]
+	var visi := float(pd["visi_m"])
+	var ponor := float(pd["ponor_m"])
+	var skaly := {}
+	for key: String in data["rostliny"]:
+		if not key.begins_with("skala_") or key.contains("_daleko"):
+			continue
+		var me := _skala_sit(key)
+		if me == null:
+			continue
+		var ab := me.get_aabb()
+		for t: Array in data["rostliny"][key]:
+			var sc := Vector3(float(t[0]), float(t[4]), float(t[8])).length()
+			var r := maxf(ab.size.x, ab.size.z) * 0.5 * sc
+			var c := Vector2(float(t[3]), float(t[11]))
+			for i in range(floori((c.x - r) / 16.0), floori((c.x + r) / 16.0) + 1):
+				for j in range(floori((c.y - r) / 16.0), floori((c.y + r) / 16.0) + 1):
+					var kc := Vector2i(i, j)
+					if not skaly.has(kc):
+						skaly[kc] = []
+					(skaly[kc] as Array).append(Vector3(c.x, c.y, r))
+	var n := 0
+	var po := {}
+	for key: String in data["rostliny"]:
+		if key.begins_with("skala_"):
+			continue
+		for t: Array in data["rostliny"][key]:
+			var x := float(t[3])
+			var z := float(t[11])
+			var zem := _teren_y(x, z)
+			if float(t[7]) - zem <= visi:
+				continue
+			var na_skale := false
+			for sk: Vector3 in skaly.get(Vector2i(floori(x / 16.0), floori(z / 16.0)), []):
+				if Vector2(x - sk.x, z - sk.y).length() < sk.z:
+					na_skale = true
+					break
+			if na_skale:
+				continue
+			t[7] = zem - ponor
+			n += 1
+			po[druh_klice(key)] = int(po.get(druh_klice(key), 0)) + 1
+	print("dosednuti v datech: %d instanci %s" % [n, str(po)])
 
 
 ## Hodnota kanalu stanoviste (0 jehlicnate, 1 listnate, 2 skaly, 3 pesina) v bode - bilinearne (nejblizsi bunka 2 m
