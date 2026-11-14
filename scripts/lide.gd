@@ -1419,6 +1419,33 @@ func _sedak(c: Dictionary, kde: Vector2, mistnost := "") -> Dictionary:
 			if d < nd:
 				nd = d
 				nej = {"klic": klic, "yaw": yaw, "y": p0.y + float(rz[1]) - float(sd["vyska_klipu_m"]), "sedak": q, "lavice": n > 1}
+	# Misa 14. 11. (kupec a poutnici sedi venku na lavici, pod stanem jsou 3 stoly se sezenim; v lomu stany se stoly):
+	# sedaky soucasti slouceneho modelu (sedani.sedaky_v_modelech: model -> [x, z, yaw_st, vyska_m] v ramci modelu)
+	var svm: Dictionary = sd.get("sedaky_v_modelech", {})
+	for ri in vb.size():
+		var r2: Dictionary = vb[ri]
+		var sm: Array = svm.get(String(r2["id"]), [])
+		if sm.is_empty() or mistnost != "":
+			continue
+		var yaw2 := float(r2["yaw"])
+		var ox2 := Vector2(cos(yaw2), -sin(yaw2))
+		var oz2 := Vector2(sin(yaw2), cos(yaw2))
+		for k2 in sm.size():
+			var klic2 := "sedm:%d:%d" % [ri, k2]
+			if _obsazeno.has(klic2):
+				continue
+			var e: Array = sm[k2]
+			var q2 := Vector2(float(r2["p"][0]), float(r2["p"][2])) + ox2 * float(e[0]) + oz2 * float(e[1])
+			var d2 := q2.distance_to(kde)
+			if d2 < nd:
+				nd = d2
+				nej = {"klic": klic2, "yaw": yaw2 + deg_to_rad(float(e[2])), "y": float(r2["p"][1]) + float(e[3]) - float(sd["vyska_klipu_m"]),
+						"sedak": q2, "lavice": false, "pevny_yaw": true}
+	if not nej.is_empty() and bool(nej.get("pevny_yaw", false)):
+		var f2 := Vector2(sin(float(nej["yaw"])), cos(float(nej["yaw"])))
+		nej["stani"] = (nej["sedak"] as Vector2) + f2 * float(sd["pred_m"])
+		_obsazeno[nej["klic"]] = c["id"]
+		return nej
 	if not nej.is_empty():
 		# celem ke stolu u sedaku, jinak k ohni, jinak k mistu cinnosti (_ohen_u); lavice jen kolmo (sedi se na ni
 		# obkrocmo jen vyjimecne), stolicka primo k cili - jen pro vybrany sedak (rozpocet snimku)

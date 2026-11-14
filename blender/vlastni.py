@@ -4959,14 +4959,15 @@ def zahon(name, plodina):
                 if druh == "salvej":
                     _salat(c, R, salvej)
                 elif druh == "mata":
-                    _natě(c, R, mata, R.randint(7, 9), 0.22, 0.03, 0.9)
+                    _salat(c, R, mata)                    # husty trs listu
+                    _natě(c, R, mata, R.randint(5, 7), 0.2, 0.035, 0.8)
                 elif druh == "hermanek":
-                    _natě(c, R, herm, R.randint(6, 8), 0.26, 0.012, 1.0)
-                    _natě((c[0], c[1], c[2] + 0.2), R, herm_k, 3, 0.05, 0.02, 1.6)
+                    _natě(c, R, herm, R.randint(9, 12), 0.26, 0.014, 1.2)
+                    _natě((c[0], c[1], c[2] + 0.2), R, herm_k, 7, 0.06, 0.03, 1.8)   # bile kvitky nad nati
                 else:
-                    _natě(c, R, lev, R.randint(6, 8), 0.34, 0.01, 0.7)
-                    _natě((c[0], c[1], c[2] + 0.26), R, lev_k, 4, 0.08, 0.018, 0.9)
-                x += R.uniform(0.26, 0.34)
+                    _natě(c, R, lev, R.randint(9, 12), 0.34, 0.012, 0.8)
+                    _natě((c[0], c[1], c[2] + 0.26), R, lev_k, 8, 0.1, 0.022, 1.0)   # fialove klasky
+                x += R.uniform(0.22, 0.28)
     return None
 
 
