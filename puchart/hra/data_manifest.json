@@ -1,16 +1,16 @@
 {
  "popis": "hern\u00ed data mimo APK po skupin\u00e1ch (nastroje/data_balik.py, scripts/data.gd) \u2013 stahuj\u00ed se jen zm\u011bn\u011bn\u00e9",
  "vetev": "ccr-f2d32673-9fi7m5",
- "zdroj": "4e270121b855abc7e35935a8cde32001",
+ "zdroj": "caf9562cf231aee8dec7346e42faeb3c",
  "packs": {
   "puchart_zaklad": {
-   "md5": "a7213365dc8f37809bdea2f0de7a0d8c",
-   "size": 20729356,
+   "md5": "349b8bc049e482baec8baa90a8c0de47",
+   "size": 20744220,
    "parts": [
     {
-     "file": "puchart_zaklad-a7213365dc.pck.000",
-     "size": 20729356,
-     "md5": "a7213365dc8f37809bdea2f0de7a0d8c"
+     "file": "puchart_zaklad-349b8bc049.pck.000",
+     "size": 20744220,
+     "md5": "349b8bc049e482baec8baa90a8c0de47"
     }
    ]
   },
@@ -63,28 +63,33 @@
    ]
   },
   "puchart_stavby": {
-   "md5": "cd21e53e2c70046b2b3e6b9e9beb0922",
-   "size": 354657172,
+   "md5": "5e2681189e2cab6b9c8b9ce6139ffd5c",
+   "size": 430665696,
    "parts": [
     {
-     "file": "puchart_stavby-cd21e53e2c.pck.000",
+     "file": "puchart_stavby-5e2681189e.pck.000",
      "size": 94371840,
-     "md5": "d8e73e91ff35dfb4342b6ff884d45f36"
+     "md5": "9718f542c1662f09d0d522975c654b47"
     },
     {
-     "file": "puchart_stavby-cd21e53e2c.pck.001",
+     "file": "puchart_stavby-5e2681189e.pck.001",
      "size": 94371840,
-     "md5": "9b773ff312fb43eb7c00aea71c7d1064"
+     "md5": "73fc3084bfbf1c619a251d56491cbbda"
     },
     {
-     "file": "puchart_stavby-cd21e53e2c.pck.002",
+     "file": "puchart_stavby-5e2681189e.pck.002",
      "size": 94371840,
-     "md5": "adc3dd477389ada5ae857e7a9907d22b"
+     "md5": "bb0760ef13d6aa605d6cc0dab9b95480"
     },
     {
-     "file": "puchart_stavby-cd21e53e2c.pck.003",
-     "size": 71541652,
-     "md5": "0e3a8ba911b6ea35f1d1a264bf7d8dd4"
+     "file": "puchart_stavby-5e2681189e.pck.003",
+     "size": 94371840,
+     "md5": "b3bcd2fc8a6e544117f88f755d7ee7fa"
+    },
+    {
+     "file": "puchart_stavby-5e2681189e.pck.004",
+     "size": 53178336,
+     "md5": "362e44f61624418790ca44b85204be56"
     }
    ]
   },
