@@ -237,6 +237,7 @@ func show_page(page: String) -> void:
 				var bb := _btn(String(settings_text.get(key, key)), "set:" + key, true)
 				first = _maybe(first, bb)
 			_slider("Hlasitost hudby", "vol:hudba", float(settings_text.get("vol:hudba", 1.0)))
+			if FileAccess.file_exists("res://data/mereni.json"): _btn("Spustit test výkonu", "mereni_spust", true)   # jen na přání (Míša 14. 11.)
 			_btn("Zpět", "page:main", true)
 	if first:
 		first.call_deferred("grab_focus")

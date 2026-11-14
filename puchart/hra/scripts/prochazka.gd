@@ -139,6 +139,11 @@ func _akce(co: String, arg: Variant) -> void:
 			get_tree().quit()
 		"save":
 			_uloz(); menu.saves = _seznam_ulozeni(); zavri_nabidku(); hv.hud.toast("Hra uložena", 2.2)
+		"mereni_spust":   # test výkonu jen na přání (Míša 14. 11.): příznak + nové spuštění, měření začne hned po načtení
+			var cf := ConfigFile.new(); cf.load("user://nastaveni.cfg"); cf.set_value("test", "pri_startu", true); cf.save("user://nastaveni.cfg")
+			if menu.can_save: _uloz()
+			get_tree().paused = false
+			get_tree().reload_current_scene()
 		"save_quit":
 			if menu.can_save: _uloz()
 			get_tree().quit()

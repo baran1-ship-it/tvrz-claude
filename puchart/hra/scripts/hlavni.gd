@@ -49,7 +49,7 @@ func _start() -> void:
 		var cf := ConfigFile.new()   # rozlišení si nastavuje hráč (Nastavení → Obraz 3D, user://nastaveni.cfg); data = výchozí
 		if cf.load("user://nastaveni.cfg") == OK: get_viewport().scaling_3d_scale = float(cf.get_value("obraz", "scale_3d", get_viewport().scaling_3d_scale))
 		var sm: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json")).get("snimky_max", {})
-		if not OS.has_feature("pc") and not FileAccess.file_exists("res://data/mereni.json"):
+		if not OS.has_feature("pc") and not chce_mereni():
 			Engine.max_fps = int(sm.get("tablet", 0))   # Havran 0.99991: méně tepla = žádné škrcení (sekání po 10 min hry)
 	Denik.zapis("svět (terén)")
 	svet = Svet.new(); svet.name = "Svet"
@@ -153,7 +153,7 @@ func _start() -> void:
 	hrac.look_at(Vector3(0.0, svet.vyska(0.0, 0.0) + 1.6, 0.0), Vector3.UP)
 	hrac.rotation.x = 0.0
 	add_child(Diag.new())
-	if FileAccess.file_exists("res://data/mereni.json") and (OS.get_environment("PUCHART_MERENI") == "1" or not OS.has_feature("pc")):
+	if chce_mereni(true):
 		var Mer := load("res://scripts/mereni.gd")
 		var mer: Node = Mer.new(); add_child(mer)
 		hrac.set_physics_process(false)
@@ -199,7 +199,7 @@ func _start() -> void:
 	print("UZLY celkem %d, halda %d MB: %s" % [Performance.get_monitor(Performance.OBJECT_NODE_COUNT), OS.get_static_memory_usage() / 1048576, ", ".join(uz)])
 	Denik.zapis("měření / procházka")
 	if _mereni.size() > 0: _mereni[0].zacni(svet, _mereni[1])
-	var meri := FileAccess.file_exists("res://data/mereni.json") and (OS.get_environment("PUCHART_MERENI") == "1" or not OS.has_feature("pc"))
+	var meri := _mereni.size() > 0
 	if OS.get_environment("PUCHART_TEST") == "pruchod":
 		_test_pruchod.call_deferred()
 	elif OS.get_environment("PUCHART_TEST") == "sceny":
@@ -211,6 +211,21 @@ func _start() -> void:
 	for jm in OS.get_environment("PUCHART_SKRYJ").split(",", false):   # diagnostika výkonu: skrýt vrstvu (Les, Kere, Byliny, Hrad, Skaly, Voda)
 		var n := get_node_or_null(jm)
 		if n: n.visible = false
+
+## Test výkonu (mereni.gd) jen na přání (Míša 14. 11.: „nespouštěj na začátku hry test, dej ho do nastavení“):
+## Nastavení → Spustit test výkonu zapíše user://nastaveni.cfg [test] pri_startu a hru spustí znovu; příznak se při použití smaže.
+## Na PC dál PUCHART_MERENI=1 (hlídači).
+var _chce_mereni := -1
+func chce_mereni(spotrebuj := false) -> bool:
+	if not FileAccess.file_exists("res://data/mereni.json"): return false
+	if OS.get_environment("PUCHART_MERENI") == "1": return true
+	if _chce_mereni < 0:
+		var cf := ConfigFile.new(); cf.load("user://nastaveni.cfg")
+		_chce_mereni = 1 if bool(cf.get_value("test", "pri_startu", false)) else 0
+	if spotrebuj and _chce_mereni == 1:
+		var cf2 := ConfigFile.new(); cf2.load("user://nastaveni.cfg")
+		cf2.set_value("test", "pri_startu", false); cf2.save("user://nastaveni.cfg")
+	return _chce_mereni == 1
 
 ## Kolize hradu pro procházku: trojúhelníková kolize ze sítí modelu (zdi, mosty, schody) – jedno statické těleso.
 func _kolize_hradu() -> void:
