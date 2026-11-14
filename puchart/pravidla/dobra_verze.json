@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "771eae7",
+ "commit": "e8cac25",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -112,15 +112,17 @@
    "budova_palac_-3_14": true,
    "budova_palac_54_147": true,
    "cesta_mezi_hrady": true,
-   "dum_hajovna_Dum1_23": true,
-   "dum_hajovna_Dum1_24": true,
-   "dum_krcma_Dum2_20": true,
-   "dum_krcma_Dum2_21": true,
+   "dum_hajovna_Dum1_25": true,
+   "dum_hajovna_Dum1_26": true,
    "dum_krcma_Dum2_22": true,
+   "dum_krcma_Dum2_23": true,
+   "dum_krcma_Dum2_24": true,
    "dum_predhradi_Dum1_10": true,
    "dum_predhradi_Dum1_11": true,
    "dum_predhradi_Dum1_15": true,
    "dum_predhradi_Dum1_16": true,
+   "dum_predhradi_Dum1_20": true,
+   "dum_predhradi_Dum1_21": true,
    "dum_predhradi_Dum1_3": true,
    "dum_predhradi_Dum1_4": true,
    "dum_predhradi_Dum2_0": true,
@@ -151,26 +153,26 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1245107,
-    "troj_max": 1250994,
-    "kresleni_p95": 365,
-    "kresleni_m_median": 477.0
+    "troj_p95": 1242571,
+    "troj_max": 1248196,
+    "kresleni_p95": 363,
+    "kresleni_m_median": 474.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1594765,
-    "troj_max": 1750269,
-    "kresleni_p95": 670,
-    "kresleni_m_median": 713.0
+    "troj_p95": 1613387,
+    "troj_max": 1783283,
+    "kresleni_p95": 746,
+    "kresleni_m_median": 714.5
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1550711,
-    "troj_max": 1699127,
-    "kresleni_p95": 829,
-    "kresleni_m_median": 1759.5
+    "troj_p95": 1566325,
+    "troj_max": 1723951,
+    "kresleni_p95": 876,
+    "kresleni_m_median": 1760.0
    },
-   "zmena_median": 35.3,
+   "zmena_median": 35.63,
    "doskoky": [],
    "ve_zdi": 2
   },
