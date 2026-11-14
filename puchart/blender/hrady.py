@@ -283,11 +283,23 @@ def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo", t_zdi
         if stity == "drevo":                                                         # zůstal trojúhelník do nebe)
             # bedněný štít ze svislých prken, prkna se o 2 cm překrývají (dřív 1 cm mezery – světlé čáry)
             k = 0.0; L = (f - e).length; dd = (f - e).normalized(); PK_ = 0.24
+            tn_ = (r - (a + b) / 2).normalized()   # tloušťka štítu (podél osy střechy)
+            vys_ = lambda q_: dz_ + vyska - sk_ * abs(q_ - L / 2) + 0.03   # výška pod krytinou v místě q_ (+3 cm do tloušťky krytiny)
             while k < L - 0.01:
-                u_ = abs((k + PK_ / 2) - L / 2); hh = dz_ + vyska - sk_ * u_ + min(sk_ * PK_ / 2, 0.04)   # střed prkna pod střechou + do tloušťky krytiny (štěrbiny pod šikmou střechou zakryté)
-                if hh > 0.03:
-                    x = e + dd * min(k + PK_ / 2, L - PK_ / 2)
-                    kit.plank(P, x + UP * y0_, x + UP * (y0_ + hh), PK_ + 0.02, 0.04, "prkna_ven", up=(r - (a + b) / 2).normalized(), wear=0.5)
+                # prkno se šikmým vrškem podle střechy (Míša 14. 11.: „leze ti tam štít přes střechu“ – rovný vršek trčel
+                # spodním rohem nad šindel): hrana vršku v rovině střechy, u hřebene lomená
+                q0_, q1_ = max(0.0, k - 0.01), min(L, k + PK_ + 0.01)
+                qs_ = [q0_] + ([L / 2] if q0_ < L / 2 < q1_ else []) + [q1_]
+                hs_ = [vys_(q_) for q_ in qs_]
+                if max(hs_) > 0.03:
+                    hs_ = [max(0.0, h_) for h_ in hs_]
+                    V_ = []
+                    for sg_ in (-0.02, 0.02):
+                        for q_, h_ in zip(qs_, hs_): V_.append(e + dd * q_ + tn_ * sg_ + UP * (y0_ + h_))
+                        for q_ in qs_[::-1]: V_.append(e + dd * q_ + tn_ * sg_ + UP * y0_)
+                    n_ = len(qs_) * 2
+                    F_ = [list(range(n_)), list(range(2 * n_ - 1, n_ - 1, -1))] + [[i, (i + 1) % n_, n_ + (i + 1) % n_, n_ + i] for i in range(n_)]
+                    P.mesh([tuple(v) for v in V_], F_, "prkna_ven")
                 k += PK_
             for k_ in range(4):   # kolize prkenného štítu: trojúhelník ze 4 zužujících se desek (povrch_kolize 9. 11.: štítem se procházelo)
                 h0_, h1_ = (vyska + dz_) * k_ / 4, (vyska + dz_) * (k_ + 1) / 4
@@ -985,7 +997,8 @@ TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "sindel": ("sindel", 1.5, 1.35), "sindel_hra": ("sindel", 1.5, 1.35),
     "rez_drevo": ("letokruhy", 1.0, 0.85),   # čela (textura zešedlá na tón zvětralého dubu – čerstvě oranžová svítila, 3. 11.) trámů a prken: letokruhy (Havran vlastni._tex_endgrain; Míša 3. 11.: „víš jak vypadá řez dřeva?“)
     "provaz": ("rough_wood", 0.3, 0.55), "voda": ("droba", 2.0, 0.12),
-    "dub": ("rough_wood", 0.5, 0.75), "hraz": ("rough_wood", 0.5, 0.6), "prkna_ven": ("weathered_brown_planks", 1.5, 1.0),   # Míša 13. 11.: hnědé opotřebované (dřív wood_planks_grey – černé podlahy)
+    "dub": ("rough_wood_sedy", 0.5, 0.8), "hraz": ("rough_wood_sedy", 0.5, 0.7),   # Míša 14. 11.: trámy a schody hnědé jako prkna (dřív rough_wood šedý)
+    "prkna_ven": ("weathered_brown_planks", 1.5, 1.0),   # Míša 13. 11.: hnědé opotřebované (dřív wood_planks_grey – černé podlahy)
     "okenice": ("weathered_brown_planks", 1.5, 0.85), "dvere": ("weathered_brown_planks", 1.5, 0.78),
     "prkno": ("rough_wood_sedy", 0.6, 0.95), "prkno_ven": ("prkna_atlas", 2.56, 1.0), "prkno_dvere": ("rough_wood_sedy", 0.6, 0.72),   # jedno prkno (hrad_vzhled.json drevo.deska)
     "skala_mech": ("mossy_rock", 2.0, 1.0), "skala_tm": ("droba", 2.5, 0.6), "skala_sv": ("droba", 3.0, 0.92), "skala": ("droba", 2.5, 0.78), "sut": ("droba", 1.2, 0.7),

@@ -106,7 +106,10 @@
    "pozn_zarovnat": "Míša 5. 11.: věž zarovnaná s hradbou (náčrt) – vnější líce v rovině líců plášťových zdí, ne přes roh",
    "prizemi": true,
    "pozn_10_11": "Míša 10. 11.: do přízemí malé věže se nedá dostat → přízemí z nádvoří se schody na ochoz; na hradbu vedle věže dveře a malý ochoz (dvere_ochoz3)",
-   "pozn_prizemi": "Míša 10. 11.: přízemí samostatná komora se vstupem z nádvoří, horní komora se vstupem z ochozu, bez schodů mezi nimi"
+   "pozn_prizemi": "Míša 10. 11.: přízemí samostatná komora se vstupem z nádvoří, horní komora se vstupem z ochozu, bez schodů mezi nimi",
+   "prizemi_patro_m": 2.5,
+   "pozn_patro_14_11": "test průchodu 14. 11.: se 3,0 m schody na 2,25 m délky 53° (postava vyjde max. 50°) → 2,5 m, rameno 2,3 m (47°), podesta nahoře 0,9 m (s 0,7 m se postava mezi zdí a sloupkem zábradlí zasekla)",
+   "pozn_14_11": "Míša 14. 11. (foto věžičky z nádvoří): „vevnitř mi udělej schody a jedno patro“ – přízemí z nádvoří má patro 3,0 m nad podlahou (prizemi_patro_m), schody podél stěny naproti dveřím (strmost jako schody komory na ochozu), střílny v patře; horní komora na ochozu zůstává samostatná"
   },
   "ochoz": {
    "useky": [
@@ -242,8 +245,10 @@
    "schody": {
     "horni_konec": [
      14.0,
-     -37.0
+     -38.5
     ],
+    "stupen_m": 0.23,
+    "pozn_14_11": "Míša 14. 11. (foto od paláce na branku): „nešlo by ten ochoz dřevěný trochu zkrátit, aby ty schody nebyly tak natažené do příkopu? můžou být prudší klidně“ – horní konec −37 → −38,5 (ochoz o 1,5 m kratší), stupeň 27 → 23 cm (≈40°)",
     "jistota": "NAVRH",
     "pozn": "3. 11. (Míša): ze země na ochoz hradby – schody podél vnitřního líce hradby v předhradí (docs/reference/branka_ochoz.md); horní konec = mezera v zábradlí pavlače"
    },
@@ -708,6 +713,7 @@
     3,
     4,
     5,
+    6,
     9,
     10,
     11,
@@ -715,7 +721,8 @@
     13,
     14
    ],
-   "pozn_5_11": "úseky 6–8 kolem paláce bez pavlače (krakorce vyložené dovnitř by vedly palácem – test průchodu 5. 11.)"
+   "pozn_5_11": "úseky 6–8 kolem paláce bez pavlače (krakorce vyložené dovnitř by vedly palácem – test průchodu 5. 11.)",
+   "pozn_14_11": "Míša 14. 11. (foto x 51 z 140, dvorek mezi věží a palácem): „tady mi dodělej ochoz a zábradlí“ – úsek 6 (V hradba) s ochozem od rohu s úsekem 5 k paláci; v délce paláce mezera (usek_v_palaci), konec u paláce se zábradlím"
   },
   "most": {
    "od": [

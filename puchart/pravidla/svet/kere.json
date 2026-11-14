@@ -149,5 +149,7 @@
  },
  "pata_zapusteni_m": 0.03,
  "pozn_vrby": "13. 11.: keřové vrby (Salix triandra/viminalis vrba_ker_1 ~3,6 m, S. purpurea vrba_ker_2 ~2,6 m; blender/rostliny_u_vody.py, 4,6 a 3,4 tis. troj.) – breh 0,03/m² (líska 0,03 → 0,02), luh 0,004/m²; hustoty NEOVERENO. Zdroj: docs/reference/potoky/README_jak_se_stavi.md §2.3 a krok 8 (pásma u vody podle snímků KCD a misa_real_01–04; Chytrý et al. 2010, Katalog biotopů ČR: K2 vrbové křoviny 2–5 m na březích a náplavech, M5 devětsilové lemy podhorských potoků 450–800 m n. m.); modely blender/rostliny_u_vody.py (licence hra/modely/rostliny/LICENCE.txt)",
- "pozn_vykon_13_11": "vrba_ker 4,6 tis. troj.: na břehu 0,03 → 0,01/m² (tablet: les bez keřů o 9 ms rychlejší, měření 13. 11.)"
+ "pozn_vykon_13_11": "vrba_ker 4,6 tis. troj.: na břehu 0,03 → 0,01/m² (tablet: les bez keřů o 9 ms rychlejší, měření 13. 11.)",
+ "stavba_okraj_m": -0.1,
+ "pozn_stavba_okraj_14_11": "Míša 14. 11.: „pořád je tráva v hájovně“ – kopřiva a tráva rostly 0,1–0,2 m za stěnou srubu a listy prostrčily dovnitř; půdorys mista_stavby (o ~0,36 m větší než zdi) zvětšený o 0,1 m: rostliny ≥ 0,45 m od zdi (záporná hodnota = zvětšení)"
 }

@@ -763,7 +763,7 @@ def podlaha(P, c, d, iw, idp, y, otvory=(), tl=0.24, mat="prkna_ven"):
             P.box(M(q + UP * (y - 0.08 - (tl - 0.08) / 2), basis=frame(d)), (v1 - v0, tl - 0.08, u1 - u0), "dub")
             kol(P, q + UP * (y - tl / 2), d, (v1 - v0, tl, u1 - u0)); POCH.append((P.cols[-1], y, "podlaha", P))
 
-def vnitrek_veze(P, c, d, iw, idp, patra, steny_ramen, sq=1.0, run=None, sirka=1.0):
+def vnitrek_veze(P, c, d, iw, idp, patra, steny_ramen, sq=1.0, run=None, sirka=1.0, sq_konec=None):
     """Patra a schodiště věže: rameno k vede z patra k do k+1 podél stěny steny_ramen[k] (0 S, 1 V, 2 J, 3 Z v lokálních
     osách). Začíná sq od rohu a končí sq před dalším rohem – čtverec v rohu je pevná podesta, ze které vychází další
     rameno (podél další stěny). Nad ramenem otvor v podlaze, zábradlí podél otvoru a přes jeho dolní konec, výstup
@@ -777,7 +777,7 @@ def vnitrek_veze(P, c, d, iw, idp, patra, steny_ramen, sq=1.0, run=None, sirka=1
         (cu, cv), (du, dv), (lu, lv) = steny[steny_ramen[k]]
         delka = iw if du else idp
         y0, y1 = patra[k], patra[k + 1]
-        n = round((y1 - y0) / 0.215); rn = run or (delka - 2 * sq); r = rn / n
+        n = round((y1 - y0) / 0.215); rn = run or (delka - sq - (sq if sq_konec is None else sq_konec)); r = rn / n
         su, sv = cu + du * sq + lu * sirka / 2, cv + dv * sq + lv * sirka / 2
         a = L(su, sv); dirw = d * du + s * dv
         e, _ = schody2(P, a, dirw, y0, y1, sirka - 0.05, zabradli=(), podklad=y0, r=r, vyska_st=(y1 - y0) / n)
@@ -1511,14 +1511,27 @@ def postav_A(P):
         dv_v.append((sd_[0], 0.0, 1.1, ny_))
         # Míša 10. 11.: „schody do malé věže nedávej – dole je vstup dole a nahoře je vstup nahoře“: přízemí je samostatná
         # komora z nádvoří, strop = podlaha komory na ochozu (vnitrek_veze ji staví v úrovni kor), bez schodů mezi nimi
+    mid_v = None; str_mid = []
+    if vz.get("prizemi") and vz.get("prizemi_patro_m"):   # Míša 14. 11.: „vevnitř mi udělej schody a jedno patro“ – patro v přízemí
+        mid_v = round(dno_v + float(vz["prizemi_patro_m"]), 2)
+        if kor - mid_v < 2.4: mid_v = None   # pod stropem komory na ochozu musí zbýt místnost
+        else: str_mid = [(st_, 0.0, mid_v + 1.2) for st_ in ("+d", "-d", "+s", "-s") if st_ != sd_[0]]   # střílny patra (světlo jen otvory – Míša 13. 11.)
     vez2(P, rc, dE, w, w, dno_v, kor + vz["nad_korunou"], "jehlan", dvere=dv_v, tw=tv,
-         strilny=[(st_, 0.0, kor + vz["patro_nad_ochozem"] + 1.2) for st_ in ("+d", "+s", "-s")])
+         strilny=[(st_, 0.0, kor + vz["patro_nad_ochozem"] + 1.2) for st_ in ("+d", "+s", "-s")] + str_mid)
     ram_all_ = vnitrek_veze(P, rc, dE, w - 2 * tv, w - 2 * tv, pat_v, ste_v, sq=0.7, run=2.64)
     ram_v = ram_all_[-1:]
     if vz.get("prizemi"):   # strop přízemí = podlaha horní komory (trámový strop z prken), dlážděná podlaha přízemí
         podlaha(P, rc, dE, w - 2 * tv, w - 2 * tv, kor, [])
         podlaha(P, rc, dE, w - 2 * tv, w - 2 * tv, dno_v, [], tl=0.12, mat="kvadr_sedy")
         TR["A_vezicka_prizemi"] = [bod(rc + nd_ * (w / 2 + 2.5)), bod(rc + nd_ * (w / 2 - tv - 0.4)), bod(rc)]
+        if mid_v is not None:   # schody podél stěny naproti dveřím na patro (vnitrek_veze: rameno, otvor v podlaze, zábradlí)
+            st_i = {"+s": 0, "-d": 1, "-s": 2, "+d": 3}[sd_[0]]   # steny: 0 = −s, 1 = +d, 2 = +s, 3 = −d; protější stěna ke dveřím
+            ram_p = vnitrek_veze(P, rc, dE, w - 2 * tv, w - 2 * tv, [dno_v, mid_v], [st_i], sq=0.5, sq_konec=0.9)   # test 14. 11.: s run 2,64 zbylo nahoře k zdi 0,36 m – prudší (věžní schody), podesta nahoře 0,75 m
+            a_p, e_p, dw_p, _, _ = ram_p[0]
+            dov_ = hz(rc - e_p); dov_ = (dov_ - dw_p * dov_.dot(dw_p)).normalized()   # z podesty do místnosti kolem zábradlí otvoru
+            TR["A_vezicka_patro"] = [bod(rc + nd_ * (w / 2 + 2.5)), bod(rc + nd_ * (w / 2 - tv - 0.4)), bod(a_p - dw_p * 0.3, dno_v), bod(a_p + dw_p * 0.3),
+                                     bod(e_p + dw_p * 0.4, mid_v), bod(e_p + dw_p * 0.4 + dov_ * 1.2, mid_v), bod(rc, mid_v)]
+            svetlo(rc + UP * (mid_v + 1.6), 0.8, 4.0)
     if vz.get("dvere_ochoz3"):   # ochoz úseku ri: od líce věžičky po líc paláce (budova na tomto úseku)
         a3, b3, L3, d3, vn3 = U[ri]
         pal = [bd_ for bd_ in A["budovy"] if bd_["usek"] == ri]
@@ -1666,9 +1679,10 @@ def postav_A(P):
             sv_ = -1.0 if (V(osa[0]) - O).length < (V(osa[-1]) - O).length else 1.0; dS = d * sv_; st_o = tt / 2 + SW / 2
             run = 3.0
             for _ in range(4):
-                f_ = a + d * sT - dS * run + vn * st_o; run = round((y_k - ter(f_.x, f_.z)) / 0.19) * 0.27
+                f_ = a + d * sT - dS * run + vn * st_o; run = round((y_k - ter(f_.x, f_.z)) / 0.19) * vs.get("stupen_m", 0.27)
             f_ = a + d * sT - dS * run + vn * st_o
-            schody2(P, f_, dS, ter(f_.x, f_.z), y_k, SW, zabradli=(1, -1))
+            schody2(P, f_, dS, ter(f_.x, f_.z), y_k, SW, zabradli=(1, -1), r=vs.get("stupen_m"))
+            print("SCHODY_V_PATA", round(f_.x, 2), round(f_.z, 2), round(ter(f_.x, f_.z), 2), "run", round(run, 2))
         else:
             plosina(P, a + d * (sT + 0.6) + vn * (tt / 2 + SW + 0.55), d, 1.2, 1.3, y_k, sloupy=True)   # podesta z pavlače na schody
             n_ = round((y_k - ter(*(a + d * (sT - 3) + vn * st_o).xz)) / 0.19); run = n_ * 0.27

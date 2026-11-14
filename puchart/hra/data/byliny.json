@@ -359,5 +359,7 @@
   }
  },
  "pozn_padle_stromy": "13. 11. (Míša 13. 11.: „není tam těch klád zase moc? a mají to být popadané stromy, ne pokácené“): kmen = padlé stromy s vylomenými konci (Poly Haven dead_tree_trunk_02 a dead_tree_trunk, CC0; build/padle_stromy/skripty/preved.py), staré rovně uříznuté špalky kmen_1/2 jen jako „spalek“ na pasekách u pařezů (stopa těžby, pozn_parezy). Hustoty: břeh 0,05 → 0,0025/m² (≈1 na 400 m² břehu a jen v lese, les_okoli; předtím 1 na 20 m²), les ~1 na 1000 m² (bučiny 0,001, suť 0,0015, dubohabřina 0,0006), paseka špalek 0,001. Vše NEOVERENO (žádné měření mrtvého dřeva 1393; les se tehdy probíral na palivo – docs/reference/potoky/README_jak_se_stavi.md krok 9: „hustota NEOVERENO, první návrh pár míst“); laděno snímkem. Kořenový talíř (vývrat) chybí: Poly Haven nemá CC0 model vývratu.",
- "pozn_vykon_13_11": "Míša 13. 11. měření na tabletu (7478176): les p95 21,5 → 55 ms, voda 23,6 → 50 ms („kolem vody se to seká“) – porost břehu (třída breh po opravě, dřív omylem cesta) a pás u vody ~2× snížen; vzhled hlídat snímkem vedle předlohy"
+ "pozn_vykon_13_11": "Míša 13. 11. měření na tabletu (7478176): les p95 21,5 → 55 ms, voda 23,6 → 50 ms („kolem vody se to seká“) – porost břehu (třída breh po opravě, dřív omylem cesta) a pás u vody ~2× snížen; vzhled hlídat snímkem vedle předlohy",
+ "stavba_okraj_m": -0.1,
+ "pozn_stavba_okraj_14_11": "Míša 14. 11.: „pořád je tráva v hájovně“ – kopřiva a tráva rostly 0,1–0,2 m za stěnou srubu a listy prostrčily dovnitř; půdorys mista_stavby (o ~0,36 m větší než zdi) zvětšený o 0,1 m: rostliny ≥ 0,45 m od zdi (záporná hodnota = zvětšení)"
 }
