@@ -1,4 +1,4 @@
-Seno (seno_albedo.jpg, seno_normal.jpg, seno_stebla.png) – odvozeno z ambientCG „Thatched Roof 001 A“ (ThatchedRoof001A, 1K-JPG:
-Color, NormalGL), https://ambientcg.com/a/ThatchedRoof001A, licence CC0 1.0 (Public Domain). Přebarveno na barvu sena podle
-předlohy docs/reference/seno/kcd1_seno_staj_misa_15_11.jpg, stébla nakreslena z proužků této textury: nastroje/seno_textury.py.
+Seno (seno_albedo.jpg, seno_normal.jpg, seno_stebla.png) – vlastní kresba (nastroje/seno_textury.py, 2. kolo 15. 11. 2026):
+spleť krátkých zvlněných stébel, paleta bledé slámy podle předlohy docs/reference/seno/kcd1_seno_staj_misa_15_11.jpg.
+Bez cizích podkladů (1. kolo používalo ambientCG „Thatched Roof 001 A“, CC0 – už se nepoužívá).
 Materiály seno.tres (objem kupy) a seno_stebla.tres (karty stébel) – pro jesle, stodoly, půdy (pravidla/svet/funkce.json jesle).

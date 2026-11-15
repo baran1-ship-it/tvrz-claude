@@ -7,6 +7,7 @@ extends Node
 ## - místa spánku (Hajovna_Spani_Hrac, KrcmaL_Spani_Hrac, pryčny chýší): „Lehnout si“ – lehne si a vybere, do kdy spát (menu_hrace)
 ## - žlab (Dum2_Kol_Zlab): „Nalít vodu“ – ve žlabu se objeví hladina (shader vody potoků), zůstane
 ## - jesle nad žlabem (dům najde přes Dum2_Kol_Zlab, tvar z dat): „Nasypat seno“ – v jeslích kupa sena (objem + karty stébel), zůstane
+## - kovadlina kovárny (Kovarna_Kovadlina_misto): pevný díl s kolizí a stupni podle vzdálenosti, osadí osad_kovadliny() při startu
 ## Tlačítko ve stylu dveří (svitek) nad ostatními tlačítky, jen zaměřená věc (zamer.gd) – jako lavice.gd.
 const Pravidla := preload("res://scripts/pravidla.gd")
 const Zamer := preload("res://scripts/zamer.gd")
@@ -104,8 +105,46 @@ static func polozky(h: Node) -> Array:
 	return out
 
 
+## Kovadlina na značce bod v každé kovárně (funkce.json kovadlina): dítě rodiče značky, počátek modelu na značce, bok dráhy
+## (model −Z) natočený ke značce kovar (kovář mezi výhní a kovadlinou); stupně model / _stredni / _daleko přes Visibility Range.
+## Vrací vložené uzly (už osazené se přeskočí).
+static func osad_kovadliny(h: Node) -> Array:
+	var kv: Dictionary = cfg("kovadlina"); var out: Array = []
+	var cesty := [String(kv.get("model", "")), String(kv.get("model_stredni", "")), String(kv.get("model_daleko", ""))]
+	if cesty[0] == "" or not ResourceLoader.exists(cesty[0]):
+		if cesty[0] != "": push_warning("FUNKCE kovadlina: model %s chybí (blender/kovadlina.py)" % cesty[0])
+		return out
+	var meze := [0.0, float(kv["stredni_od_m"]), float(kv["daleko_od_m"]), float(kv["konec_m"])]
+	for k: Node in _koreny(h):
+		for zn: Node3D in k.find_children(String(kv["bod"]), "Node3D", true, false):
+			var rod := zn.get_parent() as Node3D
+			if rod.get_node_or_null(String(kv["uzel"])) != null: continue
+			var uz := Node3D.new(); uz.name = String(kv["uzel"]); rod.add_child(uz)
+			var kovar := rod.find_child(String(kv.get("kovar", "")), true, false) as Node3D if String(kv.get("kovar", "")) != "" else null
+			var yaw := zn.global_rotation.y
+			if kovar:
+				var smer := kovar.global_position - zn.global_position; smer.y = 0.0
+				if smer.length() > 0.05: yaw = atan2(-smer.x, -smer.z)   # model −Z ke kováři
+			uz.global_transform = Transform3D(Basis(Vector3.UP, yaw), zn.global_position)
+			for i in 3:
+				if cesty[i] == "" or not ResourceLoader.exists(cesty[i]): continue
+				var sc := (load(cesty[i]) as PackedScene).instantiate()
+				sc.name = ["Podrobny", "Stredni", "Daleko"][i]; uz.add_child(sc)
+				if i > 0:   # kolize jen z podrobného modelu
+					for c in sc.find_children("*", "CollisionObject3D", true, false): c.queue_free()
+				var konec: float = meze[i + 1]
+				if i < 2 and (cesty[i + 1] == "" or not ResourceLoader.exists(cesty[i + 1])): konec = meze[3]
+				for g in sc.find_children("*", "GeometryInstance3D", true, false):
+					(g as GeometryInstance3D).visibility_range_begin = meze[i]
+					(g as GeometryInstance3D).visibility_range_end = konec
+			out.append(uz)
+	return out
+
+
 func zacni(h: Node, vrstva: CanvasLayer) -> void:
 	hlavni = h; _vrstva = vrstva
+	var kov := osad_kovadliny(h)
+	if not kov.is_empty(): print("FUNKCE kovadlina osazena %d×" % kov.size())
 	polozky_ = polozky(h)
 	var me: Dictionary = cfg("mech")
 	if ResourceLoader.exists(String(me["zvuk"])): _zvuk_mech = load(String(me["zvuk"]))
@@ -289,53 +328,72 @@ static func jesle_site(tv: Dictionary, je: Dictionary) -> Array:
 				st.set_uv(uv.rotated(sum.get_noise_2d(v.x * 0.3 + 40.0, (v.y + v.z) * 0.3) * PI * float(si["viri"]))); st.add_vertex(v)
 	st.generate_normals(); st.generate_tangents()
 	var objem := st.commit()
-	# --- karty stébel
+	# --- karty stébel (2. kolo): spleť = ležící karty po povrchu ve vrstvách (krok po povrchu v parametrech x, s – karta
+	# sleduje zakřivení kupy), trsy = krátké trčící karty; buňky atlasu sloupce × řady (pata karty dole v buňce)
 	var rnd := RandomNumberGenerator.new(); rnd.seed = int(stc["seed"])
 	var ks := SurfaceTool.new(); ks.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var nb := int(stc["bunky"]); var ao_p := float(stc["ao_pata"])
-	var trsy: Array = []
-	for t in stc["trsy"]: trsy.append(int(t))   # JSON čísla jsou float – „in“ by int buňku nenašel
-	for c in int(stc["pocet"]):
-		var x := rnd.randf_range(x0 + 0.03, x1 - 0.03)
-		var s := pow(rnd.randf(), 0.8) * 0.5 + 0.5 if rnd.randf() < float(stc["vrch_podil"]) else rnd.randf_range(0.04, 0.5)   # víc na vrchu (je vidět)
-		var bn: Array = _jesle_bod(tv, x, s, sum)
-		var b: Vector3 = bn[0]
-		var e := 0.004
-		var nn: Vector3 = (_jesle_bod(tv, x + e, s, sum)[0] as Vector3 - (_jesle_bod(tv, x - e, s, sum)[0] as Vector3)).cross(
-			(_jesle_bod(tv, x, minf(s + e, 1.0), sum)[0] as Vector3) - (_jesle_bod(tv, x, maxf(s - e, 0.0), sum)[0] as Vector3))
-		var nrm: Vector3 = bn[1]
-		nn = nn.normalized() if nn.length() > 1e-6 else nrm
-		if nn.dot(nrm) < 0.0: nn = -nn
-		var lezi := rnd.randf() < float(stc["lezi_podil"])
-		var sk: Array = stc["lezi_sklon_st"] if lezi else stc["trci_sklon_st"]
-		var sklon := deg_to_rad(rnd.randf_range(float(sk[0]), float(sk[1])))
-		var t1 := nn.cross(Vector3.UP if absf(nn.y) < 0.9 else Vector3.RIGHT).normalized(); var t2 := nn.cross(t1)
-		var az := rnd.randf() * TAU
-		var smer := (nn * cos(sklon) + (t1 * cos(az) + t2 * sin(az)) * sin(sklon)).normalized()
-		var L := rnd.randf_range(float(stc["delka_m"][0]), float(stc["delka_m"][1]))
-		var w := rnd.randf_range(float(stc["sirka_m"][0]), float(stc["sirka_m"][1]))
-		var bok := smer.cross(nn).normalized()   # ležící: karta v tečné rovině povrchu; trčící: natočená náhodně kolem stébla
-		if bok.length() < 0.5: bok = t1
-		var toc := 0.35 if lezi else PI * 0.5
-		bok = bok.rotated(smer, rnd.randf_range(-toc, toc))
-		var pata := b - nn * float(stc["zanor_m"])
-		var stred := pata + smer * L * 0.5 + Vector3.DOWN * L * float(stc["previs_m"]) * 0.3
-		var konec := pata + smer * L + Vector3.DOWN * L * float(stc["previs_m"])
-		var bunky: Array = []   # karta = celá buňka atlasu (stébla nejsou useknutá): trsy z paty pro trčící, volná stébla pro ležící
-		for bi in nb: if (bi in trsy) != lezi: bunky.append(bi)
-		var bu := int(bunky[rnd.randi() % bunky.size()])
-		var u0 := float(bu) / nb; var u1 := float(bu + 1) / nb
-		var ton := rnd.randf_range(0.88, 1.1)
-		var radky := [[pata, 1.0, ao_p], [stred, 0.5, lerpf(ao_p, 1.0, 0.6)], [konec, 0.0, 1.0]]
-		for r in 2:
-			var a: Array = radky[r]; var bb: Array = radky[r + 1]
-			var wa := w * (1.0 if r == 0 else 0.8); var wb := w * (0.8 if r == 0 else 0.6)
-			var v4 := [[a[0] - bok * wa * 0.5, u0, a[1], a[2]], [a[0] + bok * wa * 0.5, u1, a[1], a[2]],
-				[bb[0] + bok * wb * 0.5, u1, bb[1], bb[2]], [bb[0] - bok * wb * 0.5, u0, bb[1], bb[2]]]
-			for k in [0, 1, 2, 0, 2, 3]:
-				var q4: Array = v4[k]
-				ks.set_color(Color.WHITE * float(q4[3]) * ton); ks.set_normal(nn); ks.set_uv(Vector2(float(q4[1]), float(q4[2])))
-				ks.add_vertex(q4[0])
+	var at: Dictionary = stc["atlas"]; var nc := int(at["sloupce"]); var nr := int(at["rady"])
+	var lprof := float(delky[ns])
+	var vr: Dictionary = stc["vrstva"]; var tr: Dictionary = stc["trsy"]
+	var pocty := [int(vr["pocet"]), int(tr["pocet"])]
+	for druh in 2:
+		var d: Dictionary = vr if druh == 0 else tr
+		var rada := int(at["rada_vrstva"] if druh == 0 else at["rada_trsy"])
+		for c in pocty[druh]:
+			var x := rnd.randf_range(x0 + 0.02, x1 - 0.02)
+			var s := pow(rnd.randf(), 0.8) * 0.5 + 0.5 if rnd.randf() < float(d["vrch_podil"]) else rnd.randf_range(0.03, 0.5)   # víc na vrchu (je vidět)
+			var L := rnd.randf_range(float(d["delka_m"][0]), float(d["delka_m"][1]))
+			var w := L * float(d["pomer"]) * rnd.randf_range(0.85, 1.2)
+			var bu := rnd.randi() % nc
+			var u0 := float(bu) / nc; var u1 := float(bu + 1) / nc
+			var v0 := float(rada) / nr; var v1 := float(rada + 1) / nr
+			var ton := rnd.randf_range(0.9, 1.08)
+			var radky: Array = []   # [bod, v, jas]
+			var bok := Vector3.ZERO; var nn := Vector3.UP
+			if druh == 0:
+				# vrstvy nad tmavým jádrem (objem): výška nad povrchem zanor_m … vrstva_m, spodní vrstvy tmavší; karta leží v tečné
+				# rovině, směr náhodný
+				var hl := pow(rnd.randf(), 0.7)
+				var pod := -(float(d["vrstva_m"]) * (1.0 - hl) + float(d["zanor_m"]))
+				var jas := lerpf(1.0, float(d["ao_spodni"]), hl)
+				var az := rnd.randf() * TAU
+				for k in 3:
+					var t := (float(k) - 1.0) * 0.5   # −0,5 … 0,5 délky (střed karty na bodě)
+					var xk := clampf(x + cos(az) * L * t, x0, x1); var sk := clampf(s + sin(az) * L * t / lprof, 0.0, 1.0)
+					var bn: Array = _jesle_bod(tv, xk, sk, sum)
+					var e := 0.004
+					var n2: Vector3 = ((_jesle_bod(tv, xk + e, sk, sum)[0] as Vector3) - (_jesle_bod(tv, xk - e, sk, sum)[0] as Vector3)).cross(
+						(_jesle_bod(tv, xk, minf(sk + e, 1.0), sum)[0] as Vector3) - (_jesle_bod(tv, xk, maxf(sk - e, 0.0), sum)[0] as Vector3))
+					n2 = n2.normalized() if n2.length() > 1e-6 else (bn[1] as Vector3)
+					if n2.dot(bn[1]) < 0.0: n2 = -n2
+					if k == 1: nn = n2
+					radky.append([(bn[0] as Vector3) - n2 * pod + n2 * rnd.randf_range(-0.004, 0.004), v1 - (v1 - v0) * (float(k) * 0.5), jas])
+				var tang := ((radky[2][0] as Vector3) - (radky[0][0] as Vector3))
+				bok = tang.cross(nn).normalized() if tang.length() > 1e-5 else nn.cross(Vector3.RIGHT).normalized()
+			else:
+				var bn: Array = _jesle_bod(tv, x, s, sum)
+				nn = bn[1]
+				var t1 := nn.cross(Vector3.UP if absf(nn.y) < 0.9 else Vector3.RIGHT).normalized(); var t2 := nn.cross(t1)
+				var az := rnd.randf() * TAU
+				var sklon := deg_to_rad(rnd.randf_range(float(d["sklon_st"][0]), float(d["sklon_st"][1])))
+				var smer := (nn * cos(sklon) + (t1 * cos(az) + t2 * sin(az)) * sin(sklon)).normalized()
+				var pata := (bn[0] as Vector3) - nn * float(d["zanor_m"])
+				var ao_p := float(d["ao_pata"])
+				radky = [[pata, v1, ao_p], [pata + smer * L * 0.5 + Vector3.DOWN * L * float(d["previs_m"]) * 0.3, (v0 + v1) * 0.5, lerpf(ao_p, 1.0, 0.6)],
+					[pata + smer * L + Vector3.DOWN * L * float(d["previs_m"]), v0, 1.0]]
+				bok = smer.cross(nn).normalized()
+				if bok.length() < 0.5: bok = t1
+				bok = bok.rotated(smer, rnd.randf_range(-PI * 0.5, PI * 0.5))
+			if druh == 0: radky = [radky[0], radky[2]]   # ležící karta = jeden čtyřúhelník (konce na povrchu), rozpočet na víc karet
+			for r in radky.size() - 1:
+				var a: Array = radky[r]; var bb: Array = radky[r + 1]
+				var wa := w * (1.0 if druh == 0 or r == 0 else 0.85); var wb := w * (1.0 if druh == 0 else (0.85 if r == 0 else 0.7))
+				var v4 := [[a[0] - bok * wa * 0.5, u0, a[1], a[2]], [a[0] + bok * wa * 0.5, u1, a[1], a[2]],
+					[bb[0] + bok * wb * 0.5, u1, bb[1], bb[2]], [bb[0] - bok * wb * 0.5, u0, bb[1], bb[2]]]
+				for k in [0, 1, 2, 0, 2, 3]:
+					var q4: Array = v4[k]
+					ks.set_color(Color.WHITE * float(q4[3]) * ton); ks.set_normal(nn); ks.set_uv(Vector2(float(q4[1]), float(q4[2])))
+					ks.add_vertex(q4[0])
 	return [objem, ks.commit()]
 
 

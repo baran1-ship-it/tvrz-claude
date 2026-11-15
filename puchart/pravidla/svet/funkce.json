@@ -32,10 +32,20 @@
   }
  },
  "kovadlina": {
-  "popis": "Kovadlina kovárny na značce bod (Kovarna_Kovadlina_misto v kovarna.glb). Míša 15. 11.: „kovadlinu chci NOVOU, ne kovarna_kovadlina.glb z Havrana“ – model zatím není; model = cesta k .glb (res://…), prázdný = neosazuje se. Až bude model, osadí se jako pevný díl s kolizí (Havran svet.gd _kovarna_dil: vybavení na značce, natočení kovárny).",
-  "zdroj": "Havran pravidla/svet/lokace.json kovarna_ves.kovadlina (bod Kovarna_Kovadlina_misto); Míša 15. 11. (přes koordinátora): nový model kovadliny dodá",
+  "popis": "Kovadlina kovárny (blender/kovadlina.py, pravidla/svet/kovadlina_1393.json) na značce bod (Kovarna_Kovadlina_misto v kovarna.glb, docs/reference/kovarna/NAVOD_KOVARNA.md). funkce.gd osad_kovadliny() při startu vloží model k rodiči značky (kovárna – pohybuje se s ní): počátek modelu (země uprostřed špalku) na značku, natočení tak, že bok dráhy (model −Z) míří ke značce kovar (Kovarna_Kovar_stani – kovář stojí mezi výhní a kovadlinou, otočí se od ohně ke kovadlině; roh je mu po levé ruce jako v KCD2, sperhák na odvrácené straně). Stupně podle vzdálenosti (Visibility Range): model do stredni_od_m, model_stredni do daleko_od_m, model_daleko do konec_m. Kolize = uzel *-convcolonly modelu (konvexní obal). Prázdný model = neosazuje se.",
+  "zdroj": "Havran pravidla/svet/lokace.json kovarna_ves.kovadlina (bod Kovarna_Kovadlina_misto), svet.gd _kovarna_dil (vybavení na značce, natočení kovárny); NAVOD_KOVARNA.md (Kovarna_Kovar_stani −1,10; 0,05; −0,50 a Kovarna_Kovadlina_misto −0,95; 0,05; +0,30, podlaha +0,05); Míša 15. 11.: nová čistá kovadlina podle KCD2 (kcd2_kovadlina_misa_15_11.jpg – kovář stojí za dráhou, roh vlevo od něj); vzdálenosti stupňů jako predmety.gd (podrobný jen zblízka), kovárna sama do 60 m (NAVOD_KOVARNA LOD)",
   "bod": "Kovarna_Kovadlina_misto",
-  "model": ""
+  "kovar": "Kovarna_Kovar_stani",
+  "model": "res://modely/predmety_h/kovadlina_1393.glb",
+  "model_stredni": "res://modely/predmety_h/kovadlina_1393_stredni.glb",
+  "model_daleko": "res://modely/predmety_h/kovadlina_1393_daleko.glb",
+  "stredni_od_m": 8.0,
+  "daleko_od_m": 22.0,
+  "konec_m": 60.0,
+  "stupne_pozn": "8 m: podrobný (16 tis. troj., textury 2048) jen uvnitř kovárny a u ní; 22 m: daleko (460 troj.) – z cesty před kovárnou; 60 m = dosah kovárny (kovarna.glb 0–60 m). NEOVERENO na tabletu",
+  "uzel": "Kovadlina_1393",
+  "drah_vyska_m": 0.78,
+  "drah_vyska_pozn": "výška dráhy nad podlahou (pravidla/svet/kovadlina_1393.json kovadlina.drah_vyska_nad_zemi_m) – test kovadlina_osazena ji ověří paprskem na kolizi"
  },
  "spanek": {
   "popis": "Spánek jako Havran (main.gd bed, offer_sleep, sleep_until; menu_hrace.gd stránka spanek): nabídka „Lehnout si“ u místa spánku (značka uzel modelu, kolize lůžka vynechána ze zaměření), hráč si lehne (hrac.sit: bod lehu = značka + nad_znackou_m − leh_pod_m, oči oci_m nad ním, pohled pohled_nahoru_st nad vodorovnou), otevře se výběr do kdy spát (Do rána … Jen chvíli poležet); zatmění zatmeni_s, posun denní doby (den.gd set_time), vstát, uložit hru, rozednění rozednit_s. Místa: značky modelů (Hajovna_Spani_Hrac na posteli Hajovna_Kol_Postel; KrcmaL_Spani_Hrac – pokoj 1 v křídle krčmy, lůžko v modelu není, nábytek rozmisťuje Míša) a pryčny chýší (ChyseKura/ChysePrkna_Kol_Prycna0/1 – chýše zatím ve světě nejsou vložené, záznam se uplatní, až budou).",
@@ -104,7 +114,7 @@
  },
  "jesle": {
   "popis": "Jesle v chlévě Dum2 (žebřinový koš nad žlabem, šikmé příčky v síti Dum2_Interier): nabídka „Nasypat seno“ (bod zaměření bod [x, y, z] modelu – čelo kupy nad horním břevnem) → v jeslích se objeví kupa sena, zůstane (nabídka zmizí). Kupa = objem (síť po profilu jeslí: čelo těsně za příčkami, nahoře kupa nad horním břevnem k roubení, nepravidelná podle šumu) + karty stébel (2 články, ohnuté, různé délky a sklony; část leží po povrchu, část trčí a přesahuje přes příčky a horní břevno). Barva vrcholů = ztmavení do hloubky (AO): pata karty a spodek čela tmavší, konce stébel světlé (předloha KCD1). Materiály hra/textury/seno/seno.tres (objem) a seno_stebla.tres (karty, alfa nůžky + alfa do pokrytí jako stebla.gdshader) jdou použít i jinde (stodoly, půdy). Kreslí se jen zblízka (viditelnost_m). Uzel hledá funkce.gd přes kolizi žlabu (stejný dům), tvar je v souřadnicích modelu domu.",
-  "zdroj": "Míša 15. 11.: jesle „nasypat seno“, „seno ale fotorealistické“, předloha kvality docs/reference/seno/kcd1_seno_staj_misa_15_11.jpg (KCD1 stáj, kupa sena: měkký objem, tisíce stébel, světlé konce, tmavá hloubka, okraje se rozpadají do stébel, bledě slámová béžová – medián sRGB 143,130,107); tvar podle modelu domy.glb (rozbor vrcholů 15. 11.): příčky jeslí Dum2_Interier M_RoubeniVnitrni_001 od (y 1,30; z −4,36) k (y 1,90; z −3,85), rozteč 0,14 m, x −2,65…1,60, dolní břevno y 1,26…1,34 u roubení z −4,41, horní břevno y 1,88…1,96 z −3,81…−3,90; stará placka sena M_Slama v jeslích z (1,35; −4,32) k (2,0–2,12; −3,92) – kupa ji překryje; textury ambientCG ThatchedRoof001A (CC0) přebarvené na seno (nastroje/seno_textury.py, LICENCE v hra/textury/seno/)",
+  "zdroj": "Míša 15. 11.: jesle „nasypat seno“, „seno ale fotorealistické“, předloha kvality docs/reference/seno/kcd1_seno_staj_misa_15_11.jpg (KCD1 stáj, kupa sena: měkký objem, tisíce stébel, světlé konce, tmavá hloubka, okraje se rozpadají do stébel, bledě slámová béžová – medián sRGB 143,130,107); tvar podle modelu domy.glb (rozbor vrcholů 15. 11.): příčky jeslí Dum2_Interier M_RoubeniVnitrni_001 od (y 1,30; z −4,36) k (y 1,90; z −3,85), rozteč 0,14 m, x −2,65…1,60, dolní břevno y 1,26…1,34 u roubení z −4,41, horní břevno y 1,88…1,96 z −3,81…−3,90; stará placka sena M_Slama v jeslích z (1,35; −4,32) k (2,0–2,12; −3,92) – kupa ji překryje; textury vlastní kresbou (nastroje/seno_textury.py: spleť zvlněných stébel, paleta z KCD1; 1. kolo ambientCG ThatchedRoof001A – pryč, „učesané“ jako došek)",
   "kolize": [
    "Dum2_Kol_Zlab"
   ],
@@ -140,41 +150,48 @@
   "sit": {
    "delka_krok_m": 0.1,
    "profil_bodu": 14,
-   "uv_m": 0.45,
+   "uv_m": 0.6,
    "viri": 0.25
   },
   "stebla": {
-   "pocet": 1650,
-   "lezi_podil": 0.65,
-   "vrch_podil": 0.72,
-   "delka_m": [
-    0.16,
-    0.42
-   ],
-   "sirka_m": [
-    0.06,
-    0.14
-   ],
-   "trci_sklon_st": [
-    25.0,
-    65.0
-   ],
-   "lezi_sklon_st": [
-    68.0,
-    88.0
-   ],
-   "previs_m": 0.12,
-   "zanor_m": 0.03,
-   "bunky": 4,
-   "trsy": [
-    0,
-    1
-   ],
-   "ao_pata": 0.6,
+   "atlas": {
+    "sloupce": 4,
+    "rady": 2,
+    "rada_vrstva": 0,
+    "rada_trsy": 1
+   },
+   "vrstva": {
+    "pocet": 4300,
+    "vrch_podil": 0.75,
+    "delka_m": [
+     0.08,
+     0.17
+    ],
+    "pomer": 0.5,
+    "zanor_m": 0.003,
+    "vrstva_m": 0.035,
+    "ao_spodni": 0.65
+   },
+   "trsy": {
+    "pocet": 420,
+    "vrch_podil": 0.7,
+    "delka_m": [
+     0.04,
+     0.13
+    ],
+    "pomer": 0.5,
+    "sklon_st": [
+     15.0,
+     70.0
+    ],
+    "previs_m": 0.15,
+    "zanor_m": 0.015,
+    "ao_pata": 0.55
+   },
    "ao_cela_dole": 0.55,
    "seed": 1393
   },
-  "stebla_pozn": "pocet karet (po 4 troj.) + objem ≈ 7,8 tis. troj. (test 15. 11.: 7776) (rozpočet koordinátora 6–8 tis. u jeslí); vrch_podil – podíl karet na vrchu kupy (zbytek na čele za příčkami, to je ve stínu koše; 0,55 nechávalo vrch jako hladkou plochu – snímek 15. 11.); lezi_podil = karty skoro podél povrchu (vrstvy stébel), ostatní trčí (sklon od normály); previs_m – konec stébla klesne o tolik × délka (tíha); bunky – buněk atlasu seno_stebla.png vedle sebe (karta bere celou buňku – výřezy z jedné plochy stébel dávaly rovné hrany karet, snímek 15. 11.), trsy – buňky se stébly z paty (trčící karty), ostatní volná stébla (ležící karty); ao_pata – jas paty karty (konec 1,0), ao_cela_dole – jas spodku čela kupy v jeslích (stín koše). NEOVERENO – laděno snímkem docs/screens/funkce_jesle_seno.png vedle předlohy",
+  "stebla_pozn": "2. kolo (Míša 15. 11.: „hladký objem a dlouhá rovná příliš žlutá stébla v řídkých svazcích“ → povrch kupy = hustá spleť krátkých zvlněných stébel v náhodných směrech, objem jen tmavé jádro, trčící stébla kratší a tenčí, různé délky). atlas – buňky seno_stebla.png (nastroje/seno_textury.py): řada 0 spleť (ovál krátkých zvlněných stébel, okraj řídne), řada 1 trsy (pár stébel z paty). vrstva – ležící karty spleti: střed karty na povrchu, karta jde po povrchu kupy (body v parametrech x, s – sleduje zakřivení), směr náhodný, výška nad povrchem jádra zanor_m … zanor_m + vrstva_m (víc vrstev nad sebou, spodní ztmavené až na ao_spodni – tmavnutí do hloubky jako KCD1), pomer = šířka/délka karty (buňka 1 : 2); trsy – trčící karty (sklon od normály, previs_m = konec klesne o tolik × délka). vrch_podil – podíl karet na vrchu kupy (čelo je za příčkami ve stínu). ležící karta = 1 čtyřúhelník (2 troj., konce na povrchu), trčící 2 články (4 troj.). Rozpočet: objem ~1,2 tis. + 4300 × 2 + 420 × 4 ≈ 11,5 tis. troj. (troj_max); snímek 15. 11. s 2250 kartami 0,13–0,28 m: jednotlivé „lístky“ s tmavými mezerami – teď víc menších. NEOVERENO na tabletu – laděno snímkem docs/screens/funkce_jesle_seno_srovnani.png",
   "material": "res://textury/seno/seno.tres",
   "material_stebla": "res://textury/seno/seno_stebla.tres",
   "viditelnost_m": {
@@ -182,7 +199,9 @@
    "stebla": 14.0
   },
   "viditelnost_pozn": "kreslit jen zblízka (Visibility Range; renderer Compatibility neumí prolínání) – stébla do 14 m, objem do 30 m (dál je chlév zavřený a kupu přes dveře nevidět)",
-  "sit_pozn": "delka_krok_m – rozestup řezů podél jeslí, profil_bodu – bodů na profil (čelo + vrch), uv_m – metry na opakování textury objemu, viri – natočení vláken textury objemu podle šumu (× π; 0 = vlákna jedním směrem – „učesané“ jako došek; 0,8 dávalo na snímku 15. 11. lomené švy)"
+  "sit_pozn": "delka_krok_m – rozestup řezů podél jeslí, profil_bodu – bodů na profil (čelo + vrch), uv_m – metry na opakování textury objemu, viri – natočení vláken textury objemu podle šumu (× π; 0 = vlákna jedním směrem – „učesané“ jako došek; 0,8 dávalo na snímku 15. 11. lomené švy)",
+  "troj_max": 12000,
+  "troj_max_pozn": "rozpočet kupy (koordinátor 15. 11., 2. kolo: „až ~12 tis. troj., jen zblízka, LOD“) – hlídá test jesle_seno; stébla se kreslí jen do viditelnost_m.stebla"
  },
  "studna": {
   "popis": "Studna na návsi (ves.gd _studny): rumpál s klikou a vědro na laně jsou samostatné uzly Pohyb_ves_studna_rumpal_<i> a Pohyb_ves_studna_vedro_<i> – pohyblivé díly dvere.gd (Havran pohyb.gd): rumpál druh navijak (otacek otáček kolem své osy), vědro druh vedro (posun svisle dolů o hloubku k hladině, doba dur_s), skupina ves_studna_<i>, nabídka u kliky. Vědro visí vedro_pod_osou_m pod osou rumpálu nad středem šachty; lano od bubnu k uchu vědra se přepočítá. hladina_m = hloubka hladiny pod terénem (vědro sjede až k ní); terén pod studnou díru nemá – šachtu kreslí temný kruh nad terénem (ves.gd), vědro do tmy zajede a z ní vyjede.",

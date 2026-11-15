@@ -532,7 +532,7 @@ func _test_zlab() -> void:
 
 ## jesle_seno (Míša 15. 11.: jesle „nasypat seno“, „seno ale fotorealistické“): u jeslí nad žlabem nabídka „Nasypat seno“, po stisku
 ## kupa sena (objem + karty stébel, materiály seno.tres / seno_stebla.tres) v jeslích: v délce jeslí, vrch nad horním koncem příček,
-## čelo za příčkami (kromě stébel), za roubením nic; síť kreslí jen zblízka; rozpočet troj. ≤ 8 tis.; nabídka pak zmizí, seno zůstane.
+## čelo za příčkami (kromě stébel), za roubením nic; síť kreslí jen zblízka; rozpočet troj. ≤ troj_max (12 tis.); nabídka pak zmizí, seno zůstane.
 func _test_jesle() -> void:
 	var fu := _funkce(); var spatne: Array = []; var n := 0
 	var je: Dictionary = Pravidla.cti("funkce", "jesle")
@@ -561,12 +561,59 @@ func _test_jesle() -> void:
 			and abo.end.y > float(nah[0]) and abo.position.y >= float(dol[0]) - 0.05 and abo.position.z >= float(tv["stena_z"]) - 0.06 \
 			and abo.end.z <= float(nah[1]) + float(tv["kupa_ven_m"]) + 0.05
 		var znovu: Dictionary = fu.nejblizsi(fu.polozky_, hrac.cam)
-		ok = ok and mat_ok and vid_ok and tvar_ok and troj > 0 and troj <= 8000 and (znovu.is_empty() or znovu["p"] != p)
+		ok = ok and mat_ok and vid_ok and tvar_ok and troj > 0 and troj <= int(je["troj_max"]) and (znovu.is_empty() or znovu["p"] != p)
 		print("PRUCHOD jesle %s: seno %s, objem x %.2f..%.2f y %.2f..%.2f z %.2f..%.2f, troj. %d, materiály %s, viditelnost %s -> %s" % [dum.name, uz != null,
 			abo.position.x, abo.end.x, abo.position.y, abo.end.y, abo.position.z, abo.end.z, troj, mat_ok, vid_ok, "OK" if ok else "CHYBA"])
 		if not ok: spatne.append("%s: seno %s, tvar %s, troj. %d, materiály %s, viditelnost %s" % [dum.name, uz != null, tvar_ok, troj, mat_ok, vid_ok])
 	vysledek["jesle_seno"] = "OK" if spatne.is_empty() and n > 0 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádné jesle ve světě")
 	print("PRUCHOD jesle_seno ", vysledek["jesle_seno"], " (jeslí %d)" % n)
+
+## kovadlina_osazena (Míša 15. 11.: nová kovadlina podle KCD2 v kovárně): na každé značce Kovarna_Kovadlina_misto uzel kovadliny
+## (funkce.gd osad_kovadliny) se stupni podle vzdálenosti; stojí na podlaze (střed a 8 bodů na obvodu špalku: podlaha pod ním
+## nejvýš 3 cm – nevisí, nejvýš 4 cm nad ní – není pod podlahou), má kolizi (paprsek shora narazí na dráhu ve výšce ~0,78 m),
+## špalek nezasahuje do jiné kolize kovárny (výheň, měch, sloupy).
+func _test_kovadlina() -> void:
+	_funkce()
+	var kv: Dictionary = Pravidla.cti("funkce", "kovadlina"); var spatne: Array = []; var n := 0
+	var dr := float(kv["drah_vyska_m"])
+	var prostor := hrac.get_world_3d().direct_space_state
+	for k in ["Mista", "Ves"]:
+		var kor := hlavni.get_node_or_null(k)
+		if kor == null: continue
+		for zn: Node3D in kor.find_children(String(kv["bod"]), "Node3D", true, false):
+			n += 1
+			var uz := zn.get_parent().get_node_or_null(String(kv["uzel"])) as Node3D
+			var jm := "%s %s" % [zn.get_parent().name, zn.name]
+			if uz == null: spatne.append("%s: kovadlina není osazena" % jm); continue
+			hlavni.svet.kolize_ihned(uz.global_position)
+			for i in 3: await get_tree().physics_frame
+			var tela: Array = uz.find_children("*", "CollisionObject3D", true, false)
+			var rid: Array = []
+			for t: CollisionObject3D in tela: rid.append(t.get_rid())
+			var lod := 0
+			for g in uz.find_children("*", "GeometryInstance3D", true, false): if (g as GeometryInstance3D).visibility_range_end > 0.0: lod += 1
+			var o := uz.global_position; var pod_max := -1e9; var pod_min := 1e9; var bez := 0
+			for i in 9:
+				var b := o if i == 0 else o + uz.global_basis * (Vector3(cos(TAU * i / 8.0), 0, sin(TAU * i / 8.0)) * 0.42)
+				var q := PhysicsRayQueryParameters3D.create(b + Vector3(0, 0.25, 0), b - Vector3(0, 1.0, 0)); q.exclude = rid + [hrac.get_rid()]
+				var hh := prostor.intersect_ray(q)
+				if hh.is_empty(): bez += 1; continue
+				pod_max = maxf(pod_max, (hh["position"] as Vector3).y); pod_min = minf(pod_min, (hh["position"] as Vector3).y)
+			var q2 := PhysicsRayQueryParameters3D.create(o + Vector3(0, 1.6, 0), o); q2.exclude = [hrac.get_rid()]
+			var h2 := prostor.intersect_ray(q2)
+			var vrch: float = (h2["position"] as Vector3).y - o.y if not h2.is_empty() and rid.has(h2["rid"]) else -1.0
+			var qs := PhysicsShapeQueryParameters3D.new(); var cyl := CylinderShape3D.new(); cyl.radius = 0.5; cyl.height = 0.16
+			qs.shape = cyl; qs.transform = Transform3D(Basis(), o + Vector3(0, 0.18, 0)); qs.exclude = rid + [hrac.get_rid()]
+			var kriz: Array = []
+			for c: Dictionary in prostor.intersect_shape(qs, 8): kriz.append(String((c["collider"] as Node).name))
+			var nevisi := bez == 0 and o.y - pod_max <= 0.03
+			var nad_podlahou := bez == 0 and pod_max - o.y <= 0.04 and o.y - pod_min <= 0.06
+			var ok: bool = not tela.is_empty() and nevisi and nad_podlahou and absf(vrch - dr) < 0.06 and lod >= 3 and kriz.is_empty()
+			print("PRUCHOD kovadlina %s: [%.2f, %.2f, %.2f], podlaha %.3f..%.3f (bez podlahy %d), dráha (kolize) %.2f m, kolizí %d, stupňů %d, zasahuje do %s -> %s" % [jm, o.x, o.z, o.y,
+				pod_min, pod_max, bez, vrch, tela.size(), lod, kriz, "OK" if ok else "CHYBA"])
+			if not ok: spatne.append("%s: nevisí %s, nad podlahou %s, dráha %.2f, kolizí %d, stupňů %d, zasahuje %s" % [jm, nevisi, nad_podlahou, vrch, tela.size(), lod, kriz])
+	vysledek["kovadlina_osazena"] = "OK" if spatne.is_empty() and n > 0 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádná značka kovadliny ve světě")
+	print("PRUCHOD kovadlina_osazena ", vysledek["kovadlina_osazena"], " (kováren %d)" % n)
 
 ## studna_vedro (Míša 15. 11.: „co může mít funkci, tak ji mít bude“; Havran blender/studna.py + pohyb.gd vedro): u kliky studny
 ## nabídka (dvere.gd, zaměřená), „Spustit vědro“ – rumpál se točí, vědro sjede o hloubku k hladině (dvere.gd druh vedro), lano
@@ -630,6 +677,7 @@ func _konec() -> void:
 	if jen == "" or "zlab" in jen: await _test_zlab()
 	if jen == "" or "jesle" in jen: await _test_jesle()
 	if jen == "" or "studna" in jen: await _test_studna()
+	if jen == "" or "kovadlina" in jen: await _test_kovadlina()
 	hrac.autopilot = Vector3.INF
 	var f := FileAccess.open(OS.get_environment("PUCHART_VYSTUP") if OS.has_environment("PUCHART_VYSTUP") else "user://pruchod.json", FileAccess.WRITE); f.store_string(JSON.stringify(vysledek, " "))
 	var ok := vysledek.values().all(func(v): return v == "OK")

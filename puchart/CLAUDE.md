@@ -48,6 +48,7 @@ a měřením; tablet měří Míša.
   ambientCG, Quaternius, Kenney, Sketchfab CC0/CC-BY (autor do titulků). Z her nekopírovat, inspirace ano.
 - **Historie:** značení DOLOZENO / REKONSTRUKCE / NAVRH u každého dílu (`pravidla/svet/lokace.json`, katalog
   rekonstrukcí). Rok 1393: žádné cihly ani štěrk na venkově, droba/břidlice (ne pískovec), šindel a došek.
+- **Historická volnost** (Míša 15. 11.): reálně podle dokladu, kde jistota není, si hrajeme; co je doloženo až kolem 1400–1420 (např. 1408, 1415), smí být už 1393 (barevnost hry). Novověk (X) ne. Pravidlo a závěry rešerše okruhu 15 km: `docs/historie_pravidla.md` (PDF `docs/reference/Puchart_okruh_15km_historicka_reserse.pdf`).
 - Dlouhé běhy Godotu na pozadí, mezitím dělat další práci (Havran „Nečekat“).
 - **Hlídači před každou APK** (`bash nastroje/hlidaci.sh`, volá ho `export_apk.sh`): geometrie (nic nevisí), test smyslu,
   test průchodu, hlídač scén, matice vztahů (`vztahy.json` testy_puchart), tabulka chyb. Selhání = APK se nestaví.

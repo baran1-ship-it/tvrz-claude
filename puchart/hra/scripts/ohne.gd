@@ -33,7 +33,9 @@ func zacni(h: Node) -> void:
 	hlavni = h
 	if not FileAccess.file_exists("res://data/ohne.json"): pripraveno = true; hotovo.emit(); return
 	cfg = JSON.parse_string(FileAccess.get_file_as_string("res://data/ohne.json"))
-	if h.get("kolize_hotove") == false: await h.kolize_hotovo   # kolize hradu (hlavni.gd _kolize_hradu deferred až po předehrání – dřív paprsky v hradu nic nenašly)
+	print("DBG ohne ceka ", h.get("kolize_hotove"))
+	if h.get("kolize_hotove") == false: await h.kolize_hotovo
+	print("DBG ohne kolize ok")   # kolize hradu (hlavni.gd _kolize_hradu deferred až po předehrání – dřív paprsky v hradu nic nenašly)
 	for i in 3: await get_tree().physics_frame   # kolize staveb (paprsky na ohniště a do místnosti)
 	_materialy()
 	var zv: Dictionary = cfg["zvuk"]
