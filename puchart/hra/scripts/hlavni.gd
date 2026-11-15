@@ -688,14 +688,13 @@ func _mista() -> void:
 		uzel.add_child(dum)
 		_lavice_rucni(dum, String(s["model"]))
 		if _lavice_vzor != "": lavice.append_array(load("res://scripts/lavice.gd").mista(dum, _lavice_vzor))   # lavice z modelu (Míša 15. 11.)
-		_rampy_dveri(dum)
 		_krb(dum, String(s["model"]), float(lod["vnitrek_do_m"]), st_do)   # krb Rychty (krby.json; glb až od modeláře)
 		_ztlum(dum, float(md.get("jas_podrobny", 1.0)), jas_cache)   # Míša 14. 11.: „domy… až moc vypadají bílé“
 		var zbd: Array = (md.get("zebriky", {}) as Dictionary).get(String(s["model"]), [])
 		if zbd.size() == 4:   # žebřík na půdu v síni (Havran DUM_ZEBRIK; Míša 15. 11.: „chci všechny žebříky ve hře funkční“)
 			var zw := {"nazev": "Žebřík %s" % dum.name}
 			for k_ in 4: zw[["pata", "vrchol", "nastup", "sestup"][k_]] = dum.transform * Vector3(float(zbd[k_][0]), float(zbd[k_][1]), float(zbd[k_][2]))
-			zebriky.append(zw)
+			_zebrik_kolize(dum, zw); zebriky.append(zw)
 		var st_vzor: MeshInstance3D = ssc.find_child(String(s["model"]) + "_Stredni", true, false) as MeshInstance3D if ssc else null
 		var se_st := st_vzor != null and blizko < st_do
 		if se_st:
@@ -786,7 +785,8 @@ func _ztlum(dum: Node3D, jas: float, cache: Dictionary) -> void:
 
 
 ## Kamenné stupně před vnějšími dveřmi celku (Míša 14. 11.: „udělej schod do domu, jsou tam výš dveře“): po schod.vyska_m
-## až k prahu (podlaha_m), kámen z podezdívky modelu; jen vzhled – chodí se po nájezdové kolizi (rampy), hráč nemá krok nahoru
+## až k prahu (podlaha_m), kámen z podezdívky modelu; každý stupeň má kolizi stejného kvádru – hráč je vyjde krokem nahoru
+## (hrac.gd _krok_nahoru, č. 315; dřív nájezdová rampa 0,26–0,34 m nad stupni). s.rampy = vnější dveře se stupni.
 func _schody_dveri(n: Node3D, s: Dictionary) -> void:
 	var sd: Dictionary = s.get("schod", {}); var mu := n.find_child(String(s.get("schod_material", "")), true, false) as MeshInstance3D
 	if sd.is_empty() or mu == null or mu.mesh == null: return
@@ -804,6 +804,8 @@ func _schody_dveri(n: Node3D, s: Dictionary) -> void:
 			mi.mesh = bm; mi.material_override = mat; mi.name = "Schod_%s_%d" % [r["uzel"], k]
 			mi.position = Vector3(c.x, (top - 0.3) / 2, c.z) + ven * (0.12 + dl / 2)
 			n.add_child(mi)
+			var kb := StaticBody3D.new(); kb.name = "SchodDveri_%s_%d" % [r["uzel"], k]; var cs := CollisionShape3D.new(); var bx := BoxShape3D.new()
+			bx.size = bm.size; cs.shape = bx; kb.position = mi.position; kb.add_child(cs); n.add_child(kb)
 
 
 ## Hrubý obal domu (_Daleko: plochy *_Sindel, *_Roubeni bez UV) dostane texturu materiálu podrobného modelu promítnutou
@@ -856,18 +858,6 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas:
 			if vn is GeometryInstance3D: gs.append(vn)
 			for g in gs:
 				(g as GeometryInstance3D).visibility_range_end = vnitrek_do; (g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var kb := StaticBody3D.new(); kb.name = "RampyDveri"   # nájezd na práh vnějších dveří (podlaha_m nad terénem)
-	for r: Dictionary in s.get("rampy", []):
-		var dv := n.find_child(String(r["uzel"]), true, false) as MeshInstance3D
-		if dv == null: continue
-		var ab := dv.get_aabb(); var c := dv.position + ab.position + ab.size * 0.5   # střed křídla v souřadnicích modelu
-		var ven := Vector3(float(r["ven"][0]), 0, float(r["ven"][1])); var bok := Vector3(ven.z, 0, -ven.x)
-		var p0 := Vector3(c.x, -0.02, c.z) + ven * 2.4; var p1 := Vector3(c.x, float(s.get("podlaha_m", 0.45)) - 0.02, c.z) - ven * 0.5   # konec pod podlahou (Míša 15. 11.: „z hospody už dveřmi nevylezu“ – horní hrana rampy 4 cm nad podlahou zachytila postavu zevnitř)
-		var cs := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(1.0, 0.12, (p1 - p0).length()); cs.shape = bx
-		var dz := (p1 - p0).normalized(); cs.transform = Transform3D(Basis(bok, dz.cross(bok).normalized(), dz).orthonormalized(), (p0 + p1) * 0.5 - dz.cross(bok).normalized() * 0.06)
-		kb.add_child(cs)
-	if kb.get_child_count() > 0: n.add_child(kb)
-	else: kb.free()
 	_schody_dveri(n, s)
 	if jas_celku < 0.999:   # vnějšek celku tlumený jako domy (Míša 15. 11. foto krčmy: kamenná stáj skoro bílá)
 		for g in n.find_children("*", "MeshInstance3D", true, false):
@@ -883,13 +873,31 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas:
 	if s.get("zebrik") != null:   # žebřík na půdu (Míša 14. 11.): body modelu → svět
 		var z_: Dictionary = s["zebrik"]; var zw := {"nazev": String(z_.get("nazev", "Žebřík"))}
 		for k_ in ["pata", "vrchol", "nastup", "sestup"]: zw[k_] = n.transform * Vector3(float(z_[k_][0]), float(z_[k_][1]), float(z_[k_][2]))
-		zebriky.append(zw)
+		_zebrik_kolize(n, zw); zebriky.append(zw)
 	if s.get("lod1") != null and ResourceLoader.exists(String(s["lod1"])):
 		var l1: Node3D = (load(String(s["lod1"])) as PackedScene).instantiate(); l1.name = "LOD1"; n.add_child(l1)
 		for g in l1.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_begin = od1; (g as GeometryInstance3D).visibility_range_end = obal_do   # hrubý stupeň do dálky (dřív za 75 / 130 m nic)
 		Ztmav_daleko(l1, jas)
 		for c in l1.find_children("*", "CollisionObject3D", true, false): c.queue_free()
+
+
+## Kolize žebříku (č. 316; povrch_kolize: postava procházela příčlemi): deska v rovině příčlí od paty k vrcholu, šířka a tloušťka
+## hrac.json lezeni.kolize_*; šikmá (normála pod floor_max_angle) a tenká – krok nahoru na ni nevystoupí. Tělo v zw["telo"]
+## (test zebrik_lezeni ho vynechá z paprsku hledajícího vnější stěnu).
+func _zebrik_kolize(rodic: Node3D, zw: Dictionary) -> void:
+	var lz: Dictionary = preload("res://scripts/pravidla.gd").cti("hrac", "lezeni")
+	var inv := rodic.transform.affine_inverse()   # zw je rodic.transform * body modelu (_mista, _celek)
+	var a: Vector3 = inv * (zw["pata"] as Vector3); var b: Vector3 = inv * (zw["vrchol"] as Vector3); var ns: Vector3 = inv * (zw["nastup"] as Vector3)
+	var osa := (b - a).normalized(); var pred := ns - a; pred.y = 0.0
+	var sir := Vector3(-pred.z, 0, pred.x).normalized() if pred.length() > 0.01 else Vector3(osa.z, 0, -osa.x).normalized()   # napříč žebříkem (vodorovně)
+	var nor := sir.cross(osa).normalized()
+	var kb := StaticBody3D.new(); kb.name = "ZebrikKolize"
+	var cs := CollisionShape3D.new(); var bx := BoxShape3D.new()
+	bx.size = Vector3(float(lz["kolize_sirka_m"]), a.distance_to(b), float(lz["kolize_tloustka_m"])); cs.shape = bx
+	cs.transform = Transform3D(Basis(sir, osa, nor), (a + b) * 0.5)
+	kb.add_child(cs); rodic.add_child(kb)
+	zw["telo"] = kb
 
 
 ## Kolize půdy celku (mista.json modely.celky.<model>.puda; Míša 14. 11.: „na půdě je trám a hráč ho nepřekročí“): strop modelu
@@ -929,31 +937,6 @@ func _puda(n: Node3D, pd: Dictionary) -> void:
 		cs.transform = Transform3D(Basis(bok, nh, dz).orthonormalized(), (p0 + p1) * 0.5 - nh * 0.06)
 		kb.add_child(cs)
 	n.add_child(kb)
-
-
-## Šikmá kolize u vnějších dveří domu (Míša 13. 11.: „do hájovny nemůžu vstoupit, všechny budovy musí být vstupné“): domy
-## Havrana mají před prahem kamenný stupeň 0,15 m a podlahu 0,3 m nad základem, postava nemá krok nahoru (hradní schody mají
-## rampu) – rampa z terénu na práh jako u schodů hradu (puchart_hrad.schody2 kol). Vnější dveře = uzel *_Dvere_* na obvodové stěně.
-func _rampy_dveri(dum: Node3D) -> void:
-	var xmax := 0.0
-	for ch in dum.get_children():
-		if String(ch.name).contains("_Dvere_") and ch is Node3D: xmax = maxf(xmax, absf((ch as Node3D).position.x))
-	var kb := StaticBody3D.new(); kb.name = "RampyDveri"
-	for ch in dum.get_children():
-		if not (String(ch.name).contains("_Dvere_") and ch is MeshInstance3D): continue
-		var mi := ch as MeshInstance3D
-		if absf(mi.position.x) < xmax - 0.05: continue   # vnitřní dveře
-		var sg := signf(mi.position.x); var ab := mi.get_aabb()
-		var zc := mi.position.z + ab.position.z + ab.size.z * 0.5
-		var x0 := mi.position.x + sg * 2.8; var x1 := mi.position.x - sg * 0.5   # konec 0,5 m za prahem pod podlahou (Míša 15. 11.: z hospody nešlo vyjít – hrana rampy nad podlahou)   # venku na terénu → za prahem na podlaze (nad hranou stupně 1,05 m před stěnou je rampa 0,17 m – nad stupněm 0,15)
-		var y0 := -0.02; var y1 := 0.28
-		var L := Vector2(x1 - x0, y1 - y0).length(); var uh := atan2(y1 - y0, absf(x1 - x0))
-		var cs := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(L, 0.12, 0.9); cs.shape = bx
-		cs.position = Vector3((x0 + x1) * 0.5, (y0 + y1) * 0.5 - 0.06, zc)
-		cs.rotation.z = uh * (-sg)   # stoupá směrem dovnitř
-		kb.add_child(cs)
-	if kb.get_child_count() > 0: dum.add_child(kb)
-	else: kb.free()
 
 
 ## Rostliny na skalách (blender/skaly.py → hra/data/skaly_rostliny.json; Míša 10. 11.: „vegetaci sem tam, ne jen mech“, fotky

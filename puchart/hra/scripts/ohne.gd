@@ -112,10 +112,10 @@ func _usti(m: Dictionary, tel: Node3D) -> Dictionary:
 	var u: Dictionary = m["usti"]
 	var zn := dum.find_child(String(m.get("usti_uzel", "-")), true, false) as Node3D
 	if zn:
-		return {"bod": zn.global_position, "smer": (zn.global_basis.z * Vector3(1, 0, 1)).normalized(), "sirka": float(u["sirka"]), "vyska": float(u["vyska"])}
+		return {"bod": zn.global_position, "smer": (zn.global_basis.z * Vector3(1, 0, 1)).normalized(), "sirka": float(u["sirka"]), "vyska": float(u["vyska"]), "dum": dum}
 	var b: Array = u["bod"]; var sm: Array = u["smer"]
 	return {"bod": dum.global_transform * Vector3(b[0], b[1], b[2]), "smer": (dum.global_basis * Vector3(sm[0], sm[1], sm[2])).normalized(),
-		"sirka": float(u["sirka"]), "vyska": float(u["vyska"])}
+		"sirka": float(u["sirka"]), "vyska": float(u["vyska"]), "dum": dum}
 
 
 ## Směr (vodorovně) s nejdelším volným paprskem z bodu – do místnosti; vyjma = RID vlastní kolize (pec).
@@ -194,7 +194,7 @@ func _pridej(m: Dictionary, n: Node3D) -> void:
 		_geom(uh); uz.add_child(uh); uh.basis = bz; uh.position = ven * od; o["uhliky"] = uh
 		# žár modelu (materiál M_Zhar* v síni <Dům>_Interier – kamínkové ohniště před ústím) žhne stejným shaderem jako uhlíky
 		var zs: Array = []
-		for ch in tel.get_parent().get_children():
+		for ch in (usti["dum"] as Node).get_children():
 			if ch is MeshInstance3D and String(ch.name).ends_with("Interier") and (ch as MeshInstance3D).mesh:
 				for i_ in (ch as MeshInstance3D).mesh.get_surface_count():
 					var sm_ := (ch as MeshInstance3D).mesh.surface_get_material(i_)

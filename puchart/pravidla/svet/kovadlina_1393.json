@@ -94,7 +94,9 @@
   "barvy_pozn": "sRGB jako na fotce. Dráha světlá šedá ocel (KCD2), kov jen 0,32 a drsnost 0,36–0,5: s kovem 0,6 a albedem 0,5 (1. kolo) dráha v Godotu zrcadlila modrou oblohu (reflected light ze sky) a vypadala tmavě modrá; boky hnědé okuje a rez (KCD2), 1. kolo bylo téměř černé (medián sRGB 51,32,23); snímek ve hře 15. 11. odpoledne: boky s okujemi 0,27 a rzí 0,40 vycházely na slunci oranžové s mřížkou skvrn (textura rzi podél os) → tmavší hnědé, textura pootočená; 3. kolo (Míša 15. 11.: dráha ve hře přesvícená do bílé): dráha tmavší šedá ocel 0,40–0,46, drsnost 0,5–0,62, lesk (drsnost 0,36, albedo 0,52) jen v pruhu 7 cm uprostřed dráhy, kde se kove; okuje jemné zrno (šum 170/m); 28 otluků hran",
   "kramle": false,
   "kramle_pozn": "kramle přes patky (1. kolo) vynechány – v KCD2 nejsou a zblízka působily jako drátky; kovadlina drží vahou (~100 kg)",
-  "otluky": 28
+  "otluky": 28,
+  "high_voxel_m": 0.002,
+  "high_voxel_pozn": "velikost voxelu high-poly (otluky, kování); 1,6 mm = ~970 tis. troj. a ~2,2 GB paměti Blenderu – při souběžných bězích Godotu (15. 11.) ho zabíjel nedostatek paměti; 2 mm stačí pro zapečení 2048 px (1 px ≈ 0,6 mm na atlasu)"
  },
  "sperhak": {
   "poloha_m": [

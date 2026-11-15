@@ -1547,5 +1547,42 @@
     "pozn": "15. 11.: zjednodušení (Decimate) rozmazalo UV šindelů a došků (střecha růžová) → střední stupeň = vnějšek bez střešní krytiny a bez vnitřních líců stěn (60–70 % troj.) + hladká střecha z hrubého obalu s texturou krytiny; stěny beze změny"
    }
   ]
+ },
+ "okapy_vstupu": {
+  "popis": "zvednutý okap („obočí“) nad vnějšími vchody domů (blender/okap_vstupu.py, voláno z nastroje/stavby_z_havrana.sh): je-li krytina nebo krov nad pásem dveří (+ okraj_m na každou stranu) níž než min_okap_m nad terénem modelu (y 0), zvedne se okap v plochém oblouku na cil_okap_m – krytina, obruba okapu, krokve a okapní latě spolu; z originálu vstup do vystup, podrobná síť i hrubý obal (site)",
+  "zdroj": "docs/chyby.md 314 (Míša 15. 11.: „udělej to, ať to vypadá dobře řemeslně a esteticky“; snímek docs/screens/povrch_dum2_okap_vstup.jpg). Řemeslo: thatchinginfo.com „Thatching Straightwork Features“ – Eyebrow/eaves window: okapní a obočnicová vrstva jde přes otvor v plné tloušťce, hlavní vrstvy se nad otvorem ztenčí (4 na polovinu) a za ním vrátí, sklon nad obočím nejméně 45°; thatchadvicecentre.co.uk „Windows (Dormer, Eyebrow & Velux)“ – obočí je ploché polokruhové vyklenutí, z roviny střechy skoro nevystupuje; nad dveřmi bez okapového žlabu doškaři okap zvedají nebo dávají stříšku (thatchinginfo.com Thatched porches). KCD (docs/reference/kcd_vzhled, kcd_ves_predloha 05_mlyn_potok_breh) detail vstupu pod doškem neukazuje – jen hustý došek s mechem a okap nad hlavou; Havran domy.glb stejný model bez kontroly. Postava: pravidla/svet/hrac.json (kapsle 1,75 m, oči 1,65 m), kamenný stupeň před prahem 0,25 m → cil 2,25 m = hlava na stupni ještě 0,25 m pod okapem.",
+  "vstup": "build/zdroj_celky/domy.glb",
+  "vystup": "hra/modely/stavby_h/domy.glb",
+  "domy": [
+   "Dum1",
+   "Dum2",
+   "Rychta"
+  ],
+  "domy_pozn": "rodina modelů Havrana blender/ves_domy.py (CLAUDE.md: chyba prvku se opravuje všude) – Dum1 a Rychta mají šindel s okapem 2,38 m a nejnižší díl nad vchodem (zhlaví trámů) 2,22 m → beze změny (OKAP_OK), Dum2 Vstup, ChlevVen, Dvur 1,69 m → zvednout",
+  "site": [
+   "_Vnejsek",
+   "_Daleko"
+  ],
+  "krytina": [
+   "Dosky",
+   "Sindel"
+  ],
+  "krov_materialy": [
+   "Kura"
+  ],
+  "krov_pozn": "M_Kura_* = krokve a okapní latě z kulatiny s kůrou (Dum2: krokve po 0,9 m do x 3,67, latě x 3,36 a 3,64) – zvedají se s doškem jako kočky (přiložené konce krokví) pod obočím; čela krokví (M_Zhlavi) jako kusy celé za lícem dveří + presah_od_dveri_m; zhlaví stropních trámů (x 3,02–3,32) a stěny zůstanou",
+  "vnejsi_od_x_m": 2.5,
+  "presah_od_dveri_m": 0.25,
+  "min_okap_m": 1.95,
+  "cil_okap_m": 2.25,
+  "okraj_m": 0.3,
+  "nabeh_m": 0.8,
+  "valba_odstup_m": 0.5,
+  "valba_prechod_m": 0.25,
+  "spojit_do_m": 1.6,
+  "krok_z_m": 0.15,
+  "krok_x_m": 0.1,
+  "krok_pozn": "latě a krokve z kulatiny (M_Kura) a hrubý obal _Daleko mají vrcholy jen na koncích (lať 9,8 m) – rozřežou se rovinami po krok_z_m podél okapu a krok_x_m napříč v pásmu posunu, jinak by lať zůstala rovná pod zvednutým doškem (snímek 15. 11.)",
+  "spojit_pozn": "Dum2 Vstup a ChlevVen jsou na téže stěně 1,37 m od sebe (pásy s okrajem) – dva oblouky dělaly mezi dveřmi ostrý zub (snímek 15. 11.), proto jeden plochý oblouk přes oba vchody"
  }
 }

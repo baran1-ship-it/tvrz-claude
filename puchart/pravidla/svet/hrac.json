@@ -124,6 +124,8 @@
   0.15
  ],
  "_schod_m": "vyska zvednuti pri prekroceni schodu, zkousi se v poradi (plny schod, pod nizkym stropem nizsi - prah, nizky schod). Warhorse KM-A-52: schod 0,20 m - nase 0,45 je nejvyssi prekonatelny, ne norma schodu (warhorse_do_dat.md)",
+ "schod_posun_m": 0.12,
+ "schod_hloubka_min_m": 0.2,
  "schod_kolize_m": 0.2,
  "_schod_kolize_m": "kolize schodu dilu (*Kol_Schody* z modelu = konvexni klin, u vetrnego mlyna 56 st. - hrac nevyjde, Misa 0.99 „do mlyna nemuzu vejit“): klin se nahradi schody teto vysky; Warhorse KM-A-52 schod 0,20 m",
  "obnova_pohyb_podil": 0.75,
@@ -213,7 +215,10 @@
   "nad_paty_m": 1.0,
   "u_vrcholu": 0.4,
   "nad_vrcholu_m": 0.6,
-  "zdroj": "Havran větev claude/new-session-0dtk58: scripts/player.gd (LEZENI 1,1 m/s, 0,32 m, 0,15 m, 0,96, 0,6), scripts/svet.gd zebrik_use (r 2,2 m, +1,0 / +0,6 m, 0,5 / 0,4)"
+  "zdroj": "Havran větev claude/new-session-0dtk58: scripts/player.gd (LEZENI 1,1 m/s, 0,32 m, 0,15 m, 0,96, 0,6), scripts/svet.gd zebrik_use (r 2,2 m, +1,0 / +0,6 m, 0,5 / 0,4)",
+  "kolize_sirka_m": 0.5,
+  "kolize_tloustka_m": 0.06,
+  "_kolize": "deska kolize žebříku v rovině příčlí od paty k vrcholu (hlavni.gd _zebrik_kolize; č. 316 – postava procházela příčlemi): šířka = vnější líce štěřin (hájovna 3,64–4,16 = 0,52 m, Havran DUM_ZEBRIK domy), tloušťka ≈ štěřina"
  },
  "zamer": {
   "popis": "zaměření interakcí (hra/scripts/zamer.gd; Míša 15. 11.: „vše, co je interaktivní, na to musí být umístěn kurzor“; „nemůžu lézt po žebříku, který je uvnitř, zvenku“): nabídne se jen cíl, na který míří střed obrazovky, a jen když na něj hráč vidí (paprsek z očí k cíli nenarazí dřív než tolerance_m před ním)",

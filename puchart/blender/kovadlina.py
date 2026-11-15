@@ -240,7 +240,7 @@ def kovadlina_high():
                                                  location=(xk - r * 0.3, random.uniform(-hw, hw), F - 0.002))
             rez.append(bpy.context.object)
     odecti(o, rez)
-    remesh(o, 0.0016, vyhlad=1, fakt=0.5)
+    remesh(o, KV.get("high_voxel_m", 0.0016), vyhlad=1, fakt=0.5)
     g = skupina_mimo_drahu(o)
     displace(o, "CLOUDS", 0.09, 0.004, g, noise_depth=2)           # nerovnosti kování (vlny po kladivu)
     displace(o, "VORONOI", 0.02, -0.0006, g, stred=0.5, distance_metric="DISTANCE")    # ploché fazety po kladivu
@@ -256,7 +256,7 @@ def sperhak_high():
             (H + 0.07, hs, hs, 8.0), (H + v - 0.075, hs, hs, 8.0), (H + v - 0.055, hs + 0.008, hs + 0.002, 6.0),
             (H + v - 0.03, hs + 0.01, hs - 0.004, 5.0), (H + v - 0.006, hs + 0.004, 0.007, 4.0), (H + v, hs - 0.004, 0.003, 3.0)]
     o = loft_z([(z, x0, y0, hx, hy, p) for z, hx, hy, p in rezy], "sperhak_high", n=64)
-    remesh(o, 0.0015, vyhlad=3, fakt=0.5)
+    remesh(o, KV.get("high_voxel_m", 0.0015), vyhlad=3, fakt=0.5)
     g = o.vertex_groups.new(name="v"); g.add([v.index for v in o.data.vertices], 1.0, "REPLACE")
     displace(o, "CLOUDS", 0.03, 0.0015, "v", noise_depth=2)
     displace(o, "VORONOI", 0.008, -0.0007, "v", distance_metric="DISTANCE")
@@ -666,8 +666,8 @@ def textura_dreva(anvil_rect, sperhak_xy):
     pozdni = np.clip((fr - 0.55) / 0.2, 0, 1) * np.clip((1.0 - fr) / 0.1, 0, 1)
     jarni_p = np.clip(1 - np.abs(fr - 0.05) / 0.06, 0, 1)          # póry jarního dřeva (dub – kruhovitě pórovitý)
     # 3. kolo (KCD2): tmavý ohlazený dub, začouzený (hodnoty lineární – obrázek sRGB: 0,075 ≈ sRGB 0,30)
-    zakl = np.stack([0.075 + 0.0 * r, 0.056 + 0.0 * r, 0.041 + 0.0 * r], -1)
-    pozd_c = np.array([0.042, 0.030, 0.021])
+    zakl = np.stack([0.105 + 0.0 * r, 0.078 + 0.0 * r, 0.056 + 0.0 * r], -1)
+    pozd_c = np.array([0.060, 0.043, 0.030])
     col = zakl * (1 - pozdni[..., None]) + pozd_c * pozdni[..., None]
     col *= (1 - 0.25 * jarni_p * (sumC > 0.45))[..., None]
     # dřeňové paprsky (dub): tenké světlé radiální čárky
@@ -687,7 +687,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
     ddx = np.maximum(np.maximum(ax0 - x, x - ax1), 0); ddy = np.maximum(np.abs(y) - ay, 0)
     dk = np.hypot(ddx, ddy)
     saze = np.clip(1 - dk / 0.30, 0, 1) ** 1.3
-    col *= (1 - 0.6 * saze)[..., None]
+    col *= (1 - 0.45 * saze)[..., None]
     okuje = (RNG.random((W, W)) < (0.0008 + 0.035 * saze ** 2)) & disk
     from_ = okuje.copy()
     for sh in ((0, 1), (1, 0), (1, 1)):
@@ -730,7 +730,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
         sel = (uu >= bu0 - 0.002) & (uu <= bu0 + T_UV + 0.002) & (vv >= bv0 - 0.002) & (vv <= bv0 + T_UV + 0.002)
         tdl = (k + (uu - bu0) / T_UV) * 2 * np.pi / DLAZD
         s = (vv - bv0) / T_UV * 0.5
-        mul = (0.62 + 0.22 * sumA + 0.1 * sumB) * 0.45                       # 3. kolo: tmavé (saze, stáří)
+        mul = (0.62 + 0.22 * sumA + 0.1 * sumB) * 0.7                        # 3. kolo: tmavé (saze, stáří)
         mul = mul * (1 - 0.35 * np.clip((s - (S_BOK - 0.10)) / 0.08, 0, 1))      # saze u horní hrany
         mul = mul * (1 - 0.25 * np.clip((0.06 - s) / 0.06, 0, 1))               # hlína a vlhko dole
         trm = np.zeros((W, W))
@@ -778,7 +778,7 @@ def mat_drevo_autorsky(prekryv, vyska):
     alb = U.mix(U.math("SUBTRACT", 1.0, ao2.outputs["AO"]), alb, (0.03, 0.025, 0.02))   # rýhy trhlin (high-poly) tmavé
     nep = U.u("ShaderNodeTexNoise"); nep.inputs["Scale"].default_value = 60.0; nep.inputs["Detail"].default_value = 6.0
     alb = U.mix(U.math("MULTIPLY", U.mr(nep.outputs["Fac"], 0.55, 0.7), 0.25), alb, (0.32, 0.28, 0.23))   # ohlazené světlejší plošky dřeva
-    dr = U.mix(celo, U.math("ADD", 0.25, U.math("MULTIPLY", wR.outputs[0], 0.75)), U.math("ADD", 0.58, U.math("MULTIPLY", vy.outputs[0], 0.25)))
+    dr = U.mix(celo, U.math("ADD", 0.55, U.math("MULTIPLY", wR.outputs[0], 0.4)), U.math("ADD", 0.62, U.math("MULTIPLY", vy.outputs[0], 0.3)))
     nm = U.u("ShaderNodeNormalMap", uv_map="tex"); nm.inputs["Strength"].default_value = 1.0; U.ln(wN.outputs[0], nm.inputs["Color"])
     bump = U.u("ShaderNodeBump"); bump.inputs["Distance"].default_value = 0.004; bump.inputs["Strength"].default_value = 1.0
     U.ln(vy.outputs[0], bump.inputs["Height"])

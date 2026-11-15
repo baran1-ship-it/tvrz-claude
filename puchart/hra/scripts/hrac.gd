@@ -157,10 +157,48 @@ func _physics_process(dt: float) -> void:
 	else:
 		v = (transform.basis * v.limit_length(1.0)) * (beh if rychle else rychlost)
 	velocity.x = v.x; velocity.z = v.z
-	velocity.y = 0.0 if is_on_floor() else velocity.y - 9.8 * dt
+	var na_zemi := is_on_floor()
+	velocity.y = 0.0 if na_zemi else velocity.y - 9.8 * dt
 	floor_snap_length = 0.6
 	floor_max_angle = deg_to_rad(50)
+	var pred := velocity
 	move_and_slide()
+	# schod nebo práh: zkus se na něj vysunout (Havran player.gd _step_up; č. 315 – stupně místo ramp)
+	if na_zemi and is_on_wall() and Vector2(v.x, v.z).length() > 0.3:
+		_krok_nahoru(Vector3(v.x, 0, v.z).normalized(), pred, dt)
+
+
+## Krok nahoru (Havran player.gd _step_up/_zkus_schod, hrac.json schod_m): zvednout kapsli o výšku kroku (nejdřív nejvyšší,
+## pod nízkým stropem nižší), posunout dopředu, spustit dolů na povrch. Navíc proti Havranovi (č. 315 – „nevyskakovat na
+## hrany zdí a zábradlí“): dopad jen na pochozí plochu – normála do floor_max_angle a schod_hloubka_min_m
+## za hranou ve směru chůze je plocha ve výšce stupně (paprsek shora), ne tenká hrana ani úzké madlo.
+func _krok_nahoru(smer: Vector3, pred: Vector3, dt: float) -> void:
+	var motion := smer * maxf(float(Pravidla.cti("hrac", "schod_posun_m")), Vector2(pred.x, pred.z).length() * dt)
+	for vy: float in Pravidla.cti("hrac", "schod_m"):
+		if _zkus_schod(motion, smer, pred, float(vy)): return
+
+func _zkus_schod(motion: Vector3, smer: Vector3, pred: Vector3, vy: float) -> bool:
+	var xf := global_transform
+	if test_move(xf, Vector3.UP * vy): return false   # strop
+	var up := xf.translated(Vector3.UP * vy)
+	if test_move(up, motion): return false   # i zvednutá kapsle naráží – zeď, ne schod
+	var ahead := up.translated(motion)
+	var col := KinematicCollision3D.new()
+	if not test_move(ahead, Vector3.DOWN * (vy + 0.05), col): return false
+	if col.get_normal().y < cos(floor_max_angle): return false
+	var rise := vy - col.get_travel().length()
+	if rise < 0.02: return false
+	# pochozí plocha: paprsek shora schod_hloubka_min_m za bodem dotyku (hrana stupně) ve směru chůze musí trefit plochu
+	# s normálou nahoru nejvýš 0,05 m pod dotykem (stupeň, práh s podlahou za ním) – tenká hrana zdi / madlo zábradlí ne
+	var hrana := col.get_position() + smer * float(Pravidla.cti("hrac", "schod_hloubka_min_m"))
+	var q := PhysicsRayQueryParameters3D.create(Vector3(hrana.x, col.get_position().y + 0.3, hrana.z), Vector3(hrana.x, col.get_position().y - 0.05, hrana.z))
+	q.exclude = [get_rid()]; q.collision_mask = collision_mask
+	var h := get_world_3d().direct_space_state.intersect_ray(q)
+	if h.is_empty() or (h["normal"] as Vector3).y < cos(floor_max_angle): return false
+	global_position = ahead.origin + col.get_travel()
+	velocity.x = pred.x; velocity.z = pred.z; velocity.y = 0.0
+	cam.position.y -= rise   # kamera dorovná plynule (lerp v _physics_process) – bez cuknutí
+	return true
 
 
 ## Chytit se žebříku (Havran player.climb): zb {pata, vrchol, nastup, sestup} ve světě; nahore = začít od vrcholu (slézání).

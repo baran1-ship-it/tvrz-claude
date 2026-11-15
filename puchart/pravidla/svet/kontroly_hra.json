@@ -60,5 +60,16 @@
   "vrstvy_pozn_15_11": "audit hlídačů 15. 11.: kolize domů vsi, krčmy, hájovny (Mista) a stodol a plotů (Ves) se přeskakovaly jako stromy – trasy dum_/ven_ nikdy neporovnaly viditelnou síť s kolizí",
   "lod_od_max_m": 1.0,
   "lod_od_max_pozn": "sítě s visibility_range_begin nad tuto mez (střední a vzdálené stupně domů, obaly) se do povrchu nepočítají – zblízka se nekreslí (15. 11.: Dum2_Daleko dával falešné „projde viditelným“)"
+ },
+ "nevylezt": {
+  "popis": "test průchodu nevylezt (test_pruchod.gd _test_nevylezt; č. 330): krok nahoru (hrac.gd _krok_nahoru, hrac.json schod_m) nesmí vynést postavu na zídku, předprseň ani zábradlí. Na vodorovných úsecích tras s předponou z trasy (body po krok_bodu_m) paprsek kolmo k trase ve výšce vyska_paprsku_m (nad nejvyšším krokem) do dosah_m; kde narazí na svislou překážku, postava jde chuze_s proti ní (cíl za ní) – nesmí vystoupat víc než max_stoupani_m. Zkoušek musí být aspoň min_zkousek.",
+  "trasy": ["A_ochoz", "A_vezicka_ochoz_palac", "B_ochoz_vez", "pavlac_krcma", "A_vezicka"],
+  "krok_bodu_m": 1.5,
+  "vyska_paprsku_m": 0.6,
+  "dosah_m": 1.2,
+  "chuze_s": 2.5,
+  "max_stoupani_m": 0.05,
+  "min_zkousek": 6,
+  "zdroj": "zadání 15. 11. (č. 315: „postava nesmí vyskakovat na hrany zdí a zábradlí“); předprseň ochozu blender/hrady.py (zeď do pasu), zábradlí pavlače krčmy (č. 313)"
  }
 }

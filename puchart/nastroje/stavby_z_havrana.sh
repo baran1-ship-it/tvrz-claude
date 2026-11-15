@@ -11,6 +11,8 @@ sed "s#const OUT := .*#const OUT := \"$K/hra/modely/stavby_h/\"#" $K/nastroje/ha
 cd $R; git fetch -q origin claude/new-session-0dtk58 || true
 for f in $(git ls-tree -r --name-only $B data | grep -E "^data/(z_(ves|mlyn|rostliny)|p_(stodola|stodola_mala|kolna|kurnik)|tex_predmety)-"); do git show $B:$f >> $T/$(basename $(basename $f .000) .001); done   # balík po částech .000/.001 = spojit (z_rostliny: jabloň); p_stodola, p_stodola_mala, p_kolna, p_kurnik = hospodářské stavby usedlostí (+ tex_predmety: sdílené textury předmětů, bez nich se model nenačte)
 (cd $T && timeout 1200 $G --headless --path . -s ex.gd -- $T/*.pck 2>&1 | grep -E "^STAVBA|^CHYBI")
+# originál domů pro úpravy modelu (okap nad vchody, blender/okap_vstupu.py níže) – úprava jde vždy z něj, opakovaně nic nezdvojí
+mkdir -p $K/build/zdroj_celky && cp $K/hra/modely/stavby_h/domy.glb $K/build/zdroj_celky/domy.glb
 # kovárna (Míša 14. 11., Disk „budovy“ kovarna.zip – model Odkazu Havrana; docs/reference/kovarna/NAVOD_KOVARNA.md): glb + LOD1
 KOV=$(python3 -c "import json;print(json.load(open('$K/pravidla/svet/mista.json'))['modely']['hospodarske']['kovarna_disk_id'])")
 mkdir -p $K/build/zdroj_celky
@@ -28,4 +30,9 @@ python3 -c "import json;D=json.load(open('$K/pravidla/svet/mista.json'))['modely
 done
 # úpravy částí modelů (mista.json upravy_modelu: přístřešek kovárny, předměty před hájovnou) z originálu v build/zdroj_celky
 /opt/bl/bin/python $K/blender/upravy_casti.py -- $K
+# zvednutý okap („obočí“) nad vchody domů s nízkým okapem (mista.json okapy_vstupu, docs/chyby.md 314 – Dum2 1,69 m) přímo
+# v glb (zachová kolize OMI_physics), pak střední stupeň domů z upraveného modelu (mista.json lod_stredni) – jinak by
+# vývoz z Havrana nahoře vrátil starý domy_stredni.glb
+python3 $K/blender/okap_vstupu.py $K
+/opt/bl/bin/python $K/blender/stredni_lod.py -- $K
 rm -rf $T; ls -la $K/hra/modely/stavby_h/

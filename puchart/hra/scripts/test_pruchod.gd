@@ -22,7 +22,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 			trasy.merge(JSON.parse_string(FileAccess.get_file_as_string("res://data/" + f))["trasy"])
 	jmena = trasy.keys()
 	if OS.get_environment("PUCHART_JEN") != "": jmena = []   # ladění: jen vybrané testy (_konec), bez tras
-	if OS.get_environment("PUCHART_TRASA") != "": jmena = [OS.get_environment("PUCHART_TRASA")]   # ladění: jen jedna trasa
+	if OS.get_environment("PUCHART_TRASA") != "": jmena = Array(OS.get_environment("PUCHART_TRASA").split(",", false))   # ladění: jen vybrané trasy (a,b,…)
 	hrac.set_physics_process(true)
 	var clm := CanvasLayer.new(); add_child(clm); var dvm: Node = load("res://scripts/dvere.gd").new(); clm.add_child(dvm); dvm.zacni(hlavni, clm, true)   # padací mosty mají kolizi jen z dvere.gd (bez ní trasy přes most padaly, 12. 11.); křídla dveří zkouší test vrat
 	_start_trasy()
@@ -355,7 +355,11 @@ func _test_zebriky() -> void:
 		var pata_pos: Vector3 = Z.mista_pouziti(zb)[0]["pos"]
 		var stena := false   # paprsek musí v některém směru najít stěnu – jinak kontrola neproběhla (CHYBA, ne tiché přeskočení)
 		for sm: Vector3 in [Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1), Vector3(0, 0, -1)]:
-			var q := PhysicsRayQueryParameters3D.create(pata_pos, pata_pos + sm * 3.0); var hh := hrac.get_world_3d().direct_space_state.intersect_ray(q)
+			var q := PhysicsRayQueryParameters3D.create(pata_pos, pata_pos + sm * 3.0)
+			var ex_zb: Array[RID] = [hrac.get_rid()]
+			if zb.get("telo") != null: ex_zb.append((zb["telo"] as CollisionObject3D).get_rid())   # kolize samotného žebříku (č. 316) není vnější stěna
+			q.exclude = ex_zb
+			var hh := hrac.get_world_3d().direct_space_state.intersect_ray(q)
 			if hh.is_empty(): continue
 			stena = true; zvenku_n += 1
 			var venku: Vector3 = (hh["position"] as Vector3) + sm * 0.7
@@ -389,6 +393,53 @@ func _test_zebriky() -> void:
 	print("PRUCHOD zebrik zvenku přes stěnu zkontrolováno %d z %d" % [zvenku_n, zbs.size()])
 	vysledek["zebrik_lezeni"] = "OK" if spatne.is_empty() and not zbs.is_empty() else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádný žebřík v datech")
 	print("PRUCHOD zebrik_lezeni ", vysledek["zebrik_lezeni"])
+
+
+## nevylezt (č. 330; zadání 15. 11. k č. 315: krok nahoru „nesmí vyskakovat na hrany zdí a zábradlí“): na vodorovných úsecích
+## tras ochozů a pavlače (kontroly_hra.json nevylezt) postava jde kolmo proti předprsni / zábradlí / zdi – nesmí vystoupat.
+func _test_nevylezt() -> void:
+	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/kontroly_hra.json"))["nevylezt"]
+	var space := hrac.get_world_3d().direct_space_state
+	var spatne: Array = []; var zk := 0; var horsi := 0.0
+	for jm in trasy:
+		if not (cfg["trasy"] as Array).any(func(pr_): return String(jm).begins_with(pr_)): continue
+		var body: Array = trasy[jm]
+		for i in body.size() - 1:
+			var a: Array = body[i]; var b: Array = body[i + 1]
+			if a[2] == null or b[2] == null or absf(float(a[2]) - float(b[2])) > 0.05: continue   # jen vodorovné úseky (ne schody)
+			var pa := Vector3(a[0], float(a[2]), a[1]); var pb := Vector3(b[0], float(b[2]), b[1])
+			var L := Vector2(pb.x - pa.x, pb.z - pa.z).length()
+			if L < 1.0: continue
+			var t := Vector3(pb.x - pa.x, 0, pb.z - pa.z).normalized(); var kolmo := Vector3(-t.z, 0, t.x)
+			var nb := maxi(1, int(L / float(cfg["krok_bodu_m"])))
+			for k in nb:
+				var p := pa.lerp(pb, (k + 0.5) / nb)
+				hlavni.svet.kolize_ihned(p)
+				var qd := PhysicsRayQueryParameters3D.create(p + Vector3(0, 1.0, 0), p - Vector3(0, 1.0, 0)); qd.exclude = [hrac.get_rid()]
+				var hd := space.intersect_ray(qd)
+				if hd.is_empty(): continue
+				var pod: Vector3 = hd["position"]
+				for sm: Vector3 in [kolmo, -kolmo]:
+					var z0 := pod + Vector3(0, float(cfg["vyska_paprsku_m"]), 0)
+					var qs := PhysicsRayQueryParameters3D.create(z0, z0 + sm * float(cfg["dosah_m"])); qs.exclude = [hrac.get_rid()]
+					var hs := space.intersect_ray(qs)
+					if hs.is_empty() or absf((hs["normal"] as Vector3).y) > 0.5: continue   # bez svislé překážky (otevřený okraj) – nezkouší se (spadl by)
+					hrac.autopilot = Vector3.INF; hrac.velocity = Vector3.ZERO; hrac.position = pod + Vector3(0, 0.05, 0)
+					for f_ in 20: await get_tree().physics_frame
+					if not hrac.is_on_floor(): continue
+					var y0 := hrac.position.y; var ymax := y0
+					var cil: Vector3 = (hs["position"] as Vector3) + sm * 1.0
+					hrac.autopilot = Vector3(cil.x, 0, cil.z)
+					for f_ in int(float(cfg["chuze_s"]) * Engine.physics_ticks_per_second):
+						await get_tree().physics_frame
+						ymax = maxf(ymax, hrac.position.y)
+					hrac.autopilot = Vector3.INF
+					zk += 1; horsi = maxf(horsi, ymax - y0)
+					if ymax - y0 > float(cfg["max_stoupani_m"]):
+						spatne.append("%s [%.2f, %.2f] proti %s vystoupala o %.2f m" % [jm, p.x, p.z, (hs["collider"] as Node).get_parent().name + "/" + (hs["collider"] as Node).name, ymax - y0])
+	hrac.velocity = Vector3.ZERO
+	vysledek["nevylezt"] = "OK" if spatne.is_empty() and zk >= int(cfg["min_zkousek"]) else "CHYBA: zkoušek %d; %s" % [zk, "; ".join(spatne.slice(0, 12)) if not spatne.is_empty() else "málo zkoušek"]
+	print("PRUCHOD nevylezt ", vysledek["nevylezt"], " (zkoušek %d, nejvíc stoupla %.2f m)" % [zk, horsi])
 
 ## lavice_sezeni (Míša 15. 11.: „u modelů domů jsou někdy součástí modelu lavičky, tak ať jsou taky funkční“): pro každé místo
 ## k sezení z hlavni.lavice (lavice.gd z kolizí modelů) hráč stojí před lavicí, dívá se na místo – nabídka „Sednout si“ musí být
@@ -699,6 +750,7 @@ func _konec() -> void:
 	if jen == "" or "povrch" in jen: await _test_povrch()
 	if jen == "" or "vrata" in jen: await _test_vrata()
 	if jen == "" or "mapa" in jen: await _test_mapa()
+	if jen == "" or "nevylezt" in jen: await _test_nevylezt()
 	if jen == "" or "zebrik" in jen: await _test_zebriky()
 	if jen == "" or "lavice" in jen: await _test_lavice()
 	if jen == "" or "mech" in jen: await _test_mech()
@@ -729,7 +781,7 @@ func _pod_stavbou(q: Vector3) -> bool:   # bod uvnitř půdorysu zdiva (kolizní
 func _sonda() -> void:   # DOCASNE: profil kolize podél tras dveří bez ramp
 	var space := hrac.get_world_3d().direct_space_state
 	for jm in trasy:
-		if not (String(jm).begins_with("dum_") or String(jm).begins_with("pavlac") or String(jm).begins_with("puda_")): continue
+		if not (String(jm) in ["dum_krcma_KrcmaL", "dum_hajovna_Hajovna", "pavlac_krcma_KrcmaL", "puda_hajovna_Hajovna", "dum_predhradi_Dum1_3"]): continue
 		var body: Array = trasy[jm]
 		var a := Vector3(body[0][0], 0, body[0][1]); var b := Vector3(body[-1][0], 0, body[-1][1])
 		if String(jm).begins_with("dum_"): a = a + (a - b).normalized() * 1.5
@@ -741,8 +793,10 @@ func _sonda() -> void:   # DOCASNE: profil kolize podél tras dveří bez ramp
 		for k in n + 1:
 			var p := a.lerp(b, float(k) / n)
 			var yt: float = hlavni.svet.vyska(p.x, p.z)
-			var top := 40.0 if String(jm).begins_with("dum_") else -28.0
-			var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, yt + 3.0 if String(jm).begins_with("dum_") else top, p.z), Vector3(p.x, yt - 2.0 if String(jm).begins_with("dum_") else -40.0, p.z))
+			var top := 0.0
+			for bb in body: top = maxf(top, float(bb[2]) if bb[2] != null else -999.0)
+			top += 1.2
+			var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, yt + 1.2 if String(jm).begins_with("dum_") else top, p.z), Vector3(p.x, yt - 2.0 if String(jm).begins_with("dum_") else -40.0, p.z))
 			var ex: Array[RID] = [hrac.get_rid()]; q.exclude = ex
 			var h := space.intersect_ray(q)
 			while not h.is_empty() and (String((h["collider"] as Node).name) in ["RampyDveri", "Najezdy"]):
