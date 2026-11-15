@@ -8642,6 +8642,27 @@ func _postavy_modif() -> void:
 				n[2] += 1 if la.active else 0
 		for k in 3:
 			nejvic[k] = maxi(nejvic[k], n[k])
+	# 15. 11.: ve dne ve vsi (hostinec v noci = nikdo v zaberu, strop by se neoveril): strop kroku a odpojene kostry
+	if main.day:
+		main.day.set_hour(11.0, 0.0)
+	await main.fast_travel(Vector3(421.0, 0.0, 869.0), Vector3(421.0, 1.6, 900.0), 0.0, "test")
+	var kroku_ves := 0
+	var odl0 := int(li.get("anim_odlozeno"))
+	var kroku_sum := 0
+	for i in 240:
+		var k1 := int(li.get("anim_kroku"))
+		await get_tree().process_frame
+		kroku_ves = maxi(kroku_ves, int(li.get("anim_kroku")) - k1)
+		kroku_sum += int(li.get("anim_kroku")) - k1
+		odpoj_max = maxi(odpoj_max, int(li.get("modif_odpojeno")))
+		for c: Dictionary in li.get("_lide"):
+			if c.has("modif_pryc"):
+				for md: Node in c["modif_pryc"]:
+					if (md as SkeletonModifier3D).active and chyby_k.size() < 5:
+						chyby_k.append("%s: odpojeny %s zapnuty" % [c["id"], md.name])
+	kroku_max = maxi(kroku_max, kroku_ves)
+	print("POSTAVY_MODIF ves: kroku animace za snimek max %d, prumer %.1f, odlozeno %d, odpojenych koster %d" % [kroku_ves, kroku_sum / 240.0,
+			int(li.get("anim_odlozeno")) - odl0, int(li.get("modif_odpojeno"))])
 	var ok: bool = nejvic[0] <= int(mm["sukne"]) and nejvic[1] <= int(mm["sukne"]) and nejvic[2] <= 2 * int(mm["hlava"])
 	ok = ok and chyby_k.is_empty() and (strop <= 0 or kroku_max <= strop)
 	if bool(Pravidla.cti("postavy", "modif_odpojit")["zapnuto"]) and odpoj_max == 0:
