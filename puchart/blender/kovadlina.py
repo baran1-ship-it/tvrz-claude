@@ -606,7 +606,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
     trh = []
     for k in range(11):
         t = 2 * math.pi * k / 11 + RNG.uniform(-0.2, 0.2)
-        trh.append((t, RNG.uniform(0.10, 0.36), RNG.uniform(0.003, 0.0075), RNG.uniform(0.06, 0.30), RNG.uniform(0, 6)))
+        trh.append((t, RNG.uniform(0.10, 0.36), RNG.uniform(0.004, 0.011), RNG.uniform(0.06, 0.30), RNG.uniform(0, 6)))
     # --- čelo
     u0, v0, w, m = DISK
     x = (uu - u0) / w * m - m / 2; y = (vv - v0) / w * m - m / 2
@@ -622,7 +622,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
     pozdni = np.clip((fr - 0.55) / 0.2, 0, 1) * np.clip((1.0 - fr) / 0.1, 0, 1)
     jarni_p = np.clip(1 - np.abs(fr - 0.05) / 0.06, 0, 1)          # póry jarního dřeva (dub – kruhovitě pórovitý)
     zakl = np.stack([0.33 + 0.0 * r, 0.255 + 0.0 * r, 0.185 + 0.0 * r], -1)
-    pozd_c = np.array([0.285, 0.218, 0.160])
+    pozd_c = np.array([0.255, 0.192, 0.140])
     col = zakl * (1 - pozdni[..., None]) + pozd_c * pozdni[..., None]
     col *= (1 - 0.25 * jarni_p * (sumC > 0.45))[..., None]
     # dřeňové paprsky (dub): tenké světlé radiální čárky
@@ -643,7 +643,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
     dk = np.hypot(ddx, ddy)
     saze = np.clip(1 - dk / 0.22, 0, 1) ** 1.5
     col *= (1 - 0.35 * saze)[..., None]
-    okuje = (RNG.random((W, W)) < (0.004 + 0.05 * saze)) & disk
+    okuje = (RNG.random((W, W)) < (0.0004 + 0.02 * saze ** 2)) & disk
     from_ = okuje.copy()
     for sh in ((0, 1), (1, 0), (1, 1)):
         from_ |= np.roll(okuje, sh, (0, 1)) & (RNG.random((W, W)) < 0.6)
@@ -675,7 +675,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
         sir_r = 0.0035 * np.clip(1 - r / 0.07, 0, 1)
         tr_m = np.maximum(tr_m, np.clip(1 - prc / np.maximum(sir_r, 1e-5), 0, 1))
     col = col * (1 - 0.88 * tr_m[..., None])
-    vys = vys + 0.08 * pozdni - 0.04 * jarni_p - 0.55 * tr_m + 0.06 * (sumB - 0.5)
+    vys = vys + 0.12 * pozdni - 0.05 * jarni_p - 0.55 * tr_m + 0.06 * (sumB - 0.5)
     rgb = np.where(disk[..., None], col, rgb)
     vys_all = np.where(disk, vys, 0.5)
     # --- boky (násobič barvy rough_wood)

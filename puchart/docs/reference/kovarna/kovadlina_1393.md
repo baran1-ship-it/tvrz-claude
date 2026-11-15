@@ -23,15 +23,20 @@ byla běžnější špalková bez rohu. Tvar podle KCD2 na výslovné přání M
 
 ## Rozměry (Godot: Y nahoru, dráha a roh podél +X, počátek na zemi uprostřed špalku)
 - Špalek: Ø ~0,96 m (nepravidelný kmen), výška 0,42 m, zaoblená horní hrana, železný pásek 0,07 m pod vrchem, 7 hřebů.
-- Kovadlina: dráha 0,78 m nad zemí, šířka dráhy 0,14 m, délka 0,86 m (patka 0,17 + dráha + roh 0,33), pata 0,46 × 0,31 m,
+- Kovadlina: dráha 0,78 m nad zemí, šířka dráhy 0,14 m, celková délka ~1,02 m (x −0,44 … +0,58: patka 0,17 + dráha 0,52 + roh 0,33), pata 0,46 × 0,31 m,
   pas 0,22 × 0,12 m; v patce hranatý otvor pro sperhák 26 mm a kulatý průbojník Ø 17 mm; 4 kramle přes patky.
 - Sperhák: x −0,37, z +0,16 (před kovadlinou), 0,33 m nad špalkem.
 
 ## Stupně a textury
 | Stupeň | Trojúhelníky | Materiály / textury |
 |---|---|---|
-| podrobný | viz `build/kovadlina/stat.json` (cíl ≤ 20 tis.) | `kovadlina_zelezo` + `kovadlina_drevo`, každý albedo + normal + ORM 2048 px (3 vzorkovače na materiál) |
-| střední `_stredni` | ~2,8 tis. | barva vrcholů (predmety.gd) + textury 512 |
-| daleko `_daleko` | ~460 | barva vrcholů + textury 256, bez pásku a kramlí |
+| podrobný | 15 340 | `kovadlina_zelezo` + `kovadlina_drevo`, každý albedo + normal + ORM 2048 px (3 vzorkovače na materiál) |
+| střední `_stredni` | 2 812 | barva vrcholů (predmety.gd) + textury 512 |
+| daleko `_daleko` | 461 | barva vrcholů + textury 256, bez pásku a kramlí |
 
 Kolize: jeden uzel `Kovadlina_1393_kolize-convcolonly` (konvexní obal špalku, kovadliny a sperháku, 82 troj.).
+
+## Srovnání s KCD2 (docs/screens/kovadlina_1393_srovnani_kcd2.png) – co ještě zbývá
+- Tvar sedí: jeden kónický roh, pas, patka s otvory, sperhák, světlá vyleštěná dráha × tmavé boky s rzí.
+- KCD2 má mohutnější svislé tělo (pas širší) a nižší, plošší špalek s kamenitě rozpraskaným povrchem;
+  náš špalek je vyšší (0,42 m dle zadání 0,4–0,5) a má pásek (KCD1). Úprava = čísla v kovadlina_1393.json a znovu postavit.
