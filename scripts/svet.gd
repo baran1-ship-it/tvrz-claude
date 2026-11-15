@@ -8985,8 +8985,8 @@ func _cesty_kameny() -> void:
 					continue
 				# Misa 14. 11. (test rostliny_v_budovach: kaminek v sini hostince a chalupy u vetrneho mlyna - cesta konci
 				# u vchodu): jedno misto pravidla uzivani (vnitrek staveb, mistnosti, pruchody, zahony)
-				if not uzivani_smi("kamen_maly", q.x, q.y):
-					continue
+				if not uzivani_smi("kamen_maly", q.x, q.y) or kosena_louka(q.x, q.y):
+					continue                        # 15. 11. test stanoviste: kameni ne v kosene louce (557 u cest)
 				# krajnice jen pod sirym nebem: ne na mostovce ani pod strechou (kryti shora 1; Misa 5. 11. most, test most)
 				var kc := Vector2i(floori(q.x / 32.0), floori(q.y / 32.0))
 				if kryti_tab.has(kc) and int(kryti_tab[kc][clampi(floori((q.y - kc.y * 32.0) / 0.5), 0, 63) * 64 + clampi(floori((q.x - kc.x * 32.0) / 0.5), 0, 63)]) == 1:
