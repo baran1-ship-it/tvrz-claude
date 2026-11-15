@@ -224,7 +224,7 @@ def kovadlina_high():
     bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.0085, depth=0.14, location=(x_tela_l - pd * 0.22, 0, F - 0.05))
     rez.append(bpy.context.object)
     # otlučené hrany dráhy a patky (koule na obvodu dráhy, víc u konců – tam se kove nejvíc)
-    for i in range(16):
+    for i in range(KV.get("otluky", 16)):
         strana = random.choice((-1, 1))
         x = random.uniform(x_tela_l - pd + 0.01, x_tela_p - 0.01)
         if random.random() < 0.35:
@@ -537,7 +537,7 @@ def mat_zelezo_autorsky():
     xyz = U.u("ShaderNodeSeparateXYZ"); U.ln(geo.outputs["Position"], xyz.inputs[0])
     nxyz = U.u("ShaderNodeSeparateXYZ"); U.ln(geo.outputs["Normal"], nxyz.inputs[0])
     tc = U.u("ShaderNodeTexCoord")
-    mp = U.u("ShaderNodeMapping"); mp.inputs["Scale"].default_value = (2.3, 2.3, 2.3); mp.inputs["Rotation"].default_value = (0.43, 0.71, 0.29)   # pootočeno – bez mřížky skvrn podél os; U.ln(tc.outputs["Object"], mp.inputs[0])
+    mp = U.u("ShaderNodeMapping"); mp.inputs["Scale"].default_value = (2.3, 2.3, 2.3); mp.inputs["Rotation"].default_value = (0.43, 0.71, 0.29); U.ln(tc.outputs["Object"], mp.inputs[0])   # pootočeno – bez mřížky skvrn podél os (2. kolo mělo vazbu omylem v komentáři – rez byla jednolitá)
     rD = U.obr(img("rust_coarse_01_Diffuse"), mp.outputs[0], box=True)
     rH = U.obr(img("rust_coarse_01_Displacement", False), mp.outputs[0], box=True)
     rR = U.obr(img("rust_coarse_01_Rough", False), mp.outputs[0], box=True)
@@ -573,7 +573,10 @@ def mat_zelezo_autorsky():
     # barvy
     BV = KV["barvy_srgb"]                                   # 2. kolo: hnědé okuje a rez jako KCD2 (1. kolo téměř černé)
     okuje = U.mix(0.38, tuple(BV["okuje"]), rD.outputs[0])
-    okuje = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.5), okuje, tuple(c * 0.7 for c in BV["okuje"]))
+    zr = U.u("ShaderNodeTexNoise"); zr.inputs["Scale"].default_value = 170.0; zr.inputs["Detail"].default_value = 2.0
+    U.ln(geo.outputs["Position"], zr.inputs["Vector"])                      # 3. kolo: jemné zrno okují (KCD2), ne velké skvrny
+    okuje = U.mix(U.math("MULTIPLY", U.mr(zr.outputs["Fac"], 0.42, 0.62), 0.55), okuje, tuple(c * 0.6 for c in BV["okuje"]))
+    okuje = U.mix(U.math("MULTIPLY", U.mr(zr.outputs["Fac"], 0.62, 0.7), 0.4), okuje, tuple(min(1.0, c * 1.45) for c in BV["okuje"]))
     rez_b = U.mix(0.5, rD.outputs[0], tuple(BV["rez"]))
     skr = U.u("ShaderNodeMapping"); skr.inputs["Scale"].default_value = (3.0, 160.0, 3.0); U.ln(geo.outputs["Position"], skr.inputs[0])
     skr_n = U.u("ShaderNodeTexNoise"); skr_n.inputs["Scale"].default_value = 1.6; skr_n.inputs["Detail"].default_value = 3.0
@@ -581,7 +584,10 @@ def mat_zelezo_autorsky():
     skrab = U.mr(skr_n.outputs["Fac"], 0.56, 0.68)
     jamky = U.mr(rH.outputs[0], 0.38, 0.2)
     skvrny = U.mr(sum1.outputs["Fac"], 0.42, 0.62)
+    PS = BV["draha_pas"]                                     # 3. kolo: lesk jen v úzkém pruhu uprostřed dráhy (tam se kove)
+    pas_d = U.math("MULTIPLY", lesk, U.mr(U.math("ABSOLUTE", xyz.outputs[1]), PS["sirka_m"] / 2 + 0.012, PS["sirka_m"] / 2 - 0.008))
     lesk_b = U.mix(U.math("MULTIPLY", skrab, 0.4), tuple(BV["draha"][0]), tuple(BV["draha"][1]))
+    lesk_b = U.mix(U.math("MULTIPLY", pas_d, 0.8), lesk_b, tuple(PS["albedo"]))
     lesk_b = U.mix(U.math("MULTIPLY", skvrny, 0.3), lesk_b, (0.36, 0.34, 0.31))
     lesk_b = U.mix(U.math("MULTIPLY", jamky, 0.6), lesk_b, (0.17, 0.16, 0.15))
     hrana_b = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.4), tuple(BV["hrana"][0]), tuple(BV["hrana"][1]))
@@ -596,6 +602,7 @@ def mat_zelezo_autorsky():
     d0, d1 = KV["barvy_srgb"]["draha_drsnost"]
     dr = U.mix(lesk, dr, U.math("ADD", U.math("ADD", d0, U.math("MULTIPLY", skrab, d1 - d0)),
                                 U.math("ADD", U.math("MULTIPLY", jamky, 0.3), U.math("MULTIPLY", skvrny, 0.12))))
+    dr = U.mix(U.math("MULTIPLY", pas_d, 0.85), dr, PS["drsnost"])
     kov = U.mix(rez, 0.15, 0.0)
     kov = U.mix(opotr, kov, 0.6)
     kov = U.mix(lesk, kov, U.math("SUBTRACT", KV["barvy_srgb"]["draha_kov"], U.math("MULTIPLY", jamky, 0.2)))
@@ -658,10 +665,11 @@ def textura_dreva(anvil_rect, sperhak_xy):
     fr = roky - np.floor(roky)
     pozdni = np.clip((fr - 0.55) / 0.2, 0, 1) * np.clip((1.0 - fr) / 0.1, 0, 1)
     jarni_p = np.clip(1 - np.abs(fr - 0.05) / 0.06, 0, 1)          # póry jarního dřeva (dub – kruhovitě pórovitý)
-    zakl = np.stack([0.40 + 0.0 * r, 0.345 + 0.0 * r, 0.28 + 0.0 * r], -1)   # 2. kolo: šedohnědé, letokruhy tlumené (KCD2)
-    pozd_c = np.array([0.345, 0.29, 0.23])
-    col = zakl * (1 - 0.5 * pozdni[..., None]) + pozd_c * 0.5 * pozdni[..., None]   # letokruhy tlumené (KCD2 je nemá vidět)
-    col *= (1 - 0.08 * jarni_p * (sumC > 0.45))[..., None]
+    # 3. kolo (KCD2): tmavý ohlazený dub, začouzený (hodnoty lineární – obrázek sRGB: 0,075 ≈ sRGB 0,30)
+    zakl = np.stack([0.075 + 0.0 * r, 0.056 + 0.0 * r, 0.041 + 0.0 * r], -1)
+    pozd_c = np.array([0.042, 0.030, 0.021])
+    col = zakl * (1 - pozdni[..., None]) + pozd_c * pozdni[..., None]
+    col *= (1 - 0.25 * jarni_p * (sumC > 0.45))[..., None]
     # dřeňové paprsky (dub): tenké světlé radiální čárky
     b = (fi / (2 * np.pi) + 0.5) * 900
     bi = np.floor(b).astype(int) % 900
@@ -671,16 +679,16 @@ def textura_dreva(anvil_rect, sperhak_xy):
     col = np.where(pap[..., None], col * 1.22 + 0.02, col)
     # běl a obvod (zešedlé, ohlazené)
     bel = np.clip((r - (rmax - 0.045)) / 0.02, 0, 1)
-    col = col * (1 - bel[..., None] * 0.4) + np.array([0.36, 0.33, 0.29]) * bel[..., None] * 0.4
+    col = col * (1 - bel[..., None] * 0.3) + np.array([0.085, 0.072, 0.060]) * bel[..., None] * 0.3
     # stáří, saze, špína (KCD2: tmavé, ohlazené)
     col *= (0.72 + 0.30 * sumA + 0.12 * sumB)[..., None]
     # kolem kovadliny: saze, okuje (černé šupinky), spáleniny od žhavého železa
     ax0, ax1, ay = anvil_rect
     ddx = np.maximum(np.maximum(ax0 - x, x - ax1), 0); ddy = np.maximum(np.abs(y) - ay, 0)
     dk = np.hypot(ddx, ddy)
-    saze = np.clip(1 - dk / 0.22, 0, 1) ** 1.5
-    col *= (1 - 0.35 * saze)[..., None]
-    okuje = (RNG.random((W, W)) < (0.0004 + 0.02 * saze ** 2)) & disk
+    saze = np.clip(1 - dk / 0.30, 0, 1) ** 1.3
+    col *= (1 - 0.6 * saze)[..., None]
+    okuje = (RNG.random((W, W)) < (0.0008 + 0.035 * saze ** 2)) & disk
     from_ = okuje.copy()
     for sh in ((0, 1), (1, 0), (1, 1)):
         from_ |= np.roll(okuje, sh, (0, 1)) & (RNG.random((W, W)) < 0.6)
@@ -722,7 +730,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
         sel = (uu >= bu0 - 0.002) & (uu <= bu0 + T_UV + 0.002) & (vv >= bv0 - 0.002) & (vv <= bv0 + T_UV + 0.002)
         tdl = (k + (uu - bu0) / T_UV) * 2 * np.pi / DLAZD
         s = (vv - bv0) / T_UV * 0.5
-        mul = (0.62 + 0.22 * sumA + 0.1 * sumB)
+        mul = (0.62 + 0.22 * sumA + 0.1 * sumB) * 0.45                       # 3. kolo: tmavé (saze, stáří)
         mul = mul * (1 - 0.35 * np.clip((s - (S_BOK - 0.10)) / 0.08, 0, 1))      # saze u horní hrany
         mul = mul * (1 - 0.25 * np.clip((0.06 - s) / 0.06, 0, 1))               # hlína a vlhko dole
         trm = np.zeros((W, W))
@@ -763,13 +771,13 @@ def mat_drevo_autorsky(prekryv, vyska):
     ao = U.u("ShaderNodeAmbientOcclusion", samples=16, only_local=False); ao.inputs["Distance"].default_value = 0.12
     bok = U.mix(1.0, wD.outputs[0], pr.outputs[0], "MULTIPLY")
     bok = U.mix(0.35, bok, (0.30, 0.27, 0.24), "SATURATION")
-    bok = U.mix(0.3, bok, (0.44, 0.40, 0.35))                # šedohnědý, ohlazený (KCD2)
+    bok = U.mix(0.3, bok, (0.17, 0.14, 0.11))                # 3. kolo: tmavě hnědý až černošedý (saze, KCD2)
     alb = U.mix(celo, bok, pr.outputs[0])
     alb = U.mix(U.math("SUBTRACT", 1.0, U.math("ADD", 0.5, U.math("MULTIPLY", ao.outputs["AO"], 0.5))), alb, (0, 0, 0))
     ao2 = U.u("ShaderNodeAmbientOcclusion", samples=16, only_local=True); ao2.inputs["Distance"].default_value = 0.012
     alb = U.mix(U.math("SUBTRACT", 1.0, ao2.outputs["AO"]), alb, (0.03, 0.025, 0.02))   # rýhy trhlin (high-poly) tmavé
     nep = U.u("ShaderNodeTexNoise"); nep.inputs["Scale"].default_value = 60.0; nep.inputs["Detail"].default_value = 6.0
-    alb = U.mix(U.math("MULTIPLY", U.mr(nep.outputs["Fac"], 0.45, 0.7), 0.35), alb, (0.55, 0.50, 0.44))   # drolivé světlé šupinky
+    alb = U.mix(U.math("MULTIPLY", U.mr(nep.outputs["Fac"], 0.55, 0.7), 0.25), alb, (0.32, 0.28, 0.23))   # ohlazené světlejší plošky dřeva
     dr = U.mix(celo, U.math("ADD", 0.25, U.math("MULTIPLY", wR.outputs[0], 0.75)), U.math("ADD", 0.58, U.math("MULTIPLY", vy.outputs[0], 0.25)))
     nm = U.u("ShaderNodeNormalMap", uv_map="tex"); nm.inputs["Strength"].default_value = 1.0; U.ln(wN.outputs[0], nm.inputs["Color"])
     bump = U.u("ShaderNodeBump"); bump.inputs["Distance"].default_value = 0.004; bump.inputs["Strength"].default_value = 1.0

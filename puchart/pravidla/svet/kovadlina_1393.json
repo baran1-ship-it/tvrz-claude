@@ -21,7 +21,7 @@
    "hrbolky_vlna_m": 0.035,
    "obrys_m": 0.005
   },
-  "zdroj": "KCD2 kcd2_kovadlina_misa_15_11.jpg (2. kolo, Míša 15. 11.: „špalek nižší a širší, drsný, kamenitě rozpraskaný povrch, bez pásku“): špalek ~1,1 m průměr, ~0,3 m vysoký (odměřeno z KCD2: výška špalku : délka kovadliny ≈ 0,3), zaoblená otlučená hrana, povrch hrubý jako kámen s rozpraskanou sítí trhlin (voronoi F2−F1 v high-poly → zapečená normála), šedohnědý; pásek (KCD1) vynechán – pasek false"
+  "zdroj": "KCD2 kcd2_kovadlina_misa_15_11.jpg (2. kolo, Míša 15. 11.: „špalek nižší a širší, drsný, kamenitě rozpraskaný povrch, bez pásku“): špalek ~1,1 m průměr, ~0,3 m vysoký (odměřeno z KCD2: výška špalku : délka kovadliny ≈ 0,3), zaoblená otlučená hrana, povrch hrubý jako kámen s rozpraskanou sítí trhlin (voronoi F2−F1 v high-poly → zapečená normála), šedohnědý; pásek (KCD1) vynechán – pasek false; 3. kolo (Míša 15. 11.: „špalek působí jako světlý kámen“): tmavé ohlazené dubové dřevo – tmavohnědé až černošedé od sazí a okují, letokruhy na čele, okolí kovadliny začouzené se šupinkami okují (barvy čela v kódu jsou lineární: 2. kolo 0,40 lineárně = sRGB 0,67, proto světlé)"
  },
  "kovadlina": {
   "drah_vyska_nad_zemi_m": 0.78,
@@ -44,20 +44,20 @@
   "barvy_srgb": {
    "draha": [
     [
-     0.6,
-     0.59,
-     0.57
+     0.4,
+     0.39,
+     0.37
     ],
     [
-     0.7,
-     0.69,
-     0.67
+     0.46,
+     0.45,
+     0.43
     ]
    ],
-   "draha_kov": 0.32,
+   "draha_kov": 0.3,
    "draha_drsnost": [
-    0.36,
-    0.5
+    0.5,
+    0.62
    ],
    "okuje": [
     0.23,
@@ -71,20 +71,30 @@
    ],
    "hrana": [
     [
-     0.3,
-     0.28,
-     0.26
+     0.33,
+     0.31,
+     0.29
     ],
     [
-     0.38,
-     0.36,
-     0.34
+     0.41,
+     0.39,
+     0.37
     ]
-   ]
+   ],
+   "draha_pas": {
+    "sirka_m": 0.07,
+    "albedo": [
+     0.52,
+     0.51,
+     0.49
+    ],
+    "drsnost": 0.36
+   }
   },
-  "barvy_pozn": "sRGB jako na fotce. Dráha světlá šedá ocel (KCD2), kov jen 0,32 a drsnost 0,36–0,5: s kovem 0,6 a albedem 0,5 (1. kolo) dráha v Godotu zrcadlila modrou oblohu (reflected light ze sky) a vypadala tmavě modrá; boky hnědé okuje a rez (KCD2), 1. kolo bylo téměř černé (medián sRGB 51,32,23); snímek ve hře 15. 11. odpoledne: boky s okujemi 0,27 a rzí 0,40 vycházely na slunci oranžové s mřížkou skvrn (textura rzi podél os) → tmavší hnědé, textura pootočená",
+  "barvy_pozn": "sRGB jako na fotce. Dráha světlá šedá ocel (KCD2), kov jen 0,32 a drsnost 0,36–0,5: s kovem 0,6 a albedem 0,5 (1. kolo) dráha v Godotu zrcadlila modrou oblohu (reflected light ze sky) a vypadala tmavě modrá; boky hnědé okuje a rez (KCD2), 1. kolo bylo téměř černé (medián sRGB 51,32,23); snímek ve hře 15. 11. odpoledne: boky s okujemi 0,27 a rzí 0,40 vycházely na slunci oranžové s mřížkou skvrn (textura rzi podél os) → tmavší hnědé, textura pootočená; 3. kolo (Míša 15. 11.: dráha ve hře přesvícená do bílé): dráha tmavší šedá ocel 0,40–0,46, drsnost 0,5–0,62, lesk (drsnost 0,36, albedo 0,52) jen v pruhu 7 cm uprostřed dráhy, kde se kove; okuje jemné zrno (šum 170/m); 28 otluků hran",
   "kramle": false,
-  "kramle_pozn": "kramle přes patky (1. kolo) vynechány – v KCD2 nejsou a zblízka působily jako drátky; kovadlina drží vahou (~100 kg)"
+  "kramle_pozn": "kramle přes patky (1. kolo) vynechány – v KCD2 nejsou a zblízka působily jako drátky; kovadlina drží vahou (~100 kg)",
+  "otluky": 28
  },
  "sperhak": {
   "poloha_m": [

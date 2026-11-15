@@ -169,7 +169,7 @@ func _pridej(m: Dictionary, n: Node3D) -> void:
 			# = celý hrad; jejím vynecháním by paprsky prošly zdmi a nabídka by šla i přes zeď)
 			if not r.is_empty() and not m.has("koren"): vlastni = [(r["collider"] as CollisionObject3D).get_rid()]
 		ven = _do_mistnosti(zaklad + Vector3.UP * 0.5, vlastni)
-	var o := {"nazev": String(m["nazev"]), "druh": String(m["druh"]), "zaklad": zaklad, "vlastni": vlastni, "uzel": n, "boost": 0.0, "boost_cfg": {},
+	var o := {"nazev": String(m["nazev"]), "druh": String(m["druh"]), "zaklad": zaklad, "ven": ven, "vlastni": vlastni, "uzel": n, "boost": 0.0, "boost_cfg": {},
 		"hori": String(m["hori"]) == "vzdy", "noc": String(m["hori"]) == "noc", "casy": m.get("hodiny", []) if String(m["hori"]) == "casy" else [],
 		"rucne": false, "zap": false,
 		"faze": randf() * 50.0, "sum": 0.0, "sum_cil": 0.0, "sum_t": 0.0, "energie": float(dr["energie"])}
