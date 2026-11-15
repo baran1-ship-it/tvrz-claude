@@ -13613,7 +13613,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
 			var inv_d := (n as Node3D).global_transform.affine_inverse()
 			uvnitr.append([inv_d, bb.grow(-0.1)])
-			var lok_d := {"Krcma_dil": "krcma_l", "Kovarna_dil": "kovarna_ves"}.get(String(n.name), "")
+			var lok_d: String = {"Krcma_dil": "krcma_l", "Kovarna_dil": "kovarna_ves"}.get(String(n.name), "")
 			var kryti_d: Array = Pravidla.cti("lokace", lok_d).get("kryti_lok", []) if lok_d != "" else []
 			if not kryti_d.is_empty():
 				_uvnitr_bez_strechy.append(uvnitr[-1])
