@@ -7,6 +7,7 @@ extends SceneTree
 ## Vystup: modely/reka/reka.res (sit), reka_flow.png (proudeni RG, pena B, sum A), reka_dist.png, reka.json.
 
 const RiverManager := preload("res://addons/waterways/river_manager.gd")
+const Pravidla := preload("res://scripts/pravidla.gd")
 const ACT := Rect2(-245.0, -245.0, 1140.0, 1590.0)
 const ROZLISENI := 1024
 
@@ -67,7 +68,8 @@ func _run() -> void:
 		body.append(Vector3(p.x, kor.hladiny[k], p.y))
 		# voda o kus pres sikmy breh (okraj schova teren); 0,6 m siroka voda v Waterways po vyhlazeni krivky pretekala
 		# pres travu (Misa 0.67, (240,1031)) - 0,35 m, breh drzi koryto.podlaha
-		sirky.append((kor.sirky[k] + 0.35) * 2.0)
+		# presah z voda.json pad_vody.pas_presah_m (okap zaclony padu navazuje na stejnou sirku pasu, scripts/pad_vody.gd)
+		sirky.append((kor.sirky[k] + float(((Pravidla.cti("voda", "potok", "raz_toku")["druhy"] as Array).back() as Dictionary)["schody"]["pad_vody"]["pas_presah_m"])) * 2.0)
 	print("reka: bodu osy ", body.size())
 	var space := root.get_world_3d().direct_space_state
 	var curve := Curve3D.new()

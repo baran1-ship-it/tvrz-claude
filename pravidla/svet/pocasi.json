@@ -106,7 +106,7 @@
    "res://shaders/zdivo.gdshader",
    "res://shaders/textura.gdshader"
   ],
-  "_stavby_shadery": "shadery staveb (res://shaders/...) - mokro slabne uvnitř; ostatní (zem, skály) beze změny. Shadery s uniform mokro zatím Havran nemá (krok 3 převzetí)",
+  "_stavby_shadery": "shadery staveb (res://shaders/...) - mokro slabne uvnitř; ostatní (zem, skály) beze změny. Uniform dest_mokro mají zem, zdivo, textura, skala_detail; 15. 11.: i StandardMaterial3D modelů staveb z Disku (krčma, kovárna, kostel…) – barva × povrch[0], drsnost k povrch[1], slábne uvnitř jako stavby (pocasi.gd _std_mokro)",
   "povrch": [
    0.66,
    0.55,

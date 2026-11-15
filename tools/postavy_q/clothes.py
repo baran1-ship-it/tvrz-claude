@@ -7,6 +7,12 @@ from mathutils import Vector, kdtree
 
 BONES = None
 
+def pravidla_svu():
+    """Pravidla svarů oděvu (pravidla/svet/postavy_vzhled.json svy_odevu, Míša 15. 11. ř. 3 – potrhané oblečení)."""
+    import json, os
+    p = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "pravidla/svet/postavy_vzhled.json")
+    return json.load(open(p))["svy_odevu"]
+
 def body_data(obj):
     import head_features as hf
     co, no = hf.evaluated_coords(obj)
@@ -56,6 +62,10 @@ def shell(obj, co, no, mask, offset, name, smooth=0, subdiv=0, offset_fn=None, s
         except ValueError:
             pass
     bm.free()
+    # 15. 11. (Míša ř. 3, potrhané oblečení): tělo Quaternius je po importu glTF 26 kusů (vrcholy rozdělené na švech UV) ->
+    # slupka byla 23–31 nesvařených kusů, které vyhlazení, posun po normále a decimace rozevřely. Svařit do jedné skořepiny
+    # HNED (před mazáním drobných kusů, vyhlazením a posunem); UV zůstávají po rozích ploch, ostrovy atlasu se nemění.
+    bmesh.ops.remove_doubles(nbm, verts=nbm.verts[:], dist=pravidla_svu()["svar_m"])
     # osamělé kousky (méně než 30 ploch) pryč
     nbm.verts.ensure_lookup_table(); nbm.faces.ensure_lookup_table()
     seen = set(); kill = []
@@ -123,6 +133,108 @@ def transfer_weights(ob, obj, co, k=6, pelvis_blend=None):
         if len(nz) == 0: continue
         g = ob.vertex_groups.new(name=b)
         for i in nz: g.add([int(i)], float(col[i]), 'REPLACE')
+
+def svar(ob, dist=None):
+    """Oděv do jedné skořepiny (pravidlo svy_odevu): vrcholy do dist od sebe se svaří, jejich váhy kostí se předtím
+    zprůměrují (pár švu = stejné váhy, ve hře se nerozevře). Vrací (počet svařených vrcholů, počet kusů po svaru)."""
+    dist = pravidla_svu()["svar_m"] if dist is None else dist
+    me = ob.data; nv = len(me.vertices)
+    if nv == 0: return 0, 0
+    kd = kdtree.KDTree(nv)
+    for v in me.vertices: kd.insert(v.co, v.index)
+    kd.balance()
+    par = list(range(nv))
+    def f(x):
+        while par[x] != x: par[x] = par[par[x]]; x = par[x]
+        return x
+    for v in me.vertices:
+        for (_, j, _) in kd.find_range(v.co, dist):
+            a, b = f(v.index), f(j)
+            if a != b: par[a] = b
+    sk = {}
+    for i in range(nv): sk.setdefault(f(i), []).append(i)
+    skup = [s for s in sk.values() if len(s) > 1]
+    if skup:
+        ng = len(ob.vertex_groups)
+        Wm = np.zeros((nv, ng))
+        for v in me.vertices:
+            for g in v.groups:
+                if g.group < ng: Wm[v.index, g.group] = g.weight
+        for s in skup:
+            m = Wm[s].mean(0)
+            for i in s:
+                for gi in range(ng):
+                    if m[gi] > 0: ob.vertex_groups[gi].add([i], float(m[gi]), 'REPLACE')
+                    elif Wm[i, gi] > 0: ob.vertex_groups[gi].remove([i])
+    bm = bmesh.new(); bm.from_mesh(me)
+    n0 = len(bm.verts)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=dist)
+    n1 = len(bm.verts)
+    bm.to_mesh(me); bm.free(); me.update()
+    return n0 - n1, kusy(ob)
+
+def kusy(ob):
+    """Počet souvislých kusů sítě (po hranách)."""
+    me = ob.data; par = list(range(len(me.vertices)))
+    def f(x):
+        while par[x] != x: par[x] = par[par[x]]; x = par[x]
+        return x
+    for e in me.edges:
+        a, b = f(e.vertices[0]), f(e.vertices[1])
+        if a != b: par[a] = b
+    used = {i for p in me.polygons for i in p.vertices}
+    return len({f(i) for i in used})
+
+def svy_uv(ob):
+    """Vrcholy na švu UV (rohy ploch u jednoho vrcholu mají různé UV) – při decimaci zamčené jako okraje."""
+    me = ob.data
+    if not me.uv_layers: return set()
+    uv = me.uv_layers.active.data; prvni = {}; sev = set()
+    for l in me.loops:
+        u = tuple(round(c, 5) for c in uv[l.index].uv)
+        if prvni.setdefault(l.vertex_index, u) != u: sev.add(l.vertex_index)
+    return sev
+
+def ctyri_kosti(ob, kosti, n=None, min_w=None):
+    """Váhy kostí: nejvýš n největších (pravidlo svy_odevu max_kosti), pod min_w pryč, součet 1. Jen skupiny kostí
+    (kosti = jména kostí kostry); ostatní skupiny (pomocné) beze změny. Vrací počet upravených vrcholů."""
+    P = pravidla_svu(); n = P["max_kosti"] if n is None else n; min_w = P["min_vaha"] if min_w is None else min_w
+    gi_k = {g.index for g in ob.vertex_groups if g.name in kosti}
+    zm = 0
+    for v in ob.data.vertices:
+        w = sorted([(g.weight, g.group) for g in v.groups if g.group in gi_k], reverse=True)
+        if not w: continue
+        keep = [x for x in w[:n] if x[0] >= min_w] or w[:1]
+        s = sum(x[0] for x in keep)
+        pryc = [g for _, g in w if g not in {k[1] for k in keep}]
+        for g in pryc: ob.vertex_groups[g].remove([v.index])
+        for wt, g in keep:
+            if abs(wt / s - wt) > 1e-6: ob.vertex_groups[g].add([v.index], wt / s, 'REPLACE')
+        if pryc or abs(s - 1) > 1e-6: zm += 1
+    return zm
+
+def otevrene_hrany(ob, arm, oblast):
+    """Kontrola svarů (svy_odevu.oblast): otevřené hrany (jen jedna plocha) v ramenou a horních zádech mimo otvory
+    oděvu (krk, rukávy, lem). Oblast z kostí v klidové póze: nad podpaží (rameno − podpazi_pod_ramenem_m); a) ramena:
+    krk_x_m ≤ |x| ≤ rameno + rameno_x_navic_m; b) záda (y ≥ zada_y_m) |x| < krk_x_m pod krkem (neck_01 − zada_pod_krkem_m).
+    Vrací [(střed hrany ve světě)]."""
+    mw = arm.matrix_world; B = arm.data.bones
+    ram = [mw @ B[b].head_local for b in ("upperarm_l", "upperarm_r") if b in B]
+    nz = (mw @ B["neck_01"].head_local).z
+    zr = sum(r.z for r in ram) / len(ram); xr = max(abs(r.x) for r in ram)
+    z0 = zr - oblast["podpazi_pod_ramenem_m"]
+    bm = bmesh.new(); bm.from_mesh(ob.data); out = []
+    ow = ob.matrix_world
+    for e in bm.edges:
+        if len(e.link_faces) != 1: continue
+        c = ow @ ((e.verts[0].co + e.verts[1].co) * 0.5)
+        if c.z < z0: continue
+        ax = abs(c.x)
+        a = oblast["krk_x_m"] <= ax <= xr + oblast["rameno_x_navic_m"]
+        b = ax < oblast["krk_x_m"] and c.y >= oblast["zada_y_m"] and c.z < nz - oblast["zada_pod_krkem_m"]
+        if a or b: out.append(c)
+    bm.free()
+    return out
 
 def tube(obj, co, sel_mask, z_top, z_bot, name, N=64, rows=None, ease=0.012, flare=0.0, hang=True,
          center=None, hem_noise=0.0, seed=0, cap_bottom=False, slice_tol=0.02, row_center=False):

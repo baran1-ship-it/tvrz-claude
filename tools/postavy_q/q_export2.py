@@ -80,6 +80,14 @@ for o in bpy.data.objects:
     GAR.setdefault(k, []).append(o); o.hide_render = False
 for o in [body, eyes, brows] + hairs: o.hide_render = False
 print("KUSY", {k: [o.name for o in v] for k, v in GAR.items()})
+# 15. 11. (Míša ř. 3, potrhané oblečení): každý oděv = jedna skořepina - svařit shodné vrcholy (váhy průměrem) před
+# decimací; slupky svařuje už clothes.shell, tady i trubky a kusy skládané z víc dílů (pravidla svy_odevu)
+import clothes as _cl
+SVY = _cl.pravidla_svu()
+for k, objs in GAR.items():
+    for o in objs:
+        n_, ks_ = _cl.svar(o)
+        print("SVAR", o.name, "svareno", n_, "kusu", ks_)
 
 # --- 1) tělo na díly podle kostí
 NZ = (arm.matrix_world @ arm.data.bones['neck_01'].head_local).z
@@ -130,10 +138,12 @@ if CFG.get("npc"):
 def decimate(o, ratio, keep_edges=False):
     if ratio >= 0.99: return
     if keep_edges:
+        # okraje (otvory) a švy UV zamčené (pravidlo svy_odevu.zamek_svu): oděv je jedna skořepina, decimace ji nerozevře
         b2 = bmesh.new(); b2.from_mesh(o.data)
         edge = {v.index for e in b2.edges if e.is_boundary for v in e.verts}; b2.free()
+        edge |= _cl.svy_uv(o)
         g = o.vertex_groups.get("_dec") or o.vertex_groups.new(name="_dec")
-        for i in range(len(o.data.vertices)): g.add([i], 0.05 if i in edge else 1.0, 'REPLACE')
+        for i in range(len(o.data.vertices)): g.add([i], SVY["zamek_svu"] if i in edge else 1.0, 'REPLACE')
     sel_only([o]); md = o.modifiers.new("dec", 'DECIMATE'); md.ratio = ratio
     if keep_edges: md.vertex_group = "_dec"; md.vertex_group_factor = 1.0
     while o.modifiers.find("dec") > 0: bpy.ops.object.modifier_move_up(modifier="dec")
@@ -151,7 +161,6 @@ if CFG.get("npc"):
     if th > 900:
         for h in hairs: decimate(h, 900 / th)
 # vrstvy oděvu po decimaci: spodní pod vrchní (pořadí zevnitř ven), jinak prosvítají fleky
-import clothes as _cl
 VRSTVY = ["nohavice", "kosile", "skorne", main_k, "zastera", "opasek", "kape", "rouska", "cepice"]
 # zastera obleceni vzdy (vychozi) -> plochy sukne trvale pod ni pryc (jinak prorusta v klinu vsede)
 if "zastera" in GAR and "zastera" in KROJ.get("vychozi", list(GAR)):
@@ -176,6 +185,17 @@ for a_ in range(len(VRSTVY)):
 # všechno na trojúhelníky (atlas se přenáší po trojúhelnících)
 for o in list(PARTS.values()) + [eyes, brows] + hairs + [o for v in GAR.values() for o in v]:
     bm = bmesh.new(); bm.from_mesh(o.data); bmesh.ops.triangulate(bm, faces=bm.faces[:]); bm.to_mesh(o.data); bm.free()
+
+# kontrola svarů (svy_odevu): otevřené hrany v ramenou a horních zádech mimo otvory oděvu = 0, kusy oděvu po decimaci
+SVY_OTEV = {}
+for k, objs in GAR.items():
+    if k not in SVY["kontrola_kusy"] or k not in KROJ.get("vychozi", list(GAR)): continue
+    for o in objs:
+        oh = _cl.otevrene_hrany(o, arm, SVY["oblast"])
+        SVY_OTEV[o.name] = len(oh)
+        print("SVY", o.name, "kusu", _cl.kusy(o), "otevrenych hran v ramenou", len(oh),
+              [tuple(round(c, 3) for c in x) for x in oh[:4]])
+print("SVY CELKEM", sum(SVY_OTEV.values()))
 
 # --- 3) atlasy: nová UV "atlas", zabalení ostrovů bez rotace (tečné normály zůstanou platné)
 def pack(objs, density):
@@ -549,6 +569,11 @@ q_oci.add_blink(PARTS["hlava"], brows, eyes, lash_mask=_bc[:, 2] < _ez + 0.009)
 _eo = q_oci.split_eyes(eyes, arm, NAME)
 HEAD = [o for o in HEAD if o.name in bpy.data.objects and o is not eyes] if False else [o for o in HEAD if o != eyes]
 HEAD += _eo; eyes = None
+# váhy: nejvýš max_kosti kostí, znormované (svy_odevu) - v Blenderu, ne až exportem/importem (páry švu stejné váhy)
+_kosti = {b.name for b in arm.data.bones}
+for o in [o for o in bpy.data.objects if o.type == 'MESH' and o.parent == arm]:
+    n_ = _cl.ctyri_kosti(o, _kosti)
+    if n_: print("VAHY", o.name, "orezano/znormovano", n_)
 # --- 6) export
 arm.name = "Armature"
 if CFG.get("vyska"): arm.scale = (CFG["vyska"],) * 3          # výška postavy (celá kostra)
@@ -620,7 +645,7 @@ dressed = sum(t for s, t in dil.items() if s not in hidden_def) + sum(tris(o) fo
 sada = {"postava": NAME, "telo": f"{NAME}_telo.gltf",
         "dily_tela": {s: f"{NAME}_telo_{s}" for s in PARTS},
         "kusy": {k: {"soubor": f"{NAME}_{k}.gltf", "skryva": HIDE.get(k, []), "trojuhelniky": tri[k], "spodni": k == "kosile"} for k in GAR},
-        "vychozi": default, "oblecena_trojuhelniky": dressed, "cela": f"{NAME}_cela.gltf", "cela_trojuhelniky": CELA_T,
+        "vychozi": default, "oblecena_trojuhelniky": dressed, "svy_otevrene": SVY_OTEV, "cela": f"{NAME}_cela.gltf", "cela_trojuhelniky": CELA_T,
         "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
         "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"}
 json.dump(sada, open(os.path.join(OUT, f"{NAME}_sada.json"), "w"), indent=1, ensure_ascii=False)

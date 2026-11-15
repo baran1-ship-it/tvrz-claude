@@ -10,7 +10,9 @@ mkdir -p "$W/src"
 [ -d "$W/src/quaternius" ] || git -C "$R" archive origin/assets quaternius | tar -x -C "$W/src"
 B="$W/src/quaternius/base_characters/Base Characters/Godot - UE"
 # na vetvi assets chybi dve normalove mapy, ktere glTF vlasu a oci odkazuji (jsou v modely/postavy z baliku)
-for f in T_Hair_1_Normal_png.png T_Eye_Normal_png.png; do [ -f "$B/$f" ] || cp "$R/modely/postavy/$f" "$B/"; done
+# (15. 11.: v baliku z_postavy jsou jen .import - tehdy kopie ze stejne slozky bez _png; u BaseColor jsou obe md5 shodne)
+for f in T_Hair_1_Normal_png.png T_Eye_Normal_png.png; do
+  [ -f "$B/$f" ] || cp "$R/modely/postavy/$f" "$B/" 2>/dev/null || cp "$B/${f%_png.png}.png" "$B/$f"; done
 /opt/bl/bin/python -c "import cv2" 2>/dev/null || /opt/bl/bin/python -m pip install -q opencv-python-headless
 OUT="$R/modely/postavy/npc"; mkdir -p "$OUT"
 SADY="$*"
@@ -23,7 +25,9 @@ jedna() {
   /opt/bl/bin/python -I q_postava.py -- $n "$W/qd_$n.jpg" > "$W/log_d_$n.txt" 2>&1 || { echo "CHYBA postava $n"; return; }
   /opt/bl/bin/python -I q_export2.py -- $n "$W/qd_$n.blend" "$OUT" > "$W/log_e_$n.txt" 2>&1 || { echo "CHYBA export $n"; return; }
   rm -f "$OUT/_${n}_export.blend" "$W/qd_$n.blend" "$W/qd_$n.blend1"; rm -rf "$W/tex_$n"     # disk (5. 11.: mezivysledky 600 MB)
-  echo "$n $(grep -o 'CELA troj [0-9]* povrchu [0-9]*' "$W/log_e_$n.txt")"
+  echo "$n $(grep -o 'CELA troj [0-9]* povrchu [0-9]*' "$W/log_e_$n.txt") $(grep -o 'SVY CELKEM [0-9]*' "$W/log_e_$n.txt")"
+  # 15. 11. (Misa r. 3, potrhane obleceni): otevrene hrany odevu v ramenou a hornich zadech = chyba sady (svy_odevu)
+  grep -q 'SVY CELKEM 0$' "$W/log_e_$n.txt" || echo "CHYBA svy $n (otevrene hrany odevu v ramenou, $W/log_e_$n.txt)"
 }
 export -f jedna; export W OUT
 echo $SADY | tr ' ' '\n' | xargs -P ${Q_PROC:-3} -I{} bash -c 'jedna {}'

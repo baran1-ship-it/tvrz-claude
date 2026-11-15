@@ -1487,7 +1487,47 @@
       ],
       "seed": 4141,
       "pad_min_m": 0.3,
-      "pena_padu": 1.0
+      "pena_padu": 1.0,
+      "pad_vody": {
+       "_popis": "Misa 15. 11. r. 4 (kaskada = ploche leskle plechy, prorusta trava a kameny; snimky 08-10): pad kazdeho stupne (koryto.schody) je samostatna zakrivena zaclona stavena ve hre (scripts/pad_vody.gd, shaders/pad.gdshader), ne usek pasu reky. Pas Waterways (modely/reka/reka.res, predpeceny v baliku z_reka) se pri nacteni ve stope padu zbavi trojuhelniku s |normala.y| < zahodit_normala_y (prepecovat neni treba). Zaclona: od bodu k tunou (okap = horni hladina, plna sirka pasu) se zuzi na sirka_podil x pul sirky vody; previs_m pred patou (u bodu k+1) se lomi parabolou x ~ sqrt(pad) (volny pad, vodorovna tecna na hrane); vypoukle_m napric dopredu. Barva vrcholu R pena (pena_hore -> 1 u paty od pena_od), A okraj (okraj_podil sirky), G 1 = padajici cast. Rese: Uncharted GDC 2012 (vodopad = pruhy textury po padu + mlha u paty), Jedi Fallen Order (simonschreibt.de: zakrivena zaclona, posuvne vzorky, karty mlhy), 80.lv stylizovany vodopad; potok_pereje_resers.md body 1-7. Cisla [O] odhad, overit snimkem.",
+       "sirka_podil": 0.7,
+       "previs_m": 0.25,
+       "previs_min_max_m": [0.15, 0.3],
+       "vypoukle_m": 0.08,
+       "rozsireni_dole": 0.15,
+       "pod_hladinu_m": 0.06,
+       "nad_hladinou_m": 0.025,
+       "pas_presah_m": 0.35,
+       "_pas_presah_m": "o kolik je pas reky sirsi nez pul sirky vody na kazde strane (tools/reka_bake.gd, sirky + presah) - okap zaclony navazuje na plnou sirku pasu",
+       "rad_okap": 4,
+       "rad_pad": 8,
+       "sloupcu": 8,
+       "pena_hore": 0.3,
+       "pena_od": 0.35,
+       "okraj_podil": 0.3,
+       "zahodit_normala_y": 0.97,
+       "zahodit_okraj_m": 0.3,
+       "_zahodit": "pas reky ve stope padu (od bodu k do k+1, napric pul sirka pasu + zahodit_okraj_m): trojuhelnik pryc, je-li |normala.y| < zahodit_normala_y (tun s min_spad ma 1,0; nejmensi pad 0,3 m na 1 m osy ma sikminu ~0,92-0,96)",
+       "trist": {
+        "pena_sirka_podil": 1.25,
+        "pena_delka_m": 1.6,
+        "mlha_vyska_podil": 0.55,
+        "mlha_vyska_max_m": 1.4,
+        "mlha_uhel_st": 35.0,
+        "mlha_alfa": 0.22,
+        "pena_alfa": 0.85,
+        "viditelnost_m": 45.0
+       },
+       "shader": {
+        "voda": [0.30, 0.33, 0.27],
+        "pena": [0.78, 0.80, 0.76],
+        "rychlost_m_s": 1.8,
+        "rychlost_okap_m_s": 0.45,
+        "meritko_pruhu": [0.55, 0.1],
+        "prolinani_hore_m": 0.5,
+        "pruhlednost": 0.82
+       }
+      }
      },
      "breh_nad_m": 0.8
     }

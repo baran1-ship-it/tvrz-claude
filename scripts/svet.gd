@@ -1,5 +1,6 @@
 extends RefCounted
 const Pravidla := preload("res://scripts/pravidla.gd")
+const PadVody := preload("res://scripts/pad_vody.gd")
 ## Svet tvrze vymodelovany v Blenderu (blender/export_game.py): nacte modely/tvrz.glb,
 ## priradi materialy podle jmen, postavi kolize, rostliny (MultiMesh po bunkach) a predá
 ## informace o ohnich, mistnostech a pouzitelnych vecech hernimu zivotu (life.gd).
@@ -1259,6 +1260,8 @@ func reka_predpecena() -> bool:
 
 
 func _reka(parent: Node3D) -> void:
+	# pady kaskady: samostatne zaclony + trist z koryto.pady (scripts/pad_vody.gd, Misa 15. 11. r. 4)
+	PadVody.postav(parent, koryto)
 	if not reka_predpecena():
 		if FileAccess.file_exists("res://modely/reka/reka.res"):
 			print("reka: predpeceny potok nesedi na export (reka_otisk) - hladina Reka_voda z exportu")
@@ -1287,7 +1290,8 @@ func _reka(parent: Node3D) -> void:
 	m.set_shader_parameter("cirost", 0.55)                # mela voda pruhledna: dno s oblazky a kameny videt
 	var mi := MeshInstance3D.new()
 	mi.name = "Potok"
-	mi.mesh = load("res://modely/reka/reka.res")
+	# pas reky bez padu (padajici trojuhelniky ve stope padu pryc pri nacteni - balik z_reka se neprepeka)
+	mi.mesh = PadVody.oriz_pas(load("res://modely/reka/reka.res"), koryto)
 	mi.material_override = m
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(mi)
@@ -13025,6 +13029,8 @@ func _krajina() -> void:
 					# balvany v korytu, vycnivaji nad hladinu (obtekani, pena z peceni vody)
 					var q := o + nrm * rng.randf_range(-w * 0.8, w * 0.8)
 					var sb := rng.randf_range(0.5, 1.0)
+					if kr.od_zaclony(q.x, q.y) < 0.55 * sb:
+						continue                                 # ne pres zaclonu padu kaskady (koryto.pady)
 					pridej.call(balv[rng.randi() % 2], q.x, q.y, sb, 0.25, 0.3)
 					kameny_toku.append(Vector4(q.x, q.y, 0.55 * sb, atan2((b - a).y, (b - a).x)))
 				nk += 1
@@ -13036,6 +13042,15 @@ func _krajina() -> void:
 					var o2 := a.lerp(b, rng.randf())
 					var q2 := o2 + nrm * rng.randf_range(-w * 0.9, w * 0.9)
 					var sb2 := rng.randf_range(0.5, 1.1)
+					# Misa 15. 11. r. 4 (kameny prochazi padem): balvan nesmi protnout zaclonu padu (koryto.od_zaclony) -
+					# jinam na tomtez useku (hustota balvanu_na_m zustane), po 6 pokusech vynechat
+					var pok := 0
+					while kr.od_zaclony(q2.x, q2.y) < 0.55 * sb2 and pok < 6:
+						o2 = a.lerp(b, rng.randf())
+						q2 = o2 + nrm * rng.randf_range(-w * 0.9, w * 0.9)
+						pok += 1
+					if kr.od_zaclony(q2.x, q2.y) < 0.55 * sb2:
+						continue
 					pridej.call(balv[rng.randi() % 2], q2.x, q2.y, sb2, 0.25, 0.3)
 					kameny_toku.append(Vector4(q2.x, q2.y, 0.55 * sb2, atan2((b - a).y, (b - a).x)))
 					nk += 1
@@ -13095,6 +13110,8 @@ func _krajina() -> void:
 					var q3: Vector2 = (sch["p"] as Vector2) + nrm2 * lerpf(-w2, w2, float(ib) / nb) + (sch["smer"] as Vector2) * rng.randf_range(-0.3, 0.3)
 					var mh: Array = kask["schody"]["meritko_balvanu_hrany"]          # vycnivaji nad hladinu tune
 					var sb3 := rng.randf_range(float(mh[0]), float(mh[1]))
+					if kr.od_zaclony(q3.x, q3.y) < 0.55 * sb3:
+						continue                                 # prah jen vedle zaclony padu - voda pada mezerou mezi balvany
 					pridej.call(balv[rng.randi() % 2], q3.x, q3.y, sb3, 0.25, 0.3)
 					kameny_toku.append(Vector4(q3.x, q3.y, 0.55 * sb3, atan2((sch["smer"] as Vector2).y, (sch["smer"] as Vector2).x)))
 					nk += 1

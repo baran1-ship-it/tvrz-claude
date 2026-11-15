@@ -270,6 +270,7 @@ func priprav(vyska: Callable) -> bool:
 		pocty_r[String(druhy_r[raz[k]]["nazev"])] = int(pocty_r.get(String(druhy_r[raz[k]]["nazev"]), 0)) + 1
 	print("koryto: bodu osy %d (z %d), raz toku %s, stupnu kaskady %d %s" % [n, b0.size(), str(pocty_r), schody.size(),
 			str(schody.map(func(sc: Dictionary) -> String: return "(%.0f, %.0f) %.1f m" % [(sc["p"] as Vector2).x, (sc["p"] as Vector2).y, float(sc["pad"])]))])
+	_priprav_pady(kask)
 	var r := ceili(DOSAH / 16.0)
 	for k in n - 1:
 		var lo := Vector2i(floori(minf(body[k].x, body[k + 1].x) / 16.0) - r, floori(minf(body[k].y, body[k + 1].y) / 16.0) - r)
@@ -523,3 +524,74 @@ func sukne(mi: MeshInstance3D) -> void:
 	sk.name = String(mi.name) + "_sukne"            # Teren*: svet.build da material zeme, kolizi ne
 	sk.mesh = st.commit()
 	mi.add_child(sk)
+
+
+## Pady kaskady (Misa 15. 11. r. 4: „ploche leskle plechy, prochazi travou a kameny“): rozmery zaclony kazdeho stupne
+## (koryto.schody) z voda.json raz_toku kaskada schody.pad_vody - jediny zdroj pro zaclonu (scripts/pad_vody.gd), ořez
+## pasu reky (svet._reka), travu (louka._zakaz_travy) a balvany hrany (svet). Volano z priprav (pred vlakny louky).
+## Zaznam: a = bod k (zacatek okapu), smer, nrm (vlevo), delka L (k -> k+1), y_hore, y_dole, pul_pas (plna sirka pasu),
+## pul (zaclona), s_hrana (kde se okap lomi = L - previs), previs.
+var pady: Array = []
+var _pady_obd := Rect2()
+
+
+func _priprav_pady(kask: Dictionary) -> void:
+	pady.clear()
+	if not kask.has("schody") or not (kask["schody"] as Dictionary).has("pad_vody"):
+		return
+	var pv: Dictionary = kask["schody"]["pad_vody"]
+	var pmm: Array = pv["previs_min_max_m"]
+	var prvni := true
+	for sch: Dictionary in schody:
+		var k: int = sch["k"]
+		if k + 1 >= body.size():
+			continue
+		var a := body[k]
+		var d := body[k + 1] - a
+		var dl := d.length()
+		if dl < 0.05:
+			continue
+		var smer := d / dl
+		var prev := clampf(float(pv["previs_m"]), float(pmm[0]), float(pmm[1]))
+		prev = minf(prev, dl * 0.5)
+		var w := float(sirky[k])
+		var zaz := {"a": a, "smer": smer, "nrm": smer.orthogonal(), "L": dl, "y_hore": float(hladiny[k]), "y_dole": float(hladiny[k + 1]),
+				"pul_pas": w + float(pv["pas_presah_m"]), "pul": w * float(pv["sirka_podil"]), "previs": prev, "s_hrana": dl - prev, "k": k,
+				"pul_dole": w * float(pv["sirka_podil"]) * (1.0 + float(pv["rozsireni_dole"]))}
+		pady.append(zaz)
+		var o := Rect2(a, Vector2.ZERO).expand(body[k + 1]).grow(float(zaz["pul_pas"]) + 2.0)
+		_pady_obd = o if prvni else _pady_obd.merge(o)
+		prvni = false
+
+
+## Vzdalenost bodu od stopy padu (okap + zaclona, napric plna sirka pasu reky): < 0 uvnitr, INF daleko od kaskady.
+## Pro travu (pasma voda.holy_breh_padu_m). Bez zapisu - smi z vlaken louky.
+func od_padu(x: float, z: float) -> float:
+	if pady.is_empty() or not _pady_obd.has_point(Vector2(x, z)):
+		return INF
+	var best := INF
+	for pd: Dictionary in pady:
+		best = minf(best, _od_obdelniku(pd, Vector2(x, z), 0.0, float(pd["L"]), float(pd["pul_pas"])))
+	return best
+
+
+## Vzdalenost bodu od padajici casti zaclony (od lomu okapu k pate, napric pul sirky zaclony vc. rozsireni dole):
+## balvan s polomerem r ji nesmi protnout (od_zaclony < r).
+func od_zaclony(x: float, z: float) -> float:
+	if pady.is_empty() or not _pady_obd.has_point(Vector2(x, z)):
+		return INF
+	var best := INF
+	for pd: Dictionary in pady:
+		best = minf(best, _od_obdelniku(pd, Vector2(x, z), float(pd["s_hrana"]), float(pd["L"]), float(pd["pul_dole"])))
+	return best
+
+
+func _od_obdelniku(pd: Dictionary, q: Vector2, s0: float, s1: float, pul: float) -> float:
+	var v := q - (pd["a"] as Vector2)
+	var s := v.dot(pd["smer"] as Vector2)
+	var u := absf(v.dot(pd["nrm"] as Vector2))
+	var ds := maxf(s0 - s, s - s1)
+	var du := u - pul
+	if ds <= 0.0 and du <= 0.0:
+		return maxf(ds, du)
+	return Vector2(maxf(ds, 0.0), maxf(du, 0.0)).length()

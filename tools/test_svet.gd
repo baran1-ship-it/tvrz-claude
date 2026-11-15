@@ -9240,4 +9240,48 @@ func _potok_kaskada() -> void:
 	var nutno := 0.8 * float(kask["balvanu_na_m"]) * delka
 	if float(balv) < nutno:
 		chyby.append("balvanu v korytu kaskady %d < %.0f" % [balv, nutno])
-	_vysledek("potok_kaskada", chyby.is_empty(), "stupnu %d, kaskada %.0f m, balvanu %d; %s" % [(kr.schody as Array).size(), delka, balv, str(chyby.slice(0, 4))])
+	# Misa 15. 11. r. 4 (pad = plochy plech, prochazi travou a kameny): kazdy stupen ma pad (koryto.pady -> zaclona
+	# Pady ve hre), zadny balvan neprotne padajici zaclonu, ve stope padu + pasma voda.holy_breh_padu_m zadny trs louky
+	# (skutecne zaznamy rozsevu louka.trsy_v_oblasti), pas reky ve stope padu bez strmych trojuhelniku
+	var pady: Array = kr.pady
+	if pady.size() != (kr.schody as Array).size():
+		chyby.append("padu %d != stupnu %d" % [pady.size(), (kr.schody as Array).size()])
+	var nod := main.find_child("Pady", true, false) as MeshInstance3D
+	if nod == null or nod.mesh == null or nod.mesh.get_faces().is_empty():
+		chyby.append("zaclony Pady ve scene nejsou")
+	var pres_zaclonu := 0
+	for v: Vector4 in sv.kameny_toku:
+		if kr.od_zaclony(v.x, v.y) < v.z - 0.01:
+			pres_zaclonu += 1
+			if pres_zaclonu <= 3:
+				chyby.append("balvan pres zaclonu (%.1f, %.1f) r %.2f" % [v.x, v.y, v.z])
+	var hb := float(sv.pasma()["voda"]["holy_breh_padu_m"])
+	var louka: Node = main.get_node_or_null("Louka")
+	var trsu_u_padu := 0
+	var trsu_okoli := 0
+	if louka and louka.has_method("trsy_v_oblasti"):
+		for pd: Dictionary in pady:
+			var a: Vector2 = pd["a"]
+			var b: Vector2 = a + (pd["smer"] as Vector2) * float(pd["L"])
+			var o := Rect2(a, Vector2.ZERO).expand(b).grow(float(pd["pul_pas"]) + hb + 1.0)
+			for p: Vector3 in louka.trsy_v_oblasti(o):
+				trsu_okoli += 1
+				if kr.od_padu(p.x, p.z) < hb - 0.05:
+					trsu_u_padu += 1
+					if trsu_u_padu <= 3:
+						chyby.append("trs u padu (%.1f, %.1f) %.2f m od stopy" % [p.x, p.z, kr.od_padu(p.x, p.z)])
+	else:
+		chyby.append("louka neni - trava u padu neoverena")
+	var strme := 0
+	var potok := main.find_child("Potok", true, false) as MeshInstance3D
+	var prah := float(kask["schody"]["pad_vody"]["zahodit_normala_y"])
+	if potok and potok.mesh:
+		var f: PackedVector3Array = potok.mesh.get_faces()
+		for t in range(0, f.size(), 3):
+			var st := (f[t] + f[t + 1] + f[t + 2]) / 3.0
+			if kr.od_padu(st.x, st.z) < 0.0 and absf((f[t + 1] - f[t]).cross(f[t + 2] - f[t]).normalized().y) < prah:
+				strme += 1
+		if strme > 0:
+			chyby.append("pas reky ve stope padu: %d strmych troj." % strme)
+	_vysledek("potok_kaskada", chyby.is_empty(), "stupnu %d, kaskada %.0f m, balvanu %d, padu %d, balvanu pres zaclonu %d, trsu u padu %d (z %d v okoli), strmych troj. pasu %s; %s" % [
+			(kr.schody as Array).size(), delka, balv, pady.size(), pres_zaclonu, trsu_u_padu, trsu_okoli, str(strme) if potok else "bez predpeceneho pasu", str(chyby.slice(0, 6))])

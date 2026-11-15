@@ -247,3 +247,164 @@ if os.path.exists(p):
         js["buffers"][0]["byteLength"] = len(nb)
         glb_zapis(p, js, nb)
     print("HNEDA GLB zmeneno %d" % zmen)
+
+
+# 4) jas podrobneho modelu (ves_jas.jas_podrobny, Misa 15. 11. ř. 10 „bile budovy vzadu, chce hnede jako Puchart“):
+# vnejsek domu (textury po zesvetleni, i omitka) x jas_podrobny jednou - znacka podrobny:<jmeno> (soubor) a
+# asset.extras.podrobny (domy.glb); znacka kroku 1 na novy obsah (jinak by krok 1 pri dalsim behu zesvetlil zpet)
+JP = float(R.get("jas_podrobny", 1.0))
+
+
+def je_podrobny(jm):
+    return not any(k in jm for k in R.get("jas_podrobny_vynechat", [])) and not any(k in jm for k in R["zacouzene"]["pripony"])
+
+
+if JP < 1.0:
+    for f in sorted(f for v in R.get("jas_podrobny_textury", []) for f in glob.glob(v)):
+        jm = os.path.basename(f)
+        if not je_podrobny(jm) or zn.get("podrobny:" + jm) == md5(f):
+            continue
+        print("PODROBNY %-42s x%.2f" % (jm, JP))
+        if not VYPIS:
+            a = np.asarray(Image.open(f).convert("RGB")).astype(float) / 255
+            Image.fromarray((np.clip(a * JP, 0, 1) * 255 + 0.5).astype(np.uint8)).save(f, quality=92)
+            zn[jm] = zn["podrobny:" + jm] = md5(f)
+    if not VYPIS:
+        json.dump(zn, open(ZN, "w"), indent=1)
+    p = "modely/ves/domy.glb"
+    if os.path.exists(p):
+        js, bb = glb_cti(p)
+        ex = js.setdefault("asset", {}).setdefault("extras", {})
+        if ex.get("podrobny") != JP:
+            k_ = JP / float(ex.get("podrobny", 1.0))
+            vys = [bytes(bb[v.get("byteOffset", 0):v.get("byteOffset", 0) + v["byteLength"]]) for v in js["bufferViews"]]
+            zmen = 0
+            for im_ in js.get("images", []):
+                jm = "domy_" + im_.get("name", "")
+                if "bufferView" not in im_ or not je_podrobny(jm) or not ("diff" in jm or "albedo" in jm):
+                    continue
+                a = np.asarray(Image.open(io.BytesIO(vys[im_["bufferView"]])).convert("RGB")).astype(float) / 255
+                out = io.BytesIO()
+                Image.fromarray((np.clip(a * k_, 0, 1) * 255 + 0.5).astype(np.uint8)).save(out, "JPEG", quality=92)
+                vys[im_["bufferView"]] = out.getvalue()
+                im_["mimeType"] = "image/jpeg"
+                zmen += 1
+            ex["podrobny"] = JP
+            print("PODROBNY GLB zmeneno %d (x%.2f)" % (zmen, k_))
+            if not VYPIS:
+                nb = bytearray()
+                for i, v in enumerate(vys):
+                    nb += b"\0" * ((4 - len(nb) % 4) % 4)
+                    js["bufferViews"][i]["byteOffset"] = len(nb)
+                    js["bufferViews"][i]["byteLength"] = len(v)
+                    nb += v
+                js["buffers"][0]["byteLength"] = len(nb)
+                glb_zapis(p, js, nb)
+
+
+# 5) hnedy ton stredniho a dalkoveho stupne (ves_jas.stredni_daleko, Puchart modely.domy.daleko_textury.jas): barva
+# (sRGB) stazena na jas nejvys jas_strop, pak x cinitel strechy / sten. Znacka asset.extras.stredni_daleko = pouzite
+# cinitele; pri zmene cinitelu jen pomer novy/stary (puvodni barva uz v souboru neni).
+SD = R["stredni_daleko"]
+CIN = {"strecha": np.array(SD["strecha"], float), "steny": np.array(SD["steny"], float)}
+
+
+def _acc(js, b, ai):
+    """(pole float (N, n), zapis(pole)) pro accessor ai (i s byteStride)."""
+    a = js["accessors"][ai]
+    v = js["bufferViews"][a["bufferView"]]
+    n = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}[a["type"]]
+    dt = {5126: np.float32, 5121: np.uint8, 5123: np.uint16, 5125: np.uint32}[a["componentType"]]
+    sz = np.dtype(dt).itemsize
+    off = v.get("byteOffset", 0) + a.get("byteOffset", 0)
+    st = v.get("byteStride", 0) or n * sz
+    raw = np.frombuffer(bytes(b[off:off + st * (a["count"] - 1) + n * sz]), np.uint8)
+    idx = (np.arange(a["count"])[:, None] * st + np.arange(n * sz)[None, :]).ravel()
+    arr = raw[idx].view(dt).reshape(-1, n).astype(float)
+
+    def zapis(nove):
+        cel = np.frombuffer(bytes(b[off:off + st * (a["count"] - 1) + n * sz]), np.uint8).copy()
+        cel[idx] = np.frombuffer(nove.astype(dt).tobytes(), np.uint8)
+        b[off:off + len(cel)] = cel.tobytes()
+    return arr, zapis
+
+
+def hneda_lod(s, cin, prvni):
+    """s sRGB 0..1 (N, 3), cin (N, 3) cinitel -> sRGB."""
+    if prvni:
+        j = s @ LUM
+        s = s * np.minimum(1.0, SD["jas_strop"] / np.maximum(j, 1e-6))[:, None]
+    return np.clip(s * cin, 0, 1)
+
+
+def cinitel(ex):
+    """(cinitele strecha, steny k pouziti, prvni beh) podle znacky v asset.extras."""
+    st = ex.get("stredni_daleko")
+    if st is None:
+        return CIN["strecha"], CIN["steny"], True
+    return CIN["strecha"] / np.array(st["strecha"], float), CIN["steny"] / np.array(st["steny"], float), False
+
+
+for p, druh in (("modely/ves/domy_stredni.glb", "stredni"), ("modely/ves/domy.glb", "daleko")):
+    if not os.path.exists(p):
+        continue
+    js, b = glb_cti(p)
+    ex = js.setdefault("asset", {}).setdefault("extras", {})
+    if ex.get("stredni_daleko") == {"strecha": SD["strecha"], "steny": SD["steny"]}:
+        print("HNEDY %s: uz hotovo" % p)
+        continue
+    c_st, c_sn, prvni = cinitel(ex)
+    zmen = 0
+    if druh == "stredni":
+        hot = set()
+        for m in js["meshes"]:
+            for pr in m["primitives"]:
+                ai = pr["attributes"].get("COLOR_0")
+                if ai is None or ai in hot or "POSITION" not in pr["attributes"]:
+                    continue
+                hot.add(ai)
+                col, zap = _acc(js, b, ai)
+                pos = _acc(js, b, pr["attributes"]["POSITION"])[0]
+                if "indices" in pr:
+                    tri = _acc(js, b, pr["indices"])[0].astype(np.int64).reshape(-1, 3)
+                else:
+                    tri = np.arange(len(pos)).reshape(-1, 3)
+                fn = np.cross(pos[tri[:, 1]] - pos[tri[:, 0]], pos[tri[:, 2]] - pos[tri[:, 0]])     # 2 x plocha x normala
+                acc = np.zeros_like(pos)
+                for k in range(3):
+                    np.add.at(acc, tri[:, k], fn)
+                ny = acc[:, 1] / np.maximum(np.linalg.norm(acc, axis=1), 1e-9)
+                cin = np.where((ny > SD["strecha_ny_min"])[:, None], c_st[None, :], c_sn[None, :])
+                mx = {5121: 255.0, 5123: 65535.0}.get(js["accessors"][ai]["componentType"], 1.0)   # normalizovane cele
+                rgb = col[:, :3] / mx
+                s = hneda_lod(srgb(rgb), cin, prvni)
+                col[:, :3] = lin(s) * mx
+                if mx > 1.0:
+                    col = np.round(col)
+                zap(col)
+                zmen += 1
+    else:
+        for nd in js["nodes"]:
+            if "mesh" not in nd or not nd.get("name", "").endswith("_Daleko"):
+                continue
+            for pr in js["meshes"][nd["mesh"]]["primitives"]:
+                if "material" not in pr:
+                    continue
+                mt = js["materials"][pr["material"]]
+                pbr = mt.setdefault("pbrMetallicRoughness", {})
+                if "baseColorTexture" in pbr or mt.get("extras", {}).get("hnedy"):
+                    continue
+                c = np.array(pbr.get("baseColorFactor", [1, 1, 1, 1]), float)
+                cin = c_st if "_daleko_Sindel" in mt.get("name", "") else c_sn
+                s = hneda_lod(srgb(c[None, :3]), cin[None, :], prvni)[0]
+                pbr["baseColorFactor"] = [float(x) for x in lin(s)] + [float(c[3])]
+                mt.setdefault("extras", {})["hnedy"] = True      # material sdileny vic uzly: jen jednou za beh
+                zmen += 1
+        for mt in js.get("materials", []):
+            mt.get("extras", {}).pop("hnedy", None)
+            if mt.get("extras") == {}:
+                mt.pop("extras")
+    ex["stredni_daleko"] = {"strecha": SD["strecha"], "steny": SD["steny"]}
+    print("HNEDY %s: zmeneno %d (%s)" % (p, zmen, "prvni" if prvni else "pomer cinitelu"))
+    if not VYPIS:
+        glb_zapis(p, js, b)

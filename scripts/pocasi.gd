@@ -22,6 +22,7 @@ var _uvnitr := 0.0       # 0 venku .. 1 pod strechou (plynule)
 var _uvnitr_cil := 0.0
 var _t_paprsek := 0.0
 var _mat_mokro: Array = []
+var _mat_std: Array = []      # StandardMaterial3D modelu staveb (krcma, kostel, hostinec...) - mokro pres barvu a drsnost
 var _posl_mokro := -1.0
 var _posl_st := -1.0
 var _posl_zat := -1.0
@@ -117,6 +118,7 @@ var _sber_hotov := false
 
 func _sber_zacni() -> void:
 	_mat_mokro.clear()
+	_mat_std.clear()
 	_sber_videno.clear()
 	_sber_fronta = [main]
 	_sber_hotov = false
@@ -144,6 +146,17 @@ func _sber_krok() -> void:
 			for si in (g as MeshInstance3D).mesh.get_surface_count():
 				ms.append((g as MeshInstance3D).mesh.surface_get_material(si))
 		for m: Variant in ms:
+			# inventura 15. 11. (mokro jen na shaderech zem/zdivo/textura/skala): modely staveb z Disku (krcma, kovarna,
+			# kostel) maji StandardMaterial3D - tmavsi a lesklejsi pres albedo_color a roughness, puvodni hodnoty v meta
+			if m is StandardMaterial3D and not _sber_videno.has(m):
+				_sber_videno[m] = true
+				var sm3 := m as StandardMaterial3D
+				if sm3.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
+					if not sm3.has_meta("mokro_orig"):
+						sm3.set_meta("mokro_orig", [sm3.albedo_color, sm3.roughness])
+					_mat_std.append(sm3)
+					_std_mokro(sm3, _posl_st)
+				continue
 			if not (m is ShaderMaterial) or _sber_videno.has(m):
 				continue
 			_sber_videno[m] = true
@@ -158,6 +171,16 @@ func _sber_krok() -> void:
 				(m as ShaderMaterial).set_shader_parameter("dest_mokro", _mokro_pro(m as ShaderMaterial))
 	if _sber_fronta.is_empty():
 		_sber_hotov = true
+
+
+## Mokro StandardMaterial3D: barva x povrch[0], drsnost k povrch[1] (pocasi.json mokro povrch), mk 0 = puvodni
+func _std_mokro(sm3: StandardMaterial3D, mk: float) -> void:
+	var pv: Array = (P["mokro"] as Dictionary)["povrch"]
+	var orig: Array = sm3.get_meta("mokro_orig", [sm3.albedo_color, sm3.roughness])
+	var k := clampf(mk, 0.0, 1.0)
+	var c0: Color = orig[0]
+	sm3.albedo_color = Color(c0.r * lerpf(1.0, float(pv[0]), k), c0.g * lerpf(1.0, float(pv[0]), k), c0.b * lerpf(1.0, float(pv[0]), k), c0.a)
+	sm3.roughness = lerpf(float(orig[1]), minf(float(orig[1]), float(pv[1])), k)
 
 
 func _mokro_pro(m: ShaderMaterial) -> float:
@@ -271,6 +294,8 @@ func _krok(dt: float) -> void:
 		_posl_st = mk_st
 		for m: ShaderMaterial in _mat_mokro:
 			m.set_shader_parameter("dest_mokro", mk_st if (P["mokro"]["stavby_shadery"] as Array).has(m.shader.resource_path) else mokro)
+		for sm3: StandardMaterial3D in _mat_std:
+			_std_mokro(sm3, mk_st)
 
 
 func _hlas(p: AudioStreamPlayer, h: float, db0: float) -> void:

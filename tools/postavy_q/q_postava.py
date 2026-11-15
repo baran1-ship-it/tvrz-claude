@@ -571,10 +571,12 @@ if KROJ:
     under &= ~((co_[:, 1] < 0) & (np.abs(co_[:, 0]) < 0.06) & (co_[:, 2] > NZ - 0.09))
     import clothes as cl_; cl_.hide_body_under(head, under)
 # --- scéna, animace, render
-an = imp(UAL); aarm = next(o for o in an if o.type == 'ARMATURE')
-for o in an:
-    if o is not aarm: bpy.data.objects.remove(o)
-bpy.data.objects.remove(aarm)
+# animace jen pro nahled (export je v klidove poze); 15. 11.: v kontejneru z baliku z_postavy je UAL1.glb jen .import
+if os.path.exists(UAL):
+    an = imp(UAL); aarm = next(o for o in an if o.type == 'ARMATURE')
+    for o in an:
+        if o is not aarm: bpy.data.objects.remove(o)
+    bpy.data.objects.remove(aarm)
 scn = bpy.context.scene
 scn.render.engine = 'CYCLES'; scn.cycles.samples = 32; scn.cycles.use_denoising = True
 w = bpy.data.worlds.new("w"); scn.world = w; w.use_nodes = True; nt = w.node_tree

@@ -485,6 +485,13 @@ func _zakaz_travy(px: float, pz: float, budovy := true) -> bool:
 		return true                                  # trziste: vyslapana hlina
 	if main.svet.ryb_voda(px, pz):
 		return true                                  # rybnik Lhota: pod hladinou a v bahne nic (NAVOD bod 3)
+	# pady kaskady (Misa 15. 11. r. 4: trava roste pres pad): od stopy padu (okap + zaclona, plna sirka pasu reky)
+	# holy breh pasma voda.holy_breh_padu_m (tristi, mokra skala); mimo kaskadu od_padu = INF bez cteni pasem
+	var kr: RefCounted = main.svet.koryto
+	if kr:
+		var dp: float = kr.od_padu(px, pz)
+		if dp != INF and dp < float(main.svet.pasma()["voda"]["holy_breh_padu_m"]):
+			return true
 	return main.svet.od_vody(px, pz) < _breh_m       # male toky a rybniky: voda a holy breh (pasma voda breh_m)
 
 

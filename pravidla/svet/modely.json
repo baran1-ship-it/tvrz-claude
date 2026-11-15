@@ -5961,6 +5961,33 @@
    "prah_br": 0.72,
    "_pozn": "Míša 13. 11. („dřevo by bylo hnědé ošoupané“) a snímek f_ves 14. 11. 12:00: po zesvětlení šedé dřevo (průměr B/R 0,85–0,9) vypadá šedomodré. Dřevo s průměrem B/R nad prah_br se přebarví na poměr R:G:B = pomer (jako hnědé trámy tram_d 0,58/0,49/0,37) při stejném jasu; zacouzene a vynechat beze změny. Opakované spuštění nic nemění (B/R je pak pod prahem)."
   },
+  "jas_podrobny": 0.8,
+  "jas_podrobny_textury": [
+   "modely/ves/domy_*_diff*.jpg",
+   "modely/ves/domy_*albedo*.jpg"
+  ],
+  "jas_podrobny_vynechat": [
+   "tram_in",
+   "clay_plaster_pec_",
+   "dirt_floor_hl_"
+  ],
+  "_jas_podrobny": "Míša 15. 11. (tabulka misa_15_11_chyby.md ř. 10: „bílé budovy vzadu ve vsi nechci, chci hnědé jako v Puchartu“): Puchart hra/data/mista_stavby.json modely.domy.jas_podrobny 0,8 (Míša 14. 11. u Pucharta „domy jsou hezké světlé, ale až moc vypadají bílé“) – vnějšek podrobného modelu (textury domů vsi po zesvětlení na cil, i omítka) × jas_podrobny; vnitřek (jas_podrobny_vynechat) a začouzené beze změny. Jednou: značka podrobny:<textura> v modely/ves/zesvetleno.json a asset.extras.podrobny v domy.glb.",
+  "stredni_daleko": {
+   "strecha": [
+    0.66,
+    0.5,
+    0.36
+   ],
+   "steny": [
+    0.85,
+    0.66,
+    0.48
+   ],
+   "jas_strop": 0.5,
+   "strecha_ny_min": 0.4,
+   "test_jas_max": 0.42,
+   "_pozn": "Míša 15. 11. (ř. 10: z dálky šedobílé domy): střední stupeň (barvy vrcholů domy_stredni.glb, 30–75 m) a hrubý obal _Daleko (barva materiálu v domy.glb) měly jen zesvětlení na cil bez hnědého tónu. Puchart hra/data/mista_stavby.json modely.domy.daleko_textury.jas: skutečná barva × činitel [R, G, B] – střecha (Sindel) [0,66; 0,5; 0,36], stěny (Roubeni, i omítka Dum2 = M_OmitkaPecena) [0,85; 0,66; 0,48] (Míša 14. 11. u Pucharta: „jsou šedé, nemohly by být hnědé? míň to razí“; KCD: střechy a roubení z dálky hnědé). Barva (sRGB) nejdřív stažena na jas nejvýš jas_strop (bílá omítka jako zesvětlené dřevo), pak × činitel. Střecha = vrchol s normálou ny > strecha_ny_min (z trojúhelníků), u _Daleko materiál <koren>_daleko_Sindel. Jednou: asset.extras.stredni_daleko = použité činitele (při změně činitelů se dopočte jen poměr). Test smyslu ves_barva: průměr každého domu R > G > B a jas ≤ test_jas_max (bez činitele 0,5 a šedá)."
+  },
   "_pozn": "Míša 14. 11. („puchart udělal vesnici světlejší“): textury domů vsi (modely/ves/domy_*_diff/albedo) na průměrný jas cil (sRGB, nejvýš max_x), sytost × sytost; začouzené aspoň zacouzene.cil; vnitřek, pec, podlaha, omítka a kámen beze změny. Stejně barvy vrcholů středního stupně (domy_stredni.glb) a barva _Daleko (domy.glb). Podle Pucharta nastroje/havran/stavby_export.gd (a4239c63). Nástroj tools/zesvetli_ves.py (opakované spuštění nic nemění)."
  }
 }
