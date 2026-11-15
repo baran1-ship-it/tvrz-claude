@@ -13030,13 +13030,13 @@ var _hl_ryb: Array = []                 # [stred Lhota, zaznam Lhota (obrys), hl
 
 ## Odraz okoli na hladine (prostredi.json voda_odraz; Misa 9. 11. r. 61/79 „bila ledova plocha“): pod obzorem okoli
 ## hladina odrazi breh a stromy, ne oblohu. Static - tools/foto_voda.gd (test voda_odraz) nastavi totez.
-## Rybnik v2 ma vlastni vzhled hladiny (voda.json rybnik_lhota vzhled), ne kalnou vodu prikopu - Blender mu dava material
+## Rybnik v2 ma vlastni vzhled hladiny (prostredi.json rybnik_lhota_vzhled), ne kalnou vodu prikopu - Blender mu dava material
 ## voda_prikop (15. 11. kontrola pred vydanim: z nizkeho pohledu cela cerna). Kopie materialu jen pro Rybnik_lhota_voda,
 ## zapsana do vodni (vlnky a ceřeni nastavuje voda.gd).
 func _ryb_vzhled(mi: MeshInstance3D, si: int) -> void:
 	if not String(mi.name).begins_with("Rybnik_lhota_voda"):
 		return
-	var vz: Dictionary = (Pravidla.cti("voda", "rybnik_lhota") as Dictionary).get("vzhled", {})
+	var vz: Dictionary = Pravidla.cti("prostredi", "rybnik_lhota_vzhled")
 	var mt := mi.get_active_material(si) as ShaderMaterial
 	if vz.is_empty() or mt == null:
 		return

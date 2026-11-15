@@ -37,5 +37,15 @@
    "jas_min": 0.04,
    "_jas": "test voda_odraz (tools/foto_voda.gd): prumerny jas hladiny pri nizkem pohledu (oko 1,7 m, 15-60 m daleko) <= jas_k_obzoru_max x jas oblohy u obzoru (odraz okoli je tmavsi nez nebe; mereni 9. 11.: pred opravou 1,00 = hladina bila jako obloha, po oprave 0,56-0,61 - v pasu je i blizka hladina, ktera oblohu odrazet ma) a >= jas_min (0.97: cerna dira)"
   }
- }
+ },
+ "rybnik_lhota_vzhled": {
+  "okrehek": 0.35,
+  "kalnost": 0.7,
+  "deep": [
+   0.09,
+   0.13,
+   0.09
+  ]
+ },
+ "_rybnik_lhota_vzhled": "15. 11. kontrola před vydáním: hladina rybníka v2 měla materiál voda_prikop (kalnost 0,93, deep 0,05 = příkop tvrze) → z nízkého pohledu celá černá. Rybník má vlastní vzhled (nadrz.hloubka_hladiny přepíše parametry kopie materiálu u Rybnik_lhota_voda): stojatá voda s okřehkem jako KCD (sada2_10: tmavá, ale u kraje průhledná, zelenohnědá hloubka jako ostatní stojaté vody 0,08/0,115/0,08). Záznam v prostredi.json (jen hra), ne ve voda.json (vstup exportu Blenderu)."
 }
