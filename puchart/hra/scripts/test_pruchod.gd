@@ -745,7 +745,6 @@ func _chyba(t: String) -> void:
 
 func _konec() -> void:
 	var jen := OS.get_environment("PUCHART_JEN")
-	if "sonda" in jen: await _sonda()   # DOCASNE
 	if jen == "" or "kmene" in jen: await _test_kmene()
 	if jen == "" or "povrch" in jen: await _test_povrch()
 	if jen == "" or "vrata" in jen: await _test_vrata()
@@ -777,33 +776,3 @@ func _pod_stavbou(q: Vector3) -> bool:   # bod uvnitř půdorysu zdiva (kolizní
 		if q.y < float(c[1]) - 0.3 and Geometry2D.is_point_in_polygon(Vector2(q.x, q.z), c[0]): return true
 	return false
 
-
-func _sonda() -> void:   # DOCASNE: profil kolize podél tras dveří bez ramp
-	var space := hrac.get_world_3d().direct_space_state
-	for jm in trasy:
-		if not (String(jm) in ["dum_krcma_KrcmaL", "dum_hajovna_Hajovna", "pavlac_krcma_KrcmaL", "puda_hajovna_Hajovna", "dum_predhradi_Dum1_3"]): continue
-		var body: Array = trasy[jm]
-		var a := Vector3(body[0][0], 0, body[0][1]); var b := Vector3(body[-1][0], 0, body[-1][1])
-		if String(jm).begins_with("dum_"): a = a + (a - b).normalized() * 1.5
-		hlavni.svet.kolize_ihned(a)
-		for i in 4: await get_tree().physics_frame
-		var ln := "SONDA %s" % jm
-		var L := a.distance_to(b); var n := int(L / 0.05)
-		var prev := -999.0
-		for k in n + 1:
-			var p := a.lerp(b, float(k) / n)
-			var yt: float = hlavni.svet.vyska(p.x, p.z)
-			var top := 0.0
-			for bb in body: top = maxf(top, float(bb[2]) if bb[2] != null else -999.0)
-			top += 1.2
-			var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, yt + 1.2 if String(jm).begins_with("dum_") else top, p.z), Vector3(p.x, yt - 2.0 if String(jm).begins_with("dum_") else -40.0, p.z))
-			var ex: Array[RID] = [hrac.get_rid()]; q.exclude = ex
-			var h := space.intersect_ray(q)
-			while not h.is_empty() and (String((h["collider"] as Node).name) in ["RampyDveri", "Najezdy"]):
-				ex.append((h["collider"] as CollisionObject3D).get_rid()); q.exclude = ex; h = space.intersect_ray(q)
-			if h.is_empty(): continue
-			var y: float = (h["position"] as Vector3).y - yt
-			if absf(y - prev) > 0.02:
-				ln += " | %.2f: %.2f %s/%s n%.2f" % [k * 0.05, y, (h["collider"] as Node).get_parent().name, (h["collider"] as Node).name, (h["normal"] as Vector3).y]
-				prev = y
-		print(ln)
