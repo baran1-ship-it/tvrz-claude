@@ -40,5 +40,6 @@
  "dmp1g": "ČÚZK DMP 1G (obrazová korelace) ImageServer arcgis2/dmp1g; výška porostu = DMP 1G − DMR 5G",
  "biotopy": "AOPK ČR mapování biotopů, Biotopy/BiotopyProhlizecka vrstva 1 (aktuální), 295 segmentů ve výseku, mapování 2021",
  "ppv": "AOPK ČR, PrirodniPomery/PotencialVegetace vrstva 1 (mapa PPV)",
- "inaturalist": "iNaturalist species_counts research grade Plantae, bbox 49.57–49.66 N 17.60–17.76 E, 150 druhů (29. 10. 2026)"
+ "inaturalist": "iNaturalist species_counts research grade Plantae, bbox 49.57–49.66 N 17.60–17.76 E, 150 druhů (29. 10. 2026)",
+ "kovadlina_1393": "Kovadlina (blender/kovadlina.py, pravidla/svet/kovadlina_1393.json): textury Poly Haven CC0 1.0 – rust_coarse_01 (Dimitrios Savva foto, Rico Cilliers zpracování, https://polyhaven.com/a/rust_coarse_01) a rough_wood (Rob Tuytel, https://polyhaven.com/a/rough_wood), 2k jpg, staženo 15. 11. 2026; geometrie, čelo špalku (letokruhy, trhliny) a zapečení vlastní tvorba. Předloha tvaru KCD2 (docs/reference/kovarna/kcd2_kovadlina_misa_15_11.jpg) – inspirace, ne kopie."
 }
