@@ -1998,7 +1998,64 @@
    "_p": "Míša 14. 11. („studnu přesuň na náves“ – stála v místě nové krčmy u staré návsi): na návsi uvnitř zatáčky vedle lípy (dvorec_zaznam lipa_navsi 429,7 / 819); dřív vesnice.py c + au·(−6) + av·(−11) = (472,5; 817,7)"
   },
   "stara_krcma_obycejna": true,
-  "_stara_krcma_obycejna": "Míša 14. 11. („nebude se mazat současná krčma, upraví se zpět jako obyčejná usedlost“): usedlost 0 u vjezdu bez vývěsního štítu (blender/vesnice.py sign); stavení, dvůr a rozměry zůstávají. Krčmář a hosté → krčma do L (lokace krcma_l)."
+  "_stara_krcma_obycejna": "Míša 14. 11. („nebude se mazat současná krčma, upraví se zpět jako obyčejná usedlost“): usedlost 0 u vjezdu bez vývěsního štítu (blender/vesnice.py sign); stavení, dvůr a rozměry zůstávají. Krčmář a hosté → krčma do L (lokace krcma_l).",
+  "vyslapano": {
+   "popis": "Míša 15. 11. (tabulka docs/rozpracovane/misa_15_11_chyby.md ř. 11: „okolo kovárny je jen louka, ve vsi je moc trávy – v Puchartu super a uleví grafice, ale ne žádná tráva“): kde se chodí, je udusaná hlína (bez trsů, barva hlíny) – u KAŽDÉ stavby vsi (dům, stodola a kůlna usedlostí, kovárna a dům kováře, krčma do L, chalupa u větrníku; vesnice.stavby_vsi) pás okap_m kolem půdorysu a plocha před každým vstupem (pred_vstupem_m hluboká, dveře + pred_okraj_m po stranách), náves u studny (naves_polomer_m), celý dvůr usedlosti (vesnice.yard_dirt × hlina.dvur). Jedno pravidlo pro barvu terénu, masku trsů vsi i krajiny a výluku drobností (kraj.placek → vesnice.vyslapano). Ulice (ves.ulice pulsirka + ves_ramec drn_m) a cestičky od vrat a dveří (vesnice ves_paths, svet.gd _pesiny_k_domum) mají vlastní záznamy.",
+   "zdroj": "Puchart pravidla/svet/mista.json usedlosti.vyslapano (třída ves_slap: okap 1,2 m, před vstupem 3 m a 0,5 m po stranách, náves r 6 m u studny, síly hlíny ulice 0,9, náves 0,85, chodník 0,85, před vstupem 0,9, okap 0,7, dvůr 0,85) a usedlosti.vstupy (dveře 1 m, vrata stodoly 3 m uprostřed přední stěny, kůlna otevřená po celé délce); KCD docs/reference/kcd_vzhled/misa_kcd_04.jpg, misa_kcd_14.jpg",
+   "okap_m": 1.2,
+   "pred_vstupem_m": 3.0,
+   "pred_okraj_m": 0.5,
+   "dvere_sirka_m": 1.0,
+   "naves_polomer_m": 6.0,
+   "prechod_m": 0.8,
+   "sum_m": 0.5,
+   "hlina": {
+    "naves": 0.85,
+    "pred_vstupem": 0.9,
+    "okap": 0.7,
+    "dvur": 0.85
+   },
+   "vstupy_domu": {
+    "Dum1": [
+     [
+      1,
+      -0.5
+     ],
+     [
+      -1,
+      0.45
+     ]
+    ],
+    "Dum2": [
+     [
+      1,
+      -0.2
+     ],
+     [
+      -1,
+      0.2
+     ]
+    ],
+    "Rychta": [
+     [
+      1,
+      -2.25
+     ],
+     [
+      -1,
+      2.2
+     ]
+    ]
+   },
+   "vstupy_hosp": {
+    "stodola": 3.0,
+    "kolna": "cela"
+   },
+   "_klice": "okap_m pás kolem půdorysu (podezdívka / obal modelu); pred_vstupem_m hloubka plochy před vstupem, šířka = vstup + 2 × pred_okraj_m; prechod_m plynulý přechod hlíny do trávy za okrajem plochy (Puchart má ostrý polygon, mřížka trsů 2 m by dala schod), sum_m nepravidelnost okraje (kraj.sum_m perioda 3 m); hlina = síla hlíny 0..1 (okap slabší, tráva prosvítá); vstupy_domu [strana x modelu ±1 (+1 vstup z ulice, −1 do dvora), z dveří] v souřadnicích modelu (+z štít do návsi) = scripts/svet.gd DUM_MER vstup/dvur (test smyslu vyslapano hlídá shodu); vstupy_hosp: vrata stodoly (m, uprostřed stěny ke dvoru), kůlna otevřená po celé délce ke dvoru"
+  },
+  "trava_hustota_naves": 0.6,
+  "trava_naves_dosah_m": 30.0,
+  "_trava_hustota_naves": "Míša 15. 11. (ř. 11: „ve vsi je moc trávy … ale ne žádná tráva“; Puchart: tráva jen v zahradách, sadech, na lánech a za ploty): maska trsů vsi (blender/export_game.py §3b) × trava_hustota_naves mimo usedlosti (vesnice.in_homestead) do trava_naves_dosah_m od středu stavby vsi (vesnice.stavby_vsi) – náves a okolí ulice řidší, zahrady a sady beze změny. Míň trsů = míň instancí na GPU (počet NEOVĚŘENO, změřit Měřicí trasou)."
  },
  "drobne": [
   {
@@ -2446,7 +2503,34 @@
    "Kovarna_Kol_PodlahaPristresek"
   ],
   "_vynechat": "Míša 14. 11. (v Puchartu stejná kovárna: dlažba je součást modelu, nedá se na ni vystoupit, pravidelná jako dlaždice na trávníku): dlažba přístřešku i hliněná podlaha z modelu pryč (i jejich kolize) – na zemi naše udusaná hlína (kraj.PLACKY plac_r_m)",
-  "_presun": "15. 11.: kovarna a dum kovare stály v koridoru odtoku Lhoty (Misa „dum kovare na potoce“). Dva pokusy preplanovat potok kolem nich neprosly testem smyslu po exportu (tok na nasypu 7 a 17 mist - planovac pocita s terenem pred exportem, Blender udoli tvaruje jinak). Proto potok na puvodni trase a stavby posunuty mimo koridor: placka + koryto + breh + prechod (test smyslu), rovina, mimo cesty a usedlosti (vypocet z vysky.json)."
+  "_presun": "15. 11.: kovarna a dum kovare stály v koridoru odtoku Lhoty (Misa „dum kovare na potoce“). Dva pokusy preplanovat potok kolem nich neprosly testem smyslu po exportu (tok na nasypu 7 a 17 mist - planovac pocita s terenem pred exportem, Blender udoli tvaruje jinak). Proto potok na puvodni trase a stavby posunuty mimo koridor: placka + koryto + breh + prechod (test smyslu), rovina, mimo cesty a usedlosti (vypocet z vysky.json).",
+  "pudorys_lok": [
+   -3.45,
+   6.34,
+   -3.27,
+   3.08
+  ],
+  "vstupy_lok": [
+   [
+    1.45,
+    3.08,
+    0.0,
+    1.0,
+    9.79
+   ]
+  ],
+  "hlina_obdelnik": {
+   "x": [
+    -3.6,
+    6.5
+   ],
+   "z": [
+    -3.3,
+    5.0
+   ],
+   "hlina": 0.95
+  },
+  "_vyslapano": "Míša 15. 11. (ř. 11: „okolo kovárny je jen louka“): pudorys_lok [x0, x1, z0, z1] = AABB modelu kovarna.glb (Puchart mista_stavby.json pozn_kovarna: x −3,45…6,34, z −3,27…3,08), vstupy_lok [[x, z, nx, nz, šířka]] = otevřená strana +Z po celé šířce; hlina_obdelnik = udusaná hlína pod kovárnou, přístřeškem a 2 m před otevřenou stranou (Puchart modely.hospodarske.kovarna_hlina, Míša 14. 11. „jen udusaná hlína“), síla hlina. Čte vesnice.stavby_vsi / vyslapano (ves.vyslapano)."
  },
  "krcma_l": {
   "popis": "Míša 14. 11. (snímek ze hry: „krčma“ zakroužkovaná vlevo od odbočky k rybníku, studnu přesunout na náves; stará krčma U Kohouta zůstane jako obyčejná usedlost): krčma do L (Disk budovy krcma.zip, NAVOD_KRCMA_L.md) u odbočky (stará ulice) k rybníku, uliční stranou (+Z modelu) k odbočce, stájové křídlo (+x modelu) směrem k rybníku. Střed = osa staré ulice (ves.stred_stare_navsi + osa vesnice.AXIS) + 11,5 m stranou (průčelí 6 m od osy). Míša 14. 11. večer: nová verze modelu (krcma_L (1).zip) – širší křídlo (kamenná stáj 8,4 × 12,4 m dole, pavlač, pokoj 1 a 2, nocležna nahoře), model BEZ vybavení – lůžka, sudy, koryta a stoly z naší hry (nabytek).",
@@ -2809,7 +2893,58 @@
     -9.7
    ]
   ],
-  "_kryti_lok": "Míša 15. 11. (na dvoře krčmy nepršelo): střechy v rámci modelu [x0, z0, x1, z1] – dům, křídlo se stájí a pavlačí, kůlna v rohu dvora (rozbor kolizí 15. 11.: dům x −8,6…7,6 z −4,9…4,9, křídlo x 8,8…18,9 z −11,9…1,9; kůlna x −7,7…−3,1 z −12,8…−9,8 + přesah). pod_strechou bere jen tyto obdélníky, půdorys celého modelu (i s dvorem) dál drží jen trávu."
+  "_kryti_lok": "Míša 15. 11. (na dvoře krčmy nepršelo): střechy v rámci modelu [x0, z0, x1, z1] – dům, křídlo se stájí a pavlačí, kůlna v rohu dvora (rozbor kolizí 15. 11.: dům x −8,6…7,6 z −4,9…4,9, křídlo x 8,8…18,9 z −11,9…1,9; kůlna x −7,7…−3,1 z −12,8…−9,8 + přesah). pod_strechou bere jen tyto obdélníky, půdorys celého modelu (i s dvorem) dál drží jen trávu.",
+  "pudorys_lok": [
+   [
+    -8.16,
+    7.17,
+    -4.16,
+    4.16
+   ],
+   [
+    9.8,
+    18.2,
+    -11.2,
+    1.2
+   ],
+   [
+    -7.7,
+    -3.1,
+    -12.8,
+    -9.8
+   ]
+  ],
+  "vstupy_lok": [
+   [
+    0.65,
+    4.16,
+    0.0,
+    1.0,
+    1.0
+   ],
+   [
+    1.48,
+    -4.16,
+    0.0,
+    -1.0,
+    0.94
+   ],
+   [
+    8.55,
+    3.9,
+    0.0,
+    1.0,
+    2.4
+   ],
+   [
+    9.8,
+    -2.8,
+    -1.0,
+    0.0,
+    2.36
+   ]
+  ],
+  "_vyslapano": "Míša 15. 11. (ř. 11, ves.vyslapano): pudorys_lok [[x0, x1, z0, z1]] = podezdívka domu (KrcmaL_Podezdivka) a kamenné křídlo (KrcmaL_Kridlo_Kamen) a kůlna v rohu dvora (_kryti_lok) z modely/krcma/krcma_L.glb; vstupy_lok [[x, z, nx, nz, šířka]] = přízemní dveře a vrata z uzlů modelu (KrcmaL_Dvere_Vchod, _Dvur, KrcmaL_Vrata_L/P, KrcmaL_Vrata_Staj_L/P; střed otvoru, směr ven); dveře na pavlači (patro) a vnitřní ne."
  },
  "kovarna_tvrz": {
   "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",

@@ -191,9 +191,9 @@ SVY_OTEV = {}
 for k, objs in GAR.items():
     if k not in SVY["kontrola_kusy"] or k not in KROJ.get("vychozi", list(GAR)): continue
     for o in objs:
-        oh = _cl.otevrene_hrany(o, arm, SVY["oblast"])
-        SVY_OTEV[o.name] = len(oh)
-        print("SVY", o.name, "kusu", _cl.kusy(o), "otevrenych hran v ramenou", len(oh),
+        oh = _cl.otevrene_hrany(o, arm, SVY["oblast"]); ks_ = _cl.kusy(o)
+        SVY_OTEV[o.name] = len(oh) + max(0, ks_ - 1)          # i každý kus navíc = nesvařený oděv
+        print("SVY", o.name, "kusu", ks_, "otevrenych hran v ramenou", len(oh),
               [tuple(round(c, 3) for c in x) for x in oh[:4]])
 print("SVY CELKEM", sum(SVY_OTEV.values()))
 

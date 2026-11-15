@@ -1307,6 +1307,179 @@ def okraj_stavby(x, z):
 _OKRAJ = None
 
 
+# ------------------------------------------------------------------ vyslapano u staveb vsi (lokace.json ves.vyslapano)
+_LOKC = None
+_STAVBY_VSI = None
+_VY_MRIZ = None
+
+
+def _lokace():
+    global _LOKC
+    if _LOKC is None:
+        import json
+        import os
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pravidla", "svet", "lokace.json"), encoding="utf-8") as f:
+            _LOKC = json.load(f)
+    return _LOKC
+
+
+def stavby_vsi():
+    """Kazda stavba vsi s pudorysem a vstupy v ramci modelu (Misa 15. 11. ř. 11, jako Puchart usedlosti.vstupy):
+    [{id, o (x, z) pocatek modelu, ex, ez (smery os x a z modelu ve svete), boxy [(x0, x1, z0, z1)],
+    vstupy [(x, z, nx, nz, sirka)], obdelnik (x0, x1, z0, z1, hlina) nebo None}]. Usedlosti (dum podle domy_typ,
+    stodola, kulna), kovarna a dum kovare, krcma do L, chalupa u vetrniku - pro vyslapano a test smyslu vyslapano."""
+    global _STAVBY_VSI
+    if _STAVBY_VSI is not None:
+        return _STAVBY_VSI
+    L_ = _lokace()
+    ves = L_["ves"]
+    VY = ves["vyslapano"]
+    PZ = ves["domy_podezdivka"]
+    out = []
+
+    def dum(id_, typ, ox, oz, ez):
+        m = PZ[typ]
+        ex = (ez[1], -ez[0])                        # svet.gd Basis(UP, PI/2 - a): +x modelu = -av
+        vs = [(sg * m["hw"], zz, float(sg), 0.0, VY["dvere_sirka_m"]) for sg, zz in VY["vstupy_domu"].get(typ, [])]
+        out.append({"id": id_, "o": (ox, oz), "ex": ex, "ez": ez, "boxy": [(-m["hw"], m["hw"], m["b"], m["f"])], "vstupy": vs,
+                    "obdelnik": None})
+
+    def natoceni(id_, e, boxy, vstupy, obd):
+        n = e["natoceni"]                           # svet.gd Basis(UP, natoceni) (kovarna, krcma; kraj placky_lok)
+        out.append({"id": id_, "o": tuple(e["stred"]), "ex": (math.cos(n), -math.sin(n)), "ez": (math.sin(n), math.cos(n)),
+                    "boxy": [tuple(b) for b in boxy], "vstupy": [tuple(v) for v in vstupy], "obdelnik": obd})
+
+    for h in layout():
+        k = _usedlost_k(h)
+        F = Frame((h["p"].x, h["p"].z), h["yaw"], 0.0)
+        ez = (F.au.x, F.au.z)
+        typ = ves.get("domy_typ", {}).get(str(k)) if h.get("novy_ramec") else None
+        if typ:
+            o = F.c + F.au * (h["L"] / 2.0 - PZ[typ]["f"])         # jako _pads / svet.gd _domy_ramce
+            dum("ves_dum_%d" % k, typ, o.x, o.z, ez)
+        else:
+            # stara chalupa Blenderu (cottage): dvere do dvora na +v (= -x modelu) v sini mezi jizbou a komorou
+            Lj, Lk = max(5.2, h["L"] * 0.5), (2.8 if h["var"].get("typ") == "krcma" else 2.3)
+            us = (h["L"] / 2 - Lj + (-h["L"] / 2 + Lk)) / 2
+            out.append({"id": "ves_dum_%d" % k, "o": (F.c.x, F.c.z), "ex": (-F.av.x, -F.av.z), "ez": ez,
+                        "boxy": [(-h["W"] / 2, h["W"] / 2, -h["L"] / 2, h["L"] / 2)],
+                        "vstupy": [(-h["W"] / 2, us, -1.0, 0.0, VY["dvere_sirka_m"])], "obdelnik": None})
+        for key, druh in (("barn", "stodola"), ("kolna", "kolna")):
+            if key not in h:
+                continue
+            p, yaw, Lb, Wb = h[key]
+            Fb = Frame((p.x, p.z), yaw, 0.0)
+            # +x = -av stavby = ke dvoru (stodola a kulna napric za dvorem, vrata k domu)
+            w = Lb if VY["vstupy_hosp"][druh] == "cela" else float(VY["vstupy_hosp"][druh])
+            out.append({"id": "ves_%s_%d" % (druh, k), "o": (Fb.c.x, Fb.c.z), "ex": (-Fb.av.x, -Fb.av.z), "ez": (Fb.au.x, Fb.au.z),
+                        "boxy": [(-Wb / 2, Wb / 2, -Lb / 2, Lb / 2)], "vstupy": [(Wb / 2, 0.0, 1.0, 0.0, w)], "obdelnik": None})
+    kv = L_.get("kovarna_ves", {})
+    if kv.get("stred"):
+        ho = kv["hlina_obdelnik"]
+        natoceni("kovarna_ves", kv, [kv["pudorys_lok"]], kv["vstupy_lok"], (ho["x"][0], ho["x"][1], ho["z"][0], ho["z"][1], ho["hlina"]))
+        a = kv["dum"]["natoceni"]
+        dum("kovarna_ves.dum", kv["dum"]["model"], kv["dum"]["stred"][0], kv["dum"]["stred"][1], (math.cos(a), math.sin(a)))
+    kr = L_.get("krcma_l", {})
+    if kr.get("stred"):
+        natoceni("krcma_l", kr, kr["pudorys_lok"], kr["vstupy_lok"], None)
+    vc = L_.get("vetrak", {}).get("chalupa", {})
+    if vc.get("stred"):
+        a = vc["natoceni"]
+        dum("vetrak.chalupa", vc["model"], vc["stred"][0], vc["stred"][1], (math.cos(a), math.sin(a)))
+    _STAVBY_VSI = out
+    return out
+
+
+def lok_bod(s, x, z):
+    """Svet -> souradnice modelu stavby (stavby_vsi)."""
+    dx, dz = x - s["o"][0], z - s["o"][1]
+    return dx * s["ex"][0] + dz * s["ex"][1], dx * s["ez"][0] + dz * s["ez"][1]
+
+
+def svet_bod(s, mx, mz):
+    return s["o"][0] + s["ex"][0] * mx + s["ez"][0] * mz, s["o"][1] + s["ex"][1] * mx + s["ez"][1] * mz
+
+
+def _mriz_vyslapano():
+    """Mrizka 8 m -> indexy staveb v dosahu (rychle odmitnuti: kraj.placek se pta v cele krajine)."""
+    global _VY_MRIZ
+    if _VY_MRIZ is None:
+        VY = _lokace()["ves"]["vyslapano"]
+        dos = VY["okap_m"] + VY["pred_vstupem_m"] + VY["prechod_m"] + VY["sum_m"] + 1.0
+        _VY_MRIZ = {}
+        for i, s in enumerate(stavby_vsi()):
+            bx = list(s["boxy"]) + ([s["obdelnik"][:4]] if s["obdelnik"] else [])
+            r = max(max(abs(b[0]), abs(b[1])) ** 2 + max(abs(b[2]), abs(b[3])) ** 2 for b in bx) ** 0.5 + dos
+            cx, cz = int(math.floor(s["o"][0] / 8.0)), int(math.floor(s["o"][1] / 8.0))
+            n = int(r / 8.0) + 1
+            for a in range(-n, n + 1):
+                for b in range(-n, n + 1):
+                    _VY_MRIZ.setdefault((cx + a, cz + b), []).append(i)
+        for c, au, av, L, W, u0 in _yards():             # dvur (yard_dirt): -1 = bez stavby
+            cx, cz = int(math.floor(c.x / 8.0)), int(math.floor(c.z / 8.0))
+            n = int(math.hypot(L / 2 + 16.0, W / 2 + 12.0) / 8.0) + 1
+            for a in range(-n, n + 1):
+                for b in range(-n, n + 1):
+                    _VY_MRIZ.setdefault((cx + a, cz + b), []).append(-1)
+    return _VY_MRIZ
+
+
+def _box_d(mx, mz, x0, x1, z0, z1):
+    return math.hypot(max(x0 - mx, mx - x1, 0.0), max(z0 - mz, mz - z1, 0.0))
+
+
+def vyslapano(x, z):
+    """Udusana hlina 0..1 u staveb vsi (lokace.json ves.vyslapano, Puchart usedlosti.vyslapano): pas okap_m kolem
+    pudorysu, plocha pred kazdym vstupem, obdelnik hliny kovarny, naves u studny, cely dvur usedlosti. Cte kraj.placek
+    (barva terenu, maska trsu vsi i krajiny, vyluka drobnosti) - jedno pravidlo."""
+    ves = _lokace()["ves"]
+    VY = ves["vyslapano"]
+    HL = VY["hlina"]
+    m = 0.0
+    st = ves.get("studna", {}).get("stred")
+    if st and abs(x - st[0]) < VY["naves_polomer_m"] + 3.0 and abs(z - st[1]) < VY["naves_polomer_m"] + 3.0:
+        d = math.hypot(x - st[0], z - st[1]) - VY["naves_polomer_m"]
+        m = HL["naves"] * (1.0 - kraj.smooth(0.0, VY["prechod_m"], d + VY["sum_m"] * (kraj.sum_m(x, z, 3.0) - 1.0)))
+    lst = _mriz_vyslapano().get((int(math.floor(x / 8.0)), int(math.floor(z / 8.0))))
+    if not lst:
+        return m
+    # sum jen ven: jmenovita plocha (okap_m, pred_vstupem_m) cela, okraj nepravidelne o 0..2 x sum_m dal
+    nz = VY["sum_m"] * (kraj.sum_m(x, z, 3.0) - 1.0)
+    S = stavby_vsi()
+    for i in lst:
+        if i < 0:
+            continue
+        s = S[i]
+        mx, mz = lok_bod(s, x, z)
+        for b in s["boxy"]:
+            d = _box_d(mx, mz, *b)
+            m = max(m, HL["okap"] * (1.0 - kraj.smooth(VY["okap_m"], VY["okap_m"] + VY["prechod_m"], d + nz)))
+        for px, pz, nx, nzz, w in s["vstupy"]:
+            t = (mx - px) * nx + (mz - pz) * nzz
+            q = abs(-(mx - px) * nzz + (mz - pz) * nx)
+            d = math.hypot(max(-t, t - VY["pred_vstupem_m"], 0.0), max(q - w / 2.0 - VY["pred_okraj_m"], 0.0))
+            m = max(m, HL["pred_vstupem"] * (1.0 - kraj.smooth(0.0, VY["prechod_m"], d + nz)))
+        if s["obdelnik"]:
+            x0, x1, z0, z1, hl = s["obdelnik"]
+            m = max(m, hl * (1.0 - kraj.smooth(0.0, VY["prechod_m"], _box_d(mx, mz, x0, x1, z0, z1) + nz)))
+    if m < HL["dvur"]:
+        m = max(m, HL["dvur"] * yard_dirt(x, z))
+    return m
+
+
+def trava_naves(x, z):
+    """Nasobek masky trsu vsi (lokace.json ves.trava_hustota_naves): mimo usedlosti do trava_naves_dosah_m od stavby
+    vsi ridsi trava (nave a okoli ulice), zahrady a sady beze zmeny."""
+    ves = _lokace()["ves"]
+    dos = ves["trava_naves_dosah_m"]
+    if in_homestead(x, z):
+        return 1.0
+    for s in stavby_vsi():
+        if abs(x - s["o"][0]) < dos and abs(z - s["o"][1]) < dos and math.hypot(x - s["o"][0], z - s["o"][1]) < dos:
+            return ves["trava_hustota_naves"]
+    return 1.0
+
+
 def _in_building(x, z, margin=1.5):
     for c, au, av, hu, hv, yp in _pads():
         dx, dz = x - c.x, z - c.z

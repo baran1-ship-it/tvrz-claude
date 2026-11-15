@@ -254,8 +254,10 @@ CESTY = CESTY + CESTY_STAVBY
 
 
 def placek(x, z):
-    """Mira hliny na placku pred hostincem 0..1 (nepravidelny okraj)."""
-    m = 0.0
+    """Mira hliny na placku pred hostincem 0..1 (nepravidelny okraj); u staveb vsi i vyslapano (okap, pred vstupy,
+    kovarna, naves u studny, dvur - lokace.json ves.vyslapano, Misa 15. 11. ř. 11) - barva terenu, masky trsu, drobnosti."""
+    import vesnice
+    m = vesnice.vyslapano(x, z)
     for px, pz, r in PLACKY:
         d = math.hypot(x - px, z - pz) + 2.0 * sum_m(x, z, 4.0)
         m = max(m, 1.0 - smooth(r - 2.0, r + 1.0, d))
@@ -664,9 +666,142 @@ def ryb_hladina_r(ryb, a, land_fn):
 
 
 def ryb_polomer(ryb, x, z):
-    """Polomer brehu rybnika ve smeru bodu (voda.json okraj_vlny: nepravidelny breh misto kruhu)."""
+    """Polomer brehu rybnika ve smeru bodu (voda.json okraj_vlny: nepravidelny breh misto kruhu; rybnik v2: obrys)."""
+    if "obrys" in ryb:
+        return ryb2_polomer(ryb, x, z)
     a = math.atan2(z - ryb["stred"][1], x - ryb["stred"][0])
     return ryb["polomer_m"] * (1.0 + sum(v[1] * math.sin(v[0] * a + v[2]) for v in ryb.get("okraj_vlny", [])))
+
+
+# ---- rybnik v2 (Misa 15. 11. r. 13, docs/rozpracovane/misa_15_11_chyby.md: „nechces si udelat komplet novy model?“):
+# cely rybnik z jednoho zaznamu voda.json (obrys = kraj vody, hraz, vtok, pozerak, vypust, preliv, lavka). Poradi stavby:
+# teren (dno, breh, hraz, zatoka vtoku, tune vypusti: ryb2_tvar v voda_tvar) -> hladina = vrstevnice skutecneho terenu
+# v hladina_y na mrizce hladina_mrizka_m, kraj pruhledny (ryb2_hladina_sit) -> vegetace (ryb2_vegetace) -> predmety
+# k vypocitanemu kraji (ryb2_predmety). Stejne funkce bere test smyslu (rybnik_vtok, voda_bez_hrany, vypust).
+_RYB2 = {}
+
+
+def ryb2(ryb):
+    """Predpocet zaznamu rybnika v2: useky obrysu, obal, ramec hraze (u osa, n po proudu), vtok, vypust."""
+    k = id(ryb)
+    if k in _RYB2:
+        return _RYB2[k]
+    pts = [(float(p[0]), float(p[1])) for p in ryb["obrys"]]
+    xs, zs = [p[0] for p in pts], [p[1] for p in pts]
+    g = {"pts": pts, "seg": list(zip(pts, pts[1:] + pts[:1])), "bb": (min(xs), max(xs), min(zs), max(zs))}
+    hz = ryb["hraz"]
+    ux, uz = hz["smer_osy"]
+    L = math.hypot(ux, uz) or 1.0
+    ux, uz = ux / L, uz / L
+    nx, nz = -uz, ux
+    if (hz["stred"][0] - ryb["stred"][0]) * nx + (hz["stred"][1] - ryb["stred"][1]) * nz < 0.0:
+        nx, nz = -nx, -nz                              # normala hraze po proudu (od rybnika ven)
+    g["u"], g["n"] = (ux, uz), (nx, nz)
+    vy = ryb["vypust"]
+    dx, dz = vy["celo"][0] - hz["stred"][0], vy["celo"][1] - hz["stred"][1]
+    g["a0"], g["t_celo"] = dx * ux + dz * uz, dx * nx + dz * nz      # osa trouby a lice cela v ramci hraze
+    _RYB2[k] = g
+    return g
+
+
+def ryb_de(ryb, x, z):
+    """Znamenkova vzdalenost bodu od kraje vody rybnika v2 (obrys; + ve vode, - na brehu)."""
+    g = ryb2(ryb)
+    b = g["bb"]
+    if x < b[0] - 40.0 or x > b[1] + 40.0 or z < b[2] - 40.0 or z > b[3] + 40.0:
+        return -40.0
+    best = 1e18
+    uvnitr = False
+    for (ax, az), (bx, bz) in g["seg"]:
+        dx, dz = bx - ax, bz - az
+        L = dx * dx + dz * dz or 1e-12
+        t = max(0.0, min(1.0, ((x - ax) * dx + (z - az) * dz) / L))
+        ex, ez = x - ax - dx * t, z - az - dz * t
+        best = min(best, ex * ex + ez * ez)
+        if (az > z) != (bz > z) and x < ax + (z - az) * dx / (bz - az):
+            uvnitr = not uvnitr
+    best = math.sqrt(best)
+    return best if uvnitr else -best
+
+
+def ryb2_polomer(ryb, x, z):
+    """Polomer obrysu (kraje vody) ve smeru bodu od stredu - prusecik paprsku s obrysem (obrys je hvezdicovy)."""
+    cx, cz = ryb["stred"]
+    dx, dz = x - cx, z - cz
+    L = math.hypot(dx, dz)
+    if L < 1e-9:
+        dx, dz, L = 1.0, 0.0, 1.0
+    dx, dz = dx / L, dz / L
+    best = None
+    for (ax, az), (bx, bz) in ryb2(ryb)["seg"]:
+        ex, ez = bx - ax, bz - az
+        den = dx * ez - dz * ex
+        if abs(den) < 1e-12:
+            continue
+        t = ((ax - cx) * ez - (az - cz) * ex) / den          # vzdalenost po paprsku
+        s = ((ax - cx) * dz - (az - cz) * dx) / den          # poloha na useku
+        if t > 0.0 and -1e-9 <= s <= 1.0 + 1e-9 and (best is None or t < best):
+            best = t
+    return best if best is not None else float(ryb.get("polomer_m", 0.0))
+
+
+def ryb2_hraz(x, z, ryb):
+    """Vyska hraze rybnika v2 v bode (-inf mimo): koruna hladina + koruna_nad_hladinou_m, svahy sklon_svahu, v preliv
+    koruna snizena na preliv.koruna_nad_hladinou_m; za licem cela vypusti (a kridly 45 st.) hraz konci - tam je tune
+    a zacatek odtoku (vypust.celo)."""
+    g = ryb2(ryb)
+    hz = ryb["hraz"]
+    dx, dz = x - hz["stred"][0], z - hz["stred"][1]
+    a = dx * g["u"][0] + dz * g["u"][1]
+    t = dx * g["n"][0] + dz * g["n"][1]
+    vy = ryb["vypust"]
+    if t > g["t_celo"] and abs(a - g["a0"]) < vy["celo_sirka_m"] / 2.0 + (t - g["t_celo"]):
+        return -1e9                                   # cele vypusti a kridla: hraz za nimi neni (tune, odtok)
+    pr = ryb["preliv"]
+    ap = g["a0"] + pr["posun_m"]
+    w = 1.0 - smooth(pr["sirka_m"] / 2.0, pr["sirka_m"] / 2.0 + pr["nabeh_m"], abs(a - ap))
+    kor = hz["koruna_nad_hladinou_m"] + (pr["koruna_nad_hladinou_m"] - hz["koruna_nad_hladinou_m"]) * w
+    da = max(0.0, abs(a) - hz["delka_m"] / 2.0)
+    d = math.hypot(da, max(0.0, abs(t) - hz["koruna_sirka_m"] / 2.0))
+    return ryb["hladina_y"] + kor - d * hz["sklon_svahu"]
+
+
+def ryb2_tune(x, z, ryb):
+    """Dno tune pod celem vypusti (+inf mimo): misa polomeru tune_polomer_m, hloubka tune_hloubka_m pod hladinou
+    odtoku (prvni bod osy toku vypust.tok)."""
+    vy = ryb["vypust"]
+    g = ryb2(ryb)
+    tx = vy["celo"][0] + g["n"][0] * vy["tune_polomer_m"]
+    tz = vy["celo"][1] + g["n"][1] * vy["tune_polomer_m"]
+    d = math.hypot(x - tx, z - tz)
+    r = vy["tune_polomer_m"]
+    if d > r + 1.0:
+        return 1e9
+    y = vy["hladina_y"] - vy["tune_hloubka_m"] * (1.0 - (min(d, r) / r) ** 2)
+    return y + max(0.0, d - r) * 1.0
+
+
+def ryb2_tvar(x, z, h, ryb, prof_toku):
+    """Teren rybnika v2 (krok voda, po tocich): dno pod obrysem (parabola dno_svah_m, u kraje 1:2), breh nad hladinou
+    breh_svah do breh_nad_m a dal toky_tvar.svah (zarez), nizky teren zvednut na breh a dal nasyp toky_tvar.nasyp_svah
+    (voda nevytece), koryto toku (prof_toku) brehem projde; hraz (ryb2_hraz) a tune vypusti naposled."""
+    hl = ryb["hladina_y"]
+    de = ryb_de(ryb, x, z)
+    if de > -25.0:
+        if de >= 0.0:
+            f = min(1.0, de / ryb["dno_svah_m"])
+            h = min(h, hl - ryb["hloubka_m"] * (1.0 - (1.0 - f) ** 2))
+        else:
+            do = -de
+            bn = ryb["breh_nad_m"]
+            kb = bn / ryb["breh_svah"]                     # sirka strmejsiho brehu u vody
+            T = hl + min(do, kb) * ryb["breh_svah"] + _TT["svah"] * max(0.0, do - kb)
+            Tn = min(T, hl + bn) - _TT["nasyp_svah"] * max(0.0, do - kb - _TT["breh_sirka_m"] - 2.0)
+            h = max(min(h, T), min(Tn, prof_toku))
+    hr = ryb2_hraz(x, z, ryb)
+    if hr > h:
+        h = hr
+    return min(h, ryb2_tune(x, z, ryb))
 
 
 def ve_vode(x, z, y):
@@ -933,6 +1068,9 @@ def voda_tvar(x, z, h):
             # lhota_potok (585-587, 894) a nad jezem (627-629, 922-924) dno 3-9 cm pod hladinou)
             h = min(h, bed)
     for ryb in RYBNIKY:
+        if "obrys" in ryb:
+            h = ryb2_tvar(x, z, h, ryb, prof_toku)           # rybnik v2: dno, breh, hraz, tune z jednoho zaznamu
+            continue
         if "polomer_m" in ryb:
             cx, cz = ryb["stred"]
             d = math.hypot(x - cx, z - cz)

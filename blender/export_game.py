@@ -344,6 +344,8 @@ def main():
             g, les, pole = kraj.ground_attrs(x, z)
             m = max(0.0, min(1.0, (g - 0.3) / 0.45)) * (1.0 - 0.7 * les) * (0.5 if pole > 0.5 else 1.0)
             m *= vesnice.okraj_stavby(x, z)          # okraj stavby: totez pravidlo jako barva (kraj.ground_attrs)
+            # vyslapano u staveb (okap, pred vstupy, kovarna, dvur) jde pres g (kraj.placek); naves ridsi (Misa 15. 11. ř. 11)
+            m *= vesnice.trava_naves(x, z)
             import ves_ramec
             if ves_ramec.zapnuto():
                 m *= ves_ramec.ulice_pas(x, z)[1]     # trsy od kraje ulice (totez pravidlo jako barva)
