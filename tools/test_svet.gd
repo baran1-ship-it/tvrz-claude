@@ -8652,6 +8652,7 @@ func _postavy_modif() -> void:
 	for i in 240:
 		var k1 := int(li.get("anim_kroku"))
 		await get_tree().process_frame
+		li.call("_process_vlastni", 1.0 / 30.0)       # v testu se Lide nezpracovavaji samy (jako lide_zasek)
 		kroku_ves = maxi(kroku_ves, int(li.get("anim_kroku")) - k1)
 		kroku_sum += int(li.get("anim_kroku")) - k1
 		odpoj_max = maxi(odpoj_max, int(li.get("modif_odpojeno")))
