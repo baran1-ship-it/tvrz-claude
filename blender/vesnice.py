@@ -1128,6 +1128,21 @@ def pad_y(p, yaw, L, W):
     return _land(p.x, p.z)
 
 
+def ploty_usedlosti(h):
+    """Lomene cary plotu usedlosti (svet): predni latkovy plot s vraty a s brankou v linii stitu chalupy, bocni a zadni
+    ohrada z kulatiny. Jedno misto pro stavbu plotu (build) i test smyslu plot_ulice (rozpor #11: plot nesmi na hlinu
+    ulice - hra ho tam usekne, svet._ves_site_vyrez)."""
+    F = Frame((h["p"].x, h["p"].z), h["yaw"], 0.0)
+    L, W = h["L"], h["W"]
+    front = L / 2 + 0.05
+    back = -(L / 2 + 13.0)
+    pb = F.c + F.au * front + F.av * (W / 2 + 9.5)
+    pg1 = F.c + F.au * front + F.av * (-W / 2 - 6.2)
+    return {"latkovy_vrata": [F.c + F.au * front + F.av * (W / 2 + 0.12), pb],
+            "latkovy_branka": [F.c + F.au * front + F.av * (-W / 2 - 0.12), pg1],
+            "ohrada": [pb, F.c + F.au * back + F.av * (W / 2 + 9.5), F.c + F.au * back + F.av * (-W / 2 - 6.2), pg1]}
+
+
 def build(coll):
     P = Part("Vesnice", bevel=0.0)                 # rozpocet: zkosene hrany 3,7x vic troj. na kazde prkno
     Pf = Part("Vesnice_ploty", bevel=0.0)
@@ -1149,18 +1164,16 @@ def build(coll):
         else:
             barn(P, (bp.x, bp.z), byaw, bL, bW, h["barn_roof"], ypad=pad_y(bp, byaw, bL, bW))
         # ulice: plot v linii stitu chalupy (od rohu chalupy), na dvorni strane s vraty se strisekou
+        pl = ploty_usedlosti(h)
+        pa, pb = pl["latkovy_vrata"]
         front = L / 2 + 0.05
-        pa = F.c + F.au * front + F.av * (W / 2 + 0.12)
-        pb = F.c + F.au * front + F.av * (W / 2 + 9.5)
         picket_fence(Pf, pa, pb, gap=(1.0, 4.2))
         roofed_gate(Pf, F, W / 2 + 0.12 + 2.6, front, 3.0)
-        pg0 = F.c + F.au * front + F.av * (-W / 2 - 0.12)
-        pg1 = F.c + F.au * front + F.av * (-W / 2 - 6.2)
+        pg0, pg1 = pl["latkovy_branka"]
         picket_fence(Pf, pg0, pg1, gap=(0.62, 1.68))
         wicket(Pf, pg0 + (pg1 - pg0).normalized() * 0.7, (pg1 - pg0).normalized(), 0.9)
         # bocni a zadni ohrada dvora a zahrady
-        back = -(L / 2 + 13.0)
-        rail_fence(Pf, [pb, F.c + F.au * back + F.av * (W / 2 + 9.5), F.c + F.au * back + F.av * (-W / 2 - 6.2), pg1])
+        rail_fence(Pf, pl["ohrada"])
         # zahradka u chalupy za plotem (mezi stenou a bocnim plotem)
         garden(Pg, F, -L / 2 + 0.8, L / 2 - 0.6, -W / 2 - 5.8, -W / 2 - 1.0)
         # hranice dreva u zadniho stitu (ne pred dvermi), vuz na dvore, sudy u steny mimo vchod

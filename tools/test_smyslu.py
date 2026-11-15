@@ -775,6 +775,40 @@ for _typ, _vs in _VY["vstupy_domu"].items():
         chyba("vyslapano", _typ, "vstupy_domu %s nesouhlasi se svet.gd DUM_MER vstup/dvur (%s)" % (_vs, _m.groups() if _m else "chybi"))
 print("SMYSL vyslapano: %d staveb vsi, %d vstupu" % (len(_SV), sum(len(s_["vstupy"]) for s_ in _SV)))
 
+# okraj_stavby (rozpor #8, docs/rozpracovane/rozpory_blender_godot.md): JEDEN obrys domu vsi pro Blender i hru. Blender:
+# placka (vesnice._pads) = podezdivka ves.domy_podezdivka + pasma.budova.placka_okraj_m, okraj_stavby (barva terenu a maska
+# trsu) od ni; hra: louka._v_budove = svet._dum_zabira (DUM_MER z tychz domy_podezdivka, ramec _domy_ramce = stavby_vsi
+# dum) + pasma.budova.prah_m. Kontrola: (a) kazdy dum stavby_vsi ma placku se stejnym stredem a rozmerem (podezdivka +
+# placka_okraj_m), (b) v pasmu prah_m za zdi je Blender okraj_stavby 0 (udusana hlina, maska trsu 0) - hra tam travu
+# zakazuje taky, zadny pas, kde jedno pravidlo travu ma a druhe ne.
+_PB = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json"), encoding="utf-8"))["pasma"]["budova"]
+_pady = vesnice._pads()
+_okr_n = 0
+for s_ in _SV:
+    if not s_["id"].startswith("ves_dum_") or len(s_["boxy"]) != 1:
+        continue
+    x0, x1, z0, z1 = s_["boxy"][0]
+    if not any(abs(x1 - m_["hw"]) < 1e-6 and abs(z0 - m_["b"]) < 1e-6 and abs(z1 - m_["f"]) < 1e-6 for m_ in _LV["domy_podezdivka"].values()):
+        continue                                      # stara chalupa Blenderu (bez domy_typ) - hra ji nestavi
+    cx_, cz_ = vesnice.svet_bod(s_, 0.0, (z0 + z1) / 2.0)
+    hu_, hv_ = (z1 - z0) / 2.0 + _PB["placka_okraj_m"], (x1 - x0) / 2.0 + _PB["placka_okraj_m"]
+    shoda = [p for p in _pady if math.hypot(p[0].x - cx_, p[0].z - cz_) < 0.05 and abs(p[3] - hu_) < 0.05 and abs(p[4] - hv_) < 0.05]
+    if not shoda:
+        bl = min(_pady, key=lambda p: math.hypot(p[0].x - cx_, p[0].z - cz_))
+        chyba("okraj_stavby", s_["id"], "placka Blenderu nesedi na podezdivku domu hry: stred %.2f m vedle, polodelky %.2f/%.2f x %.2f/%.2f" % (
+            math.hypot(bl[0].x - cx_, bl[0].z - cz_), bl[3], hu_, bl[4], hv_))
+    pr_ = _PB["prah_m"]
+    trava = []
+    for mx, mz in ((0.0, z1 + pr_), (0.0, z0 - pr_), (x1 + pr_, (z0 + z1) / 2), (x0 - pr_, (z0 + z1) / 2),
+                   (x0 - pr_, z0 - pr_), (x1 + pr_, z0 - pr_), (x0 - pr_, z1 + pr_), (x1 + pr_, z1 + pr_)):
+        o_ = vesnice.okraj_stavby(*vesnice.svet_bod(s_, mx, mz))
+        if o_ > 0.0:
+            trava.append((round(mx, 2), round(mz, 2), round(o_, 2)))
+    if trava:
+        chyba("okraj_stavby", s_["id"], "v pasmu prah_m %.2f m za zdi Blender okraj_stavby > 0 (trsy), hra tam travu zakazuje: %s" % (pr_, trava[:4]))
+    _okr_n += 1
+print("SMYSL okraj_stavby: %d domu vsi, placka = podezdivka + %.2f m, prah %.2f m v udusanem okraji" % (_okr_n, _PB["placka_okraj_m"], _PB["prah_m"]))
+
 # ves_barva (Misa 15. 11. ř. 10: „bile budovy vzadu ve vsi nechci, chci hnede jako Puchart“): stredni stupen (barvy
 # vrcholu domy_stredni.glb) a hruby obal _Daleko (barva materialu domy.glb) kazdeho domu: prumer sRGB R > G > B a jas
 # nejvys modely.json ves_jas.stredni_daleko.test_jas_max (bez hnedeho cinitele 0,5 a seda). Soubory jsou vystup

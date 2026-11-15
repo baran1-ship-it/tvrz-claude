@@ -97,7 +97,7 @@
   "npc_pasacka": 7145,
   "npc_pastyr": 7400,
   "npc_petr": 7212,
-  "npc_ponocny": 6828,
+  "npc_ponocny": 7368,
   "npc_rychtar": 7381,
   "npc_stepan": 7571,
   "npc_straz": 7320,
@@ -150,7 +150,7 @@
   "mustek_min_m": 0.045,
   "mustek_pozn": "15. 11.: mezi dvema smyckami okraje jednoho kusu (pruramek limce kukle x spodni lem) zadny pasek uzsi - plochy pryc, otvory spojene (test_sev_dosah_m + rezerva pohybu)",
   "kape": {
-   "pozn": "15. 11.: kukle = jedna slupka (kapuce + limec), odsazeni na krku prechazi z kapuce na limec",
+   "pozn": "15. 11. (Misa r. 3, 02.jpg tmavy trojuhelnik pod kapuci): kukle = jedna slupka (kapuce + limec, maska kapuce u limce s presahem limec_nad_krkem_m), odsazeni na krku prechazi z kapuce na limec, cela nad kotlemi a kosili (vrstva_mezera_m), limec bere vahy kosti z kotle (vahy_vrstvy_*: obe vrstvy se ohybaji stejne), smycek okraje = obliceje + spodni lem (kontrola q_export2 SVY)",
    "kapuce_odsazeni_m": 0.014,
    "limec_odsazeni_m": 0.03,
    "limec_delka_m": 0.16,
@@ -160,7 +160,11 @@
    "smycek": 2,
    "vahy_vrstvy_plne_m": 0.05,
    "vahy_vrstvy_nic_m": 0.09
-  }
+  },
+  "test_vrstva_nad_krkem_m": 0.1,
+  "test_vrstva_dosah_m": 0.03,
+  "test_vrstva_tolerance_m": 0.002,
+  "test_vrstva_pozn": "15. 11.: test_svy_odevu - zadny vrchol spodniho kusu nesmi v klidu ani v pozach lezet vne vrchniho kusu pres hlavu (kukle) vic nez tolerance (stara kukle: kotle v tylu 1-2 cm venku)"
  },
  "_svy_odevu": "Míša 15. 11. ř. 3 (potrhané oblečení – tmavé trojúhelníky na ramenou a zádech). PŘÍČINA ZMĚŘENA: tělo Quaternius je po importu glTF 26 kusů (vrcholy rozdělené na švech UV/normál; svařené = 1 uzavřená skořepina), slupky oděvu (clothes.shell) je kopírovaly → oděv 23–31 nesvařených kusů, kusy < 30 ploch se mazaly (díry), vyhlazení a decimace hýbaly okraji kusů zvlášť. PRAVIDLO (tools/postavy_q): každý oděv svařit do jedné skořepiny (svar_m) před vyhlazením a decimací (clothes.shell, clothes.svar s průměrem vah shodných vrcholů), při decimaci okraje a švy UV zamčené (váha zamek_svu), váhy nejvýš max_kosti kostí (pod min_vaha pryč) a znormované v Blenderu. KONTROLA: q_export2 – otevřené hrany kusů kontrola_kusy v oblasti ramen a horních zad (oblast, mimo otvory krku, rukávů a lemu) = 0 (sada.json svy_otevrene, sestav.sh CHYBA); Godot tools/test_svy_odevu.gd – každá sada v test_snimku fázích test_klipy, skinování na CPU: vrcholy se stejnou klidovou polohou (do test_par_m) od sebe nejvýš test_partner_m a oblast ramen bez otevřených hran. jeden_kus: oděvy, jejichž každý objekt musí být po svaru jeden kus (košile ne – pod kotlemi z ní zůstávají jen viditelné části: límec a předloktí, záměrně 3 kusy; škorně 2 = dvě boty)."
 }

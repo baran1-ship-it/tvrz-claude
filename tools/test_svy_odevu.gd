@@ -81,6 +81,11 @@ func _beh() -> void:
 			await process_frame
 		var h := _zmer(sit)
 		_obj(sit, sada + "_klid")
+		var vk := _vrstva(sit)
+		var vrstvy: int = vk[0]
+		print("SVY %s klid: vrchni kus pres hlavu %d ploch, spodnich vrcholu %d, prorusta %d (nejvic %.4f m, klid %s)" % [sada, sit["vrch"].size() / 3, sit["spod"].size(), vk[0], vk[1], vk[2]])
+		if vk[0] > 0:
+			print("SVY CHYBA %s klid: spodni kus prorusta vrchnim (kukle), %d vrcholu" % [sada, vk[0]])
 		var horsi_par: float = h[0]
 		var sevy: int = h[1]
 		print("SVY %s klid: nejhorsi par %s" % [sada, h[3]])
@@ -106,6 +111,10 @@ func _beh() -> void:
 					await process_frame
 				var r := _zmer(sit)
 				_obj(sit, "%s_%s_%d" % [sada, kl, f])
+				var vf := _vrstva(sit)
+				vrstvy = maxi(vrstvy, int(vf[0]))
+				if int(vf[0]) > 0:
+					print("SVY CHYBA %s %s faze %d/%d: spodni kus prorusta vrchnim (kukle), %d vrcholu, nejvic %.4f m, klid %s" % [sada, kl, f, nf, vf[0], vf[1], vf[2]])
 				kp = maxf(kp, float(r[0]))
 				ks = maxi(ks, int(r[1]))
 				if float(r[0]) > float(R["test_partner_m"]) or int(r[1]) > 0:
@@ -115,7 +124,7 @@ func _beh() -> void:
 			print("SVY %s %s: par nejvic %.4f m, nesvarene okraje nejvic %d" % [sada, kl, kp, ks])
 			horsi_par = maxf(horsi_par, kp)
 			sevy = maxi(sevy, ks)
-		if horsi_par > float(R["test_partner_m"]) or sevy > 0:
+		if horsi_par > float(R["test_partner_m"]) or sevy > 0 or vrstvy > 0:
 			chyb += 1
 		u.queue_free()
 		await process_frame
@@ -133,6 +142,7 @@ func _priprav(u: Node3D, kostra: Skeleton3D) -> Dictionary:
 	var hranice := {}
 	var sousede := {}
 	var troj := PackedInt32Array()
+	var krk_y := -INF
 	var q := float(R["test_par_m"])
 	var ob: Dictionary = R["oblast"]
 	for mi0: Node in u.find_children("*", "MeshInstance3D", true, false):
@@ -157,6 +167,7 @@ func _priprav(u: Node3D, kostra: Skeleton3D) -> Dictionary:
 		var zr := (ul.y + ur.y) * 0.5
 		var xr := maxf(absf(ul.x), absf(ur.x))
 		var nz: float = (poz["neck_01"] as Vector3).y
+		krk_y = maxf(krk_y, nz)
 		var z0 := zr - float(ob["podpazi_pod_ramenem_m"])
 		for si in mi.mesh.get_surface_count():
 			var mat := mi.mesh.surface_get_material(si) as BaseMaterial3D
@@ -243,7 +254,123 @@ func _priprav(u: Node3D, kostra: Skeleton3D) -> Dictionary:
 					smycka[y] = ns
 					st.append(y)
 		ns += 1
-	return {"v": V, "pary": pary, "okraje": okraje, "hranice": hranice.keys(), "smycka": smycka, "troj": troj}
+	# vrchni kus pres hlavu (kukle): souvisla cast odevu s nejvyssim vrcholem, sahajici test_vrstva_nad_krkem_m nad krk;
+	# spodni = vrcholy ostatnich kusu v jejim dosahu (kontrola vrstev _vrstva)
+	var rep := {}
+	var par: Array = []                  # Array (odkaz) - lambda najdi ho sdili, Packed* by zkopirovala
+	par.resize(V.size())
+	for i in V.size():
+		var kk := Vector3i(((V[i][0] as Vector3) / q).round())
+		par[i] = int(rep.get_or_add(kk, i))
+	var najdi := func(x: int) -> int:
+		while par[x] != x:
+			par[x] = par[par[x]]
+			x = par[x]
+		return x
+	for t in range(0, troj.size(), 3):
+		var a: int = najdi.call(troj[t])
+		for e in [1, 2]:
+			var b: int = najdi.call(troj[t + e])
+			if a != b:
+				par[b] = a
+	var vrch := PackedInt32Array()
+	var spod := PackedInt32Array()
+	var ty := -INF
+	var tk := -1
+	for i in V.size():
+		if (V[i][0] as Vector3).y > ty:
+			ty = (V[i][0] as Vector3).y
+			tk = najdi.call(i)
+	if tk >= 0 and ty > krk_y + float(R["test_vrstva_nad_krkem_m"]):
+		var lo := Vector3.INF
+		var hi := -Vector3.INF
+		for t in range(0, troj.size(), 3):
+			if najdi.call(troj[t]) == tk:
+				for e in 3:
+					vrch.append(troj[t + e])
+					lo = lo.min(V[troj[t + e]][0])
+					hi = hi.max(V[troj[t + e]][0])
+		var dd := Vector3.ONE * float(R["test_vrstva_dosah_m"])
+		for i in V.size():
+			var p0: Vector3 = V[i][0]
+			if najdi.call(i) != tk and p0 == p0.clamp(lo - dd, hi + dd):
+				spod.append(i)
+	return {"v": V, "pary": pary, "okraje": okraje, "hranice": hranice.keys(), "smycka": smycka, "troj": troj,
+		"vrch": vrch, "spod": spod}
+
+
+## Vrstvy (15. 11., Míša ř. 3 / 02.jpg: tmavý trojúhelník na zádech pod kapucí = kotle prosvítala límcem kukle):
+## žádný vrchol spodního kusu, který se kolmo promítá do plochy vrchního kusu přes hlavu (do test_vrstva_dosah_m),
+## nesmí ležet vně jeho povrchu víc než test_vrstva_tolerance_m. Vrací [počet, nejvíc m, příklad polohy].
+func _vrstva(sit: Dictionary) -> Array:
+	var V: Array = sit["v"]
+	var vr: PackedInt32Array = sit["vrch"]
+	var sp: PackedInt32Array = sit["spod"]
+	if vr.is_empty():
+		return [0, 0.0, Vector3.ZERO]
+	var d := float(R["test_vrstva_dosah_m"])
+	var tol := float(R["test_vrstva_tolerance_m"])
+	var P := {}
+	for i: int in vr:
+		if not P.has(i):
+			P[i] = _poloha(V[i])
+	var mriz := {}
+	var F: Array = []
+	for t in range(0, vr.size(), 3):
+		var a: Vector3 = P[vr[t]]
+		var b: Vector3 = P[vr[t + 1]]
+		var c: Vector3 = P[vr[t + 2]]
+		var n := (b - a).cross(c - a)
+		if n.length_squared() < 1e-14:
+			continue
+		n = n.normalized()
+		var nv := _normala(V[vr[t]]) + _normala(V[vr[t + 1]]) + _normala(V[vr[t + 2]])
+		if n.dot(nv) < 0.0:
+			n = -n
+		var fi := F.size()
+		F.append([a, b, c, n])
+		var lo := Vector3i((a.min(b).min(c) - Vector3.ONE * d) / d)
+		var hi := Vector3i((a.max(b).max(c) + Vector3.ONE * d) / d)
+		for x in range(lo.x, hi.x + 1):
+			for y in range(lo.y, hi.y + 1):
+				for z in range(lo.z, hi.z + 1):
+					(mriz.get_or_add(Vector3i(x, y, z), []) as Array).append(fi)
+	var pocet := 0
+	var nej := 0.0
+	var kde := Vector3.ZERO
+	for i: int in sp:
+		var qv := _poloha(V[i])
+		for fi: int in mriz.get(Vector3i(qv / d), []):
+			var f: Array = F[fi]
+			var a: Vector3 = f[0]
+			var n: Vector3 = f[3]
+			var s := (qv - a).dot(n)
+			if absf(s) > d:
+				continue
+			# kolmý průmět dovnitř trojúhelníku (ne okraj - rukáv v průramku, lem)
+			var pr := qv - n * s
+			var v0: Vector3 = (f[1] as Vector3) - a
+			var v1: Vector3 = (f[2] as Vector3) - a
+			var v2 := pr - a
+			var d00 := v0.dot(v0)
+			var d01 := v0.dot(v1)
+			var d11 := v1.dot(v1)
+			var d20 := v2.dot(v0)
+			var d21 := v2.dot(v1)
+			var den := d00 * d11 - d01 * d01
+			if den <= 0.0:
+				continue
+			var bv := (d11 * d20 - d01 * d21) / den
+			var bw := (d00 * d21 - d01 * d20) / den
+			if bv < 0.0 or bw < 0.0 or bv + bw > 1.0:
+				continue
+			if s > tol:
+				pocet += 1
+				if s > nej:
+					nej = s
+					kde = V[i][0]
+			break
+	return [pocet, nej, kde]
 
 
 ## Ladeni (TVRZ_SVY_OBJ=slozka): skinovana sit povrchu odevu a tela v dane fazi jako OBJ (rozbor vrstev mimo Godot)
