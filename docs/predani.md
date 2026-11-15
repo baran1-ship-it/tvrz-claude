@@ -1481,3 +1481,5 @@ Hotovo v kódu a datech (testy u každého):
   skupinách 3–5 testů souběžně (sdílená místa beh.sh) s `TVRZ_TEST_LIMIT=1500`.
 - **Snímky na pozadí (15. 11.):** Bash na pozadí má výchozí limit 30 min → foto se 6–7 snímky zabito (2×). U foto vždy
   `timeout` 7200000 v nástroji (nejen BEH_LIMIT), nebo nejvýš 3–4 snímky v jednom běhu.
+- **Otisk exportu (15. 11.):** úprava `voda.json`/`lokace.json`/`cesty.json`… po exportu = „nevydávat, znovu exportovat“.
+  Herní vzhled bez vlivu na Blender patří do `prostredi.json` (není vstupem exportu, `tools/otisk_exportu.py VSTUPY`).
