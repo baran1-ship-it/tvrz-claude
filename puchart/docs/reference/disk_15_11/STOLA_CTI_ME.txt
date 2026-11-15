@@ -1,0 +1,54 @@
+STARÁ ŠTOLA 1393 / REALISM
+
+Tato verze nahrazuje původní hladký model. Byla přepracována geometrie
+skalních chodeb i vstupu a hlavní materiály byly nahrazeny skutečnými
+staženými PBR mapami. Skalní vstup je upravený fotogrammetrický model.
+
+SOUBORY
+Stara_stola_1393.blend – upravitelná kompletní scéna Blenderu 4.3.2.
+Použité textury jsou zabalené uvnitř souboru.
+Stara_stola_1393.glb – herní export s vloženými texturami a kolizemi.
+Stara_stola_1393.tscn – scéna pro Godot s tlumenými světly kahanů.
+textures/ – skutečné PBR mapy použité ve scéně.
+nahledy/ – skutečné rendery této geometrie, nikoli ilustrační AI obrázky.
+Pudorys.png – schéma rozmístění chodeb ve stejném měřítku obou os.
+ZDROJE.txt – původ assetů, autoři, úpravy a licence CC0.
+download_receipts.json – URL a kontrolní součty stažených podkladů.
+statistika.json, QA_*.json – skutečné počty a výsledky kontrol.
+zdroj/ – pracovní skripty pro navazující technické úpravy.
+
+OBSAH MODELU
+Přibližně 189 m os chodeb, čtyři odbočky, dobývky, staré zavalené dílo,
+39 rámů výdřevy, místní boční pažení, krátký prkenný přechod přes vlhkou
+podlahu, kahany, nářadí, vědra, přístřešek, rumpál, třídicí pracoviště
+a skutečně vyplněná halda hlušiny. Součásti lze upravovat samostatně.
+Scéna neobsahuje NPC ani skripty herních interakcí.
+
+UMÍSTĚNÍ DO KRAJINY
+Jednotky jsou metry. Blender: Z nahoru, +Y do kopce. Godot/glTF:
+Y nahoru, důl pokračuje přibližně ve směru -Z. Společný počátek je
+u vstupu; skalní tlama začíná přibližně 2,4 m před tímto bodem.
+Umísti a natoč celý nadřazený uzel. Terén musí zakrýt celý půdorys
+chodeb i jejich strop. Skalní vstup je vytvořen pro zapuštění do svahu;
+na renderech je vidět samostatný volný model bez okolního kopce.
+V terénu i jeho kolizi je nutné otevřít vstup a odstranit všechny části,
+které protínají průchozí prostor. Pouhé zasunutí modelu otvor nevyrobí.
+
+GODOT
+Zkopíruj GLB i TSCN do stejné složky projektu. Počkej na dokončení
+importu a vlož scénu Stara_stola_1393.tscn. Vše má společný rodičovský
+uzel. Objekty s příponou -colonly se při importu mění na statické
+konkávní kolize; celý důl nesmí dostat jeden konvexní obal.
+Zdrojová geometrie byla v exportu rozdělena na prostorové úseky.
+Drobné nehybné rekvizity nemají všechny samostatnou fyzikální kolizi.
+Kahany mají emisivní plamen a krátkodosahová světla v TSCN. Vlastní
+hráčovo světlo a nastavení výsledného prostředí doplň v cílové hře.
+
+NÁHLEDY A MEZE OVĚŘENÍ
+Světla označená NAHLED slouží pro fotografickou kontrolu materiálů
+a reliéfu. Neexportují se do GLB. Rendery tedy nejsou přímým snímkem
+Android hry. V náhledovém souhrnu je pouze potlačen renderovací šum.
+Výkon na konkrétním Android tabletu není změřen. Před vydáním hry je
+nutný skutečný průchod s hráčem a měření FPS v cílovém projektu.
+Důl je vlastní historicky inspirovaná herní lokalita; nejde o doložený
+historický půdorys. Na mapě jej umísti mimo hrad podle svého rozšíření.

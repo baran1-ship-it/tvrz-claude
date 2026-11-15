@@ -1,0 +1,49 @@
+STAŽENÉ PBR MATERIÁLY A FOTOGRAMMETRIE – REALISM
+
+Poly Haven / Rock Face 03
+https://polyhaven.com/a/rock_face_03
+Autoři: Dario Barresi (fotografie), Rico Cilliers (zpracování).
+Použito: stěny a stropy dolu; skutečná barevná, normálová,
+drsnostní a výšková mapa v rozlišení 2048 × 2048.
+Výšková mapa má vedle shaderu vliv i na drobný reliéf geometrie.
+
+Poly Haven / Rough Wood
+https://polyhaven.com/a/rough_wood
+Autor: Rob Tuytel.
+Použito: výdřeva, pažení, přístřešek, prkna, rumpál a dřevěné vybavení.
+Staženy: barevná, normálová, drsnostní a výšková mapa 2K.
+Barevná mapa má vlastní tmavší hnědou úpravu RGB × (0,74; 0,63; 0,50).
+Jde o odvozeninu skutečné stažené fotografie, nikoli uměle vytvořený vzor.
+
+Poly Haven / Brown Mud 02
+https://polyhaven.com/a/brown_mud_02
+Autor: Rob Tuytel.
+Použito: podlaha štoly, předpolí a podklad hlušiny.
+Staženy: barevná, normálová, drsnostní a výšková mapa 2K.
+
+Poly Haven / Rock Face 01 – skutečný 3D sken
+https://polyhaven.com/a/rock_face_01
+Autor: Dario Barresi.
+Stažen skutečný glTF model, binární geometrie a jeho barevná,
+normálová a sloučená AO/drsnost/metalická mapa 2K.
+Použito: skalní vstup s vyříznutým otvorem a odvozené úlomky hlušiny.
+Model byl tvarově přizpůsoben portálu. Drobné úlomky mají zjednodušenou
+geometrii; jejich textury pocházejí ze stejného fotogrammetrického assetu.
+
+LICENCE VŠECH UVEDENÝCH ASSETŮ: CC0
+https://polyhaven.com/license
+https://creativecommons.org/publicdomain/zero/1.0/
+Poly Haven dovoluje použití, úpravy i distribuci včetně komerčních projektů.
+Uvedení autorů je zde zachováno pro dohledatelnost zdrojů.
+
+VÝTVARNÉ REFERENCE – NEJSOU SOUČÁSTÍ ASSETŮ HRY
+Jakub Englický: Abandoned Mine – Kingdom Come: Deliverance II
+https://jakub_englicky.artstation.com/projects/qJEzgN
+Skutečné herní snímky KCD: Deep Mining Cave
+https://forum.kingdomcomerpg.com/t/deep-mining-cave/51048
+Reference určují hrubost horniny, práci se dřevem, pažení a osvětlení.
+Žádná geometrie ani textura z KCD nebyla zkopírována do tohoto modelu.
+
+Ostatní doplňková geometrie je vytvořená pro tuto scénu. Na malých
+čelních plochách dřeva zůstávají vlastní mapy letokruhů; drobné železné,
+keramické a lanové části mají vlastní fyzikální materiály.
