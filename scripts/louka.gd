@@ -359,14 +359,8 @@ func _vzorek(px: float, pz: float, budovy := true) -> Vector3:
 		best.x *= 1.0 - smoothstep(0.85, 1.15, sklon + (hj - 0.5) * 0.25)
 	# radce 17:05 bod 4 (Misa 0.70 "hostinec plny travy", (-66,883)): pudorysy statickych staveb (hostinec, stan,
 	# zriceniny) - kryti shora z offline peceni hostinec neznalo
-	if (budovy and _v_budove(px, pz)) or main.svet.v_zahrade(px, pz) or main.svet.v_nove_zahrade(px, pz) == 2 or main.svet.v_pruchodu(px, pz):
-		best.x = 0.0                                 # i zahradky ve vsi (Misa 0.72 "zarostle travou"), pod zahony
-	if main.svet.v_trzisti(px, pz) < -1.0 + fposmod(sin(px * 7.13 + pz * 3.71) * 437.5, 1.0) * 1.5:
-		best.x = 0.0                                 # trziste: vyslapana hlina
-	if main.svet.ryb_voda(px, pz):
-		best.x = 0.0                                 # rybnik Lhota: pod hladinou a v bahne nic (NAVOD bod 3)
-	if main.svet.od_vody(px, pz) < _breh_m:
-		best.x = 0.0                                 # male toky a rybniky: voda a holy breh (pasma voda breh_m)
+	if _zakaz_travy(px, pz, budovy):
+		best.x = 0.0
 	# dil mlyna (NAVOD_MLYN bod 3): vyska z terenu dilu, trava podle barvy vrcholu G (dvur a cesta 0 = udusana hlina)
 	var mt: Vector2 = main.svet.mlyn_teren(px, pz)
 	if mt.x != INF:
@@ -478,6 +472,20 @@ func _budovy_u(c: Vector2i) -> bool:
 		if r.intersects(rc):
 			return true
 	return false
+
+
+## Tvrde zakazy travy (stavba, zahrada, pruchod, trziste, voda a holy breh). Misa 15. 11. (tráva v hostinci a pred dvermi
+## chysi v lomu, opakovane): pas kryti cesty v _rozsej prepisoval hustotu prumerem okoli 5 m i tam, kde _vzorek dal 0 kvuli
+## stavbe nebo pruchodu - zakaz ted plati i pro nej (jedno misto pro vsechny zakazy).
+func _zakaz_travy(px: float, pz: float, budovy := true) -> bool:
+	# radce 17:05 bod 4 (Misa 0.70 "hostinec plny travy"): pudorysy statickych staveb; zahradky ve vsi (Misa 0.72)
+	if (budovy and _v_budove(px, pz)) or main.svet.v_zahrade(px, pz) or main.svet.v_nove_zahrade(px, pz) == 2 or main.svet.v_pruchodu(px, pz):
+		return true
+	if main.svet.v_trzisti(px, pz) < -1.0 + fposmod(sin(px * 7.13 + pz * 3.71) * 437.5, 1.0) * 1.5:
+		return true                                  # trziste: vyslapana hlina
+	if main.svet.ryb_voda(px, pz):
+		return true                                  # rybnik Lhota: pod hladinou a v bahne nic (NAVOD bod 3)
+	return main.svet.od_vody(px, pz) < _breh_m       # male toky a rybniky: voda a holy breh (pasma voda breh_m)
 
 
 func _v_budove(px: float, pz: float) -> bool:
@@ -1568,7 +1576,8 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			# neudrzovana louka (radce 07:45, Misa: "kde nechodi clovek, zarostle az beda"): x1,5 trsu, x1,3 vyska
 			var div := Svet.divokost(px, pz)
 			# pas kryti cesty za okrajem hliny (Misa 0.87 „svetly pas podel cest“): trsy jako okolni louka
-			var kr_cesta: bool = _kryto(kr, c, px, pz) and _kryti_hodnota(kr, c, px, pz) == 2 and main.svet.cesta_trava(px, pz).x > 0.9
+			var kr_cesta: bool = _kryto(kr, c, px, pz) and _kryti_hodnota(kr, c, px, pz) == 2 and main.svet.cesta_trava(px, pz).x > 0.9 \
+					and not _zakaz_travy(px, pz)
 			if kr_cesta:
 				v.x = _okoli_hust(px, pz, okoli_c)          # prumer okoli 5 m (max delal husty pas na ridke louce)
 				v.z = maxf(v.z, 3.0)
