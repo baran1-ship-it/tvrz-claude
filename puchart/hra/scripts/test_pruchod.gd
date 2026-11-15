@@ -106,6 +106,15 @@ func _dvere() -> Node:   # skript dveří jako ve hře (křídla mají kolizi a�
 		_dv = load("res://scripts/dvere.gd").new(); cl.add_child(_dv); _dv.zacni(hlavni, cl)
 	return _dv
 
+## rozbor nálezu povrchu: bod světa v souřadnicích stavby (dítě vrstvy Mista / Ves / Hrad), ve kterém leží síť – [stavba, x, y, z]
+func _lokalne(n: Node3D, w: Vector3) -> Array:
+	if n == null: return []
+	var u: Node = n
+	while u.get_parent() != null and not (String(u.get_parent().name) in ["Mista", "Ves", "Hrad", "Hospodarske"]): u = u.get_parent()
+	if not (u is Node3D): return []
+	var l: Vector3 = (u as Node3D).global_transform.affine_inverse() * w
+	return [String(u.name), snappedf(l.x, 0.01), snappedf(l.y, 0.01), snappedf(l.z, 0.01)]
+
 func _test_povrch() -> void:
 	_dvere(); await get_tree().physics_frame
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/kontroly_hra.json"))["povrch"]
@@ -167,7 +176,7 @@ func _test_povrch() -> void:
 				if mat != null and String(mat.resource_name) in cfg["bez_materialu"]: continue
 				var am := ArrayMesh.new(); am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mi.mesh.surface_get_arrays(si))
 				var tm := am.generate_triangle_mesh()
-				if tm != null: site.append([tm, mi.global_transform.affine_inverse(), mi.global_transform, (mi.global_transform * am.get_aabb()).grow(3.0), String(mat.resource_name) if mat != null else "", String(mi.name)])
+				if tm != null: site.append([tm, mi.global_transform.affine_inverse(), mi.global_transform, (mi.global_transform * am.get_aabb()).grow(3.0), String(mat.resource_name) if mat != null else "", String(mi.name), mi])
 	print("POVRCH sítí %d, příprava %d ms" % [site.size(), Time.get_ticks_msec() - _t0])
 	var koule := CapsuleShape3D.new(); koule.radius = float(cfg["telo_r_m"]); koule.height = float(cfg["telo_vyska_m"])   # celé tělo postavy
 	var space := hrac.get_world_3d().direct_space_state
@@ -220,7 +229,7 @@ func _test_povrch() -> void:
 					var dosah := float(cfg["steny_dosah_m"]); var tol_s := float(cfg["steny_tolerance_m"])
 					for u in 8:
 						var sm := Vector3(cos(u * PI / 4), 0, sin(u * PI / 4))
-						var _dwp := Vector3.ZERO; var _dmi := ""; var dv_min := INF; var dv_vse := INF; var dk_min := INF; var dmat := ""; var dk_obj := ""   # dv_min od 0,4 m (projde viditelným), dv_vse všechny výšky (neviditelná stěna)
+						var _dwp := Vector3.ZERO; var _dmi := ""; var _dnode: Node3D = null; var dv_min := INF; var dv_vse := INF; var dk_min := INF; var dmat := ""; var dk_obj := ""   # dv_min od 0,4 m (projde viditelným), dv_vse všechny výšky (neviditelná stěna)
 						for v in cfg["steny_vysky_m"]:
 							var z0 := Vector3(p.x, hy + float(v), p.z)
 							var pin := PhysicsPointQueryParameters3D.new(); pin.position = z0; pin.exclude = [hrac.get_rid()]
@@ -230,7 +239,7 @@ func _test_povrch() -> void:
 								if not r.is_empty() and (s[2].basis * (r["normal"] as Vector3)).dot(sm) < 0.0:   # jen líc natočený k hráči (rub plochy není vidět)
 									var dd: float = z0.distance_to(s[2] * (r["position"] as Vector3))
 									dv_vse = minf(dv_vse, dd)
-									if dd < dv_min and float(v) >= float(cfg["steny_od_m"]) and not (s[4] in cfg["projit_smi"]): dv_min = dd; _dwp = s[2] * (r["position"] as Vector3); _dmi = s[5]; dmat = "%s %s y%.2f [%.2f,%.2f,%.2f]" % [s[4], s[5], hy, (s[2] * (r["position"] as Vector3)).x, (s[2] * (r["position"] as Vector3)).z, (s[2] * (r["position"] as Vector3)).y]
+									if dd < dv_min and float(v) >= float(cfg["steny_od_m"]) and not (s[4] in cfg["projit_smi"]): dv_min = dd; _dwp = s[2] * (r["position"] as Vector3); _dmi = s[5]; _dnode = s[6]; dmat = "%s %s y%.2f [%.2f,%.2f,%.2f]" % [s[4], s[5], hy, (s[2] * (r["position"] as Vector3)).x, (s[2] * (r["position"] as Vector3)).z, (s[2] * (r["position"] as Vector3)).y]
 							var qs := PhysicsRayQueryParameters3D.create(z0, z0 + sm * dosah); qs.exclude = [hrac.get_rid()]
 							var hs := space.intersect_ray(qs)
 							if not hs.is_empty() and vrstvy.any(func(vv): return vv.is_ancestor_of(hs["collider"])):
@@ -268,7 +277,7 @@ func _test_povrch() -> void:
 												var _rid: RID = (_c as CollisionObject3D).get_rid()
 												_dbg.append("  B:%s srv=%s shapes=%d space=%s my=%s layer=%d dis=%s ch=%d" % [_c.name, PhysicsServer3D.body_get_state(_rid, PhysicsServer3D.BODY_STATE_TRANSFORM), PhysicsServer3D.body_get_shape_count(_rid), PhysicsServer3D.body_get_space(_rid), hrac.get_world_3d().space, (_c as CollisionObject3D).collision_layer, (_c as CollisionObject3D).process_mode, _c.get_child_count()])
 												for _cs in _c.get_children(): _dbg.append("    S:%s %s dis=%s" % [(_cs as CollisionShape3D).shape, (_cs as Node3D).global_transform, (_cs as CollisionShape3D).disabled])
-							sten += 1; vse.append({"druh": "zed", "chyba": chyba, "trasa": jm, "p": [p.x, p.z, hy], "smer": u * 45, "zed": dv_min, "kolize": dk_min, "mat": dmat, "dbg": _dbg})
+							sten += 1; vse.append({"druh": "zed", "chyba": chyba, "trasa": jm, "p": [p.x, p.z, hy], "smer": u * 45, "zed": dv_min, "kolize": dk_min, "mat": dmat, "dbg": _dbg, "lok": _lokalne(_dnode, _dwp)})
 							if spatne.size() < 24: spatne.append("%s [%.1f, %.1f] směr %d° %s (vidět %s m, kolize %s m %s, %s)" % [jm, p.x, p.z, u * 45, chyba, "–" if dv_min == INF else "%.2f" % dv_min, "–" if dk_min == INF else "%.2f" % dk_min, dk_obj, dmat])
 				var d: float = (h["position"] as Vector3).y - vis
 				if absf(d) > tol:
