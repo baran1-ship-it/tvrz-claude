@@ -79,7 +79,10 @@ def land(x, z, flat=True, pads=True, zaznam=None, voda=True, ulice=True):
     if flat:
         y = kraj.flatten(x, z, y, land)
         zap(("cesty (flatten)", y))
-        y = kraj.stavba_pad(x, z, y, lambda a, b: land(a, b, False, False))
+        # puvodni teren pod plackou bez vody (poradi teren -> cesty -> budovy -> voda): s vodou se vyska placky pocitala
+        # z koryta a voda_tvar -> stavba_dolina_vaha -> vesnice._pads -> land -> stavba_pad se zacyklila (15. 11.,
+        # kovarna_ves u udoli odtoku Lhoty: RecursionError v testu smyslu)
+        y = kraj.stavba_pad(x, z, y, lambda a, b: land(a, b, False, False, None, False))
         zap(("stavby (stavba_pad)", y))
         y = kraj.mlyn_pad(x, z, y)                # dil mlyna: teren dilu a napojeni (voda.json mlyn.dil)
         zap(("dil mlyna", y))

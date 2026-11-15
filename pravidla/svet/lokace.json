@@ -2263,8 +2263,8 @@
   "model": "res://modely/kovarna/kovarna.glb",
   "lod1": "res://modely/kovarna/kovarna_lod1.glb",
   "stred": [
-   394.0,
-   906.0
+   398.0,
+   898.0
   ],
   "natoceni": 1.5708,
   "rovina_r_m": 7.0,
@@ -2297,8 +2297,8 @@
   "dum": {
    "model": "Dum1",
    "stred": [
-    408.0,
-    918.0
+    412.0,
+    906.0
    ],
    "natoceni": -1.22,
    "rovina_r_m": 7.5,
@@ -2311,7 +2311,8 @@
    "Kovarna_Kol_Podlaha",
    "Kovarna_Kol_PodlahaPristresek"
   ],
-  "_vynechat": "Míša 14. 11. (v Puchartu stejná kovárna: dlažba je součást modelu, nedá se na ni vystoupit, pravidelná jako dlaždice na trávníku): dlažba přístřešku i hliněná podlaha z modelu pryč (i jejich kolize) – na zemi naše udusaná hlína (kraj.PLACKY plac_r_m)"
+  "_vynechat": "Míša 14. 11. (v Puchartu stejná kovárna: dlažba je součást modelu, nedá se na ni vystoupit, pravidelná jako dlaždice na trávníku): dlažba přístřešku i hliněná podlaha z modelu pryč (i jejich kolize) – na zemi naše udusaná hlína (kraj.PLACKY plac_r_m)",
+  "_presun": "15. 11.: kovarna a dum kovare stály v koridoru odtoku Lhoty (Misa „dum kovare na potoce“). Dva pokusy preplanovat potok kolem nich neprosly testem smyslu po exportu (tok na nasypu 7 a 17 mist - planovac pocita s terenem pred exportem, Blender udoli tvaruje jinak). Proto potok na puvodni trase a stavby posunuty mimo koridor: placka + koryto + breh + prechod (test smyslu), rovina, mimo cesty a usedlosti (vypocet z vysky.json)."
  },
  "krcma_l": {
   "popis": "Míša 14. 11. (snímek ze hry: „krčma“ zakroužkovaná vlevo od odbočky k rybníku, studnu přesunout na náves; stará krčma U Kohouta zůstane jako obyčejná usedlost): krčma do L (Disk budovy krcma.zip, NAVOD_KRCMA_L.md) u odbočky (stará ulice) k rybníku, uliční stranou (+Z modelu) k odbočce, stájové křídlo (+x modelu) směrem k rybníku. Střed = osa staré ulice (ves.stred_stare_navsi + osa vesnice.AXIS) + 11,5 m stranou (průčelí 6 m od osy). Míša 14. 11. večer: nová verze modelu (krcma_L (1).zip) – širší křídlo (kamenná stáj 8,4 × 12,4 m dole, pavlač, pokoj 1 a 2, nocležna nahoře), model BEZ vybavení – lůžka, sudy, koryta a stoly z naší hry (nabytek).",
