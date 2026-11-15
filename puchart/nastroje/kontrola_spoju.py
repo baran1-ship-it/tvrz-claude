@@ -91,7 +91,9 @@ json.dump({"popis": "tesařské spoje trámů hradu (nastroje/kontrola_spoju.py)
           open(os.path.join(K, "build/spoje.json"), "w"), ensure_ascii=False, indent=1)
 print("SPOJE trámů %d, dvojic %d:" % (len(T), len(pary)), vysl)
 for d_, v in sorted(souhrn.items(), key=lambda x: -sum(x[1].values()))[:15]: print("  ", d_, v)
-strop = json.load(open(os.path.join(K, "pravidla/svet/kontroly.json"))).get("spoje", {}).get("max_vadnych")
+_sp = json.load(open(os.path.join(K, "pravidla/svet/kontroly.json"))).get("spoje", {}); _vy = _sp.get("vyjimka", {})
+import datetime as _dt
+strop = _sp.get("max_vadnych") if _vy.get("do", "9999") >= _dt.date.today().isoformat() else _vy.get("strop_puvodni", _sp.get("max_vadnych"))   # výjimka po datu neplatí (audit 15. 11.)
 n = vysl["vrostlý"] + vysl["křížení"]
 if strop is not None and n > strop:
     print("SPOJE CHYBA: vadných %d > strop %d" % (n, strop)); sys.exit(1)

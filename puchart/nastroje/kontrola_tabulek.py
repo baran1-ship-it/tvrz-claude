@@ -10,11 +10,15 @@ for l in open(K + "/docs/chyby.md"):
     m = re.match(r"^\| (\d+) \|", l)
     if not m: continue
     c = [x.strip() for x in l.strip().strip("|").split("|")]
+    if len(c) != 7: chyby.append("#%s má %d sloupců místo 7 (stav by se nečetl – audit 15. 11.)" % (m.group(1), len(c))); continue
     stav, kontrola = c[-1].lower(), c[-2]
     if "opraven" not in stav: continue
     testy = re.findall(r"(smysl|pruchod|hlidac):([A-Za-z0-9_\-]+)", kontrola)
     if not testy:
         if not re.search(r"snímek|snimek|tablet|mereni|měření", kontrola): chyby.append("#%s bez kontroly" % m.group(1))
+        else:   # uvedený soubor snímku musí existovat (audit 15. 11.: stačilo slovo „snímek“)
+            for f_ in re.findall(r"docs/screens/[\w./\-]+\.(?:png|jpg)", kontrola):
+                if not os.path.exists(K + "/" + f_): chyby.append("#%s: snímek %s neexistuje" % (m.group(1), f_))
         continue
     for d, t in testy:
         if d == "hlidac":   # testy Godotu v hlidaci.sh s vlastním výpisem (KLIK_TEST, BEHLET_TEST) – výsledek z build/hlidaci.txt

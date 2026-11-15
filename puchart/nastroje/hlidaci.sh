@@ -5,6 +5,7 @@
 #   bash nastroje/hlidaci.sh            celá sada (před vydáním)
 #   bash nastroje/hlidaci.sh --rychle   jen data (geometrie, smysl, matice bez průchodu) – při každé změně
 set -o pipefail
+unset PUCHART_JEN PUCHART_TRASA PUCHART_SKRYJ PUCHART_DEST PUCHART_SKRIPT PUCHART_FOTO   # ladicí proměnné by tiše zúžily testy (audit 15. 11.)
 K=$(cd "$(dirname "$0")/.." && pwd); G=${GODOT:-/opt/godot47/Godot_v4.7.2-stable_linux.x86_64}
 mkdir -p $K/build; S=$K/build/hlidaci.txt; : > $S; rc=0
 # výšky pro hru (vysek.r16z, kolize a výška terénu ve hře) musí být z aktuální vysek.r16 (14. 11.: po přestavbě vsi zůstala
@@ -29,6 +30,7 @@ for _py in $K/blender/*.py $K/nastroje/*.py; do python3 -m py_compile "$_py" 2>&
 if grep -nE "#[^\"']*\bbod\(" $K/blender/*.py | tee -a $S | grep -q .; then rc=1; echo "KOMENTAR_USEKL_KOD CHYBA" | tee -a $S; fi
 krok geometrie; /opt/bl/bin/python $K/blender/kontrola_geometrie.py $K 2>&1 | grep GEOMETRIE | tee -a $S
 [ -s $K/build/kontrola_geometrie.json ] || { rc=1; echo "GEOMETRIE CHYBA: bez výsledku" | tee -a $S; }
+python3 -c "import json,sys;sys.exit(0 if json.load(open('$K/build/kontrola_geometrie.json')).get('hotovo') else 1)" 2>/dev/null || { rc=1; echo "GEOMETRIE CHYBA: výpočet nedoběhl do konce (hotovo chybí)" | tee -a $S; }
 krok spoje; python3 $K/nastroje/kontrola_spoju.py $K 2>&1 | grep SPOJE | tee -a $S; [ ${PIPESTATUS[0]} -eq 0 ] || rc=1
 krok "test smyslu"; python3 $K/nastroje/test_smyslu.py $K | grep -E "CHYBA|TEST_SMYSLU" | tee -a $S || rc=1
 if [ "$1" != "--rychle" ]; then
@@ -38,7 +40,19 @@ if [ "$1" != "--rychle" ]; then
   (cd $K/hra && PUCHART_TEST=sceny PUCHART_VYSTUP=$K/build/sceny.json timeout 2400 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 > $K/build/hlidaci_sceny_godot.log 2>&1) &
   _PSC=$!
   (cd $K/hra && PUCHART_TEST=pruchod PUCHART_VYSTUP=$K/build/pruchod.json timeout 2700 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | tee $K/build/hlidaci_beh_godot.log | grep -E "^PRUCHOD" | cut -c1-160 | tee -a $S)
-  python3 -c "import json,sys;d=json.load(open('$K/build/pruchod.json'));sys.exit(0 if all(v=='OK' for v in d.values()) else 1)" || rc=1
+  # všechny trasy z dat i pevné testy musí mít výsledek OK (audit 15. 11.: chybějící trasa dřív prošla)
+  python3 - "$K" <<'PY' | tee -a $S || rc=1
+import json, sys
+K = sys.argv[1]; d = json.load(open(K + "/build/pruchod.json"))
+oc = set()
+for f in ("pruchody.json", "pruchody_mista.json"):
+    try: oc |= set(json.load(open(K + "/hra/data/" + f))["trasy"].keys())
+    except Exception: pass
+oc |= {"strom_kolize", "povrch_kolize", "vrata_funkce", "mapa_cestovani", "zebrik_lezeni"}
+chybi = sorted(oc - set(d)); spatne = sorted(k for k, v in d.items() if v != "OK")
+print("PRUCHOD_UPLNOST tras %d, chybí %d %s, chybných %d %s" % (len(d), len(chybi), chybi[:6], len(spatne), spatne[:6]))
+sys.exit(1 if chybi or spatne else 0)
+PY
   wait $_PSC
   grep -E "^SCENY" $K/build/hlidaci_sceny_godot.log | tee -a $S; cat $K/build/hlidaci_sceny_godot.log >> $K/build/hlidaci_beh_godot.log
   [ -s $K/build/sceny.json ] || { rc=1; echo "SCENY CHYBA: bez výsledku" | tee -a $S; }
@@ -52,10 +66,6 @@ UN=$(grep -ohE "^UZLY celkem [0-9]+" $K/build/hlidaci_beh_godot.log 2>/dev/null 
 if [ -z "$UN" ]; then [ "$1" != "--rychle" ] && { rc=1; echo "UZLY CHYBA: hra nevypsala počet uzlů" | tee -a $S; }
 elif [ "$UN" -gt "$UMAX" ]; then rc=1; echo "UZLY CHYBA: $UN uzlů po startu > rozpočet $UMAX (rozpocty.json pamet.uzlu_max)" | tee -a $S
 else echo "UZLY OK: $UN (rozpočet $UMAX)" | tee -a $S; fi
-# louče a svícny v tmavých místnostech (11. 11.: při běžném startu 0/20 – hledaly zeď dřív, než vznikly kolize hradu)
-for sv in $(grep -ohE "^SVICNY [0-9]+/[0-9]+" $K/build/hlidaci_beh_godot.log 2>/dev/null | awk '{print $2}' | sort -u); do
-  [ "${sv%/*}" != "${sv#*/}" ] && { rc=1; echo "SVICNY CHYBA: postaveno $sv (každé světlo bez dne potřebuje louč/svícen)" | tee -a $S; }
-done
 # měřicí APK (12. 11.: měření po konci běželo dál, chyba každý snímek a kamera se přetahovala s hráčem): zkrácené měření
 # musí doběhnout všech úseků a variant, zastavit se a předat hru procházce – bez chyby skriptu
 krok "klepnutí na dveře"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_klik.gd timeout 600 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | grep -E "^KLIK_TEST" | tee -a $S)

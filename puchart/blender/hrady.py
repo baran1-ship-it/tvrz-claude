@@ -46,6 +46,11 @@ def ter(x, z):
     a, b, cc, d = HH[r0, c0], HH[r0, c0 + 1], HH[r0 + 1, c0], HH[r0 + 1, c0 + 1]
     return float((a * (1 - fc) + b * fc) * (1 - fr) + (cc * (1 - fc) + d * fc) * fr)
 
+def ter_np(x, z):   # bilineárně pro pole bodů (kontrola_geometrie: Python smyčka přes miliony vrcholů – audit 15. 11.)
+    c = np.clip(np.asarray(x, float) - VI["x0_hra"], 0, VI["sirka"] - 1.001); r = np.clip(np.asarray(z, float) - VI["z0_hra"], 0, VI["vyska"] - 1.001)
+    c0 = c.astype(int); r0 = r.astype(int); fc = c - c0; fr = r - r0
+    return (HH[r0, c0] * (1 - fc) + HH[r0, c0 + 1] * fc) * (1 - fr) + (HH[r0 + 1, c0] * (1 - fc) + HH[r0 + 1, c0 + 1] * fc) * fr
+
 def ter_rozsah(pts, krok=1.0):
     """min a max terénu pod polygonem / úsečkami (vzorky po krocích po obvodu a uvnitř)."""
     xs = [p[0] for p in pts]; zs = [p[1] for p in pts]

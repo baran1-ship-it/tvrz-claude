@@ -155,6 +155,7 @@ func _start() -> void:
 	hrac.look_at(Vector3(0.0, svet.vyska(0.0, 0.0) + 1.6, 0.0), Vector3.UP)
 	hrac.rotation.x = 0.0
 	add_child(Diag.new())
+	if FileAccess.file_exists("res://data/ohne.json"): var oh_: Node3D = load("res://scripts/ohne.gd").new(); oh_.name = "Ohne"; add_child(oh_); oh_.zacni(self)   # ohně ve stavbách (Míša 15. 11.; ohne.gd)
 	if chce_mereni(true):
 		var Mer := load("res://scripts/mereni.gd")
 		var mer: Node = Mer.new(); add_child(mer)

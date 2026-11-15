@@ -1,0 +1,76 @@
+{
+ "popis": "Ohně ve stavbách (hra/scripts/ohne.gd, hra/shaders/ohen.gdshader): plamen z křížených karet + žhavé uhlíky + OmniLight3D BEZ stínu s blikáním, nabídka Zapálit / Uhasit oheň. Místa ze značek modelů (krčma, hájovna, kovárna) a z kolizí pecí domů Havrana. Kopie v hra/data/ohne.json (nastroje/postav_vse.sh cp).",
+ "zdroj": "Míša 15. 11.: „dodělej ohně – v Havranovi jsou a jdou zapnout a vypnout, ale moc se mi nelíbí jejich vzhled“; „když stojím ve dveřích do místnosti, oheň nic neosvětluje, osvětlí až tak na 2 m… nešlo by, aby zdálky byla místnost osvětlená a zblízka to bylo funkční?“. Havran (větev claude/new-session-0dtk58) scripts/life.gd _build_fires / _light: krb energie 2,7 dosah 9,5 m útlum 1,3, barva FIRE_COL (1; 0,64; 0,38), blikání 3 siny rychlost 7–11, rozpočet nejbližších 7 světel s hysterezí 34/38 m; měření Havrana: světlo ohně se stínem p95 78 ms proti 27–38 ms bez → nikdy stín ze světla ohně. Útlum 1,3 (Havran) = světlo klesá rychleji než 1/d, proto „osvětlí až na 2 m“ – zde útlum pod 1 a vyšší energie.",
+ "rozpocet": {
+  "_popis": "Světla zapnutá jen u nejbližších svetel_max ohňů (Compatibility kreslí max 8 světel na objekt; Havran 7), zapnutí pod zap_m, vypnutí nad vyp_m (hystereze, Havran 34/38 m); mezi zap_m a vyp_m energie plynule ubývá. Plamen a uhlíky se kreslí jen do plamen_do_m (shader, CPU nic nesimuluje), zvuk hraje jen do zvuk_do_m. kontrola_s = jak často se přepočítá pořadí světel.",
+  "svetel_max": 6,
+  "zap_m": 34.0,
+  "vyp_m": 38.0,
+  "plamen_do_m": 40.0,
+  "zvuk_do_m": 22.0,
+  "kontrola_s": 0.25
+ },
+ "svetlo": {
+  "_popis": "OmniLight3D bez stínu. barva = Havran FIRE_COL. utlum = omni_attenuation (Godot: 1 = 1/d; Havran 1,3 → tma už ve 2 m; 0,55 = místnost čitelná od dveří, Míša 15. 11.). blikani: siny [rychlost rad/s, amplituda podílu energie], pomalý šum (nový cíl po sum_krok_s, amplituda sum_amp), chvění polohy ±poloha_m.",
+  "barva": [1.0, 0.64, 0.38],
+  "specular": 0.35,
+  "utlum": 0.55,
+  "blikani": {
+   "siny": [[7.3, 0.05], [11.1, 0.035], [17.9, 0.02]],
+   "sum_amp": 0.05,
+   "sum_krok_s": 0.35,
+   "poloha_m": 0.02
+  }
+ },
+ "plamen": {
+  "_popis": "Plamen: karet křížených svislých karet (natočení po 180/karet stupních), šum textury/ohen_sum.png (sum_px, seme – generátor ohen_sum.py), rychlost stoupání šumu, vlnění vrcholů (m/m), eroze krajů, barvy přechodu (bílé jádro → žlutá → oranžová → červená; fotky skutečného ohně v krbu: modrá jen u dřeva neviditelně, jádro téměř bílé).",
+  "karet": 3,
+  "sum_px": 128,
+  "sum_seme": 1393,
+  "rychlost": 1.1,
+  "vlneni": 0.05,
+  "eroze": 0.62,
+  "barva_jadro": [1.0, 0.95, 0.78],
+  "barva_zluta": [1.0, 0.74, 0.26],
+  "barva_oranz": [1.0, 0.4, 0.07],
+  "barva_cervena": [0.5, 0.07, 0.02]
+ },
+ "uhliky": {
+  "_popis": "Žhavé uhlíky: plochý disk (ohniště, pec) nebo překryv sítě žáru modelu (kovárna Kovarna_Zhar, material_overlay). meritko = buněk žáru na metr, pulz = Hz pomalého dýchání žáru.",
+  "meritko": 6.0,
+  "pulz": 0.6
+ },
+ "zvuk": {
+  "_popis": "Praskání ohně: Havran zvuky/prostredi/krb.ogg (CC0, antumdeluge + pagdev, opengameart; Havran zvuky/seznam.txt), smyčka 90 s. Havran _add_fire_loop: unit_size 2,5, max_distance 22.",
+  "soubor": "res://zvuky/ohen/krb.ogg",
+  "db": 0.0,
+  "unit_size": 2.5,
+  "max_m": 20.0
+ },
+ "nabidka": {
+  "_popis": "Zapálit / Uhasit oheň jako dveře a žebříky (tlačítko svitku nad tlačítkem žebříku, zaměření zamer.gd). dosah_m od očí k plameni.",
+  "dosah_m": 2.6,
+  "zapalit": "Zapálit oheň",
+  "uhasit": "Uhasit oheň"
+ },
+ "domy_noc": {
+  "_popis": "Pece domů (druh noc) hoří od hori_od_h do hori_do_h (hodina den.gd); když je hráč přepne ručně, platí jeho volba.",
+  "hori_od_h": 17.0,
+  "hori_do_h": 7.5
+ },
+ "druhy": {
+  "_popis": "Velikost podle druhu: plamen [šířka, výška] m, uhliky_r m (0 = bez disku), svetlo_v = výška světla nad základnou plamene, svetlo_ven = posun světla do místnosti (směr nejdelšího volného paprsku), energie, dosah_m. Pec: bez viditelného plamene (plamen [0, 0]) – pec v jizbě se topí z kuchyně / síně (krčma: ústí pece šenkovny je za stěnou u ohniště kuchyně, snímek 15. 11.; klenba nemá ústí do šenkovny), svítí jen světlem od líce klenby; bod nabídky na líci (usti_v = podíl výšky pece nad její spodní hranou, usti_od_stredu = podíl půlrozměru kolize od středu ve směru do místnosti – líc klenby nad podstavcem; snímek ohen_pec 15. 11.). Kovárna (vyhen): plamen nízký nad žárem.",
+  "ohniste": {"plamen": [0.85, 0.95], "uhliky_r": 0.38, "svetlo_v": 0.7, "svetlo_ven": 0.4, "energie": 3.2, "dosah_m": 9.0},
+  "pec": {"plamen": [0.0, 0.0], "uhliky_r": 0.0, "usti_v": 0.3, "usti_od_stredu": 0.6, "svetlo_v": 0.45, "svetlo_ven": 0.55, "energie": 2.4, "dosah_m": 7.0},
+  "vyhen": {"plamen": [0.42, 0.34], "uhliky_r": 0.0, "svetlo_v": 0.55, "svetlo_ven": 0.9, "energie": 2.0, "dosah_m": 7.0}
+ },
+ "mista": [
+  {"id": "krcma_kuchyne", "nazev": "oheň v kuchyni krčmy", "uzel": "KrcmaL_Ohen_Kuchyne", "druh": "ohniste", "hori": "vzdy"},
+  {"id": "krcma_senkovna", "nazev": "pec v šenkovně", "uzel": "KrcmaL_Pec_Senkovna", "pec_kolize": "KrcmaL_Kol_Pec", "druh": "pec", "hori": "vzdy"},
+  {"id": "hajovna_sin", "nazev": "ohniště v síni hájovny", "uzel": "Hajovna_Ohen_Sin", "druh": "ohniste", "hori": "vzdy"},
+  {"id": "kovarna_vyhen", "nazev": "výheň kovárny", "uzel": "Kovarna_Ohen_bod", "zhar": "Kovarna_Zhar", "druh": "vyhen", "hori": "vzdy"},
+  {"id": "dum_pec", "nazev": "pec v domě", "pec_kolize": "Dum1_Kol_Pec", "druh": "pec", "hori": "noc"},
+  {"id": "dum_pec", "nazev": "pec v domě", "pec_kolize": "Dum2_Kol_Pec", "druh": "pec", "hori": "noc"},
+  {"id": "rychta_pec", "nazev": "pec na rychtě", "pec_kolize": "Rychta_Kol_Pec", "druh": "pec", "hori": "noc"}
+ ]
+}

@@ -56,7 +56,7 @@ for f, v in G.items():
     TEST("pod_terenem_" + jm, not nove, "celých kusů pod terénem %d (schváleno %d, nových %d)" % (v["pod_terenem_pocet"], len(znam), len(nove)))
 TEST("vyjimky_prosle", not _prosle, "prošlé výjimky (platnost „do“): %s" % _prosle)
 TEST("vyjimky_s_duvodem", _hole == 0, "výjimek bez důvodu a schválení (holé souřadnice, starší): %d – doplnit" % _hole, vaha="varovani")
-TEST("geometrie_spoctena", len(G) == len(KC["geometrie"]["soubory"]), "blender/kontrola_geometrie.py: %d souborů" % len(G))
+TEST("geometrie_spoctena", len(G) == len(KC["geometrie"]["soubory"]) and json.load(open(K + "/build/kontrola_geometrie.json")).get("hotovo"), "blender/kontrola_geometrie.py: %d souborů" % len(G))
 
 # --- voda: hladina nestoupá po proudu, leží pod okolním terénem (koryto), lávka nad vodou a na břehu
 TH = json.load(open(D + "toky_hladina.json"))["toky"]
@@ -296,7 +296,7 @@ TEST("data_casti", all(c < 95 for c in casti), "části balíku %s MiB" % [round
 dz = max(float(np.abs(np.diff(Yt, axis=0)).max()), float(np.abs(np.diff(Yt, axis=1)).max()))
 TEST("teren_skoky", dz < KC["teren"]["skok_max_m"], "největší skok mezi sousedními metry %.1f m (skalní stěny ≤ %s)" % (dz, KC["teren"]["skok_max_m"]))
 DL = json.load(open(K + "/hra/dlazdice/dlazdice.json"))
-TEST("dlazdice", len(DL["dlazdice"]) == DL["pocet"][0] * DL["pocet"][1] and all(os.path.exists(K + "/hra/dlazdice/" + os.path.basename(str(d.get("soubor", d) if isinstance(d, dict) else d))) or True for d in DL["dlazdice"]),
+TEST("dlazdice", len(DL["dlazdice"]) == DL["pocet"][0] * DL["pocet"][1] and all(os.path.exists(K + "/hra/dlazdice/" + os.path.basename(str(d.get("soubor", d) if isinstance(d, dict) else d))) for d in DL["dlazdice"]),   # dřív „or True“ (audit 15. 11.)
      "%d dlaždic, LOD %s" % (len(DL["dlazdice"]), DL["lod"]))
 CP = json.load(open(K + "/pravidla/svet/cesty_puchart.json")); CP_TYP = {c_["id"]: c_["typ"] for c_ in CP["cesty"] if not c_.get("jen_maska")}   # brod: terén (koryto) beze změny
 mez = KC["cesty"]["rez_max_m"]
@@ -370,7 +370,7 @@ TEST("potok_jemny_pas", nbr > 0, "kusů jemného pásu břehů: %d" % nbr)
 # schody: nástup a výstup ≥ 0,9 m volna v šíři ramene (Míša 4. 11.: „všechny schody začínají nebo končí moc blízko stěny,
 # malý průchod… ne pansky“) – build/schody.json z blender/puchart_hrad.py; výjimky s důvodem v kontroly.json schody.vyjimky
 SCH_ = json.load(open(K + "/build/schody.json")) if os.path.exists(K + "/build/schody.json") else {"vady": None}
-_vyj = KC.get("schody", {}).get("vyjimky", [])
+_vyj = [e for e in KC.get("schody", {}).get("vyjimky", []) if e.get("do", "9999") >= _dnes]   # prošlé výjimky neplatí (audit 15. 11.)
 _vad = [v for v in (SCH_["vady"] or []) if not any(abs(v["bod"][0] - e["bod"][0]) < 0.5 and abs(v["bod"][1] - e["bod"][1]) < 0.5 for e in _vyj)]
 TEST("schody_nastup_vystup", SCH_["vady"] is not None and not _vad, "blokovaný nástup/výstup: %s" % _vad[:3])
 # zdi bez švů (Míša 5. 11.: „černé čáry máš pořád a všude“): hradby, věže a sklepní zdi jako jedna síť se sdílenými vrcholy;
@@ -773,6 +773,22 @@ if "mi.visible = venku" in _dg: _c18.append("déšť se pod střechou vypíná c
 if "strechy" not in _ds or "_strechy(" not in _dg: _c18.append("chybí mapa střech v dešti")
 if not json.load(open(K + "/hra/data/pocasi.json")).get("strechy"): _c18.append("pocasi.json bez strechy")
 TEST("dest_pod_strechou", not _c18, "; ".join(_c18) if _c18 else "déšť vidět oknem, dveřmi a zpod přístřešku, pod střechou neprší")
+
+# rozpočet trojúhelníků staveb (audit 15. 11.: žádný rozpočet na stavbu; Míša: „další optimalizace“) – z hlavičky glb
+import struct as _st2
+def _troj_glb(f, jen=None, bez=()):
+    b_ = open(f, "rb").read(); n_ = _st2.unpack("<I", b_[12:16])[0]; j_ = json.loads(b_[20:20 + n_]); t_ = 0
+    for nd in j_["nodes"]:
+        if "mesh" not in nd or any(x in nd["name"] for x in bez) or (jen and not any(nd["name"].startswith(x) for x in jen)): continue
+        t_ += sum(j_["accessors"][p_["indices"]]["count"] // 3 for p_ in j_["meshes"][nd["mesh"]]["primitives"] if "indices" in p_)
+    return t_
+_RS = json.load(open(K + "/pravidla/svet/rozpocty.json")).get("stavby", {}); _c19 = []
+for _f, _e in _RS.get("soubory", {}).items():
+    if not os.path.exists(K + "/" + _f): _c19.append("chybí " + _f); continue
+    for _m in _e.get("modely", [None]):
+        _t = _troj_glb(K + "/" + _f, [_m] if _m else None, tuple(_e.get("bez", [])))
+        if _t > _e["max_troj"]: _c19.append("%s %s: %d troj. > %d" % (os.path.basename(_f), _m or "", _t, _e["max_troj"]))
+TEST("stavby_rozpocet_troj", _RS and not _c19, "; ".join(_c19) if _c19 else "všechny stavby v rozpočtu (rozpocty.json stavby)")
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)

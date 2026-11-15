@@ -103,5 +103,43 @@
   "navijak_do_m": 40.0,
   "retezy_do_m": 120.0,
   "pozn": "Míša 13. 11. (z Havrana: „hrad se maluje celý i s vnitřkem i na dohled z vesnice, což je zbytečné“): dveře, vrata, navijáky a řetězy hradu (Pohyb_*, dvere.gd) se kreslily na jakoukoli vzdálenost (~60 tis. troj., desítky kreslení i z vsi – daleká verze hradu je bez nich). Dveře a navijáky jen zblízka, padací mosty jsou vidět z cesty dál; zbytek hradu: blízká verze do hrad_vzhled lod.daleko_od_m, pak daleká"
+ },
+ "stavby": {
+  "popis": "strop trojúhelníků jednotlivých staveb (test_smyslu stavby_rozpocet_troj) – podrobný model, střední, hrubý; jen se smí snižovat",
+  "zdroj": "audit 15. 11. (domy.glb 184 tis., krčma 161 tis., hájovna 131 tis., kovárna 66 tis.); střední stupeň domů 15. 11. (blender/stredni_lod.py)",
+  "soubory": {
+   "hra/modely/stavby_h/domy_stredni.glb": {
+    "modely": [
+     "Dum1",
+     "Dum2",
+     "Rychta",
+     "ChyseKura",
+     "ChysePrkna"
+    ],
+    "max_troj": 16000
+   },
+   "hra/modely/stavby_h/domy.glb": {
+    "modely": [
+     "Dum1",
+     "Dum2",
+     "Rychta"
+    ],
+    "bez": [
+     "Daleko",
+     "Interier",
+     "Drobne"
+    ],
+    "max_troj": 65000
+   },
+   "hra/modely/stavby_h/krcma_rada.glb": {
+    "max_troj": 175000
+   },
+   "hra/modely/stavby_h/hajovna.glb": {
+    "max_troj": 135000
+   },
+   "hra/modely/stavby_h/kovarna.glb": {
+    "max_troj": 70000
+   }
+  }
  }
 }

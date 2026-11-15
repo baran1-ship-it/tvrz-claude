@@ -14,6 +14,8 @@ K = H.K
 KC = json.load(open(os.path.join(K, "pravidla/svet/kontroly.json")))["geometrie"]
 vysl = {"popis": "ostrovy sítí bez opory (visí) a celé pod terénem – blender/kontrola_geometrie.py", "soubory": {}}
 for soubor in KC["soubory"]:
+    rovina = isinstance(soubor, dict) and soubor.get("teren") == "rovina"   # stavby vsi (audit 15. 11.: ves se nekontrolovala):
+    soubor = soubor["cesta"] if isinstance(soubor, dict) else soubor        # počátek modelu je na terénu → terén = rovina y 0
     cesta = os.path.join(K, soubor)
     if not os.path.exists(cesta): continue
     for o in list(bpy.data.objects): bpy.data.objects.remove(o)
@@ -41,7 +43,7 @@ for soubor in KC["soubory"]:
     np.minimum.at(lo, lab, V); np.maximum.at(hi, lab, V)
     # opora od terénu: nejnižší body ostrova (do 5 cm od jeho dna) do tolerance nad terénem, nebo pod terénem
     stoji = np.zeros(nc, bool); pod = np.zeros(nc, bool)
-    ter_v = np.array([H.ter(x, z) for x, z in V[:, [0, 2]]])
+    ter_v = np.zeros(len(V)) if rovina else H.ter_np(V[:, 0], V[:, 2]) if hasattr(H, "ter_np") else np.array([H.ter(x, z) for x, z in V[:, [0, 2]]])
     nad = V[:, 1] - ter_v
     min_nad = np.full(nc, 1e9); np.minimum.at(min_nad, lab, nad)
     max_nad = np.full(nc, -1e9); np.maximum.at(max_nad, lab, nad)
@@ -138,4 +140,5 @@ for soubor in KC["soubory"]:
                   "nad_terenem_m": round(float(min_nad[i]), 2)} for i in visi[:200]], "visi_pocet": int(len(visi)),
         "pod_terenem": [{"stred": [round(float(c), 2) for c in (lo[i] + hi[i]) / 2]} for i in pod_t[:50]], "pod_terenem_pocet": int(len(pod_t))}
     print("GEOMETRIE", soubor, "ostrovů", nc, "visí", len(visi), "pod terénem", len(pod_t))
+vysl["hotovo"] = True   # hlidaci.sh ověří, že výpočet doběhl (audit 15. 11.: Blender spadl na konci a prošlo to)
 json.dump(vysl, open(os.path.join(K, "build/kontrola_geometrie.json"), "w"), ensure_ascii=False, indent=1)

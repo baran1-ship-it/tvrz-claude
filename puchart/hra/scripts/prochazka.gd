@@ -59,7 +59,9 @@ func pouzij() -> void:   # A: vrata a dveře na dosah, žebřík (bližší z ob
 	if dvere and dvere._blizko != "":
 		var dd: float = (hrac.global_position + Vector3(0, 1.0, 0)).distance_to(dvere.mista[dvere._blizko])
 		if zb.is_empty() or dd <= float(zb["d"]): dvere.prepni(dvere._blizko); return
-	if not zb.is_empty(): zebriky.pouzij()
+	if not zb.is_empty(): zebriky.pouzij(); return
+	var oh: Node = hlavni.get_node_or_null("Ohne")   # oheň na dosah (ohne.gd): Zapálit / Uhasit
+	if oh and int(oh._blizko) >= 0: oh.pouzij()
 
 func zacni(h: Node, p: CharacterBody3D) -> void:
 	hlavni = h; hrac = p

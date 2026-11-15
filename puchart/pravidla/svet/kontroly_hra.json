@@ -1,59 +1,62 @@
 {
-  "popis": "kontroly za běhu hry (test průchodu); Míša 3. 11.: nic nelevituje, nelícuje, nepropadá se",
-  "povrch": {
-    "popis": "po trasách průchodu paprsek dolů: kolize proti viditelné síti hradu a terénu (Havran kolize_troj, stavby_na_zemi)",
-    "krok_m": 0.5,
-    "nad_m": 1.6,
-    "pod_m": 3.0,
-    "tolerance_m": 0.2,
-    "zdroj": "reliéf zdiva ±5 cm + vystupující kámen do 10 cm + hrana schodu 19 cm (5 paprsků v okruhu 6 cm berou nejvyšší); víc než 20 cm je vidět jako bořící se/visící noha",
-    "steny_kazdy": 4,
-    "steny_dosah_m": 2.5,
-    "steny_tolerance_m": 0.3,
-    "steny_popis": "každý 4. bod trasy, 8 směrů, výšky těla 0,3–1,6 m (bere se nejbližší): CHYBA když viditelná věc do 1 m nemá kolizi blíž než vidět + 0,3 m (projde viditelným), nebo kolize do 1 m nemá nic viditelného do kolize + 0,3 m (neviditelná stěna). Otevřené zábradlí s plnou kolizí není chyba (trám nebo sloupek je vidět).",
-    "vrstvy": [
-      "Hrad",
-      "Skaly",
-      "Voda"
-    ],
-    "bez_materialu": [
-      "voda",
-      "kolize"
-    ],
-    "skaly_kazda": 6,
-    "pozn_svet": "terén celého výseku hlídá test smyslu teren_shoda (síť .glb vs kolize), rostliny strom/ker/bylina_na_zemi",
-    "okno_m": 0.6,
-    "okno_popis": "viditelný povrch se hledá od 0,6 m nad zásahem kolize dolů (bod trasy bez výšky může ležet pod mostovkou – paprsek pak měří zem pod mostem)",
-    "telo_r_m": 0.28,
-    "telo_popis": "bod se měří jen tam, kam se vejde celá postava (kapsle r 0,28 m, výška 1,7 m) – ne pod nízkou mostovkou, ve zdi ani pod patou klenby",
-    "steny_vysky_m": [
-      0.1,
-      0.2,
-      0.3,
-      0.4,
-      0.5,
-      0.6,
-      0.7,
-      0.8,
-      0.9,
-      1.0,
-      1.1,
-      1.2,
-      1.3,
-      1.4,
-      1.5,
-      1.6,
-      1.7
-    ],
-    "steny_blizko_m": 1.0,
-    "steny_od_m": 0.4,
-    "steny_od_popis": "viditelné věci se počítají od 0,4 m nad podlahou (nižší – stupně, kořeny, okraj skal – hlídá povrch); kolize ve všech výškách",
-    "telo_vyska_m": 1.7,
-    "projit_smi": [
-      "zelezo"
-    ],
-    "projit_smi_pozn": "železné kování, kruhy a řetězy (tenké, visící) – kolizi nemají v žádné hře, postava jimi projde bez rušení; vše ostatní viditelné musí mít kolizi",
-    "relief_bok_m": 0.12,
-    "relief_popis": "výstupek, vedle kterého (±12 cm) je do vidět+0,3 m kolize, je reliéf zdi (kameny do 10 cm) – ne průchozí věc"
-  }
+ "popis": "kontroly za běhu hry (test průchodu); Míša 3. 11.: nic nelevituje, nelícuje, nepropadá se",
+ "povrch": {
+  "popis": "po trasách průchodu paprsek dolů: kolize proti viditelné síti hradu a terénu (Havran kolize_troj, stavby_na_zemi)",
+  "krok_m": 0.5,
+  "nad_m": 1.6,
+  "pod_m": 3.0,
+  "tolerance_m": 0.2,
+  "zdroj": "reliéf zdiva ±5 cm + vystupující kámen do 10 cm + hrana schodu 19 cm (5 paprsků v okruhu 6 cm berou nejvyšší); víc než 20 cm je vidět jako bořící se/visící noha",
+  "steny_kazdy": 4,
+  "steny_dosah_m": 2.5,
+  "steny_tolerance_m": 0.3,
+  "steny_popis": "každý 4. bod trasy, 8 směrů, výšky těla 0,3–1,6 m (bere se nejbližší): CHYBA když viditelná věc do 1 m nemá kolizi blíž než vidět + 0,3 m (projde viditelným), nebo kolize do 1 m nemá nic viditelného do kolize + 0,3 m (neviditelná stěna). Otevřené zábradlí s plnou kolizí není chyba (trám nebo sloupek je vidět).",
+  "vrstvy": [
+   "Hrad",
+   "Skaly",
+   "Voda",
+   "Mista",
+   "Ves"
+  ],
+  "bez_materialu": [
+   "voda",
+   "kolize"
+  ],
+  "skaly_kazda": 6,
+  "pozn_svet": "terén celého výseku hlídá test smyslu teren_shoda (síť .glb vs kolize), rostliny strom/ker/bylina_na_zemi",
+  "okno_m": 0.6,
+  "okno_popis": "viditelný povrch se hledá od 0,6 m nad zásahem kolize dolů (bod trasy bez výšky může ležet pod mostovkou – paprsek pak měří zem pod mostem)",
+  "telo_r_m": 0.28,
+  "telo_popis": "bod se měří jen tam, kam se vejde celá postava (kapsle r 0,28 m, výška 1,7 m) – ne pod nízkou mostovkou, ve zdi ani pod patou klenby",
+  "steny_vysky_m": [
+   0.1,
+   0.2,
+   0.3,
+   0.4,
+   0.5,
+   0.6,
+   0.7,
+   0.8,
+   0.9,
+   1.0,
+   1.1,
+   1.2,
+   1.3,
+   1.4,
+   1.5,
+   1.6,
+   1.7
+  ],
+  "steny_blizko_m": 1.0,
+  "steny_od_m": 0.4,
+  "steny_od_popis": "viditelné věci se počítají od 0,4 m nad podlahou (nižší – stupně, kořeny, okraj skal – hlídá povrch); kolize ve všech výškách",
+  "telo_vyska_m": 1.7,
+  "projit_smi": [
+   "zelezo"
+  ],
+  "projit_smi_pozn": "železné kování, kruhy a řetězy (tenké, visící) – kolizi nemají v žádné hře, postava jimi projde bez rušení; vše ostatní viditelné musí mít kolizi",
+  "relief_bok_m": 0.12,
+  "relief_popis": "výstupek, vedle kterého (±12 cm) je do vidět+0,3 m kolize, je reliéf zdi (kameny do 10 cm) – ne průchozí věc",
+  "vrstvy_pozn_15_11": "audit hlídačů 15. 11.: kolize domů vsi, krčmy, hájovny (Mista) a stodol a plotů (Ves) se přeskakovaly jako stromy – trasy dum_/ven_ nikdy neporovnaly viditelnou síť s kolizí"
+ }
 }

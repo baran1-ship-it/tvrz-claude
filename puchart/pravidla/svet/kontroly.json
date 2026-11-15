@@ -4,11 +4,42 @@
   "soubory": [
    "hra/modely/hrady/puchart.glb",
    "hra/modely/hrady/skaly.glb",
-   "hra/modely/voda.glb"
+   "hra/modely/voda.glb",
+   {
+    "cesta": "hra/modely/stavby_h/domy.glb",
+    "teren": "rovina"
+   },
+   {
+    "cesta": "hra/modely/stavby_h/krcma_rada.glb",
+    "teren": "rovina"
+   },
+   {
+    "cesta": "hra/modely/stavby_h/hajovna.glb",
+    "teren": "rovina"
+   },
+   {
+    "cesta": "hra/modely/stavby_h/kovarna.glb",
+    "teren": "rovina"
+   },
+   {
+    "cesta": "hra/modely/predmety_h/stodola.glb",
+    "teren": "rovina"
+   },
+   {
+    "cesta": "hra/modely/predmety_h/stodola_mala.glb",
+    "teren": "rovina"
+   },
+   {
+    "cesta": "hra/modely/predmety_h/kolna.glb",
+    "teren": "rovina"
+   }
   ],
   "vynechat_objekty": [
    "KOLIZE",
-   "Pohyb_"
+   "Pohyb_",
+   "_Kol_",
+   "_Daleko",
+   "Interier"
   ],
   "tolerance_teren_m": 0.15,
   "tolerance_dotyk_m": 0.15,
@@ -79,7 +110,31 @@
     }
    ],
    "hra/modely/hrady/skaly.glb": [],
-   "hra/modely/voda.glb": []
+   "hra/modely/voda.glb": [],
+   "hra/modely/stavby_h/hajovna.glb": [
+    {
+     "stred": [
+      -4.87,
+      2.18,
+      1.5
+     ],
+     "duvod": "paroží na štítku nad oknem (NAVOD_HAJOVNA) – visí na stěně, mezera k roubení nad tolerancí",
+     "schvalil": "audit hlídačů 15. 11. (snímek hájovny)",
+     "do": "2026-12-31"
+    }
+   ],
+   "hra/modely/predmety_h/kolna.glb": [
+    {
+     "stred": [
+      0.0,
+      2.58,
+      0.0
+     ],
+     "duvod": "pultová střecha kůlny leží na pozednicích (snímek kolna 15. 11.), dotek mimo toleranci paprsku",
+     "schvalil": "audit hlídačů 15. 11. (snímek)",
+     "do": "2026-12-31"
+    }
+   ]
   },
   "schvaleno_pozn": "3. 11.: zbývají 2 nálezy (hřebenáč paláce B) – k ověření snímkem; dřívější kování v průjezdu branky zmizelo se strážnicí",
   "schvaleno_pod_terenem": {
@@ -327,13 +382,26 @@
      176.1
     ]
    ],
-   "hra/modely/voda.glb": []
+   "hra/modely/voda.glb": [],
+   "hra/modely/stavby_h/domy.glb": [
+    {
+     "stred": [
+      0.0,
+      -0.45,
+      -6.43
+     ],
+     "duvod": "podezdívka / základ domu jde pod terén záměrně (počátek modelu = terén plošiny, Havran DUM_MER)",
+     "schvalil": "audit hlídačů 15. 11.",
+     "do": "2026-12-31"
+    }
+   ]
   },
   "schvaleno_pod_terenem_pozn": "2. 11.: stav při zavedení testu (základy zdí zapuštěné 1,5 m, okraje skal pod terénem záměrně) – NEOVERENO jednotlivě; nový kus pod terénem = chyba",
   "shoda_m": 1.5,
   "pozn_sachta": "3. 11. (Míša: „šachtu chci, jsou výjimky pro některé hlídače“): šachta studny a hladina pod terénem schváleně (A.studna, otvor v síti terénu teren_dlazdice.dira)",
   "pozn_vedro": "3. 11. (Míša: jsou výjimky pro některé hlídače): vědro studny, jeho obruče, ucho a lano visí na rumpálu – drží shora (lano z navinutí na bubnu, díly do sebe zasahují); kontrola počítá oporu jen zespodu",
-  "pozn_vyjimky": "formát výjimky (Havran 3. 11.): stred, duvod, schvalil, do (ISO datum; prošlá neplatí). Starší holé souřadnice hlásí test vyjimky_s_duvodem jako varování."
+  "pozn_vyjimky": "formát výjimky (Havran 3. 11.): stred, duvod, schvalil, do (ISO datum; prošlá neplatí). Starší holé souřadnice hlásí test vyjimky_s_duvodem jako varování.",
+  "pozn_vsi_15_11": "audit hlídačů 15. 11.: stavby vsi (domy, krčma, hájovna, kovárna, stodoly, kůlna) se nekontrolovaly – teď v souřadnicích modelu, terén = rovina y 0 (počátek modelu je na terénu)"
  },
  "voda": {
   "podil_nad_brehem_max": 0.05,

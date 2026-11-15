@@ -44,11 +44,15 @@ static func kopie(g: GeometryInstance3D, koren: Node3D, videno: Dictionary, mimo
 static func predehrej(koren_sveta: Node3D, cam: Camera3D, navic: Array, snimku := 4) -> void:
 	if OS.has_environment("PUCHART_BEZ_PREDEHRATI") or cam == null: return
 	var t0 := Time.get_ticks_usec()
+	var oh := koren_sveta.get_node_or_null("Ohne")   # ohně (ohne.gd) se staví až po kolizích – počkat, ať se jejich shader sestaví teď
+	if oh and not bool(oh.get("pripraveno")) and oh.has_signal("hotovo"): await oh.hotovo
 	var koren := Node3D.new(); koren.name = "Predehrati"; koren_sveta.add_child(koren)
 	koren.global_transform = Transform3D(cam.global_basis, cam.global_position - cam.global_basis.z * 3.0)
 	var videno := {}; var n := 0
 	for gi in koren_sveta.find_children("*", "GeometryInstance3D", true, false):
 		if gi.get_parent() != koren: n += kopie(gi as GeometryInstance3D, koren, videno)
+	for gi in koren_sveta.get_tree().get_nodes_in_group("predehrat"):   # i skryté (oheň zhasnutý / daleko – ohne.gd): shader ohně
+		if gi is GeometryInstance3D: n += kopie(gi as GeometryInstance3D, koren, videno, true)
 	var site := []
 	for v in navic:   # vzorky vrstev po buňkách kolem hráče (bunky_kolem.gd vzory) – mimo strom scény
 		if v is GeometryInstance3D:
