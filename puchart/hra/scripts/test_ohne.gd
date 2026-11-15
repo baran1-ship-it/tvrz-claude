@@ -74,25 +74,34 @@ func _ready() -> void:
 		get_tree().paused = false
 		if pr.get("menu") and pr.menu.has_method("hide_menu"): pr.menu.hide_menu()
 		hr.set_physics_process(false)
-		var cil: Vector3 = p0 + Vector3.UP * 0.15
-		var smer := Vector3(1.8, 0, 0)
-		for k in 8:   # strana ohně, ze které je vidět (ne přes zeď)
-			var a := k * TAU / 8.0; var kde := cil + Vector3(cos(a), 0, sin(a)) * 1.8
-			var q := PhysicsRayQueryParameters3D.create(cil + Vector3.UP * 1.0, kde + Vector3.UP * 1.0)
-			if get_viewport().get_world_3d().direct_space_state.intersect_ray(q).is_empty(): smer = Vector3(cos(a), 0, sin(a)) * 1.8; break
-		hr.global_position = Vector3(cil.x + smer.x, p0.y, cil.z + smer.z)
-		hr.cam.global_position = hr.global_position + Vector3.UP * 1.65
-		hr.cam.look_at(cil, Vector3.UP)
-		for k in 12: await get_tree().process_frame
-		var t: Button = oh.tlacitko
-		if t == null or not t.visible: chyby.append("nabídka ohně se neukázala (hráč u ohně, míří na něj)")
-		else:
+		var ss := get_viewport().get_world_3d().direct_space_state
+		for io in ([i0, ik] if ik >= 0 else [i0]):   # krčma (kolize ohniště vlastní) a kuchyně hradu (jedna kolize celého hradu)
+			var oi: Dictionary = oh.ohne[io]; var pz: Vector3 = oi["zaklad"]
+			if io == ik and h.get("den"): h.den.set_hour(17.0, 0.0); oh._noc(false, 17.0)   # kuchyně hradu hoří při vaření večeře
+			var cil: Vector3 = pz + Vector3.UP * 0.15
+			var smer := Vector3(1.8, 0, 0)
+			for k in 8:   # strana ohně, ze které je vidět (ne přes zeď)
+				var a := k * TAU / 8.0; var kde := cil + Vector3(cos(a), 0, sin(a)) * 1.8
+				var q := PhysicsRayQueryParameters3D.create(cil + Vector3.UP * 1.0, kde + Vector3.UP * 1.0)
+				if ss.intersect_ray(q).is_empty(): smer = Vector3(cos(a), 0, sin(a)) * 1.8; break
+			var stoj := Vector3(cil.x + smer.x, pz.y, cil.z + smer.z)
+			var dol := ss.intersect_ray(PhysicsRayQueryParameters3D.create(stoj + Vector3.UP * 1.0, stoj - Vector3.UP * 3.0))
+			if not dol.is_empty(): stoj.y = (dol["position"] as Vector3).y   # podlaha (ohniště hradu je vyvýšené)
+			hr.global_position = stoj
+			hr.cam.global_position = hr.global_position + Vector3.UP * 1.65
+			hr.cam.look_at(cil, Vector3.UP)
+			for k in 12: await get_tree().process_frame
+			var t: Button = oh.tlacitko
+			if t == null or not t.visible: chyby.append("nabídka ohně se neukázala (%s, hráč u ohně, míří na něj)" % oi["nazev"]); continue
 			var t0 := t.text
 			t.pressed.emit()
 			for k in 8: await get_tree().process_frame
-			if t0 != String(cfg["nabidka"]["uhasit"]) or bool(o0["hori"]) or t.text != String(cfg["nabidka"]["zapalit"]): chyby.append("nabídka: %s → %s, hoří %s" % [t0, t.text, o0["hori"]])
+			if t0 != String(cfg["nabidka"]["uhasit"]) or bool(oi["hori"]) or t.text != String(cfg["nabidka"]["zapalit"]): chyby.append("nabídka %s: %s → %s, hoří %s" % [oi["nazev"], t0, t.text, oi["hori"]])
+			var t1 := t.text
 			t.pressed.emit()
-			print("OHNE_TEST nabídka %s / %s, hoří %s" % [t0, t.text, o0["hori"]])
+			for k in 8: await get_tree().process_frame
+			print("OHNE_TEST nabídka %s: %s → %s → %s, hoří %s" % [oi["nazev"], t0, t1, t.text, oi["hori"]])
+			if not bool(oi["hori"]): chyby.append("nabídka %s: znovu zapálit nejde" % oi["nazev"])
 	else: chyby.append("procházka (tlačítka) nenalezena")
 	for o: Dictionary in oh.ohne:
 		print("OHNE_TEST oheň %s %s hoří %s zaklad %s" % [o["nazev"], o["druh"], o["hori"], o["zaklad"]])

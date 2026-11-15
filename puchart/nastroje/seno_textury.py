@@ -17,7 +17,7 @@ from PIL import Image, ImageDraw, ImageFilter
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "hra", "textury", "seno")
 rnd = random.Random(1393)
 # paleta stébel (sRGB): bledá sláma, šedobéžová, tmavší starší, nazelenale šedá (KCD1: bledé, matné, málo syté)
-PALETA = [((190, 174, 140), 0.34), ((168, 154, 126), 0.30), ((140, 125, 98), 0.18), ((158, 150, 122), 0.10), ((204, 186, 148), 0.08)]
+PALETA = [((190, 174, 140), 0.28), ((168, 154, 126), 0.27), ((140, 125, 98), 0.18), ((112, 100, 80), 0.10), ((158, 150, 122), 0.09), ((204, 186, 148), 0.08)]
 
 
 def barva():
@@ -30,7 +30,7 @@ def barva():
     return PALETA[0][0]
 
 
-def steblo(x0, y0, uhel, delka, krok=6.0, vlna=None, ohyb=None):
+def steblo(x0, y0, uhel, delka, krok=8.0, vlna=None, ohyb=None):
     """body zvlněného stébla: směr se plynule stáčí (ohyb) a vlní (krátká vlna – zmačkané suché stéblo)"""
     vlna = vlna if vlna is not None else rnd.uniform(0.05, 0.22)
     ohyb = ohyb if ohyb is not None else rnd.uniform(-0.9, 0.9) / max(delka, 1)
@@ -78,21 +78,21 @@ dr, da = ImageDraw.Draw(rgb), ImageDraw.Draw(alfa)
 for b in range(4):                                     # řada 0: spleť (vrstvy po povrchu kupy)
     x0b, y0b = b * CW, 0
     okraj = 0.07
-    for i in range(1150):
+    for i in range(230):
         # pata stébla uvnitř elipsy buňky, hustota k okraji řídne (karta nemá rovné hrany)
         for _ in range(30):
             u, v = rnd.random(), rnd.random()
             d = math.hypot((u - 0.5) / 0.5, (v - 0.5) / 0.5)
-            if d < 0.95 and rnd.random() > d ** 1.4:
+            if d < 0.97 and rnd.random() < min(1.0, (1.0 - d) / 0.4):   # rovnoměrně, jen u okraje řídne (ne hustý „lístek“)
                 break
         uhel = rnd.uniform(0, 2 * math.pi)
-        if rnd.random() < 0.45:                        # část podél karty (karta leží napříč i podél povrchu)
+        if rnd.random() < 0.25:                        # část podél karty (karta leží napříč i podél povrchu)
             uhel = -math.pi / 2 + rnd.uniform(-0.6, 0.6) + (math.pi if rnd.random() < 0.5 else 0)
-        delka = rnd.uniform(0.08, 0.32) * CH
-        body = orez(steblo(x0b + u * CW, y0b + v * CH, uhel, delka), x0b + okraj * CW, x0b + (1 - okraj) * CW, y0b + okraj * 0.5 * CH, y0b + (1 - okraj * 0.5) * CH, rnd.uniform(0.45, 1.0) ** 2)
+        delka = rnd.uniform(0.15, 0.5) * CH
+        body = orez(steblo(x0b + u * CW, y0b + v * CH, uhel, delka), x0b + okraj * CW, x0b + (1 - okraj) * CW, y0b + okraj * 0.5 * CH, y0b + (1 - okraj * 0.5) * CH, rnd.uniform(0.75, 1.0) ** 2)
         if len(body) < 3:
             continue
-        kresli(dr, da, None, body, rnd.uniform(3.0, 6.0), barva())
+        kresli(dr, da, None, body, rnd.uniform(11.0, 17.0), barva())   # stéblo ~2 mm na kartě ~6 cm široké (1/30 buňky) – tenčí se v mipmapách slily do „lístku“
 for b in range(4):                                     # řada 1: trsy (trčící stébla z paty)
     x0b, y0b = b * CW, CH
     for i in range(rnd.randint(7, 11)):
@@ -101,7 +101,7 @@ for b in range(4):                                     # řada 1: trsy (trčíc�
         delka = rnd.uniform(0.3, 0.92) * (CH - 10)
         body = steblo(xp, yp, uhel, delka, vlna=rnd.uniform(0.03, 0.12), ohyb=rnd.uniform(-0.5, 0.5) / delka)
         body = orez(body, x0b + 0.04 * CW, x0b + 0.96 * CW, y0b + 6, y0b + CH)
-        kresli(dr, da, None, body, rnd.uniform(3.0, 5.0), barva())
+        kresli(dr, da, None, body, rnd.uniform(9.0, 14.0), barva())
 a = np.asarray(alfa).astype(float) / 255.0
 r = np.asarray(rgb).astype(float)
 prum = (r * a[..., None]).sum((0, 1)) / max(a.sum(), 1)

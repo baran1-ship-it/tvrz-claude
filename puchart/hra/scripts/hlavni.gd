@@ -199,6 +199,7 @@ func _start() -> void:
 	Denik.zapis("keře")
 	var ker: Node3D = load("res://scripts/byliny.gd").new(); ker.name = "Kere"; add_child(ker)   # keře a zmlazení (data/kere.json)
 	ker.postav(svet, cam, "res://data/kere.json")
+	_kolize_hradu.call_deferred()   # před předehřátím: predehrati.gd čeká na ohne.gd a ohně čekají na kolize hradu
 	Denik.zapis("předehřátí shaderů")
 	if _foto == "" and OS.get_environment("PUCHART_TEST") == "" and _pr.get("predehrati", {}).get("zapojeno", false):   # shadery všech materiálů sestavit hned, ne až za chůze (záseky při 1. průchodu – Havran 0.62)
 		await get_tree().process_frame
@@ -217,7 +218,6 @@ func _start() -> void:
 		_test_sceny.call_deferred()
 	elif _foto == "" and not meri:
 		_prochazka.call_deferred()
-	_kolize_hradu.call_deferred()
 	if OS.get_environment("PUCHART_SKRIPT") != "": var ts_: Node = load(OS.get_environment("PUCHART_SKRIPT")).new(); add_child(ts_)   # ladicí skript (testy funkcí)
 	for jm in OS.get_environment("PUCHART_SKRYJ").split(",", false):   # diagnostika výkonu: skrýt vrstvu (Les, Kere, Byliny, Hrad, Skaly, Voda)
 		var n := get_node_or_null(jm)

@@ -347,7 +347,7 @@ static func jesle_site(tv: Dictionary, je: Dictionary) -> Array:
 			var bu := rnd.randi() % nc
 			var u0 := float(bu) / nc; var u1 := float(bu + 1) / nc
 			var v0 := float(rada) / nr; var v1 := float(rada + 1) / nr
-			var ton := rnd.randf_range(0.9, 1.08)
+			var ton := rnd.randf_range(0.95, 1.05)
 			var radky: Array = []   # [bod, v, jas]
 			var bok := Vector3.ZERO; var nn := Vector3.UP
 			if druh == 0:
