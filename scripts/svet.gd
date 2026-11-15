@@ -6985,7 +6985,9 @@ func _chyse_na_sit(root: Node3D) -> void:
 		# v zemi), teren pod chysi a kolem srovnany na prah (t_pas = pod - teren_pod_prahem_m); luzko na zemi (vyska 0)
 		var lch: Dictionary = Pravidla.cti("lokace", "lom_chyse")
 		if bool(lch.get("na_terenu", false)) and String(d["typ"]) == String(lch["typ"]):
-			y0 = (mn + mx) * 0.5 - pod
+			# podlaha na nejvyssim bode pod chysi (ne prumer): teren pred dvermi nikdy nad prahem - na svahu byl a preklad
+			# dveri (StitFNad) zavrel vstup (test lide_chovani chyse_22); terén kolem se dosype (t_pas)
+			y0 = mx - pod
 			var m2: Dictionary = (d["m"] as Dictionary).duplicate()
 			m2["t_pas"] = pod - float(lch["teren_pod_prahem_m"])
 			d["m"] = m2
