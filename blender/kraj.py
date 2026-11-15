@@ -1068,13 +1068,46 @@ def od_zdi(x, z):
 VYSOKE_U_DOMU = ("divoka_trava", "grass_medium", "fern", "kapradi", "shrub", "sipek", "bez_cerny")
 
 
+_RUINY_PRUCHODY = None
+
+
+def v_pruchodu_ruiny(x, z):
+    """Volny pruchod zriceniny (lokace.json ruiny: pudorysy pruchody dilu + pruchody_lok, usecky [x0, z0, x1, z1, w]
+    v mistnich souradnicich, otoceni jako ruiny._F a svet._ruiny_ves_dil). 15. 11. test ruiny_ves: les, remizky a mech
+    rostly v pruchodech Doubravy - pravidlo plati pro vsechny generatory pres uzivani_smi."""
+    global _RUINY_PRUCHODY
+    if _RUINY_PRUCHODY is None:
+        _RUINY_PRUCHODY = []
+        for e in _LOKACE_J["ruiny"]:
+            cx, cz, yaw = e["stred"][0], e["stred"][1], e["natoceni"]
+            c0, s0 = math.cos(yaw), math.sin(yaw)
+            loc = [tuple(q) for q in e.get("pruchody_lok", [])]
+            for d in e.get("dily", []):
+                sb, du, dv, st = d[0], d[1], d[2], d[3]
+                a = math.radians(st)
+                c, s = math.cos(a), math.sin(a)
+                for x0, z0, x1, z1, w in e.get("pudorysy", {}).get(sb, {}).get("pruchody", []):
+                    loc.append((du + x0 * c + z0 * s, dv - x0 * s + z0 * c, du + x1 * c + z1 * s, dv - x1 * s + z1 * c, w))
+            for u0, v0, u1, v1, w in loc:
+                _RUINY_PRUCHODY.append((cx + u0 * c0 + v0 * s0, cz - u0 * s0 + v0 * c0,
+                                        cx + u1 * c0 + v1 * s0, cz - u1 * s0 + v1 * c0, w))
+    for x0, z0, x1, z1, w in _RUINY_PRUCHODY:
+        dx, dz = x1 - x0, z1 - z0
+        t = max(0.0, min(1.0, ((x - x0) * dx + (z - z0) * dz) / max(dx * dx + dz * dz, 1e-6)))
+        if math.hypot(x - (x0 + dx * t), z - (z0 + dz * t)) < w:
+            return True
+    return False
+
+
 def uzivani_smi(pid, x, z):
     """Pravidlo uzivani (Misa 27. 10.): u paty zdi (pasma.budova plevel_u_zdi_m) plevel a trava, dal do drn_m jen
     nizky seslapany drn - zadna vysoka trava, kapradi ani kere; strom az od kmen_od_zdi_m."""
     i = druh_id(pid)
     sk = DRUHY[i]["skupina"] if i else ""
     if sk not in ("strom", "ker", "trava", "bylina"):
-        return True
+        return not pid.startswith("mech_") or not v_pruchodu_ruiny(x, z)
+    if sk != "trava" and v_pruchodu_ruiny(x, z):
+        return False                                   # pruchod zriceniny: jen trava (lokace ruiny pruchody)
     d = od_zdi(x, z)
     if sk == "strom":
         return d >= _PASMA_BUDOVA["kmen_od_zdi_m"]
