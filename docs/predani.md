@@ -1463,3 +1463,6 @@ Hotovo v kódu a datech (testy u každého):
   `git fetch --depth 1 origin main` (nove.py čte `origin/main:modely/nove/*.glb`); `tools/krok_b/vysky.json` (viz výše); `python3 tools/gen_tex.py`.
 - **Export světa – jablon (15. 11., 6. pád):** `modely/nove/jablon.glb` není v origin/main ani v repu → před exportem
   `/opt/bl/bin/python blender/strom2.py -- jablon` (vytvoří modely/nove/jablon.glb + _daleko.glb).
+- **Export světa – jabloň (15. 11., 7. pád):** strom2.py potřebuje `blender/tex_cache/listy/LeafSet001/` (ambientCG
+  LeafSet001_2K-PNG.zip), `tex_cache/kury/bark_brown_02_{diff,nor_gl}_1k.jpg` (Poly Haven) a `tex_cache/jablko/food_apple_01_1k.gltf`
+  (Poly Haven API files/food_apple_01, gltf 1k + include). Pak `/opt/bl/bin/python blender/strom2.py -- jablon`.

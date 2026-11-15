@@ -477,3 +477,20 @@ Paměť: VRAM 894 MB (textury 609, buffery 286), halda 1782 MB, uzlů 28 702.
 - Další krok: varianta trasy, která na louce u (103–129, 447–463) zastaví koně a zapíše přírůstek uzlů a nahrání do GPU
   po snímcích (izolovaný test podezření, ne oprava).
 
+### 0.999998 – Měřicí trasa 15. 11. 17:28 (2. trasa téže verze; Míša: bez aplikací na pozadí, bez wifi; tablet „vařící“)
+p50 vše / bez_vnitrku / déšť / vše znovu (v závorce ranní 09:26): tvrz-cesta 25/36/26/29 (25/35/45/30), louka 24/28/29/39
+(24/35/32/38), les 28/31/25/27 (33/26/30/29), skály 32/30/29/24 (27/23/33/30), ves 31/24/27/26 (27/28/28/31), mlýn 18/20/30/21
+(18/21/23/28), ves-vjezd 36/43/28/39 (36/42/37/27), ves-dvory 32/27/30/28 (34/24/31/45), krcma-kovarna 28/25/27/28 (25/37/30/27),
+hostinec 26/34/33/41 (27/25/26/34), věž 24/24/24/23 (27/25/30/29). Paměť VRAM 887 MB, halda 1775 MB, uzlů 28 693.
+- **Špičky > 200 ms: 1** (ráno 11): jen 7 409 ms na úplném začátku (tvrz-cesta u (20, 78), skripty 1, fyzika 4, kreslení 439
+  jako okolí). Série na louce při otáčení koně (ráno 0,5–1,4 s) **zmizela** (max 97 ms), krčma 1. průjezd 1 095 → 42 ms.
+  NAMĚŘENO: ranní velké špičky se při 2. trase téže verze neopakovaly → PODEZŘENÍ: 1. trasa po instalaci (keš shaderů ovladače)
+  a/nebo aplikace na pozadí; louka „nahrávání buněk“ jako příčina tím OSLABENA. Oddělit to jde jen 1. trasou po instalaci bez pozadí.
+- **p50 stejné jako ráno** (aplikace na pozadí průměr neovlivnily, jen špičky).
+- **ves-vjezd nejhorší úsek ve všech variantách** (36/43/28/39, >40 ms 107–187 snímků): kreslení 810 a 2,28 mil. troj. = nejvíc
+  ze všech úseků (louka 370 / 1,5; mlýn 320 / 1,07); bez_vnitrku nepomáhá (43). NAMĚŘENO: cena = množství kresleného
+  (GPU) u vjezdu, ne vnitřek ani skripty (skr 8–9). Kandidáti (NEOVĚŘENO): pohled přes celou ves + krčmu + kovárnu, dosahy LOD.
+- **hostinec: skripty** – nejhorší snímky skr 35–39 ms (bez_vnitrku, déšť, vše znovu), p50 33–41 → v hostinci se občas
+  počítá skript 35+ ms (PODEZŘENÍ: postavy hostince – výběr činnosti/cesty). Jediný úsek, kde vede skript.
+- **Teplo:** panel ukazuje vlny 20–25 FPS (prům. 40–47 ms) střídané 45–56 FPS; „vše znovu“ louka 39, hostinec 41 = zahřátí.
+
