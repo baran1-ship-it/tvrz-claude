@@ -1,0 +1,644 @@
+{
+ "popis": "Topení od Míšina modeláře (pece, krby, kamna, kuchyňská topeniště, komín, začouzení stropu, nádobí). Zdroj = dva zipy z Disku (zdroj), rozbalené v build/zdroj_modelar/<sada>; nastroje/topeni_modely.py je přebalí do hra/modely/topeni/ (jen výchozí scéna, sdílené textury v textury/ místo vložených v každém glb – 22 map místo 22 × 34 kopií; varianty s vynechanými díly); nastroje/topeni_domy.py odstraní ze zdroje domů staré pece Havrana a vyřízne prostupy komína Rychty; hlavni.gd _topeni vloží modely podle vlozit (k instanci domu / celku podle modelu, k hradu do uzlu Topeni), přejmenuje značky na <prefix>_<značka> (ohne.json je najde) a nastaví LOD. Kopie v hra/data/topeni.json (nastroje/postav_vse.sh cp).",
+ "zdroj": {
+  "slozka": "build/zdroj_modelar",
+  "sady": {
+   "Topeni_1400": {
+    "disk_id": "1431ZySVPzoct1JjTAkF8zXheyLBLUXN4",
+    "zip": "Topeni_1400.zip"
+   },
+   "Topeni_1400_Doplnek": {
+    "disk_id": "1xDluFX8N9DYOPi1b7yob1AFk33mrrYj8",
+    "zip": "Topeni_1400_Doplnek.zip"
+   }
+  },
+  "stazeni": "curl -sSL \"https://drive.usercontent.google.com/download?id=<disk_id>&export=download&confirm=t\" (nastroje/stavby_z_havrana.sh)",
+  "autor": "Míšin modelář (vlastní modely pro Puchart, 15. 11. 2026) – CTI_ME.md, NAVOD_KRB.md, NAVOD_PEC.md, NAVOD_NADOBI.md v sadách",
+  "licence": "vlastní dodané modely a skripty volně pro hru; textury Poly Haven CC0 (rock_face_03, rough_wood, white_rough_plaster; Clay Plaster – Amal Kumar, Plaster Stone Wall 01 – Charlotte Baglioni, Large Sandstone Blocks – Rob Tuytel); KCD jen vizuální inspirace, nic z KCD v modelech (PRAMENY_A_LICENCE.md, PODKLADY_A_LICENCE.md)",
+  "volba": "Míša 15. 11.: „krby a pece do kuchyně se mi víc líbí v doplňku“ → krby Krb_Sinovy_Vysoky, kuchyně Topeniste_Kuchynske_Siroke (Doplněk); z Topeni_1400 Pec_Chalupni, Pec_Krcma, Kamna_Hradni_Nadobkova, Komin_Rychta_Dil_1m, Zacouzeni_Stropu; Krb_Rychta a Krb_Hradni jen tam, kde síňový krb nesedí (vlozit[].proc)"
+ },
+ "vystup": "hra/modely/topeni",
+ "lod": {
+  "lod0_do_m": 12.0,
+  "vnitrek_do_m": 35.0,
+  "_zdroj": "NAVOD_PEC / NAVOD_KRB: .tscn přepínají LOD0→LOD1 v 8 m (výchozí, „uprav podle velikosti v obraze“); jizba je 6–7 m – v 8 m by pec přeskakovala na hrubý stupeň už ode dveří → 12 m (celá místnost i pohled ze dveří síně LOD0). LOD1 jen do vnitrek_do_m (jako Interier domů – mista.json lod.vnitrek_do_m 35 m); díly nad střechou (vnejsek true – komín Rychty) do střední vzdálenosti domů (stredni_do_m). Kolize jen z LOD0 (-convcolonly), LOD1 bez kolizí."
+ },
+ "modely": {
+  "Pec_Chalupni": {
+   "sada": "Topeni_1400",
+   "druh": "pec",
+   "usti": [
+    0.58,
+    0.48
+   ]
+  },
+  "Pec_Krcma": {
+   "sada": "Topeni_1400",
+   "druh": "pec",
+   "usti": [
+    0.72,
+    0.57
+   ]
+  },
+  "Kamna_Hradni_Nadobkova": {
+   "sada": "Topeni_1400",
+   "druh": "kamna"
+  },
+  "Komin_Rychta_Dil_1m": {
+   "sada": "Topeni_1400",
+   "druh": "komin"
+  },
+  "Zacouzeni_Stropu": {
+   "sada": "Topeni_1400",
+   "druh": "strop"
+  },
+  "Krb_Rychta": {
+   "sada": "Topeni_1400",
+   "druh": "krb"
+  },
+  "Krb_Hradni": {
+   "sada": "Topeni_1400",
+   "druh": "krb"
+  },
+  "Krb_Sinovy_Vysoky": {
+   "sada": "Topeni_1400_Doplnek",
+   "druh": "krb"
+  },
+  "Topeniste_Kuchynske_Siroke": {
+   "sada": "Topeni_1400_Doplnek",
+   "druh": "kuchyne"
+  }
+ },
+ "varianty": {
+  "_popis": "model bez některých dílů (uzly začínající na vynechat, LOD0 i LOD1) – úprava u zdroje, ne skrývání ve hře",
+  "Pec_Chalupni_BezLavice": {
+   "z": "Pec_Chalupni",
+   "vynechat": [
+    "Noha_lavice",
+    "Stepana_sedaci_deska"
+   ],
+   "proc": "Dum2: jizba hluboká jen 3,4 m – s lavicí by mezi dveřmi jizby a pecí zbylo 0,78 m"
+  },
+  "Topeniste_Kuchynske_Siroke_BezOdtahu": {
+   "z": "Topeniste_Kuchynske_Siroke",
+   "vynechat": [
+    "Komin_napojeni_kuchyne"
+   ],
+   "proc": "černá kuchyně hradu A: strop 3,26 m nad podlahou (paprsek KOLIZE puchart.glb 15. 11.: podlaha 39,12, strop 42,36) – dýmník (3,28 m) končí v tloušťce stropu, krátký odtah 3,28–3,56 by prošel podlahou světnice"
+  }
+ },
+ "nadobi": {
+  "_popis": "samostatné nádobí z Doplňku – do katalogu předmětů pískoviště (hra/modely/predmety_h/topeni_*.tscn: kořen RigidBody3D, jedna konvexní kolize, freeze = true jako dodaná .tscn – NAVOD_NADOBI.md), NEROZMISŤOVAT (Míša si výbavu rozmisťuje sama)",
+  "sada": "Topeni_1400_Doplnek",
+  "predmety": [
+   "Hrnec_Trinohy",
+   "Dzban_Keramicky",
+   "Miska_Hlinena",
+   "Poharek_Keramicky",
+   "Kotel_Zavesny",
+   "Panev_Kovana",
+   "Naberacka_Kovana",
+   "Sberacka_Derovana",
+   "Trojnozka_Kovana"
+  ],
+  "lod0_do_m": 6.0,
+  "_lod_pozn": "NAVOD_NADOBI: „pro menší předměty můžeš hranici zkrátit“ – předměty 0,1–0,4 m: 6 m",
+  "katalog": {
+   "_popis": "záznam katalogu pískoviště (hra/modely/predmety_h.json, id topeni_<Model>) – nazev, kat, stav, cena jako podobné předměty Havrana (hrnec 5, džbán 6, miska 2, pánev 30); vaha = mass z dodané .tscn (orientační, NAVOD_NADOBI); rozmer spočte nástroj z LOD0; ikona <id>.png (nastroje/godot/ikony_predmetu.gd)",
+   "Hrnec_Trinohy": {
+    "nazev": "Hrnec na trojnožce",
+    "cena": 5
+   },
+   "Dzban_Keramicky": {
+    "nazev": "Keramický džbán",
+    "cena": 6
+   },
+   "Miska_Hlinena": {
+    "nazev": "Hliněná miska",
+    "cena": 2
+   },
+   "Poharek_Keramicky": {
+    "nazev": "Keramický pohárek",
+    "cena": 2
+   },
+   "Kotel_Zavesny": {
+    "nazev": "Závěsný kotel",
+    "cena": 40
+   },
+   "Panev_Kovana": {
+    "nazev": "Kovaná pánev",
+    "cena": 25
+   },
+   "Naberacka_Kovana": {
+    "nazev": "Kovaná naběračka",
+    "cena": 6
+   },
+   "Sberacka_Derovana": {
+    "nazev": "Děrovaná sběračka",
+    "cena": 8
+   },
+   "Trojnozka_Kovana": {
+    "nazev": "Kovaná trojnožka",
+    "cena": 12
+   }
+  },
+  "kat": "nadoby",
+  "stav": "dekorace"
+ },
+ "vlozit": [
+  {
+   "id": "pec_dum1",
+   "kam": "dum",
+   "model": "Dum1",
+   "topeni": "Pec_Chalupni",
+   "prefix": "Dum1",
+   "poloha": [
+    -1.45,
+    0.3,
+    3.42
+   ],
+   "yaw_deg": 90.0,
+   "proc": "nová pec je s lavicí a zápecím 2,52 × 2,50 m (stará 1,48 × 1,91) – v rohu u příčky by zakryla dveře jizby (x −1,73…−0,81); proto u přední (štítové) a levé stěny, ústí do jizby (+x), lavice ke štítu; od dveří jizby volno 1,48 m (z 0,88…2,36)",
+   "jistota": "NAVRH",
+   "zdroj": "NAVOD_PEC.md (kouřová jizba bez komína, ústí +Z, počátek u podlahy); rozbor domy.glb 15. 11. (jizba x −3,40…3,40, z 0,79…4,91, podlaha 0,30, dveře jizby x −1,73…−0,81)"
+  },
+  {
+   "id": "pec_dum2",
+   "kam": "dum",
+   "model": "Dum2",
+   "topeni": "Pec_Chalupni_BezLavice",
+   "prefix": "Dum2",
+   "poloha": [
+    -0.96,
+    0.25,
+    3.31
+   ],
+   "yaw_deg": 90.0,
+   "proc": "jizba Dum2 x −2,91…2,90, z 1,01…4,40 (hloubka 3,4 m), dveře jizby x −1,50…−0,64 – pec bez lavice u štítu a levé stěny, od dveří volno 1,18 m",
+   "jistota": "NAVRH",
+   "zdroj": "jako pec_dum1"
+  },
+  {
+   "id": "pec_rychta",
+   "kam": "dum",
+   "model": "Rychta",
+   "topeni": "Pec_Chalupni",
+   "prefix": "Rychta",
+   "poloha": [
+    -1.75,
+    0.3,
+    2.35
+   ],
+   "yaw_deg": 90.0,
+   "proc": "jizba Rychty x −3,70…3,69, z −0,45…3,84, dveře jizby x −1,83…−0,91 v příčce z −0,45 – pec u štítu a levé stěny, od dveří volno 1,74 m; krb na příčce vpravo (x 0,67…2,43)",
+   "jistota": "NAVRH",
+   "zdroj": "jako pec_dum1"
+  },
+  {
+   "id": "rychta_krb",
+   "kam": "dum",
+   "model": "Rychta",
+   "topeni": "Krb_Rychta",
+   "prefix": "Rychta",
+   "poloha": [
+    1.55,
+    0.3,
+    -0.145
+   ],
+   "yaw_deg": 0.0,
+   "proc": "Krb_Sinovy_Vysoky (Doplněk) se do jizby Rychty nevejde: jizba je vysoká 2,29 m (podlaha 0,30, záklop 2,59), síňový krb má římsu ve 2,11–2,18 m a plášť do 3,34 m – prošel by záklopem 1 m nad podlahou půdy; Krb_Rychta má napojení komína ve 2,32 m nad podlahou = v záklopu (2,62). Záda krbu na příčce (líc roubení z −0,44), komín mezi příčkou a stropním trámem (z 0…0,17) – osa z −0,225",
+   "jistota": "NAVRH",
+   "zdroj": "krby.json rychta_krb (Míša 15. 11.); NAVOD_KRB.md (Krb_Rychta, Komin_Napojeni 2,32 m, Krb_Kour 3,32 m)"
+  },
+  {
+   "id": "rychta_komin",
+   "kam": "dum",
+   "model": "Rychta",
+   "topeni": "Komin_Rychta_Dil_1m",
+   "prefix": "Rychta_Komin",
+   "poloha": [
+    1.55,
+    3.62,
+    -0.225
+   ],
+   "yaw_deg": 0.0,
+   "opakovat": {
+    "pocet": 5,
+    "krok": [
+     0.0,
+     1.0,
+     0.0
+    ]
+   },
+   "vnejsek": true,
+   "proc": "komín Rychty: na provizorní 1m nástavec krbu (vrch 0,30 + 3,32 = 3,62) pět dílů po 1 m → vrchol 8,62 (hřeben 8,23, krby.json komin_vrchol_min 8,6); prochází otvorem v záklopu a střeše (upravy_domy Rychta)",
+   "jistota": "NAVRH",
+   "zdroj": "NAVOD_KRB.md (Komin_Rychta_Dil_1m: počátek dole, Krb_Kour nahoře; „neškáluj celý krb“); krby.json rychta_krb vyska"
+  },
+  {
+   "id": "krcma_pec",
+   "kam": "celek",
+   "model": "KrcmaL",
+   "topeni": "Pec_Krcma",
+   "prefix": "KrcmaL_Senkovna",
+   "poloha": [
+    -3.55,
+    0.44,
+    -2.14
+   ],
+   "yaw_deg": -90.0,
+   "proc": "šenkovna x −7,89…−1,11, z −3,89…3,89: větší chlebová pec v koutě u stěny kuchyně a zadní stěny (stará pec x −2,75…−1,10, z −3,90…−1,15), ústí do šenkovny (−x), lavice k zadní stěně; dveře šenkovny (z 1,61…2,62) volné",
+   "jistota": "NAVRH",
+   "zdroj": "NAVOD_PEC.md („větší pec se hodí do kouřové šenkovny“); krcma_rada.glb kolize stěn (rozbor 15. 11.)"
+  },
+  {
+   "id": "krcma_kuchyne",
+   "kam": "celek",
+   "model": "KrcmaL",
+   "topeni": "Topeniste_Kuchynske_Siroke",
+   "prefix": "KrcmaL_Kuchyne",
+   "poloha": [
+    -0.15,
+    0.44,
+    -2.26
+   ],
+   "yaw_deg": 90.0,
+   "proc": "černá kuchyně x −0,89…2,09, z −3,89…−0,11 (otevřená do krovu – mista.json puda krčmy) je na šířku topeniště (3,22 m) úzká → podél západní stěny, obsluha do kuchyně (+x); dveře do dvora (x 1,01…1,97) a žebřík na půdu (x 1,27…1,81) volné, ulička mezi pracovní deskou a žebříkem 0,77 m",
+   "jistota": "NAVRH",
+   "zdroj": "NAVOD_PEC.md Doplňku; NAVOD_KRCMA_L.md (černá kuchyně, dym dymníkem)"
+  },
+  {
+   "id": "hajovna_pec",
+   "kam": "celek",
+   "model": "Hajovna",
+   "topeni": "Pec_Chalupni",
+   "prefix": "Hajovna",
+   "poloha": [
+    -0.59,
+    0.44,
+    -0.95
+   ],
+   "yaw_deg": 0.0,
+   "proc": "jizba hájovny x −4,39…0,49, z −2,89…2,89: pec v koutě u příčky (x 0,49) a zadní stěny (stará pec x −0,95…0,50, z −2,90…−1,15), ústí do jizby (+z, ke dveřím jizby), lavice k posteli (mezera 0,25 m)",
+   "jistota": "NAVRH",
+   "zdroj": "NAVOD_HAJOVNA.md (jizba: hliněná pec); hajovna.glb kolize (rozbor 15. 11.)"
+  },
+  {
+   "id": "hradA_kuchyne",
+   "kam": "hrad",
+   "topeni": "Topeniste_Kuchynske_Siroke_BezOdtahu",
+   "prefix": "HradA_Kuchyne",
+   "poloha": [
+    -4.958,
+    39.12,
+    3.574
+   ],
+   "yaw_deg": -171.95,
+   "proc": "černá kuchyně paláce A: záda topeniště na líci jižního čela (u 0,554), osa paláce v 0, obsluha k severu (+d); místo ohniště a dýmníku z puchart_hrad.py (hrad_puchart.json vybaveni.topeni_generator false)",
+   "jistota": "NAVRH",
+   "zdroj": "krby.json hradA_kuchyne; paprsky KOLIZE puchart.glb 15. 11. (líc čela u 0,554, podlaha 39,12, strop 42,36)"
+  },
+  {
+   "id": "hradA_kamna",
+   "kam": "hrad",
+   "topeni": "Kamna_Hradni_Nadobkova",
+   "prefix": "HradA_Kamna",
+   "poloha": [
+    -7.567,
+    42.6,
+    1.191
+   ],
+   "yaw_deg": 8.05,
+   "proc": "světnice paláce A, roh u hradby (v −2,99) a příčky do síně (líc světnice u 4,94, síně 5,06): přikládací tunel (−Z modelu) končí v líci síně (u 5,06) – v síni zůstává tmavé ústí topeniště a značka HradA_Ohen_Kamna z puchart_hrad.py; těleso čelem do světnice",
+   "jistota": "NAVRH",
+   "zdroj": "krby.json hradA_kamna (Žebrák, Radyně – kamna přikládaná ze síně); NAVOD_PEC.md hradní kamna"
+  },
+  {
+   "id": "hradA_krb",
+   "kam": "hrad",
+   "topeni": "Krb_Hradni",
+   "prefix": "HradA",
+   "poloha": [
+    -8.333,
+    42.6,
+    -1.084
+   ],
+   "yaw_deg": 98.05,
+   "proc": "síň 1. patra paláce A: Krb_Sinovy_Vysoky (šířka 3,00 m) se mezi příčku světnice (líc u 5,06) a schody do podkroví (od u 7,75) nevejde – volno 2,7 m (paprsky KOLIZE 15. 11.); Krb_Hradni (2,67 m) u 5,05…7,71, záda na líci hradby (v −2,99); výška 3,42 m vs. strop 3,26 m – vrchol dýmníku 0,16 m v tloušťce stropu (strop 45,86, podlaha podkroví nad ním)",
+   "jistota": "NAVRH",
+   "zdroj": "krby.json hradA_krb_navrh (síň s krbem – Valdek)"
+  },
+  {
+   "id": "hradB_krb",
+   "kam": "hrad",
+   "topeni": "Krb_Sinovy_Vysoky",
+   "prefix": "HradB",
+   "poloha": [
+    57.86,
+    14.63,
+    146.3
+   ],
+   "yaw_deg": -90.0,
+   "proc": "síň 1. patra paláce B, východní čelo (líc x 58,25) mezi okny (otvory z 144,05…145,05 a 147,55…148,55 ve výšce 1,4–2,4 m): krb š 3,00 m (z 144,80…147,80) – ostění a konzoly přesahují ostění oken o 0,12–0,25 m; strop 18,39 (výška 3,76 m) – krb 3,34 m pod ním",
+   "jistota": "NAVRH",
+   "zdroj": "krby.json hradB_krb_navrh; paprsky KOLIZE puchart.glb 15. 11."
+  }
+ ],
+ "upravy_domy": {
+  "_popis": "nastroje/topeni_domy.py přímo v glb (zachová kolize OMI_physics): po blender/okap_vstupu.py, před blender/stredni_lod.py (nastroje/stavby_z_havrana.sh). pec_pryc = smazat trojúhelníky sítě <Dům>_Interier celé uvnitř kvádru [x0, x1, y0, y1, z0, z1] (stará pec Havrana: M_Kamen podstavec + kamínkové ohniště, M_PecHlina, M_PecZacouzena, M_Tma, M_Zhar) a uzel kolize <Dům>_Kol_Pec; prostupy = otvor [x0, x1, y0, y1, z0, z1] v sítích s materiály (trojúhelníky rozříznuté rovinami x0, x1, z0, z1, smazané uvnitř). Opakované spuštění nic nezdvojí.",
+  "soubor": "hra/modely/stavby_h/domy.glb",
+  "pec_pryc": {
+   "Dum1": [
+    -3.38,
+    -1.8,
+    0.305,
+    1.9,
+    0.81,
+    2.85
+   ],
+   "Dum2": [
+    -2.88,
+    -1.6,
+    0.255,
+    1.9,
+    1.02,
+    3.0
+   ],
+   "Rychta": [
+    -3.68,
+    -2.3,
+    0.305,
+    1.9,
+    -0.43,
+    1.55
+   ]
+  },
+  "prostupy": {
+   "Rychta": [
+    {
+     "popis": "otvor v záklopu nad krbem (prkna M_PovalaZacouzena y 2,59–2,64) – výměna: prkna končí na komínu",
+     "kvadr": [
+      1.25,
+      1.85,
+      2.55,
+      2.7,
+      -0.47,
+      0.02
+     ],
+     "site": [
+      "Rychta_Vnejsek"
+     ],
+     "materialy": [
+      "M_PovalaZacouzena"
+     ]
+    },
+    {
+     "popis": "otvor ve střeše (podbití, šindel) – komín 1,5 m od hřebene",
+     "kvadr": [
+      1.25,
+      1.85,
+      4.5,
+      8.3,
+      -0.47,
+      0.02
+     ],
+     "site": [
+      "Rychta_Vnejsek"
+     ],
+     "materialy": [
+      "M_Podbiti",
+      "M_Sindel"
+     ]
+    }
+   ]
+  },
+  "zdroj": "rozbor domy.glb 15. 11. (paprsky/obaly kusů): staré pece celé uvnitř kvádrů (Dum1 128+168+138+8+4 trojúhelníků, Dum2 a Rychta obdobně), jinak v kvádrech nic; nad krbem Rychty záklop ze 3 prken (x 1,15…2,02), stropní trám z 0…0,17 (komín ho mine), krokve ani latě v otvoru střechy nejsou (jen podbití a šindel)"
+ },
+ "trasy": {
+  "_popis": "trasy testu průchodu kolem nového topení (nastroje/topeni_trasy.py → hra/data/pruchody_topeni.json, test_pruchod.gd je načte s ostatními pruchody_*.json): pro každou instanci modelu (hra/data/mista_stavby.json) navazují na trasu vstupu do domu (pruchody_mista.json dum_<místo>_<model>[_<i>]) a pokračují body [x, z] v souřadnicích modelu – dveře jizby, kolem pece / topeniště, ke krbu; nové topení nesmí zablokovat průchod (zadání 15. 11.)",
+  "Dum1": [
+   [
+    2.5,
+    -0.5
+   ],
+   [
+    -1.27,
+    0.0
+   ],
+   [
+    -1.27,
+    1.4
+   ],
+   [
+    0.5,
+    1.7
+   ],
+   [
+    -0.35,
+    3.4
+   ],
+   [
+    1.5,
+    3.6
+   ]
+  ],
+  "Dum2": [
+   [
+    2.0,
+    -0.2
+   ],
+   [
+    -1.07,
+    0.3
+   ],
+   [
+    -1.07,
+    1.65
+   ],
+   [
+    0.5,
+    2.0
+   ],
+   [
+    0.2,
+    3.3
+   ],
+   [
+    1.8,
+    3.6
+   ]
+  ],
+  "Rychta": [
+   [
+    1.0,
+    -2.0
+   ],
+   [
+    -1.37,
+    -1.2
+   ],
+   [
+    -1.37,
+    0.3
+   ],
+   [
+    -1.0,
+    0.9
+   ],
+   [
+    0.5,
+    1.3
+   ],
+   [
+    -0.6,
+    2.35
+   ],
+   [
+    1.55,
+    1.3
+   ]
+  ],
+  "KrcmaL": [
+   [
+    0.65,
+    2.5
+   ],
+   [
+    0.2,
+    0.4
+   ],
+   [
+    0.85,
+    -0.4
+   ],
+   [
+    0.95,
+    -1.5
+   ],
+   [
+    1.5,
+    -2.6
+   ],
+   [
+    1.49,
+    -3.5
+   ],
+   [
+    1.5,
+    -2.6
+   ],
+   [
+    0.6,
+    1.5
+   ],
+   [
+    -0.3,
+    2.1
+   ],
+   [
+    -2.0,
+    2.1
+   ],
+   [
+    -4.5,
+    0.0
+   ],
+   [
+    -5.0,
+    -2.1
+   ]
+  ],
+  "Hajovna": [
+   [
+    2.0,
+    2.0
+   ],
+   [
+    1.2,
+    1.9
+   ],
+   [
+    -0.3,
+    1.9
+   ],
+   [
+    -1.0,
+    0.6
+   ],
+   [
+    -3.0,
+    0.0
+   ]
+  ]
+ },
+ "zacouzeni_stropu": {
+  "rozhodnuti": "NEVKLÁDÁ SE – Zacouzeni_Stropu je deska s materiálem vápenné omítky (Vapenna_omitka_PBR, lime_diff) a začouzením v COLOR_0, určená pro omítnutý strop; jizby domů mají dřevěný záklop, který je v modelu Havrana už začouzený (M_PovalaZacouzena, horní věnce M_RoubeniZacouzene). Vložená deska 1 cm pod záklopem byla mezi trámy vidět jako světlá omítková záplata (snímek 15. 11. docs/screens/topeni_pec_chalupa.png, první verze). NAVOD_PEC: „pro členitý strop přenes jeho barevný gradient na vlastní síť stropu“ – záklop začouzený už je. Model je přebalený (modely/topeni/Zacouzeni_Stropu_LOD*.glb) pro omítnuté stropy (hrad), polohy pro jizby zůstávají zde.",
+  "polohy_jizby": [
+   {
+    "id": "saze_dum1",
+    "kam": "dum",
+    "model": "Dum1",
+    "topeni": "Zacouzeni_Stropu",
+    "prefix": "Dum1_Saze",
+    "poloha": [
+     -0.8,
+     2.58,
+     3.42
+    ],
+    "yaw_deg": 90.0,
+    "proc": "začouzený záklop nad ústím pece (kouř z ústí stoupá před pecí pod strop, NAVOD_PEC: „těsně pod skutečný strop nad ústím“): střed 0,5 m před ústím, 1 cm pod spodkem záklopu (2,59); mezi trámy (spodek 2,40) je vidět, v trámech zanikne",
+    "jistota": "NAVRH",
+    "zdroj": "NAVOD_PEC.md Kouřová jizba; záklop M_PovalaZacouzena y 2,59 (rozbor domy.glb)"
+   },
+   {
+    "id": "saze_dum2",
+    "kam": "dum",
+    "model": "Dum2",
+    "topeni": "Zacouzeni_Stropu",
+    "prefix": "Dum2_Saze",
+    "poloha": [
+     -0.31,
+     2.53,
+     3.31
+    ],
+    "yaw_deg": 90.0,
+    "jistota": "NAVRH",
+    "zdroj": "jako saze_dum1 (záklop Dum2 y 2,54)"
+   },
+   {
+    "id": "saze_rychta",
+    "kam": "dum",
+    "model": "Rychta",
+    "topeni": "Zacouzeni_Stropu",
+    "prefix": "Rychta_Saze",
+    "poloha": [
+     -1.1,
+     2.58,
+     2.35
+    ],
+    "yaw_deg": 90.0,
+    "jistota": "NAVRH",
+    "zdroj": "jako saze_dum1"
+   }
+  ]
+ },
+ "materialy": {
+  "_popis": "úprava materiálů glb u zdroje (nastroje/topeni_modely.py, klíče pbrMetallicRoughness): kované železo modeláře nemá barevnou texturu ani baseColorFactor → bílý kov × COLOR_0 (metallic 0,72–0,85) se ve hře leskl jako nerez (trojnožka, kozlíky, háky – snímky 15. 11. topeni_pec_chalupa, topeni_krcma_pec, ikony nádobí); kovářské železo je tmavě šedé s okujemi (KCD kovárna, docs/reference/kovarna) → baseColorFactor tmavá šeď, zakouřené tmavší",
+  "Kovane_zelezo": {
+   "baseColorFactor": [
+    0.2,
+    0.19,
+    0.18,
+    1.0
+   ]
+  },
+  "Kovane_zelezo_zakourene": {
+   "baseColorFactor": [
+    0.13,
+    0.12,
+    0.115,
+    1.0
+   ]
+  }
+ }
+}

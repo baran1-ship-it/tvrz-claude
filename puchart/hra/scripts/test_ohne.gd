@@ -1,8 +1,8 @@
 extends Node
 ## Test ohňů (Míša 15. 11., chyby.md 274): PUCHART_SKRIPT=res://scripts/test_ohne.gd – počet ohňů z dat, světla v rozpočtu
 ## (u krčmy: nejvýš svetel_max, žádné se stínem), zapnutí / vypnutí jednoho ohně (plamen, světlo); všechny ohně hoří v 6, 14, 17
-## a 22 h (Míša 15. 11.: v KCD hoří pořád); pece domů mají plamen a uhlíky v ústí (v obalu pece); krby (krby.json, hrad) –
-## přeskočeno, dokud model nedodán; chůze vsí: nejvýš svetel_max světel, nejbližší, bez bliknutí; u kuchyně hradu nejvýš
+## a 22 h (Míša 15. 11.: v KCD hoří pořád); pece mají plamen a uhlíky v ústí (v obalu pece); krby a kuchyňská topeniště
+## (topeni.json – hrad A, B, Rychta, krčma) hoří; chůze vsí: nejvýš svetel_max světel, nejbližší, bez bliknutí; u kuchyně hradu nejvýš
 ## svetel_max světel ohňů a nejvýš svetel_objekt_max světel celkem (Compatibility: 8 na objekt). Výpis OHNE_TEST … OK / CHYBA.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # hlavní nabídka pozastaví strom
@@ -120,13 +120,17 @@ func _ready() -> void:
 		print("OHNE_TEST oheň %s %s hoří %s zaklad %s" % [o["nazev"], o["druh"], o["hori"], o["zaklad"]])
 	_konec(chyby, n, sv)
 
-## Pece domů s ústím (Míša 15. 11.: oheň vidět v ústí jako v chalupách KCD): uzel plamene a uhlíků existuje, hoří a je viditelný,
-## leží v obalu kolize pece (rozšířeném o 0,1 m – karta je těsně před lícem otvoru); každý dům Dum1/Dum2/Rychta aspoň jednou.
+## Pece s ústím (Míša 15. 11.: oheň vidět v ústí jako v chalupách KCD; modely Pec_Chalupni / Pec_Krcma od modeláře – topeni.json):
+## uzel plamene a uhlíků existuje, hoří a je viditelný, leží v obalu kolizí pece (rozšířeném o 0,1 m – karta je těsně před lícem
+## otvoru); pec každého místa (Dum1, Dum2, Rychta, Hajovna, KrcmaL_Senkovna) aspoň jednou.
 func _pece(oh: Node, chyby: Array) -> void:
 	var modely := {}
 	for o: Dictionary in oh.ohne:
 		if String(o["druh"]) != "pec" or not o.has("plamen"): continue
-		var tel := o["uzel"] as Node3D
+		var zn := o["uzel"] as Node3D
+		var tel: Node = zn
+		while tel and not tel.has_meta("topeni"): tel = tel.get_parent()
+		if tel == null: chyby.append("pec %s není v topení od modeláře (hlavni.gd _topeni)" % zn.name); continue
 		var ab := AABB(); var prvni := true
 		for cs in tel.find_children("*", "CollisionShape3D", true, false):
 			var b := (cs as CollisionShape3D).global_transform * (cs as CollisionShape3D).shape.get_debug_mesh().get_aabb()
@@ -135,32 +139,28 @@ func _pece(oh: Node, chyby: Array) -> void:
 		var pl := o["plamen"] as MeshInstance3D; var uh := o["uhliky"] as MeshInstance3D
 		var pa := pl.global_transform * pl.get_aabb(); var ua := uh.global_transform * uh.get_aabb()
 		var ok := bool(o["hori"]) and pl.is_visible_in_tree() and uh.is_visible_in_tree() and ab.encloses(pa) and ab.encloses(ua)
-		var m := String(tel.name).get_slice("_Kol_", 0); modely[m] = true
+		var m := String(zn.name).get_slice("_Pec_Usti", 0); modely[m] = true
 		if not ok: chyby.append("pec %s (%s): plamen v ústí hoří %s viditelný %s/%s, v obalu pece %s/%s" % [m, tel.get_parent().name, o["hori"], pl.is_visible_in_tree(), uh.is_visible_in_tree(), ab.encloses(pa), ab.encloses(ua)])
 	print("OHNE_TEST pece s ohněm v ústí: %s" % [modely.keys()])
-	for m in ["Dum1", "Dum2", "Rychta"]:
+	for m in ["Dum1", "Dum2", "Rychta", "Hajovna", "KrcmaL_Senkovna"]:
 		if not modely.has(m): chyby.append("pec %s bez ohně v ústí" % m)
 
 
-## Krby (modely od modeláře – data/krby.json vlozit; hrad: značky *_Krb_Ohen*): dokud glb / značka chybí, přeskočeno (ne chyba).
+## Krby a kuchyňská topeniště od modeláře (data/topeni.json vlozit – Krb_* a Topeniste_*): každý vložený má oheň na své
+## značce (<prefix>_Krb_Ohen, <prefix>_Pec_Ohen / _Pec_Ohen_2), hoří a plamen je vidět; glb chybí = CHYBA (modely jsou dodané).
 func _krby(oh: Node, chyby: Array) -> void:
-	var kj: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/krby.json")) if FileAccess.file_exists("res://data/krby.json") else {}
-	for k: Dictionary in kj.get("vlozit", []):
-		if not ResourceLoader.exists(String(k["soubor"])):
-			print("OHNE_TEST krb %s: přeskočeno – model nedodán (%s)" % [k["model"], k["soubor"]]); continue
+	var tj: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/topeni.json")) if FileAccess.file_exists("res://data/topeni.json") else {}
+	for k: Dictionary in tj.get("vlozit", []):
+		var tp := String(k["topeni"])
+		if not (tp.begins_with("Krb_") or tp.begins_with("Topeniste_")): continue
+		var zn: Array = [String(k["prefix"]) + "_Krb_Ohen"] if tp.begins_with("Krb_") else [String(k["prefix"]) + "_Pec_Ohen", String(k["prefix"]) + "_Pec_Ohen_2"]
 		var nal := 0
 		for o: Dictionary in oh.ohne:
-			if String(o["druh"]) == "krb" and String((o["uzel"] as Node).name).begins_with(String(k["model"])):
+			if zn.has(String((o["uzel"] as Node).name)):
 				nal += 1
-				if not bool(o["hori"]) or not (o["plamen"] as Node3D).is_visible_in_tree(): chyby.append("krb %s nehoří" % k["model"])
-		print("OHNE_TEST krb %s: ohňů %d" % [k["model"], nal])
-		if nal == 0: chyby.append("krb %s: model vložen, ale oheň (značka %s_Krb_Ohen) nenalezen" % [k["model"], k["model"]])
-	var kh := 0
-	for o: Dictionary in oh.ohne:
-		if String(o["druh"]) == "krb" and (o["uzel"] as Node).get_parent() and String((o["uzel"] as Node).name).begins_with("Hrad"):
-			kh += 1
-			if not bool(o["hori"]): chyby.append("krb hradu %s nehoří" % (o["uzel"] as Node).name)
-	print("OHNE_TEST krby hradu: %s" % (("%d hoří" % kh) if kh > 0 else "přeskočeno – v modelu hradu zatím krb není (krby.json navrhy_hrad, model od modeláře)"))
+				if not bool(o["hori"]) or not o.has("plamen") or not (o["plamen"] as Node3D).is_visible_in_tree(): chyby.append("%s (%s) nehoří" % [k["id"], (o["uzel"] as Node).name])
+		print("OHNE_TEST %s %s: ohňů %d (čekám %d)" % [k["id"], tp, nal, zn.size()])
+		if nal < zn.size(): chyby.append("%s: %s vložen, ale ohňů jen %d na značkách %s (ResourceLoader %s)" % [k["id"], tp, nal, zn, ResourceLoader.exists("res://modely/topeni/%s_LOD0.glb" % tp)])
 
 
 ## Rozpočet světel při chůzi vsí (všechny pece hoří pořád): trasa přes všechny ohně vsi po 0,5 m; v každém bodě nejvýš svetel_max
@@ -170,7 +170,7 @@ func _ves_rozpocet(oh: Node, chyby: Array) -> void:
 	var rz: Dictionary = oh.cfg["rozpocet"]; var mx := int(rz["svetel_max"]); var hy := float(rz.get("poradi_hystereze_m", 0.0))
 	var body: Array = []
 	for o: Dictionary in oh.ohne:
-		if not String((o["uzel"] as Node).get_path()).contains("/Hrad/"): body.append((o["zaklad"] as Vector3) + Vector3.UP * 1.0)
+		if not String((o["uzel"] as Node).get_path()).contains("/Hrad/") and not String((o["uzel"] as Node).get_path()).contains("/Topeni/"): body.append((o["zaklad"] as Vector3) + Vector3.UP * 1.0)
 	if body.size() < 2: return
 	body.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.x < b.x)
 	var hist := {}; var maxsv := 0; var spatne := 0; var kroku := 0; var blik := 0

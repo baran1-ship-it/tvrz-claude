@@ -53,7 +53,9 @@ func icon(id: String) -> Texture2D:
 
 func scene(id: String) -> PackedScene:
 	if not _scenes.has(id):
-		_scenes[id] = load(DIR + id + ".glb")
+		# hotová scéna předmětu (nádobí Míšina modeláře: kořen RigidBody3D se zamraženou konvexní kolizí a LOD0/LOD1 –
+		# nastroje/topeni_modely.py, pravidla/svet/topeni.json nadobi), jinak glb z Havrana
+		_scenes[id] = load(DIR + id + (".tscn" if ResourceLoader.exists(DIR + id + ".tscn") else ".glb"))
 	return _scenes[id]
 
 
@@ -181,7 +183,8 @@ func spawn(rec: Dictionary) -> void:
 		dosah = 160.0                       # lomova stena je videt z dalky
 	for g in m.find_children("*", "GeometryInstance3D", true, false):
 		var gi3 := g as GeometryInstance3D
-		gi3.visibility_range_end = dosah
+		# stupeň LOD z hotové scény (nádobí: LOD0 do 6 m, LOD1 dál) – jen zkrátit na dosah, jinak by se kreslily oba stupně
+		gi3.visibility_range_end = minf(gi3.visibility_range_end, dosah) if gi3.visibility_range_end > 0.0 else dosah
 		gi3.visibility_range_end_margin = 3.0
 		gi3.visibility_range_fade_mode = Pravidla.fade_dosahu()
 		# Misa 0.92 (stin predmetu 40-50 kresleni u rybnika/hostince): bez stinu do 1 m (dzbany, vedra, nacini)
@@ -239,7 +242,9 @@ func spawn(rec: Dictionary) -> void:
 		_light_fx(rec)
 	# kolize: vetsi veci zastavi hrace; drobnosti a veci na zdi maji kolizi jen pro pokladani
 	# (vrstva 2: na talir jde polozit jablko, na polici svicen, hrac o ne nezakopne)
-	if not dily.has("kolize"):
+	if m is RigidBody3D:   # vlastní fyzika scény (zamražená konvexní kolize, NAVOD_NADOBI.md) – bez náhradního kvádru; vrstva 1 + 2 (hráč i pokládání)
+		(m as RigidBody3D).collision_layer = 3
+	elif not dily.has("kolize"):
 		var b := StaticBody3D.new()
 		# stany a pristresky (Misa 0.73 "do stanu nevejdu"): hrac projde pod platnem, kolize jen pro pokladani
 		if not ((float(r[1]) > 0.25 or float(r[0]) > 0.6) and not info.get("zed", false)) or bool(info.get("pruchozi", false)):
@@ -736,6 +741,8 @@ func begin_place(id: String, from_inv: bool) -> void:
 	_from_inv = from_inv
 	_ghost = Node3D.new()
 	_ghost_m = scene(id).instantiate()
+	if _ghost_m is CollisionObject3D:   # předmět s vlastní fyzikou (nádobí): náhled nesmí zachytit paprsek pokládání ani hráče
+		(_ghost_m as CollisionObject3D).collision_layer = 0; (_ghost_m as CollisionObject3D).collision_mask = 0
 	_ghost.add_child(_ghost_m)
 	root.add_child(_ghost)
 	_gorient = 0

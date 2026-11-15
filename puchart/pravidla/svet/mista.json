@@ -1384,6 +1384,15 @@
       "Hajovna_Kol_Stul",
       "Hajovna_Kol_Spalek"
      ]
+    },
+    {
+     "popis": "bez staré pece v jizbě (nahradí Pec_Chalupni od modeláře – topeni.json hajovna_pec)",
+     "pozn": "Míša 15. 11. (modely topení): pec jizby x −0,95…0,50, z −2,88…−1,15 (M_PecHlina2, M_PecZacouzena2 – 2 kusy celé v oblasti, rozbor 15. 11.) a její kolize; ohniště v síni zůstává",
+     "uzly": ["Hajovna_Interier"],
+     "oblast": [-1.0, 0.6, -2.95, -1.1],
+     "y_max": 2.1,
+     "smazat": true,
+     "kolize": ["Hajovna_Kol_Pec"]
     }
    ]
   },
@@ -1391,6 +1400,15 @@
    "zdroj": "krcma_rada.glb",
    "pozn_zdroj": "výstup blender/celky_upravy.py (křídlo do řady) – nastroje/stavby_z_havrana.sh ho ukládá do build/zdroj_celky",
    "casti": [
+    {
+     "popis": "bez staré pece šenkovny a ohniště černé kuchyně (nahradí Pec_Krcma a Topeniste_Kuchynske_Siroke od modeláře – topeni.json krcma_pec, krcma_kuchyne)",
+     "pozn": "Míša 15. 11. (modely topení): pec šenkovny x −2,75…−1,12, z −3,88…−1,25 (M_PecHlina2, M_PecZacouzena2) a ohniště kuchyně x −0,90…0,60, z −3,85…−2,25 (M_PecZacouzena2, M_KamenSaze, M_Uhli, M_Popel) – všechny kusy sítě KrcmaL_Interier_Dum v oblasti (rozbor 15. 11.); kolize pece šenkovny; pec jizby hospodského (x 2,2…3,55) zůstává",
+     "uzly": ["KrcmaL_Interier_Dum"],
+     "oblast": [-2.85, 0.7, -3.95, -1.05],
+     "y_max": 2.2,
+     "smazat": true,
+     "kolize": ["KrcmaL_Kol_Pec"]
+    },
     {
      "popis": "zábradlí schodů na pavlač na vnější stranu, podesta dozábradlená",
      "pozn": "Míša 15. 11. (foto x −65,5 z 96,9 a −72,5 z 98): „schody nahoru na pavlač nad stájí mají špatné zábradlí a na koncích nejsou dodělané“ – madlo se sloupky bylo u zdi stáje (z −4,1), vnější strana schodů a podesty otevřená → madlo a sloupky na vnější stranu (z −5,0), na čele podesty (x 18,36) dvě příčky se sloupky; kolize zábradlí pro okraj schodů",

@@ -34,5 +34,13 @@ done
 # v glb (zachová kolize OMI_physics), pak střední stupeň domů z upraveného modelu (mista.json lod_stredni) – jinak by
 # vývoz z Havrana nahoře vrátil starý domy_stredni.glb
 python3 $K/blender/okap_vstupu.py $K
+# topení od Míšina modeláře (pravidla/svet/topeni.json): zipy z Disku do build/zdroj_modelar (jen herní soubory – glb, tscn,
+# návody, ASSETY), z domů stará pec Havrana a prostupy komína Rychty (nastroje/topeni_domy.py – po okapu, před středním stupněm)
+python3 -c "import json;Z=json.load(open('$K/pravidla/svet/topeni.json'))['zdroj'];[print(Z['slozka'],k,v['disk_id']) for k,v in Z['sady'].items()]" | while read ZD_ SADA_ ID_; do
+  [ -f $K/$ZD_/$SADA_/ASSETY.json ] && continue
+  mkdir -p $K/$ZD_ && curl -sSL -m 900 -o $T/$SADA_.zip "https://drive.usercontent.google.com/download?id=$ID_&export=download&confirm=t" && unzip -oq $T/$SADA_.zip '*.glb' '*.tscn' '*.json' '*.md' -d $K/$ZD_/ ; rm -f $T/$SADA_.zip
+done
+python3 $K/nastroje/topeni_domy.py $K
+python3 $K/nastroje/topeni_modely.py $K
 /opt/bl/bin/python $K/blender/stredni_lod.py -- $K
 rm -rf $T; ls -la $K/hra/modely/stavby_h/

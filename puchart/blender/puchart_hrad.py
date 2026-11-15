@@ -19,7 +19,8 @@ import hrad_geom
 
 K = H.K
 D = json.load(open(os.path.join(K, "pravidla/svet/hrad_puchart.json")))
-VYBAVENI = D.get("vybaveni", {}).get("stavet", True)   # nábytek, sudy, truhly, lože, kruhy s řetězy – pravidla hrad_puchart.json vybaveni
+VYBAVENI = D.get("vybaveni", {}).get("stavet", True)
+TOPENI_GEN = D.get("vybaveni", {}).get("topeni_generator", True)   # ohniště a dýmník černé kuchyně, kachlová kamna paláce A z kvádrů – false: modely od modeláře (pravidla/svet/topeni.json, hlavni.gd _topeni)   # nábytek, sudy, truhly, lože, kruhy s řetězy – pravidla hrad_puchart.json vybaveni
 A, B = D["A"], D["B"]
 
 # ------------------------------------------------------------------ kolize zdiva automaticky
@@ -1392,19 +1393,20 @@ def palac_A(P, p0, p1, bd, PI):
                 depth=0.5, top="segment", leaf=True)
     # černá kuchyně: zvýšené ohniště u jižního čela, nad ním dýmník – omítnutý plášť jehlanu na trámcích, kouř do podkroví
     # (Žebrák), kotel na trojnožce, polena; pracovní stůl, sudy
-    oh_ = W(1.45, 0, F0)
-    P.box(M(oh_ + UP * 0.25, basis=frame(d)), (2.2, 0.5, 1.6), "kvadr", collide=True)
-    P.box(M(oh_ + UP * 0.51, basis=frame(d)), (1.5, 0.03, 1.0), "tma")   # popel a uhlíky
-    for k_ in range(4): P.beam(oh_ + s * (-0.27 + k_ * 0.18) - d * 0.35 + UP * 0.57, oh_ + s * (-0.25 + k_ * 0.17) + d * 0.3 + UP * 0.57, 0.09, 0.09, "dub", j=0.3)   # polena vedle sebe (spoje: křížení)
-    for a_ in range(3):   # trojnožka a kotel
-        an_ = a_ * 2.094; f_ = oh_ + (d * math.cos(an_) + s * math.sin(an_)) * 0.45 + UP * 0.52
-        P.beam(f_, oh_ + UP * 1.35, 0.04, 0.04, "zelezo")
-    P.lathe(M(oh_ + UP * 0.78), [(0.18, 0), (0.3, 0.12), (0.32, 0.3), (0.28, 0.42)], 10, "zelezo")
-    H.ZNACKY.append(("HradA_Ohen_Kuchyne", oh_ + UP * 0.7))   # oheň na ohništi (ohne.json mista; ohne.gd: paprsek dolů na vršek ohniště)
-    hw_ = 1.3; y_d = F0 + 2.0   # dýmník: čtyřboký jehlan (lathe o 4 stěnách, hrany podél zdí)
-    hc_ = W(0.55 + hw_ + 0.02, 0, F0)   # plášť přiléhá k čelní zdi
-    P.lathe(M(hc_ + UP * (y_d - F0), basis=frame(d)), [(hw_ * 1.414, 0.0), (0.45 * 1.414, F1 - 0.24 - y_d)], 4, "omitka", phase=math.pi / 4, cap_bot=False)
-    for sg_ in (-1, 1): P.beam(hc_ + s * sg_ * (hw_ - 0.06) - d * (hw_ - 0.02) + UP * (y_d - F0 - 0.07), hc_ + s * sg_ * (hw_ - 0.06) + d * (hw_ + 0.1) + UP * (y_d - F0 - 0.07), 0.12, 0.14, "dub")   # trámky pod pláštěm
+    if TOPENI_GEN:   # Míša 15. 11.: místo ohniště z kvádrů Topeniste_Kuchynske_Siroke od modeláře (topeni.json hradA_kuchyne)
+        oh_ = W(1.45, 0, F0)
+        P.box(M(oh_ + UP * 0.25, basis=frame(d)), (2.2, 0.5, 1.6), "kvadr", collide=True)
+        P.box(M(oh_ + UP * 0.51, basis=frame(d)), (1.5, 0.03, 1.0), "tma")   # popel a uhlíky
+        for k_ in range(4): P.beam(oh_ + s * (-0.27 + k_ * 0.18) - d * 0.35 + UP * 0.57, oh_ + s * (-0.25 + k_ * 0.17) + d * 0.3 + UP * 0.57, 0.09, 0.09, "dub", j=0.3)   # polena vedle sebe (spoje: křížení)
+        for a_ in range(3):   # trojnožka a kotel
+            an_ = a_ * 2.094; f_ = oh_ + (d * math.cos(an_) + s * math.sin(an_)) * 0.45 + UP * 0.52
+            P.beam(f_, oh_ + UP * 1.35, 0.04, 0.04, "zelezo")
+        P.lathe(M(oh_ + UP * 0.78), [(0.18, 0), (0.3, 0.12), (0.32, 0.3), (0.28, 0.42)], 10, "zelezo")
+        H.ZNACKY.append(("HradA_Ohen_Kuchyne", oh_ + UP * 0.7))   # oheň na ohništi (ohne.json mista; ohne.gd: paprsek dolů na vršek ohniště)
+        hw_ = 1.3; y_d = F0 + 2.0   # dýmník: čtyřboký jehlan (lathe o 4 stěnách, hrany podél zdí)
+        hc_ = W(0.55 + hw_ + 0.02, 0, F0)   # plášť přiléhá k čelní zdi
+        P.lathe(M(hc_ + UP * (y_d - F0), basis=frame(d)), [(hw_ * 1.414, 0.0), (0.45 * 1.414, F1 - 0.24 - y_d)], 4, "omitka", phase=math.pi / 4, cap_bot=False)
+        for sg_ in (-1, 1): P.beam(hc_ + s * sg_ * (hw_ - 0.06) - d * (hw_ - 0.02) + UP * (y_d - F0 - 0.07), hc_ + s * sg_ * (hw_ - 0.06) + d * (hw_ + 0.1) + UP * (y_d - F0 - 0.07), 0.12, 0.14, "dub")   # trámky pod pláštěm
     _stul(P, W(4.3, -vl + 0.6, F0), d, 1.8, lavice=False)
     sud(P, W(4.9, vl - 0.6), F0); sud(P, W(4.1, vl - 0.6), F0)
     # síň přízemí: zásoby podél zdí
@@ -1433,16 +1435,17 @@ def palac_A(P, p0, p1, bd, PI):
     # kachlová kamna v rohu světnice u příčky, přikládá se otvorem ze síně (Žebrák, Radyně): kamenný sokl, hliněné těleso
     # s vmazanými miskovými kachli (14. st. – hrnčířské misky ústím ven), kopule
     km = DS["kamna"]; kv_ = vh_ + 0.75 if km["strana"] == "hradba" else vi - 0.75; ku_ = DS["patro_pricky"][0]["u"] - 0.75
-    k0_ = W(ku_, kv_, F1)
-    P.box(M(k0_ + UP * 0.2, basis=frame(d)), (1.4, 0.4, 1.4), "kvadr", collide=True)
-    P.box(M(k0_ + UP * 0.95, basis=frame(d)), (1.2, 1.1, 1.2), "omitka", collide=True)
-    P.lathe(M(k0_ + UP * 1.5, basis=frame(d)), [(0.6 * 1.414, 0.0), (0.55, 0.25), (0.42, 0.5), (0.2, 0.68), (0.02, 0.72)], 8, "omitka", phase=math.pi / 8, cap_bot=False)
-    for (e_, n_) in ((d, s), (s, -d)):   # dvě viditelné stěny tělesa (k místnosti, od rohu u hradby a příčky): 3 × 3 kachle
-        for a_ in (-0.39, -0.13, 0.13, 0.39):   # miskové kachle: mělké misky ústím ven, vmazané v hlíně (ne černé čtverce)
-            for yk_ in (0.6, 0.86, 1.12, 1.38):
-                mk_ = M(k0_ + n_ * 0.6 + e_ * a_ + UP * yk_, basis=frame(UP, n_))
-                P.lathe(mk_, [(0.1, 0.0), (0.105, 0.03), (0.085, 0.035)], 10, "kvadr_okno", cap_top=False)
-                P.lathe(mk_, [(0.08, 0.0), (0.07, 0.03)], 10, "tma", cap_bot=False)
+    if TOPENI_GEN:   # Míša 15. 11.: kamna Kamna_Hradni_Nadobkova od modeláře (topeni.json hradA_kamna); topeniště ze síně (tma) a značka zůstávají
+        k0_ = W(ku_, kv_, F1)
+        P.box(M(k0_ + UP * 0.2, basis=frame(d)), (1.4, 0.4, 1.4), "kvadr", collide=True)
+        P.box(M(k0_ + UP * 0.95, basis=frame(d)), (1.2, 1.1, 1.2), "omitka", collide=True)
+        P.lathe(M(k0_ + UP * 1.5, basis=frame(d)), [(0.6 * 1.414, 0.0), (0.55, 0.25), (0.42, 0.5), (0.2, 0.68), (0.02, 0.72)], 8, "omitka", phase=math.pi / 8, cap_bot=False)
+        for (e_, n_) in ((d, s), (s, -d)):   # dvě viditelné stěny tělesa (k místnosti, od rohu u hradby a příčky): 3 × 3 kachle
+            for a_ in (-0.39, -0.13, 0.13, 0.39):   # miskové kachle: mělké misky ústím ven, vmazané v hlíně (ne černé čtverce)
+                for yk_ in (0.6, 0.86, 1.12, 1.38):
+                    mk_ = M(k0_ + n_ * 0.6 + e_ * a_ + UP * yk_, basis=frame(UP, n_))
+                    P.lathe(mk_, [(0.1, 0.0), (0.105, 0.03), (0.085, 0.035)], 10, "kvadr_okno", cap_top=False)
+                    P.lathe(mk_, [(0.08, 0.0), (0.07, 0.03)], 10, "tma", cap_bot=False)
     P.box(M(W(DS["patro_pricky"][0]["u"] + 0.08, kv_, F1) + UP * 0.6, basis=frame(d)), (0.55, 0.5, 0.03), "tma")   # topeniště ze síně
     H.ZNACKY.append(("HradA_Ohen_Kamna", W(DS["patro_pricky"][0]["u"] + 0.35, kv_, F1) + UP * 0.3))   # topeniště kamen ze síně (ohne.json druh kamna: světlo z ústí, bez plamene)
     _stul(P, W(2.3, 0.6, F1), d, 2.2)

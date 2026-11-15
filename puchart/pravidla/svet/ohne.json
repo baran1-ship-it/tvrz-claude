@@ -164,23 +164,41 @@
    "energie": 3.6,
    "dosah_m": 10.0,
    "_pozn": "krb (budoucí modely Míšina modeláře – krby.json): otevřené ohniště pod pláštěm, plamen větší než ohniště vsi, světlo silnější (místnost s krbem bývá větší – síň, jizba rychty)"
+  },
+  "topeniste": {
+   "plamen": [
+    0.42,
+    0.5
+   ],
+   "uhliky_r": 0.2,
+   "svetlo_v": 0.55,
+   "svetlo_ven": 0.45,
+   "energie": 3.0,
+   "dosah_m": 9.0,
+   "_pozn": "oheň na pracovní desce kuchyňského topeniště (Topeniste_Kuchynske_Siroke – NAVOD_PEC Doplňku: větší ohniště vlevo ~0,8 × 0,6 m mezi kamennými okraji, menší uprostřed); plamen ohniště vsi (0,85 × 0,95 m) přesahoval okraje a sahal pod dýmník (snímek 15. 11. topeni_krcma_kuchyne.png, první verze) → poloviční, světlo jako ohniště"
   }
  },
  "mista": [
   {
    "id": "krcma_kuchyne",
    "nazev": "oheň v kuchyni krčmy",
-   "uzel": "KrcmaL_Ohen_Kuchyne",
-   "druh": "ohniste",
-   "hori": "vzdy"
+   "uzel": "KrcmaL_Kuchyne_Pec_Ohen*",
+   "druh": "topeniste",
+   "hori": "vzdy",
+   "zdroj": "Topeniste_Kuchynske_Siroke: Pec_Ohen (větší ohniště vlevo) a Pec_Ohen_2 (menší uprostřed) – NAVOD_PEC.md Doplňku; místo starého ohniště (značka KrcmaL_Ohen_Kuchyne modelu krčmy se už nepoužívá)"
   },
   {
    "id": "krcma_senkovna",
    "nazev": "pec v šenkovně",
-   "uzel": "KrcmaL_Pec_Senkovna",
-   "pec_kolize": "KrcmaL_Kol_Pec",
+   "uzel": "KrcmaL_Senkovna_Pec_Usti",
    "druh": "pec",
-   "hori": "vzdy"
+   "hori": "vzdy",
+   "usti": {
+    "sirka": 0.72,
+    "vyska": 0.57,
+    "spodek_pod_znackou_m": 0.254
+   },
+   "zdroj": "Pec_Krcma (ústí do šenkovny – dřív pec topená z kuchyně jen se světlem) – pravidla/svet/topeni.json vlozit (modely Míšina modeláře 15. 11.: značka ve středu ústí, místní +Z ven – NAVOD_PEC.md; spodek ústí = dno pece v LOD0 – Pec_Chalupni Dno_pece y 0,52 pod značkou 0,73, Pec_Krcma 0,58 pod 0,834)"
   },
   {
    "id": "hajovna_sin",
@@ -198,100 +216,52 @@
    "hori": "vzdy"
   },
   {
-   "id": "dum_pec",
-   "nazev": "pec v domě",
-   "pec_kolize": "Dum1_Kol_Pec",
+   "id": "pec_chalupa",
+   "nazev": "pec v jizbě",
+   "uzel": "Dum?_Pec_Usti",
    "druh": "pec",
    "hori": "vzdy",
    "usti": {
-    "bod": [
-     -2.618,
-     0.94,
-     2.22
-    ],
-    "smer": [
-     0,
-     0,
-     1
-    ],
-    "sirka": 0.42,
-    "vyska": 0.335,
-    "zdroj": "rozbor sítě hra/modely/stavby_h/domy.glb 15. 11. (Havran blender/ves_domy.py): ústí pece = plocha materiálu M_Tma (černý otvor s obloukem) v síti <Dům>_Interier, svislá, normála +z modelu (do jizby); body oblouku Dum1 x −2,828…−2,408, y 0,94…1,275, z 2,22; začouzení nad ústím je už v modelu (M_PecZacouzena y 1,07–1,43 na líci klenby); žhavé uhlíky modelu (M_Zhar) leží uvnitř pece za otvorem (nevidět). Vzhled: KCD chalupy – oheň a uhlíky viditelné v ústí hliněné pece (docs/reference/kcd_vzhled, Havran docs/screens/ref_kcd2_*)",
-    "ohnisko": [
-     -2.49,
-     0.68,
-     2.475,
-     0.14
-    ]
+    "sirka": 0.58,
+    "vyska": 0.48,
+    "spodek_pod_znackou_m": 0.21
    },
-   "usti_uzel": "Dum1_Pec_Usti"
-  },
-  {
-   "id": "dum_pec",
-   "nazev": "pec v domě",
-   "pec_kolize": "Dum2_Kol_Pec",
-   "druh": "pec",
-   "hori": "vzdy",
-   "usti": {
-    "bod": [
-     -2.255,
-     0.89,
-     2.41
-    ],
-    "smer": [
-     0,
-     0,
-     1
-    ],
-    "sirka": 0.42,
-    "vyska": 0.335,
-    "zdroj": "rozbor sítě hra/modely/stavby_h/domy.glb 15. 11. (Havran blender/ves_domy.py): ústí pece = plocha materiálu M_Tma (černý otvor s obloukem) v síti <Dům>_Interier, svislá, normála +z modelu (do jizby); body oblouku Dum1 x −2,828…−2,408, y 0,94…1,275, z 2,22; začouzení nad ústím je už v modelu (M_PecZacouzena y 1,07–1,43 na líci klenby); žhavé uhlíky modelu (M_Zhar) leží uvnitř pece za otvorem (nevidět). Vzhled: KCD chalupy – oheň a uhlíky viditelné v ústí hliněné pece (docs/reference/kcd_vzhled, Havran docs/screens/ref_kcd2_*)",
-    "ohnisko": [
-     -2.13,
-     0.63,
-     2.67,
-     0.14
-    ]
-   },
-   "usti_uzel": "Dum2_Pec_Usti"
+   "zdroj": "Pec_Chalupni (Dum1, Dum2) – pravidla/svet/topeni.json vlozit (modely Míšina modeláře 15. 11.: značka ve středu ústí, místní +Z ven – NAVOD_PEC.md; spodek ústí = dno pece v LOD0 – Pec_Chalupni Dno_pece y 0,52 pod značkou 0,73, Pec_Krcma 0,58 pod 0,834)"
   },
   {
    "id": "rychta_pec",
    "nazev": "pec na rychtě",
-   "pec_kolize": "Rychta_Kol_Pec",
+   "uzel": "Rychta_Pec_Usti",
    "druh": "pec",
    "hori": "vzdy",
    "usti": {
-    "bod": [
-     -3.0,
-     0.94,
-     0.97
-    ],
-    "smer": [
-     0,
-     0,
-     1
-    ],
-    "sirka": 0.42,
-    "vyska": 0.335,
-    "zdroj": "rozbor sítě hra/modely/stavby_h/domy.glb 15. 11. (Havran blender/ves_domy.py): ústí pece = plocha materiálu M_Tma (černý otvor s obloukem) v síti <Dům>_Interier, svislá, normála +z modelu (do jizby); body oblouku Dum1 x −2,828…−2,408, y 0,94…1,275, z 2,22; začouzení nad ústím je už v modelu (M_PecZacouzena y 1,07–1,43 na líci klenby); žhavé uhlíky modelu (M_Zhar) leží uvnitř pece za otvorem (nevidět). Vzhled: KCD chalupy – oheň a uhlíky viditelné v ústí hliněné pece (docs/reference/kcd_vzhled, Havran docs/screens/ref_kcd2_*)",
-    "ohnisko": [
-     -2.875,
-     0.68,
-     1.225,
-     0.14
-    ]
+    "sirka": 0.58,
+    "vyska": 0.48,
+    "spodek_pod_znackou_m": 0.21
    },
-   "usti_uzel": "Rychta_Pec_Usti"
+   "zdroj": "Pec_Chalupni – pravidla/svet/topeni.json vlozit (modely Míšina modeláře 15. 11.: značka ve středu ústí, místní +Z ven – NAVOD_PEC.md; spodek ústí = dno pece v LOD0 – Pec_Chalupni Dno_pece y 0,52 pod značkou 0,73, Pec_Krcma 0,58 pod 0,834)"
+  },
+  {
+   "id": "hajovna_pec",
+   "nazev": "pec v jizbě hájovny",
+   "uzel": "Hajovna_Pec_Usti",
+   "druh": "pec",
+   "hori": "vzdy",
+   "usti": {
+    "sirka": 0.58,
+    "vyska": 0.48,
+    "spodek_pod_znackou_m": 0.21
+   },
+   "zdroj": "Pec_Chalupni – pravidla/svet/topeni.json vlozit (modely Míšina modeláře 15. 11.: značka ve středu ústí, místní +Z ven – NAVOD_PEC.md; spodek ústí = dno pece v LOD0 – Pec_Chalupni Dno_pece y 0,52 pod značkou 0,73, Pec_Krcma 0,58 pod 0,834)"
   },
   {
    "id": "hradA_kuchyne",
    "nazev": "oheň v černé kuchyni hradu",
-   "uzel": "HradA_Ohen_Kuchyne",
-   "koren": "Hrad",
-   "druh": "ohniste",
+   "uzel": "HradA_Kuchyne_Pec_Ohen*",
+   "koren": "Topeni",
+   "druh": "topeniste",
    "hori": "vzdy",
-   "zdroj": "Havran docs/rozpracovane/choreografie_postav.md (kuchařka: 5–9 vaří snídani, 10–13:30 oběd, 16–21 večeři) – oheň v černé kuchyni ráno až po oběd a večer; mimo tyto hodiny vyhaslý (pokud ho hráč nezapálí)",
+   "zdroj": "Topeniste_Kuchynske_Siroke_BezOdtahu (topeni.json hradA_kuchyne) místo ohniště z puchart_hrad.py",
    "hori_pozn": "Míša 15. 11.: všechny ohně hoří pořád (KCD) – viz hori_vzdy"
   },
   {
@@ -311,7 +281,7 @@
    "druh": "krb",
    "hori": "vzdy",
    "jistota": "NAVRH",
-   "zdroj": "pravidla/svet/krby.json (krb Rychty – model dodá Míšin modelář; dokud glb chybí, značka neexistuje a oheň se nevytvoří)"
+   "zdroj": "Krb_Rychta (topeni.json rychta_krb, značka Krb_Ohen → Rychta_Krb_Ohen)"
   },
   {
    "id": "krb_obecny",
@@ -319,9 +289,9 @@
    "uzel": "*_Krb_Ohen*",
    "druh": "krb",
    "hori": "vzdy",
-   "koren": "Hrad",
+   "koren": "Topeni",
    "jistota": "NAVRH",
-   "zdroj": "budoucí krby hradu (krby.json navrhy_hrad) – značka HradX_Krb_Ohen<N> v modelu hradu; dnes v modelu žádný krb není (blender/puchart_hrad.py: palác A má jen ohniště černé kuchyně a kachlová kamna, palác B nic)"
+   "zdroj": "krby hradu A a B (topeni.json hradA_krb, hradB_krb: Krb_Hradni / Krb_Sinovy_Vysoky, značka Krb_Ohen → HradA_Krb_Ohen, HradB_Krb_Ohen) – uzel Topeni (hlavni.gd _topeni)"
   }
  ],
  "hori_vzdy": {

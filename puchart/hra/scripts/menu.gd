@@ -20,6 +20,7 @@ const CREDITS := [
 	"Ostřice a vrby: fotoskeny listů ambientCG, CC0; devětsil: list z „Dim's Arboretum“ – Dim (opengameart.org), CC-BY 3.0",
 	"Terén: DMR 5G, ČÚZK; vodní síť a cesty: ZABAGED, OpenStreetMap (ODbL)",
 	"Hrad podle kreseb a půdorysů GC80T08 a rešerší (docs/reference)",
+	"Pece, krby, kamna, kuchyňská topeniště a nádobí: vlastní modely Míšina modeláře (Topení 1400 a doplněk, 2026); textury Poly Haven, CC0 – Rock Face 03, Rough Wood, White Rough Plaster, Clay Plaster (Amal Kumar), Plaster Stone Wall 01 (Charlotte Baglioni), Large Sandstone Blocks (Rob Tuytel); prameny: Vlastivědné muzeum v Olomouci, NPÚ (Kachlová kamna 2021), Archaeologia historica (kachle z hradu Kost)",
 	"Písmo: Grenze Gotisch (Omnibus-Type), SIL Open Font License",
 	"Herní engine: Godot Engine, MIT",
 ]

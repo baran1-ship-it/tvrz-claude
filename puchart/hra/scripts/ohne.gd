@@ -158,6 +158,10 @@ func _pridej(m: Dictionary, n: Node3D) -> void:
 			# ústí: na líci klenby pece (kolize je jeden kvádr pece i s podstavcem – klenba končí na usti_od_stredu půlrozměru)
 			var lic := c + ven * minf(ab.size.x, ab.size.z) * 0.5 * float(dr["usti_od_stredu"])
 			zaklad = Vector3(lic.x, ab.position.y + ab.size.y * float(dr["usti_v"]), lic.z)
+	elif m.has("usti"):   # pec od modeláře (topeni.json): n = značka <prefix>_Pec_Usti ve středu ústí, místní +Z ven z pece (glb)
+		usti = {"bod": n.global_position - Vector3.UP * float(m["usti"].get("spodek_pod_znackou_m", 0.0)), "smer": (n.global_basis.z * Vector3(1, 0, 1)).normalized(),
+			"sirka": float(m["usti"]["sirka"]), "vyska": float(m["usti"]["vyska"]), "dum": null, "ohnisko": []}
+		zaklad = usti["bod"]; ven = usti["smer"]; vlastni = _kolize_topeni(n)
 	else:
 		var p := n.global_position
 		if m.has("zhar"):
@@ -171,6 +175,8 @@ func _pridej(m: Dictionary, n: Node3D) -> void:
 			# vlastní kolize ohniště (zaměření a paprsky do místnosti ji přeskočí) – ne u modelu s jednou kolizí celku (hrad: KOLIZE_col
 			# = celý hrad; jejím vynecháním by paprsky prošly zdmi a nabídka by šla i přes zeď)
 			if not r.is_empty() and not m.has("koren"): vlastni = [(r["collider"] as CollisionObject3D).get_rid()]
+			var vt := _kolize_topeni(n)   # topeniště od modeláře: celé jeho kolize (deska, dýmník) – ne jen kus pod plamenem
+			if not vt.is_empty(): vlastni = vt
 		ven = _do_mistnosti(zaklad + Vector3.UP * 0.5, vlastni)
 	var o := {"nazev": String(m["nazev"]), "druh": String(m["druh"]), "zaklad": zaklad, "ven": ven, "vlastni": vlastni, "uzel": n, "boost": 0.0, "boost_cfg": {},
 		"hori": String(m["hori"]) == "vzdy", "noc": String(m["hori"]) == "noc", "casy": m.get("hodiny", []) if String(m["hori"]) == "casy" else [],
@@ -226,6 +232,17 @@ func _pridej(m: Dictionary, n: Node3D) -> void:
 		uz.add_child(a); o["zvuk"] = a
 	ohne.append(o)
 	_ukaz(o)
+
+
+## RID kolizí topení, do kterého značka patří (hlavni.gd _topeni: předek s meta "topeni") – paprsky do místnosti a zaměření
+## nabídky přes vlastní pec nevedou.
+func _kolize_topeni(n: Node) -> Array:
+	var t := n
+	while t and not t.has_meta("topeni"): t = t.get_parent()
+	var a: Array = []
+	if t:
+		for c in t.find_children("*", "CollisionObject3D", true, false): a.append((c as CollisionObject3D).get_rid())
+	return a
 
 
 func _geom(g: GeometryInstance3D) -> void:

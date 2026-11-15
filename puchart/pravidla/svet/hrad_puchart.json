@@ -1283,6 +1283,8 @@
  },
  "vybaveni": {
   "stavet": false,
+  "topeni_generator": false,
+  "topeni_pozn": "Míša 15. 11. (modely topení od modeláře, pravidla/svet/topeni.json): ohniště s dýmníkem černé kuchyně a kachlová kamna paláce A z kvádrů blender/puchart_hrad.py se nestaví – místo nich Topeniste_Kuchynske_Siroke a Kamna_Hradni_Nadobkova (hlavni.gd _topeni); topeniště kamen ze síně (tmavé ústí) a značka HradA_Ohen_Kamna zůstávají",
   "svetla_louci": false,
   "pozn": "Míša 12. 11.: „vymaž všechny vlastní modely vybavení z hradu a vesnice, ani jedno není hezké a nedá se používat, vše si vybavím sám“; „na horním hradě máš v kuchyni louč přímo v místě kamenné pece, nesmysl, vymaž louče taky, si je dám sám“ – hrad bez nábytku, sudů, truhel, loží a loučí; zůstávají pevné stavební díly (pec, krb, kamna, schody, dveře)"
  }

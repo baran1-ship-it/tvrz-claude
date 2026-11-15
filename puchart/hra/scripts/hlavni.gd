@@ -74,6 +74,8 @@ func _start() -> void:
 		if OS.get_environment("PUCHART_BEZ_LOD") == "": _hrad_lod(h, hrad_id)
 		_zdivo_bez_rastru(h)
 		if get_node_or_null("HradDaleko"): _zdivo_bez_rastru(get_node("HradDaleko"))
+		var tp := Node3D.new(); tp.name = "Topeni"; add_child(tp)   # topení hradu (topeni.json kam hrad; vlastní uzel – _zdivo_bez_rastru mění materiály pod Hrad)
+		_topeni(tp, "hrad", "", 130.0)
 	Denik.zapis("skály")
 	if ResourceLoader.exists("res://modely/hrady/skaly.glb"):   # skalní výchozy (blender/skaly.py, skaly.json)
 		var sk: Node3D = load("res://modely/hrady/skaly.glb").instantiate(); sk.name = "Skaly"; add_child(sk)
@@ -688,7 +690,7 @@ func _mista() -> void:
 		uzel.add_child(dum)
 		_lavice_rucni(dum, String(s["model"]))
 		if _lavice_vzor != "": lavice.append_array(load("res://scripts/lavice.gd").mista(dum, _lavice_vzor))   # lavice z modelu (Míša 15. 11.)
-		_krb(dum, String(s["model"]), float(lod["vnitrek_do_m"]), st_do)   # krb Rychty (krby.json; glb až od modeláře)
+		_topeni(dum, "dum", String(s["model"]), st_do)   # pece, krb a komín Rychty, začouzení (topeni.json vlozit; modely od modeláře)
 		_ztlum(dum, float(md.get("jas_podrobny", 1.0)), jas_cache)   # Míša 14. 11.: „domy… až moc vypadají bílé“
 		var zbd: Array = (md.get("zebriky", {}) as Dictionary).get(String(s["model"]), [])
 		if zbd.size() == 4:   # žebřík na půdu v síni (Havran DUM_ZEBRIK; Míša 15. 11.: „chci všechny žebříky ve hře funkční“)
@@ -735,24 +737,41 @@ func _mista() -> void:
 	print("MISTA staveb %d" % uzel.get_child_count())
 
 
-## Krb vložený do domu (data/krby.json vlozit[]: model, soubor glb, poloha a yaw v souřadnicích modelu domu; Míša 15. 11.: krby
-## „hezké dobové dle KCD“ vymodeluje modelář). Glb chybí → nic. Kolize z glb (-col/-colonly), značka ohně <Model>_Krb_Ohen najde
-## ohne.gd (ohne.json rychta_krb). Vnitřní díl (jméno s Vnitrek) jen do vnitrek_do_m, ostatní (plášť, komín nad střechou) do vnejsi_do_m.
-var _krby: Array = []
-var _krby_nacteno := false
-func _krb(dum: Node3D, model: String, vnitrek_do: float, vnejsi_do: float) -> void:
-	if not _krby_nacteno:
-		_krby_nacteno = true
-		if FileAccess.file_exists("res://data/krby.json"): _krby = (JSON.parse_string(FileAccess.get_file_as_string("res://data/krby.json")) as Dictionary).get("vlozit", [])
-	for k: Dictionary in _krby:
-		if String(k["model"]) != model or not ResourceLoader.exists(String(k["soubor"])): continue
-		var kr := (load(String(k["soubor"])) as PackedScene).instantiate() as Node3D
-		var po: Array = k["poloha"]
-		kr.name = model + "_Krb"; kr.transform = Transform3D(Basis(Vector3.UP, deg_to_rad(float(k["yaw_deg"]))), Vector3(po[0], po[1], po[2]))
-		dum.add_child(kr)
-		for mi in kr.find_children("*", "MeshInstance3D", true, false):
-			(mi as MeshInstance3D).visibility_range_end = vnitrek_do if String(mi.name).contains("Vnitrek") else vnejsi_do
-			(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+## Topení od modeláře (data/topeni.json vlozit[]: kam dum / celek / hrad, model = instance domu nebo celku, topeni = glb
+## v modely/topeni/, poloha a yaw v souřadnicích modelu – u hradu ve hře; opakovat = díly komína nad sebou). LOD0 (s kolizemi
+## -convcolonly a značkami) do lod.lod0_do_m, LOD1 do lod.vnitrek_do_m (díly nad střechou – vnejsek – do vnejsi_do jako vnějšek
+## domu); bez stínu jako Interier domů. Značky (prázdné uzly LOD0: Pec_Usti, Pec_Ohen, Krb_Ohen, Krb_Kour…) se přejmenují na
+## <prefix>_<značka> – ohne.gd je najde podle ohne.json. Glb chybí → nic (nastroje/topeni_modely.py).
+var _top: Dictionary = {}
+func _topeni(koren: Node3D, kam: String, model: String, vnejsi_do: float) -> void:
+	if _top.is_empty():
+		_top = {"vlozit": []}
+		if FileAccess.file_exists("res://data/topeni.json"): _top = JSON.parse_string(FileAccess.get_file_as_string("res://data/topeni.json"))
+	var lod: Dictionary = _top.get("lod", {})
+	var d0 := float(lod.get("lod0_do_m", 12.0)); var vn := float(lod.get("vnitrek_do_m", 35.0))
+	for k: Dictionary in _top.get("vlozit", []):
+		if String(k["kam"]) != kam or String(k.get("model", "")) != model: continue
+		var c0 := "res://modely/topeni/%s_LOD0.glb" % k["topeni"]; var c1 := "res://modely/topeni/%s_LOD1.glb" % k["topeni"]
+		if not ResourceLoader.exists(c0): continue
+		var op: Dictionary = k.get("opakovat", {"pocet": 1, "krok": [0.0, 0.0, 0.0]})
+		var po: Array = k["poloha"]; var kr: Array = op["krok"]
+		var dal := vnejsi_do if bool(k.get("vnejsek", false)) else vn
+		for i in int(op["pocet"]):
+			var t := Node3D.new(); t.name = "%s_%s_%d" % [k["prefix"], k["topeni"], i]
+			t.transform = Transform3D(Basis(Vector3.UP, deg_to_rad(float(k["yaw_deg"]))),
+				Vector3(float(po[0]) + float(kr[0]) * i, float(po[1]) + float(kr[1]) * i, float(po[2]) + float(kr[2]) * i))
+			t.set_meta("topeni", String(k["id"]))
+			koren.add_child(t)
+			var l0: Node3D = (load(c0) as PackedScene).instantiate(); l0.name = "LOD0"; t.add_child(l0)
+			for g in l0.find_children("*", "GeometryInstance3D", true, false):
+				(g as GeometryInstance3D).visibility_range_end = d0; (g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			for z in l0.find_children("*", "Node3D", true, false):
+				if z.get_class() == "Node3D" and z.get_child_count() == 0: z.name = "%s_%s" % [k["prefix"], z.name]
+			if ResourceLoader.exists(c1):
+				var l1: Node3D = (load(c1) as PackedScene).instantiate(); l1.name = "LOD1"; t.add_child(l1)
+				for g in l1.find_children("*", "GeometryInstance3D", true, false):
+					(g as GeometryInstance3D).visibility_range_begin = d0; (g as GeometryInstance3D).visibility_range_end = dal
+					(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 ## Viditelné lavice bez kolizního uzlu (mista.json modely.lavice.rucni; Míša 15. 11.: každá lavice v modelu funkční): kvádr
@@ -859,6 +878,7 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas:
 			for g in gs:
 				(g as GeometryInstance3D).visibility_range_end = vnitrek_do; (g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_schody_dveri(n, s)
+	_topeni(n, "celek", String(s["model"]), od1)   # pec a kuchyňské topeniště krčmy, pec hájovny (topeni.json vlozit)
 	if jas_celku < 0.999:   # vnějšek celku tlumený jako domy (Míša 15. 11. foto krčmy: kamenná stáj skoro bílá)
 		for g in n.find_children("*", "MeshInstance3D", true, false):
 			var mi := g as MeshInstance3D

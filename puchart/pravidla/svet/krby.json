@@ -9,48 +9,47 @@
   "site": "vnitřní části (ohniště, plášť zevnitř) ve sítích se slovem Vnitrek v názvu (kreslí se jen do vnitrek_do_m 35 m), komín nad střechou zvlášť (kreslí se jako vnějšek domu do stredni_do_m)",
   "rozpocet": "do 15 tis. trojúhelníků, ≤ 3 materiály, textury 1024 (rozpocty.json), bez světel v glb"
  },
- "vlozit": [
-  {
-   "id": "rychta_krb",
-   "model": "Rychta",
-   "soubor": "res://modely/stavby_h/krb_rychta.glb",
-   "poloha": [
-    1.55,
-    0.3,
-    -0.45
+ "vlozit_pozn": "Vkládání krbů (i pecí, kamen, kuchyňských topenišť, komína Rychty) je od 15. 11. v pravidla/svet/topeni.json vlozit (modely Míšina modeláře dodány: Topeni_1400 a Doplněk; hlavni.gd _topeni). Krb Rychty = Krb_Rychta (síňový krb Doplňku je na jizbu Rychty vysoký – topeni.json rychta_krb proc). Rozbor místa Rychty (výšky, volné místo) níže v mista_pro_modelare a v historii gitu.",
+ "vlozit_rozbor_rychta": {
+  "id": "rychta_krb",
+  "model": "Rychta",
+  "soubor": "res://modely/stavby_h/krb_rychta.glb",
+  "poloha": [
+   1.55,
+   0.3,
+   -0.45
+  ],
+  "yaw_deg": 0.0,
+  "jistota": "NAVRH",
+  "zdroj": "Míša 15. 11. (krb na Rychtě, přiznaná hypotéza – bohatší stavba s komínem); poloha z rozboru domy.glb 15. 11. (paprsky Blender 4.2: jizba Rychty x −3,70…3,69, z −0,45…3,84, podlaha y 0,30, spodek záklopu (M_PovalaZacouzena) y 2,59, vršek 2,64; střecha zevnitř (M_Podbiti) nad x 1,4 y 6,23, nad x 2,5 y 4,66, hřeben x 0 y ~8,23 (štít 8,36); dveře jizby x −1,83…−0,91 ve stěně z −0,45; pec x −3,65…−2,35 z −0,41…1,50; lavice x 0,10…3,36 z 3,46…3,79); rešerše: docs/reference/reserse_dispozice_palacu.md (síň s krbem – Valdek), Přimda: římsa krbu ve věži (12. st.), 14. st. převládají kachlová kamna v sídlech šlechty a patriciátu (NPÚ, výstava Kachlová kamna 2021; is.slu.cz Kultura bydlení hradů a tvrzí) – krb na vesnické rychtě 1393 je proto NAVRH (hra, barevnost)",
+  "rozhodnuti": "pec zůstává (chléb, kouřová jizba), krb PŘIDAT do jizby na příčku jizba | síň vpravo od dveří jizby: komín tam jde svisle záklopem a podkrovím a střechou 1,5 m od hřebene (krátký prostup u hřebene, ne u okapu jako nad pecí v rohu x −3,0, kde je střecha jen 3,94 m nad počátkem)",
+  "volne_misto": {
+   "x": [
+    0.2,
+    3.4
    ],
-   "yaw_deg": 0.0,
-   "jistota": "NAVRH",
-   "zdroj": "Míša 15. 11. (krb na Rychtě, přiznaná hypotéza – bohatší stavba s komínem); poloha z rozboru domy.glb 15. 11. (paprsky Blender 4.2: jizba Rychty x −3,70…3,69, z −0,45…3,84, podlaha y 0,30, spodek záklopu (M_PovalaZacouzena) y 2,59, vršek 2,64; střecha zevnitř (M_Podbiti) nad x 1,4 y 6,23, nad x 2,5 y 4,66, hřeben x 0 y ~8,23 (štít 8,36); dveře jizby x −1,83…−0,91 ve stěně z −0,45; pec x −3,65…−2,35 z −0,41…1,50; lavice x 0,10…3,36 z 3,46…3,79); rešerše: docs/reference/reserse_dispozice_palacu.md (síň s krbem – Valdek), Přimda: římsa krbu ve věži (12. st.), 14. st. převládají kachlová kamna v sídlech šlechty a patriciátu (NPÚ, výstava Kachlová kamna 2021; is.slu.cz Kultura bydlení hradů a tvrzí) – krb na vesnické rychtě 1393 je proto NAVRH (hra, barevnost)",
-   "rozhodnuti": "pec zůstává (chléb, kouřová jizba), krb PŘIDAT do jizby na příčku jizba | síň vpravo od dveří jizby: komín tam jde svisle záklopem a podkrovím a střechou 1,5 m od hřebene (krátký prostup u hřebene, ne u okapu jako nad pecí v rohu x −3,0, kde je střecha jen 3,94 m nad počátkem)",
-   "volne_misto": {
-    "x": [
-     0.2,
-     3.4
-    ],
-    "z": [
-     -0.45,
-     0.6
-    ],
-    "_pozn": "š 3,2 m podél příčky (od dveří jizby x −0,91 + 1,1 m průchod) × hloubka 1,05 m do jizby; krb doporučeně š 1,8–2,0 m (x 0,55…2,55), hloubka ohniště 0,7 m, plášť do 1,0 m od stěny"
-   },
-   "vyska": {
-    "podlaha": 0.3,
-    "zaklop_spodek": 2.59,
-    "zaklop_vrsek": 2.64,
-    "strecha_zevnitr_nad_x1_55": 6.0,
-    "strecha_venku_nad_x1_55": 6.06,
-    "hreben": 8.23,
-    "komin_vrchol_min": 8.6,
-    "_pozn": "komín prochází záklopem (otvor v záklopu, výměna trámů – tesařsky, ne prostup trámem) a střechou (lemování šindele); vrchol aspoň 0,4 m nad hřebenem (komín 1,5 m od hřebene)"
-   },
-   "zadni_stena": "příčka jizba | síň je roubená (M_RoubeniVnitrni, z −0,45…−0,64, mazanice): krb s kamennou zadní stěnou a izolační mezerou před roubením",
-   "snimek": [
-    "docs/screens/ohen_krb_rychta.png",
-    "docs/screens/rychta_komin.png"
-   ]
-  }
- ],
+   "z": [
+    -0.45,
+    0.6
+   ],
+   "_pozn": "š 3,2 m podél příčky (od dveří jizby x −0,91 + 1,1 m průchod) × hloubka 1,05 m do jizby; krb doporučeně š 1,8–2,0 m (x 0,55…2,55), hloubka ohniště 0,7 m, plášť do 1,0 m od stěny"
+  },
+  "vyska": {
+   "podlaha": 0.3,
+   "zaklop_spodek": 2.59,
+   "zaklop_vrsek": 2.64,
+   "strecha_zevnitr_nad_x1_55": 6.0,
+   "strecha_venku_nad_x1_55": 6.06,
+   "hreben": 8.23,
+   "komin_vrchol_min": 8.6,
+   "_pozn": "komín prochází záklopem (otvor v záklopu, výměna trámů – tesařsky, ne prostup trámem) a střechou (lemování šindele); vrchol aspoň 0,4 m nad hřebenem (komín 1,5 m od hřebene)"
+  },
+  "zadni_stena": "příčka jizba | síň je roubená (M_RoubeniVnitrni, z −0,45…−0,64, mazanice): krb s kamennou zadní stěnou a izolační mezerou před roubením",
+  "snimek": [
+   "docs/screens/ohen_krb_rychta.png",
+   "docs/screens/rychta_komin.png"
+  ]
+ },
  "mista_pro_modelare": [
   {
    "id": "pec_dum1",
@@ -204,7 +203,7 @@
    "snimek": "docs/screens/hradB_sin.png (pohled na východ, krb mezi dvěma okny)"
   }
  ],
- "navrhy_hrad": "viz mista_pro_modelare hradA_krb_navrh, hradB_krb_navrh – v modelu hradu (blender/puchart_hrad.py) dnes žádný krb není; modelář dodá krb jako glb se značkou HradA_Krb_Ohen1 / HradB_Krb_Ohen1 (ohne.json krb_obecny), vložení do hradu doplnit po dodání (stejně jako vlozit u Rychty)",
+ "navrhy_hrad": "hrad A: Krb_Hradni (Krb_Sinovy_Vysoky 3,0 m se mezi příčku a schody nevejde), hrad B: Krb_Sinovy_Vysoky – topeni.json hradA_krb, hradB_krb (značky HradA_Krb_Ohen / HradB_Krb_Ohen, ohne.json krb_obecny, koren Topeni)",
  "reference": [
   "docs/reference/reserse_dispozice_palacu.md (Valdek: síň s krbem; Žebrák, Radyně: kamna přikládaná ze síně; Žebrák: dýmník černé kuchyně)",
   "Přimda – římsa krbu v 1. patře věže (12. st.), is.slu.cz Kultura bydlení hradů a tvrzí: https://is.slu.cz/el/fpf/zima2024/ARCHSTN041/6_Kultura_bydleni__vybaveni_hradu__tvrzi.pdf",
