@@ -8644,8 +8644,23 @@ func _postavy_modif() -> void:
 			nejvic[k] = maxi(nejvic[k], n[k])
 	# 15. 11.: ve dne ve vsi (hostinec v noci = nikdo v zaberu, strop by se neoveril): strop kroku a odpojene kostry
 	if main.day:
-		main.day.set_hour(11.0, 0.0)
-	await main.fast_travel(Vector3(421.0, 0.0, 869.0), Vector3(421.0, 1.6, 900.0), 0.0, "test")
+		main.day.hour = 11.0
+	li.call("_process_vlastni", 0.0)
+	# stred = viditelna postava s nejvic viditelnymi sousedy do 30 m (jako lide_zasek)
+	var nej := Vector3(421.0, 0.0, 869.0)
+	var nej_n := -1
+	for c: Dictionary in li.get("_lide"):
+		var q: Vector3 = (c["uzel"] as Node3D).position
+		if not (c["uzel"] as Node3D).visible or q == Vector3.ZERO:
+			continue
+		var nn := 0
+		for c2: Dictionary in li.get("_lide"):
+			if (c2["uzel"] as Node3D).visible and q.distance_to((c2["uzel"] as Node3D).position) < 30.0:
+				nn += 1
+		if nn > nej_n:
+			nej_n = nn
+			nej = q
+	await main.fast_travel(nej + Vector3(3.0, 0.0, 3.0), nej + Vector3(3.0, 1.6, -7.0), 0.0, "test")
 	var kroku_ves := 0
 	var odl0 := int(li.get("anim_odlozeno"))
 	var kroku_sum := 0
