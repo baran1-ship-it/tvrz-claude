@@ -193,6 +193,8 @@ func _skut(dt: float) -> float:
 ## Na cem hrac stoji/narazi (posledni srazky move_and_slide): jmeno, tvar, troj. (radce 17:10 – podklad hrace)
 var _tk := 0.0
 var _krz_text := "-"
+var _krz_xf := Transform3D()
+var _krz_hotovo := false
 
 
 ## Misa 15. 11. (letajici trsy, mech a houby - na PC nereprodukovano): co je pod krizem - kolize paprskem a nejblizsi
@@ -216,6 +218,7 @@ func _pod_krizem() -> String:
 		var co: Object = h["collider"]
 		out.append("kolize %s %.1f m" % [String((co as Node).name) if co is Node else "?", d_kol])
 	var nej := [0.8, null, -1, Vector3.ZERO]
+	var prohledano := 0
 	for n in get_tree().root.find_children("*", "MultiMeshInstance3D", true, false):
 		var mmi := n as MultiMeshInstance3D
 		if not mmi.is_visible_in_tree() or mmi.multimesh == null:
@@ -225,8 +228,9 @@ func _pod_krizem() -> String:
 			continue
 		var mm := mmi.multimesh
 		var cnt := mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
-		if cnt > 30000:
+		if cnt > 30000 or prohledano > 60000:
 			continue
+		prohledano += cnt
 		for i in cnt:
 			var lp := mm.get_instance_transform(i).origin
 			if lp == Vector3.ZERO and mm.use_custom_data:
@@ -517,10 +521,21 @@ func _process_diag(dt: float) -> void:
 		if _tp >= 0.5:
 			_tp = 0.0
 			_panel.size.x = maxf(400.0, get_viewport().get_visible_rect().size.x - 230.0)
-			_tk += 0.5
-			if _tk >= 1.0:
-				_tk = 0.0
-				_krz_text = _pod_krizem()
+			# Misa 15. 11. „monitor mereni dost bere“: pod krizem jen jednou, kdyz kamera 1 s stoji (hrac miri) - ne kazdou
+			# sekundu za chuze (prochazi instance MultiMeshu = zasek)
+			var cam_k := get_viewport().get_camera_3d()
+			if cam_k:
+				var xk := cam_k.global_transform
+				if xk.origin.distance_to(_krz_xf.origin) > 0.05 or xk.basis.z.angle_to(_krz_xf.basis.z) > 0.02:
+					_krz_xf = xk
+					_tk = 0.0
+					_krz_hotovo = false
+				else:
+					_tk += 0.5
+					if _tk >= 1.0 and not _krz_hotovo:
+						_krz_hotovo = true
+						var t_k := Time.get_ticks_usec()
+						_krz_text = _pod_krizem() + " (%.0f ms)" % ((Time.get_ticks_usec() - t_k) / 1000.0)
 			_panel.text = "FPS %d · nejdelší %.0f ms · %s · záseků %d, pomalých %d%s" % [Engine.get_frames_per_second(), _max_dt_panel * 1000.0, poloha_text(),
 					zaseku, pomalych, (main.kvalita.panel_text() if main and main.get("kvalita") else "") + "\npod křížem: " + _krz_text + (("\n" + String(_zaseky[0])) if not _zaseky.is_empty() else "")]
 			_max_dt_panel = 0.0
