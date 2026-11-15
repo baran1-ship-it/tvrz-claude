@@ -131,7 +131,7 @@ func _pridej(m: Dictionary, n: Node3D) -> void:
 			zaklad = (r["position"] as Vector3) if not r.is_empty() else p
 			if not r.is_empty(): vlastni = [(r["collider"] as CollisionObject3D).get_rid()]
 		ven = _do_mistnosti(zaklad + Vector3.UP * 0.5, vlastni)
-	var o := {"nazev": String(m["nazev"]), "druh": String(m["druh"]), "zaklad": zaklad, "vlastni": vlastni,
+	var o := {"nazev": String(m["nazev"]), "druh": String(m["druh"]), "zaklad": zaklad, "vlastni": vlastni, "uzel": n, "boost": 0.0, "boost_cfg": {},
 		"hori": String(m["hori"]) != "noc", "noc": String(m["hori"]) == "noc", "rucne": false, "zap": false,
 		"faze": randf() * 50.0, "sum": 0.0, "sum_cil": 0.0, "sum_t": 0.0, "energie": float(dr["energie"])}
 	var uz := Node3D.new(); uz.name = "Ohen_%d" % ohne.size(); add_child(uz); uz.global_position = zaklad
@@ -185,6 +185,17 @@ func prepni(i: int, rucne := true) -> void:
 	_rozpocet()
 
 
+## Rozdmýchat oheň ve stavbě koren (měch kovárny – funkce.gd; Havran main.gd kovarna_mech → life.gd fire_spots boost = 1):
+## síla 1 klesá na 0 za roz.pokles_s; světlo × (1 + roz.svetlo × síla), plamen × (1 + roz.plamen × síla). Čísla funkce.json mech.rozhoreni.
+func rozdmychej(koren: Node, roz: Dictionary) -> bool:
+	var ok := false
+	for o: Dictionary in ohne:
+		var u: Node = o.get("uzel")
+		if is_instance_valid(u) and (koren == u or koren.is_ancestor_of(u)):
+			o["boost"] = 1.0; o["boost_cfg"] = roz; ok = true
+	return ok
+
+
 func pocet_svetel() -> int:
 	var k := 0
 	for o: Dictionary in ohne:
@@ -234,6 +245,11 @@ func _process(dt: float) -> void:
 	# blikání zapnutých světel (≤ svetel_max): siny + pomalý šum, chvění polohy; mezi zap_m a vyp_m energie ubývá
 	var bl: Dictionary = cfg["svetlo"]["blikani"]; var t := Time.get_ticks_msec() / 1000.0
 	var zap := float(cfg["rozpocet"]["zap_m"]); var vyp := float(cfg["rozpocet"]["vyp_m"]); var pm := float(bl["poloha_m"])
+	for o: Dictionary in ohne:   # rozhoření měchem (rozdmychej): plamen vyšší, síla klesá
+		if float(o["boost"]) <= 0.0: continue
+		var rz: Dictionary = o["boost_cfg"]
+		o["boost"] = maxf(0.0, float(o["boost"]) - dt / float(rz["pokles_s"]))
+		if o.has("plamen"): (o["plamen"] as Node3D).scale = Vector3.ONE * (1.0 + float(rz["plamen"]) * float(o["boost"]))
 	for o: Dictionary in ohne:
 		if not o["zap"]: continue
 		var l: OmniLight3D = o["svetlo"]; var f: float = o["faze"] + t
@@ -242,6 +258,7 @@ func _process(dt: float) -> void:
 		o["sum"] = lerpf(float(o["sum"]), float(o["sum_cil"]), clampf(dt * 4.0, 0.0, 1.0))
 		var k := 1.0 + float(o["sum"])
 		for s: Array in bl["siny"]: k += float(s[1]) * sin(f * float(s[0]))
+		if float(o["boost"]) > 0.0: k *= 1.0 + float(o["boost_cfg"]["svetlo"]) * float(o["boost"])
 		l.light_energy = float(o["energie"]) * k * clampf((vyp - float(o["d"])) / (vyp - zap), 0.0, 1.0)
 		l.global_position = (o["poloha"] as Vector3) + Vector3(sin(f * 5.3), sin(f * 6.7) * 0.5, cos(f * 4.1)) * pm
 	_nabidka()

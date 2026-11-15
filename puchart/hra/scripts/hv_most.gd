@@ -2,6 +2,7 @@ extends Node
 ## Propojka Havranových skriptů (menu_hrace, predmety, dovednosti – převzato z větve Havrana beze změny kódu) na Puchart
 ## (Míša 10. 11.: „Havran už to má hotové“). Havranův main poskytoval life (zvuky, světla, ohně), hud (hlášky), player,
 ## day, mode, svet, info, udalost/open_container/offer_sleep/sleep_until – tady jejich nejmenší náhrada nad Puchartem.
+const Pravidla := preload("res://scripts/pravidla.gd")
 var mode := "pribeh"           # pribeh | piskoviste (výběr v hlavní nabídce)
 var player: CharacterBody3D
 var predmety: Node
@@ -57,6 +58,14 @@ func setup(hlavni: Node3D, hrac: CharacterBody3D) -> void:
 func udalost(id: String, data := {}) -> void:
 	if dovednosti: dovednosti.udalost(id, data)
 func open_container(rec: Dictionary) -> void: menu_hrace.show_page("vymena", rec)
-func offer_sleep() -> void: hud.toast("Spánek zatím není")
-func sleep_until(kdy: String) -> void:   # Havran: spánek do zvolené doby (menu hráče → spánek)
-	if day is Node and kdy != "": (day as Node).set_time(kdy, 2.0)
+## Spánek jako Havran (main.gd offer_sleep / sleep_until; Míša 15. 11.: „ano, jako Havran“): po „Lehnout si“ (funkce.gd)
+## výběr do kdy spát (menu_hrace stránka spanek), pak zatmění, posun denní doby, vstát a uložit hru (funkce.gd spi_do).
+func offer_sleep() -> void: menu_hrace.show_page("spanek")
+func sleep_until(kdy: String) -> void:
+	var pr := get_parent()
+	var fu: Node = pr.get("funkce") if pr else null
+	var uloz := Callable()
+	if pr and pr.get("menu") != null and pr.menu.can_save: uloz = pr._uloz
+	if fu: await fu.spi_do(kdy, uloz)
+	elif day is Node and kdy != "": (day as Node).set_time(kdy, 2.0)
+	if uloz.is_valid(): hud.toast(String(Pravidla.cti("funkce", "spanek", "hlaska")), 2.5)

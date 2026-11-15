@@ -13,6 +13,7 @@ var mapa: CanvasLayer
 var dvere: Node
 var zebriky: Node            # žebříky (zebriky.gd): Lézt nahoru / Slézt dolů
 var lavice: Node             # lavice z modelů staveb (lavice.gd): Sednout si / Vstát
+var funkce: Node             # měch, spánek, žlab (funkce.gd): Foukat měchem / Lehnout si / Nalít vodu
 var menu: CanvasLayer       # menu.gd: úvod + pauza
 var menu_hrace: CanvasLayer   # Havranovo menu hráče (hv_most.gd)
 var hv: Node                  # propojka na Havranovy skripty: předměty, dovednosti, menu hráče, režim hry
@@ -55,7 +56,7 @@ func _process(_d: float) -> void:   # Havranovo menu se zavírá samo (B, dotyk)
 	if nabidka: nabidka.visible = not _mh_otevreno   # horní lišta (Brašna, Nabídka) přes Havranovo menu neprosvítá
 	if kruhy: kruhy.visible = not _mh_otevreno
 
-func pouzij() -> void:   # A: vsedě vstát; jinak nejbližší z dveří a vrat, žebříku, ohně a lavice (každý jen zaměřený – zamer.gd)
+func pouzij() -> void:   # A: vsedě vstát; jinak nejbližší z dveří a vrat, žebříku, ohně, lavice a funkční věci (funkce.gd) (každý jen zaměřený – zamer.gd)
 	if hrac.seated: hrac.stand_up(); return
 	var oko := hrac.global_position + Vector3(0, 1.0, 0)
 	var nej := ""; var nd := 1e9
@@ -69,11 +70,14 @@ func pouzij() -> void:   # A: vsedě vstát; jinak nejbližší z dveří a vrat
 		if od < nd: nd = od; nej = "ohen"
 	var lv: Dictionary = lavice._blizko if lavice else {}
 	if not lv.is_empty() and float(lv["d"]) < nd: nd = float(lv["d"]); nej = "lavice"
+	var fu: Dictionary = funkce._blizko if funkce else {}
+	if not fu.is_empty() and float(fu["d"]) < nd: nd = float(fu["d"]); nej = "funkce"
 	match nej:
 		"dvere": dvere.prepni(dvere._blizko)
 		"zebrik": zebriky.pouzij()
 		"ohen": oh.pouzij()
 		"lavice": lavice.pouzij()
+		"funkce": funkce.pouzij()
 
 func zacni(h: Node, p: CharacterBody3D) -> void:
 	hlavni = h; hrac = p
@@ -83,6 +87,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	var dv: Node = load("res://scripts/dvere.gd").new(); dv.name = "Dvere"; add_child(dv); dv.zacni(h, self); dvere = dv   # vrata a dveře
 	var zbr: Node = load("res://scripts/zebriky.gd").new(); zbr.name = "Zebriky"; add_child(zbr); zbr.zacni(h, self); zebriky = zbr   # žebříky (hájovna)
 	var lvc: Node = load("res://scripts/lavice.gd").new(); lvc.name = "Lavice"; add_child(lvc); lvc.zacni(h, self); lavice = lvc   # lavice z modelů domů a hájovny
+	var fce: Node = load("res://scripts/funkce.gd").new(); fce.name = "Funkce"; add_child(fce); fce.zacni(h, self); funkce = fce   # měch kovárny, spánek, žlab (funkce.gd)
 	# tečka uprostřed obrazovky (KCD; Míša 15. 11.: „na interaktivní věc musí být umístěn kurzor“ – zamer.gd míří středem)
 	var tk := ColorRect.new(); tk.name = "Tecka"; tk.color = Color(1, 1, 1, 0.55); tk.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tk.anchor_left = 0.5; tk.anchor_right = 0.5; tk.anchor_top = 0.5; tk.anchor_bottom = 0.5

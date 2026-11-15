@@ -69,7 +69,9 @@ static func polozky(h: Node) -> Array:
 			if znacky.is_empty() and String(m.get("kolize", "")) != "":   # pryčna jen s kolizí: horní plocha uprostřed
 				for sb in k.find_children(String(m["kolize"]), "StaticBody3D", true, false):
 					var ab := aabb_kolize(sb, sb.get_parent() as Node3D)
-					var zn := Node3D.new(); zn.name = "Spani_" + String(sb.name); (sb.get_parent() as Node3D).add_child(zn)
+					var zn := sb.get_parent().get_node_or_null("Spani_" + String(sb.name)) as Node3D
+					if zn: znacky.append(zn); continue
+					zn = Node3D.new(); zn.name = "Spani_" + String(sb.name); (sb.get_parent() as Node3D).add_child(zn)
 					zn.position = Vector3(ab.get_center().x, ab.end.y - float(sp["nad_znackou_m"]), ab.get_center().z)
 					znacky.append(zn)
 			for zn: Node3D in znacky:

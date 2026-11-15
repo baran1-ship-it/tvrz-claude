@@ -14,6 +14,7 @@ var svet: Node3D
 var hrac: CharacterBody3D
 var lavice: Array = []    # místa k sezení na lavicích z modelů staveb (_mista/_celek → lavice.gd mista; prochazka.gd nabídka „Sednout si“)
 var _lavice_vzor := ""    # mista_stavby.json modely.lavice.uzel_vzor – kolizní uzly lavic v modelech
+var mat_voda: ShaderMaterial = null   # materiál hladiny potoků (shaders/voda.gdshader z voda_hra.json) – i voda ve žlabu (funkce.gd)
 var zebriky: Array = []   # žebříky ve světě {pata, vrchol, nastup, sestup, nazev} (_celek ze záznamu zebrik; zebriky.gd, hrac.chyt_zebrik)
 var _foto := ""
 var _snimek := 0
@@ -120,6 +121,7 @@ func _start() -> void:
 				if not vz.has(k): continue
 				var v = vz[k]
 				mv.set_shader_parameter(k if k == "kraj_m" else k.trim_suffix("_m"), Color(v[0], v[1], v[2]) if v is Array else float(v))
+		mat_voda = mv
 		for mi in vo.find_children("*", "MeshInstance3D", true, false):
 			var m := mi as MeshInstance3D
 			if m.name.begins_with("KOLIZE"): m.visible = false; continue
