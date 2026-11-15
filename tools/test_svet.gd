@@ -9409,7 +9409,11 @@ func _potok_kaskada() -> void:
 			pres_zaclonu += 1
 			if pres_zaclonu <= 3:
 				chyby.append("balvan pres zaclonu (%.1f, %.1f) r %.2f" % [v.x, v.y, v.z])
+	# zakaz louky plati v mrizce vzorku (_vz interpoluje mezi body) - trs muze byt do kroku mrizky blize nez
+	# holy_breh_padu_m; test hlida holy breh vody holy_breh_m od stopy padu (plna sirka pasu) + nejblizsi trs
 	var hb := float(sv.pasma()["voda"]["holy_breh_padu_m"])
+	var hb_test := float(sv.pasma()["voda"]["holy_breh_m"])
+	var nejbliz := INF
 	var louka: Node = main.get_node_or_null("Louka")
 	var trsu_u_padu := 0
 	var trsu_okoli := 0
@@ -9420,7 +9424,8 @@ func _potok_kaskada() -> void:
 			var o := Rect2(a, Vector2.ZERO).expand(b).grow(float(pd["pul_pas"]) + hb + 1.0)
 			for p: Vector3 in louka.trsy_v_oblasti(o):
 				trsu_okoli += 1
-				if kr.od_padu(p.x, p.z) < hb - 0.05:
+				nejbliz = minf(nejbliz, kr.od_padu(p.x, p.z))
+				if kr.od_padu(p.x, p.z) < hb_test:
 					trsu_u_padu += 1
 					if trsu_u_padu <= 3:
 						chyby.append("trs u padu (%.1f, %.1f) %.2f m od stopy" % [p.x, p.z, kr.od_padu(p.x, p.z)])
@@ -9437,8 +9442,8 @@ func _potok_kaskada() -> void:
 				strme += 1
 		if strme > 0:
 			chyby.append("pas reky ve stope padu: %d strmych troj." % strme)
-	_vysledek("potok_kaskada", chyby.is_empty(), "stupnu %d, kaskada %.0f m, balvanu %d, padu %d, balvanu pres zaclonu %d, trsu u padu %d (z %d v okoli), strmych troj. pasu %s; %s" % [
-			(kr.schody as Array).size(), delka, balv, pady.size(), pres_zaclonu, trsu_u_padu, trsu_okoli, str(strme) if potok else "bez predpeceneho pasu", str(chyby.slice(0, 6))])
+	_vysledek("potok_kaskada", chyby.is_empty(), "stupnu %d, kaskada %.0f m, balvanu %d, padu %d, balvanu pres zaclonu %d, trsu u padu %d (z %d v okoli, nejblizsi %.2f m od stopy), strmych troj. pasu %s; %s" % [
+			(kr.schody as Array).size(), delka, balv, pady.size(), pres_zaclonu, trsu_u_padu, trsu_okoli, nejbliz, str(strme) if potok else "bez predpeceneho pasu", str(chyby.slice(0, 6))])
 
 
 
