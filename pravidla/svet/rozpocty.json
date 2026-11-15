@@ -17,6 +17,17 @@
   "test_s": 30.0,
   "_pozn": "15. 11. (docs/rozpracovane/zaseky_rozbor_system.md §3 bod 1, tester 13.-15. 11. zaseky ve vsi a na louce): scripts/planovac.gd - JEDEN rozpocet snimku pro streamovani: kolize + rostliny (svet.planovac, strop planovac.rozpocet_us_*) a louka (bunky trsu, kupy; strop louka_us = drive ROZPOCET_US v louka.gd). rozpocet_us_* = cas vsech dohromady za snimek: soucet drivejsich samostatnych rozpoctu (planovac 2/3 ms + louka 4 ms), tj. bez zpomaleni dorustu travy, ale uz se nescitaji s dalsimi frontami - UVAHA, NEOVERENO NA ZARIZENI. Nahrani do GPU: spolecny rozpocet louka_nahravani.nahrani_b_snimek pro louku, kupy a rostliny; rostliny nejvys rostliny_podil_b z nej (louka ma vzdy zbytek). Tezke ulohy (davka kolizi, odkryti bunky rostlin, dokonceni bunky louky, dil kup): planovac.tezkych_uloh_za_snimek, stridave mezi tridami. ruseni_za_snimek = uzlu streamovani uvolnenych (queue_free) za snimek, ostatni skryte cekaji (UVAHA). test_*: test planovac_snimek (jizda cvalem pres louku test_s s): cas planovace za snimek <= rozpocet + test_presah_us (posledni uloha se neprerusuje), bajty <= nahrani_b_snimek, tezkych <= limit."
  },
+ "kolize_dily": {
+  "stavby": [
+   "hostinec"
+  ],
+  "deska_m": 0.1,
+  "svar_m": 0.001,
+  "rovina_m": 0.005,
+  "vodorovna_cos": 0.7,
+  "konvex_troj_max": 96,
+  "_pozn": "15. 11. (docs/rozpracovane/zaseky_rozbor_system.md A8 = potvrzena pricina: tablet 0.999997, hrac v hostinci 28,3 ms - move_and_slide 16,5 + schod 11,7 na hostinec_kolize ConcavePolygon; radce: steny konvexni/boxy, nikdy ConcavePolygon z vizualni site): svet._kolize_dily - kolize stavby ze seznamu stavby z puvodni site <id>_kolize jako konvexni dily. Uzavrena konvexni komponenta do konvex_troj_max trojuhelniku -> ConvexPolygonShape3D; ostatni po rovinnych skupinach (soused pres hranu, normala a rovina do rovina_m) -> deska tloustky deska_m (vodorovna |n.y| >= vodorovna_cos dolu, horni strana = povrch; ostatni na obe strany), nekonvexni skupina po trojuhelnicich. svar_m = svar vrcholu. deska_m 0,1 = UVAHA (kapsle hrace r 0,28 m neprojde; tenci desky = mene prekryvu v rozich). A/B: TVRZ_KOLIZE_TROJ=1 = drivejsi trimesh. Test hostinec_prochod (pruchodnost) a kolize_troj (fyzika chuze hostincem)."
+ },
  "kolize": {
   "zapojeno": false,
   "bunka_m": 32,

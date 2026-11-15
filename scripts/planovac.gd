@@ -143,6 +143,7 @@ static func zrus(n: Node) -> void:
 		return
 	if n is Node3D:
 		(n as Node3D).visible = false
+	n.set_meta("plan_rusit", true)          # rozestavene veci (dily kup) uz do nej nestavet
 	_rusit.append(n)
 
 

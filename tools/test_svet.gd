@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -9200,6 +9200,87 @@ func _louka_nahravani() -> void:
 			snimku, nej_b / 1024.0, rozp / 1024.0, nad, sum_b / 1024.0 / maxf(1.0, snimku), nej_inst, nej_bunek, postaveno, Time.get_ticks_msec() - t0]
 	print("LOUKA_NAHRAVANI " + txt)
 	_vysledek("louka_nahravani", nad == 0 and postaveno > 0, txt)
+
+
+## 15. 11. (docs/rozpracovane/zaseky_rozbor_system.md §3 bod 1, tester 13.-15. 11.: zaseky ve vsi a na louce): jeden
+## planovac snimku (scripts/planovac.gd) pro kolize, rostliny, louku a kupy. Streamovani jako ve hre (_jako_hra), hrac
+## jede cvalem pres louku (trasa louka_nahravani) rozpocty.json snimek.test_s; kazdy snimek Planovac.posledni (uzavreny
+## predchozi snimek). Projde: cas streamovani <= rozpocet_us_pc + test_presah_us, bajty do GPU <= nahrani_b_snimek,
+## tezkych uloh <= planovac.tezkych_uloh_za_snimek v kazdem snimku, a louka i rostliny dostaly aspon jednu tezkou ulohu
+## (stridani - zadna fronta nehladovi).
+func _planovac_snimek() -> void:
+	var P := preload("res://scripts/planovac.gd")
+	var louka: Node = main.get_node_or_null("Louka")
+	if louka == null:
+		_vysledek("planovac_snimek", false, "louka chybi")
+		return
+	_jako_hra()
+	var rs: Dictionary = Pravidla.cti("rozpocty", "snimek")
+	var lim_us := P.rozpocet_us() + int(rs["test_presah_us"])
+	var lim_b := P.rozpocet_b()
+	var lim_t := int(Pravidla.cti("rozpocty", "planovac", "tezkych_uloh_za_snimek"))
+	var a := Vector2(0.0, 170.0)
+	var b := Vector2(-10.0, 540.0)
+	var smer := (b - a).normalized()
+	var v := float(Pravidla.cti("jizda", "kun", "chody")["cval"])
+	player.set_flying(true)
+	var q := a
+	player.global_position = Vector3(q.x, sv._vyska(q.x, q.y) + 1.7, q.y)
+	for f in 600:
+		await get_tree().process_frame
+		if louka.okoli_hotove(float(sv.pasma()["test"]["trava_dorust_m"]) + louka.BUNKA):
+			break
+	var nad_us := 0
+	var nad_b := 0
+	var nad_t := 0
+	var nej_us := 0
+	var nej_b := 0
+	var sum_b := 0
+	var tridy := {}
+	var ruseno := 0
+	var snimku := 0
+	var chyby: Array = []
+	var trvani := float(rs["test_s"])
+	var t0 := Time.get_ticks_msec()
+	while q.distance_to(a) < minf(a.distance_to(b), v * trvani):
+		var dt := get_process_delta_time()
+		q += smer * v * maxf(dt, 1.0 / 60.0)
+		player.global_position = Vector3(q.x, sv._vyska(q.x, q.y) + 1.7, q.y)
+		player.velocity = Vector3(smer.x * v, 0.0, smer.y * v)
+		player.yaw = atan2(-smer.x, -smer.y)
+		await get_tree().process_frame
+		var z: Dictionary = P.posledni
+		snimku += 1
+		var cu := int(z["cas_us"])
+		var cb := int(z["bajty"])
+		nej_us = maxi(nej_us, cu)
+		nej_b = maxi(nej_b, cb)
+		sum_b += cb
+		ruseno += int(z["ruseno"])
+		for t: String in String(z["tridy"]).split(",", false):
+			tridy[t] = int(tridy.get(t, 0)) + 1
+		if cu > lim_us:
+			nad_us += 1
+			if nad_us <= 3:
+				chyby.append("cas %.1f ms u (%.0f, %.0f)" % [cu / 1000.0, q.x, q.y])
+		if cb > lim_b:
+			nad_b += 1
+			if nad_b <= 3:
+				chyby.append("GPU %.0f kB u (%.0f, %.0f)" % [cb / 1024.0, q.x, q.y])
+		if int(z["tezkych"]) > lim_t:
+			nad_t += 1
+			if nad_t <= 3:
+				chyby.append("tezkych %d (%s)" % [int(z["tezkych"]), String(z["tridy"])])
+	player.set_flying(false)
+	if not tridy.has("louka") or not tridy.has("rostliny"):
+		chyby.append("tezke ulohy jen %s (louka nebo rostliny hladovi)" % str(tridy))
+	var txt := "%d snimku, cas nejvic %.1f ms (mez %.1f), GPU nejvic %.0f kB (mez %.0f) prumer %.1f kB, nad: cas %d, GPU %d, tezke %d; tezke ulohy %s, uvolneno uzlu %d, fronta mazani %d, %d ms" % [
+			snimku, nej_us / 1000.0, lim_us / 1000.0, nej_b / 1024.0, lim_b / 1024.0, sum_b / 1024.0 / maxf(1.0, snimku), nad_us, nad_b, nad_t,
+			str(tridy), ruseno, P.ceka_ruseni(), Time.get_ticks_msec() - t0]
+	print("PLANOVAC_SNIMEK " + txt)
+	sv.kolize_vse(true)
+	sv.rostliny_vse(true)
+	_vysledek("planovac_snimek", chyby.is_empty(), txt + ("" if chyby.is_empty() else " | " + "; ".join(chyby)))
 
 
 ## Misa 14. 11. (potok z kopce „perina“, pak „schody? to nemyslis vazne“): strmy usek je klikata kaskada podle

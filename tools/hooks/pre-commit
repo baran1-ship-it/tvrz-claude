@@ -1,0 +1,29 @@
+#!/bin/bash
+# Git hook (Puchart nastroje/hooks/pre-commit, docs/rozpracovane/hlidaci_z_pucharta.md #9): rozbita data uz pri commitu.
+# Instalace (kazdy klon zvlast): git config core.hooksPath tools/hooks
+# Rychle hlidace (do ~20 s, bez Godotu): JSON pravidel a dat jde nacist, Python skripty se prelozi, matice vztahu,
+# tabulky chyb; test smyslu jen pri zmene blender/, pravidla/ nebo tools/test_smyslu.py (17 s).
+# Obejit jen vyjimecne a s duvodem v commitu: git commit --no-verify
+cd "$(git rev-parse --show-toplevel)" || exit 0
+zm=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$zm" ] && exit 0
+chyba=0
+for f in $(echo "$zm" | grep -E '\.json$' | grep -E '^(pravidla|modely|data_manifest)'); do
+  python3 -c "import json,sys;json.load(open(sys.argv[1],encoding='utf-8'))" "$f" 2>/dev/null || { echo "PRE-COMMIT vadny JSON: $f"; chyba=1; }
+done
+py=$(echo "$zm" | grep -E '^(tools|blender)/.*\.py$')
+if [ -n "$py" ]; then
+  python3 -m py_compile $py 2>&1 | head -5 | sed 's/^/PRE-COMMIT /'
+  python3 -m py_compile $py 2>/dev/null || chyba=1
+fi
+if echo "$zm" | grep -qE '^(pravidla/|tools/kontrola_vztahu.py|tools/test_svet.gd)'; then
+  python3 tools/kontrola_vztahu.py > /tmp/precommit_vztahy.txt 2>&1 || { tail -5 /tmp/precommit_vztahy.txt | sed 's/^/PRE-COMMIT /'; chyba=1; }
+fi
+if echo "$zm" | grep -qE '^docs/rozpracovane/.*chyby.*\.md$|^tools/kontrola_tabulek.py'; then
+  python3 tools/kontrola_tabulek.py > /tmp/precommit_tabulky.txt 2>&1 || { grep -E "^(BEZ KONTROLY|CHYBA)" /tmp/precommit_tabulky.txt | head -8 | sed 's/^/PRE-COMMIT /'; chyba=1; }
+fi
+if echo "$zm" | grep -qE '^(blender/|pravidla/|tools/test_smyslu.py)' && [ -x /opt/bl/bin/python ]; then
+  /opt/bl/bin/python tools/test_smyslu.py > /tmp/precommit_smysl.txt 2>&1 || { grep "^SMYSL" /tmp/precommit_smysl.txt | tail -6 | sed 's/^/PRE-COMMIT /'; chyba=1; }
+fi
+[ $chyba -eq 0 ] || echo "PRE-COMMIT: rychli hlidaci neprosli (git commit --no-verify jen vyjimecne a s duvodem)"
+exit $chyba

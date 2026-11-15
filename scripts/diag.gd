@@ -357,7 +357,7 @@ func _detektor() -> void:
 	var z := "%.0f ms (%s)%s u %s, t %ds: fyzika %.0f (%d kroků), _process %.0f (měřené skripty %.0f, %s %.0f), kreslení+čekání %.0f%s, nové uzly %d%s%s" % [
 			cel, pr, fz, poloha_text().get_slice(" (", 0), int(Time.get_ticks_msec() / 1000), fy, int(_sn.get("kroku", 0)), pc,
 			float(_sn.get("skripty", 0)) / 1000.0, String(_sn.get("nej", "-")), float(_sn.get("nej_us", 0)) / 1000.0, kr,
-			_rozpad_kresleni(), int(_sn.get("uzly", 0)), String(_sn.get("plan", "")), ", měřič PSS" if bool(_sn.get("pss", false)) else ""]
+			_rozpad_kresleni(), int(_sn.get("uzly", 0)), String(_sn.get("plan", "")), ", měřič PSS (vlákno %.0f ms)" % _pss_ms if bool(_sn.get("pss", false)) else ""]
 	z += ", odebráno uzlů %d, předchozí snímky %s ms, kreslení %d volání / %.2f M prim., události: %s" % [int(_sn.get("odebrano", 0)),
 			_hist_text(),
 			RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
@@ -391,7 +391,7 @@ func _detektor() -> void:
 func _rozpad_kresleni() -> String:
 	if not _sn.has("kr_cpu"):
 		return " (rozpad -)"
-	return " (před kreslením %.1f, kreslení CPU %.1f, swap/GPU %.1f)" % [int(_sn["pred_kr"]) / 1000.0, int(_sn["kr_cpu"]) / 1000.0,
+	return " (před kreslením %.1f z toho diag %.1f, kreslení CPU %.1f, swap/GPU %.1f)" % [int(_sn["pred_kr"]) / 1000.0, int(_sn.get("diag_us", 0)) / 1000.0, int(_sn["kr_cpu"]) / 1000.0,
 			int(_sn["swap"]) / 1000.0]
 
 
@@ -460,7 +460,23 @@ func _zapis_zaseky(hned := false) -> void:
 		_zaseky_uloha = WorkerThreadPool.add_task(_zapis_soubor_do.bind(LOG_ZASEKY, text))
 
 
+## 15. 11.: vlastni rezie diag po razitku konce snimku (panel, zapis logu, mereni pameti) jde do „před kreslením" -
+## zmerit zvlast (radek zaseku: „z toho diag"), aby se nemichala se skutecnou praci enginu (mazani, casovace, sync).
 func _process(dt: float) -> void:
+	_process_diag(dt)
+	if not _sn_ted.is_empty() and _sn_ted.has("konec"):
+		_sn_ted["diag_us"] = Time.get_ticks_usec() - int(_sn_ted["konec"])
+	if _pss_uloha >= 0 and not _sn_ted.is_empty():
+		_sn_ted["pss"] = true              # cteni PSS ve vlakne prave bezi (pripadne cekani na zamek pameti jadra)
+
+
+func _exit_tree() -> void:
+	if _pss_uloha >= 0:
+		WorkerThreadPool.wait_for_task_completion(_pss_uloha)
+		_pss_uloha = -1
+
+
+func _process_diag(dt: float) -> void:
 	var d0 := Time.get_ticks_usec()
 	var plny := bool(main.get("mereni_on"))
 	var jen_fps := not plny and bool(main.get("mereni_fps"))
@@ -648,7 +664,25 @@ var _dbg: Variant = null
 var _volna := -1
 var _pss := -1
 var _pss_t := -100000
-var _pss_ms := 0.0
+var _pss_ms := 0.0                       # trvani posledniho cteni PSS ve vlakne (ms)
+var _pss_uloha := -1
+var _pss_kb := -1
+
+
+## Vlakno: PSS procesu z /proc/self/smaps_rollup (radek „Pss:" v kB); -1 = soubor neni.
+func _pss_vlakno() -> void:
+	var u0 := Time.get_ticks_usec()
+	var kb := -1
+	var f := FileAccess.open("/proc/self/smaps_rollup", FileAccess.READ)
+	if f:
+		while not f.eof_reached():
+			var l := f.get_line()
+			if l.begins_with("Pss:"):
+				kb = int(l.trim_prefix("Pss:").strip_edges().split(" ")[0])
+				break
+		f.close()
+	_pss_kb = kb
+	_pss_ms = (Time.get_ticks_usec() - u0) / 1000.0
 
 
 ## Volna pamet systemu z /proc/meminfo (MemAvailable, kB -> B); -1 = nelze precist. Android OS.get_memory_info vraci 0.
@@ -676,13 +710,20 @@ func ram_mb() -> int:
 		if vol <= 0:
 			vol = int(mi.get("free", -1))          # tablet 0.59b: available chybi (panel "volna 0")
 		_volna = vol / 1048576 if vol > 0 else -1  # -1 = nezname (N/A), ne 0
-		# pamet procesu (PSS, vsechny haldy + ovladac GPU): drahe volani, jednou za 30 s
-		if _dbg != null and Time.get_ticks_msec() - _pss_t > 30000:
+		# pamet procesu (PSS, vsechny haldy + ovladac GPU): drahe volani, jednou za 30 s.
+		# 15. 11. (panel tabletu 0.999998, docs/screens/misa_15_11 20, 23, 25: „před kreslením" 71, 145, 53 ms - vsechny
+		# tri radky s „měřič PSS", 8 radku bez nej 1,5-7,3 ms): Debug.getPss() cetl smaps synchronne v hlavnim vlakne az
+		# po razitku konce snimku (_konec_snimku) -> padalo do „před kreslením". Ted /proc/self/smaps_rollup ve vlakne
+		# (WorkerThreadPool), hlavni vlakno jen prevezme hotove cislo (NEOVERENO NA ZARIZENI: dostupnost smaps_rollup,
+		# pripadne cekani hlavniho vlakna na zamek pameti jadra behem cteni - snimky behem cteni nesou „měřič PSS").
+		if _pss_uloha >= 0 and WorkerThreadPool.is_task_completed(_pss_uloha):
+			WorkerThreadPool.wait_for_task_completion(_pss_uloha)
+			_pss_uloha = -1
+			_pss = _pss_kb / 1024 if _pss_kb > 0 else -1
+		if _pss_uloha < 0 and Time.get_ticks_msec() - _pss_t > 30000:
 			_pss_t = Time.get_ticks_msec()
-			var u0 := Time.get_ticks_usec()
-			_pss = int(_dbg.getPss()) / 1024
+			_pss_uloha = WorkerThreadPool.add_task(_pss_vlakno)
 			_sn_ted["pss"] = true        # zasek v tomto snimku muze byt od mereni
-			_pss_ms = (Time.get_ticks_usec() - u0) / 1000.0
 	else:
 		var f := FileAccess.open("/proc/self/statm", FileAccess.READ)
 		if f:

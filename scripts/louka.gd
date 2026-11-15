@@ -1922,7 +1922,7 @@ var _kupy_fronta: Array = []          # [koren (skryty), vysledek vlakna, dalsi 
 func _kupy_nahrej() -> void:
 	while not _kupy_fronta.is_empty():
 		var e: Array = _kupy_fronta[0]
-		if not is_instance_valid(e[0]) or (e[0] as Node).is_queued_for_deletion() or not (e[0] as Node).is_inside_tree():
+		if not is_instance_valid(e[0]) or (e[0] as Node).is_queued_for_deletion() or (e[0] as Node).has_meta("plan_rusit"):
 			_kupy_fronta.pop_front()                     # bunka mezitim zrusena
 			continue
 		var root: Node3D = e[0]
@@ -1935,7 +1935,9 @@ func _kupy_nahrej() -> void:
 		if not Planovac.vejde_b(b) or not Planovac.tezka("kupy"):
 			return                                       # rozpocet snimku vycerpan - dalsi snimek
 		var L: Array = KUPY[hot["kupy"]]
+		var tk := Time.get_ticks_usec()
 		_mm(root, _kupa, xfs.slice(od, do_), hot["cen"], float(L[1]), float(L[2]), false, (hot["cust"] as Array).slice(od, do_))
+		Planovac.spotrebuj_us(int(Time.get_ticks_usec() - tk))
 		_nah_b += b
 		_nah_inst += do_ - od
 		Planovac.nahraj_b(b)

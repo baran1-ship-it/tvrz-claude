@@ -1902,7 +1902,19 @@
     538.51,
     877.66
    ]
-  ]
+  ],
+  "vegetace": {
+   "rakos_pas_m": [
+    -0.6,
+    1.6
+   ],
+   "rakos_hloubka_max_m": 0.5,
+   "stromy_od_kraje_m": [
+    3.0,
+    5.0
+   ],
+   "popis": "rakos a orobinec v trsech v pasu rakos_pas_m od kraje vody (- breh, + voda) do hloubky rakos_hloubka_max_m (pasma voda: mokry okraj 0,2-0,5 m), vrby hlavate a olse stromy_od_kraje_m za krajem; ne na hrazi, v usti vtoku, u lavky (kraj.ryb2_vegetace). Odhad podle drivejsiho navesniho rybnicku."
+  }
  },
  "rybnik_tvrz": {
   "popis": "Rybnik v rohu mapy na strane tvrze (Misa 17:05, ne u tvrze) na rovince v udolnici pramene (-155, -235); odtok k zapadnimu okraji, vlastni povodi (rozvodi s Bystrici). Generuje kraj.py (dno, breh, hraz, hladina).",

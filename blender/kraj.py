@@ -775,8 +775,8 @@ def ryb2_tune(x, z, ryb):
     tz = vy["celo"][1] + g["n"][1] * vy["tune_polomer_m"]
     d = math.hypot(x - tx, z - tz)
     r = vy["tune_polomer_m"]
-    if d > r + 1.0:
-        return 1e9
+    if d > r + 1.0 or (x - vy["celo"][0]) * g["n"][0] + (z - vy["celo"][1]) * g["n"][1] < 0.0:
+        return 1e9                                    # jen pred licem cela (za nim hraz)
     y = vy["hladina_y"] - vy["tune_hloubka_m"] * (1.0 - (min(d, r) / r) ** 2)
     return y + max(0.0, d - r) * 1.0
 
@@ -790,7 +790,18 @@ def ryb2_tvar(x, z, h, ryb, prof_toku):
     if de > -25.0:
         if de >= 0.0:
             f = min(1.0, de / ryb["dno_svah_m"])
-            h = min(h, hl - ryb["hloubka_m"] * (1.0 - (1.0 - f) ** 2))
+            dno = hl - ryb["hloubka_m"] * (1.0 - (1.0 - f) ** 2)
+            # nizsi puvodni teren (prohlub stareho navesniho rybnicku) jen pod sklonem dna u kraje od kraje vody - kraj
+            # vody zustane na obrysu, ne sraz pod hladinou u brehu (vypocet 15. 11.: 220 st. 2,50 na obrysu, breh 3,50)
+            h = max(min(h, dno), dno - de * 2.0 * ryb["hloubka_m"] / ryb["dno_svah_m"])
+            # usti: dno pritoku pokracuje za rezem vtoku dolu sklonem dna u kraje (bez prahu mezi korytem a dnem)
+            s = ryb2_vtok_rez(ryb, x, z)
+            tk = next((t for t in TOKY if t.id == ryb["vtok"]["tok"]), None)
+            if s is not None and s >= 0.0 and tk is not None:
+                vt = ryb["vtok"]
+                lat = abs(-(x - vt["bod"][0]) * vt["smer"][1] + (z - vt["bod"][1]) * vt["smer"][0])
+                if lat < tk.w / 2.0:
+                    h = min(h, hl + vt["skok_m"] - tk.hloubka - s * 2.0 * ryb["hloubka_m"] / ryb["dno_svah_m"])
         else:
             do = -de
             bn = ryb["breh_nad_m"]
@@ -802,6 +813,100 @@ def ryb2_tvar(x, z, h, ryb, prof_toku):
     if hr > h:
         h = hr
     return min(h, ryb2_tune(x, z, ryb))
+
+
+def ryb2_vtok_rez(ryb, x, z):
+    """Vzdalenost bodu za rezem vtoku po proudu (+ v rybniku) v pasu pritoku, jinak None. Pas = pul sirky toku
+    + toky_tvar.hladina_presah_m + toky_tvar.breh_sirka_m (pas hladiny pritoku i s presahem pod breh)."""
+    vt = ryb["vtok"]
+    tk = next((t for t in TOKY if t.id == vt["tok"]), None)
+    pas = (tk.w / 2.0 if tk else 0.0) + _TT["hladina_presah_m"] + _TT["breh_sirka_m"]
+    sx, sz = vt["smer"]
+    dx, dz = x - vt["bod"][0], z - vt["bod"][1]
+    s = dx * sx + dz * sz
+    if abs(-dx * sz + dz * sx) > pas or s > pas:
+        return None
+    return s
+
+
+def ryb2_hladina_sit(ryb, land_fn):
+    """Hladina rybnika v2 = vrstevnice terenu v hladina_y (Puchart „voda jen nad vyhloubenym dnem“): mrizka
+    hladina_mrizka_m (zarovnana s jemnym terenem u vody), pole f = hladina - teren v souvislem kusu od stredu, v pasu
+    pritoku proti proudu od rezu vtoku f = min(f, vzdalenost za rezem) - hladina konci presne na rezu, kde zacina pas
+    hladiny pritoku (bez prekryvu). Bunka = 2 trojuhelniky (uhlopricka jako sit terenu), orez f >= 0 linearne po
+    hranach. Vraci (vrcholy (x, y, z), trojuhelniky, hloubka vrcholu, na_rezu): kraj site hloubka 0 (shader voda:
+    pruhledny), na rezu vtoku hloubka terenu (navazuje na pritok)."""
+    k = ryb["hladina_mrizka_m"]
+    hl = ryb["hladina_y"]
+    b = ryb2(ryb)["bb"]
+    m = 3.0
+    i0, i1 = int(math.floor((b[0] - m) / k)), int(math.ceil((b[1] + m) / k))
+    j0, j1 = int(math.floor((b[2] - m) / k)), int(math.ceil((b[3] + m) / k))
+    hl_ter, f = {}, {}
+    for i in range(i0, i1 + 1):
+        for j in range(j0, j1 + 1):
+            x, z = i * k, j * k
+            y = land_fn(x, z)
+            hl_ter[(i, j)] = hl - y
+            s = ryb2_vtok_rez(ryb, x, z)
+            f[(i, j)] = hl - y if s is None else min(hl - y, s)
+    # souvisly kus od stredu (zaplava za hrazi, v korytu odtoku nebo v prohlubni za brehem neni rybnik)
+    cx, cz = ryb["stred"]
+    st = (int(round(cx / k)), int(round(cz / k)))
+    vod = set()
+    fr = [st] if f.get(st, -1.0) > 0.0 else []
+    while fr:
+        p = fr.pop()
+        if p in vod:
+            continue
+        vod.add(p)
+        for q in ((p[0] + 1, p[1]), (p[0] - 1, p[1]), (p[0], p[1] + 1), (p[0], p[1] - 1)):
+            if q not in vod and f.get(q, -1.0) > 0.0:
+                fr.append(q)
+    for p in f:
+        if p not in vod:
+            f[p] = min(f[p], -1e-3)
+    vs, hloubka, rez, idx, tris = [], [], [], {}, []
+
+    def roh(p):
+        if p not in idx:
+            idx[p] = len(vs)
+            vs.append((p[0] * k, hl, p[1] * k))
+            hloubka.append(max(0.0, hl_ter[p]))
+            rez.append(False)
+        return idx[p]
+
+    def hrana(p, q):
+        key = (min(p, q), max(p, q))
+        if key not in idx:
+            fp, fq = f[p], f[q]
+            t = fp / (fp - fq)
+            x = (p[0] + (q[0] - p[0]) * t) * k
+            z = (p[1] + (q[1] - p[1]) * t) * k
+            hh = hl_ter[p] + (hl_ter[q] - hl_ter[p]) * t
+            na_rezu = hh > 0.005 and ryb2_vtok_rez(ryb, x, z) is not None
+            idx[key] = len(vs)
+            vs.append((x, hl, z))
+            hloubka.append(max(0.0, hh) if na_rezu else 0.0)
+            rez.append(na_rezu)
+        return idx[key]
+    for i in range(i0, i1):
+        for j in range(j0, j1):
+            a, bq, c, d = (i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1)
+            for tri in ((a, bq, c), (a, c, d)):
+                if all(f[p] <= 0.0 for p in tri):
+                    continue
+                poly = []
+                for n_ in range(3):
+                    p, q = tri[n_], tri[(n_ + 1) % 3]
+                    if f[p] > 0.0:
+                        poly.append(roh(p))
+                    if (f[p] > 0.0) != (f[q] > 0.0):
+                        poly.append(hrana(p, q))
+                for n_ in range(1, len(poly) - 1):
+                    if poly[0] != poly[n_] and poly[n_] != poly[n_ + 1] and poly[0] != poly[n_ + 1]:
+                        tris.append((poly[0], poly[n_], poly[n_ + 1]))
+    return vs, tris, hloubka, rez
 
 
 def ve_vode(x, z, y):
@@ -1069,7 +1174,10 @@ def voda_tvar(x, z, h):
             h = min(h, bed)
     for ryb in RYBNIKY:
         if "obrys" in ryb:
-            h = ryb2_tvar(x, z, h, ryb, prof_toku)           # rybnik v2: dno, breh, hraz, tune z jednoho zaznamu
+            # rybnik v2: dno, breh, hraz, tune z jednoho zaznamu; brehem projde jen koryto pritoku (vtok.tok) - dolina
+            # odtoku za hrazi brehem nesmi (export 15. 11. vypocet: breh na 220 st. 0,85 m pod hladinou, voda by vytekla)
+            jen_pritok = prof_toku if tn is not None and tn[3].id == ryb["vtok"]["tok"] else 1e9
+            h = ryb2_tvar(x, z, h, ryb, jen_pritok)
             continue
         if "polomer_m" in ryb:
             cx, cz = ryb["stred"]
@@ -1432,6 +1540,12 @@ def toky_voda(coll, land_fn):
             # pas toku odrizl, hladina rybnika tam nedosahla a koryto zustalo suche (Misa 0.994 „pritok peklo“)
             # dil Lhota: pas konci tok_konec_polomer_m uvnitr hladiny modelu (okraj vody dilu 11,3-11,6 m, kruh 12 m nechal
             # suchy pas koryta u vtoku - test rybnik_dil „bez vody nad osou“); hra prekryv s hladinou dilu odrizne
+            if "obrys" in ryb:
+                # rybnik v2: pritok konci v bode vtoku (osa z planovace), odtok zacina za celem vypusti - pas toku
+                # se nereze; jen co by lezelo pod obrysem (kraj vody), pryc
+                if ryb_de(ryb, x, z) > 0.05:
+                    return True
+                continue
             r = ryb_obrys(ryb, x, z, land_fn) if "polomer_m" in ryb else ryb.get("tok_konec_polomer_m", ryb.get("voda_polomer_m"))
             if r and math.hypot(x - ryb["stred"][0], z - ryb["stred"][1]) < r:
                 if "polomer_m" in ryb or land_fn(x, z) < ryb["hladina_y"] - 0.02:
@@ -1522,6 +1636,9 @@ def toky_voda(coll, land_fn):
     _toky_proud(o, smery)
     _toky_kameny(coll, land_fn)
     for ryb in RYBNIKY:
+        if "obrys" in ryb:
+            ryb2_hladina(coll, ryb, land_fn)
+            continue
         if "polomer_m" not in ryb:
             continue
         # hladina: mnohouhelnik po brehu + presah pod breh (cara vody = prusecik s terenem, Misa 0.99: ctverce 1 m
@@ -1538,6 +1655,269 @@ def toky_voda(coll, land_fn):
         fs = [(0, 1 + k, 1 + (k + 1) % n) for k in range(n)]
         Q.mesh(vs, fs, "voda_prikop", uvs=[[(vs[i][0] - cx, vs[i][2] - cz) for i in f] for f in fs])
         Q.commit(coll)
+
+
+def ryb2_hladina(coll, ryb, land_fn):
+    """Hladina rybnika v2 (ryb2_hladina_sit) do sceny: material voda_prikop, barva vrcholu R = hloubka / 4 (hra:
+    voda.gdshader hloubka_vrcholu - kraj hloubka 0 = pruhledny, nadrz.gd ji u Rybnik_lhota_voda bere z Blenderu), UV po
+    metrech od stredu. Pak predmety k vypocitanemu kraji (ryb2_predmety)."""
+    from lib import Part
+    vs, tris, hl, _rez = ryb2_hladina_sit(ryb, land_fn)
+    if not tris:
+        print("rybnik v2: hladina prazdna (teren pod hladinou chybi)")
+        return
+    cx, cz = ryb["stred"]
+    Q = Part("Rybnik_lhota_voda")
+    Q.mesh(vs, tris, "voda_prikop", uvs=[[(vs[i][0] - cx, vs[i][2] - cz) for i in t] for t in tris])
+    o = Q.commit(coll)
+    me = o.data
+    col = me.color_attributes.new("Hloubka", "BYTE_COLOR", "CORNER")
+    vals = [0.0] * (len(me.loops) * 4)
+    for poly in me.polygons:
+        for li in poly.loop_indices:
+            h = hl[me.loops[li].vertex_index]
+            vals[li * 4:li * 4 + 4] = [min(1.0, h / 4.0), 0.0, 0.0, 1.0]
+    col.data.foreach_set("color", vals)
+    me.color_attributes.active_color = col
+    me.color_attributes.render_color_index = me.color_attributes.active_color_index
+    print("rybnik v2: hladina %d troj., %d vrcholu (kraj hloubka 0: %d, rez vtoku %d)" % (
+        len(tris), len(vs), sum(1 for h in hl if h == 0.0), sum(1 for r in _rez if r)))
+    ryb2_predmety(coll, ryb, land_fn, vs, tris, hl)
+
+
+def ryb2_kraj(vs, tris, hl):
+    """Okrajove hrany site hladiny (pouzite jednou) bez rezu vtoku: [(i, j)]."""
+    cnt = {}
+    for t in tris:
+        for a, b in ((t[0], t[1]), (t[1], t[2]), (t[2], t[0])):
+            k = (min(a, b), max(a, b))
+            cnt[k] = cnt.get(k, 0) + 1
+    return [k for k, c in cnt.items() if c == 1]
+
+
+def ryb2_predmety(coll, ryb, land_fn, vs, tris, hl):
+    """Predmety rybnika v2 (posledni krok, teren nemeni): pozerak, kamenne celo vypusti s troubou, kamenne koryto
+    prelivu, kameny na vypocitanem kraji vody a dlazba navodniho svahu hraze, praci lavka. Mista ze zaznamu
+    (tools/krok_b/rybnik_v2.py), rozmery z jeho cisel."""
+    import kit
+    import nove
+    from lib import M, Part
+    from mathutils import Vector
+    R = random.Random(8791)
+    g = ryb2(ryb)
+    hz, vy, pz, pr, lv = ryb["hraz"], ryb["vypust"], ryb["pozerak"], ryb["preliv"], ryb["lavka"]
+    hl_y = ryb["hladina_y"]
+    ux, uz = g["u"]
+    nx, nz = g["n"]
+    yaw_n = math.degrees(math.atan2(-nz, nx))            # lokalni +x = po proudu (normala hraze)
+    kor = hl_y + hz["koruna_nad_hladinou_m"]
+    P = Part("Rybnik_stavby", bevel=0.0)
+
+    # vypust: celo z kvadru (lice kolmo na n), kridla 45 st., trouba z kmene v lici nad dnem tune
+    cx_, cz_ = vy["celo"]
+    y_dno = vy["hladina_y"] - vy["tune_hloubka_m"]
+    y_vrch = vy["hladina_y"] + vy["celo_vyska_m"] + 0.15
+    sir = vy["celo_sirka_m"]
+
+    def zed(ax, az, bx, bz, y0, y1, tl=0.45):
+        L = math.hypot(bx - ax, bz - az)
+        if L < 0.1:
+            return
+        dx, dz = (bx - ax) / L, (bz - az) / L
+        yaw = math.degrees(math.atan2(-dz, dx))
+        y = y0
+        rada = 0
+        while y < y1 - 0.05:
+            hh = min(0.3 + R.uniform(-0.04, 0.05), y1 - y)
+            s = -0.2 * (rada % 2)
+            while s < L - 0.05:
+                dl = min(R.uniform(0.45, 0.75), L - max(s, 0.0))
+                s0 = max(s, 0.0)
+                c = (ax + dx * (s0 + dl / 2), y + hh / 2, az + dz * (s0 + dl / 2))
+                kit.stone(P, M(c, yaw + R.uniform(-2, 2)), (dl - 0.02, hh - 0.015, tl + R.uniform(-0.04, 0.04)), "kvadr_sedy",
+                          cham=0.03, rough=0.012)
+                s = s0 + dl
+            y += hh
+            rada += 1
+        P.cols.append((M(((ax + bx) / 2, (y0 + y1) / 2, (az + bz) / 2), yaw), (L, y1 - y0, tl)))
+    # lice cela (osa u), zed tl. 0,45 za licem
+    l0 = (cx_ - ux * sir / 2 - nx * 0.22, cz_ - uz * sir / 2 - nz * 0.22)
+    l1 = (cx_ + ux * sir / 2 - nx * 0.22, cz_ + uz * sir / 2 - nz * 0.22)
+    zed(l0[0], l0[1], l1[0], l1[1], y_dno - 0.2, y_vrch)
+    for sg, l in ((-1, l0), (1, l1)):
+        kr = 1.6
+        ex, ez = l[0] + (nx + ux * sg) * kr / math.sqrt(2), l[1] + (nz + uz * sg) * kr / math.sqrt(2)
+        zed(l[0], l[1], ex, ez, y_dno - 0.2, y_vrch - 0.35)
+    # trouba: vydlabany kmen z hraze, konec 0,25 m pred licem, dno trouby na hladine odtoku
+    rt = vy["trouba_prumer_m"] / 2.0
+    ty = vy["hladina_y"] + rt + 0.02
+    P.rod(Vector((cx_ - nx * 0.6, ty, cz_ - nz * 0.6)), Vector((cx_ + nx * 0.25, ty, cz_ + nz * 0.25)), rt + 0.06, 10, "dub_ven")
+    P.rod(Vector((cx_ + nx * 0.24, ty, cz_ + nz * 0.24)), Vector((cx_ + nx * 0.26, ty, cz_ + nz * 0.26)), rt - 0.01, 10, "saze")
+
+    # pozerak: dreveny zlab (tri steny z prken, dluze vpredu) na navodnim svahu, lavka dvou prken na korunu
+    px, pz_ = pz["bod"]
+    w = pz["sirka_m"]
+    y0 = land_fn(px, pz_) - 0.3
+    y1 = kor + pz["nad_korunou_m"]
+    for sg in (-1, 1):
+        a = Vector((px + ux * sg * w / 2, y0, pz_ + uz * sg * w / 2))
+        kit.plank(P, a, a + Vector((0, y1 - y0, 0)), w + 0.1, 0.06, "dub_ven", up=(ux * -sg, 0, uz * -sg), wear=0.3, seg_len=0.5)
+    zad = Vector((px + nx * w / 2, y0, pz_ + nz * w / 2))
+    kit.plank(P, zad, zad + Vector((0, y1 - y0, 0)), w + 0.1, 0.06, "dub_ven", up=(-nx, 0, -nz), wear=0.3, seg_len=0.5)
+    y = y0
+    while y < hl_y + 0.05:                                # dluze (prkna vpredu az k hladine - pretekaji)
+        pr_c = Vector((px - nx * w / 2, y, pz_ - nz * w / 2))
+        kit.plank(P, pr_c - Vector((ux, 0, uz)) * (w / 2), pr_c + Vector((ux, 0, uz)) * (w / 2), 0.2, 0.05, "prkna_ven",
+                  up=(nx, 0, nz), wear=0.2, seg_len=0.4)
+        y += 0.2
+    # lavka na korunu (pres zlab k vnitrni hrane koruny)
+    t_kor = -hz["koruna_sirka_m"] / 2.0
+    kx, kz = hz["stred"][0] + ux * g["a0"] + nx * t_kor, hz["stred"][1] + uz * g["a0"] + nz * t_kor
+    for sg in (-0.17, 0.17):
+        a = Vector((px - nx * 0.1 + ux * sg, y1 + 0.02, pz_ - nz * 0.1 + uz * sg))
+        b = Vector((kx + nx * 0.4 + ux * sg, kor + 0.06, kz + nz * 0.4 + uz * sg))
+        kit.plank(P, a, b, 0.3, 0.05, "prkna_ven", wear=0.6, seg_len=0.4)
+    P.cols.append((M(((px + kx) / 2, (y1 + kor) / 2 + 0.04, (pz_ + kz) / 2), yaw_n), (math.hypot(kx - px, kz - pz_) + 0.4, 0.08, 0.7)))
+
+    # preliv: plochy kamen pres korunu a vzdusny svah od navodni hrany koruny k pate (teren hraze se snizenou korunou)
+    ap = g["a0"] + pr["posun_m"]
+    t = -hz["koruna_sirka_m"] / 2.0 - 0.6
+    while True:
+        bx, bz = hz["stred"][0] + ux * ap + nx * t, hz["stred"][1] + uz * ap + nz * t
+        yb = land_fn(bx, bz)
+        if t > 0 and yb < vy["hladina_y"] + 0.15:
+            break
+        o = -pr["sirka_m"] / 2.0
+        while o < pr["sirka_m"] / 2.0:
+            dl = R.uniform(0.35, 0.55)
+            sx, sz = bx + ux * (o + dl / 2), bz + uz * (o + dl / 2)
+            kit.stone(P, M((sx, land_fn(sx, sz) - 0.02, sz), yaw_n + R.uniform(-8, 8)), (R.uniform(0.38, 0.52), 0.12, dl - 0.03),
+                      "kvadr_sedy", cham=0.03, rough=0.02)
+            o += dl
+        for sg in (-1, 1):                               # obrubnik
+            sx, sz = bx + ux * sg * (pr["sirka_m"] / 2 + 0.15), bz + uz * sg * (pr["sirka_m"] / 2 + 0.15)
+            kit.stone(P, M((sx, land_fn(sx, sz) + 0.04, sz), yaw_n + R.uniform(-5, 5)), (0.45, 0.25, 0.28), "kvadr_sedy", cham=0.04, rough=0.02)
+        t += 0.45
+        if t > hz["koruna_sirka_m"] + 12.0:
+            break
+
+    # praci lavka: kuly a prkna kolmo do vody od kraje
+    lx, lz = lv["bod"]
+    sx, sz = lv["smer"]
+    yl = hl_y + lv["nad_hladinou_m"]
+    a = Vector((lx - sx * 0.6, yl, lz - sz * 0.6))
+    b = Vector((lx + sx * lv["delka_m"], yl, lz + sz * lv["delka_m"]))
+    kit.deck(P, a, b, lv["sirka_m"] / 2.0, "prkna_ven", worn=0.8, beams=(-lv["sirka_m"] / 2 + 0.08, lv["sirka_m"] / 2 - 0.08))
+    s = 0.2
+    while s <= lv["delka_m"] + 0.05:
+        for sg in (-1, 1):
+            qx = lx + sx * s - sz * sg * (lv["sirka_m"] / 2 - 0.08)
+            qz = lz + sz * s + sx * sg * (lv["sirka_m"] / 2 - 0.08)
+            P.rod(Vector((qx, land_fn(qx, qz) - 0.4, qz)), Vector((qx, yl - 0.005, qz)), 0.07, 7, "dub_ven")
+        qa = Vector((lx + sx * s + sz * lv["sirka_m"] / 2, yl - 0.08, lz + sz * s - sx * lv["sirka_m"] / 2))
+        qb = Vector((lx + sx * s - sz * lv["sirka_m"] / 2, yl - 0.08, lz + sz * s + sx * lv["sirka_m"] / 2))
+        kit.plank(P, qa, qb, 0.12, 0.08, "dub_ven", wear=0.2, seg_len=0.5)
+        s += 1.2
+    P.cols.append((M(((a.x + b.x) / 2, yl - 0.03, (a.z + b.z) / 2), math.degrees(math.atan2(-sz, sx))), ((b - a).length, 0.08, lv["sirka_m"])))
+    P.commit(coll)
+
+    # kameny na vypocitanem kraji vody (okrajove hrany hladiny) a dlazba navodniho svahu hraze; ne v usti a u lavky
+    Pk = Part("Rybnik_kameny", bevel=0.0)
+    kraj = ryb2_kraj(vs, tris, hl)
+    n = 0
+    vt = ryb["vtok"]
+    for i, j in kraj:
+        (ax, _, az), (bx, _, bz) = vs[i], vs[j]
+        L = math.hypot(bx - ax, bz - az)
+        mx, mz = (ax + bx) / 2, (az + bz) / 2
+        if math.hypot(mx - vt["bod"][0], mz - vt["bod"][1]) < vt["rovny_kraj_m"] + 0.5:
+            continue
+        if math.hypot(mx - lx, mz - lz) < lv["sirka_m"] + 0.6:
+            continue
+        dxh, dzh = mx - hz["stred"][0], mz - hz["stred"][1]
+        na_hrazi = abs(dxh * ux + dzh * uz) < hz["delka_m"] / 2.0 and abs(dxh * nx + dzh * nz) < hz["koruna_sirka_m"] / 2 + 3.0
+        hust = ryb["kameny_na_m"] * (4.0 if na_hrazi else 1.0)
+        if R.random() > hust * L:
+            continue
+        o = R.uniform(-0.3, 0.5)                          # kousek do vody (+) i na breh (-)
+        gx, gz = (ryb["stred"][0] - mx, ryb["stred"][1] - mz)
+        gl = math.hypot(gx, gz) or 1.0
+        x, z = mx + gx / gl * o, mz + gz / gl * o
+        size = R.uniform(0.2, 0.45) if R.random() < 0.85 else R.uniform(0.45, 0.7)
+        pid = R.choice(nove.KAMENY_POLE)
+        nove.misto(pid, x, land_fn(x, z), z, size / nove.DIM[pid][0], R.uniform(0, 2 * math.pi), Pk if size > 0.6 else None,
+                   sink=R.uniform(0.3, 0.45))
+        n += 1
+    Pk.commit(coll)
+    print("rybnik v2: pozerak, celo vypusti, preliv, lavka; kamenu na kraji vody %d (okrajovych hran %d)" % (n, len(kraj)))
+
+
+def ryb2_vegetace(land_fn, R):
+    """Vegetace rybnika v2 (krok po vode, pred predmety): rakos a orobinec v trsech u kraje vody (obrys) v pasu
+    vegetace.rakos_pas_m (- breh, + voda) do hloubky vegetace.rakos_hloubka_max_m, ne na hrazi, v usti vtoku a u lavky;
+    vrby hlavate a olse vegetace.stromy_od_kraje_m za krajem mimo hraz. Vola veg.py misto stareho navesniho rybnicku
+    (vesnice.pond_point)."""
+    import nove
+    out = 0
+    k = 0
+    for ryb in RYBNIKY:
+        if "obrys" not in ryb:
+            continue
+        g = ryb2(ryb)
+        hz, vt, lv, ve = ryb["hraz"], ryb["vtok"], ryb["lavka"], ryb["vegetace"]
+        pts = g["pts"]
+        per = [math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in g["seg"]]
+        cel = sum(per)
+
+        def bod(s):
+            for (a, b), L in zip(g["seg"], per):
+                if s <= L:
+                    return a[0] + (b[0] - a[0]) * s / L, a[1] + (b[1] - a[1]) * s / L, (b[0] - a[0]) / L, (b[1] - a[1]) / L
+                s -= L
+            return pts[0][0], pts[0][1], 1.0, 0.0
+
+        def volno(x, z):
+            dx, dz = x - hz["stred"][0], z - hz["stred"][1]
+            if abs(dx * g["u"][0] + dz * g["u"][1]) < hz["delka_m"] / 2.0 + 1.0 and abs(dx * g["n"][0] + dz * g["n"][1]) < 8.0:
+                return False
+            if math.hypot(x - vt["bod"][0], z - vt["bod"][1]) < vt["rovny_kraj_m"] + 1.0:
+                return False
+            return math.hypot(x - lv["bod"][0], z - lv["bod"][1]) > lv["delka_m"] + 1.5
+        s = R.uniform(0, 3.0)
+        while s < cel:
+            x0, z0, tx, tz = bod(s)
+            nx_, nz_ = tz, -tx                              # dovnitr/ven podle obrysu
+            if ryb_de(ryb, x0 + nx_ * 0.5, z0 + nz_ * 0.5) < 0:
+                nx_, nz_ = -nx_, -nz_
+            if R.random() < 0.6 and volno(x0, z0):
+                pid0 = R.choice(["orobinec_1", "orobinec_2", "rakos_1", "rakos_2"])
+                for _ in range(R.randint(4, 9)):
+                    o = R.uniform(*ve["rakos_pas_m"])       # od kraje do vody (melcina) i kousek na breh
+                    q = R.uniform(-1.2, 1.2)
+                    x, z = x0 + nx_ * o + tx * q, z0 + nz_ * o + tz * q
+                    if ryb["hladina_y"] - land_fn(x, z) > ve["rakos_hloubka_max_m"]:
+                        continue
+                    pid = pid0 if R.random() < 0.8 else R.choice(["orobinec_1", "rakos_2"])
+                    nove.misto(pid, x, land_fn(x, z), z, R.uniform(0.75, 1.15), R.uniform(0, 2 * math.pi), None, sink=0.05)
+                    out += 1
+            s += R.uniform(2.5, 5.0)
+        k = 0
+        s = R.uniform(0, 6.0)
+        while s < cel:
+            x0, z0, tx, tz = bod(s)
+            gx, gz = x0 - ryb["stred"][0], z0 - ryb["stred"][1]
+            gl = math.hypot(gx, gz) or 1.0
+            o = R.uniform(*ve["stromy_od_kraje_m"])
+            x, z = x0 + gx / gl * o, z0 + gz / gl * o
+            if volno(x, z):
+                if k % 3 == 2:
+                    nove.strom("olse_mlada", x, land_fn(x, z), z, R.uniform(6, 8.5))
+                else:
+                    nove.strom(R.choice(["vrba_hlavata_1", "vrba_hlavata_2"]), x, land_fn(x, z), z, R.uniform(5.0, 7.0))
+                k += 1
+            s += R.uniform(9.0, 14.0)
+    print("rybnik v2: rakos a orobinec %d trsu, stromu u brehu %d" % (out, k))
+    return out
 
 
 def _toky_kameny(coll, land_fn):

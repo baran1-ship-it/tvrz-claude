@@ -27,6 +27,18 @@ def hraz_y(x, z, ryb):
     cx, cz = hz["stred"]
     ux, uz = hz["smer_osy"]
     dx, dz = x - cx, z - cz
+    vy = ryb.get("vypust", {})
+    if "celo" in vy:
+        # rybnik v2 (kraj.ryb2_hraz): za licem kamenneho cela vypusti a kridly 45 st. hraz neni - tune a zacatek odtoku
+        L = math.hypot(ux, uz) or 1.0
+        u_, n_ = (ux / L, uz / L), (-uz / L, ux / L)
+        if (cx - ryb["stred"][0]) * n_[0] + (cz - ryb["stred"][1]) * n_[1] < 0.0:
+            n_ = (-n_[0], -n_[1])
+        ex, ez = vy["celo"][0] - cx, vy["celo"][1] - cz
+        a0, t0 = ex * u_[0] + ez * u_[1], ex * n_[0] + ez * n_[1]
+        t = dx * n_[0] + dz * n_[1]
+        if t > t0 and abs(dx * u_[0] + dz * u_[1] - a0) < vy["celo_sirka_m"] / 2.0 + (t - t0):
+            return -1e9
     a = max(0.0, abs(dx * ux + dz * uz) - hz["delka_m"] / 2.0)
     b = abs(-dx * uz + dz * ux)
     d = math.hypot(a, max(0.0, b - hz["koruna_sirka_m"] / 2.0))

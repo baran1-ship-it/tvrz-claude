@@ -3,7 +3,9 @@
   python3 tools/export_kontroly.py blender       build/export_hotov.json z tohoto behu Blenderu (rc 1 chybi/stary)
   python3 tools/export_kontroly.py import LOG     chyby importu Godotu v logu (rc 1)
   python3 tools/export_kontroly.py drevo         jas materialu dreva (Misa 13. 11. cerne drevo; rc 1)
-  python3 tools/export_kontroly.py reka          potok predpecen pro tento export? (rc 0 ano, 1 ne = predpect)"""
+  python3 tools/export_kontroly.py reka          potok predpecen pro tento export? (rc 0 ano, 1 ne = predpect)
+  python3 tools/export_kontroly.py geometrie     (volitelne, po Blenderu) kusy modelu bez opory / pod terenem -
+                                                 tools/kontrola_geometrie.py + rohatka (rc 1 = novy nalez; ~2 min na dil)"""
 import glob
 import json
 import os
@@ -57,4 +59,7 @@ if co == "drevo":
     for z in zle:
         print("DREVO TMAVE", z)
     sys.exit(1 if zle else 0)
+if co == "geometrie":
+    # hlidaci z Pucharta #1 (docs/rozpracovane/hlidaci_z_pucharta.md): volitelny krok, export.sh ho zatim nevola
+    sys.exit(subprocess.run(["/opt/bl/bin/python", "tools/kontrola_geometrie.py"] + sys.argv[2:]).returncode)
 sys.exit("neznama kontrola %s" % co)

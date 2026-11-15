@@ -14149,6 +14149,195 @@ func _plants(parent: Node3D, quality: int) -> void:
 			(scenes[kind] as Node).free()
 
 
+## 15. 11. (zaseky_rozbor_system.md A8 - potvrzena pricina: hrac v hostinci 28,3 ms, move_and_slide 16,5 + schod 11,7
+## na hostinec_kolize ConcavePolygon; radce: „stěny → konvexní/boxy; nikdy ConcavePolygon z vizuální sítě"): kolize stavby
+## z konvexnich dilu. Zdroj = data modelu: puvodni sit <id>_kolize (blender/predmety.py). (1) Uzavrene konvexni casti
+## (tram, sloup, deska stolu - kazda hrana ve 2 trojuhelnicich, vsechny vrcholy pod kazdou rovinou) -> ConvexPolygonShape3D
+## z vrcholu. (2) Ostatni plochy po rovinnych skupinach (spojene trojuhelniky v jedne rovine): konvexni skupina -> jedna
+## tenka deska, nekonvexni (stena s dvermi) -> deska po trojuhelnicich. Deska: vodorovna plocha dolu (horni strana =
+## povrch modelu, chuze beze zmeny vysky), ostatni na obe strany po polovine. Zadny ConcavePolygon. Vsechny tvary pod
+## jednim vlastnikem tela (bez uzlu navic). Cisla rozpocty.json kolize_dily.
+func _kolize_dily(mi: MeshInstance3D) -> void:
+	if mi.has_meta("bez_kolize"):
+		return
+	var t0 := Time.get_ticks_msec()
+	var kd: Dictionary = Pravidla.cti("rozpocty", "kolize_dily")
+	var deska := float(kd["deska_m"])
+	var svar := float(kd["svar_m"])
+	var rov := float(kd["rovina_m"])
+	var vod := float(kd["vodorovna_cos"])
+	var kmax := int(kd["konvex_troj_max"])
+	var f := cisti_faces((mi.get_meta("kolize_sit") as Mesh if mi.has_meta("kolize_sit") else mi.mesh).get_faces())
+	var nt := f.size() / 3
+	# svar vrcholu (SketchUp: stejne body v ruznych plochach) -> indexy
+	var idx := {}
+	var pts := PackedVector3Array()
+	var vi := PackedInt32Array()
+	vi.resize(f.size())
+	for i in f.size():
+		var k := Vector3i((f[i] / svar).round())
+		var j: int = idx.get(k, -1)
+		if j < 0:
+			j = pts.size()
+			idx[k] = j
+			pts.append(f[i])
+		vi[i] = j
+	# hrany -> trojuhelniky (sousednost), komponenty pres hrany
+	var hrany := {}
+	for t in nt:
+		for e in 3:
+			var a := vi[t * 3 + e]
+			var b := vi[t * 3 + (e + 1) % 3]
+			var hk := Vector2i(mini(a, b), maxi(a, b))
+			if not hrany.has(hk):
+				hrany[hk] = []
+			(hrany[hk] as Array).append(t)
+	var nrm := PackedVector3Array()
+	nrm.resize(nt)
+	for t in nt:
+		nrm[t] = (f[t * 3 + 1] - f[t * 3]).cross(f[t * 3 + 2] - f[t * 3]).normalized()
+	var komp := PackedInt32Array()
+	komp.resize(nt)
+	komp.fill(-1)
+	var komponenty: Array = []
+	for t in nt:
+		if komp[t] >= 0:
+			continue
+		var ci := komponenty.size()
+		var sez: Array = [t]
+		komp[t] = ci
+		var i := 0
+		while i < sez.size():
+			var u: int = sez[i]
+			i += 1
+			for e in 3:
+				var a := vi[u * 3 + e]
+				var b := vi[u * 3 + (e + 1) % 3]
+				for w: int in hrany[Vector2i(mini(a, b), maxi(a, b))]:
+					if komp[w] < 0:
+						komp[w] = ci
+						sez.append(w)
+		komponenty.append(sez)
+	var sb := StaticBody3D.new()
+	sb.name = String(mi.name) + "_kolize"
+	var own := sb.create_shape_owner(sb)
+	var n_konv := 0
+	var n_desek := 0
+	var zbyle: Array = []                 # trojuhelniky do rovinnych skupin
+	for sez: Array in komponenty:
+		if sez.size() >= 4 and sez.size() <= kmax and _dily_konvexni(sez, f, vi, nrm, hrany, rov):
+			var body := {}
+			for t: int in sez:
+				for e in 3:
+					body[vi[t * 3 + e]] = true
+			var cp := PackedVector3Array()
+			for j: int in body:
+				cp.append(pts[j])
+			var sh := ConvexPolygonShape3D.new()
+			sh.points = cp
+			sb.shape_owner_add_shape(own, sh)
+			n_konv += 1
+		else:
+			zbyle.append_array(sez)
+	# rovinne skupiny ze zbylych trojuhelniku
+	var skup := PackedInt32Array()
+	skup.resize(nt)
+	skup.fill(-1)
+	for t: int in zbyle:
+		skup[t] = -2
+	var n_skup := 0
+	for t0_: int in zbyle:
+		if skup[t0_] != -2:
+			continue
+		var n0 := nrm[t0_]
+		var d0 := n0.dot(f[t0_ * 3])
+		var sez: Array = [t0_]
+		skup[t0_] = n_skup
+		var i := 0
+		while i < sez.size():
+			var u: int = sez[i]
+			i += 1
+			for e in 3:
+				var a := vi[u * 3 + e]
+				var b := vi[u * 3 + (e + 1) % 3]
+				for w: int in hrany[Vector2i(mini(a, b), maxi(a, b))]:
+					if skup[w] == -2 and absf(nrm[w].dot(n0)) > 1.0 - rov and absf(n0.dot(f[w * 3]) - d0) < rov \
+							and absf(n0.dot(f[w * 3 + 1]) - d0) < rov and absf(n0.dot(f[w * 3 + 2]) - d0) < rov:
+						skup[w] = n_skup
+						sez.append(w)
+		n_skup += 1
+		n_desek += _dily_deska(sb, own, sez, f, n0, deska, vod)
+	mi.add_child(sb)
+	print("kolize z dilu %s: %d troj. -> %d konvexnich casti, %d desek (%d rovinnych skupin), %d ms" % [mi.name, nt, n_konv, n_desek, n_skup,
+			Time.get_ticks_msec() - t0])
+
+
+## Je komponenta (seznam trojuhelniku) uzavrene konvexni teleso? Kazda hrana ve 2 trojuhelnicich komponenty a vsechny
+## vrcholy na jedne strane roviny kazdeho trojuhelniku (tolerance rov) a komponenta neni rovinna.
+func _dily_konvexni(sez: Array, f: PackedVector3Array, vi: PackedInt32Array, nrm: PackedVector3Array, hrany: Dictionary, rov: float) -> bool:
+	var body := {}
+	for t: int in sez:
+		for e in 3:
+			var a := vi[t * 3 + e]
+			var b := vi[t * 3 + (e + 1) % 3]
+			if (hrany[Vector2i(mini(a, b), maxi(a, b))] as Array).size() != 2:
+				return false
+			body[a] = f[t * 3 + e]
+	var rovinna := true
+	for t: int in sez:
+		var n := nrm[t]
+		var d := n.dot(f[t * 3])
+		var mn := 0.0
+		var mx := 0.0
+		for p: Vector3 in body.values():
+			var x := n.dot(p) - d
+			mn = minf(mn, x)
+			mx = maxf(mx, x)
+		if mn < -rov and mx > rov:
+			return false
+		if mx - mn > rov:
+			rovinna = false
+	return not rovinna
+
+
+## Tenka deska z rovinne skupiny trojuhelniku (normala n): konvexni obrys (plocha konvexniho obalu = plocha skupiny) ->
+## jedna deska, jinak deska po trojuhelnicich. Vodorovna (|n.y| >= vod) dolu o tl, ostatni o tl/2 na obe strany.
+## Vraci pocet pridanych tvaru.
+func _dily_deska(sb: StaticBody3D, own: int, sez: Array, f: PackedVector3Array, n: Vector3, tl: float, vod: float) -> int:
+	var u := n.cross(Vector3.UP if absf(n.y) < 0.9 else Vector3.RIGHT).normalized()
+	var w := n.cross(u)
+	var pl := 0.0
+	var p2 := PackedVector2Array()
+	var p3 := PackedVector3Array()
+	for t: int in sez:
+		pl += (f[t * 3 + 1] - f[t * 3]).cross(f[t * 3 + 2] - f[t * 3]).length() * 0.5
+		for e in 3:
+			p3.append(f[t * 3 + e])
+			p2.append(Vector2(u.dot(f[t * 3 + e]), w.dot(f[t * 3 + e])))
+	var obal := Geometry2D.convex_hull(p2)
+	var po := 0.0
+	for i in obal.size() - 1:
+		po += obal[i].x * obal[i + 1].y - obal[i + 1].x * obal[i].y
+	po = absf(po) * 0.5
+	var posun := Vector3(0.0, -tl, 0.0) if absf(n.y) >= vod else n * tl
+	var od := Vector3.ZERO if absf(n.y) >= vod else -n * tl * 0.5
+	var kusy: Array = []
+	if sez.size() == 1 or po <= pl * 1.01 + 1e-4:
+		kusy.append(p3)
+	else:
+		for i in range(0, p3.size(), 3):
+			kusy.append(p3.slice(i, i + 3))
+	for k: PackedVector3Array in kusy:
+		var cp := PackedVector3Array()
+		for p: Vector3 in k:
+			cp.append(p + od)
+			cp.append(p + od + posun)
+		var sh := ConvexPolygonShape3D.new()
+		sh.points = cp
+		sb.shape_owner_add_shape(own, sh)
+	return kusy.size()
+
+
 ## Pevne predmety z katalogu (bozi muka na krizovatce): model z modely/predmety, kolize kvadrem.
 var _stavby: Array = []                # [stred xz, polomer] staticke stavby (zricenina, stan, hostinec) - pesiny je obchazeji
 
@@ -14198,9 +14387,15 @@ func _static_items(parent: Node3D) -> void:
 			# model z importu (hostinec): kolize jen z puvodni site <id>_kolize, ta se nekresli
 			var vse := n.find_children("*", "MeshInstance3D", true, false)
 			var kol := vse.filter(func(m: Node) -> bool: return String(m.name).ends_with("_kolize"))
+			# 15. 11. (A8): vybrane stavby (rozpocty.json kolize_dily.stavby, hostinec) kolize z dilu misto ConcavePolygon
+			var z_dilu: bool = id in (Pravidla.cti("rozpocty", "kolize_dily", "stavby") as Array) and not kol.is_empty() \
+					and not OS.has_environment("TVRZ_KOLIZE_TROJ")          # A/B: TVRZ_KOLIZE_TROJ=1 = drivejsi trimesh
 			for mi in vse:
 				if kol.is_empty() or mi in kol:
-					_trimesh(mi as MeshInstance3D)
+					if z_dilu:
+						_kolize_dily(mi as MeshInstance3D)
+					else:
+						_trimesh(mi as MeshInstance3D)
 				if mi in kol:
 					(mi as MeshInstance3D).visible = false
 				else:
