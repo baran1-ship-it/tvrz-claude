@@ -3654,7 +3654,11 @@ func rostliny_okoli(p: Vector3, vse := false, rozpocet_us := 1500) -> void:
 	for b: Vector2i in _rost_uzly.keys():
 		if (Vector2(b) * BUNKA + Vector2.ONE * BUNKA * 0.5).distance_to(q) > uvol + BUNKA:
 			for m: Node in _rost_uzly[b]:
-				m.queue_free()
+				# planovac snimku: skryt hned, uvolnit po castech (drive cela bunka 10-50 MultiMeshu v jednom queue_free)
+				if vse:
+					m.queue_free()
+				else:
+					Planovac.zrus(m)
 			_rost_uzly.erase(b)
 	var chybi: Array = []
 	var r := int(ceil(ROST_R / BUNKA)) + 1
@@ -3689,6 +3693,9 @@ func rostliny_okoli(p: Vector3, vse := false, rozpocet_us := 1500) -> void:
 			continue
 		var ii: int = _rost_rozest[1]
 		if ii >= (_rost_data[bb] as Array).size():
+			# planovac snimku: odkryti bunky = tezka uloha (nejvys tezkych_uloh_za_snimek vsech front, stridave)
+			if not Planovac.tezka("rostliny"):
+				break
 			for m: Node3D in _rost_uzly[bb]:
 				m.visible = true
 			# radek zaseku (diag.udalost, zaseky_rozbor_system.md): odkryta bunka rostlin = nahrani jejich MultiMeshu
@@ -3698,7 +3705,14 @@ func rostliny_okoli(p: Vector3, vse := false, rozpocet_us := 1500) -> void:
 				dg_r.udalost("rost_mmi", (_rost_uzly[bb] as Array).size())
 			_rost_rozest = []
 			continue
+		# planovac snimku: mm.buffer = glBufferData celeho dilu hned (Godot 4.4.1 gles3 mesh_storage.cpp
+		# _multimesh_set_buffer) - bajty do spolecneho rozpoctu nahravani snimku (rostliny nejvys svuj podil)
+		var e_r: Dictionary = (_rost_data[bb] as Array)[ii]
+		var b_r := Planovac.b_instanci(int(e_r["n"]), bool(e_r["barvy"]) or bool(e_r["data"]))
+		if not Planovac.vejde_b(b_r, true):
+			break
 		_rost_dil(bb, ii)
+		Planovac.nahraj_b(b_r, true)
 		_rost_rozest[1] = ii + 1
 
 
@@ -3719,16 +3733,22 @@ func _nac() -> Dictionary:
 	return _nac_d
 
 
+## 15. 11. (zaseky_rozbor_system.md §3 bod 1): planovac snimku (scripts/planovac.gd) - cas, bajty nahrani do GPU,
+## tezke ulohy a mazani spolecne s loukou (louka._krok bezi po main ve stejnem snimku a bere zbytek).
+const Planovac := preload("res://scripts/planovac.gd")
+
+
 func planovac(p: Vector3) -> void:
 	var t0 := Time.get_ticks_usec()
+	Planovac.zacni("svet")
 	plan_kol_us = 0
 	plan_rost_us = 0
-	var mob := OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")
-	var roz := int(_nac().get("rozpocet_us_tablet" if mob else "rozpocet_us_pc", 2000 if mob else 3000))
+	var mob := Planovac.mobil()
+	# strop teto casti (kolize + rostliny) a zaroven nejvys zbytek spolecneho rozpoctu snimku
+	var roz := mini(int(_nac().get("rozpocet_us_tablet" if mob else "rozpocet_us_pc", 2000 if mob else 3000)), Planovac.zbyva_us())
 	kolize_okoli(p)                     # jen sprava bunek (stred, fronta, ruseni) - uloha nize
 	okluzory_u_hrace(p)                 # okluzory remizku u hrace vypnout (16 vzdalenosti, levne)
-	var tezke := int(_nac().get("tezkych_uloh_za_snimek", 1))
-	if not _kol_fronta.is_empty() and tezke > 0:
+	if not _kol_fronta.is_empty() and Planovac.tezka("kolize"):
 		var tk := Time.get_ticks_usec()
 		var u := _kol_krok()
 		plan_kol_us = Time.get_ticks_usec() - tk
@@ -3740,6 +3760,8 @@ func planovac(p: Vector3) -> void:
 		plan_rost_us = Time.get_ticks_usec() - tr
 	if _kol_fronta.is_empty() and _rost_chybi == 0 and Time.get_ticks_usec() - t0 < roz:
 		_kol_krok()                     # uvolneni (fronta kolizi prazdna = jen ruseni)
+	Planovac.krok_ruseni()              # uzly streamovani (rostliny, louka, kupy) po castech
+	Planovac.spotrebuj_us(int(Time.get_ticks_usec() - t0))
 	plan_ms = (Time.get_ticks_usec() - t0) / 1000.0
 	plan_max_ms = maxf(plan_max_ms, plan_ms)
 
@@ -3752,7 +3774,7 @@ func plan_text() -> String:
 	var fz := "fyzika %d Hz/%d kroky%s · " % [Engine.physics_ticks_per_second, Engine.max_physics_steps_per_frame, ", max %d FPS" % Engine.max_fps if Engine.max_fps > 0 else ""]
 	var t := fz + "plánovač %.1f ms (max %.1f) · fronta: kolize %d, rostliny %d, uvolnit %d · poslední %s" % [plan_ms, plan_max_ms,
 			_kol_fronta.size(), _rost_chybi, _kol_rusit.size(), plan_uloha if plan_uloha != "" else "-"]
-	return t
+	return t + " · " + Planovac.text()
 
 
 ## Testy: vsechny bunky (true), nebo zpet jen okoli (false).

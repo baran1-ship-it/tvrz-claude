@@ -10,6 +10,7 @@ extends Node3D
 
 const Svet := preload("res://scripts/svet.gd")    # Svet.divokost (neudrzovana louka)
 const Pravidla := preload("res://scripts/pravidla.gd")
+const Planovac := preload("res://scripts/planovac.gd")    # 15. 11.: jeden rozpocet snimku se svet.planovac (cas, GPU, tezke, mazani)
 const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kresleni (pady ovladace pri ~7500 volanich)
 const KROK := 0.36                    # rozestup trsu (m), plna hustota
 # 0.59 (pady 0.58 = dosla RAM, 219 bunek): bunky jen do dosahu nejdelsi vrstvy (tablet trsy 80 m, PC 110 m) + 10 m;
@@ -533,10 +534,12 @@ func _process_vlastni(_dt: float) -> void:
 	if _player == null or _mriz.is_empty() or not main.ready_done:
 		return
 	var tp := Time.get_ticks_usec()
+	Planovac.zacni("louka")
 	_nah_zacni()
 	_krok()
 	_kupy_nahrej()
 	_nah_konec()
+	Planovac.krok_ruseni()
 	if _cas:
 		var ms := (Time.get_ticks_usec() - tp) / 1000.0
 		if ms > 1.0:
@@ -556,8 +559,8 @@ func _krok() -> void:
 		if _ceka_kupy.has(kk):
 			WorkerThreadPool.wait_for_task_completion(_ceka_kupy[kk])
 			_ceka_kupy.erase(kk)
+			# jen prazdny skryty koren a zaznam do fronty; MultiMeshe (nahrani do GPU) po dilech v _kupy_nahrej
 			(_kupy[hot["kupy"]] as Dictionary)[hot["c"]] = _kupy_uzel(hot)
-			postaveno_kupy += 1
 	elif not hot.is_empty():
 		var c: Vector2i = hot["c"]
 		if _ceka.has(c):
@@ -565,13 +568,16 @@ func _krok() -> void:
 			_ceka.erase(c)
 		_stavba.append([hot, _postav_zacni(hot), 0])
 	# 1b) stavba po castech (nejvyse jedna bunka rozestavena). Misa 0.65: "hodne kazi dojem nacitani travy" - jedna
-	# davka 500 instanci za snimek = bunka ~1,5 s. Ted davky PLNIT a nove vrstvy opakovane do ROZPOCET_US za snimek
+	# davka 500 instanci za snimek = bunka ~1,5 s. Ted davky PLNIT a nove vrstvy opakovane do rozpoctu snimku (planovac, louka_us)
 	if not _stavba.is_empty():
 		var t0 := Time.get_ticks_usec()
 		var st: Array = _stavba[0]
 		var sh: Dictionary = st[0]
 		var sb: Dictionary = st[1]
-		while Time.get_ticks_usec() - t0 < ROZPOCET_US and not _nah_plno:
+		# planovac snimku (rozpocty.json snimek): strop louky louka_us a nejvys zbytek spolecneho rozpoctu (kolize a
+		# rostliny bezi v main pred loukou); bez zbytku tento snimek nic
+		var roz_l := mini(int(Planovac._p()["louka_us"]), Planovac.zbyva_us())
+		while Time.get_ticks_usec() - t0 < roz_l and not _nah_plno:
 			if not _plnit(sb, PLNIT, true):
 				if _nah_plno:
 					break
@@ -583,12 +589,14 @@ func _krok() -> void:
 						break
 				if not dalsi:
 					break
-		if int(st[2]) >= 8 and (sb.get("plnit", []) as Array).is_empty():
+		Planovac.spotrebuj_us(int(Time.get_ticks_usec() - t0))
+		# dokonceni bunky (odkryti, _viditelne, stara bunka pryc) = tezka uloha planovace snimku
+		if int(st[2]) >= 8 and (sb.get("plnit", []) as Array).is_empty() and Planovac.tezka("louka"):
 			_stavba.pop_front()
 			var c: Vector2i = sh["c"]
 			var stara: Dictionary = _bunky.get(c, {})
 			if stara.has("uzel"):
-				(stara["uzel"] as Node).queue_free()        # prestavba na jinou uroven
+				Planovac.zrus(stara["uzel"])              # prestavba na jinou uroven (skryt hned, uvolnit po castech)
 			if sb.has("uzel"):
 				(sb["uzel"] as Node3D).visible = true
 			sb["lvl"] = sh.get("lvl", 0)
@@ -661,7 +669,7 @@ func _krok() -> void:
 		var d := _vzdal_bunky(c, q)
 		if d > _dosah + UVOLNIT:
 			if b.has("uzel"):
-				(b["uzel"] as Node).queue_free()
+				Planovac.zrus(b["uzel"])
 			_bunky.erase(c)
 			continue
 		if (_snimek + c.x + c.y) % 4 == 0:
@@ -693,7 +701,7 @@ func _krok() -> void:
 			if Vector2((c.x + 0.5) * bk, (c.y + 0.5) * bk).distance_to(q) > dosah + bk * 2.0:
 				var n: Node = hk[c]
 				if n:
-					n.queue_free()
+					Planovac.zrus(n)
 				hk.erase(c)
 
 
@@ -792,7 +800,7 @@ func _vid_nastav(mm: MultiMesh, need: int, rozpocet: bool) -> void:
 	if rozpocet:
 		while k > cur and not _nah_vejde(mm, k, false):
 			k -= _nah_kv
-		if k <= cur and _nah_b == 0:
+		if k <= cur and Planovac.bajty == 0:
 			k = mini(cur + _nah_kv, cil)             # postup zaruceny: jedno kvantum, kdyz se v snimku jeste nic nenahralo
 	if k > cur:
 		var pred := _nah_inst
@@ -831,7 +839,8 @@ func _model_b(mm: MultiMesh, od: int, do_: int) -> int:
 func _nah_vejde(mm: MultiMesh, do_: int, prvni: bool) -> bool:
 	var z: Array = _nah_mm.get(mm, [maxi(mm.visible_instance_count, 0), 0])
 	var b := _model_b(mm, mini(int(z[0]), maxi(mm.visible_instance_count, 0)), do_) - int(z[1])
-	return (prvni and _nah_b == 0) or _nah_b + maxi(b, 0) <= _nah_rozp
+	# spolecny rozpocet snimku (planovac: louka, kupy, rostliny); prvni nahrani snimku projde vzdy
+	return (prvni and Planovac.bajty == 0) or Planovac.bajty + maxi(b, 0) <= _nah_rozp
 
 
 ## visible_instance_count = do_ a zapocitat nahrani (bajty podle modelu od zacatku snimku, instance).
@@ -848,6 +857,7 @@ func _nah_zvys(mm: MultiMesh, do_: int) -> void:
 		z[0] = mini(int(z[0]), cur)
 		var nb := _model_b(mm, int(z[0]), do_)
 		_nah_b += maxi(nb - int(z[1]), 0)
+		Planovac.nahraj_b(maxi(nb - int(z[1]), 0))
 		z[1] = maxi(nb, int(z[1]))
 		_nah_inst += do_ - cur
 	mm.visible_instance_count = do_
@@ -961,6 +971,8 @@ func vypni() -> void:
 			if hk[c]:
 				(hk[c] as Node).queue_free()
 		hk.clear()
+	_kupy_fronta.clear()
+	Planovac.rus_vse()                     # skryte uzly ve fronte mazani planovace (rychle cestovani: pamet)
 
 
 func _exit_tree() -> void:
@@ -1132,7 +1144,7 @@ func _postav_zacni(hot: Dictionary) -> Dictionary:
 var _vypnute: Array = Array(OS.get_environment("TVRZ_LOUKA_VYP").split(",", false)).map(func(x: String) -> int: return int(x)) \
 		if OS.has_environment("TVRZ_LOUKA_VYP") else [2, 4]       # 4 = vejir (radce 09:50); 2 = drn - shora "hvezdice" (Misa 0.75, radce 21:35)
 const PLNIT := 400                     # davka instanci travy (radce 18:35); davky se opakuji do rozpoctu
-const ROZPOCET_US := 4000               # cas stavby louky za snimek (us); 4 ms (0.991: trava pri behu nestihala)
+# cas stavby louky za snimek: rozpocty.json snimek.louka_us (drive const ROZPOCET_US 4 ms, 0.991: trava pri behu nestihala)
 
 
 ## Naplni nejvys n instanci rozestavenych MultiMeshu bunky; true = v tomto snimku se plnilo (dalsi krok stavby az priste).
@@ -1892,37 +1904,47 @@ func _kupy_uzel(hot: Dictionary) -> Node3D:
 	var L: Array = KUPY[hot["kupy"]]
 	var root := Node3D.new()
 	root.name = "kupy_mala" if float(L[0]) < 100.0 else "kupy_velka"
+	# 15. 11. (zaseky_rozbor_system.md, overeno ve zdroji Godot 4.4.1 gles3 mesh_storage.cpp _multimesh_set_buffer):
+	# mm.buffer = glBufferData CELEHO bufferu hned pri prirazeni - drivejsi visible_instance_count = 0 a pridavani po
+	# kvantech nahrani nerozlozilo (cely buffer sel nahoru v _mm a pak se nahraval znovu po kvantech). Ted koren skryty,
+	# MultiMeshe po dilech nejvys rozpocet bajtu snimku (planovac, spolecny s loukou a rostlinami), jeden dil za snimek
+	# (tezka uloha); koren se ukaze po poslednim dilu (odkryti nic nenahrava).
+	root.visible = false
 	add_child(root)
-	_mm(root, _kupa, hot["xfs"], hot["cen"], float(L[1]), float(L[2]), false, hot["cust"])
-	# zaseky_rozbor_system.md (kupy: cely buffer v 1 snimku): kreslene instance rostou po kvantech v rozpoctu bajtu
-	# snimku (_kupy_nahrej, stejny model _nah_* jako louka) - nahrani do GPU se rozlozi do snimku
-	for g in root.get_children():
-		var mmi := g as MultiMeshInstance3D
-		if mmi and mmi.multimesh:
-			mmi.multimesh.visible_instance_count = 0
-			_kupy_fronta.append(mmi.multimesh)
+	_kupy_fronta.append([root, hot, 0])
 	return root
 
 
-var _kupy_fronta: Array[MultiMesh] = []
+var _kupy_fronta: Array = []          # [koren (skryty), vysledek vlakna, dalsi instance k nahrani]
 
 
-## Kupy ve fronte nahrani: kazdy snimek kreslene instance + kvantum, dokud se vejdou do rozpoctu bajtu snimku.
+## Kupy ve fronte: nejvys jeden dil (MultiMesh do rozpoctu bajtu snimku) za snimek, kdyz planovac dovoli tezkou ulohu.
 func _kupy_nahrej() -> void:
 	while not _kupy_fronta.is_empty():
-		var mm: MultiMesh = _kupy_fronta[0]
-		if mm == null or not is_instance_valid(mm) or mm.get_reference_count() <= 2:   # fronta + mistni promenna = zrusena bunka
+		var e: Array = _kupy_fronta[0]
+		if not is_instance_valid(e[0]) or (e[0] as Node).is_queued_for_deletion() or not (e[0] as Node).is_inside_tree():
 			_kupy_fronta.pop_front()                     # bunka mezitim zrusena
 			continue
-		var cur := maxi(mm.visible_instance_count, 0)
-		if cur >= mm.instance_count:
-			mm.visible_instance_count = -1
-			_kupy_fronta.pop_front()
-			continue
-		var do_ := mini(cur + _nah_kv, mm.instance_count)
-		if not _nah_vejde(mm, do_, true):
+		var root: Node3D = e[0]
+		var hot: Dictionary = e[1]
+		var xfs: Array = hot["xfs"]
+		var od: int = e[2]
+		var na_dil := maxi(1, Planovac.rozpocet_b() / Planovac.b_instanci(1, true))
+		var do_ := mini(od + na_dil, xfs.size())
+		var b := Planovac.b_instanci(do_ - od, true)
+		if not Planovac.vejde_b(b) or not Planovac.tezka("kupy"):
 			return                                       # rozpocet snimku vycerpan - dalsi snimek
-		_nah_zvys(mm, do_)
+		var L: Array = KUPY[hot["kupy"]]
+		_mm(root, _kupa, xfs.slice(od, do_), hot["cen"], float(L[1]), float(L[2]), false, (hot["cust"] as Array).slice(od, do_))
+		_nah_b += b
+		_nah_inst += do_ - od
+		Planovac.nahraj_b(b)
+		e[2] = do_
+		if do_ >= xfs.size():
+			root.visible = true
+			postaveno_kupy += 1
+			_kupy_fronta.pop_front()
+		return
 
 
 ## Vsechny kvety v jednom MultiMeshi (rozpocet kresleni): atlas 4 barev vedle sebe, barvu vybira INSTANCE_CUSTOM.r.

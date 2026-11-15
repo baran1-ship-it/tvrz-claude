@@ -240,6 +240,8 @@ def plan(V):
     if not uvnitr(pts, lb[0] + ln[0] * 0.5, lb[1] + ln[1] * 0.5):
         ln = (-ln[0], -ln[1])
 
+    # preliv: posun od osy trouby k prostredku hraze (koryto prelivu na hrazi, ne za jejim koncem)
+    posun = abs(pr["posun_m"]) * (-1.0 if a0 > 0 else 1.0)
     obal = max(math.hypot(x - cx, z - cz) for x, z in pts)
     return {
         "obrys": [[round(x, 2), round(z, 2)] for x, z in pts],
@@ -248,6 +250,7 @@ def plan(V):
         "vypust": {"celo": [round(celo[0], 3), round(celo[1], 3)], "smer": [round(nx, 4), round(nz, 4)], "hladina_y": round(y_vyp, 3),
                    "osa_bod": [round(ref[0], 3), round(ref[1], 3)]},
         "pozerak": {"bod": [round(poz[0], 3), round(poz[1], 3)]},
+        "preliv": {"posun_m": round(posun, 3)},
         "lavka": {"bod": [round(lb[0], 3), round(lb[1], 3)], "smer": [round(ln[0], 4), round(ln[1], 4)]},
         "potok_osa": osa, "odtok_osa": osa_od, "kotva": (ik, j0, d0),
     }
@@ -270,7 +273,7 @@ if __name__ == "__main__":
     if "--zapis" in sys.argv:
         R["obrys"] = p["obrys"]
         R["polomer_m"] = p["polomer_m"]
-        for k in ("vtok", "vypust", "pozerak", "lavka"):
+        for k in ("vtok", "vypust", "pozerak", "preliv", "lavka"):
             R[k].update(p[k])
         for k in ("okraj_vlny", "voda_polomer_m", "tok_konec_polomer_m", "_tok_konec_polomer_m", "dil", "breh"):
             R.pop(k, None)

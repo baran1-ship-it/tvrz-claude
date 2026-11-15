@@ -1544,7 +1544,20 @@
   "natoceni": -0.705,
   "pulsirka_dilu_m": 30.0,
   "pas_napojeni_m": 6.0,
+  "_ctverec_dilu": "natoceni, pulsirka_dilu_m, pas_napojeni_m: ctverec drivejsiho dilu rybnik.glb uz jen pro konec pesiny k rybniku (svet.gd _pesiny/_vo_data) - dil se nevklada (v2).",
+  "verze": 2,
+  "popis": "Navesni rybnik Lhota v2 (Misa 15. 11. r. 13: „nechces si udelat komplet novy model? nechám na tobe“): cely rybnik z tohoto zaznamu, stavi jen Blender (kraj.ryb2_*), hra nic nemeni. Poradi: teren (dno pod obrysem, breh, hraz s prelivem, zatoka vtoku, tune vypusti) -> hladina = vrstevnice skutecneho terenu v hladina_y na mrizce hladina_mrizka_m, okraj pruhledny (hloubka 0), na vtoku rez kolmo navazany na pas pritoku bez prekryvu -> vegetace -> predmety (pozerak, celo vypusti s troubou, preliv, kameny, lavka) k vypocitanemu kraji. Odvozena mista (obrys, vtok bod/smer, vypust celo, pozerak, lavka, osy pritoku a odtoku u rybnika) pocita tools/krok_b/rybnik_v2.py z cisel tady. Testy smyslu rybnik_vtok, voda_bez_hrany, vypust; hra ryb_napojeni, voda_v_korytu.",
   "hladina_y": 3.35,
+  "hloubka_m": 1.2,
+  "dno_svah_m": 4.8,
+  "_dno_svah_m": "dno od kraje vody parabolou do plne hloubky na dno_svah_m (u kraje 1:2, uprostred ploche) - navesni rybnicek, odhad NEOVERENO zdrojem",
+  "breh_nad_m": 0.3,
+  "breh_svah": 0.3,
+  "_breh": "breh od kraje vody stoupa breh_svah do breh_nad_m nad hladinu, dal toky_tvar.svah (vyssi teren se zarizne); nizsi teren se zvedne na hladinu + breh_nad_m do toky_tvar.breh_sirka_m + 2 m a dal nasyp toky_tvar.nasyp_svah (voda nevytece). Odhad jako drive (0,3 m), NEOVERENO zdrojem.",
+  "obrys_bodu": 64,
+  "hladina_mrizka_m": 0.5,
+  "_hladina": "hladina = vrstevnice terenu (kraj.ryb2_hladina_sit): mrizka hladina_mrizka_m zarovnana s jemnym terenem u vody (toky_tvar.jemny_krok_m), voda jen v souvislem kusu od stredu, kde je teren pod hladinou; barva vrcholu R = hloubka/4 (shader voda: pruhledna u kraje), kraj site hloubka 0. Drive vejir 96 paprsku 1,5 m pod breh bez mekkeho okraje (cerna deska pres koryto pritoku).",
+  "polomer_m": 13.55,
   "hraz": {
    "stred": [
     509.65,
@@ -1561,32 +1574,335 @@
    "popis": "hraz na jihozapadnim (zapadnim) brehu dilu, kde je prirozeny okraj nejniz; vypust = zacatek toku lhota_odtok. Koruna 0,8 m nad hladinou (CSN 75 2410: 0,5-1,0 m, odhad), svahy 1:2.",
    "_poloha12": "12. 11. (Misa fotky (495, 881): odtok je pas v trave bez napojeni; test ryb_napojeni: odtok zacinal 5,6 m za koncem hraze a vedl soubezne s ni): hraz napric odtoku - osa kolmo na smer od stredu rybnika k zacatku odtoku (odtok vede radialne, odchylka 4 st), stred koruny = voda_polomer + 0,5 + vnitrni svah (koruna_nad_hladinou/sklon) + koruna/2 od stredu; odtok zacina za vzdusnou patou (test ryb_napojeni, test smyslu odtok_za_hrazi). Drive [514.2, 870.7] smer [0.627, -0.779] (soubezne s odtokem)."
   },
-  "popis": "Navesni rybnik Lhota (dil modely/rybnik/rybnik.glb). Hladina pevne z dat (drive z obvodu terenu ve hre).",
-  "voda_polomer_m": 12.0,
-  "tok_konec_polomer_m": 11.0,
-  "_tok_konec_polomer_m": "pas hladiny pritoku (Toky_voda, kraj.toky_voda) konci tolik od stredu - uvnitr hladiny modelu (okraj vody dilu ve smeru vtoku 11,3-11,6 m, glb); kruh voda_polomer_m 12 m nechal 0,5 m suche koryto (test rybnik_dil „bez vody nad osou“ (536, 884)). Prekryv s hladinou dilu hra odrizne (svet._toky_voda_v_dilu).",
-  "breh": {
-   "model_m": 2.0,
-   "prechod_m": 2.0,
-   "svah": 0.25,
-   "popis": "Misa 9. 11. r. 51/79 (hlineny sraz kolem rybnika, holy pas): breh dilu podle pravidla, ne pevny okraj modelu +0,30. Teren modelu plati jen do model_m od kraje vody (kameny, lavka, okraj), za prechod_m teren sveta omezeny svahem od kraje vody nahoru (svah dy/dx; 0,25 = 1:4, mirny travnaty breh - odhad, stejny jako toky_tvar.svah; NEOVERENO zdrojem) a dolu za okrajem toky_tvar.breh_nad_hladinou_min_m svahem toky_tvar.nasyp_svah (nizka strana = nasep, voda nevytece). Hrana ctverce dilu = teren sveta (bez pasu napojeni). Travu a bahno urcuje vzdalenost od vody (pasma.voda.holy_breh_m), ne barva modelu (svet._ryb_hraz_toky, louka)."
+  "vtok": {
+   "tok": "lhota_potok",
+   "prima_m": 8.0,
+   "rovny_kraj_m": 2.5,
+   "skok_m": 0.02,
+   "spad_od_m": 0.3,
+   "usti_m": 2.0,
+   "popis": "pritok vtece kolmo na kraj vody (bod na obrysu, smer do rybnika): osa posledni prima_m rovne, kraj vody rovny_kraj_m na obe strany kolmo na smer; hladina pritoku od posledniho bodu aspon spad_od_m nad rybnikem linearne dolu, na hladinu rybnika + skok_m (<= 2 cm) az v usti (posledni usti_m). Pas hladiny pritoku konci rezem v bode vtoku, hladina rybnika za rezem proti proudu neni (bez prekryvu).",
+   "bod": [
+    538.192,
+    880.135
+   ],
+   "smer": [
+    -0.992,
+    -0.1263
+   ]
   },
-  "polomer_m": 12.0,
-  "hloubka_m": 1.2,
-  "okraj_vlny": [
+  "pozerak": {
+   "od_vodni_cary_m": 0.6,
+   "sirka_m": 0.7,
+   "nad_korunou_m": 0.3,
+   "popis": "pozerak (dreveny zlab s dluzemi) na navodnim svahu hraze v ose trouby vypusti, od_vodni_cary_m do vody; lavka dvou prken na korunu. Rozmery odhad podle navesnich rybniku (NEOVERENO zdrojem).",
+   "bod": [
+    513.338,
+    881.421
+   ]
+  },
+  "vypust": {
+   "tok": "lhota_odtok",
+   "celo_vyska_m": 0.9,
+   "zacatek_m": 0.5,
+   "celo_sirka_m": 2.4,
+   "tune_polomer_m": 1.0,
+   "tune_hloubka_m": 0.5,
+   "trouba_prumer_m": 0.3,
+   "popis": "vypust: trouba (vydlabany kmen) pod hrazi od pozeraku kolmo na hraz; kamenne celo na vzdusne strane tam, kde je svah hraze celo_vyska_m nad hladinou odtoku, s kridly 45 st.; pod celem tune (polomer, hloubka pod hladinou odtoku); odtok (tok) zacina zacatek_m za licem cela v hladine odtoku. Za licem a kridly hraz neni.",
+   "celo": [
+    505.316,
+    882.63
+   ],
+   "smer": [
+    -0.9888,
+    0.149
+   ],
+   "hladina_y": 1.794,
+   "osa_bod": [
+    502.142,
+    883.108
+   ]
+  },
+  "preliv": {
+   "posun_m": 3.5,
+   "sirka_m": 1.6,
+   "nabeh_m": 0.6,
+   "koruna_nad_hladinou_m": 0.35,
+   "popis": "bezpecnostni preliv: koruna hraze snizena na koruna_nad_hladinou_m v pasu sirka_m (nabeh_m po stranach) posun_m od osy trouby k prostredku hraze; koryto z plochych kamenu pres korunu a vzdusny svah k pate. Odhad, NEOVERENO zdrojem."
+  },
+  "lavka": {
+   "od_hraze_m": 3.0,
+   "delka_m": 3.5,
+   "sirka_m": 0.9,
+   "nad_hladinou_m": 0.35,
+   "popis": "praci lavka (prkna na kulech) kolmo do vody z kraje nejblize smeru k vsi, aspon od_hraze_m od konce hraze.",
+   "bod": [
+    517.86,
+    869.714
+   ],
+   "smer": [
+    0.6041,
+    0.7969
+   ]
+  },
+  "kameny_na_m": 0.3,
+  "_kameny": "kameny na kraji vody (vypocitany obrys hladiny) kameny_na_m na metr, na navodnim svahu hraze dlazba; ne v usti vtoku a u lavky.",
+  "_historie": "Do 15. 11. dil modely/rybnik/rybnik.glb (0.76) a potom „jeden zdroj“ 12. 11. (polomer_m + okraj_vlny, hladina vejirem) - 7 oprav vzdy jedne vrstvy (docs/predani.md). v2 nahrazuje okraj_vlny, voda_polomer_m, tok_konec_polomer_m, breh, dil.",
+  "obrys": [
    [
-    3,
-    0.08,
-    0.9
+    538.19,
+    880.14
    ],
    [
-    5,
-    0.05,
-    2.3
+    537.88,
+    882.62
+   ],
+   [
+    537.12,
+    883.1
+   ],
+   [
+    536.44,
+    884.16
+   ],
+   [
+    535.72,
+    885.14
+   ],
+   [
+    534.99,
+    886.07
+   ],
+   [
+    534.25,
+    886.97
+   ],
+   [
+    533.46,
+    887.83
+   ],
+   [
+    532.61,
+    888.63
+   ],
+   [
+    531.67,
+    889.31
+   ],
+   [
+    530.64,
+    889.84
+   ],
+   [
+    529.54,
+    890.21
+   ],
+   [
+    528.4,
+    890.4
+   ],
+   [
+    527.27,
+    890.47
+   ],
+   [
+    526.16,
+    890.47
+   ],
+   [
+    525.08,
+    890.45
+   ],
+   [
+    523.99,
+    890.48
+   ],
+   [
+    522.87,
+    890.56
+   ],
+   [
+    521.68,
+    890.66
+   ],
+   [
+    520.41,
+    890.73
+   ],
+   [
+    519.09,
+    890.66
+   ],
+   [
+    517.77,
+    890.39
+   ],
+   [
+    516.54,
+    889.85
+   ],
+   [
+    515.5,
+    889.03
+   ],
+   [
+    514.7,
+    887.97
+   ],
+   [
+    514.19,
+    886.72
+   ],
+   [
+    513.96,
+    885.4
+   ],
+   [
+    513.93,
+    884.07
+   ],
+   [
+    514.03,
+    882.8
+   ],
+   [
+    514.17,
+    881.62
+   ],
+   [
+    514.26,
+    880.52
+   ],
+   [
+    514.28,
+    879.45
+   ],
+   [
+    514.23,
+    878.38
+   ],
+   [
+    514.17,
+    877.28
+   ],
+   [
+    514.16,
+    876.14
+   ],
+   [
+    514.27,
+    874.97
+   ],
+   [
+    514.56,
+    873.83
+   ],
+   [
+    515.04,
+    872.74
+   ],
+   [
+    515.7,
+    871.75
+   ],
+   [
+    516.49,
+    870.86
+   ],
+   [
+    517.39,
+    870.07
+   ],
+   [
+    518.33,
+    869.35
+   ],
+   [
+    519.32,
+    868.68
+   ],
+   [
+    520.35,
+    868.03
+   ],
+   [
+    521.44,
+    867.44
+   ],
+   [
+    522.59,
+    866.93
+   ],
+   [
+    523.81,
+    866.58
+   ],
+   [
+    525.08,
+    866.45
+   ],
+   [
+    526.35,
+    866.6
+   ],
+   [
+    527.55,
+    867.02
+   ],
+   [
+    528.65,
+    867.7
+   ],
+   [
+    529.59,
+    868.55
+   ],
+   [
+    530.4,
+    869.5
+   ],
+   [
+    531.1,
+    870.44
+   ],
+   [
+    531.77,
+    871.3
+   ],
+   [
+    532.47,
+    872.06
+   ],
+   [
+    533.25,
+    872.74
+   ],
+   [
+    534.15,
+    873.39
+   ],
+   [
+    535.12,
+    874.08
+   ],
+   [
+    536.11,
+    874.88
+   ],
+   [
+    537.0,
+    875.83
+   ],
+   [
+    537.71,
+    876.94
+   ],
+   [
+    538.51,
+    877.66
    ]
-  ],
-  "dil": "predmety",
-  "_jeden_zdroj12": "12. 11. (Misa: „uz po milionte se sereme s odvodem a privodem vody do rybnika“): misto prestavovaly tri vrstvy (model dilu s vlastnim terenem a vodou, Blender toky, hra _ryb_hraz_toky/_toky_voda_v_dilu/ryb_teren) - kazda oprava jedne rozbila druhou (posledne: barva vody z hloubky zapecene Blenderem, dno zmenila hra). Ted jako rybnik tvrze: dno, breh, hraz, hladinu a napojeni toku stavi jen Blender (kraj.py, polomer_m/hloubka_m/okraj_vlny), z dilu modely/rybnik/rybnik.glb jen predmety (lavka, kameny, rakos, lekniny) posazene na teren sveta; hra teren ani vodu u rybnika nemeni. polomer_m 12 = voda modelu 11,3-11,6 m (glb), hloubka 1,2 m a vlny brehu NEOVERENO zdrojem (navesni rybnicek: odhad)."
+  ]
  },
  "rybnik_tvrz": {
   "popis": "Rybnik v rohu mapy na strane tvrze (Misa 17:05, ne u tvrze) na rovince v udolnici pramene (-155, -235); odtok k zapadnimu okraji, vlastni povodi (rozvodi s Bystrici). Generuje kraj.py (dno, breh, hraz, hladina).",
@@ -2937,96 +3253,76 @@
     [
      551.466,
      881.788,
-     3.58
+     3.698
     ],
     [
      550.572,
      881.346,
-     3.461
+     3.674
     ],
     [
      549.655,
      880.973,
-     3.385
+     3.65
     ],
     [
      548.707,
      880.742,
-     3.37
+     3.626
     ],
     [
      547.738,
      880.713,
-     3.37
+     3.603
     ],
     [
      546.768,
      880.868,
-     3.37
+     3.579
     ],
     [
      545.805,
      881.105,
-     3.37
+     3.555
     ],
     [
-     544.835,
-     881.302,
-     3.37
+     544.813,
+     880.979,
+     3.531
     ],
     [
-     543.849,
-     881.382,
-     3.37
+     543.821,
+     880.852,
+     3.507
     ],
     [
-     542.854,
-     881.371,
-     3.37
+     542.829,
+     880.726,
+     3.483
     ],
     [
-     541.858,
-     881.353,
-     3.37
+     541.837,
+     880.6,
+     3.459
     ],
     [
-     540.872,
-     881.418,
-     3.37
+     540.845,
+     880.473,
+     3.435
     ],
     [
-     539.916,
-     881.633,
-     3.37
+     539.853,
+     880.347,
+     3.41
     ],
     [
-     539.011,
-     882.013,
-     3.37
+     538.861,
+     880.221,
+     3.386
     ],
     [
-     538.163,
-     882.523,
-     3.37
-    ],
-    [
-     537.349,
-     883.1,
-     3.37
-    ],
-    [
-     536.552,
-     883.697,
-     3.37
-    ],
-    [
-     535.78,
-     884.303,
-     3.37
-    ],
-    [
-     535.019,
-     884.982,
+     538.192,
+     880.135,
      3.37
     ]
    ]
@@ -3038,6 +3334,21 @@
    "hloubka_m": 0.4,
    "do": "potok",
    "osa_xzy": [
+    [
+     504.822,
+     882.704,
+     1.794
+    ],
+    [
+     503.833,
+     882.853,
+     1.794
+    ],
+    [
+     502.844,
+     883.002,
+     1.794
+    ],
     [
      502.142,
      883.108,
