@@ -1383,3 +1383,9 @@ Hotovo v kódu a datech (testy u každého):
   Chodec bral bod trasy za dosažený v pevných 1,5 m: bod (4,95; 7,2) „dosáhl“ z (5,49; 5,92) ještě za koncem zábradlí
   dolního ramene (x ≥ 5,24, z 6,20–6,32) a mířil na horní rameno skrz něj. S body na 0,5 m tatáž trasa OK 23 m.
   Poloměr dosažení teď `pravidla_sveta.json pasma.test.prochod_cil_m` / `prochod_cil_podil` (½ kratšího úseku, 0,5–1,5 m).
+
+### 15. 11. odpoledne – poslední opravy před 0.999998
+- Plynulé prolínání vlastnosti mezi úseky (břeh kaskády) nesmí snížit přísnější úsek: nejdřív rozšířit maximum na sousedy, pak prolínat.
+- Věci sázené na „výšku cesty“ musí brát i hotový terén (brod je vyseknutý korytem níž) – min(cesta, terén).
+- Výška chýše na terénu jen z bodů pod chýší, ne ze zápraží (svah před dveřmi chýši zvedl, lůžka visela).
+- Test visici: zavěšené předměty mají v katalogu `zed`/`upevneno` – nepočítat je jako levitaci, ne výjimkou v testu podle jména.
