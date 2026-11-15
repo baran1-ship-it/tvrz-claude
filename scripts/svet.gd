@@ -1734,6 +1734,7 @@ func _koryto_terenu(root: Node3D) -> void:
 			print("nadrz: prirozena hladina (oval z vesnice.py) u %s" % str(nd2["kruh"][0]))
 			continue
 		nd.hloubka_hladiny(h[0], h[1], _vyska)
+		_ryb_vzhled(h[0] as MeshInstance3D, int(h[1]))
 	var k: RefCounted = preload("res://scripts/koryto.gd").new()
 	var ma_koryto: bool = k.priprav(_vyska)
 	if ma_koryto:
@@ -10472,6 +10473,13 @@ func _dil_lod(sc: Node3D, zaz: Dictionary, interier: Node, jm: String) -> float:
 			var cl := PackedColorArray()
 			cl.resize((a[Mesh.ARRAY_VERTEX] as PackedVector3Array).size())
 			cl.fill(c)
+			# 15. 11. kontrola pred vydanim: kostel/ruiny z dalky bile - material s barvou vrcholu jako albedem (mech, saze,
+			# vlhko z modelu; lokace barva_vrcholu_materialy) -> stredni stupen nasobi barvu textury barvou vrcholu modelu
+			var mt0 := mi.get_active_material(si) as BaseMaterial3D
+			if mt0 and mt0.vertex_color_use_as_albedo and a[Mesh.ARRAY_COLOR] != null:
+				var vc: PackedColorArray = a[Mesh.ARRAY_COLOR]
+				for vi in mini(vc.size(), cl.size()):
+					cl[vi] = Color(c.r * vc[vi].r, c.g * vc[vi].g, c.b * vc[vi].b, 1.0)
 			b[Mesh.ARRAY_COLOR] = cl
 			b[Mesh.ARRAY_INDEX] = a[Mesh.ARRAY_INDEX]
 			tmp.clear_surfaces()
@@ -13022,6 +13030,24 @@ var _hl_ryb: Array = []                 # [stred Lhota, zaznam Lhota (obrys), hl
 
 ## Odraz okoli na hladine (prostredi.json voda_odraz; Misa 9. 11. r. 61/79 „bila ledova plocha“): pod obzorem okoli
 ## hladina odrazi breh a stromy, ne oblohu. Static - tools/foto_voda.gd (test voda_odraz) nastavi totez.
+## Rybnik v2 ma vlastni vzhled hladiny (voda.json rybnik_lhota vzhled), ne kalnou vodu prikopu - Blender mu dava material
+## voda_prikop (15. 11. kontrola pred vydanim: z nizkeho pohledu cela cerna). Kopie materialu jen pro Rybnik_lhota_voda,
+## zapsana do vodni (vlnky a ceřeni nastavuje voda.gd).
+func _ryb_vzhled(mi: MeshInstance3D, si: int) -> void:
+	if not String(mi.name).begins_with("Rybnik_lhota_voda"):
+		return
+	var vz: Dictionary = (Pravidla.cti("voda", "rybnik_lhota") as Dictionary).get("vzhled", {})
+	var mt := mi.get_active_material(si) as ShaderMaterial
+	if vz.is_empty() or mt == null:
+		return
+	var sm := mt.duplicate() as ShaderMaterial
+	sm.set_shader_parameter("okrehek", float(vz["okrehek"]))
+	sm.set_shader_parameter("kalnost", float(vz["kalnost"]))
+	sm.set_shader_parameter("deep", Color(float(vz["deep"][0]), float(vz["deep"][1]), float(vz["deep"][2])))
+	mi.set_surface_override_material(si, sm)
+	vodni.append(sm)
+
+
 static func voda_odraz(m: ShaderMaterial) -> void:
 	var o: Dictionary = Pravidla.cti("prostredi", "voda_odraz")
 	var c: Array = o["okoli_rgb"]

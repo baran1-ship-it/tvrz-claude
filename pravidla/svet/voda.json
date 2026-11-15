@@ -1492,7 +1492,10 @@
        "_popis": "Misa 15. 11. r. 4 (kaskada = ploche leskle plechy, prorusta trava a kameny; snimky 08-10): pad kazdeho stupne (koryto.schody) je samostatna zakrivena zaclona stavena ve hre (scripts/pad_vody.gd, shaders/pad.gdshader), ne usek pasu reky. Pas Waterways (modely/reka/reka.res, predpeceny v baliku z_reka) se pri nacteni ve stope padu zbavi trojuhelniku s |normala.y| < zahodit_normala_y (prepecovat neni treba). Zaclona: od bodu k tunou (okap = horni hladina, plna sirka pasu) se zuzi na sirka_podil x pul sirky vody; previs_m pred patou (u bodu k+1) se lomi parabolou x ~ sqrt(pad) (volny pad, vodorovna tecna na hrane); vypoukle_m napric dopredu. Barva vrcholu R pena (pena_hore -> 1 u paty od pena_od), A okraj (okraj_podil sirky), G 1 = padajici cast. Rese: Uncharted GDC 2012 (vodopad = pruhy textury po padu + mlha u paty), Jedi Fallen Order (simonschreibt.de: zakrivena zaclona, posuvne vzorky, karty mlhy), 80.lv stylizovany vodopad; potok_pereje_resers.md body 1-7. Cisla [O] odhad, overit snimkem.",
        "sirka_podil": 0.7,
        "previs_m": 0.25,
-       "previs_min_max_m": [0.15, 0.3],
+       "previs_min_max_m": [
+        0.15,
+        0.3
+       ],
        "vypoukle_m": 0.08,
        "rozsireni_dole": 0.15,
        "pod_hladinu_m": 0.06,
@@ -1519,11 +1522,22 @@
         "viditelnost_m": 45.0
        },
        "shader": {
-        "voda": [0.15, 0.18, 0.13],
-        "pena": [0.6, 0.63, 0.58],
+        "voda": [
+         0.15,
+         0.18,
+         0.13
+        ],
+        "pena": [
+         0.6,
+         0.63,
+         0.58
+        ],
         "rychlost_m_s": 1.8,
         "rychlost_okap_m_s": 0.45,
-        "meritko_pruhu": [1.5, 0.3],
+        "meritko_pruhu": [
+         1.5,
+         0.3
+        ],
         "prolinani_hore_m": 0.5,
         "pruhlednost": 0.82,
         "okap_kryti": 0.45
@@ -1916,7 +1930,17 @@
     5.0
    ],
    "popis": "rakos a orobinec v trsech v pasu rakos_pas_m od kraje vody (- breh, + voda) do hloubky rakos_hloubka_max_m (pasma voda: mokry okraj 0,2-0,5 m), vrby hlavate a olse stromy_od_kraje_m za krajem; ne na hrazi, v usti vtoku, u lavky (kraj.ryb2_vegetace). Odhad podle drivejsiho navesniho rybnicku."
-  }
+  },
+  "vzhled": {
+   "okrehek": 0.35,
+   "kalnost": 0.7,
+   "deep": [
+    0.09,
+    0.13,
+    0.09
+   ]
+  },
+  "_vzhled": "15. 11. kontrola před vydáním: hladina rybníka v2 měla materiál voda_prikop (kalnost 0,93, deep 0,05 = příkop tvrze) → z nízkého pohledu celá černá. Rybník má vlastní vzhled (nadrz.hloubka_hladiny přepíše parametry kopie materiálu u Rybnik_lhota_voda): stojatá voda s okřehkem jako KCD (sada2_10: tmavá, ale u kraje průhledná, zelenohnědá hloubka jako ostatní stojaté vody 0,08/0,115/0,08)."
  },
  "rybnik_tvrz": {
   "popis": "Rybnik v rohu mapy na strane tvrze (Misa 17:05, ne u tvrze) na rovince v udolnici pramene (-155, -235); odtok k zapadnimu okraji, vlastni povodi (rozvodi s Bystrici). Generuje kraj.py (dno, breh, hraz, hladina).",
