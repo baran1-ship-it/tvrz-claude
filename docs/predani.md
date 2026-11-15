@@ -1389,3 +1389,6 @@ Hotovo v kódu a datech (testy u každého):
 - Věci sázené na „výšku cesty“ musí brát i hotový terén (brod je vyseknutý korytem níž) – min(cesta, terén).
 - Výška chýše na terénu jen z bodů pod chýší, ne ze zápraží (svah před dveřmi chýši zvedl, lůžka visela).
 - Test visici: zavěšené předměty mají v katalogu `zed`/`upevneno` – nepočítat je jako levitaci, ne výjimkou v testu podle jména.
+- Skála smazaná pěšinou (`pesiny volne: skal pryc`) musí vzít s sebou i to, co na ní stojí (borovice z vrcholu visela 15 m).
+- Pravidlo jasu vsi (`ves_jas.textury`) platí pro každou budovu z vesnické výroby – nová budova = přidat vzor textur, jinak je černá.
+- Brána exportu chce ≥ 1000 MB volna; vydání potřebuje navíc ~3× velikost přestavěných balíků (data + git + dočasné) – rezerva: `/root/.rustup` (624 MB, projekt ho nepoužívá).
