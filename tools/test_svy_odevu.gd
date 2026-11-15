@@ -51,6 +51,7 @@ func _beh() -> void:
 	root.add_child(koren)
 	var lide: Node3D = Lide.new()
 	koren.add_child(lide)
+	lide.set_process(false)          # jen stavba postav a klipy; bez sveta a hrace (log bez chyb kazdy snimek)
 	var P: Dictionary = Lide.P
 	var vzor: Dictionary = (P["obyvatele"] as Array)[0]
 	var modelu := 0

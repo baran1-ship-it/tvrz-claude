@@ -7,6 +7,16 @@
   "rostliny_dosah_m": 115,
   "rostliny_uvolnit_m": 145
  },
+ "snimek": {
+  "rozpocet_us_tablet": 6000,
+  "rozpocet_us_pc": 7000,
+  "louka_us": 4000,
+  "rostliny_podil_b": 0.5,
+  "ruseni_za_snimek": 4,
+  "test_presah_us": 3000,
+  "test_s": 30.0,
+  "_pozn": "15. 11. (docs/rozpracovane/zaseky_rozbor_system.md §3 bod 1, tester 13.-15. 11. zaseky ve vsi a na louce): scripts/planovac.gd - JEDEN rozpocet snimku pro streamovani: kolize + rostliny (svet.planovac, strop planovac.rozpocet_us_*) a louka (bunky trsu, kupy; strop louka_us = drive ROZPOCET_US v louka.gd). rozpocet_us_* = cas vsech dohromady za snimek: soucet drivejsich samostatnych rozpoctu (planovac 2/3 ms + louka 4 ms), tj. bez zpomaleni dorustu travy, ale uz se nescitaji s dalsimi frontami - UVAHA, NEOVERENO NA ZARIZENI. Nahrani do GPU: spolecny rozpocet louka_nahravani.nahrani_b_snimek pro louku, kupy a rostliny; rostliny nejvys rostliny_podil_b z nej (louka ma vzdy zbytek). Tezke ulohy (davka kolizi, odkryti bunky rostlin, dokonceni bunky louky, dil kup): planovac.tezkych_uloh_za_snimek, stridave mezi tridami. ruseni_za_snimek = uzlu streamovani uvolnenych (queue_free) za snimek, ostatni skryte cekaji (UVAHA). test_*: test planovac_snimek (jizda cvalem pres louku test_s s): cas planovace za snimek <= rozpocet + test_presah_us (posledni uloha se neprerusuje), bajty <= nahrani_b_snimek, tezkych <= limit."
+ },
  "kolize": {
   "zapojeno": false,
   "bunka_m": 32,

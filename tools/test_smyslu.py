@@ -725,6 +725,125 @@ for ryb in kraj.RYBNIKY:
         chyba("breh_nadrze", "rybnik_tvrz", "sraz u vody v %d smerech (napr. %s)" % (len(sraz), sraz[:4]))
     print("SMYSL breh rybnika %.2f: obvod 120 smeru, visi %d, sraz %d" % (hl, len(visi), len(sraz)))
 
+# vyslapano (Misa 15. 11. ř. 11: „okolo kovarny jen louka, ve vsi moc travy“, Puchart usedlosti.vyslapano): KAZDA stavba
+# vsi (vesnice.stavby_vsi - usedlosti, kovarna, dum kovare, krcma, chalupa u vetrniku) ma vstup, pas hliny okap_m kolem
+# pudorysu a plochu pred kazdym vstupem (kraj.placek = barva i masky trsu). Seznam se nepise rucne: kazdy zaznam lokace
+# s modelem a stredem do ves.rovina_r_m od navsi a kazdy vnoreny dum (model z ves.domy_podezdivka) musi v nem byt.
+import vesnice  # noqa: E402
+_LV = lok["ves"]
+_VY = _LV["vyslapano"]
+_SV = vesnice.stavby_vsi()
+_ids = {s_["id"] for s_ in _SV}
+_chce = ["ves_dum_%d" % u["k"] for u in _LV["usedlosti"]]
+for _kl, _zv in lok.items():
+    if not isinstance(_zv, dict):
+        continue
+    if "stred" in _zv and "model" in _zv and math.dist(_zv["stred"], _LV["stred_stare_navsi"]) < _LV["rovina_r_m"]:
+        _chce.append(_kl)
+    for _k2, _z2 in _zv.items():
+        if isinstance(_z2, dict) and "stred" in _z2 and _z2.get("model") in _LV["domy_podezdivka"]:
+            _chce.append(_kl + "." + _k2)
+for _i in _chce:
+    if _i not in _ids:
+        chyba("vyslapano", _i, "stavba neni ve vesnice.stavby_vsi (bez okapu a hliny pred vstupem) - doplnit pudorys a vstupy do dat")
+_HL = _VY["hlina"]
+for s_ in _SV:
+    if not s_["vstupy"]:
+        chyba("vyslapano", s_["id"], "stavba bez vstupu (vstupy_domu / vstupy_hosp / vstupy_lok)")
+    spat = []
+    for x0, x1, z0, z1 in s_["boxy"]:
+        h_ = _VY["okap_m"] / 2
+        for mx, mz in (((x0 + x1) / 2, z1 + h_), ((x0 + x1) / 2, z0 - h_), (x1 + h_, (z0 + z1) / 2), (x0 - h_, (z0 + z1) / 2),
+                       (x0 - h_, z0 - h_), (x1 + h_, z0 - h_), (x0 - h_, z1 + h_), (x1 + h_, z1 + h_)):
+            if kraj.placek(*vesnice.svet_bod(s_, mx, mz)) < _HL["okap"] - 0.01:
+                spat.append(("okap", round(mx, 1), round(mz, 1)))
+    for px, pz, nx, nz, w in s_["vstupy"]:
+        sx, sz = -nz, nx
+        q = w / 2 + _VY["pred_okraj_m"] - 0.05
+        t = _VY["pred_vstupem_m"] - 0.05
+        for a, b in ((t / 2, 0.0), (t, q), (t, -q), (0.1, q), (0.1, -q)):
+            mx, mz = px + nx * a + sx * b, pz + nz * a + sz * b
+            if kraj.placek(*vesnice.svet_bod(s_, mx, mz)) < _HL["pred_vstupem"] - 0.01:
+                spat.append(("pred_vstupem", round(mx, 1), round(mz, 1)))
+    if spat:
+        chyba("vyslapano", s_["id"], "tráva tam, kde se chodí (%d bodů, souřadnice modelu): %s" % (len(spat), spat[:6]))
+# dvere domu: ves.vyslapano.vstupy_domu = svet.gd DUM_MER vstup/dvur (hra vede chodnicky ke stejnym dverim)
+_sg = open(os.path.join(ROOT, "scripts", "svet.gd"), encoding="utf-8").read()
+for _typ, _vs in _VY["vstupy_domu"].items():
+    _m = re.search(r'"%s": \{"vstup": (-?[\d.]+), "dvur": (-?[\d.]+)' % _typ, _sg)
+    if not _m or abs(float(_m.group(1)) - _vs[0][1]) > 0.01 or abs(float(_m.group(2)) - _vs[1][1]) > 0.01:
+        chyba("vyslapano", _typ, "vstupy_domu %s nesouhlasi se svet.gd DUM_MER vstup/dvur (%s)" % (_vs, _m.groups() if _m else "chybi"))
+print("SMYSL vyslapano: %d staveb vsi, %d vstupu" % (len(_SV), sum(len(s_["vstupy"]) for s_ in _SV)))
+
+# ves_barva (Misa 15. 11. ř. 10: „bile budovy vzadu ve vsi nechci, chci hnede jako Puchart“): stredni stupen (barvy
+# vrcholu domy_stredni.glb) a hruby obal _Daleko (barva materialu domy.glb) kazdeho domu: prumer sRGB R > G > B a jas
+# nejvys modely.json ves_jas.stredni_daleko.test_jas_max (bez hnedeho cinitele 0,5 a seda). Soubory jsou vystup
+# blender/ves_domy.py + tools/zesvetli_ves.py (krok 16 exportu); chybi-li (kontejner bez zdroju vsi) = NEOVERENO.
+_SDJ = J("modely.json")["ves_jas"]["stredni_daleko"]
+_LUMK = (0.2126, 0.7152, 0.0722)
+
+
+def _srgb1(c):
+    return c * 12.92 if c <= 0.0031308 else 1.055 * max(c, 0.0) ** (1 / 2.4) - 0.055
+
+
+def _glb_json(p):
+    import struct
+    d_ = open(p, "rb").read()
+    jl_ = struct.unpack("<I", d_[12:16])[0]
+    return json.loads(d_[20:20 + jl_]), d_[28 + jl_:]
+
+
+def _ves_barva(koren, rgb, kde):
+    jas_ = sum(a * b for a, b in zip(rgb, _LUMK))
+    ok_ = rgb[0] > rgb[1] > rgb[2] and jas_ <= _SDJ["test_jas_max"]
+    print("SMYSL ves_barva %s %s: sRGB %s jas %.2f%s" % (kde, koren, [round(c, 2) for c in rgb], jas_, "" if ok_ else " CHYBA"))
+    if not ok_:
+        chyba("ves_barva", koren, "%s: prumer sRGB %s jas %.2f - ne hneda (R>G>B) nebo nad test_jas_max %.2f (tools/zesvetli_ves.py krok 5)"
+              % (kde, [round(c, 2) for c in rgb], jas_, _SDJ["test_jas_max"]))
+
+
+_pS, _pD = os.path.join(ROOT, "modely", "ves", "domy_stredni.glb"), os.path.join(ROOT, "modely", "ves", "domy.glb")
+if not (os.path.exists(_pS) and os.path.exists(_pD)):
+    print("SMYSL ves_barva NEOVERENO: chybi modely/ves/domy_stredni.glb nebo domy.glb (zdroje vsi v kontejneru nejsou)")
+else:
+    import numpy as _np
+    _js, _b = _glb_json(_pS)
+    for _nd in _js["nodes"]:
+        if "mesh" not in _nd or not _nd.get("name", "").endswith("_Stredni"):
+            continue
+        _sum, _n = _np.zeros(3), 0
+        for _pr in _js["meshes"][_nd["mesh"]]["primitives"]:
+            _ai = _pr["attributes"].get("COLOR_0")
+            if _ai is None:
+                continue
+            _a = _js["accessors"][_ai]
+            _v = _js["bufferViews"][_a["bufferView"]]
+            _k = {"VEC3": 3, "VEC4": 4}[_a["type"]]
+            _dt = {5126: _np.float32, 5121: _np.uint8, 5123: _np.uint16}[_a["componentType"]]
+            _sz = _np.dtype(_dt).itemsize
+            _st = _v.get("byteStride", 0) or _k * _sz
+            _off = _v.get("byteOffset", 0) + _a.get("byteOffset", 0)
+            _raw = _np.frombuffer(_b, _np.uint8, _st * (_a["count"] - 1) + _k * _sz, _off)
+            _ix = (_np.arange(_a["count"])[:, None] * _st + _np.arange(_k * _sz)[None, :]).ravel()
+            _c = _raw[_ix].view(_dt).reshape(-1, _k)[:, :3].astype(float) / {5126: 1.0, 5121: 255.0, 5123: 65535.0}[_a["componentType"]]
+            _c = _np.where(_c <= 0.0031308, _c * 12.92, 1.055 * _np.power(_np.clip(_c, 0, None), 1 / 2.4) - 0.055)
+            _sum += _c.sum(0)
+            _n += len(_c)
+        if _n:
+            _ves_barva(_nd["name"][:-len("_Stredni")], list(_sum / _n), "stredni")
+    _js, _b = _glb_json(_pD)
+    for _nd in _js["nodes"]:
+        if "mesh" not in _nd or not _nd.get("name", "").endswith("_Daleko"):
+            continue
+        _cs = []
+        for _pr in _js["meshes"][_nd["mesh"]]["primitives"]:
+            _pbr = _js["materials"][_pr["material"]].get("pbrMetallicRoughness", {}) if "material" in _pr else {}
+            if "baseColorTexture" not in _pbr:
+                _cs.append([_srgb1(c) for c in _pbr.get("baseColorFactor", [1, 1, 1])[:3]])
+        if _cs:
+            _ves_barva(_nd["name"][:-len("_Daleko")], [sum(c[i] for c in _cs) / len(_cs) for i in range(3)], "daleko")
+
 souhrn = {}
 for c in CHYBY:
     souhrn[c] = souhrn.get(c, 0) + 1
