@@ -520,6 +520,7 @@ func _process_vlastni(_dt: float) -> void:
 	var tp := Time.get_ticks_usec()
 	_nah_zacni()
 	_krok()
+	_kupy_nahrej()
 	_nah_konec()
 	if _cas:
 		var ms := (Time.get_ticks_usec() - tp) / 1000.0
@@ -1851,7 +1852,35 @@ func _kupy_uzel(hot: Dictionary) -> Node3D:
 	root.name = "kupy_mala" if float(L[0]) < 100.0 else "kupy_velka"
 	add_child(root)
 	_mm(root, _kupa, hot["xfs"], hot["cen"], float(L[1]), float(L[2]), false, hot["cust"])
+	# zaseky_rozbor_system.md (kupy: cely buffer v 1 snimku): kreslene instance rostou po kvantech v rozpoctu bajtu
+	# snimku (_kupy_nahrej, stejny model _nah_* jako louka) - nahrani do GPU se rozlozi do snimku
+	for g in root.get_children():
+		var mmi := g as MultiMeshInstance3D
+		if mmi and mmi.multimesh:
+			mmi.multimesh.visible_instance_count = 0
+			_kupy_fronta.append(mmi.multimesh)
 	return root
+
+
+var _kupy_fronta: Array[MultiMesh] = []
+
+
+## Kupy ve fronte nahrani: kazdy snimek kreslene instance + kvantum, dokud se vejdou do rozpoctu bajtu snimku.
+func _kupy_nahrej() -> void:
+	while not _kupy_fronta.is_empty():
+		var mm: MultiMesh = _kupy_fronta[0]
+		if mm == null or not is_instance_valid(mm) or mm.get_reference_count() <= 1:
+			_kupy_fronta.pop_front()                     # bunka mezitim zrusena
+			continue
+		var cur := maxi(mm.visible_instance_count, 0)
+		if cur >= mm.instance_count:
+			mm.visible_instance_count = -1
+			_kupy_fronta.pop_front()
+			continue
+		var do_ := mini(cur + _nah_kv, mm.instance_count)
+		if not _nah_vejde(mm, do_, true):
+			return                                       # rozpocet snimku vycerpan - dalsi snimek
+		_nah_zvys(mm, do_)
 
 
 ## Vsechny kvety v jednom MultiMeshi (rozpocet kresleni): atlas 4 barev vedle sebe, barvu vybira INSTANCE_CUSTOM.r.
