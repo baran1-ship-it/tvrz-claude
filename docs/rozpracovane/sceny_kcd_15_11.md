@@ -409,3 +409,20 @@ Ostatní je podezření nebo návrh. Po dvou neúspěšných pokusech o tutéž 
 | `kcd1_ves_cesta_svah.jpg` | vjezd do vsi: cesta mezi plotem, vysokou trávou a pásem keřů/sutí na svahu; ves odkryta jen v ose cesty; svahy v dálce = textura terénu + řídké shluky stromů, hřbet lesa nahoře jako jedna tmavá hmota | clona u vjezdu (krok a), dálka ochuzená: terén + hmota, ne jednotlivé stromy |
 | `les100_hmota_dalka.jpg` | Míšina pokusná hra: v dálce za kmeny jedna hmota korun | totéž |
 Míša: „les je plný a dálka je dost ochuzená, takže asi moc nestojí“ – souhlasí s plánem: cena jde do blízka, dálka levná.
+
+## Inspirace Míši 15. 11. noc – Matěj Bejček, level artist KCD1/KCD2 (`docs/reference/sceny_15_11/bejcek_01–18.jpg`)
+Míša: „posílám inspiraci, jak bych to chtěl, vem si z toho maximum“. Co z toho brát (kopírovat ne, inspiraci ano):
+- **Cesty:** vyjeté koleje, kamínky, pruh trávy uprostřed, okraj cesty = vysoká tráva, bylinky (bílé okoličnaté, růžové
+  kvítí), keře a nízké stromy těsně u cesty – cesta je „tunel“ zeleně (03, 05), dálka vidět jen v ose cesty.
+- **Potok ve vsi:** úzké koryto s vysokou trávou a rákosovitými latami (třtina) na obou březích, břízy, lávka (06, 09).
+- **Ves:** domy za ploty z latí/plaňek, mezi nimi stromy (ovocné, lípa), hlína ulice, trávník u domů jen pruhy (08, 02);
+  kostelík a statky v zeleni, louka s květy v popředí, les za vsí jako hmota (02).
+- **Dvory:** hlína + trávník, velký strom uprostřed, stůl s lavicemi, špalek, dříví u zdi, svlačec/břečťan na zdech (11, 12).
+- **Hrad/tvrz na kopci:** louka s kameny a pěšinou, skalní výchozy, pole ve svazích jako pruhy s mezemi a keři (01, 16–18).
+- **Rybníček u dvora:** rákos, vrby (hlavaté), okřehek, zídka (10, 14).
+- **Křižovatka:** ohrada z kuláčů s otevřenou branou, pole za ní, lesní hmota v pozadí (07).
+
+## Pole ve vsi (Míša 15. 11. noc)
+„Úprava polí ve vsi, které máme zbytečně po kraji – stačilo by něco za vesnicí a zbytek louky a lesy.“ → pole jen za
+vsí (pruhy s mezemi a keři jako bejcek_16/18), ostatní plochy louky a les; záznam v `lokace.json`/`pole` (ne v kódu).
+Pořadí po vydání: 1) pole, 2) scény (clona vjezdu, houština, hmota lesa). Míša pošle ještě sadu fotek z Havrana podél mapy.
