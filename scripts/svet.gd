@@ -12891,8 +12891,6 @@ func smi_tu_byt(x: float, z: float, druh := "") -> bool:
 		return false                                  # pravidla druhu (druhy.json) a voda + brehovy pas
 	if v_lomu(x, z) < 1.0 and not druh.begins_with("kamen") and not druh.begins_with("balvan"):
 		return false
-	if not (druh.contains("trava") or druh.contains("grass")) and v_pruchodu_ruiny(x, z):
-		return false                                  # pruchod zriceniny: jen trava (jako Blender kraj.v_pruchodu_ruiny)
 	var c := Vector2i(floori(x / 32.0), floori(z / 32.0))
 	if kryti_tab.has(c):
 		var i := clampi(floori((x - c.x * 32.0) / 0.5), 0, 63)
@@ -13087,6 +13085,8 @@ func druh_smi_hra(key: String, x: float, z: float, y := INF, sc := 1.0) -> bool:
 			return false
 	if not uzivani_smi(key, x, z, sc):
 		return false                                  # uzivani: zahon, pruchod, vnitrek stavby, cesta
+	if not (key.contains("trava") or key.contains("grass")) and v_pruchodu_ruiny(x, z):
+		return false                                  # pruchod zriceniny: jen trava (i pro _lesni_patro, _skalni_mesto)
 	var d: Dictionary = _druhy_hra.get(druh_klice(key), {})
 	if d.is_empty():
 		return true
