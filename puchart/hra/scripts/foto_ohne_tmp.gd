@@ -74,7 +74,7 @@ func _ready() -> void:
 		sh.append(["hradA_sin_svetlo", W.call(5.6, 2.3, F + 1.7), W.call(8.0, -3.0, F + 0.9), 12.0, true])
 	sh.append(["hradB_sin_v", Vector3(50.3, 16.3, 146.6), Vector3(57.5, 15.4, 146.6), 12.0, true])
 	sh.append(["hradB_sin_z", Vector3(57.5, 16.3, 144.0), Vector3(50.0, 15.4, 149.5), 12.0, true])
-	sh.append(["hradB_sin_j", Vector3(53.9, 16.3, 144.0), Vector3(53.9, 15.4, 150.0), 12.0, true])
+	sh.append(["hradB_sin_j", Vector3(53.9, 16.3, 149.6), Vector3(53.9, 15.4, 143.2), 12.0, true])
 	var lamp := OmniLight3D.new(); lamp.omni_range = 14.0; lamp.light_energy = 2.0; lamp.visible = false; cam.add_child(lamp)
 	var jen := OS.get_environment("PUCHART_FOTO_JEN").split(",", false)
 	for s in sh:

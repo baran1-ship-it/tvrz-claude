@@ -70,10 +70,9 @@
   ]
  },
  "uhliky": {
-  "_popis": "Žhavé uhlíky: plochý disk (ohniště, pec) nebo překryv sítě žáru modelu (kovárna Kovarna_Zhar, material_overlay). meritko = buněk žáru na metr, pulz = Hz pomalého dýchání žáru. material_modelu: povrch sítě <Dům>_Interier s tímto materiálem (domy.glb: kamínkové ohniště před ústím pece a žár uvnitř) dostane při hoření shader uhlíků místo materiálu modelu (snímek ohen_pec_usti 15. 11.: materiál modelu pod světlem pece přepálený do bíla).",
+  "_popis": "Žhavé uhlíky: plochý disk (ohniště, pec) nebo překryv sítě žáru modelu (kovárna Kovarna_Zhar, material_overlay). meritko = buněk žáru na metr, pulz = Hz pomalého dýchání žáru. Pec domu: navíc disk uhlíků v kamínkovém ohništi před ústím (mista[].usti.ohnisko [x, y, z, poloměr] v souřadnicích domu; domy.glb – plocha M_Zhar uprostřed kruhu kamenů; 1. pokus překrýt materiál modelu shaderem nebyl vidět – UV modelu mimo 0–1, snímek 15. 11.).",
   "meritko": 6.0,
-  "pulz": 0.6,
-  "material_modelu": "M_Zhar"
+  "pulz": 0.6
  },
  "zvuk": {
   "_popis": "Praskání ohně: Havran zvuky/prostredi/krb.ogg (CC0, antumdeluge + pagdev, opengameart; Havran zvuky/seznam.txt), smyčka 90 s. Havran _add_fire_loop: unit_size 2,5, max_distance 22.",
@@ -211,7 +210,13 @@
     ],
     "sirka": 0.42,
     "vyska": 0.335,
-    "zdroj": "rozbor sítě hra/modely/stavby_h/domy.glb 15. 11. (Havran blender/ves_domy.py): ústí pece = plocha materiálu M_Tma (černý otvor s obloukem) v síti <Dům>_Interier, svislá, normála +z modelu (do jizby); body oblouku Dum1 x −2,828…−2,408, y 0,94…1,275, z 2,22; začouzení nad ústím je už v modelu (M_PecZacouzena y 1,07–1,43 na líci klenby); žhavé uhlíky modelu (M_Zhar) leží uvnitř pece za otvorem (nevidět). Vzhled: KCD chalupy – oheň a uhlíky viditelné v ústí hliněné pece (docs/reference/kcd_vzhled, Havran docs/screens/ref_kcd2_*)"
+    "zdroj": "rozbor sítě hra/modely/stavby_h/domy.glb 15. 11. (Havran blender/ves_domy.py): ústí pece = plocha materiálu M_Tma (černý otvor s obloukem) v síti <Dům>_Interier, svislá, normála +z modelu (do jizby); body oblouku Dum1 x −2,828…−2,408, y 0,94…1,275, z 2,22; začouzení nad ústím je už v modelu (M_PecZacouzena y 1,07–1,43 na líci klenby); žhavé uhlíky modelu (M_Zhar) leží uvnitř pece za otvorem (nevidět). Vzhled: KCD chalupy – oheň a uhlíky viditelné v ústí hliněné pece (docs/reference/kcd_vzhled, Havran docs/screens/ref_kcd2_*)",
+    "ohnisko": [
+     -2.49,
+     0.68,
+     2.475,
+     0.14
+    ]
    },
    "usti_uzel": "Dum1_Pec_Usti"
   },
@@ -234,7 +239,13 @@
     ],
     "sirka": 0.42,
     "vyska": 0.335,
-    "zdroj": "rozbor sítě hra/modely/stavby_h/domy.glb 15. 11. (Havran blender/ves_domy.py): ústí pece = plocha materiálu M_Tma (černý otvor s obloukem) v síti <Dům>_Interier, svislá, normála +z modelu (do jizby); body oblouku Dum1 x −2,828…−2,408, y 0,94…1,275, z 2,22; začouzení nad ústím je už v modelu (M_PecZacouzena y 1,07–1,43 na líci klenby); žhavé uhlíky modelu (M_Zhar) leží uvnitř pece za otvorem (nevidět). Vzhled: KCD chalupy – oheň a uhlíky viditelné v ústí hliněné pece (docs/reference/kcd_vzhled, Havran docs/screens/ref_kcd2_*)"
+    "zdroj": "rozbor sítě hra/modely/stavby_h/domy.glb 15. 11. (Havran blender/ves_domy.py): ústí pece = plocha materiálu M_Tma (černý otvor s obloukem) v síti <Dům>_Interier, svislá, normála +z modelu (do jizby); body oblouku Dum1 x −2,828…−2,408, y 0,94…1,275, z 2,22; začouzení nad ústím je už v modelu (M_PecZacouzena y 1,07–1,43 na líci klenby); žhavé uhlíky modelu (M_Zhar) leží uvnitř pece za otvorem (nevidět). Vzhled: KCD chalupy – oheň a uhlíky viditelné v ústí hliněné pece (docs/reference/kcd_vzhled, Havran docs/screens/ref_kcd2_*)",
+    "ohnisko": [
+     -2.13,
+     0.63,
+     2.67,
+     0.14
+    ]
    },
    "usti_uzel": "Dum2_Pec_Usti"
   },
@@ -257,7 +268,13 @@
     ],
     "sirka": 0.42,
     "vyska": 0.335,
-    "zdroj": "rozbor sítě hra/modely/stavby_h/domy.glb 15. 11. (Havran blender/ves_domy.py): ústí pece = plocha materiálu M_Tma (černý otvor s obloukem) v síti <Dům>_Interier, svislá, normála +z modelu (do jizby); body oblouku Dum1 x −2,828…−2,408, y 0,94…1,275, z 2,22; začouzení nad ústím je už v modelu (M_PecZacouzena y 1,07–1,43 na líci klenby); žhavé uhlíky modelu (M_Zhar) leží uvnitř pece za otvorem (nevidět). Vzhled: KCD chalupy – oheň a uhlíky viditelné v ústí hliněné pece (docs/reference/kcd_vzhled, Havran docs/screens/ref_kcd2_*)"
+    "zdroj": "rozbor sítě hra/modely/stavby_h/domy.glb 15. 11. (Havran blender/ves_domy.py): ústí pece = plocha materiálu M_Tma (černý otvor s obloukem) v síti <Dům>_Interier, svislá, normála +z modelu (do jizby); body oblouku Dum1 x −2,828…−2,408, y 0,94…1,275, z 2,22; začouzení nad ústím je už v modelu (M_PecZacouzena y 1,07–1,43 na líci klenby); žhavé uhlíky modelu (M_Zhar) leží uvnitř pece za otvorem (nevidět). Vzhled: KCD chalupy – oheň a uhlíky viditelné v ústí hliněné pece (docs/reference/kcd_vzhled, Havran docs/screens/ref_kcd2_*)",
+    "ohnisko": [
+     -2.875,
+     0.68,
+     1.225,
+     0.14
+    ]
    },
    "usti_uzel": "Rychta_Pec_Usti"
   },

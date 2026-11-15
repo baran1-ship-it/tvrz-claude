@@ -112,10 +112,10 @@ func _usti(m: Dictionary, tel: Node3D) -> Dictionary:
 	var u: Dictionary = m["usti"]
 	var zn := dum.find_child(String(m.get("usti_uzel", "-")), true, false) as Node3D
 	if zn:
-		return {"bod": zn.global_position, "smer": (zn.global_basis.z * Vector3(1, 0, 1)).normalized(), "sirka": float(u["sirka"]), "vyska": float(u["vyska"]), "dum": dum}
+		return {"bod": zn.global_position, "smer": (zn.global_basis.z * Vector3(1, 0, 1)).normalized(), "sirka": float(u["sirka"]), "vyska": float(u["vyska"]), "dum": dum, "ohnisko": u.get("ohnisko", [])}
 	var b: Array = u["bod"]; var sm: Array = u["smer"]
 	return {"bod": dum.global_transform * Vector3(b[0], b[1], b[2]), "smer": (dum.global_basis * Vector3(sm[0], sm[1], sm[2])).normalized(),
-		"sirka": float(u["sirka"]), "vyska": float(u["vyska"]), "dum": dum}
+		"sirka": float(u["sirka"]), "vyska": float(u["vyska"]), "dum": dum, "ohnisko": u.get("ohnisko", [])}
 
 
 ## Směr (vodorovně) s nejdelším volným paprskem z bodu – do místnosti; vyjma = RID vlastní kolize (pec).
@@ -192,14 +192,13 @@ func _pridej(m: Dictionary, n: Node3D) -> void:
 		_geom(pl); uz.add_child(pl); pl.basis = bz; pl.position = ven * (od * 1.5) + Vector3.UP * 0.02; o["plamen"] = pl
 		var uh := MeshInstance3D.new(); uh.name = "Uhliky"; uh.mesh = _karta(sw * 0.92, float(dr["usti_uhliky_v"]), 1); uh.material_override = _mat_uhliky
 		_geom(uh); uz.add_child(uh); uh.basis = bz; uh.position = ven * od; o["uhliky"] = uh
-		# žár modelu (materiál M_Zhar* v síni <Dům>_Interier – kamínkové ohniště před ústím) žhne stejným shaderem jako uhlíky
-		var zs: Array = []
-		for ch in (usti["dum"] as Node).get_children():
-			if ch is MeshInstance3D and String(ch.name).ends_with("Interier") and (ch as MeshInstance3D).mesh:
-				for i_ in (ch as MeshInstance3D).mesh.get_surface_count():
-					var sm_ := (ch as MeshInstance3D).mesh.surface_get_material(i_)
-					if sm_ and String(sm_.resource_name).begins_with(String(cfg["uhliky"].get("material_modelu", "M_Zhar"))): zs.append([ch, i_])
-		if not zs.is_empty(): o["zhar_site"] = zs
+		# kamínkové ohniště před ústím (domy.glb: kruh kamenů s plochou M_Zhar) – disk žhavých uhlíků (mista[].usti.ohnisko [x, y, z, r])
+		if (usti["ohnisko"] as Array).size() == 4:
+			var oq: Array = usti["ohnisko"]; var r_ := float(oq[3])
+			if not _disk.has(r_): _disk[r_] = _sit_disku(r_)
+			var od_ := MeshInstance3D.new(); od_.name = "UhlikyOhniste"; od_.mesh = _disk[r_]; od_.material_override = _mat_uhliky
+			_geom(od_); add_child(od_); od_.global_position = (usti["dum"] as Node3D).global_transform * Vector3(oq[0], oq[1], oq[2]) + Vector3.UP * 0.012
+			od_.global_basis = (usti["dum"] as Node3D).global_basis; o["uhliky2"] = od_
 	if zhar:   # žár výhně: překryv sítě modelu (druhý průchod se stejným shaderem)
 		zhar.material_overlay = _mat_uhliky; o["zhar"] = zhar
 	var l := OmniLight3D.new(); l.name = "Svetlo"
@@ -228,7 +227,7 @@ func _ukaz(o: Dictionary) -> void:
 	if o.has("plamen"): (o["plamen"] as Node3D).visible = o["hori"]
 	if o.has("uhliky"): (o["uhliky"] as Node3D).visible = o["hori"]
 	if o.has("zhar"): (o["zhar"] as GeometryInstance3D).material_overlay = _mat_uhliky if o["hori"] else null
-	for z_: Array in o.get("zhar_site", []): (z_[0] as MeshInstance3D).set_surface_override_material(int(z_[1]), _mat_uhliky if o["hori"] else null)
+	if o.has("uhliky2"): (o["uhliky2"] as Node3D).visible = o["hori"]
 
 
 ## Zapálit / uhasit oheň i (ručně – pece domů pak nepřepíná denní doba).
