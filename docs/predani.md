@@ -1423,3 +1423,9 @@ Hotovo v kódu a datech (testy u každého):
   do `modely/krcma/`; segfault na konci Blenderu je normální.
 - **Tráva v budovách (opakovaná chyba) – skutečná příčina:** pás krytí cesty v `louka._rozsej` přepisoval tvrdé zákazy; testy byly
   slepé (poloha trsu je v custom data, ne v transformaci). Teď `louka._zakaz_travy` (jedno místo) a testy čtou `louka.trsy_v_oblasti`.
+- **Rybník Lhota v2 (15. 11., Míša „nechceš si udělat komplet nový model?“):** jeden záznam `voda.json rybnik_lhota` (verze 2: obrys,
+  hladina, hráz, vtok kolmo, požerák, výpust s čelem a tůní, přeliv, lávka), plánovač `tools/krok_b/rybnik_v2.py [--zapis]`, Blender
+  staví dno, hladinu jen nad vyhloubeným dnem (mřížka 0,5 m, průhledný kraj) a předměty; hra už `rybnik.glb` nenačítá. Rákos
+  `kraj.ryb2_vegetace` (veg.py), pěšina končí u lávky. Test `rybnik_dil` vyřazen (díl není), hlídá `ryb_napojeni` + `voda_v_korytu`.
+- **`tools/krok_b/vysky.json`** = terén PŘED vodou (`fort.land(..., voda=False)`) – s vodou hlásil test smyslu falešný sklon
+  cesty k mlýnu 14 % přes zářez odtoku. Soubor není v gitu: v nové session `cd blender && /opt/bl/bin/python ../tools/krok_b/vysky.py ../tools/krok_b/vysky.json`.

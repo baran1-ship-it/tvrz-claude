@@ -1625,11 +1625,12 @@
    ]
   },
   "preliv": {
-   "posun_m": 3.5,
+   "posun_m": 2.8,
    "sirka_m": 1.6,
    "nabeh_m": 1.2,
    "koruna_nad_hladinou_m": 0.35,
-   "popis": "bezpecnostni preliv: koruna hraze snizena na koruna_nad_hladinou_m v pasu sirka_m (nabeh_m po stranach: 0,45 m na 1,2 m = 20 st., na 0,6 m bylo 37 st. - skala v zem.gdshader) posun_m od osy trouby k prostredku hraze; koryto z plochych kamenu pres korunu a vzdusny svah k pate. Odhad, NEOVERENO zdrojem."
+   "popis": "bezpecnostni preliv: koryto z plochych kamenu sirka_m (svahy nabeh_m) posun_m od osy trouby vypusti k prostredku hraze; na korune vodorovne v koruna_nad_hladinou_m, za vzdusnou hranou koruny dolu k odkopu u cela vypusti (kde kridlo 45 st. potka osu prelivu), konec konec_nad_hladinou_m nad hladinou odtoku - voda steka do tune a odtoku (teren za hrazi je vys nez snizena koruna, bez koryta by preliv nikam neodtekl, nahled 15. 11.). Rozmery odhad, NEOVERENO zdrojem.",
+   "konec_nad_hladinou_m": 0.3
   },
   "lavka": {
    "od_hraze_m": 3.0,

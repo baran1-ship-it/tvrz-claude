@@ -189,10 +189,10 @@ for o in list(PARTS.values()) + [eyes, brows] + hairs + [o for v in GAR.values()
 # kontrola svarů (svy_odevu): otevřené hrany v ramenou a horních zádech mimo otvory oděvu = 0, kusy oděvu po decimaci
 SVY_OTEV = {}
 for k, objs in GAR.items():
-    if k not in SVY["kontrola_kusy"] or k not in KROJ.get("vychozi", list(GAR)): continue
+    if k not in KROJ.get("vychozi", list(GAR)) or (k not in SVY["kontrola_kusy"] and k not in SVY["jeden_kus"]): continue
     for o in objs:
-        oh = _cl.otevrene_hrany(o, arm, SVY["oblast"]); ks_ = _cl.kusy(o)
-        SVY_OTEV[o.name] = len(oh) + max(0, ks_ - 1)          # i každý kus navíc = nesvařený oděv
+        oh = _cl.otevrene_hrany(o, arm, SVY["oblast"]) if k in SVY["kontrola_kusy"] else []; ks_ = _cl.kusy(o)
+        SVY_OTEV[o.name] = len(oh) + (max(0, ks_ - 1) if k in SVY["jeden_kus"] else 0)   # kus navíc = nesvařený oděv
         print("SVY", o.name, "kusu", ks_, "otevrenych hran v ramenou", len(oh),
               [tuple(round(c, 3) for c in x) for x in oh[:4]])
 print("SVY CELKEM", sum(SVY_OTEV.values()))

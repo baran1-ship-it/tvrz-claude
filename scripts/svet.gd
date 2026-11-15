@@ -86,6 +86,10 @@ func _vo_jen_ulice() -> void:
 			break
 		t += 0.5
 	var cil := RYB_C + smer_k * t
+	# Misa 15. 11. (novy rybnik v2, voda.json rybnik_lhota lavka): pesina konci na brehu u pate lavky, ne u ctverce stareho dilu
+	var lv: Dictionary = Pravidla.cti("voda", "rybnik_lhota").get("lavka", {})
+	if int(Pravidla.cti("voda", "rybnik_lhota").get("verze", 1)) >= 2 and lv.has("bod"):
+		cil = Vector2(float(lv["bod"][0]), float(lv["bod"][1])) - Vector2(float(lv["smer"][0]), float(lv["smer"][1])) * 1.5
 	PESINY.append([ko, ko.lerp(cil, 0.35) + Vector2(4.0, -3.0), ko.lerp(cil, 0.7) + Vector2(-2.0, 4.0), cil])
 	PES_SIRKA.append(float(Pravidla.cti("cesty", "pesiny_odvozene", "k_rybniku_pulsirka_m")))
 	_vys = {}
@@ -287,6 +291,10 @@ func _vo_data() -> void:
 			break
 		t += 0.5
 	var cil := RYB_C + smer_k * t
+	# Misa 15. 11. (novy rybnik v2, voda.json rybnik_lhota lavka): pesina konci na brehu u pate lavky, ne u ctverce stareho dilu
+	var lv: Dictionary = Pravidla.cti("voda", "rybnik_lhota").get("lavka", {})
+	if int(Pravidla.cti("voda", "rybnik_lhota").get("verze", 1)) >= 2 and lv.has("bod"):
+		cil = Vector2(float(lv["bod"][0]), float(lv["bod"][1])) - Vector2(float(lv["smer"][0]), float(lv["smer"][1])) * 1.5
 	PESINY.append([ko, ko.lerp(cil, 0.35) + Vector2(4.0, -3.0), ko.lerp(cil, 0.7) + Vector2(-2.0, 4.0), cil])
 	PES_SIRKA.append(float(Pravidla.cti("cesty", "pesiny_odvozene", "k_rybniku_pulsirka_m")))
 	_vys = {}
@@ -11089,6 +11097,8 @@ func _rybnik_breh() -> void:
 	if _ryb_y != INF:
 		_rybnik_breh_dil()
 		return
+	if (Pravidla.cti("voda", "rybnik_lhota") as Dictionary).has("obrys"):
+		return                          # rybnik v2: rakos a stromy u kraje vody sazi Blender (kraj.ryb2_vegetace)
 	if nadrz == null:
 		return
 	var r: Dictionary = data["rostliny"]

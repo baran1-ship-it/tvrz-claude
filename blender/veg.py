@@ -522,24 +522,9 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                         nove.strom(Rr.choice(["vrba_hlavata_1", "vrba_hlavata_2"]), x, F.land(x, z), z, Rr.uniform(5.5, 7.5))
                 s_ += Rr.uniform(16.0, 34.0)
             acc += L
-        # rybnik ve vsi: rakos a orobinec v trsech na mělcine u brehu (ne dokola stejne), dal vrby hlavate a olse
-        import vesnice
-        a0_ = Rr.uniform(0, 2 * math.pi)
-        a_ = a0_
-        while a_ < a0_ + 2 * math.pi:
-            if Rr.random() < 0.7:                       # trs, mezi trsy volny breh
-                pid0 = Rr.choice(["orobinec_1", "orobinec_2", "rakos_1", "rakos_2"])
-                for _ in range(Rr.randint(4, 9)):
-                    x, z = vesnice.pond_point(a_ + Rr.uniform(-0.12, 0.12), Rr.uniform(0.86, 1.08))
-                    pid = pid0 if Rr.random() < 0.8 else Rr.choice(["orobinec_1", "rakos_2"])
-                    nove.misto(pid, x, F.land(x, z), z, Rr.uniform(0.75, 1.15), Rr.uniform(0, 2 * math.pi), None, sink=0.05)
-            a_ += Rr.uniform(0.35, 0.7)
-        for i in range(7):
-            x, z = vesnice.pond_point(i / 7 * 2 * math.pi + Rr.uniform(-0.3, 0.3), Rr.uniform(1.3, 1.6))
-            if i % 3 == 2:
-                nove.strom("olse_mlada", x, F.land(x, z), z, Rr.uniform(6, 8.5))
-            else:
-                nove.strom(Rr.choice(["vrba_hlavata_1", "vrba_hlavata_2"]), x, F.land(x, z), z, Rr.uniform(5.0, 7.0))
+        # rybnik Lhota v2 (Misa 15. 11. „novy model“, voda.json rybnik_lhota verze 2): rakos, orobinec a stromy u vypocteneho
+        # kraje vody - drive kolem stareho ovalu navesniho rybnicku (vesnice.pond_point)
+        kraj.ryb2_vegetace(F.land, Rr)
         # psenice na lanech s obilim (plochy.json psenice, Misa 28. 10.): zrala a zelena po lanech, kraj lanu ridsi s travou
         ps_body, ps_trava = kraj.psenice_body()
         for pid, x, z, k, yaw in ps_body:

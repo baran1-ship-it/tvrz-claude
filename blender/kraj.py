@@ -813,7 +813,38 @@ def ryb2_tvar(x, z, h, ryb, prof_toku):
     hr = ryb2_hraz(x, z, ryb)
     if hr > h:
         h = hr
-    return min(h, ryb2_tune(x, z, ryb))
+    return min(h, ryb2_tune(x, z, ryb), ryb2_preliv_dno(x, z, ryb))
+
+
+def ryb2_preliv(ryb):
+    """Osa koryta prelivu v ramci hraze: (a osy, t zacatku na navodni hrane koruny, t konce, y koruny prelivu, y konce).
+    Koryto vede pres korunu a vzdusny svah k pate, konci v odkopu u cela vypusti (kde kridlo 45 st. potka osu prelivu)
+    preliv.konec_nad_hladinou_m nad hladinou odtoku - voda z prelivu steka do tune a odtoku (teren za hrazi je tu vys
+    nez snizena koruna, bez koryta by preliv nikam neodtekl)."""
+    g = ryb2(ryb)
+    hz, vy, pr = ryb["hraz"], ryb["vypust"], ryb["preliv"]
+    ap = g["a0"] + pr["posun_m"]
+    t1 = g["t_celo"] + abs(pr["posun_m"]) - vy["celo_sirka_m"] / 2.0
+    return ap, -hz["koruna_sirka_m"] / 2.0, t1, ryb["hladina_y"] + pr["koruna_nad_hladinou_m"], vy["hladina_y"] + pr["konec_nad_hladinou_m"]
+
+
+def ryb2_preliv_dno(x, z, ryb):
+    """Dno koryta prelivu (+inf mimo): na korune vodorovne v koruna_nad_hladinou_m, za vzdusnou hranou koruny linearne
+    dolu na konec; napric sirka_m, po stranach svah nabeh_m."""
+    g = ryb2(ryb)
+    hz, pr = ryb["hraz"], ryb["preliv"]
+    ap, t0, t1, y0, y1 = ryb2_preliv(ryb)
+    dx, dz = x - hz["stred"][0], z - hz["stred"][1]
+    a = dx * g["u"][0] + dz * g["u"][1]
+    t = dx * g["n"][0] + dz * g["n"][1]
+    lat = abs(a - ap) - pr["sirka_m"] / 2.0
+    if t < t0 - pr["nabeh_m"] or t > t1 + pr["nabeh_m"] or lat > pr["nabeh_m"] * 3.0:
+        return 1e9
+    tk = hz["koruna_sirka_m"] / 2.0
+    tt = min(max(t, t0), t1)
+    y = y0 if tt <= tk else y0 + (y1 - y0) * (tt - tk) / max(t1 - tk, 1e-6)
+    return y + max(0.0, lat) * (hz["koruna_nad_hladinou_m"] - pr["koruna_nad_hladinou_m"]) / pr["nabeh_m"] \
+        + max(0.0, t0 - t, t - t1) * 1.0
 
 
 def ryb2_vtok_rez(ryb, x, z):
@@ -1780,14 +1811,11 @@ def ryb2_predmety(coll, ryb, land_fn, vs, tris, hl):
         kit.plank(P, a, b, 0.3, 0.05, "prkna_ven", wear=0.6, seg_len=0.4)
     P.cols.append((M(((px + kx) / 2, (y1 + kor) / 2 + 0.04, (pz_ + kz) / 2), yaw_n), (math.hypot(kx - px, kz - pz_) + 0.4, 0.08, 0.7)))
 
-    # preliv: plochy kamen pres korunu a vzdusny svah od navodni hrany koruny k pate (teren hraze se snizenou korunou)
-    ap = g["a0"] + pr["posun_m"]
-    t = -hz["koruna_sirka_m"] / 2.0 - 0.6
-    while True:
+    # preliv: plochy kamen v korytu prelivu (ryb2_preliv_dno) od navodni hrany koruny po konec u cela vypusti
+    ap, t, t_kon, _y0, _y1 = ryb2_preliv(ryb)
+    t -= 0.6
+    while t <= t_kon + 0.3:
         bx, bz = hz["stred"][0] + ux * ap + nx * t, hz["stred"][1] + uz * ap + nz * t
-        yb = land_fn(bx, bz)
-        if t > 0 and yb < vy["hladina_y"] + 0.15:
-            break
         o = -pr["sirka_m"] / 2.0
         while o < pr["sirka_m"] / 2.0:
             dl = R.uniform(0.35, 0.55)
@@ -1799,8 +1827,6 @@ def ryb2_predmety(coll, ryb, land_fn, vs, tris, hl):
             sx, sz = bx + ux * sg * (pr["sirka_m"] / 2 + 0.15), bz + uz * sg * (pr["sirka_m"] / 2 + 0.15)
             kit.stone(P, M((sx, land_fn(sx, sz) + 0.04, sz), yaw_n + R.uniform(-5, 5)), (0.45, 0.25, 0.28), "kvadr_sedy", cham=0.04, rough=0.02)
         t += 0.45
-        if t > hz["koruna_sirka_m"] + 12.0:
-            break
 
     # praci lavka: kuly a prkna kolmo do vody od kraje
     lx, lz = lv["bod"]

@@ -8,6 +8,6 @@ h=array.array('f')
 for j in range(nz):
     z=Z0+j*K
     for i in range(nx):
-        h.append(fort.land(X0+i*K, z, flat=False, pads=False))
+        h.append(fort.land(X0+i*K, z, flat=False, pads=False, voda=False))
 json.dump({'K':K,'X0':X0,'Z0':Z0,'nx':nx,'nz':nz,'h':list(h)}, open(sys.argv[1],'w'))
 print('hotovo', nx, nz, time.time()-t)

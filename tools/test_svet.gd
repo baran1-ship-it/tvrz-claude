@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1878,6 +1878,10 @@ func _voda_v_korytu() -> void:
 		vynech.append([Vector2(float(pr["stred"][0]), float(pr["stred"][1])), float(pr.get("polomer_m", 8.0))])
 	for k in ["rybnik_lhota", "rybnik_tvrz"]:
 		var r: Dictionary = P.cti("voda", k)
+		if r.has("obrys"):
+			# rybnik v2 (Misa 15. 11. r. 13): pritok konci ve vtoku na kraji vody, odtok zacina u cela vypusti - bez
+			# vyjimky (driv kruh 14 m kolem stredu: usti pritoku a zacatek odtoku test nevidel)
+			continue
 		vynech.append([Vector2(float(r["stred"][0]), float(r["stred"][1])), float(r.get("polomer_m", r.get("voda_polomer_m", 12.0))) + 2.0])
 	# jez u vtoku nahonu mlyna (hladina vzduta na uroven nahonu) je stavba jako brod - stejna vyjimka a dosah jako test
 	# smyslu breh_toku a dil_okraj (toky_tvar breh_sirka_m + 3 m od prvniho bodu nahonu, tools/krok_b/mlyn_voda.json)
@@ -5034,6 +5038,8 @@ func _rybnik_ves() -> void:
 ## 2) okraj hladiny Rybnik_Voda: teren dilu pod okrajem ne niz nez hladina - predmet_visi_m (jinak hladina visi nad
 ##    snizenym brehem), krome mist pod hladinou toku (vtok, vypust);
 ## 3) toky pres dil (osa do pulsirka dilu + pas napojeni): teren dilu pod osou aspon hloubka_dno_min_m pod hladinou toku
+## VYRAZENO z behu 15. 11.: rybnik v2 (voda.json rybnik_lhota verze 2, Misa „novy model“) uz dil rybnik.glb nema -
+## napojeni a voda hlida ryb_napojeni (mrizka 0,5 m v 30 m) a voda_v_korytu (bez vyjimky rybniku); funkce zustava pro historii.
 ##    (jinak tok pod valem = tunel) a nad osou voda (pas toku Toky_voda nebo hladina rybnika) az do rybnika.
 func _rybnik_dil() -> void:
 	if sv._ryb_y == INF:
@@ -8418,6 +8424,71 @@ func _ryb_napojeni() -> void:
 			# dno pod potokem bahno/sterk, ne louka (g = trava; Blender ground_attrs u toku 0,05)
 			if nej < 0.5 and nej_g > 0.3:
 				chyby.append("dno toku v (%.0f, %.0f) barvy louky g %.2f" % [px, pz, nej_g])
+	# rybnik v2 (Misa 15. 11. r. 13: cerna deska pres koryto pritoku = dve hladiny nad sebou, hladina 1,5 m pod breh):
+	# mrizka 0,5 m do 30 m od stredu - hladina rybnika a pas toku se neprekryvaji (dve pruhledne vrstvy), dno pod
+	# hladinou uvnitr obrysu ma vodu, viditelny teren nad hladinou rybnika nema pod sebou jeji sit vic nez 0,5 m od kraje
+	var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
+	if rl.has("obrys"):
+		var tri_r := PackedVector3Array()
+		var tri_t := PackedVector3Array()
+		for jm3: String in ["Rybnik_lhota_voda*", "Toky_voda"]:
+			for mi0 in main.find_children(jm3, "MeshInstance3D", true, false):
+				var mi := mi0 as MeshInstance3D
+				if mi.mesh == null or not mi.is_visible_in_tree():
+					continue
+				var f := mi.mesh.get_faces()
+				var xf := mi.global_transform
+				for i in range(0, f.size(), 3):
+					var c := xf * f[i]
+					if Vector2(c.x, c.z).distance_to(sv.RYB_C) < 40.0:
+						var cil := tri_r if jm3.begins_with("Rybnik") else tri_t
+						cil.append(c)
+						cil.append(xf * f[i + 1])
+						cil.append(xf * f[i + 2])
+		var gr: Dictionary = sv._tri_mrizka(tri_r, Transform3D())
+		var gtk: Dictionary = sv._tri_mrizka(tri_t, Transform3D())
+		var hl_r := float(rl["hladina_y"])
+		var ob := PackedVector2Array()
+		for b3: Array in rl["obrys"]:
+			ob.append(Vector2(float(b3[0]), float(b3[1])))
+		var n_m := {"bodu": 0, "dve_vrstvy": 0, "dno_bez_vody": 0, "voda_pod_brehem": 0}
+		var pr_m: Array = []
+		var xg: float = sv.RYB_C.x - 30.0
+		while xg <= sv.RYB_C.x + 30.0:
+			var zg: float = sv.RYB_C.y - 30.0
+			while zg <= sv.RYB_C.y + 30.0:
+				var q := Vector2(xg, zg)
+				zg += 0.5
+				if q.distance_to(sv.RYB_C) > 30.0:
+					continue
+				var zv: float = sv._tri_vyska(gt, q.x, q.y)
+				if zv == INF or zv == -INF:
+					continue
+				n_m["bodu"] += 1
+				var wr: float = sv._tri_vyska(gr, q.x, q.y)
+				var wt: float = sv._tri_vyska(gtk, q.x, q.y)
+				var ma_r := wr != INF and wr != -INF
+				var ma_t := wt != INF and wt != -INF
+				var uvnitr := Geometry2D.is_point_in_polygon(q, ob)
+				var od_kraje := INF
+				for k3 in ob.size():
+					od_kraje = minf(od_kraje, q.distance_to(Geometry2D.get_closest_point_to_segment(q, ob[k3], ob[(k3 + 1) % ob.size()])))
+				if ma_r and ma_t and wr > zv + 0.01 and wt > zv + 0.01:
+					n_m["dve_vrstvy"] += 1
+					if pr_m.size() < 12:
+						pr_m.append("dve vrstvy (%.1f, %.1f) %.2f / %.2f" % [q.x, q.y, wr, wt])
+				if uvnitr and od_kraje > 0.5 and zv < hl_r - 0.05 and not ma_r and not ma_t:
+					n_m["dno_bez_vody"] += 1
+					if pr_m.size() < 12:
+						pr_m.append("dno bez vody (%.1f, %.1f) teren %.2f" % [q.x, q.y, zv])
+				if ma_r and not uvnitr and od_kraje > 0.5 and zv > hl_r + 0.05:
+					n_m["voda_pod_brehem"] += 1
+					if pr_m.size() < 12:
+						pr_m.append("hladina pod brehem (%.1f, %.1f) teren %.2f" % [q.x, q.y, zv])
+			xg += 0.5
+		radky.append("mrizka 0,5 m: %s" % str(n_m))
+		if n_m["dve_vrstvy"] + n_m["dno_bez_vody"] + n_m["voda_pod_brehem"] > 0:
+			chyby.append("mrizka rybnika %s %s" % [str(n_m), str(pr_m)])
 	# 12. 11. (snimek build/ryb8: prazdna misa - hladinu skryl kod stareho navesniho rybnicku): nad stredem rybnika
 	# viditelna voda (trojuhelnik hladiny bez skryteho materialu) nad dnem
 	var vid := false
@@ -9416,7 +9487,7 @@ func _povrch() -> void:
 	for cil: Dictionary in Pravidla.cti(K, "povrch", "cile"):
 		var uzly: Array = []
 		if cil.has("uzel"):
-			var u := main.world.find_child(String(cil["uzel"]), true, false)
+			var u: Node = main.world.find_child(String(cil["uzel"]), true, false)
 			if u != null:
 				uzly.append(u)
 		else:
@@ -9717,7 +9788,7 @@ func _volne_hrany() -> void:
 			continue                          # tvrz: ochozy a hradby maji vlastni testy (prikop, steny)
 		var uzly: Array = []
 		if cil.has("uzel"):
-			var u := main.world.find_child(String(cil["uzel"]), true, false)
+			var u: Node = main.world.find_child(String(cil["uzel"]), true, false)
 			if u != null:
 				uzly.append(u)
 		else:
