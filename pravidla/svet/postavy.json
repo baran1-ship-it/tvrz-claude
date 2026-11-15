@@ -6850,6 +6850,18 @@
   "hlava": 6,
   "_pozn": "13. 11.: řidič a pružina sukně jen u 4 nejbližších postav, LookAt hlavy u 6 (trasa 0.999994: postavy stojí −9..−12 ms; PC tools/mereni_postav.gd 20 postav: řidič sukně +18 ms, hlava +13 ms). Ostatní: sukně jen skinovaná, hlava podle animace. Vliv na tabletu NEOVĚŘENO"
  },
+ "anim_strop_snimek": 8,
+ "_anim_strop_snimek": "15. 11. (docs/rozpracovane/vykon_postavy_puchart_15_11.md bod 2, AC Unity tvrdy rozpocet): nejvys tolik kroku animace postav (AnimationPlayer.advance = prepocet a nahrani kostry, Compatibility skinuje kazdy povrch zvlast) za snimek, i u chodicich; ostatni kandidati (plna animace, kroky anim_daleko_fps / anim_dalka_fps) nasbiraji cas a dostanou krok v dalsim snimku - poradi podle zpozdeni (anim_t / cilovy krok), pri shode blizsi. 0 = bez stropu. 8 = velkoryse (plne_max 8 + chodici), rešerše ~6. Varianta merici trasy bez_stropu_koster = drivejsi stav. Vliv na tabletu NEOVERENO.",
+ "modif_odpojit": {
+  "zapnuto": true,
+  "po_s": 1.0,
+  "_pozn": "15. 11. (bod 4; Godot 4.4.1 skeleton_3d.cpp:441 - kostra s jakymkoli ditetem SkeletonModifier3D, i neaktivnim, se aktualizuje kazdy snimek): postava, ktera nema zadny modifikator zapnuty (hlava, sukne, uchop, nohy IK) dele nez po_s, ma modifikatory z kostry odebrane (lide._modif_kostra), pri potrebe se hned vrati ve stejnem poradi. Varianta trasy modif_pripojene = drivejsi stav. Vliv na tabletu NEOVERENO."
+ },
+ "daleko_varianta": {
+  "bez_anim_od_m": 45.0,
+  "dosah_m": 50.0,
+  "_pozn": "15. 11. (bod 5) JEN varianta merici trasy postavy_daleko: za bez_anim_od_m zadna animace, dohled postav dosah_m misto dosah_m 70 (viditelnost i logika). Vychozi hra beze zmeny."
+ },
  "obsluha_hostinec_pravidla": {
   "min_mist": 5,
   "kuchyne": [

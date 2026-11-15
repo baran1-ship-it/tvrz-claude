@@ -27,6 +27,8 @@ static var P: Dictionary = {
 	"dojem": Pravidla.cti("postavy", "hrac_dojem"), "schod_m": float(Pravidla.cti("hrac", "schod_m")[0]),
 	"dalka_fps": float(Pravidla.cti("postavy", "anim_dalka_fps")), "hlava_do": float(Pravidla.cti("postavy", "hlava_do_m")),
 	"drzeni": Pravidla.cti("postavy", "drzeni"), "sedani": Pravidla.cti("postavy", "sedani"), "modif_max": Pravidla.cti("postavy", "modif_max"),
+	"anim_strop": int(Pravidla.cti("postavy", "anim_strop_snimek")), "modif_odpojit": Pravidla.cti("postavy", "modif_odpojit"),
+	"daleko_var": Pravidla.cti("postavy", "daleko_varianta"),
 	"rozvrh": Pravidla.cti("postavy", "rozvrh_rozptyl"), "hovor": Pravidla.cti("postavy", "hovor_skupina"),
 	"dvere": Pravidla.cti("postavy", "dvere"), "lom": Pravidla.cti("postavy", "lom"),
 	"u_predmetu": Pravidla.cti("postavy", "u_predmetu"), "rozestup": Pravidla.cti("postavy", "rozestup"),
@@ -53,6 +55,9 @@ var main: Node
 var _profil := OS.has_environment("TVRZ_LIDE_PROFIL")
 var trasa_vypni := {}                 # merici trasa (izolovany test 13. 11.): "sukne", "uchop", "modifikatory" vypnute
 var anim_kroku := 0                   # pocet advance() animaci (test_vykon postavy_mimo_zaber)
+var anim_odlozeno := 0                # kroky animace odlozene stropem anim_strop_snimek (test postavy_modif)
+var _anim_kand: Array = []            # kandidati kroku animace v tomto snimku [zpozdeni, vzdalenost, postava]
+var modif_odpojeno := 0               # postav s modifikatory odpojenymi od kostry (test postavy_modif)
 var _lide: Array = []                  # obyvatel: {id, uzel, kostra, ap, cil_hlavy, role, blok, cesta, i, misto...}
 var _t := 0.0
 var _sh_hlava: Shader = preload("res://shaders/postava_hlava.gdshader")
@@ -2170,7 +2175,7 @@ func ruce(c: Dictionary, spec: Dictionary) -> void:
 			um.name = "uchop"
 			um.set("postava", c["uzel"])
 			um.set("prsty_st", float(dr.get("_prsty_st", 50.0)))
-			kostra.add_child(um)
+			_modif_pridej(c, um)
 			drzi["mod"] = um
 		(drzi["mod"] as Node).call("nastav", ruka, id, d, drz)
 
@@ -2302,6 +2307,8 @@ func _process_vlastni(dt: float) -> void:
 	var n_zmen := 0                           # zmeny bloku v tomto snimku (graf.zmena_bloku_snimek)
 	var n_sukne := 0                          # pocitadlo: shodne vzdalenosti nesmi prekrocit modif_max (test postavy_modif)
 	var n_hlava := 0
+	# 15. 11. (bod 2): strop kroku animace za snimek (postavy.json anim_strop_snimek; 0 / varianta bez_stropu_koster = bez stropu)
+	var strop := 0 if trasa_vypni.has("strop") else int(P["anim_strop"])
 	for c: Dictionary in _lide:
 		var u: Node3D = c["uzel"]
 		var d := Vector2(u.position.x - pp.x, u.position.z - pp.z).length()
@@ -2337,6 +2344,7 @@ func _process_vlastni(dt: float) -> void:
 		if not blizko or skryty:
 			u.visible = false
 			_modif_vyp(c)                         # 13. 11.: skryta postava nepocita kostru (modifikatory bezely i neviditelne)
+			_modif_kostra(c, false, dt)
 			if not blizko and not skryty:
 				_daleko_krok(c, dt)
 			continue
@@ -2531,29 +2539,43 @@ func _process_vlastni(dt: float) -> void:
 		var cam: Camera3D = main.player.cam if main.player else null
 		var v_zaberu := cam == null or d < ANIM_OKRAJ or _v_kuzelu(cam, u.global_position + Vector3(0, 1.0, 0))
 		# hlava a krk sleduji jen do hlava_do_m (dal pohyb hlavy neni videt, LookAt stoji cas)
+		# 15. 11. (vykon_postavy_puchart_15_11.md bod 4): nejdriv se spocita, co ma byt zapnute, pak se kostra pripadne
+		# pripoji / odpoji (_modif_kostra), teprve pak se prepinaji active (pruzina sukne potrebuje kostru pro reset())
 		var hl_on := d < float(P["hlava_do"]) and d <= mez_hlava and n_hlava < int(mm["hlava"]) and v_zaberu and not trasa_vypni.has("modifikatory")
 		n_hlava += 1 if hl_on and not (c.get("hlava_mod", []) as Array).is_empty() else 0
+		var nik_on := false
+		if c.has("nohy_ik"):
+			nik_on = v_zaberu and d < float(P["nohy_ik"]["do_m"]) and not bool(c.get("v_posteli", false)) and not bool(c.get("sedi", false)) \
+					and not trasa_vypni.has("modifikatory")
+		var uc_on := false
+		var uc_mod: Node = (c["ruce"] as Dictionary).get("mod")
+		if uc_mod:
+			uc_on = v_zaberu and d < float(P["do"]) and not trasa_vypni.has("uchop") and not trasa_vypni.has("modifikatory")
+		# 13. 11. (kontrola pred vydanim): ridic sukne jen v zaberu do sukne.do_m, jinak bezel u vsech postav kazdy snimek
+		var sr_on := false
+		if c.has("sukne_ridic") and is_instance_valid(c["sukne_ridic"]):
+			sr_on = v_zaberu and d < float(P["sukne"]["do_m"]) and d <= mez_sukne and n_sukne < int(mm["sukne"]) and u.visible and not trasa_vypni.has("sukne") \
+					and not trasa_vypni.has("modifikatory")
+			c["sr_on"] = sr_on
+			n_sukne += 1 if sr_on else 0
+		var su_on := false
+		if c.has("sukne") and is_instance_valid(c["sukne"]):
+			su_on = v_zaberu and d < float(P["sukne"]["do_m"]) and d <= mez_sukne and bool(c.get("sr_on", true))
+		var hl_ma := hl_on and not (c.get("hlava_mod", []) as Array).is_empty()
+		var uc_ma := uc_on and not (uc_mod.get("polozky") as Dictionary).is_empty() if uc_mod else false
+		_modif_kostra(c, hl_ma or nik_on or uc_ma or sr_on or su_on, dt)
 		for la: SkeletonModifier3D in c.get("hlava_mod", []):
 			if la.active != hl_on:
 				la.active = hl_on
 		if c.has("nohy_ik"):
-			var nik_on := v_zaberu and d < float(P["nohy_ik"]["do_m"]) and not bool(c.get("v_posteli", false)) and not bool(c.get("sedi", false)) \
-					and not trasa_vypni.has("modifikatory")
 			if (c["nohy_ik"] as SkeletonModifier3D).active != nik_on:
 				(c["nohy_ik"] as SkeletonModifier3D).active = nik_on
-		if (c["ruce"] as Dictionary).has("mod"):
-			(c["ruce"]["mod"] as Node).call("zapni", v_zaberu and d < float(P["do"]) and not trasa_vypni.has("uchop") \
-					and not trasa_vypni.has("modifikatory"))
-		# 13. 11. (kontrola pred vydanim): ridic sukne jen v zaberu do sukne.do_m, jinak bezel u vsech postav kazdy snimek
+		if uc_mod:
+			uc_mod.call("zapni", uc_on)
 		if c.has("sukne_ridic") and is_instance_valid(c["sukne_ridic"]):
-			var sr_on := v_zaberu and d < float(P["sukne"]["do_m"]) and d <= mez_sukne and n_sukne < int(mm["sukne"]) and u.visible and not trasa_vypni.has("sukne") \
-					and not trasa_vypni.has("modifikatory")
 			if (c["sukne_ridic"] as SkeletonModifier3D).active != sr_on:
 				(c["sukne_ridic"] as SkeletonModifier3D).active = sr_on
-			c["sr_on"] = sr_on
-			n_sukne += 1 if sr_on else 0
 		if c.has("sukne") and is_instance_valid(c["sukne"]):
-			var su_on := v_zaberu and d < float(P["sukne"]["do_m"]) and d <= mez_sukne and bool(c.get("sr_on", true))
 			var su: SpringBoneSimulator3D = c["sukne"]
 			if su.active != su_on:
 				su.active = su_on
@@ -2561,8 +2583,18 @@ func _process_vlastni(dt: float) -> void:
 					su.reset()                    # po vypnuti/skoku pozy (rešerše: bez reset() simulace „vystreli“)
 		# LOD animaci: zblizka kazdy snimek (plne_max nejblizsich), do anim_do_m anim_daleko_fps, dal do dosahu
 		# anim_dalka_fps - nikdy ztuhla klouzajici poza (plan krok 3.2)
-		if not v_zaberu or trasa_vypni.has("animace"):
+		# 15. 11. (bod 5, jen varianta trasy postavy_daleko): za bez_anim_od_m zadna animace
+		if not v_zaberu or trasa_vypni.has("animace") or (trasa_vypni.has("daleko") and d >= float(P["daleko_var"]["bez_anim_od_m"])):
 			c["anim_t"] = minf(float(c["anim_t"]) + dt, 1.0)     # po navratu do zaberu jeden krok (faze dobehne)
+		elif strop > 0:
+			# 15. 11. (bod 2): strop kroku animace za snimek - kandidati se seradi podle zpozdeni (anim_t / cilovy krok),
+			# kroky dostane jen anim_strop_snimek nejzpozdenejsich, ostatni nasbiraji cas na dalsi snimek (stridani)
+			c["anim_t"] = float(c["anim_t"]) + dt
+			var plna := (d < float(P["plna"]) and d <= mez_plne) or (d < float(P["do"]) and float(c.get("v", 0.0)) > 0.1 \
+					and not trasa_vypni.has("chuze_plna"))
+			var krok_s: float = dt if plna else 1.0 / (float(P["fps"]) if d < float(P["do"]) else float(P["dalka_fps"]))
+			if float(c["anim_t"]) >= krok_s - 1e-6:
+				_anim_kand.append([float(c["anim_t"]) / maxf(krok_s, 1e-4), d, c])
 		elif (d < float(P["plna"]) and d <= mez_plne) or (d < float(P["do"]) and float(c.get("v", 0.0)) > 0.1 \
 				and not trasa_vypni.has("chuze_plna")):
 			# 12. 11. (The Last Eagle devlog: vzdalene postavy po nekolika snimcich = trhana chuze): kdo jde a je v zaberu
@@ -2578,6 +2610,15 @@ func _process_vlastni(dt: float) -> void:
 				anim_kroku += 1
 				(c["ap"] as AnimationPlayer).advance(float(c["anim_t"]))
 				c["anim_t"] = 0.0
+	if not _anim_kand.is_empty():
+		_anim_kand.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) > float(b[0]) or (float(a[0]) == float(b[0]) and float(a[1]) < float(b[1])))
+		for i in mini(strop, _anim_kand.size()):
+			var ck: Dictionary = _anim_kand[i][2]
+			anim_kroku += 1
+			(ck["ap"] as AnimationPlayer).advance(float(ck["anim_t"]))
+			ck["anim_t"] = 0.0
+		anim_odlozeno += maxi(0, _anim_kand.size() - strop)
+		_anim_kand.clear()
 	if _profil and Time.get_ticks_usec() - _tp0 > 8000:
 		print("LIDE_PROFIL smycka postav %.1f ms" % ((Time.get_ticks_usec() - _tp0) / 1000.0))
 	_tp0 = Time.get_ticks_usec()
@@ -2698,6 +2739,64 @@ func _modif_vyp(c: Dictionary) -> void:
 			la.active = false
 	if (c["ruce"] as Dictionary).has("mod"):
 		(c["ruce"]["mod"] as Node).call("zapni", false)
+
+
+## 15. 11. (vykon_postavy_puchart_15_11.md bod 4; Godot 4.4.1 skeleton_3d.cpp:441): kostra s jakymkoli ditetem
+## SkeletonModifier3D (i neaktivnim) se aktualizuje kazdy snimek (zaloha a obnova vsech kosti). Kdyz postava nema zadny
+## modifikator zapnuty dele nez modif_odpojit.po_s, modifikatory se z kostry odeberou (remove_child, poradi se pamatuje),
+## pri potrebe se hned vrati ve stejnem poradi. Varianta trasy modif_pripojene (trasa_vypni "odpojit") = drivejsi stav.
+func _modif_kostra(c: Dictionary, potreba: bool, dt: float) -> void:
+	var odp := bool(P["modif_odpojit"]["zapnuto"]) and not trasa_vypni.has("odpojit")
+	if potreba or not odp:
+		c["modif_vyp_t"] = 0.0
+		if c.has("modif_pryc"):
+			var sk: Skeleton3D = c["kostra"]
+			for m: Node in c["modif_pryc"]:
+				if is_instance_valid(m) and m.get_parent() == null:
+					sk.add_child(m)
+			c.erase("modif_pryc")
+			modif_odpojeno -= 1
+		return
+	if c.has("modif_pryc"):
+		return
+	c["modif_vyp_t"] = float(c.get("modif_vyp_t", 0.0)) + dt
+	if float(c["modif_vyp_t"]) < float(P["modif_odpojit"]["po_s"]):
+		return
+	var sk2: Skeleton3D = c["kostra"]
+	var pryc: Array = []
+	for ch: Node in sk2.get_children():
+		if ch is SkeletonModifier3D:
+			pryc.append(ch)
+	if pryc.is_empty():
+		return
+	for m2: Node in pryc:
+		sk2.remove_child(m2)
+	c["modif_pryc"] = pryc
+	modif_odpojeno += 1
+
+
+## Pridani modifikatoru za behu (uchop): kdyz jsou modifikatory postavy odpojene, ceka v seznamu (pripoji se s ostatnimi).
+func _modif_pridej(c: Dictionary, m: SkeletonModifier3D) -> void:
+	if c.has("modif_pryc"):
+		(c["modif_pryc"] as Array).append(m)
+	else:
+		(c["kostra"] as Skeleton3D).add_child(m)
+
+
+## Varianta trasy postavy_daleko (bod 5): dohled postav daleko_varianta.dosah_m misto dosah_m (viditelnost i logika),
+## za bez_anim_od_m bez animace. false = zpet.
+func nastav_daleko(on: bool) -> void:
+	var stary := DOSAH
+	DOSAH = float(P["daleko_var"]["dosah_m"]) if on else float(P["dosah"])
+	if on:
+		trasa_vypni["daleko"] = true
+	else:
+		trasa_vypni.erase("daleko")
+	for c: Dictionary in _lide:
+		for g: Node in (c["uzel"] as Node).find_children("*", "GeometryInstance3D", true, false):
+			var gi := g as GeometryInstance3D
+			if absf(gi.visibility_range_end - stary) < 0.01:
+				gi.visibility_range_end = DOSAH
 
 
 ## Kolize pohyblive casti (dvere, vrata, okenice - uzly Pohyb_*): neni o co se oprit natrvalo.

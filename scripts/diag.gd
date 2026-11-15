@@ -13,6 +13,11 @@ var _radky: PackedStringArray = []
 var _start := 0
 var _panel: Label
 var _tp := 0.0
+## 15. 11. (Misa „monitor mereni dost bere“, vykon_postavy_puchart_15_11.md bod 1): lehky monitor behem merici trasy -
+## pravidelny zapis logu a PSS jen na hranicich useku (trasa_hranice), node_added jen citac, „pod křížem“ vypnuto.
+## Zapina mereni_trasa.gd (mereni_trasa.json lehky_monitor), varianta diag_plny = drivejsi stav.
+var lehky := false
+var _pss_hranice := false
 
 
 func setup(p_main: Node) -> void:
@@ -532,7 +537,7 @@ func _process_diag(dt: float) -> void:
 					_krz_hotovo = false
 				else:
 					_tk += 0.5
-					if _tk >= 1.0 and not _krz_hotovo:
+					if _tk >= 1.0 and not _krz_hotovo and not lehky:
 						_krz_hotovo = true
 						var t_k := Time.get_ticks_usec()
 						_krz_text = _pod_krizem() + " (%.0f ms)" % ((Time.get_ticks_usec() - t_k) / 1000.0)
@@ -541,7 +546,7 @@ func _process_diag(dt: float) -> void:
 			_max_dt_panel = 0.0
 		_kontrola_rozpoctu()
 		_t += dt
-		if _t >= 2.0:
+		if _t >= 2.0 and not lehky:
 			_t = 0.0
 			_zapis("")
 		return
@@ -601,7 +606,7 @@ func _process_diag(dt: float) -> void:
 	_kontrola_rozpoctu()
 	_rezie_ms = (Time.get_ticks_usec() - d0) / 1000.0
 	_t += dt
-	if _t < 2.0:
+	if _t < 2.0 or lehky:
 		return
 	_t = 0.0
 	_zapis("")
@@ -761,7 +766,7 @@ func ram_mb() -> int:
 			WorkerThreadPool.wait_for_task_completion(_pss_uloha)
 			_pss_uloha = -1
 			_pss = _pss_kb / 1024 if _pss_kb > 0 else -1
-		if _pss_uloha < 0 and Time.get_ticks_msec() - _pss_t > 30000:
+		if _pss_uloha < 0 and ((not lehky and Time.get_ticks_msec() - _pss_t > 30000) or (lehky and _pss_hranice)):
 			_pss_t = Time.get_ticks_msec()
 			_pss_uloha = WorkerThreadPool.add_task(_pss_vlakno)
 			_sn_ted["pss"] = true        # zasek v tomto snimku muze byt od mereni
@@ -783,6 +788,16 @@ func ram_mb() -> int:
 const MAX_KRESLENI := 1500
 const MAX_TROJ := 2000000
 var _varovano := 0.0
+
+
+## Lehky monitor (merici trasa): radek logu a mereni PSS jen tady - na hranici useku, kde se nemeri.
+func trasa_hranice(pozn: String) -> void:
+	_pss_hranice = true
+	_zapis(pozn, false)
+	_pss_hranice = false
+	_t = 0.0
+	_max_dt = 0.0
+	_cpu_max = 0.0
 
 
 func _kontrola_rozpoctu() -> void:
@@ -943,6 +958,8 @@ func _svetla_text() -> String:
 
 func _pridan(n: Node) -> void:
 	_pridano_uzlu += 1
+	if lehky:
+		return                             # lehky monitor: jen citac (bez materialu a geometrii)
 	if n is GeometryInstance3D:
 		_nove_geom += 1
 		var g := n as GeometryInstance3D

@@ -892,10 +892,10 @@ func _podil(k: int, d: float, kresleni := true) -> float:
 	if k == 4:
 		# tablet 0.57: louka se sekala (prekryv karet) - plny vejir jen do 15 m, 15-40 m na 25 %, za 60 m nic
 		return lerpf(1.0, 0.25, smoothstep(15.0, 40.0, d)) * (1.0 - smoothstep(40.0, 60.0, d)) * 1.1
-	var z1 := float(ZANIK[k][1])
+	var z1 := float(_zanik[k][1])
 	if _mob and (k == 0 or k == 3):
 		z1 = minf(z1, _dosah - 10.0)            # tablet: trsy a vysoka trava do dosahu trsu (modely.json trava_dosah_m)
-	var hu := 1.0 - smoothstep(float(ZANIK[k][0]), z1, d)
+	var hu := 1.0 - smoothstep(float(_zanik[k][0]), z1, d)
 	# vypln (drn 2, vejir 4) se kvalitou neridi: hustota 0,7 (kvalita 1) ubrala 30 % vyplne = diry mezi trsy
 	return hu * (1.0 if k == 2 else hustota) * 1.1
 
@@ -1208,7 +1208,7 @@ func _postav_cast(hot: Dictionary, b: Dictionary, krok: int) -> bool:
 	mmi.multimesh = mm
 	mmi.custom_aabb = aabb
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	mmi.visibility_range_end = float(ZANIK[k][1]) + 30.0
+	mmi.visibility_range_end = float(_zanik[k][1]) + 30.0
 	(b["uzel"] as Node3D).add_child(mmi)
 	if k < 4:
 		b["mm"][k] = mm
@@ -1608,9 +1608,9 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 	while x < BUNKA:
 		var z := 0.0
 		while z < BUNKA:
-			var px := c.x * BUNKA + x + rng.randf_range(-0.45, 0.45) * KROK
-			var pz := c.y * BUNKA + z + rng.randf_range(-0.45, 0.45) * KROK
-			z += KROK
+			var px := c.x * BUNKA + x + rng.randf_range(-0.45, 0.45) * krok_trsu
+			var pz := c.y * BUNKA + z + rng.randf_range(-0.45, 0.45) * krok_trsu
+			z += krok_trsu
 			var v := _vz(vg, c, px, pz, bud)
 			if v.x > 0.02:                                             # hustsi pas na okraji lesa (ne v korytu, prikopu, stavbe)
 				v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
@@ -1661,7 +1661,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					bb = 7
 				_zaznam(zaz[0] if not _v_gpu(px, pz) else [], c, px + rng.randf_range(-0.2, 0.2), v.y - 0.03, pz + rng.randf_range(-0.2, 0.2), rng.randf(),
 						1.0, 1.0, bb, rng.randi() % 256)
-		x += KROK
+		x += krok_trsu
 	# kvety ve skupinkach (na louce, ne v lese ani na cestach)
 	# kvety vypnute (Misa 19:45, pravidla_sveta.json kvety hustota 0), dokud nebudou fotograficke
 	var nsk := 0 * rng.randi_range(0, 3) * int(BUNKA * BUNKA / 256.0)   # skupinky kvetu na 16x16 m
@@ -2295,6 +2295,47 @@ func _trs_do() -> float:
 	var td: Dictionary = Pravidla.cti("modely", "trava_dosah_m")
 	var v: Array = td["usporna" if main.trava_uspora else "plna"]
 	return float(v[1] if _mob else v[0])
+
+
+## 15. 11. (vykon_postavy_puchart_15_11.md bod 6, varianta merici trasy louka_puchart; data mereni_trasa.json
+## varianty_parametry.louka_puchart): louka jako Puchart - rozestup trsu krok_m (drive KROK 0,36), trsy a vysoka trava
+## plne do od_m a ridnou do do_m (shader hust_od/hust_do i orez bufferu _zanik), dosah bunek do_m + 10. Louka se vyprazdni
+## a okoli se nacte znovu (jako les_bez_travy). on false = vychozi stav.
+var krok_trsu := KROK                   # rozestup trsu za behu (rozsev ve vlaknech cte az po cekej())
+var _zanik: Array = ZANIK.duplicate(true)
+var _puchart := false
+
+
+func nastav_puchart(on: bool, krok_m := KROK, od_m := 20.0, do_m := 80.0) -> void:
+	if _puchart == on:
+		return
+	cekej()
+	_puchart = on
+	krok_trsu = krok_m if on else KROK
+	for k: int in [0, 3]:
+		_zanik[k] = [od_m, do_m] if on else (ZANIK[k] as Array).duplicate()
+	for m: Mesh in [_trs, _vysoka]:
+		var sm := m.surface_get_material(0) as ShaderMaterial
+		sm.set_shader_parameter("hust_od", od_m if on else null)
+		sm.set_shader_parameter("hust_do", do_m if on else (_trs_do() if m == _trs else null))
+	_dosah = (do_m if on else _trs_do()) + 10.0
+	vypni()
+
+
+## 15. 11. (bod 6, varianta merici trasy louka_bez_stinu; Puchart: louka bez stinu): bunky louky (louka.gd _bunka_mm)
+## i kupy (_mm stin false) uz stin NEVRHAJI - zbyva stinovy pruchod slunce, ktery v Compatibility dostane kazdy
+## osvetleny material (drivers/gles3/rasterizer_scene_gles3.cpp:3032 uses_additive_lighting = directional_shadow_count
+## > 0 a ne unshaded; render_mode shadows_disabled ho nevypne). Varianta: trava unshaded (jako louka_un) + kontrola,
+## ze zadny uzel louky stin nevrha (pocet nalezenych se vypise). on false = vychozi stav.
+func nastav_bez_stinu(on: bool) -> void:
+	nastav_unshaded(on or bool(_un0))
+	if on:
+		var n := 0
+		for g: Node in find_children("*", "GeometryInstance3D", true, false):
+			if (g as GeometryInstance3D).cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+				(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				n += 1
+		print("LOUKA bez stinu: uzlu se stinem nalezeno %d (vypnuto)" % n)
 
 
 ## Dosah trsu za behu (merici trasa, varianta trava_NN): m <= 0 = podle nastaveni.

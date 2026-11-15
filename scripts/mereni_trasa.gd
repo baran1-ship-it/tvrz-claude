@@ -35,6 +35,12 @@ var _let0 := false
 var _panel0: Array = [false, false]
 var _kv0 := false                         # automaticka kvalita pred trasou (behem trasy vypnuta, varianta „auto“ ji zapne)
 var _hod0 := -1.0                        # denni doba stoji (0.9991: trasa 30 min, ves uz za soumraku - jine stiny)
+# 15. 11. (vykon_postavy_puchart_15_11.md bod 1, mereni_trasa.json lehky_monitor): behem trasy lehky monitor (diag.lehky:
+# log a PSS jen na hranicich useku, node_added jen citac, pod krizem vypnuto) a popisek nejvys 1x za popisek_s;
+# varianta diag_plny = drivejsi stav (log po 2 s, PSS po 30 s, popisek kazdy snimek)
+var _lehky := false
+var _lbl_t := 0.0
+var _diag0 := false
 
 
 func zacni(m: Node) -> void:
@@ -75,8 +81,24 @@ func zacni(m: Node) -> void:
 	_panel0 = [main.mereni_on, main.mereni_fps]
 	main.mereni_on = false                  # plny panel sam stoji 7-10 ms (3. 11.) - behem trasy vypnut
 	main.mereni_fps = false
+	var lm: Dictionary = cfg.get("lehky_monitor", {})
+	_lehky = bool(lm.get("zapnuto", false))
+	if main.diag:
+		_diag0 = bool(main.diag.get("lehky"))
 	_varianta(true)
+	_monitor()
 	_posl = Time.get_ticks_usec()
+
+
+## Lehky monitor podle varianty (diag_plny = plny jako drive).
+func _monitor() -> void:
+	var leh := _lehky and String(varianty[i_var]) != "diag_plny"
+	if main.diag:
+		main.diag.set("lehky", leh)
+
+
+func _par(v: String) -> Dictionary:
+	return (cfg.get("varianty_parametry", {}) as Dictionary).get(v, {})
 
 
 func _skup0() -> Dictionary:
@@ -128,6 +150,33 @@ func _varianta(zap: bool) -> void:
 				if is_instance_valid(gi):
 					gi.visible = true
 			_vnitrek = []
+	elif v == "bez_stropu_koster" or v == "modif_pripojene":   # 15. 11. body 2 a 4: drivejsi stav (bez stropu kroku animace / modifikatory stale na kostre)
+		var ls: Node = main.world.get_node_or_null("Lide") if main.world else null
+		if ls:
+			var ks := "strop" if v == "bez_stropu_koster" else "odpojit"
+			if zap:
+				ls.trasa_vypni[ks] = true
+			else:
+				ls.trasa_vypni.erase(ks)
+	elif v == "postavy_daleko":                # 15. 11. bod 5: za 45 m bez animace, dohled postav 70 -> 50 m (postavy.json daleko_varianta)
+		var ld: Node = main.world.get_node_or_null("Lide") if main.world else null
+		if ld:
+			ld.nastav_daleko(zap)
+	elif v == "louka_bez_stinu":               # 15. 11. bod 6: louka bez stinoveho pruchodu slunce (bunky stin nevrhaji uz ted)
+		var lb: Node = main.get_node_or_null("Louka")
+		if lb:
+			lb.nastav_bez_stinu(zap)
+	elif v == "louka_puchart":                 # 15. 11. bod 6: trs krok_m, plna do od_m, ridne do do_m (varianty_parametry)
+		var lp: Node = main.get_node_or_null("Louka")
+		if lp:
+			var pp: Dictionary = _par(v)
+			lp.nastav_puchart(zap, float(pp.get("krok_m", 0.5)), float(pp.get("od_m", 14.0)), float(pp.get("do_m", 60.0)))
+	elif v == "stin_filtr_1":                  # 15. 11. bod 8: filtr stinu slunce (Compatibility: 2 = PCF 5, 1 = jeden vzorek)
+		var q0 := int(ProjectSettings.get_setting_with_override("rendering/lights_and_shadows/directional_shadow/soft_shadow_filter_quality"))
+		var q := int(_par(v).get("kvalita", 1)) if zap else q0
+		RenderingServer.directional_soft_shadow_filter_set_quality(q as RenderingServer.ShadowQuality)
+	elif v == "diag_plny":                     # 15. 11. bod 1: plny monitor jako drive (prepina _monitor)
+		pass
 	elif v == "dest":                          # 13. 11.: cena deste (pocasi.gd z Pucharta) - plny dest po celou variantu
 		if main.pocasi:
 			main.pocasi.vynuceno = 1.0 if zap else -1.0
@@ -255,6 +304,20 @@ func _jm(v: String) -> String:
 		return "bez světel"
 	if v == "svetla_bez_stinu":
 		return "svět.bez st"
+	if v == "diag_plny":
+		return "diag plný"
+	if v == "bez_stropu_koster":
+		return "bez stropu"
+	if v == "modif_pripojene":
+		return "modif.na k."
+	if v == "postavy_daleko":
+		return "post. 45/50"
+	if v == "louka_bez_stinu":
+		return "louka b.st"
+	if v == "louka_puchart":
+		return "louka Puch"
+	if v == "stin_filtr_1":
+		return "filtr st.1"
 	if v.begins_with("trava_"):
 		return "tráva " + v.substr(6) + "m"
 	return String(main.AB_NAZVY.get(v, v)).substr(0, 10)
@@ -323,8 +386,11 @@ func _process(d: float) -> void:
 		if ms > float(nej.get("ms", 0.0)):
 			nej = {"ms": ms, "pr": pr, "fy": fy, "gp": gp, "kr": kr}
 	var vn := String(varianty[i_var])
-	lbl.text = "MĚŘICÍ TRASA – varianta %d/%d: %s   úsek %d/%d: %s   %.0f s" % [i_var + 1, varianty.size(), _jm(vn),
-			i_us + 1, useky.size(), u["jmeno"], celk - t]
+	_lbl_t -= d
+	if _lbl_t <= 0.0 or not bool(main.diag.get("lehky") if main.diag else false):
+		_lbl_t = float((cfg.get("lehky_monitor", {}) as Dictionary).get("popisek_s", 1.0))
+		lbl.text = "MĚŘICÍ TRASA – varianta %d/%d: %s   úsek %d/%d: %s   %.0f s" % [i_var + 1, varianty.size(), _jm(vn),
+				i_us + 1, useky.size(), u["jmeno"], celk - t]
 	if t < celk:
 		return
 	var s := casy.duplicate()
@@ -351,6 +417,8 @@ func _process(d: float) -> void:
 	nad100 = 0
 	nej = {}
 	_uloz()                                   # po kazdem useku (0.9991: trasa nedobehla do konce = tabulka ztracena)
+	if main.diag and main.diag.has_method("trasa_hranice") and bool(main.diag.get("lehky")):
+		main.diag.trasa_hranice("TRASA %s / %s" % [_jm(vn), String(u["jmeno"])])
 	casy = PackedFloat32Array()
 	kres = 0.0
 	troj = 0.0
@@ -363,6 +431,7 @@ func _process(d: float) -> void:
 		i_var += 1
 		if i_var < varianty.size():
 			_varianta(true)
+			_monitor()
 		else:
 			_konec()
 
@@ -417,4 +486,6 @@ func _konec() -> void:
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), false)
 	if main.kvalita:
 		main.kvalita.nastav(_kv0)
+	if main.diag:
+		main.diag.set("lehky", _diag0)
 	queue_free()
