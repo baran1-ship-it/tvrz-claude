@@ -1823,7 +1823,7 @@ func _lom_na_zemi() -> void:
 	var lom_j: Dictionary = load("res://scripts/pravidla.gd").cti("plochy", "lom")
 	var pata_nej := 0.0
 	var pata_z := 0.0
-	var zl := sv.LOM_Z.x + 2.0
+	var zl: float = sv.LOM_Z.x + 2.0
 	while zl <= sv.LOM_Z.y - 2.0:
 		var dp := absf(sv.lom_stena_x(zl) - float(lom_j["pata_x"]))
 		if dp > pata_nej:

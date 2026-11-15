@@ -159,7 +159,8 @@
    "limec_nad_krkem_m": 0.08,
    "smycek": 2,
    "vahy_vrstvy_plne_m": 0.05,
-   "vahy_vrstvy_nic_m": 0.09
+   "vahy_vrstvy_nic_m": 0.09,
+   "mezera_m": 0.015
   },
   "test_vrstva_nad_krkem_m": 0.1,
   "test_vrstva_dosah_m": 0.03,

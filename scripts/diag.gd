@@ -86,8 +86,34 @@ func zkopiruj_log() -> int:
 	# posledni vysledek merici trasy (user://mereni_trasa.txt, Misa 2. 11.: tabulka byla jen minutu na obrazovce)
 	if FileAccess.file_exists("user://mereni_trasa.txt"):
 		t = FileAccess.get_file_as_string("user://mereni_trasa.txt") + "\n" + t
+	t += _chyby_enginu()
 	DisplayServer.clipboard_set(t)
 	return t.length()
+
+
+## Misa 15. 11. („vsimej si vsech chyb, treba najdes, proc se to seka“): chyby enginu z user://logs/godot.log tohoto
+## spusteni - kazda opakovana chyba (vypis + zasobnik) stoji cas snimku. Souhrn: pocet a text, nejcastejsi nahore.
+func _chyby_enginu() -> String:
+	var cesta := "user://logs/godot.log"
+	if not FileAccess.file_exists(cesta):
+		return "\n== chyby enginu ==\nlog neni (%s)\n" % cesta
+	var f := FileAccess.open(cesta, FileAccess.READ)
+	if f == null:
+		return ""
+	var pocty := {}
+	var n := 0
+	while not f.eof_reached() and n < 400000:
+		var r := f.get_line()
+		n += 1
+		if r.begins_with("ERROR") or r.begins_with("SCRIPT ERROR") or r.begins_with("WARNING"):
+			var k := r.left(160)
+			pocty[k] = int(pocty.get(k, 0)) + 1
+	var klice: Array = pocty.keys()
+	klice.sort_custom(func(a: String, b: String) -> bool: return int(pocty[a]) > int(pocty[b]))
+	var out := "\n== chyby enginu (%d druhu, %d radku logu) ==\n" % [klice.size(), n]
+	for k: String in klice.slice(0, 25):
+		out += "%6d x %s\n" % [int(pocty[k]), k]
+	return out
 
 
 ## Faze nacitani: zapise se hned (pri padu behem nacitani je videt, kde hra skoncila).

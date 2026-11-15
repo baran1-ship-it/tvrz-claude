@@ -279,7 +279,7 @@ def build(body, kroj, NAME):
                 return o_h + (o_l - o_h) * _limec(c)
             kp = cl.shell(body, co, no, m_hd | m_cp, o_h, f"{NAME}_kapuce", smooth=5, smooth_border=4, offset_fn=_odsaz)
             print("KAPE mustky pryc ploch", cl.bez_mustku(kp))
-            print("KAPE nad vrstvou posunuto", cl.nad_vrstvou(kp, [top, sh], kroj.get("vrstva_mezera_m", 0.006)))
+            print("KAPE nad vrstvou posunuto", cl.nad_vrstvou(kp, [top, sh], KP["mezera_m"]))
             print("KAPE vahy z kotle", cl.vahy_z_vrstvy(kp, [top], KP["vahy_vrstvy_plne_m"], KP["vahy_vrstvy_nic_m"],
                                                                podil_fn=_limec))
             print("KAPE kusu", cl.kusy(kp), "smycek okraje", cl.smycky(kp))

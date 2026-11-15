@@ -180,7 +180,9 @@ if not CFG.get("dily", not CFG.get("npc")):
 for a_ in range(len(VRSTVY)):
     for b_ in range(a_ + 1, len(VRSTVY)):
         if VRSTVY[a_] in GAR and VRSTVY[b_] in GAR:
-            n_ = _cl.pod_vrstvou(GAR[VRSTVY[a_]], GAR[VRSTVY[b_]], KROJ.get("vrstva_mezera_m", 0.006))
+            # kukle nad kotlemi s větším odstupem (svy_odevu.kape.mezera_m: v kleku a sedu se 6 mm ztratilo, test vrstev)
+            mz_ = SVY["kape"]["mezera_m"] if VRSTVY[b_] == "kape" else KROJ.get("vrstva_mezera_m", 0.006)
+            n_ = _cl.pod_vrstvou(GAR[VRSTVY[a_]], GAR[VRSTVY[b_]], mz_)
             if n_: print("VRSTVY", VRSTVY[a_], "pod", VRSTVY[b_], "posunuto", n_)
 # všechno na trojúhelníky (atlas se přenáší po trojúhelnících)
 for o in list(PARTS.values()) + [eyes, brows] + hairs + [o for v in GAR.values() for o in v]:

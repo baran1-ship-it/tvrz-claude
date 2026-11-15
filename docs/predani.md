@@ -1446,3 +1446,8 @@ Hotovo v kódu a datech (testy u každého):
   (barva materiálu × průměr textury do barev vrcholů, 1 kreslení), daleký = LOD1 od `lod1_od_m` (větrák: obal 2 barevné kvádry);
   domy vsi `_Daleko` s texturou střechy/zdi (triplanár). Čísla `modely.json dily_lod`, test `lod_urovne`. Střední stupeň snižuje
   kreslení, ne trojúhelníky (krčma 164 tis., kostel 245 tis.) – to až decimací zdrojových .glb (jen na Disku). Tablet NEOVĚŘENO.
+- **Chyby z běhu (15. 11., Míša „všímej si všech chyb, třeba najdeš, proč se to seká“):** „Zkopírovat log“ (diag.zkopiruj_log)
+  teď přidá souhrn chyb enginu z `user://logs/godot.log` (počet × text) – opakovaná chyba stojí čas snímku. Na PC: 24 tis. × „Cannot set
+  a buffer on a Multimesh…“ po „rostliny po bunkach“ jen headless (s rendererem 0) – na tabletu nečekáno, ověřit souhrnem z tabletu.
+  **Před vydáním z nové session spustit `python3 tools/gen_tex.py`** – `textures/` (p_flame, p_soft… pro oheň) není v gitu ani
+  v balících, APK 0.999998 je obsahovalo; bez nich oheň bez textury a chyba při každém zapálení.
