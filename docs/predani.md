@@ -1397,8 +1397,12 @@ Hotovo v kódu a datech (testy u každého):
 - Výstupy exportu (vč. `modely/ves/zesvetleno.json`) nikdy ručně – brána vydání (otisk) to správně zastaví; oprava pravidla → nový export.
 - Úprava JSON pravidel jen přes načtení a přesnou náhradu hodnoty (nebo json.dumps), nikdy řez textu po další `",\n` – 15. 11. tak zmizel záznam `kovarna_tvrz` (JSON zůstal platný, spadl až Blender export). Po úpravě porovnat množinu klíčů s předchozí verzí.
 
+- **Plný instalátor – koncovky částí** (15. 11., záloha 0.999998): `multivolumefile` jmenuje části `.7z.0001`, 7-Zip sadu
+  otevírá od `.7z.001` → `tools/plny_instalator.py` po testzip přejmenuje na 3 číslice. Nový kontejner: Godot/SDK chybí →
+  `bash tools/prostredi.sh` (~4 min), klíč z Disku (id v CLAUDE.md) a ověřit sha256sum. Běh nástroje 247 s, APK 1 990 MB, 6 částí.
+
 ### Stav po 0.999998 (15. 11. 08:00) – co dál v nové session
-- Vydáno 0.999998 (commit f97a7381); záloha plného instalátoru běží v samostatné session „Havran – záloha 0.999998 na Disk“
+- Vydáno 0.999998 (commit f97a7381); záloha plného instalátoru hotová 15. 11. (6 částí poslány Míše) – session „Havran – záloha 0.999998 na Disk“
   (`tools/plny_instalator.py`, hra rozbalí data z APK – `data.gd _z_apk`, na tabletu NEOVĚŘENO).
 - Čeká na Míšu: Měřicí trasa 0.999998 → `docs/mereni_verze.md`; vyzkoušet plný instalátor (bez stahování).
 - Další body: záseky a nízké FPS (systémový rozbor `docs/rozpracovane/zaseky_rozbor_system.md`: plánovač snímku

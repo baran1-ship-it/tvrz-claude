@@ -108,5 +108,10 @@ with multivolumefile.open(cil, mode="rb") as mv:
         if a.testzip() is not None:
             stop("archiv 7z je poskozeny")
 os.remove(apk)
+# multivolumefile jmenuje casti .0001, 7-Zip sadu otevre jen od .001 (15. 11.) -> prejmenovat na 3 cislice
+for f in __import__("glob").glob(cil + ".*"):
+    m = re.match(r"(.*\.7z)\.(\d+)$", f)
+    if m and len(m.group(2)) != 3:
+        os.rename(f, "%s.%03d" % (m.group(1), int(m.group(2))))
 casti = sorted(__import__("glob").glob(cil + ".*"))
 print("ZALOHA OK: %d casti po %d MB: %s" % (len(casti), CAST_MB, ", ".join(casti)))
