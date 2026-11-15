@@ -98,6 +98,42 @@ def _dist_seg(p, a, b):
     t_ = 0.0 if ab.length < 1e-6 else max(0.0, min(1.0, (p - a).dot(ab) / ab.length_squared)); return (p - (a + ab * t_)).length
 HRADBY = []  # [(a, b, koruna_y)] osy hradeb (puchart_hrad plní) – strany budov v hradbě kamenné, okna nad korunou
 DIRY = []    # díry v terénu (studna): shader terénu je nekreslí
+# značky a funkční uzly pro hru (jen blízká verze s kolizí – uloz): Míša 15. 11. „co může mít funkci, tak ji mít bude“
+ZNACKY = []      # prázdné uzly [(jméno, Vector)] – ohně (ohne.gd: *_Ohen_*), skupiny sedátek (*_Sedatka, rodič kolizí lavic)
+LAVICE_KOL = []  # kolizní kvádry sedátek [(jméno, rodič, Matrix, (x, y, z))] → uzel <jméno>-convcolonly (lavice.gd: *_Kol_Lavice*)
+OKENICE_N = [0]  # číslo skupiny okenic (Pohyb_okeniceN_l/_p)
+_HP = json.load(open(os.path.join(K, "pravidla/svet/hrad_puchart.json")))
+POHYB_OK = _HP.get("pohyb_okenice", {}); POHYB_ST = _HP.get("pohyb_studna", {})
+
+def _kridlo_okenice(Q, wl, h, sx):
+    """Křídlo okenice v místních souřadnicích pantu: osa pantu = místní Y v počátku, křídlo k ose okna (−sx · x), tloušťka
+    prken 0..+z (k líci zdi), svlaky na straně do místnosti (−z). Prkna a svlaky materiálu okenice (Havran kit.window)."""
+    th = POHYB_OK["tloustka_m"]; n = POHYB_OK["prken"]; sw, st = POHYB_OK["svlak_m"]
+    for i in range(n):
+        x = -sx * wl * (i + 0.5) / n
+        kit.plank(Q, Vector((x, 0.0, 0.0)), Vector((x, h, 0.0)), wl / n - 0.004, th, "okenice", up=Vector((0, 0, 1)), wear=0.3)
+    for yy in (0.18 * h, 0.82 * h):   # svlaky (příčné laťky) přibité zevnitř
+        Q.box(M((-sx * wl / 2, yy, -st / 2)), (wl - 0.06, sw, st), "okenice")
+
+def okenice(P, m, w, y0, y1, z_lic, uhel, use):
+    """Dvě křídla vnitřní okenice světlíku šířky w (m = rám okna, osa z ven) jako pohyblivé díly Pohyb_okeniceN_l/_p (Míša
+    15. 11.: okenice „otvírat“): pant na hraně světlíku (+ přesah) na straně do místnosti, z_lic = líc, ke kterému okenice
+    doléhá (z místně). Ve glb otevřené o uhel (dvere.gd: zavřeno = −open). Dálková verze: pevné desky otevřené jako dřív."""
+    th = POHYB_OK["tloustka_m"]; pr = POHYB_OK["presah_m"]; wl = w / 2 + pr; h = y1 - y0 + 2 * pr
+    zh = z_lic - POHYB_OK["odstup_m"] - th   # pant na straně do místnosti (křídlo 0..+th k líci)
+    OKENICE_N[0] += 1; gid = "okenice%d" % OKENICE_N[0]
+    for sx, kon in ((-1, "l"), (1, "p")):
+        hm = m @ M((sx * (w / 2 + pr), y0 - pr, zh))
+        kit.movable("%s_%s" % (gid, kon), "dvere", hm, lambda Q, sx=sx: _kridlo_okenice(Q, wl, h, sx), cols=(), use=list(use), group=gid,
+                    open=round(-sx * uhel, 1), dur=POHYB_OK["doba_s"])
+
+def uhel_okenice_nika(w, wn):
+    """Největší úhel otevření křídla v nice (nejvýš uhel_nika_max): konec křídla (délka w/2 + přesah) nesmí dojít k boku niky
+    (wn/2) – mezera mezera_m (ostění niky)."""
+    wl = w / 2 + POHYB_OK["presah_m"]; volno = wn / 2 - POHYB_OK["mezera_m"] - (w / 2 + POHYB_OK["presah_m"])
+    st = POHYB_OK["svlak_m"][1]; u = 90.0   # svlaky (na straně do místnosti) se při otevření přes 90° stáčejí k boku niky
+    while u + 1.0 <= POHYB_OK["uhel_nika_max"] and -wl * math.cos(math.radians(u + 1.0)) + st * math.sin(math.radians(u + 1.0)) <= volno: u += 1.0
+    return u
 BRANY = []   # (práh vnějšího líce průjezdu, výška podlahy) – mosty se napojují na nejbližší
 
 # ------------------------------------------------------------------ zdi
@@ -545,12 +581,24 @@ def okno_palace(P, c, dd, nout, t, w, ya, yb, dvoj, ys, yn):
         if DETAIL: vypln_okna(P, m, x0, x1, ya + 0.02, yb - 0.02, zg, "sklo" if dvoj else "blana")
     OKNA_SVETLA.append(f - nout * (t + 1.2) + UP * ((ya + yb) / 2))
     hn = t - sl   # nika: sedátko a okenice
-    if hn < 0.05:   # přízemí: okenice na vnitřním líci
-        for sx in (-1, 1): P.box(m @ M((sx * (w / 2 + w / 4 + 0.02), (ya + yb) / 2, -t - 0.03)), (w / 2, yb - ya, 0.04), "okenice")
+    # okenice vnitřní (docs/reference/okna_palace.md), blízká verze: pohyblivá křídla Pohyb_okeniceN_l/_p (pohyb_okenice)
+    use_ = m @ Vector((0.0, (ya + yb) / 2, -sl - POHYB_OK["ovladani_do_mistnosti_m"]))
+    if hn < 0.05:   # přízemí a okénka v hradbě: okenice na vnitřním líci zdi, otevřené k líci
+        if DETAIL: okenice(P, m, w, ya, yb, -t, POHYB_OK["uhel_lic"], use_)
+        else:
+            for sx in (-1, 1): P.box(m @ M((sx * (w / 2 + w / 4 + 0.02), (ya + yb) / 2, -t - 0.03)), (w / 2, yb - ya, 0.04), "okenice")
         return
     P.box(m @ M((0, ys - 0.03, -sl - hn / 2)), (wn, 0.06, hn), "kvadr_okno")
-    for sx in (-1, 1):
-        P.box(m @ M((sx * (wn / 2 - 0.03), (ya + yb) / 2, -sl - w / 4 - 0.02)), (0.04, yb - ya, w / 2), "okenice")
+    if DETAIL:
+        okenice(P, m, w, ya, yb, -sl, uhel_okenice_nika(w, wn), use_)
+        # sedátko na dně niky: kolizní kvádr pro lavice.gd (mista.json modely.lavice.uzel_vzor *_Kol_Lavice*); rodič = značka
+        # v místnosti před oknem (lavice.gd otočí sedícího ke svému rodiči – zády k oknu)
+        jm_ = "Okno%d" % OKENICE_N[0]
+        ZNACKY.append((jm_ + "_Sedatka", m @ Vector((0.0, ys, -t - 1.5))))
+        LAVICE_KOL.append((jm_ + "_Kol_Lavice", jm_ + "_Sedatka", m @ M((0, ys - 0.03, -sl - hn / 2)), (wn - 0.04, 0.06, hn - 0.02)))
+    else:
+        for sx in (-1, 1):
+            P.box(m @ M((sx * (wn / 2 - 0.03), (ya + yb) / 2, -sl - w / 4 - 0.02)), (0.04, yb - ya, w / 2), "okenice")
 
 def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac", okna_ven=True, podl=None, otvory=(), vstup=None, patra=None, patra_rel=None):
     """Obdélník s osou a->b. typ palac: kamenné přízemí s omítkou + hrázděné patro; hrazdena: kamenná podezdívka +
@@ -934,20 +982,31 @@ def studna(P, x, z):
         lib.shingle_roof(P, p + Vector((-1.38 * sz, yb - 0.08, sz * 1.12)), p + Vector((1.38 * sz, yb - 0.08, sz * 1.12)),
                          p + Vector((1.38 * sz, yb + 0.94, 0)), p + Vector((-1.38 * sz, yb + 0.94, 0)), row=0.11, length=0.36)
     c = p + Vector((0, hy, 0)); L = 1.75; rot = Matrix.Rotation(-math.pi / 2, 4, "Z")   # rumpál s klikou, lano, vědro
-    P.lathe(M(c + Vector((-L / 2, 0, 0))) @ rot, [(0.03, 0.0), (0.11, 0.0), (0.11, L), (0.03, L)], 12, "dub_ven")
-    for sx in (-1, 1): P.lathe(M(c + Vector((sx * 0.55 - 0.02, 0, 0))) @ rot, [(0.15, 0.0), (0.15, 0.04)], 12, "dub_ven")
-    P.rod(c + Vector((-L / 2 - 0.1, 0, 0)), c + Vector((L / 2 + 0.05, 0, 0)), 0.025, 6, "zelezo")
-    P.rod(c + Vector((L / 2 + 0.05, 0, 0)), c + Vector((L / 2 + 0.05, 0.32, 0)), 0.022, 6, "zelezo")
-    P.rod(c + Vector((L / 2 + 0.05, 0.32, 0)), c + Vector((L / 2 + 0.28, 0.32, 0)), 0.03, 6, "dub")
-    P.lathe(M(c + Vector((-0.45, 0, 0))) @ rot, [(0.125, 0.0), (0.125, 0.6)], 12, "provaz")   # navinuté lano
-    P.rod(c + Vector((0.0, -0.10, 0.0)), c + Vector((0.0, -0.78, 0.0)), 0.012, 5, "provaz")   # lano z navinutého lana na bubnu (v Havranovi 12 cm vedle – viselo)
-    q = c + Vector((0.0, -0.75 - 0.48, 0.0))   # vědro na laně (Havran props.bucket i s uchem – lano končí na uchu, kontrola visi_puchart)
-    P.lathe(M(q), [(0.0, 0.0), (0.13, 0.0), (0.16, 0.3), (0.145, 0.3), (0.12, 0.02), (0.0, 0.02)], 16, "dub")
-    for t in (0.06, 0.24):   # obruče zapuštěné do stěny vědra (samostatně visely)
-        P.lathe(M(q + Vector((0, t, 0))), [(0.13 + 0.03 * t / 0.3 - 0.01, 0), (0.13 + 0.03 * t / 0.3 - 0.01, 0.025)], 16, "zelezo", False, False)
-    for k_ in range(8):   # kované ucho
-        a0, a1 = math.pi * k_ / 8, math.pi * (k_ + 1) / 8
-        P.rod(q + Vector((0.155 * math.cos(a0), 0.28 + 0.2 * math.sin(a0), 0)), q + Vector((0.155 * math.cos(a1), 0.28 + 0.2 * math.sin(a1), 0)), 0.008, 4, "zelezo")   # ucho zapuštěné do okraje vědra
+    def rumpal(Q, o):   # buben (osa X) s klikou a navinutým lanem; o = počátek (střed bubnu)
+        Q.lathe(M(o + Vector((-L / 2, 0, 0))) @ rot, [(0.03, 0.0), (0.11, 0.0), (0.11, L), (0.03, L)], 12, "dub_ven")
+        for sx in (-1, 1): Q.lathe(M(o + Vector((sx * 0.55 - 0.02, 0, 0))) @ rot, [(0.15, 0.0), (0.15, 0.04)], 12, "dub_ven")
+        Q.rod(o + Vector((-L / 2 - 0.1, 0, 0)), o + Vector((L / 2 + 0.05, 0, 0)), 0.025, 6, "zelezo")
+        Q.rod(o + Vector((L / 2 + 0.05, 0, 0)), o + Vector((L / 2 + 0.05, 0.32, 0)), 0.022, 6, "zelezo")
+        Q.rod(o + Vector((L / 2 + 0.05, 0.32, 0)), o + Vector((L / 2 + 0.28, 0.32, 0)), 0.03, 6, "dub")
+        Q.lathe(M(o + Vector((-0.45, 0, 0))) @ rot, [(0.125, 0.0), (0.125, 0.6)], 12, "provaz")   # navinuté lano
+    def vedro(Q, q):   # vědro na laně (Havran props.bucket i s uchem – lano končí na uchu, kontrola visi_puchart); q = dno
+        Q.lathe(M(q), [(0.0, 0.0), (0.13, 0.0), (0.16, 0.3), (0.145, 0.3), (0.12, 0.02), (0.0, 0.02)], 16, "dub")
+        for t in (0.06, 0.24):   # obruče zapuštěné do stěny vědra (samostatně visely)
+            Q.lathe(M(q + Vector((0, t, 0))), [(0.13 + 0.03 * t / 0.3 - 0.01, 0), (0.13 + 0.03 * t / 0.3 - 0.01, 0.025)], 16, "zelezo", False, False)
+        for k_ in range(8):   # kované ucho
+            a0, a1 = math.pi * k_ / 8, math.pi * (k_ + 1) / 8
+            Q.rod(q + Vector((0.155 * math.cos(a0), 0.28 + 0.2 * math.sin(a0), 0)), q + Vector((0.155 * math.cos(a1), 0.28 + 0.2 * math.sin(a1), 0)), 0.008, 4, "zelezo")   # ucho zapuštěné do okraje vědra
+    q = c + Vector((0.0, -0.75 - 0.48, 0.0))   # dno vědra (ucho 0,48 nad dnem, lano z bubnu k uchu)
+    if not DETAIL:   # dálková verze: pevně jako dřív
+        rumpal(P, c); P.rod(c + Vector((0.0, -0.10, 0.0)), c + Vector((0.0, -0.78, 0.0)), 0.012, 5, "provaz"); vedro(P, q)
+        return
+    # blízká verze: rumpál a vědro jako pohyblivé díly (Míša 15. 11.: „co může mít funkci, tak ji mít bude“; Havran
+    # blender/studna.py kit.movable studna_rumpal navijak + studna_vedro vedro, scripts/pohyb.gd) – data pohyb_studna
+    PS = POHYB_ST
+    kit.movable("studna_rumpal", "navijak", M(c), lambda Q: rumpal(Q, Vector((0, 0, 0))), use=list(c + Vector(PS["ovladani"])), group="studna", turns=PS["turns"])
+    lift = round((p.y - 3.0 - PS["ponor_m"]) - q.y, 3)   # dno vědra pod hladinu (voda 3,0 m pod terénem – lathe výše)
+    kit.movable("studna_vedro", "vedro", M(q), lambda Q: vedro(Q, Vector((0, 0, 0))), group="studna", lift=lift, init=0.0, dur=PS["doba_s"],
+                ropes=[[[round(v, 3) for v in (c + Vector((0.0, -0.11, 0.0)))], [0.0, 0.48, 0.0]]])
 
 def schody(P, a, b, y0, y1, sirka=1.2):
     A = Vector((a[0], 0, a[1])); B = Vector((b[0], 0, b[1])); d = (B - A).normalized()
@@ -1401,6 +1460,21 @@ def uloz(parts, jmeno, kolize=False, vzhled=None, vnitrek_pryc=False):
             vel = mt.get("vel", 1.0) if mt else 1.0
             for li in poly.loop_indices: uv[li].uv = (uv[li].uv[0] / vel, uv[li].uv[1] / vel)
         for mo in list(ob.modifiers): ob.modifiers.remove(mo)
+    if kolize:   # značky (prázdné uzly) a kolizní kvádry sedátek – jen blízká verze (dálková je bez vnitřku)
+        zn_ = {}
+        for jm_, q_ in ZNACKY:
+            e_ = bpy.data.objects.new(jm_, None); e_.empty_display_size = 0.2; coll.objects.link(e_)
+            e_.matrix_world = lib.mat_to_bl(M(q_)); zn_[jm_] = e_
+        for jm_, rod_, m_, sz_ in LAVICE_KOL:
+            hx, hy, hz_ = sz_[0] / 2, sz_[1] / 2, sz_[2] / 2
+            me_ = bpy.data.meshes.new(jm_)
+            me_.from_pydata([(sx * hx, sz * hz_, sy * hy) for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)], [],
+                            [(0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3)])
+            ob_ = bpy.data.objects.new(jm_ + "-convcolonly", me_); coll.objects.link(ob_)   # Godot: StaticBody3D + ConvexPolygonShape3D
+            if rod_ in zn_: ob_.parent = zn_[rod_]
+            ob_.matrix_world = lib.mat_to_bl(m_)
+        print("ZNACKY %d, sedátek %d, okenic %d" % (len(ZNACKY), len(LAVICE_KOL), OKENICE_N[0]), flush=True)
+    ZNACKY.clear(); LAVICE_KOL.clear(); OKENICE_N[0] = 0
     if vnitrek_pryc:
         sm_, ce_ = odstran_neviditelne([o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith(("KOLIZE", "Pohyb_"))])
         print("VNITREK_PRYC %s: neviditelných ploch %d z %d" % (jmeno, sm_, ce_), flush=True)

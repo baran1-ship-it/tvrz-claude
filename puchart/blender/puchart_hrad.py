@@ -1400,6 +1400,7 @@ def palac_A(P, p0, p1, bd, PI):
         an_ = a_ * 2.094; f_ = oh_ + (d * math.cos(an_) + s * math.sin(an_)) * 0.45 + UP * 0.52
         P.beam(f_, oh_ + UP * 1.35, 0.04, 0.04, "zelezo")
     P.lathe(M(oh_ + UP * 0.78), [(0.18, 0), (0.3, 0.12), (0.32, 0.3), (0.28, 0.42)], 10, "zelezo")
+    H.ZNACKY.append(("HradA_Ohen_Kuchyne", oh_ + UP * 0.7))   # oheň na ohništi (ohne.json mista; ohne.gd: paprsek dolů na vršek ohniště)
     hw_ = 1.3; y_d = F0 + 2.0   # dýmník: čtyřboký jehlan (lathe o 4 stěnách, hrany podél zdí)
     hc_ = W(0.55 + hw_ + 0.02, 0, F0)   # plášť přiléhá k čelní zdi
     P.lathe(M(hc_ + UP * (y_d - F0), basis=frame(d)), [(hw_ * 1.414, 0.0), (0.45 * 1.414, F1 - 0.24 - y_d)], 4, "omitka", phase=math.pi / 4, cap_bot=False)
@@ -1443,6 +1444,7 @@ def palac_A(P, p0, p1, bd, PI):
                 P.lathe(mk_, [(0.1, 0.0), (0.105, 0.03), (0.085, 0.035)], 10, "kvadr_okno", cap_top=False)
                 P.lathe(mk_, [(0.08, 0.0), (0.07, 0.03)], 10, "tma", cap_bot=False)
     P.box(M(W(DS["patro_pricky"][0]["u"] + 0.08, kv_, F1) + UP * 0.6, basis=frame(d)), (0.55, 0.5, 0.03), "tma")   # topeniště ze síně
+    H.ZNACKY.append(("HradA_Ohen_Kamna", W(DS["patro_pricky"][0]["u"] + 0.35, kv_, F1) + UP * 0.3))   # topeniště kamen ze síně (ohne.json druh kamna: světlo z ústí, bez plamene)
     _stul(P, W(2.3, 0.6, F1), d, 2.2)
     _truhla(P, W(1.0, vh_ + 0.45, F1), d)
     # komora: lože a truhla
@@ -2124,9 +2126,9 @@ def stavba(suf):
         for k_ in ("A_vstup", "B_vstup"):   # ven branou (Míša 4. 11.: „ve vstupu do dolního hradu jsem nemohl vyjít, u země překážka“)
             if k_ in TR: TR[k_ + "_ven"] = TR[k_][::-1][:-2]   # ven po nástup na most (dál ruční body vstupu mimo pěšinu, přímka přes kraj skály)
         TR["cesta_mezi_hrady"] = [[p[0], p[1], None] for p in next(c for c in cc["cesty"] if c["id"] == "hrebenova")["osa"]] + [TR["B_vstup"][2]]
-        json.dump({"popis": "pohyblivé díly (kit.movable): uzel Pohyb_* je ve glb OTEVŘENÝ; zavřený = otočení o −open° kolem místní osy Y (pant). Padací most (kind most) je ve glb spuštěný, zvednutý = otočení o open° kolem místní X (pant na prahu), chains = [kotva ve zdi (svět), oko na mostě (místní)]; naviják (navijak) se při pohybu skupiny točí o turns otáček kolem místní X. "
+        json.dump({"popis": "pohyblivé díly (kit.movable): uzel Pohyb_* je ve glb OTEVŘENÝ; zavřený = otočení o −open° kolem místní osy Y (pant). Padací most (kind most) je ve glb spuštěný, zvednutý = otočení o open° kolem místní X (pant na prahu), chains = [kotva ve zdi (svět), oko na mostě (místní)]; naviják (navijak) se při pohybu skupiny točí o turns otáček kolem místní X. Okenice (Pohyb_okeniceN_l/_p, hrady.okenice) jsou druh dvere. Vědro studny (vedro, Havran pohyb.gd) se posouvá o lift·k po místní Y (k 0 = ve glb nahoře, 1 = u hladiny), init = počáteční posun, ropes = [kotva lana (svět), ucho vědra (místní)]; skupina studna s navijakem (rumpál). "
                    "cols = kolize v místních souřadnicích uzlu, use = místo ovládání (svět). Čte hra/scripts/dvere.gd.",
-                   "dily": [{k: e[k] for k in ("name", "kind", "group", "cols", "use", "open", "dur", "chains", "turns") if k in e} for e in lib.MOVABLE]},
+                   "dily": [{k: e[k] for k in ("name", "kind", "group", "cols", "use", "open", "dur", "chains", "turns", "lift", "ropes") + (("init",) if e["kind"] == "vedro" else ()) if k in e} for e in lib.MOVABLE]},
                   open(os.path.join(K, "hra/data/pohyb.json"), "w"), ensure_ascii=False)
         json.dump({"popis": "padací mosty (most_kryti): otvor portálu [š, v], zvednutý most [š, délka], výklenek – test smyslu most_kryje_otvor",
                    "mosty": MOST_KRYTI}, open(os.path.join(K, "hra/data/mosty_kryti.json"), "w"), ensure_ascii=False)
