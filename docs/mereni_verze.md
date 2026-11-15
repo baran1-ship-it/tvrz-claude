@@ -449,3 +449,9 @@ hostinec 22/21/31/22, věž 29/26/24/28. Špičky > 200 ms jen 2 (206, 209), zá
 - Fyzika 46 ms v hostinci: hráč 28,3 ms (move_and_slide 16,5 + schod 11,7) na `hostinec_kolize` ConcavePolygon =
   **naměřená příčina** jednoho druhu záseku: trojúhelníková kolize hostince je pro hráče drahá (řádek 17 K2 plánu).
 - `_process` 26 ms s „předměty 20“ v hostinci (1238 s) – skript předmětů občas 8–20 ms = naměřený vliv, příčina NEZNÁMÁ.
+
+## 0.999998 (commit f97a7381, 15. 11. 07:08) – NEOVĚŘENO NA ZAŘÍZENÍ
+Změny proti 0.999997: kaskáda potoka z kopce (stupně, pěna, balvany), krčma do L (zábradlí schodů/podesty/konců pavlače
+ze zdroje, jas textur jako ves), chýše v lomu na zemi (nábytek na síti terénu), levitace (kamínky u brodu a na valu,
+borovice na smazané skále, zavěšené předměty), břeh kaskády, louka: rozpočet nahrávání do GPU (záseky – NEZMĚŘENO na tabletu).
+Čeká na Měřicí trasu od Míši.
