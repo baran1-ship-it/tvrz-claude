@@ -2988,10 +2988,6 @@
    "pulsirka_m": 0.6,
    "osa": [
     [
-     6.0,
-     95.0
-    ],
-    [
      90.0,
      75.0
     ],
@@ -3000,10 +2996,15 @@
      35.0
     ],
     [
-     220.0,
-     40.0
+     212.5,
+     62.7
+    ],
+    [
+     226.1,
+     54.6
     ]
-   ]
+   ],
+   "_osa_15_11": "Míša 15. 11. (nová zřícenina kostela, lokace ruiny kostel): pěšina už nekončí uprostřed kostela (stará západní brána), ale před branou hřbitova (model −3,2; 15,5 → svět 226,1; 54,6), kolem západního rohu hřbitovní zdi (model −19; 14,5). Body přepočítané natočením 0,6."
   },
   {
    "id": "tvrz_doubrava",
