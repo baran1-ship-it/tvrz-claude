@@ -1,6 +1,8 @@
 extends Node
 ## Test ohňů (Míša 15. 11., chyby.md 274): PUCHART_SKRIPT=res://scripts/test_ohne.gd – počet ohňů z dat, světla v rozpočtu
-## (u krčmy: nejvýš svetel_max, žádné se stínem), zapnutí / vypnutí jednoho ohně (plamen, světlo). Výpis OHNE_TEST … OK / CHYBA.
+## (u krčmy: nejvýš svetel_max, žádné se stínem), zapnutí / vypnutí jednoho ohně (plamen, světlo); hrad A (koren Hrad): černá
+## kuchyně hoří v 6:00 a 17:00, ne ve 14:00 a 22:00 (hori casy), kamna v noci (22:00), ne ve 14:00; u kuchyně hradu nejvýš
+## svetel_max světel ohňů a nejvýš svetel_objekt_max světel celkem (Compatibility: 8 na objekt). Výpis OHNE_TEST … OK / CHYBA.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # hlavní nabídka pozastaví strom
 	var h := get_parent()
@@ -14,7 +16,7 @@ func _ready() -> void:
 	# rozpočet u krčmy (kuchyně): světla zapnutá nejvýš svetel_max, nikdy stín
 	var i0 := -1
 	for i in n:
-		if String(oh.ohne[i]["nazev"]).contains("kuchyni"): i0 = i
+		if String(oh.ohne[i]["nazev"]).contains("kuchyni krčmy"): i0 = i
 	if i0 < 0: chyby.append("oheň v kuchyni krčmy nenalezen"); i0 = 0
 	var p0: Vector3 = oh.ohne[i0]["zaklad"]
 	oh._rozpocet(p0 + Vector3(2, 1.5, 0))
@@ -33,6 +35,32 @@ func _ready() -> void:
 	# daleko (200 m): žádné světlo
 	oh._rozpocet(p0 + Vector3(200, 0, 0))
 	if oh.pocet_svetel() != 0: chyby.append("světla svítí i 200 m od ohňů (%d)" % oh.pocet_svetel())
+	# hrad A: kuchyně v hodinách vaření (hodiny ohne.json), kamna v noci (domy_noc)
+	var ik := -1; var ia := -1
+	for i in n:
+		var nz := String(oh.ohne[i]["nazev"])
+		if nz.contains("kuchyni hradu"): ik = i
+		if nz.contains("kamna"): ia = i
+	if ik < 0 or ia < 0: chyby.append("hrad: kuchyně %d / kamna %d nenalezena (značky HradA_Ohen_* pod uzlem Hrad)" % [ik, ia])
+	else:
+		var ok_k: Dictionary = oh.ohne[ik]; var ok_a: Dictionary = oh.ohne[ia]
+		for hc: Array in [[6.0, true, true], [14.0, false, false], [17.0, true, true], [22.0, false, true]]:
+			oh._noc(false, float(hc[0]))
+			print("OHNE_TEST hrad %02d:00 kuchyně hoří %s, kamna hoří %s" % [int(hc[0]), ok_k["hori"], ok_a["hori"]])
+			if bool(ok_k["hori"]) != bool(hc[1]): chyby.append("kuchyně hradu v %s h hoří %s (čekám %s)" % [hc[0], ok_k["hori"], hc[1]])
+			if bool(ok_a["hori"]) != bool(hc[2]): chyby.append("kamna hradu v %s h hoří %s (čekám %s)" % [hc[0], ok_a["hori"], hc[2]])
+		oh._noc(false, 17.0)   # kuchyně i kamna hoří: rozpočet světel u kuchyně hradu
+		var pk: Vector3 = ok_k["zaklad"]; var kde := pk + Vector3(1.5, 1.5, 0)
+		oh._rozpocet(kde)
+		var svk: int = oh.pocet_svetel()
+		var vse := 0   # všechna viditelná světla ve hře, jejichž dosah zasahuje místo u ohně (limit na objekt)
+		for l in h.find_children("*", "OmniLight3D", true, false):
+			if (l as OmniLight3D).is_visible_in_tree() and (l as OmniLight3D).global_position.distance_to(kde) < (l as OmniLight3D).omni_range: vse += 1
+		print("OHNE_TEST hrad u kuchyně: světel ohňů %d (max %d), světel celkem v dosahu %d; kuchyně svítí %s, plamen %s" % [svk, int(cfg["rozpocet"]["svetel_max"]), vse,
+			(ok_k["svetlo"] as OmniLight3D).visible, (ok_k["plamen"] as Node3D).visible])
+		if svk > int(cfg["rozpocet"]["svetel_max"]) or not (ok_k["svetlo"] as OmniLight3D).visible or not (ok_k["plamen"] as Node3D).visible: chyby.append("kuchyně hradu v 17 h nesvítí / rozpočet %d" % svk)
+		if vse > 8: chyby.append("u kuchyně hradu %d světel (Compatibility 8 na objekt)" % vse)
+		oh._noc(true)
 	# nabídka: hráč 1,8 m od ohně v kuchyni krčmy, míří na něj → „Uhasit oheň“, stisk uhasí, znovu → „Zapálit oheň“
 	var hr: CharacterBody3D = h.hrac
 	var pr: Node = null

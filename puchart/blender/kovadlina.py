@@ -179,9 +179,12 @@ def kovadlina_high():
     wa, ws = KV["pas_m"][0] / 2, KV["pas_m"][1] / 2
     hw = KV["drah_sirka_m"] / 2
     h = F - B
-    rezy = [(0.000, xb, 0, pa, ps, p), (0.040, xb, 0, pa - 0.004, ps - 0.004, p), (0.058, xb, 0, pa - 0.03, ps - 0.03, p),
-            (0.085, xb, 0, wa + 0.05, ws + 0.035, p), (0.112, xb, 0, wa + 0.015, ws + 0.01, p), (0.150, xb, 0, wa, ws, p), (0.205, xb, 0, wa + 0.005, ws - 0.002, p),
-            (0.250, xb + 0.01, 0, wa + 0.04, ws + 0.002, p), (0.290, xb + 0.02, 0, hl - 0.05, hw - 0.002, p),
+    # 2. kolo (KCD2): mohutné svislé tělo – pata sedí celou plochou na špalku (nízký sokl, žádné „nožičky“), pas široký
+    # (~0,7 délky dráhy), boky skoro svislé, nahoře se rozšíří do dráhy; výšky jako podíl výšky těla h
+    rezy = [(0.000, xb, 0, pa, ps, p), (0.022, xb, 0, pa - 0.003, ps - 0.003, p), (0.034, xb, 0, pa - 0.016, ps - 0.016, p),
+            (0.060, xb, 0, wa + 0.035, ws + 0.028, p), (0.105, xb, 0, wa + 0.012, ws + 0.009, p), (0.16 * h / 0.37, xb, 0, wa, ws, p),
+            (0.50 * h, xb + 0.004, 0, wa + 0.004, ws - 0.002, p), (0.66 * h, xb + 0.012, 0, wa + 0.022, (ws + hw) / 2, p),
+            (0.80 * h, xb + 0.022, 0, hl - 0.04, hw - 0.002, p),
             (h - 0.045, xb + 0.03, 0, hl - 0.02, hw, 8.0), (h - 0.002, xb + 0.03, 0, hl - 0.02, hw, 8.0),
             (h, xb + 0.03, 0, hl - 0.022, hw - 0.002, 8.0)]
     telo = loft_z([(B + z, cx, cy, hx, hy, pp) for z, cx, cy, hx, hy, pp in rezy], "telo")
@@ -195,7 +198,7 @@ def kovadlina_high():
     # roh: kónický, štíhne do špičky, horní hrana mírně pod dráhou a klesá; spodek (hrdlo) vybíhá z pasu konkávně
     L = KV["roh_delka_m"]
     xa = xb + 0.05; xt = x_tela_p + L
-    bz0 = B + 0.16; top_t = F - 0.008 - 0.024; bt = top_t - 0.022
+    bz0 = B + 0.50 * h; top_t = F - 0.008 - 0.024; bt = top_t - 0.022
     rr = []
     for k in range(25):
         q = k / 24
@@ -213,9 +216,8 @@ def kovadlina_high():
     remesh(o, 0.004)
     # odečíst: oblouky mezi patkami, otvor pro sperhák (hranatý) a průbojník (kulatý) v patce, otlučené hrany
     rez = []
-    bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=0.12, depth=1.0, location=(xb, 0, B - 0.058), rotation=(math.pi / 2, 0, 0))
-    rez.append(bpy.context.object)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=0.095, depth=1.0, location=(xb, 0, B - 0.05), rotation=(0, math.pi / 2, 0))
+    ro = 0.22; vo = KV.get("oblouk_pod_patou_m", 0.012)            # mělký oblouk mezi patkami (KCD2: pata sedí celou plochou)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=ro, depth=1.0, location=(xb, 0, B - ro + vo), rotation=(math.pi / 2, 0, 0))
     rez.append(bpy.context.object)
     bpy.ops.mesh.primitive_cube_add(size=1, location=(x_tela_l - pd * 0.62, 0, F - 0.05)); c = bpy.context.object
     c.scale = (0.026, 0.026, 0.14); rez.append(c)
@@ -265,12 +267,14 @@ def r_spalku(t, z=0.0, sin=math.sin):
     """poloměr špalku v úhlu t (nepravidelný dubový kmen), dole mírný náběh."""
     r = R0 * (1 + 0.035 * sin(2 * t + 0.4) + 0.028 * sin(3 * t + 0.7) + 0.02 * sin(5 * t + 2.1) + 0.012 * sin(9 * t + 0.3)
               + 0.007 * sin(17 * t + 1.0) + 0.004 * sin(29 * t + 2.0))
+    ob = SP.get("povrch", {}).get("obrys_m", 0.0)               # otlučený, hrbolatý obrys (KCD2)
+    r += ob * (0.6 * sin(7 * t + 9 * z + 0.3) + 0.4 * sin(19 * t - 11 * z + 1.7) + 0.3 * sin(31 * t + 23 * z + 2.2))
     return r + 0.02 * max(0.0, 1 - z / 0.08) ** 2 - 0.006 * z / H
 
 
 DLAZD = 6                      # boky špalku: 6 dlaždic po 60° (atlas dřeva 2 řady × 3)
 T_UV = 0.245                   # velikost dlaždice v UV (0,5 m → ~1000 px/m při 2048)
-DISK = (0.0025, 0.5025, 0.49, 1.04)   # u0, v0, velikost v UV, velikost v m (čelo špalku)
+DISK = (0.0025, 0.5025, 0.49, 2 * (R0 * 1.12))   # u0, v0, velikost v UV, velikost v m (čelo špalku)
 S_BOK = (H - FIL) + FIL * math.pi / 2   # délka profilu boku (zem → zaoblení → čelo)
 
 
@@ -291,7 +295,9 @@ def vyska_cela(x, y):
     return H + 0.003 * math.sin(7 * x + 1.3) * math.sin(5 * y + 0.4) + 0.002 * math.sin(13 * x - 9 * y)
 
 
-def spalek(n=96, zbok=(0, 0.02, 0.05, 0.09, 0.14, 0.20, 0.26, 0.31, 0.345), nfil=5, krouzky=(0.88, 0.72, 0.55, 0.38, 0.22, 0.09)):
+def spalek(n=128, zbok=(0, 0.06, 0.15, 0.28, 0.42, 0.56, 0.70, 0.84, 0.94, 1.0), nfil=6, krouzky=(0.9, 0.78, 0.64, 0.5, 0.36, 0.22, 0.09)):
+    """zbok – výšky řad boku jako podíl výšky pod zaoblením (H − FIL)."""
+    zbok = tuple(z * (H - FIL) for z in zbok[:-1])
     bm = bmesh.new()
     uvb = bm.loops.layers.uv.new("bake"); uvt = bm.loops.layers.uv.new("tex")
     prof = []                                   # (z, dr, s) podél profilu boku
@@ -344,6 +350,36 @@ def spalek(n=96, zbok=(0, 0.02, 0.05, 0.09, 0.14, 0.20, 0.26, 0.31, 0.345), nfil
             lp[uvb].uv = uv_disk(x, y); lp[uvt].uv = (x, y)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     o = obj_z_bm(bm, "spalek")
+    for p in o.data.polygons:
+        p.use_smooth = True
+    return o
+
+
+def spalek_high(st):
+    """high-poly špalku pro zapečení: dělení + síť trhlin (voronoi F2−F1 přes barevnou rampu = úzké rýhy) + hrbolky –
+    drsný, kamenitě rozpraskaný povrch jako KCD2 (2. kolo). UV a materiál zůstávají (dělení Simple)."""
+    pv = SP["povrch"]
+    o = kopie(st, "spalek_high")
+    m = o.modifiers.new("sd", "SUBSURF"); m.subdivision_type = "SIMPLE"; m.levels = 3; m.render_levels = 3
+    aplikuj(o)
+    # trhliny: síť F2−F1 voronoi v pokřivených souřadnicích (ne pravidelné buňky), jen místy (maska fbm), různě hluboké;
+    # hrbolky: fbm dvou měřítek; vše podél normály (mathutils.noise, deterministicky)
+    from mathutils import noise as N
+    bunka, hl = pv["trhliny_bunka_m"], pv["trhliny_hloubka_m"]
+    hb, vl = pv["hrbolky_m"], pv["hrbolky_vlna_m"]
+    me = o.data
+    for v in me.vertices:
+        p = v.co
+        q = p / bunka
+        q = q + N.noise_vector(q * 0.7 + Vector((3.1, 7.7, 1.3))) * 0.55          # pokřivení buněk
+        d = N.voronoi(q, distance_metric="DISTANCE", exponent=2.0)[0]
+        f21 = d[1] - d[0]
+        rh = max(0.0, 1.0 - f21 / 0.11) ** 1.6                                     # úzká rýha
+        maska = min(1.0, max(0.0, (N.fractal(p / (bunka * 3.0) + Vector((9.0, 1.0, 4.0)), 0.6, 2.0, 3) + 0.15) * 2.2))
+        jemne = max(0.0, 1.0 - (d[2] - d[0]) / 0.09) ** 2 * 0.35                    # vedlejší vlásečnice
+        dz = -hl * (rh * (0.35 + 0.65 * maska) + jemne * maska)
+        dz += hb * N.fractal(p / vl, 0.55, 2.1, 4) + hb * 0.35 * N.noise(p / (vl * 0.22))
+        v.co = p + v.normal * dz
     for p in o.data.polygons:
         p.use_smooth = True
     return o
@@ -501,7 +537,7 @@ def mat_zelezo_autorsky():
     xyz = U.u("ShaderNodeSeparateXYZ"); U.ln(geo.outputs["Position"], xyz.inputs[0])
     nxyz = U.u("ShaderNodeSeparateXYZ"); U.ln(geo.outputs["Normal"], nxyz.inputs[0])
     tc = U.u("ShaderNodeTexCoord")
-    mp = U.u("ShaderNodeMapping"); mp.inputs["Scale"].default_value = (2.6, 2.6, 2.6); U.ln(tc.outputs["Object"], mp.inputs[0])
+    mp = U.u("ShaderNodeMapping"); mp.inputs["Scale"].default_value = (4.2, 4.2, 4.2); U.ln(tc.outputs["Object"], mp.inputs[0])
     rD = U.obr(img("rust_coarse_01_Diffuse"), mp.outputs[0], box=True)
     rH = U.obr(img("rust_coarse_01_Displacement", False), mp.outputs[0], box=True)
     rR = U.obr(img("rust_coarse_01_Rough", False), mp.outputs[0], box=True)
@@ -535,33 +571,34 @@ def mat_zelezo_autorsky():
                  U.math("ADD", U.math("ADD", u_dreva, U.math("MULTIPLY", pas_k, 0.35)), dal))
     rez = U.math("MULTIPLY", rez, U.math("SUBTRACT", 1.0, U.math("MAXIMUM", lesk, U.math("MULTIPLY", hrana, 0.8))), clamp=True)
     # barvy
-    okuje = U.mix(0.5, (0.125, 0.115, 0.105), rD.outputs[0], "MULTIPLY")
-    okuje = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.6), okuje, (0.15, 0.135, 0.12))
-    rez_b = U.mix(0.25, rD.outputs[0], (0.20, 0.11, 0.06), "MULTIPLY")
-    rez_b = U.mix(0.5, rez_b, rD.outputs[0])
+    BV = KV["barvy_srgb"]                                   # 2. kolo: hnědé okuje a rez jako KCD2 (1. kolo téměř černé)
+    okuje = U.mix(0.55, tuple(BV["okuje"]), rD.outputs[0])
+    okuje = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.5), okuje, tuple(c * 0.7 for c in BV["okuje"]))
+    rez_b = U.mix(0.5, rD.outputs[0], tuple(BV["rez"]))
     skr = U.u("ShaderNodeMapping"); skr.inputs["Scale"].default_value = (3.0, 160.0, 3.0); U.ln(geo.outputs["Position"], skr.inputs[0])
     skr_n = U.u("ShaderNodeTexNoise"); skr_n.inputs["Scale"].default_value = 1.6; skr_n.inputs["Detail"].default_value = 3.0
     U.ln(skr.outputs[0], skr_n.inputs["Vector"])
     skrab = U.mr(skr_n.outputs["Fac"], 0.56, 0.68)
     jamky = U.mr(rH.outputs[0], 0.38, 0.2)
     skvrny = U.mr(sum1.outputs["Fac"], 0.42, 0.62)
-    lesk_b = U.mix(U.math("MULTIPLY", skrab, 0.3), (0.50, 0.49, 0.47), (0.60, 0.59, 0.57))
-    lesk_b = U.mix(U.math("MULTIPLY", skvrny, 0.45), lesk_b, (0.20, 0.18, 0.16))
-    lesk_b = U.mix(U.math("MULTIPLY", jamky, 0.75), lesk_b, (0.09, 0.085, 0.08))
-    hrana_b = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.4), (0.15, 0.145, 0.14), (0.22, 0.215, 0.21))
+    lesk_b = U.mix(U.math("MULTIPLY", skrab, 0.4), tuple(BV["draha"][0]), tuple(BV["draha"][1]))
+    lesk_b = U.mix(U.math("MULTIPLY", skvrny, 0.3), lesk_b, (0.36, 0.34, 0.31))
+    lesk_b = U.mix(U.math("MULTIPLY", jamky, 0.6), lesk_b, (0.17, 0.16, 0.15))
+    hrana_b = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.4), tuple(BV["hrana"][0]), tuple(BV["hrana"][1]))
     alb = U.mix(rez, okuje, rez_b)
     alb = U.mix(opotr, alb, hrana_b)
     alb = U.mix(lesk, alb, lesk_b)
-    alb = U.mix(U.math("SUBTRACT", 1.0, U.math("ADD", 0.45, U.math("MULTIPLY", ao_f, 0.55))), alb, (0, 0, 0))
+    alb = U.mix(U.math("MULTIPLY", U.math("SUBTRACT", 1.0, U.math("ADD", 0.45, U.math("MULTIPLY", ao_f, 0.55))), U.math("SUBTRACT", 1.0, U.math("MULTIPLY", lesk, 0.6))), alb, (0, 0, 0))
     # drsnost a kov
     dr_ok = U.math("ADD", 0.66, U.math("MULTIPLY", rR.outputs[0], 0.22))
     dr = U.mix(rez, dr_ok, 0.9)
     dr = U.mix(opotr, dr, 0.5)
-    dr = U.mix(lesk, dr, U.math("ADD", U.math("ADD", 0.33, U.math("MULTIPLY", skrab, 0.12)),
-                                U.math("ADD", U.math("MULTIPLY", jamky, 0.35), U.math("MULTIPLY", skvrny, 0.15))))
+    d0, d1 = KV["barvy_srgb"]["draha_drsnost"]
+    dr = U.mix(lesk, dr, U.math("ADD", U.math("ADD", d0, U.math("MULTIPLY", skrab, d1 - d0)),
+                                U.math("ADD", U.math("MULTIPLY", jamky, 0.3), U.math("MULTIPLY", skvrny, 0.12))))
     kov = U.mix(rez, 0.15, 0.0)
     kov = U.mix(opotr, kov, 0.6)
-    kov = U.mix(lesk, kov, U.math("SUBTRACT", 0.6, U.math("MULTIPLY", jamky, 0.4)))
+    kov = U.mix(lesk, kov, U.math("SUBTRACT", KV["barvy_srgb"]["draha_kov"], U.math("MULTIPLY", jamky, 0.2)))
     # reliéf
     vyska = U.math("MULTIPLY", rH.outputs[0], U.math("SUBTRACT", 1.0, U.math("MULTIPLY", lesk, 0.9)))
     vyska = U.math("ADD", vyska, U.math("MULTIPLY", rez, U.math("MULTIPLY", sum2.outputs["Fac"], 0.6)))
@@ -621,10 +658,10 @@ def textura_dreva(anvil_rect, sperhak_xy):
     fr = roky - np.floor(roky)
     pozdni = np.clip((fr - 0.55) / 0.2, 0, 1) * np.clip((1.0 - fr) / 0.1, 0, 1)
     jarni_p = np.clip(1 - np.abs(fr - 0.05) / 0.06, 0, 1)          # póry jarního dřeva (dub – kruhovitě pórovitý)
-    zakl = np.stack([0.33 + 0.0 * r, 0.255 + 0.0 * r, 0.185 + 0.0 * r], -1)
-    pozd_c = np.array([0.255, 0.192, 0.140])
-    col = zakl * (1 - pozdni[..., None]) + pozd_c * pozdni[..., None]
-    col *= (1 - 0.25 * jarni_p * (sumC > 0.45))[..., None]
+    zakl = np.stack([0.40 + 0.0 * r, 0.345 + 0.0 * r, 0.28 + 0.0 * r], -1)   # 2. kolo: šedohnědé, letokruhy tlumené (KCD2)
+    pozd_c = np.array([0.345, 0.29, 0.23])
+    col = zakl * (1 - 0.5 * pozdni[..., None]) + pozd_c * 0.5 * pozdni[..., None]   # letokruhy tlumené (KCD2 je nemá vidět)
+    col *= (1 - 0.08 * jarni_p * (sumC > 0.45))[..., None]
     # dřeňové paprsky (dub): tenké světlé radiální čárky
     b = (fi / (2 * np.pi) + 0.5) * 900
     bi = np.floor(b).astype(int) % 900
@@ -726,8 +763,13 @@ def mat_drevo_autorsky(prekryv, vyska):
     ao = U.u("ShaderNodeAmbientOcclusion", samples=16, only_local=False); ao.inputs["Distance"].default_value = 0.12
     bok = U.mix(1.0, wD.outputs[0], pr.outputs[0], "MULTIPLY")
     bok = U.mix(0.35, bok, (0.30, 0.27, 0.24), "SATURATION")
+    bok = U.mix(0.3, bok, (0.44, 0.40, 0.35))                # šedohnědý, ohlazený (KCD2)
     alb = U.mix(celo, bok, pr.outputs[0])
     alb = U.mix(U.math("SUBTRACT", 1.0, U.math("ADD", 0.5, U.math("MULTIPLY", ao.outputs["AO"], 0.5))), alb, (0, 0, 0))
+    ao2 = U.u("ShaderNodeAmbientOcclusion", samples=16, only_local=True); ao2.inputs["Distance"].default_value = 0.012
+    alb = U.mix(U.math("SUBTRACT", 1.0, ao2.outputs["AO"]), alb, (0.03, 0.025, 0.02))   # rýhy trhlin (high-poly) tmavé
+    nep = U.u("ShaderNodeTexNoise"); nep.inputs["Scale"].default_value = 60.0; nep.inputs["Detail"].default_value = 6.0
+    alb = U.mix(U.math("MULTIPLY", U.mr(nep.outputs["Fac"], 0.45, 0.7), 0.35), alb, (0.55, 0.50, 0.44))   # drolivé světlé šupinky
     dr = U.mix(celo, U.math("ADD", 0.25, U.math("MULTIPLY", wR.outputs[0], 0.75)), U.math("ADD", 0.58, U.math("MULTIPLY", vy.outputs[0], 0.25)))
     nm = U.u("ShaderNodeNormalMap", uv_map="tex"); nm.inputs["Strength"].default_value = 1.0; U.ln(wN.outputs[0], nm.inputs["Color"])
     bump = U.u("ShaderNodeBump"); bump.inputs["Distance"].default_value = 0.004; bump.inputs["Strength"].default_value = 1.0
@@ -860,27 +902,44 @@ def nahled(objs):
         sc.render.filepath = os.path.join(PRAC, f"nahled_{k}.png"); bpy.ops.render.render(write_still=True)
 
 
+LICENCE = """Kovadlina 1393 (blender/kovadlina.py, pravidla/svet/kovadlina_1393.json) – kovadlina_1393.glb, kovadlina_1393_stredni.glb, kovadlina_1393_daleko.glb
+
+Cizí podklady – Poly Haven, licence CC0 1.0 (public domain), staženo 15. 11. 2026 (2k jpg):
+  „Rust Coarse 01“ – Dimitrios Savva (foto), Rico Cilliers (zpracování), https://polyhaven.com/a/rust_coarse_01
+     (rez a okuje železa, zapečeno do kovadlina_zelezo albedo/normal/ORM)
+  „Rough Wood“ – Rob Tuytel, https://polyhaven.com/a/rough_wood
+     (boky dubového špalku, zapečeno do kovadlina_drevo albedo/normal/ORM)
+Vlastní tvorba: geometrie kovadliny, sperháku, kramlí a špalku (high-poly s trhlinami); textura čela špalku
+(letokruhy, dřeňové paprsky, trhliny, okuje, spáleniny – numpy); masky opotřebení a zapečení.
+Předloha tvaru: KCD2 (docs/reference/kovarna/kcd2_kovadlina_misa_15_11.jpg) – inspirace, ne kopie modelu.
+Titulky: pokryto řádkem „Textury, rostliny a předměty: Poly Haven, CC0“ (menu.gd).
+"""
+
+
 # ------------------------------------------------------------------ stavba
 def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     nastav_cycles()
     an_h, (ax0, ax1), hw = kovadlina_high()
     sp_h = sperhak_high()
-    ob = obruc(); kr = kramle(CX - 0.06, KV["pata_m"][1] / 2)
+    ob = obruc() if SP.get("pasek", True) else None
+    kr = kramle(CX - 0.06, KV["pata_m"][1] / 2) if KV.get("kramle", True) else None
     st = spalek()
-    print("HIGH kovadlina", troj(an_h), "sperhak", troj(sp_h), "spalek", troj(st), "obruc", troj(ob), "kramle", troj(kr), flush=True)
+    print("HIGH kovadlina", troj(an_h), "sperhak", troj(sp_h), "spalek", troj(st), "obruc", troj(ob) if ob else 0, "kramle", troj(kr) if kr else 0, flush=True)
     if A.nahled:
-        nahled([an_h, sp_h, ob, kr, st]); return
+        nahled([o for o in (an_h, sp_h, ob, kr, st) if o]); return
     # low-poly železa
     an_l = decimuj(kopie(an_h, "kovadlina_low"), 9000)
     sp_l = decimuj(kopie(sp_h, "sperhak_low"), 1400)
-    ob_l = kopie(ob, "obruc_low"); kr_l = kopie(kr, "kramle_low")
+    ob_l = kopie(ob, "obruc_low") if ob else None; kr_l = kopie(kr, "kramle_low") if kr else None
     nastav_dil(an_l, 0); nastav_dil(sp_l, 1)
-    zel = spoj([an_l, sp_l, ob_l, kr_l], "Kovadlina_zelezo")
+    zel = spoj([o for o in (an_l, sp_l, ob_l, kr_l) if o], "Kovadlina_zelezo")
     for p in zel.data.polygons:
         p.use_smooth = True
     for u in [u for u in zel.data.uv_layers if u.name != "bake"]:
         zel.data.uv_layers.remove(u)
+    if "bake" not in zel.data.uv_layers:                       # bez pásku (pasek false) nemá žádný díl UV „bake“
+        zel.data.uv_layers.new(name="bake")
     zel.data.uv_layers.active = zel.data.uv_layers["bake"]
     dil = [0] * len(zel.data.polygons); zel.data.attributes["dil"].data.foreach_get("value", dil)
     aktivni(zel)
@@ -907,12 +966,15 @@ def main():
         bpy.ops.uv.pack_islands(rotate=True, margin=0.003)
     bpy.ops.object.mode_set(mode="OBJECT")
     # high sada železa (pásek a kramle samy sebou)
-    ob_h = kopie(ob, "obruc_high"); kr_h = kopie(kr, "kramle_high")
-    bpy.data.objects.remove(ob); bpy.data.objects.remove(kr)
+    ob_h = kopie(ob, "obruc_high") if ob else None; kr_h = kopie(kr, "kramle_high") if kr else None
+    if ob:
+        bpy.data.objects.remove(ob)
+    if kr:
+        bpy.data.objects.remove(kr)
     for o in (ob_h, kr_h):
-        for p in o.data.polygons:
+        for p in (o.data.polygons if o else ()):
             p.use_smooth = True
-    high = [an_h, sp_h, ob_h, kr_h]
+    high = [o for o in (an_h, sp_h, ob_h, kr_h) if o]
     mz, kanaly_z, info_z = mat_zelezo_autorsky()
     mzi = (mz, kanaly_z, info_z)
     for o in high:
@@ -945,14 +1007,21 @@ def main():
         o.hide_render = True
     print("pece zelezo ao", flush=True)
     i = bake_obr("zelezo_ao"); cil_obr(zel, i); peč("AO", zel); vystup["z_ao"] = uloz(i, "zelezo_ao")
-    # --- dřevo (na sobě; kovadlina vrhá AO)
+    # --- dřevo: high-poly (trhliny, hrbolky) → low; kovadlina vrhá AO
+    st_h = spalek_high(st)
+    print("HIGH spalek", troj(st_h), flush=True)
+    for v in ("visible_camera", "visible_diffuse", "visible_glossy", "visible_shadow", "visible_transmission"):
+        setattr(st, v, False)
     for kanal, barva in (("albedo", True), ("drsnost", False)):
         print("pece drevo", kanal, flush=True)
         emit_kanal(mdi, kanal); i = bake_obr("drevo_" + kanal, barva); cil_obr(st, i)
-        peč("EMIT", st); vystup["d_" + kanal] = uloz(i, "drevo_" + kanal)
+        peč("EMIT", st, [st_h]); vystup["d_" + kanal] = uloz(i, "drevo_" + kanal)
     U, bsdf, em, out = info_d; U.ln(bsdf.outputs[0], out.inputs[0])
     print("pece drevo normal", flush=True)
-    i = bake_obr("drevo_normal"); cil_obr(st, i); peč("NORMAL", st); vystup["d_normal"] = uloz(i, "drevo_normal")
+    i = bake_obr("drevo_normal"); cil_obr(st, i); peč("NORMAL", st, [st_h]); vystup["d_normal"] = uloz(i, "drevo_normal")
+    for v in ("visible_camera", "visible_diffuse", "visible_glossy", "visible_shadow", "visible_transmission"):
+        setattr(st, v, True)
+    bpy.data.objects.remove(st_h)
     print("pece drevo ao", flush=True)
     i = bake_obr("drevo_ao"); cil_obr(st, i); peč("AO", st); vystup["d_ao"] = uloz(i, "drevo_ao")
     # --- finální materiály
@@ -986,17 +1055,16 @@ def main():
     print("PODROBNY troj", n_pod, "kolize", troj(kol), flush=True)
     # --- střední a daleký stupeň (vlastní zjednodušení, textury menší, barva vrcholů)
     stat = {"podrobny": n_pod}
-    for nazev, cil_k, n_sp, zb, kr_, px, obr_ in (("stredni", 1900, 48, (0, 0.05, 0.14, 0.26, 0.345), 2, 512, True),
-                                                   ("daleko", 300, 18, (0, 0.2), 1, 256, False)):
+    for nazev, cil_k, n_sp, zb, kr_, px, obr_ in (("stredni", 1900, 48, (0, 0.18, 0.55, 0.9, 1.0), 2, 512, True),
+                                                   ("daleko", 300, 18, (0, 0.5, 1.0), 1, 256, False)):
         ob2 = kopie(pod, "lod_" + nazev)
         # rozdělit materiály: železo decimovat, dřevo postavit znovu s méně segmenty
         aktivni(ob2); bpy.ops.object.mode_set(mode="EDIT"); bpy.ops.mesh.select_all(action="DESELECT")
         ob2.active_material_index = 1; bpy.ops.object.material_slot_select(); bpy.ops.mesh.delete(type="FACE")
         bpy.ops.object.mode_set(mode="OBJECT")
         if nazev == "daleko":                  # bez pásku, hřebů a kramlí
-            bm = bmesh.new(); bm.from_mesh(ob2.data)
-            pryc = [f for f in bm.faces if math.hypot(f.calc_center_median().x, f.calc_center_median().y) > 0.40
-                    or (f.calc_center_median().z < H + 0.06 and abs(f.calc_center_median().y) > 0.12)]
+            bm = bmesh.new(); bm.from_mesh(ob2.data); dl2 = bm.faces.layers.int.get("dil")
+            pryc = [f for f in bm.faces if dl2 is not None and f[dl2] >= 2]      # pásek, hřeby, kramle (atribut dil)
             bmesh.ops.delete(bm, geom=pryc, context="FACES"); bm.to_mesh(ob2.data); bm.free()
         decimuj(ob2, cil_k)
         st2 = spalek(n=n_sp, zbok=zb, nfil=kr_, krouzky=(0.6, 0.25) if nazev == "stredni" else (0.4,))
@@ -1013,6 +1081,7 @@ def main():
         export([lod], os.path.join(OUT, f"kovadlina_1393_{nazev}.glb"), barvy=True)
         print("LOD", nazev, stat[nazev], flush=True)
     json.dump(stat, open(os.path.join(PRAC, "stat.json"), "w"))
+    open(os.path.join(OUT, "LICENCE_kovadlina_1393.txt"), "w").write(LICENCE)
     print("HOTOVO", stat)
 
 

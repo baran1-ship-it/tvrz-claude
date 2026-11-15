@@ -105,6 +105,9 @@ func _start() -> void:
 	if FileAccess.file_exists("res://data/skaly_rostliny.json"): _rostliny_skal()
 	Denik.zapis("stavby míst")
 	if FileAccess.file_exists("res://data/mista_stavby.json"): _mista()   # Předhradí, krčma, hájovna (Míša 11. 11.; domy z Havrana)
+	var hr_ := get_node_or_null("Hrad")
+	if hr_ and _lavice_vzor != "":   # sedátka v nikách oken paláců (hrady.py okno: OknoN_Sedatka = rodič kolize OknoN_Kol_Lavice, 1,5 m v místnosti → sedí se zády k oknu)
+		for s_ in hr_.find_children("*_Sedatka", "Node3D", true, false): lavice.append_array(load("res://scripts/lavice.gd").mista(s_, _lavice_vzor))
 	if FileAccess.file_exists("res://data/mista_stavby.json"): add_child(preload("res://scripts/ves.gd").new())   # usedlosti: stodoly, kůlny, ploty, zahrady, studna, stromy (ves.gd)
 	Denik.zapis("kameny v korytech")
 	if FileAccess.file_exists("res://data/koryto_kameny.json"): _kameny_koryta()   # valouny a balvany v korytech (Míša 10. 11.)   # kapradí, tráva, mech, semenáčky na římsách skal
@@ -236,10 +239,13 @@ func chce_mereni(spotrebuj := false) -> bool:
 	return _chce_mereni == 1
 
 ## Kolize hradu pro procházku: trojúhelníková kolize ze sítí modelu (zdi, mosty, schody) – jedno statické těleso.
+signal kolize_hotovo
+var kolize_hotove := false
 func _kolize_hradu() -> void:
 	for jm in (["Hrad"] if _foto != "" else ["Hrad", "Skaly", "Voda"]):   # snímek: jen hrad (louče hledají zeď)
 		var h := get_node_or_null(jm)
 		if h != null: _kolize_uzlu(h)
+	kolize_hotove = true; kolize_hotovo.emit()   # ohne.gd čeká (značky ohňů hradu hledají ohniště a místnost paprskem)
 	# louče a svícny až po kolizích (hledají podlahu a zeď paprskem; 11. 11.: voláno dřív = 0/20 při běžném startu)
 	if not _k_svicnum.is_empty(): _svicny()
 

@@ -9,7 +9,8 @@ extends Node3D
 ##   plamen_do_m; uhlíky = disk se stejným shaderem
 ## - světlo OmniLight3D NIKDY se stínem (Havran: stín ohně p95 78 ms), útlum pod 1 → místnost čitelná i ode dveří; zapnutá
 ##   jen nejbližší svetel_max s hysterezí zap_m / vyp_m, blikání siny + pomalý šum + chvění polohy
-## - nabídka Zapálit / Uhasit oheň jako dveře a žebříky (tlačítko svitku, zamer.gd); pece domů hoří večer a v noci (den.gd)
+## - nabídka Zapálit / Uhasit oheň jako dveře a žebříky (tlačítko svitku, zamer.gd); pece domů a kamna hradu hoří večer a v noci,
+##   kuchyně hradu v hodinách vaření (hori casy + hodiny; den.gd); značky hradu se hledají pod kořenem m.koren ("Hrad")
 const Zamer := preload("res://scripts/zamer.gd")
 
 var hlavni: Node
@@ -32,6 +33,7 @@ func zacni(h: Node) -> void:
 	hlavni = h
 	if not FileAccess.file_exists("res://data/ohne.json"): pripraveno = true; hotovo.emit(); return
 	cfg = JSON.parse_string(FileAccess.get_file_as_string("res://data/ohne.json"))
+	if h.get("kolize_hotove") == false: await h.kolize_hotovo   # kolize hradu (hlavni.gd _kolize_hradu deferred až po předehrání – dřív paprsky v hradu nic nenašly)
 	for i in 3: await get_tree().physics_frame   # kolize staveb (paprsky na ohniště a do místnosti)
 	_materialy()
 	var zv: Dictionary = cfg["zvuk"]
@@ -40,8 +42,8 @@ func zacni(h: Node) -> void:
 		if _zvuk_stream is AudioStreamOggVorbis: (_zvuk_stream as AudioStreamOggVorbis).loop = true
 	for m: Dictionary in cfg["mista"]:
 		var koreny: Array = []
-		for jm in ["Mista", "Ves"]:
-			var k := h.get_node_or_null(jm)
+		for jm in ([m["koren"]] if m.has("koren") else ["Mista", "Ves"]):   # koren = uzel modelu (hrad A: "Hrad"), jinak stavby vsi
+			var k := h.get_node_or_null(String(jm))
 			if k: koreny.append(k)
 		for k: Node in koreny:
 			for n in k.find_children(String(m.get("uzel", m.get("pec_kolize", ""))), "", true, false):
@@ -129,10 +131,13 @@ func _pridej(m: Dictionary, n: Node3D) -> void:
 		else:
 			var r := ss.intersect_ray(PhysicsRayQueryParameters3D.create(p + Vector3.UP * 0.1, p - Vector3.UP * 1.5))
 			zaklad = (r["position"] as Vector3) if not r.is_empty() else p
-			if not r.is_empty(): vlastni = [(r["collider"] as CollisionObject3D).get_rid()]
+			# vlastní kolize ohniště (zaměření a paprsky do místnosti ji přeskočí) – ne u modelu s jednou kolizí celku (hrad: KOLIZE_col
+			# = celý hrad; jejím vynecháním by paprsky prošly zdmi a nabídka by šla i přes zeď)
+			if not r.is_empty() and not m.has("koren"): vlastni = [(r["collider"] as CollisionObject3D).get_rid()]
 		ven = _do_mistnosti(zaklad + Vector3.UP * 0.5, vlastni)
 	var o := {"nazev": String(m["nazev"]), "druh": String(m["druh"]), "zaklad": zaklad, "vlastni": vlastni, "uzel": n, "boost": 0.0, "boost_cfg": {},
-		"hori": String(m["hori"]) != "noc", "noc": String(m["hori"]) == "noc", "rucne": false, "zap": false,
+		"hori": String(m["hori"]) == "vzdy", "noc": String(m["hori"]) == "noc", "casy": m.get("hodiny", []) if String(m["hori"]) == "casy" else [],
+		"rucne": false, "zap": false,
 		"faze": randf() * 50.0, "sum": 0.0, "sum_cil": 0.0, "sum_t": 0.0, "energie": float(dr["energie"])}
 	var uz := Node3D.new(); uz.name = "Ohen_%d" % ohne.size(); add_child(uz); uz.global_position = zaklad
 	var ps: Array = dr["plamen"]; var kl := "%s" % m["druh"]
@@ -224,16 +229,23 @@ func _rozpocet(kde = null) -> void:
 			elif not ma and a.playing: a.stop()
 
 
-## Pece domů: večer a v noci hoří, ve dne ne (pokud je hráč nepřepnul ručně).
-func _noc(hned := false) -> void:
+## Ohně podle denní doby (pokud je hráč nepřepnul ručně): hori "noc" (pece domů, kamna) večer a v noci, ve dne ne;
+## hori "casy" (kuchyně hradu) v intervalech hodiny [[od, do], …] hodin den.gd. hod = hodina pro test (jinak den.gd).
+func _noc(hned := false, hod := -1.0) -> void:
 	var den: Node = hlavni.get("den")
-	var hod := float(den.hour) if den else 20.0
+	if hod < 0.0: hod = float(den.hour) if den else 20.0
 	var dn: Dictionary = cfg["domy_noc"]
 	var noc := hod >= float(dn["hori_od_h"]) or hod < float(dn["hori_do_h"])
 	var zmena := false
 	for o: Dictionary in ohne:
-		if o["noc"] and not o["rucne"] and o["hori"] != noc:
-			o["hori"] = noc; _ukaz(o); zmena = true
+		if o["rucne"]: continue
+		var ma: bool = o["hori"]
+		if o["noc"]: ma = noc
+		elif not (o["casy"] as Array).is_empty():
+			ma = false
+			for c: Array in o["casy"]: ma = ma or (hod >= float(c[0]) and hod < float(c[1]))
+		if ma != o["hori"]:
+			o["hori"] = ma; _ukaz(o); zmena = true
 	if zmena and not hned: _rozpocet()
 
 

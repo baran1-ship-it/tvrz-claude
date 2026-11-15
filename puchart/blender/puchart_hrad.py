@@ -1481,7 +1481,7 @@ def palac_A(P, p0, p1, bd, PI):
     # světla: kuchyně (ohniště), síň dole, světnice, síň, komora, podkroví
     for (u, v, y, e) in ((2.5, 0.0, F0, 1.0), (9.0, 0.0, F0, 0.9), (2.6, 0.0, F1, 1.2), (6.9, 0.0, F1, 0.9), (10.4, 0.0, F1, 0.8), (3.0, 0.0, F2, 1.1), (9.5, 0.0, F2, 1.1)):
         svetlo(W(u, v, y + 2.1), e, 6.0, svit="svicen" if y == F1 else "louc")   # přízemí (kuchyně, zásoby) a podkroví: louč; obytné patro: svícen
-    svetlo(W(1.4, 0, F0) + UP * 1.0, 1.4, 5.0, svit="ohen")   # žhavé ohniště
+    # ohniště kuchyně svítí ohněm z ohne.json (hradA_kuchyne, ohne.gd: hoří v hodinách vaření, jde uhasit) – pevné světlo svit="ohen" by se s ním zdvojilo
     # trasy testu: přízemí (síň → kuchyně), patro po schodech a pavlači do síně a podkroví, světnice, komora
     vs = PI["vstup"]
     pav = lambda u: bod(W(u, h / 2 + t / 2 + PV["sirka"] / 2), F1)
