@@ -384,7 +384,7 @@ def preview_scene(trees=((-14, 16, 13), (16, 20, 12), (-20, -4, 11), (22, 6, 15)
             t = bpy.context.active_object; t.data.materials.append(tm); to_prev(t); bpy.ops.object.shade_smooth()
             d = t.modifiers.new("d", 'DISPLACE'); tx = bpy.data.textures.new("t%d%d" % (x, j), 'CLOUDS'); tx.noise_scale = rr * 0.3; tx.noise_depth = 3
             d.texture = tx; d.strength = rr * 0.5
-    world = bpy.data.worlds.new("Svet"); scene.world = world
+    world = bpy.data.worlds.new("Svet"); world.use_nodes = True; scene.world = world
     wnt = world.node_tree; sky = wnt.nodes.new("ShaderNodeTexSky")
     try: sky.sky_type = 'MULTIPLE_SCATTERING'
     except Exception: pass
