@@ -1672,6 +1672,10 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var pz := c.y * BUNKA + z2 + rng.randf_range(-0.5, 0.5) * DRN_KROK
 			z2 += DRN_KROK
 			var v := _vz(vg, c, px, pz, bud)
+			# Misa 15. 11. (rozbor s daty tabletu: 228 trsu v hostinci, 215 u dveri chysi v lomu - vse na kryti 2): na krytí
+			# cesty ani drn, ani trsy hrbetu cesty (nize) nesmi tam, kde je tvrdy zakaz (stavba, pruchod, zahrada, voda)
+			if _kryti_hodnota(kr, c, px, pz) == 2 and _zakaz_travy(px, pz):
+				continue
 			# pas za okrajem hliny cesty (kryti 2): maska z Blenderu tam mela pas cesty / pesiny bez travy - prah a lem
 			# pesin neplati (Misa 0.85 „lemy“: svetle zelene pasy podel cest, jen rady trsu)
 			var za_cestou := false
