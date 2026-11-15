@@ -118,6 +118,9 @@ func _test_povrch() -> void:
 	for jm in cfg["vrstvy"]:
 		var nd: Node = hlavni.get_node_or_null(jm)
 		if nd != null: vrstvy.append(nd)
+	for par in hlavni._lod_pary:   # LOD hradu podle kamery (≥60 m = HradDaleko) – test porovnává s blízkou verzí, kterou hráč u zdi vidí (15. 11.: 702 falešných nálezů u A, když test skončil u B)
+		for m in par[2]: (m as Node3D).visible = true
+		for m in par[3]: (m as Node3D).visible = false
 	for vr: Node in vrstvy:
 		for m in vr.find_children("*", "MeshInstance3D", true, false):
 			var mi := m as MeshInstance3D
