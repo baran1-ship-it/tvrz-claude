@@ -58,6 +58,10 @@ if ! python3 tools/export_kontroly.py reka; then
     krok 12 "predpeceni potoka (build/pregeneruj_reka.log)" bash tools/pregeneruj.sh reka
     krok 12 "potok po predpeceni z tohoto exportu" python3 tools/export_kontroly.py reka
 fi
+# 15. 11.: datove textury potoka vznikaji az predpecenim -> bezztratove, import a kontrola znovu po nem
+krok 11 "datove textury bezztratove po predpeceni" python3 tools/datove_textury_import.py
+krok 8 "import Godotu po predpeceni" bash -c "godot --headless --path . --import > build/beh/export_import2.log 2>&1"
+krok 11 "datove textury bezztratove po predpeceni (kontrola)" python3 tools/kontrola_datovych_textur.py
 krok 13 "zapis otisku exportu" python3 tools/otisk_exportu.py zapis
 stav OK 0
 echo "EXPORT OK"

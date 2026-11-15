@@ -1466,3 +1466,6 @@ Hotovo v kódu a datech (testy u každého):
 - **Export světa – jabloň (15. 11., 7. pád):** strom2.py potřebuje `blender/tex_cache/listy/LeafSet001/` (ambientCG
   LeafSet001_2K-PNG.zip), `tex_cache/kury/bark_brown_02_{diff,nor_gl}_1k.jpg` (Poly Haven) a `tex_cache/jablko/food_apple_01_1k.gltf`
   (Poly Haven API files/food_apple_01, gltf 1k + include). Pak `/opt/bl/bin/python blender/strom2.py -- jablon`.
+- **Export v nové session – textury potoka (15. 11., 8. pád, rc 11):** reka_dist/reka_flow.png vznikají až předpečením
+  potoka (krok 12) – kontrola datových textur běžela dřív a padala na chybějícím zdroji. Oprava: kontrola chybějící
+  zdroj přeskočí, export.sh po předpečení pustí datove_textury_import + import + kontrolu znovu; .import bez [params] se doplní.
