@@ -52,7 +52,7 @@ uniform vec2 lan_sirka = vec2(15.0, 30.0);   // plochy.json pole.lan_sirka_m (sv
 uniform float oranice_k = 1.0;
 uniform float obili_m = 2.0;
 uniform float oranice_m = 3.0;
-uniform vec2 ves = vec2(470.0, 830.0);     // stred navsi (lany poli vybihaji od ni)
+uniform vec2 ves = vec2(470.0, 830.0);     // stred navsi (lany poli vybihaji od ni) - hra nastavi z lokace.json ves stred_stare_navsi
 // pesina: stanoviste.a = 0,5 + znamenkova vzdalenost od osy / 6 m (svet.gd); hodnoty v uzlech mrizky stan_k (2 m),
 // texel i ma stred o pul kroku dal - posun o pul texelu. Zadny dalsi vzorkovac: na Adrenu jich material ma jen 13.
 uniform float stan_k = 2.0;

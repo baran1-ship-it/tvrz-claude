@@ -1064,6 +1064,9 @@ func material(name: String) -> Material:
 			for k in 16:
 				pata.append(lom_stena_x(LOM_Z.x + k * 5.0))
 			s3.set_shader_parameter("lom_pata", pata)
+			# stred navsi z dat (lokace.json ves stred_stare_navsi) - drive pevne v zem.gdshader (inventura 15. 11. B4)
+			var vs: Array = Pravidla.cti("lokace", "ves")["stred_stare_navsi"]
+			s3.set_shader_parameter("ves", Vector2(float(vs[0]), float(vs[1])))
 			if TRZISTE:
 				s3.set_shader_parameter("trziste", Vector4(TRZ_O.x, TRZ_O.y, TRZ_U.x, TRZ_U.y))
 				s3.set_shader_parameter("ves_rovna", not VES_OBLOUK)
