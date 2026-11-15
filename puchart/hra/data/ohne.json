@@ -2,21 +2,39 @@
  "popis": "Ohně ve stavbách (hra/scripts/ohne.gd, hra/shaders/ohen.gdshader): plamen z křížených karet + žhavé uhlíky + OmniLight3D BEZ stínu s blikáním, nabídka Zapálit / Uhasit oheň. Místa ze značek modelů (krčma, hájovna, kovárna; hrad A: černá kuchyně a kamna – koren Hrad, hori casy = hoří v intervalech hodiny [od, do] hodin den.gd) a z kolizí pecí domů Havrana. Kopie v hra/data/ohne.json (nastroje/postav_vse.sh cp).",
  "zdroj": "Míša 15. 11.: „dodělej ohně – v Havranovi jsou a jdou zapnout a vypnout, ale moc se mi nelíbí jejich vzhled“; „když stojím ve dveřích do místnosti, oheň nic neosvětluje, osvětlí až tak na 2 m… nešlo by, aby zdálky byla místnost osvětlená a zblízka to bylo funkční?“. Havran (větev claude/new-session-0dtk58) scripts/life.gd _build_fires / _light: krb energie 2,7 dosah 9,5 m útlum 1,3, barva FIRE_COL (1; 0,64; 0,38), blikání 3 siny rychlost 7–11, rozpočet nejbližších 7 světel s hysterezí 34/38 m; měření Havrana: světlo ohně se stínem p95 78 ms proti 27–38 ms bez → nikdy stín ze světla ohně. Útlum 1,3 (Havran) = světlo klesá rychleji než 1/d, proto „osvětlí až na 2 m“ – zde útlum pod 1 a vyšší energie.",
  "rozpocet": {
-  "_popis": "Světla zapnutá jen u nejbližších svetel_max ohňů (Compatibility kreslí max 8 světel na objekt; Havran 7), zapnutí pod zap_m, vypnutí nad vyp_m (hystereze, Havran 34/38 m); mezi zap_m a vyp_m energie plynule ubývá. Plamen a uhlíky se kreslí jen do plamen_do_m (shader, CPU nic nesimuluje), zvuk hraje jen do zvuk_do_m. kontrola_s = jak často se přepočítá pořadí světel.",
+  "_popis": "Světla zapnutá jen u nejbližších svetel_max ohňů (Compatibility kreslí max 8 světel na objekt; Havran 7), zapnutí pod zap_m, vypnutí nad vyp_m (hystereze, Havran 34/38 m); mezi zap_m a vyp_m energie plynule ubývá. Plamen a uhlíky se kreslí jen do plamen_do_m (shader, CPU nic nesimuluje), zvuk hraje jen do zvuk_do_m. kontrola_s = jak často se přepočítá pořadí světel. poradi_hystereze_m: svítící oheň si drží místo v pořadí, dokud ho jiný nepředstihne o tolik metrů (ve vsi hoří všechny pece najednou – bez hystereze by si dva skoro stejně vzdálené ohně při chůzi předávaly světlo).",
   "svetel_max": 6,
   "zap_m": 34.0,
   "vyp_m": 38.0,
   "plamen_do_m": 40.0,
   "zvuk_do_m": 22.0,
-  "kontrola_s": 0.25
+  "kontrola_s": 0.25,
+  "poradi_hystereze_m": 2.0
  },
  "svetlo": {
   "_popis": "OmniLight3D bez stínu. barva = Havran FIRE_COL. utlum = omni_attenuation (Godot: 1 = 1/d; Havran 1,3 → tma už ve 2 m; 0,55 = místnost čitelná od dveří, Míša 15. 11.). blikani: siny [rychlost rad/s, amplituda podílu energie], pomalý šum (nový cíl po sum_krok_s, amplituda sum_amp), chvění polohy ±poloha_m.",
-  "barva": [1.0, 0.64, 0.38],
+  "barva": [
+   1.0,
+   0.64,
+   0.38
+  ],
   "specular": 0.35,
   "utlum": 0.55,
   "blikani": {
-   "siny": [[7.3, 0.05], [11.1, 0.035], [17.9, 0.02]],
+   "siny": [
+    [
+     7.3,
+     0.05
+    ],
+    [
+     11.1,
+     0.035
+    ],
+    [
+     17.9,
+     0.02
+    ]
+   ],
    "sum_amp": 0.05,
    "sum_krok_s": 0.35,
    "poloha_m": 0.02
@@ -30,10 +48,26 @@
   "rychlost": 1.1,
   "vlneni": 0.05,
   "eroze": 0.62,
-  "barva_jadro": [1.0, 0.95, 0.78],
-  "barva_zluta": [1.0, 0.74, 0.26],
-  "barva_oranz": [1.0, 0.4, 0.07],
-  "barva_cervena": [0.5, 0.07, 0.02]
+  "barva_jadro": [
+   1.0,
+   0.95,
+   0.78
+  ],
+  "barva_zluta": [
+   1.0,
+   0.74,
+   0.26
+  ],
+  "barva_oranz": [
+   1.0,
+   0.4,
+   0.07
+  ],
+  "barva_cervena": [
+   0.5,
+   0.07,
+   0.02
+  ]
  },
  "uhliky": {
   "_popis": "Žhavé uhlíky: plochý disk (ohniště, pec) nebo překryv sítě žáru modelu (kovárna Kovarna_Zhar, material_overlay). meritko = buněk žáru na metr, pulz = Hz pomalého dýchání žáru.",
@@ -59,21 +93,215 @@
   "hori_do_h": 7.5
  },
  "druhy": {
-  "_popis": "Velikost podle druhu: plamen [šířka, výška] m, uhliky_r m (0 = bez disku), svetlo_v = výška světla nad základnou plamene, svetlo_ven = posun světla do místnosti (směr nejdelšího volného paprsku), energie, dosah_m. Pec: bez viditelného plamene (plamen [0, 0]) – pec v jizbě se topí z kuchyně / síně (krčma: ústí pece šenkovny je za stěnou u ohniště kuchyně, snímek 15. 11.; klenba nemá ústí do šenkovny), svítí jen světlem od líce klenby; bod nabídky na líci (usti_v = podíl výšky pece nad její spodní hranou, usti_od_stredu = podíl půlrozměru kolize od středu ve směru do místnosti – líc klenby nad podstavcem; snímek ohen_pec 15. 11.). Kovárna (vyhen): plamen nízký nad žárem.",
-  "ohniste": {"plamen": [0.85, 0.95], "uhliky_r": 0.38, "svetlo_v": 0.7, "svetlo_ven": 0.4, "energie": 3.2, "dosah_m": 9.0},
-  "pec": {"plamen": [0.0, 0.0], "uhliky_r": 0.0, "usti_v": 0.3, "usti_od_stredu": 0.6, "svetlo_v": 0.45, "svetlo_ven": 0.55, "energie": 2.4, "dosah_m": 7.0},
-  "vyhen": {"plamen": [0.42, 0.34], "uhliky_r": 0.0, "svetlo_v": 0.55, "svetlo_ven": 0.9, "energie": 2.0, "dosah_m": 7.0},
-  "kamna": {"plamen": [0.0, 0.0], "uhliky_r": 0.0, "svetlo_v": 0.6, "svetlo_ven": 0.25, "energie": 1.4, "dosah_m": 5.0, "_pozn": "kachlová kamna hradu A (puchart_hrad.palac_A): těleso ve světnici je zavřené, přikládá se otvorem ze síně (Žebrák, Radyně) – značka stojí v síni před topeništěm, svítí jen žár z ústí do síně (nižší energie a dosah než otevřené ohniště), bez plamene jako pec"}
+  "_popis": "Velikost podle druhu: plamen [šířka, výška] m, uhliky_r m (0 = bez disku), svetlo_v = výška světla nad základnou plamene, svetlo_ven = posun světla do místnosti (směr nejdelšího volného paprsku), energie, dosah_m. Pec: bez viditelného plamene (plamen [0, 0]) – pec v jizbě se topí z kuchyně / síně (krčma: ústí pece šenkovny je za stěnou u ohniště kuchyně, snímek 15. 11.; klenba nemá ústí do šenkovny), svítí jen světlem od líce klenby; bod nabídky na líci (usti_v = podíl výšky pece nad její spodní hranou, usti_od_stredu = podíl půlrozměru kolize od středu ve směru do místnosti – líc klenby nad podstavcem; snímek ohen_pec 15. 11.). Kovárna (vyhen): plamen nízký nad žárem. Pec s ústím (Míša 15. 11.: „místo pecí bych možná dal krby, jsou hezčí na oko“ → pece mají viditelný oheň v ústí jako chalupy KCD): ústí = značka modelu <Dům>_Pec_Usti (počátek = střed spodní hrany ústí, osa +Z do místnosti; až dodá modelář) nebo data mista[].usti (střed spodní hrany, směr, šířka a výška otvoru v souřadnicích modelu domu); plamen = jedna karta v rovině ústí (usti_plamen = podíl šířky a výšky otvoru), před ní pruh žhavých uhlíků (usti_uhliky_v m), odsazení před líc usti_odsazeni m; pec bez ústí (krčma: ústí za stěnou v kuchyni) svítí jen světlem. Krb (značka *_Krb_Ohen na ohništi krbu, budoucí modely): velký plamen ze 3 karet, uhlíky, silnější světlo.",
+  "ohniste": {
+   "plamen": [
+    0.85,
+    0.95
+   ],
+   "uhliky_r": 0.38,
+   "svetlo_v": 0.7,
+   "svetlo_ven": 0.4,
+   "energie": 3.2,
+   "dosah_m": 9.0
+  },
+  "pec": {
+   "plamen": [
+    0.0,
+    0.0
+   ],
+   "uhliky_r": 0.0,
+   "usti_v": 0.3,
+   "usti_od_stredu": 0.6,
+   "usti_plamen": [
+    0.8,
+    0.85
+   ],
+   "usti_uhliky_v": 0.07,
+   "usti_odsazeni": 0.012,
+   "svetlo_v": 0.3,
+   "svetlo_ven": 0.45,
+   "energie": 2.4,
+   "dosah_m": 7.0
+  },
+  "vyhen": {
+   "plamen": [
+    0.42,
+    0.34
+   ],
+   "uhliky_r": 0.0,
+   "svetlo_v": 0.55,
+   "svetlo_ven": 0.9,
+   "energie": 2.0,
+   "dosah_m": 7.0
+  },
+  "kamna": {
+   "plamen": [
+    0.0,
+    0.0
+   ],
+   "uhliky_r": 0.0,
+   "svetlo_v": 0.6,
+   "svetlo_ven": 0.25,
+   "energie": 1.4,
+   "dosah_m": 5.0,
+   "_pozn": "kachlová kamna hradu A (puchart_hrad.palac_A): těleso ve světnici je zavřené, přikládá se otvorem ze síně (Žebrák, Radyně) – značka stojí v síni před topeništěm, svítí jen žár z ústí do síně (nižší energie a dosah než otevřené ohniště), bez plamene jako pec"
+  },
+  "krb": {
+   "plamen": [
+    0.9,
+    0.85
+   ],
+   "uhliky_r": 0.42,
+   "svetlo_v": 0.6,
+   "svetlo_ven": 0.5,
+   "energie": 3.6,
+   "dosah_m": 10.0,
+   "_pozn": "krb (budoucí modely Míšina modeláře – krby.json): otevřené ohniště pod pláštěm, plamen větší než ohniště vsi, světlo silnější (místnost s krbem bývá větší – síň, jizba rychty)"
+  }
  },
  "mista": [
-  {"id": "krcma_kuchyne", "nazev": "oheň v kuchyni krčmy", "uzel": "KrcmaL_Ohen_Kuchyne", "druh": "ohniste", "hori": "vzdy"},
-  {"id": "krcma_senkovna", "nazev": "pec v šenkovně", "uzel": "KrcmaL_Pec_Senkovna", "pec_kolize": "KrcmaL_Kol_Pec", "druh": "pec", "hori": "vzdy"},
-  {"id": "hajovna_sin", "nazev": "ohniště v síni hájovny", "uzel": "Hajovna_Ohen_Sin", "druh": "ohniste", "hori": "vzdy"},
-  {"id": "kovarna_vyhen", "nazev": "výheň kovárny", "uzel": "Kovarna_Ohen_bod", "zhar": "Kovarna_Zhar", "druh": "vyhen", "hori": "vzdy"},
-  {"id": "dum_pec", "nazev": "pec v domě", "pec_kolize": "Dum1_Kol_Pec", "druh": "pec", "hori": "noc"},
-  {"id": "dum_pec", "nazev": "pec v domě", "pec_kolize": "Dum2_Kol_Pec", "druh": "pec", "hori": "noc"},
-  {"id": "rychta_pec", "nazev": "pec na rychtě", "pec_kolize": "Rychta_Kol_Pec", "druh": "pec", "hori": "noc"},
-  {"id": "hradA_kuchyne", "nazev": "oheň v černé kuchyni hradu", "uzel": "HradA_Ohen_Kuchyne", "koren": "Hrad", "druh": "ohniste", "hori": "vzdy", "hori_pozn": "Míša 15. 11.: „kuchyně hoří celý den, ať je světlo“ (dřív casy 5–13:30 a 16–21 podle rozvrhu kuchařky)", "zdroj": "Havran docs/rozpracovane/choreografie_postav.md (kuchařka: 5–9 vaří snídani, 10–13:30 oběd, 16–21 večeři) – oheň v černé kuchyni ráno až po oběd a večer; mimo tyto hodiny vyhaslý (pokud ho hráč nezapálí)"},
-  {"id": "hradA_kamna", "nazev": "kachlová kamna ve světnici hradu", "uzel": "HradA_Ohen_Kamna", "koren": "Hrad", "druh": "kamna", "hori": "noc", "zdroj": "Havran scripts/life.gd _build_fires (krb hearth: hoří, hráč může zapálit/přiložit) + domy_noc (večer a v noci); topí se k večeru"}
- ]
+  {
+   "id": "krcma_kuchyne",
+   "nazev": "oheň v kuchyni krčmy",
+   "uzel": "KrcmaL_Ohen_Kuchyne",
+   "druh": "ohniste",
+   "hori": "vzdy"
+  },
+  {
+   "id": "krcma_senkovna",
+   "nazev": "pec v šenkovně",
+   "uzel": "KrcmaL_Pec_Senkovna",
+   "pec_kolize": "KrcmaL_Kol_Pec",
+   "druh": "pec",
+   "hori": "vzdy"
+  },
+  {
+   "id": "hajovna_sin",
+   "nazev": "ohniště v síni hájovny",
+   "uzel": "Hajovna_Ohen_Sin",
+   "druh": "ohniste",
+   "hori": "vzdy"
+  },
+  {
+   "id": "kovarna_vyhen",
+   "nazev": "výheň kovárny",
+   "uzel": "Kovarna_Ohen_bod",
+   "zhar": "Kovarna_Zhar",
+   "druh": "vyhen",
+   "hori": "vzdy"
+  },
+  {
+   "id": "dum_pec",
+   "nazev": "pec v domě",
+   "pec_kolize": "Dum1_Kol_Pec",
+   "druh": "pec",
+   "hori": "vzdy",
+   "usti": {
+    "bod": [
+     -2.618,
+     0.94,
+     2.22
+    ],
+    "smer": [
+     0,
+     0,
+     1
+    ],
+    "sirka": 0.42,
+    "vyska": 0.335,
+    "zdroj": "rozbor sítě hra/modely/stavby_h/domy.glb 15. 11. (Havran blender/ves_domy.py): ústí pece = plocha materiálu M_Tma (černý otvor s obloukem) v síti <Dům>_Interier, svislá, normála +z modelu (do jizby); body oblouku Dum1 x −2,828…−2,408, y 0,94…1,275, z 2,22; začouzení nad ústím je už v modelu (M_PecZacouzena y 1,07–1,43 na líci klenby); žhavé uhlíky modelu (M_Zhar) leží uvnitř pece za otvorem (nevidět). Vzhled: KCD chalupy – oheň a uhlíky viditelné v ústí hliněné pece (docs/reference/kcd_vzhled, Havran docs/screens/ref_kcd2_*)"
+   },
+   "usti_uzel": "Dum1_Pec_Usti"
+  },
+  {
+   "id": "dum_pec",
+   "nazev": "pec v domě",
+   "pec_kolize": "Dum2_Kol_Pec",
+   "druh": "pec",
+   "hori": "vzdy",
+   "usti": {
+    "bod": [
+     -2.255,
+     0.89,
+     2.41
+    ],
+    "smer": [
+     0,
+     0,
+     1
+    ],
+    "sirka": 0.42,
+    "vyska": 0.335,
+    "zdroj": "rozbor sítě hra/modely/stavby_h/domy.glb 15. 11. (Havran blender/ves_domy.py): ústí pece = plocha materiálu M_Tma (černý otvor s obloukem) v síti <Dům>_Interier, svislá, normála +z modelu (do jizby); body oblouku Dum1 x −2,828…−2,408, y 0,94…1,275, z 2,22; začouzení nad ústím je už v modelu (M_PecZacouzena y 1,07–1,43 na líci klenby); žhavé uhlíky modelu (M_Zhar) leží uvnitř pece za otvorem (nevidět). Vzhled: KCD chalupy – oheň a uhlíky viditelné v ústí hliněné pece (docs/reference/kcd_vzhled, Havran docs/screens/ref_kcd2_*)"
+   },
+   "usti_uzel": "Dum2_Pec_Usti"
+  },
+  {
+   "id": "rychta_pec",
+   "nazev": "pec na rychtě",
+   "pec_kolize": "Rychta_Kol_Pec",
+   "druh": "pec",
+   "hori": "vzdy",
+   "usti": {
+    "bod": [
+     -3.0,
+     0.94,
+     0.97
+    ],
+    "smer": [
+     0,
+     0,
+     1
+    ],
+    "sirka": 0.42,
+    "vyska": 0.335,
+    "zdroj": "rozbor sítě hra/modely/stavby_h/domy.glb 15. 11. (Havran blender/ves_domy.py): ústí pece = plocha materiálu M_Tma (černý otvor s obloukem) v síti <Dům>_Interier, svislá, normála +z modelu (do jizby); body oblouku Dum1 x −2,828…−2,408, y 0,94…1,275, z 2,22; začouzení nad ústím je už v modelu (M_PecZacouzena y 1,07–1,43 na líci klenby); žhavé uhlíky modelu (M_Zhar) leží uvnitř pece za otvorem (nevidět). Vzhled: KCD chalupy – oheň a uhlíky viditelné v ústí hliněné pece (docs/reference/kcd_vzhled, Havran docs/screens/ref_kcd2_*)"
+   },
+   "usti_uzel": "Rychta_Pec_Usti"
+  },
+  {
+   "id": "hradA_kuchyne",
+   "nazev": "oheň v černé kuchyni hradu",
+   "uzel": "HradA_Ohen_Kuchyne",
+   "koren": "Hrad",
+   "druh": "ohniste",
+   "hori": "vzdy",
+   "zdroj": "Havran docs/rozpracovane/choreografie_postav.md (kuchařka: 5–9 vaří snídani, 10–13:30 oběd, 16–21 večeři) – oheň v černé kuchyni ráno až po oběd a večer; mimo tyto hodiny vyhaslý (pokud ho hráč nezapálí)",
+   "hori_pozn": "Míša 15. 11.: všechny ohně hoří pořád (KCD) – viz hori_vzdy"
+  },
+  {
+   "id": "hradA_kamna",
+   "nazev": "kachlová kamna ve světnici hradu",
+   "uzel": "HradA_Ohen_Kamna",
+   "koren": "Hrad",
+   "druh": "kamna",
+   "hori": "vzdy",
+   "zdroj": "Havran scripts/life.gd _build_fires (krb hearth: hoří, hráč může zapálit/přiložit) + domy_noc (večer a v noci); topí se k večeru",
+   "hori_pozn": "Míša 15. 11.: všechny ohně hoří pořád (KCD) – viz hori_vzdy"
+  },
+  {
+   "id": "rychta_krb",
+   "nazev": "krb na rychtě",
+   "uzel": "Rychta_Krb_Ohen",
+   "druh": "krb",
+   "hori": "vzdy",
+   "jistota": "NAVRH",
+   "zdroj": "pravidla/svet/krby.json (krb Rychty – model dodá Míšin modelář; dokud glb chybí, značka neexistuje a oheň se nevytvoří)"
+  },
+  {
+   "id": "krb_obecny",
+   "nazev": "krb",
+   "uzel": "*_Krb_Ohen*",
+   "druh": "krb",
+   "hori": "vzdy",
+   "koren": "Hrad",
+   "jistota": "NAVRH",
+   "zdroj": "budoucí krby hradu (krby.json navrhy_hrad) – značka HradX_Krb_Ohen<N> v modelu hradu; dnes v modelu žádný krb není (blender/puchart_hrad.py: palác A má jen ohniště černé kuchyně a kachlová kamna, palác B nic)"
+  }
+ ],
+ "hori_vzdy": {
+  "_popis": "Všechny ohně hoří celý den i noc (hori vzdy); hráč je může uhasit / zapálit (nabídka). domy_noc a hori noc/casy zůstávají v kódu pro případné výjimky.",
+  "zdroj": "Míša 15. 11.: „když jsem hrál KCD, tak všechny ohně hořely pořád, protože jinak byla v místnostech tma a šero“ (KCD1/KCD2: krby a pece v chalupách i na hradech hoří stále)"
+ }
 }

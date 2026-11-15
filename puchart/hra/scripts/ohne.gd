@@ -9,8 +9,10 @@ extends Node3D
 ##   plamen_do_m; uhlíky = disk se stejným shaderem
 ## - světlo OmniLight3D NIKDY se stínem (Havran: stín ohně p95 78 ms), útlum pod 1 → místnost čitelná i ode dveří; zapnutá
 ##   jen nejbližší svetel_max s hysterezí zap_m / vyp_m, blikání siny + pomalý šum + chvění polohy
-## - nabídka Zapálit / Uhasit oheň jako dveře a žebříky (tlačítko svitku, zamer.gd); pece domů a kamna hradu hoří večer a v noci,
-##   kuchyně hradu v hodinách vaření (hori casy + hodiny; den.gd); značky hradu se hledají pod kořenem m.koren ("Hrad")
+## - nabídka Zapálit / Uhasit oheň jako dveře a žebříky (tlačítko svitku, zamer.gd); všechny ohně hoří pořád (Míša 15. 11.: „v KCD
+##   všechny ohně hořely pořád, jinak byla v místnostech tma“ – hori vzdy; noc/casy zůstávají pro výjimky); značky hradu pod m.koren ("Hrad")
+## - pec s ústím (značka <Dům>_Pec_Usti nebo data mista[].usti): plamen = karta v rovině otvoru + pruh žhavých uhlíků (KCD chalupy);
+##   krb (značka *_Krb_Ohen, modely od modeláře – krby.json) = velký plamen ze 3 karet + uhlíky
 const Zamer := preload("res://scripts/zamer.gd")
 
 var hlavni: Node
@@ -248,7 +250,7 @@ func pocet_svetel() -> int:
 	return k
 
 
-## Pořadí světel: nejbližších svetel_max hořících ohňů; zapnout pod zap_m, vypnout nad vyp_m; zvuk jen do zvuk_do_m.
+## Pořadí světel: nejbližších svetel_max hořících ohňů (s hysterezí pořadí); zapnout pod zap_m, vypnout nad vyp_m; zvuk jen do zvuk_do_m.
 func _rozpocet(kde = null) -> void:
 	var cam := get_viewport().get_camera_3d()
 	var p: Vector3 = kde if kde != null else (cam.global_position if cam else Vector3.ZERO)
@@ -257,7 +259,10 @@ func _rozpocet(kde = null) -> void:
 	for i in ohne.size():
 		var o: Dictionary = ohne[i]; var d: float = p.distance_to(o["zaklad"]); o["d"] = d
 		if o["hori"] and d < (vyp if o["zap"] else zap): kand.append(i)
-	kand.sort_custom(func(a: int, b: int) -> bool: return float(ohne[a]["d"]) < float(ohne[b]["d"]))
+	# pořadí s hysterezí: svítící oheň drží místo, dokud ho nový kandidát nepředstihne o poradi_hystereze_m (víc ohňů ve vsi
+	# hoří najednou – Míša 15. 11. „všechny ohně hoří pořád“ – dva skoro stejně daleké by si jinak při chůzi předávaly světlo)
+	var hy := float(rz.get("poradi_hystereze_m", 0.0))
+	kand.sort_custom(func(a: int, b: int) -> bool: return float(ohne[a]["d"]) - (hy if ohne[a]["zap"] else 0.0) < float(ohne[b]["d"]) - (hy if ohne[b]["zap"] else 0.0))
 	var maxn := int(rz["svetel_max"])
 	for i in ohne.size():
 		var o: Dictionary = ohne[i]

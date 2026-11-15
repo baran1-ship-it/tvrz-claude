@@ -1,0 +1,55 @@
+{
+ "popis": "Krby (Míša 15. 11.: „místo pecí bych možná dal krby, jsou hezčí na oko“; „krby chci hezké dobové dle KCD, žádný hnus ze skriptu“; „tak samo se musí předělat pece v budovách i ve hradě“). Geometrii krbů, pecí a kamen vymodeluje Míšin modelář (glb s NAVOD jako krčma / hájovna); generátor ji NESTAVÍ. Zde: (1) vlozit – kam hra vloží dodaný glb krbu (hlavni.gd _krb: ke každé instanci modelu domu, poloha a yaw v souřadnicích modelu; glb chybí → nic se nevloží, test přeskočí); (2) mista_pro_modelare – soupis míst všech ohňů (pece, kamna, ohniště, krby) se současným stavem, volným prostorem a kouřovodem pro zadání modeláři. Kopie v hra/data/krby.json.",
+ "souradnice": "Model domu (domy.glb, uzel Rychta / Dum1 / Dum2): Godot osy – x napříč domem (−3,9…3,9), y nahoru od počátku modelu (= terén plošiny; podlaha jizby y 0,30), z podél domu, +z = štít do návsi (jizba vpředu, z −0,45…3,84). Hrad: souřadnice hry (počátek = přední hrad, x východ, z jih, y nahoru).",
+ "pozadavky_glb": {
+  "_popis": "Co musí dodaný glb krbu mít, aby ho hra sama napojila (hlavni.gd _krb, ohne.gd):",
+  "pocatek": "střed přední hrany ohniště na podlaze (y 0 = podlaha), osa +Z = do místnosti (ven z krbu)",
+  "znacka_ohne": "prázdný uzel <Model>_Krb_Ohen (např. Rychta_Krb_Ohen) na ohništi uprostřed polen, ~0,1 m nad dnem ohniště – ohne.gd tam dá plamen (3 karty), uhlíky a světlo (ohne.json druh krb)",
+  "kolize": "kolizní sítě s příponou -colonly (Godot import): těleso krbu, plášť a komín; ohniště průchozí není",
+  "site": "vnitřní části (ohniště, plášť zevnitř) ve sítích se slovem Vnitrek v názvu (kreslí se jen do vnitrek_do_m 35 m), komín nad střechou zvlášť (kreslí se jako vnějšek domu do stredni_do_m)",
+  "rozpocet": "do 15 tis. trojúhelníků, ≤ 3 materiály, textury 1024 (rozpocty.json), bez světel v glb"
+ },
+ "vlozit": [
+  {
+   "id": "rychta_krb",
+   "model": "Rychta",
+   "soubor": "res://modely/stavby_h/krb_rychta.glb",
+   "poloha": [
+    1.55,
+    0.3,
+    -0.45
+   ],
+   "yaw_deg": 0.0,
+   "jistota": "NAVRH",
+   "zdroj": "Míša 15. 11. (krb na Rychtě, přiznaná hypotéza – bohatší stavba s komínem); poloha z rozboru domy.glb 15. 11. (paprsky Blender 4.2: jizba Rychty x −3,70…3,69, z −0,45…3,84, podlaha y 0,30, spodek záklopu (M_PovalaZacouzena) y 2,59, vršek 2,64; střecha zevnitř (M_Podbiti) nad x 1,4 y 6,23, nad x 2,5 y 4,66, hřeben x 0 y ~8,23 (štít 8,36); dveře jizby x −1,83…−0,91 ve stěně z −0,45; pec x −3,65…−2,35 z −0,41…1,50; lavice x 0,10…3,36 z 3,46…3,79); rešerše: docs/reference/reserse_dispozice_palacu.md (síň s krbem – Valdek), Přimda: římsa krbu ve věži (12. st.), 14. st. převládají kachlová kamna v sídlech šlechty a patriciátu (NPÚ, výstava Kachlová kamna 2021; is.slu.cz Kultura bydlení hradů a tvrzí) – krb na vesnické rychtě 1393 je proto NAVRH (hra, barevnost)",
+   "rozhodnuti": "pec zůstává (chléb, kouřová jizba), krb PŘIDAT do jizby na příčku jizba | síň vpravo od dveří jizby: komín tam jde svisle záklopem a podkrovím a střechou 1,5 m od hřebene (krátký prostup u hřebene, ne u okapu jako nad pecí v rohu x −3,0, kde je střecha jen 3,94 m nad počátkem)",
+   "volne_misto": {
+    "x": [
+     0.2,
+     3.4
+    ],
+    "z": [
+     -0.45,
+     0.6
+    ],
+    "_pozn": "š 3,2 m podél příčky (od dveří jizby x −0,91 + 1,1 m průchod) × hloubka 1,05 m do jizby; krb doporučeně š 1,8–2,0 m (x 0,55…2,55), hloubka ohniště 0,7 m, plášť do 1,0 m od stěny"
+   },
+   "vyska": {
+    "podlaha": 0.3,
+    "zaklop_spodek": 2.59,
+    "zaklop_vrsek": 2.64,
+    "strecha_zevnitr_nad_x1_55": 6.0,
+    "strecha_venku_nad_x1_55": 6.06,
+    "hreben": 8.23,
+    "komin_vrchol_min": 8.6,
+    "_pozn": "komín prochází záklopem (otvor v záklopu, výměna trámů – tesařsky, ne prostup trámem) a střechou (lemování šindele); vrchol aspoň 0,4 m nad hřebenem (komín 1,5 m od hřebene)"
+   },
+   "zadni_stena": "příčka jizba | síň je roubená (M_RoubeniVnitrni, z −0,45…−0,64, mazanice): krb s kamennou zadní stěnou a izolační mezerou před roubením",
+   "snimek": [
+    "docs/screens/ohen_krb_rychta.png",
+    "docs/screens/rychta_komin.png"
+   ]
+  }
+ ],
+ "mista_pro_modelare": []
+}

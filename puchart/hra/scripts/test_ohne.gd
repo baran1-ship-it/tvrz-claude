@@ -1,7 +1,8 @@
 extends Node
 ## Test ohňů (Míša 15. 11., chyby.md 274): PUCHART_SKRIPT=res://scripts/test_ohne.gd – počet ohňů z dat, světla v rozpočtu
-## (u krčmy: nejvýš svetel_max, žádné se stínem), zapnutí / vypnutí jednoho ohně (plamen, světlo); hrad A (koren Hrad): černá
-## kuchyně hoří celý den (hori vzdy, Míša 15. 11.), kamna v noci (22:00), ne ve 14:00; u kuchyně hradu nejvýš
+## (u krčmy: nejvýš svetel_max, žádné se stínem), zapnutí / vypnutí jednoho ohně (plamen, světlo); všechny ohně hoří v 6, 14, 17
+## a 22 h (Míša 15. 11.: v KCD hoří pořád); pece domů mají plamen a uhlíky v ústí (v obalu pece); krby (krby.json, hrad) –
+## přeskočeno, dokud model nedodán; chůze vsí: nejvýš svetel_max světel, nejbližší, bez bliknutí; u kuchyně hradu nejvýš
 ## svetel_max světel ohňů a nejvýš svetel_objekt_max světel celkem (Compatibility: 8 na objekt). Výpis OHNE_TEST … OK / CHYBA.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # hlavní nabídka pozastaví strom
@@ -44,11 +45,15 @@ func _ready() -> void:
 	if ik < 0 or ia < 0: chyby.append("hrad: kuchyně %d / kamna %d nenalezena (značky HradA_Ohen_* pod uzlem Hrad)" % [ik, ia])
 	else:
 		var ok_k: Dictionary = oh.ohne[ik]; var ok_a: Dictionary = oh.ohne[ia]
-		for hc: Array in [[6.0, true, true], [14.0, true, false], [17.0, true, true], [22.0, true, true]]   # Míša 15. 11.: kuchyně hradu hoří celý den (hori vzdy):
+		for hc: Array in [[6.0, true, true], [14.0, true, true], [17.0, true, true], [22.0, true, true]]   # Míša 15. 11.: všechny ohně hoří pořád (KCD, hori vzdy)
 			oh._noc(false, float(hc[0]))
-			print("OHNE_TEST hrad %02d:00 kuchyně hoří %s, kamna hoří %s" % [int(hc[0]), ok_k["hori"], ok_a["hori"]])
+			var nehori: Array = []
+			for o: Dictionary in oh.ohne:
+				if not bool(o["hori"]): nehori.append(String(o["nazev"]))
+			print("OHNE_TEST %02d:00 kuchyně hradu hoří %s, kamna hoří %s, nehoří %d ohňů %s" % [int(hc[0]), ok_k["hori"], ok_a["hori"], nehori.size(), nehori])
 			if bool(ok_k["hori"]) != bool(hc[1]): chyby.append("kuchyně hradu v %s h hoří %s (čekám %s)" % [hc[0], ok_k["hori"], hc[1]])
 			if bool(ok_a["hori"]) != bool(hc[2]): chyby.append("kamna hradu v %s h hoří %s (čekám %s)" % [hc[0], ok_a["hori"], hc[2]])
+			if not nehori.is_empty(): chyby.append("v %s h nehoří %s (všechny ohně hoří pořád)" % [hc[0], nehori])
 		oh._noc(false, 17.0)   # kuchyně i kamna hoří: rozpočet světel u kuchyně hradu
 		var pk: Vector3 = ok_k["zaklad"]; var kde := pk + Vector3(1.5, 1.5, 0)
 		oh._rozpocet(kde)
@@ -61,6 +66,9 @@ func _ready() -> void:
 		if svk > int(cfg["rozpocet"]["svetel_max"]) or not (ok_k["svetlo"] as OmniLight3D).visible or not (ok_k["plamen"] as Node3D).visible: chyby.append("kuchyně hradu v 17 h nesvítí / rozpočet %d" % svk)
 		if vse > 8: chyby.append("u kuchyně hradu %d světel (Compatibility 8 na objekt)" % vse)
 		oh._noc(true)
+	_pece(oh, chyby)
+	_krby(oh, chyby)
+	_ves_rozpocet(oh, chyby)
 	# nabídka: hráč 1,8 m od ohně v kuchyni krčmy, míří na něj → „Uhasit oheň“, stisk uhasí, znovu → „Zapálit oheň“
 	var hr: CharacterBody3D = h.hrac
 	var pr: Node = null
@@ -106,6 +114,86 @@ func _ready() -> void:
 	for o: Dictionary in oh.ohne:
 		print("OHNE_TEST oheň %s %s hoří %s zaklad %s" % [o["nazev"], o["druh"], o["hori"], o["zaklad"]])
 	_konec(chyby, n, sv)
+
+## Pece domů s ústím (Míša 15. 11.: oheň vidět v ústí jako v chalupách KCD): uzel plamene a uhlíků existuje, hoří a je viditelný,
+## leží v obalu kolize pece (rozšířeném o 0,1 m – karta je těsně před lícem otvoru); každý dům Dum1/Dum2/Rychta aspoň jednou.
+func _pece(oh: Node, chyby: Array) -> void:
+	var modely := {}
+	for o: Dictionary in oh.ohne:
+		if String(o["druh"]) != "pec" or not o.has("plamen"): continue
+		var tel := o["uzel"] as Node3D
+		var ab := AABB(); var prvni := true
+		for cs in tel.find_children("*", "CollisionShape3D", true, false):
+			var b := (cs as CollisionShape3D).global_transform * (cs as CollisionShape3D).shape.get_debug_mesh().get_aabb()
+			ab = b if prvni else ab.merge(b); prvni = false
+		ab = ab.grow(0.1)
+		var pl := o["plamen"] as MeshInstance3D; var uh := o["uhliky"] as MeshInstance3D
+		var pa := pl.global_transform * pl.get_aabb(); var ua := uh.global_transform * uh.get_aabb()
+		var ok := bool(o["hori"]) and pl.is_visible_in_tree() and uh.is_visible_in_tree() and ab.encloses(pa) and ab.encloses(ua)
+		var m := String(tel.name).get_slice("_Kol_", 0); modely[m] = true
+		if not ok: chyby.append("pec %s (%s): plamen v ústí hoří %s viditelný %s/%s, v obalu pece %s/%s" % [m, tel.get_parent().name, o["hori"], pl.is_visible_in_tree(), uh.is_visible_in_tree(), ab.encloses(pa), ab.encloses(ua)])
+	print("OHNE_TEST pece s ohněm v ústí: %s" % [modely.keys()])
+	for m in ["Dum1", "Dum2", "Rychta"]:
+		if not modely.has(m): chyby.append("pec %s bez ohně v ústí" % m)
+
+
+## Krby (modely od modeláře – data/krby.json vlozit; hrad: značky *_Krb_Ohen*): dokud glb / značka chybí, přeskočeno (ne chyba).
+func _krby(oh: Node, chyby: Array) -> void:
+	var kj: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/krby.json")) if FileAccess.file_exists("res://data/krby.json") else {}
+	for k: Dictionary in kj.get("vlozit", []):
+		if not ResourceLoader.exists(String(k["soubor"])):
+			print("OHNE_TEST krb %s: přeskočeno – model nedodán (%s)" % [k["model"], k["soubor"]]); continue
+		var nal := 0
+		for o: Dictionary in oh.ohne:
+			if String(o["druh"]) == "krb" and String((o["uzel"] as Node).name).begins_with(String(k["model"])):
+				nal += 1
+				if not bool(o["hori"]) or not (o["plamen"] as Node3D).is_visible_in_tree(): chyby.append("krb %s nehoří" % k["model"])
+		print("OHNE_TEST krb %s: ohňů %d" % [k["model"], nal])
+		if nal == 0: chyby.append("krb %s: model vložen, ale oheň (značka %s_Krb_Ohen) nenalezen" % [k["model"], k["model"]])
+	var kh := 0
+	for o: Dictionary in oh.ohne:
+		if String(o["druh"]) == "krb" and (o["uzel"] as Node).get_parent() and String((o["uzel"] as Node).name).begins_with("Hrad"):
+			kh += 1
+			if not bool(o["hori"]): chyby.append("krb hradu %s nehoří" % (o["uzel"] as Node).name)
+	print("OHNE_TEST krby hradu: %s" % (("%d hoří" % kh) if kh > 0 else "přeskočeno – v modelu hradu zatím krb není (krby.json navrhy_hrad, model od modeláře)"))
+
+
+## Rozpočet světel při chůzi vsí (všechny pece hoří pořád): trasa přes všechny ohně vsi po 0,5 m; v každém bodě nejvýš svetel_max
+## světel, zapnuté jsou nejbližší (žádný nesvítící hořící oheň do zap_m není blíž o víc než hystereze než nějaký svítící),
+## bliknutí = světlo ohně se během 3 m chůze zapne a zase vypne (nebo naopak).
+func _ves_rozpocet(oh: Node, chyby: Array) -> void:
+	var rz: Dictionary = oh.cfg["rozpocet"]; var mx := int(rz["svetel_max"]); var hy := float(rz.get("poradi_hystereze_m", 0.0))
+	var body: Array = []
+	for o: Dictionary in oh.ohne:
+		if not String((o["uzel"] as Node).get_path()).contains("/Hrad/"): body.append((o["zaklad"] as Vector3) + Vector3.UP * 1.0)
+	if body.size() < 2: return
+	body.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.x < b.x)
+	var hist := {}; var maxsv := 0; var spatne := 0; var kroku := 0; var blik := 0
+	for o: Dictionary in oh.ohne: o["zap"] = false
+	for i in body.size() - 1:
+		var a: Vector3 = body[i]; var b: Vector3 = body[i + 1]; var n := int(ceil(a.distance_to(b) / 0.5))
+		for k in n:
+			var p := a.lerp(b, float(k) / float(n)); kroku += 1
+			oh._rozpocet(p)
+			var sv: int = oh.pocet_svetel(); maxsv = maxi(maxsv, sv)
+			var dmax := -1.0; var dmin_nesviti := 1e9
+			for j in oh.ohne.size():
+				var o: Dictionary = oh.ohne[j]
+				if not bool(o["hori"]): continue
+				if bool(o["zap"]): dmax = maxf(dmax, float(o["d"]))
+				elif float(o["d"]) < float(rz["zap_m"]): dmin_nesviti = minf(dmin_nesviti, float(o["d"]))
+				var h: Array = hist.get(j, [])
+				if h.is_empty() or bool(h[-1][0]) != bool(o["zap"]): h.append([bool(o["zap"]), kroku]); hist[j] = h
+			if sv >= mx and dmin_nesviti < dmax - hy - 0.01: spatne += 1
+	for j in hist:
+		var h: Array = hist[j]
+		for q in range(2, h.size()):
+			if (int(h[q][1]) - int(h[q - 2][1])) * 0.5 < 3.0: blik += 1
+	print("OHNE_TEST ves chůze: bodů %d, ohňů na trase %d, světel nejvýš %d (max %d), nejbližší nevybráno %d×, bliknutí %d" % [kroku, body.size(), maxsv, mx, spatne, blik])
+	if maxsv > mx: chyby.append("ve vsi svítí %d světel ohňů (max %d)" % [maxsv, mx])
+	if spatne > 0: chyby.append("ve vsi %d× nesvítí bližší oheň" % spatne)
+	if blik > 0: chyby.append("ve vsi %d bliknutí světel při chůzi" % blik)
+
 
 func _konec(chyby: Array, n: int, sv: int) -> void:
 	print("OHNE_TEST ohňů %d, zapnutých světel u krčmy %d: %s" % [n, sv, "OK" if chyby.is_empty() else "CHYBA " + "; ".join(chyby)])

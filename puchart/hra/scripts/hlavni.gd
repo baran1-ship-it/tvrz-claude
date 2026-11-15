@@ -895,6 +895,7 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas:
 ## Kolize půdy celku (mista.json modely.celky.<model>.puda; Míša 14. 11.: „na půdě je trám a hráč ho nepřekročí“): strop modelu
 ## (jeden kvádr i nad síní otevřenou do krovu) nahradí kvádry strop_kvadry jen pod viditelnou povalou – otvor nad žebříkem;
 ## kolize příček bez viditelného trámu (oriznout) končí na vrchu stropu; přes viditelný trám šikmé nájezdy (najezdy od → do).
+## Střecha nad půdou (strecha od → do, jako nájezdy): krokve ani krytina kolizi nemají – u okapu by hlava prošla střechou (č. 312).
 func _puda(n: Node3D, pd: Dictionary) -> void:
 	var st := n.find_child(String(pd.get("strop_smazat", "")), true, false) if pd.has("strop_smazat") else null
 	if st: st.free()
@@ -920,7 +921,7 @@ func _puda(n: Node3D, pd: Dictionary) -> void:
 			var bx := BoxShape3D.new(); bx.size = Vector3(ab.size.x, top - ab.position.y, ab.size.z)
 			(cs as CollisionShape3D).shape = bx
 			(cs as Node3D).position += Vector3(ab.position.x + ab.size.x * 0.5, (ab.position.y + top) * 0.5, ab.position.z + ab.size.z * 0.5)
-	for r: Dictionary in pd.get("najezdy", []):   # deska tl. 0,12 m, horní plocha na úsečce od → do (jako rampy dveří)
+	for r: Dictionary in pd.get("najezdy", []) + pd.get("strecha", []):   # deska tl. 0,12 m, horní plocha na úsečce od → do (jako rampy dveří); strecha = deska pod krokvemi (spodek na spodní hraně krokví), hlava neprojde střechou
 		var p0 := Vector3(float(r["od"][0]), float(r["od"][1]), float(r["od"][2])); var p1 := Vector3(float(r["do"][0]), float(r["do"][1]), float(r["do"][2]))
 		var dz := (p1 - p0).normalized(); var bok := Vector3(dz.z, 0, -dz.x).normalized(); var nh := dz.cross(bok).normalized()
 		if nh.y < 0.0: nh = -nh; bok = -bok
