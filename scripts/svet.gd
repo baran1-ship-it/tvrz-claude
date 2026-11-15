@@ -12274,9 +12274,11 @@ func _bloky_steny(pridej: Callable, pocty: Dictionary) -> void:
 ## (maska louky 0 mimo les a skaly - dvur pred hostincem je 0), ne na pesine. Louka.gd cte tentyz zaklad.
 ## LOM (radce 16:20, Misa: "u steny (146,949) bude lom"): stena terasy x ~114 (z 906-955), dal po proudu ustupuje
 ## (+0,5 m na m); plocha lomu 42 m od paty steny, z 906-975. Znamenkova vzdalenost od okraje plochy (< 0 uvnitr).
-const LOM_Z := Vector2(906.0, 975.0)
+# rozpor #17 (docs/rozpracovane/rozpory_blender_godot.md): rozsah lomu ze zaznamu plochy.json lom (z, leseni_z) - tytez
+# cisla cte Blender kraj.lom_tvar; drive opsane konstanty
+var LOM_Z := Vector2(float(Pravidla.cti("plochy", "lom", "z")[0]), float(Pravidla.cti("plochy", "lom", "z")[1]))
 const NASTOJATO := ["krumpac", "kladivo_kamenicke"]     # modely nastojato (hlavou nahoru) - ve vybaveni lezi
-const LESENI_Z := Vector2(911.0, 950.5)           # lamana cast steny s lesenim (svetla stena, osyp tam neni)
+var LESENI_Z := Vector2(float(Pravidla.cti("plochy", "lom", "leseni_z")[0]), float(Pravidla.cti("plochy", "lom", "leseni_z")[1]))   # lamana cast steny s lesenim (svetla stena, osyp tam neni)
 var _leseni_rect: Array = []
 const LOM_SIRKA := 42.0
 

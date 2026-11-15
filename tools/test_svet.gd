@@ -1817,7 +1817,23 @@ func _lom_na_zemi() -> void:
 			var d2 := xf.origin.y - g2
 			if d2 > 0.08 and d2 < 0.4:
 				spatne.append("kvadr (%.0f,%.0f) +%.2f" % [xf.origin.x, xf.origin.z, d2])
-	_vysledek("lom_na_zemi", spatne.is_empty() and n > 10, "predmetu %d, kvadru %d, nad zemi %d: %s" % [n, kv, spatne.size(), ", ".join(spatne.slice(0, 12))])
+	# rozpor #17: pata steny, kterou hra hleda v terenu (svet.lom_stena_x - stena, leseni, sut, vozy), proti zaznamu
+	# plochy.json lom pata_x, podle ktereho lom tvaruje Blender (kraj.lom_tvar): rozdil nad pata_steny_tolerance_m = dve
+	# pravidla (hra stavi stenu jinde nez Blender lom vykopal; terasa _terasa_terenu stenu meni jen ve hre, rozpor #16)
+	var lom_j: Dictionary = load("res://scripts/pravidla.gd").cti("plochy", "lom")
+	var pata_nej := 0.0
+	var pata_z := 0.0
+	var zl := sv.LOM_Z.x + 2.0
+	while zl <= sv.LOM_Z.y - 2.0:
+		var dp := absf(sv.lom_stena_x(zl) - float(lom_j["pata_x"]))
+		if dp > pata_nej:
+			pata_nej = dp
+			pata_z = zl
+		zl += 1.0
+	print("LOM_PATA hra x %.2f (z %.0f) zaznam pata_x %.2f: nejvetsi rozdil %.2f m" % [sv.lom_stena_x(pata_z), pata_z, float(lom_j["pata_x"]), pata_nej])
+	if pata_nej > float(lom_j["pata_steny_tolerance_m"]):
+		spatne.append("pata steny ve hre %.2f m od zaznamu pata_x (z %.0f)" % [pata_nej, pata_z])
+	_vysledek("lom_na_zemi", spatne.is_empty() and n > 10, "predmetu %d, kvadru %d, nad zemi %d, pata steny proti zaznamu nejvys %.2f m: %s" % [n, kv, spatne.size(), pata_nej, ", ".join(spatne.slice(0, 12))])
 
 
 ## Ladeni (TVRZ_CO="x,z"): co se kresli do 6 m od bodu - MultiMesh instance (jmeno uzlu, vzdalenost, vyska, meritko)

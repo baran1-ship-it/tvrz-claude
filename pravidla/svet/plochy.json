@@ -79,6 +79,12 @@
    906.0,
    975.0
   ],
+  "leseni_z": [
+   911.0,
+   950.5
+  ],
+  "_leseni_z": "lamana cast steny s lesenim (svetla stena bez osypu; hra svet.gd LESENI_Z - leseni, lom_vyhrazeno, lom_cerstve v zem.gdshader). Drive konstanta opsana v svet.gd (rozpor #17). pata_steny_tolerance_m: pata steny, kterou hra hleda v terenu (svet.lom_stena_x), nejvys tolik od zaznamu pata_x (test lom_na_zemi). Namereno 15. 11.: hledani hry (krok 0,5 m) na terenu Blenderu fort.land da pata_x + 0,5 m ve vsech 26 rezech z 902-977 -> mez krok + 0,5 m.",
+  "pata_steny_tolerance_m": 1.0,
   "x_konec": 178.0,
   "stena_sirka_m": 1.5,
   "okraj_m": 8.0,

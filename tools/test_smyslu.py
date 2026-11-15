@@ -809,6 +809,41 @@ for s_ in _SV:
     _okr_n += 1
 print("SMYSL okraj_stavby: %d domu vsi, placka = podezdivka + %.2f m, prah %.2f m v udusanem okraji" % (_okr_n, _PB["placka_okraj_m"], _PB["prah_m"]))
 
+# plot_ulice (rozpor #11): ploty usedlosti (vesnice.ploty_usedlosti - totez stavi build) nelezi na hline ulice ani v
+# nejsirsim rozbitem okraji hry. Hra plot na hline usekne (svet._ves_site_vyrez podle cesta_kraj_osa = cesta_ok), Blender
+# kresli hlinu ulice podle pulsirky (ves_ramec.ulice_pas). Obalka okraje hry = pulsirka x (1 + soucet amplitud sumu) +
+# amplituda v metrech - cisla ctena z svet.gd cesta_ok (|_vln| <= 1), ne opsana. Mez: aspon 0 m za obalkou.
+import ves_ramec  # noqa: E402
+_mok = re.search(r"static func cesta_ok\(hw: float, s: float, sd: float\) -> float:\s*return hw \* \(1\.0 \+ ([\d.]+) \* _vln\([^)]*\) \+ ([\d.]+) \* _vln\([^)]*\)\) \+ ([\d.]+) \* _vln", _sg)
+if not _mok:
+    chyba("plot_ulice", "svet.gd", "cesta_ok nenalezena nebo zmeneny tvar - obalku okraje hliny nejde precist")
+else:
+    _a1, _a2, _am = (float(g_) for g_ in _mok.groups())
+    _osa_u = ves_ramec.osa_ulice()
+    _plot_nej = (1e9, None)
+    _plot_zle = []
+    for h_ in vesnice.layout():
+        if not h_.get("novy_ramec"):
+            continue
+        for nm_, pts_ in vesnice.ploty_usedlosti(h_).items():
+            for a_, b_ in zip(pts_, pts_[1:]):
+                n_ = int((b_ - a_).length / 0.25) + 1
+                for i_ in range(n_ + 1):
+                    q_ = a_ + (b_ - a_) * (i_ / n_)
+                    bi_, d_ = ves_ramec._blizko(q_.x, q_.z)
+                    if bi_ < 0:
+                        continue
+                    hw_ = ves_ramec.pulsirka(bi_ / max(len(_osa_u) - 1, 1))
+                    e_ = d_ - (hw_ * (1.0 + _a1 + _a2) + _am)
+                    if e_ < _plot_nej[0]:
+                        _plot_nej = (e_, (round(q_.x, 1), round(q_.z, 1), nm_))
+                    if e_ < 0.0:
+                        _plot_zle.append((round(q_.x, 1), round(q_.z, 1), nm_, round(e_, 2)))
+    if _plot_zle:
+        chyba("plot_ulice", "ves", "%d bodu plotu v obalce okraje hliny ulice (hra je usekne): %s" % (len(_plot_zle), _plot_zle[:5]))
+    print("SMYSL plot_ulice: nejblize %.2f m za obalkou okraje ulice %s (obalka pulsirka x %.2f + %.2f m)" % (
+        _plot_nej[0], _plot_nej[1], 1.0 + _a1 + _a2, _am))
+
 # ves_barva (Misa 15. 11. ř. 10: „bile budovy vzadu ve vsi nechci, chci hnede jako Puchart“): stredni stupen (barvy
 # vrcholu domy_stredni.glb) a hruby obal _Daleko (barva materialu domy.glb) kazdeho domu: prumer sRGB R > G > B a jas
 # nejvys modely.json ves_jas.stredni_daleko.test_jas_max (bez hnedeho cinitele 0,5 a seda). Soubory jsou vystup
