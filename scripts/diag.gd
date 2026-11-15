@@ -165,6 +165,63 @@ func _skut(dt: float) -> float:
 
 
 ## Na cem hrac stoji/narazi (posledni srazky move_and_slide): jmeno, tvar, troj. (radce 17:10 – podklad hrace)
+var _tk := 0.0
+var _krz_text := "-"
+
+
+## Misa 15. 11. (letajici trsy, mech a houby - na PC nereprodukovano): co je pod krizem - kolize paprskem a nejblizsi
+## instance MultiMeshe do 0,8 m od paprsku (do 40 m; poloha z transformace, u louky z custom data): uzel, druh site,
+## vyska paty nad terenem. Jednou za 1 s, jen s panelem.
+func _pod_krizem() -> String:
+	var cam := get_viewport().get_camera_3d()
+	if cam == null:
+		return "-"
+	var o := cam.global_position
+	var smer := -cam.global_transform.basis.z
+	var out := []
+	var q := PhysicsRayQueryParameters3D.create(o, o + smer * 60.0)
+	var pl: Object = main.get("player") if main else null
+	if pl is CollisionObject3D:
+		q.exclude = [(pl as CollisionObject3D).get_rid()]
+	var h := cam.get_world_3d().direct_space_state.intersect_ray(q)
+	var d_kol := 60.0
+	if not h.is_empty():
+		d_kol = o.distance_to(h["position"])
+		var co: Object = h["collider"]
+		out.append("kolize %s %.1f m" % [String((co as Node).name) if co is Node else "?", d_kol])
+	var nej := [0.8, null, -1, Vector3.ZERO]
+	for n in get_tree().root.find_children("*", "MultiMeshInstance3D", true, false):
+		var mmi := n as MultiMeshInstance3D
+		if not mmi.is_visible_in_tree() or mmi.multimesh == null:
+			continue
+		var ab := mmi.global_transform * mmi.get_aabb()
+		if ab.grow(1.0).intersects_segment(o, o + smer * minf(d_kol + 1.0, 40.0)) == null:
+			continue
+		var mm := mmi.multimesh
+		var cnt := mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
+		if cnt > 30000:
+			continue
+		for i in cnt:
+			var lp := mm.get_instance_transform(i).origin
+			if lp == Vector3.ZERO and mm.use_custom_data:
+				var cd := mm.get_instance_custom_data(i)
+				lp = Vector3(cd.g, cd.b, cd.a)
+			var wp := mmi.global_transform * lp
+			var t := (wp - o).dot(smer)
+			if t < 0.3 or t > minf(d_kol + 0.5, 40.0):
+				continue
+			var kolmo := (o + smer * t).distance_to(wp)
+			if kolmo < float(nej[0]):
+				nej = [kolmo, mmi, i, wp]
+	if nej[1] != null:
+		var m2 := nej[1] as MultiMeshInstance3D
+		var wp2: Vector3 = nej[3]
+		var ty: float = float(main.svet._teren_y(wp2.x, wp2.z)) if main and main.get("svet") else wp2.y
+		out.append("%s/%s #%d %s pata %.2f m nad terénem" % [String(m2.get_parent().name), String(m2.name), int(nej[2]),
+				m2.multimesh.mesh.resource_name if m2.multimesh.mesh else "?", wp2.y - ty])
+	return " · ".join(out) if not out.is_empty() else "nic"
+
+
 func _pod_nohama() -> String:
 	var pl: CharacterBody3D = main.get("player") if main else null
 	if pl == null:
@@ -418,8 +475,12 @@ func _process(dt: float) -> void:
 		if _tp >= 0.5:
 			_tp = 0.0
 			_panel.size.x = maxf(400.0, get_viewport().get_visible_rect().size.x - 230.0)
+			_tk += 0.5
+			if _tk >= 1.0:
+				_tk = 0.0
+				_krz_text = _pod_krizem()
 			_panel.text = "FPS %d · nejdelší %.0f ms · %s · záseků %d, pomalých %d%s" % [Engine.get_frames_per_second(), _max_dt_panel * 1000.0, poloha_text(),
-					zaseku, pomalych, (main.kvalita.panel_text() if main and main.get("kvalita") else "") + (("\n" + String(_zaseky[0])) if not _zaseky.is_empty() else "")]
+					zaseku, pomalych, (main.kvalita.panel_text() if main and main.get("kvalita") else "") + "\npod křížem: " + _krz_text + (("\n" + String(_zaseky[0])) if not _zaseky.is_empty() else "")]
 			_max_dt_panel = 0.0
 		_kontrola_rozpoctu()
 		_t += dt
