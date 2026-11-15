@@ -213,17 +213,19 @@
    "ochoz_odstup_konce_m": 3.0,
    "pozn_ochoz": "4. 11. (Míša): ochoz se schody jen u branné věže, ne po hradbách k hornímu hradu – ochoz_od_branky_m (u hradby se schody ze země až za ně); bez ochozu bez portálku (NAVRH)",
    "ochoz_sirka_m": 1.2,
-   "ochoz_od_branky_m": 0.0,
+   "ochoz_od_branky_m": 999.0,
    "pozn_5_11": "Míša 5. 11.: „není vnější hradba moc do šířky? mrkni na terén“ – Z a S úseky na hřbetu valu (DMR, posun 0–1 m), J úsek stažen z dolního svahu na konec valu",
    "pozn_napojeni": "Míša 5. 11.: vnější hradba končí v JZ nároží jádra, vnější líc v rovině jižní zdi jádra (bez přesahu ven i dovnitř); před nárožím jednou lomená (kresba misa_04)",
    "pozn_hrana": "Míša 5. 11.: hradba po hraně valu k příkopu (DMR: vnitřní hrana = 1,2 m pod hřbetem, posun 2–6,5 m dovnitř)",
-   "plynula_koruna": true,
+   "plynula_koruna": false,
    "pozn_koruna": "Míša 5. 11.: koruna bez schodů, plynule nahoru a dolů po terénu (kresba misa_04)",
    "pozn_vyska": "Míša 6. 11.: vnější hradba vlevo od vstupu moc nízká (3,2 m) → 4,5 m nad valem, koruna blízko podlahy strážnice branky (NAVRH)",
    "cimburi_u_branky": true,
    "koruna_rohu_v_ochozu": true,
    "bez_stinek_u_veze_m": 0.6,
-   "pozn_stinky_14_11": "Míša 14. 11. (foto x 13,3 z −41 u věže branky): „nahoře u věžičky chybí hradbičky“, „ať do dveří vejde jen dřevěný ochoz“ – ochoz vede do portálku po vnitřní straně zdi (půdorys or1), překážela jen trasa testu, která zkracovala roh přes korunu (opraveno v puchart_hrad TR A_branka_patro); stínky až k líci věže (0,6 m = konec osy 0,3 m uvnitř věže)"
+   "pozn_stinky_14_11": "Míša 14. 11. (foto x 13,3 z −41 u věže branky): „nahoře u věžičky chybí hradbičky“, „ať do dveří vejde jen dřevěný ochoz“ – ochoz vede do portálku po vnitřní straně zdi (půdorys or1), překážela jen trasa testu, která zkracovala roh přes korunu (opraveno v puchart_hrad TR A_branka_patro); stínky až k líci věže (0,6 m = konec osy 0,3 m uvnitř věže)",
+   "rovna_koruna": "ochoz",
+   "pozn_15_11": "Míša 15. 11. (foto x −18,6 z −11,2 a shora x 8,4 z −8,9): „rovinu hradeb jsem nechtěl podle terénu, a chtěl bych ochozy i u vnějších hradeb, tím pádem u vstupní věžičky přibudou dveře na druhou stranu hradeb“ – koruna celé hradby po valu v jedné výšce (výška strážnice branky, jako hradba_vychod; plynula_koruna vypnuta), dřevěný ochoz po celé délce (ochoz_od_branky_m 999 = celá osa) s portálkem do strážnice z druhé strany (puchart_hrad POR / ochoz_hradby)"
   },
   "hradba_vychod": {
    "osa": [

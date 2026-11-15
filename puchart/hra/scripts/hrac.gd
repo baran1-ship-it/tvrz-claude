@@ -12,6 +12,11 @@ var yaw: float:   # Havranovy předměty (pokládání v pískovišti) čtou pla
 var seated := false
 var vydrz_max := 100.0
 func stand_up() -> void: seated = false
+## natočí postavu a kameru na bod (testy zaměření – zamer.gd)
+func pohled_na(cil: Vector3) -> void:
+	var d := cil - cam.global_position
+	_yaw = atan2(-d.x, -d.z); _pitch = clampf(atan2(d.y, Vector2(d.x, d.z).length()), -1.4, 1.4)
+	rotation.y = _yaw; cam.rotation.x = _pitch
 var _pitch := 0.0
 var _tah_pohyb := -1          # index prstu na levé půlce
 var _tah_pohled := -1

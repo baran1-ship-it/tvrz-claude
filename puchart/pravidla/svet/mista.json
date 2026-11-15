@@ -49,7 +49,77 @@
     "jas_pozn": "násobek barvy textury [R, G, B] hrubých stupňů (obal nemá normálovou mapu – bez ztmavení byl šindel skoro bílý, snímek 14. 11. d2_srov); Míša 14. 11.: „jsou šedé, nemohly by být hnědé? míň to razí“ → teplý hnědý tón jako ztmavlé dřevo (KCD: střechy a roubení z dálky hnědé)"
    },
    "jas_podrobny": 0.8,
-   "jas_podrobny_pozn": "Míša 14. 11. (foto x −65 z −141, Dum1): „domy jsou hezké světlé, ale až moc vypadají bílé“ – textury domů Havrana jsou při převodu zesvětlené na průměrný jas 0,5 (nastroje/havran/stavby_export.gd JAS_CIL, KCD1 ves_2); ve hře násobek barvy podrobného modelu (vnějšek, ne vnitřek) – ~0,4 jako hospodářské stavby (JAS_PREDMETY 0,42); hrubé stupně mají vlastní daleko_textury.jas"
+   "jas_podrobny_pozn": "Míša 14. 11. (foto x −65 z −141, Dum1): „domy jsou hezké světlé, ale až moc vypadají bílé“ – textury domů Havrana jsou při převodu zesvětlené na průměrný jas 0,5 (nastroje/havran/stavby_export.gd JAS_CIL, KCD1 ves_2); ve hře násobek barvy podrobného modelu (vnějšek, ne vnitřek) – ~0,4 jako hospodářské stavby (JAS_PREDMETY 0,42); hrubé stupně mají vlastní daleko_textury.jas",
+   "zebriky": {
+    "popis": "žebřík na půdu v síni domů z Havrana [pata, vrchol, nástup, sestup] v souřadnicích modelu (hlavni.gd _mista → zebriky.gd)",
+    "zdroj": "Havran scripts/svet.gd DUM_ZEBRIK (lezení 0.76, Míša: „žebříky v domech, na půdy“); Míša 15. 11. (foto x −56 z −145,3): „chci všechny žebříky ve hře, aby byly funkční“",
+    "Dum1": [
+     [
+      1.72,
+      0.3,
+      0.27
+     ],
+     [
+      0.62,
+      2.84,
+      0.27
+     ],
+     [
+      2.35,
+      0.3,
+      0.27
+     ],
+     [
+      -1.0,
+      2.64,
+      0.25
+     ]
+    ],
+    "Dum2": [
+     [
+      1.72,
+      0.25,
+      0.47
+     ],
+     [
+      0.62,
+      2.79,
+      0.47
+     ],
+     [
+      2.35,
+      0.25,
+      0.47
+     ],
+     [
+      -1.0,
+      2.59,
+      0.35
+     ]
+    ],
+    "Rychta": [
+     [
+      2.24,
+      0.3,
+      -0.98
+     ],
+     [
+      0.95,
+      2.84,
+      -0.98
+     ],
+     [
+      2.8,
+      0.3,
+      -0.98
+     ],
+     [
+      -0.8,
+      2.64,
+      -1.03
+     ]
+    ]
+   }
   },
   "mlyn": {
    "soubor": "res://modely/stavby_h/mlyn.glb",
@@ -241,7 +311,7 @@
     "lod1": "res://modely/stavby_h/krcma_rada_lod1.glb",
     "aabb": [
      -8.59,
-     23.91,
+     23.31,
      -5.1,
      5.9
     ],
@@ -287,7 +357,7 @@
      ],
      "otoceni_deg": -90.0,
      "posun": [
-      11.8,
+      11.2,
       -13.85
      ],
      "smazat": [
@@ -306,7 +376,7 @@
       5.6
      ],
      "dvur_za_domem_z": 4.6,
-     "posun_pozn": "nové křídlo (obal x 8,79…18,93, z −12,11…1,84) otočené o −90° a posunuté: x 9,96…23,91 (za vraty do dvora x 7,32…9,77), z −5,06…5,08 (souměrně s domem)"
+     "posun_pozn": "nové křídlo (obal x 8,79…18,93, z −12,11…1,84) otočené o −90° a posunuté: x 9,96…23,91 (za vraty do dvora x 7,32…9,77), z −5,06…5,08 (souměrně s domem); Míša 15. 11. (foto x −84,9 z 105,3): „nelíbí se mi, že mezi stříškou a stájí je mezera“ – zeď stáje byla 0,63 m od sloupu vrat (x 9,97) → křídlo o 0,6 m blíž (posun x 11,2)"
     },
     "rampy": [
      {
@@ -324,7 +394,7 @@
       ]
      }
     ],
-    "podlaha_m": 0.45,
+    "podlaha_m": 0.43,
     "stromy": {
      "druh": "jablon",
      "pocet": 2,
@@ -359,32 +429,32 @@
     "trasy": {
      "pavlac": [
       [
-       25.2,
+       24.6,
        0.0,
        -4.55
       ],
       [
-       23.6,
+       23.0,
        0.1,
        -4.55
       ],
       [
-       19.45,
+       18.85,
        2.85,
        -4.55
       ],
       [
-       19.45,
+       18.85,
        2.85,
        -2.95
       ],
       [
-       19.62,
+       19.02,
        2.85,
        -1.9
       ],
       [
-       20.8,
+       20.2,
        2.85,
        -0.35
       ]
@@ -394,19 +464,82 @@
     "najezdy": [
      {
       "od": [
-       23.88,
+       23.28,
        -0.05,
        -4.55
       ],
       "do": [
-       20.05,
+       19.45,
        2.9,
        -4.55
       ],
       "sirka_m": 0.9
      }
     ],
-    "najezdy_pozn": "nové křídlo (14. 11. noc): podesta schodů na pavlač je v modelu tenká deska (Kol_Podesta y 2,77–2,85, x' 18,95–19,95), která visí nad horním koncem šikmé kolize schodů (Kol_Schody 31°, výšky 2,85 dosáhne až na x' 18,97) – postava do hrany desky narazila (test pavlac_ uvízl ve výšce 2,2–2,7 m); nájezd od paty schodů na vrch podesty před její hranou (≈38°, postava zvládne 50°), souřadnice upraveného modelu"
+    "najezdy_pozn": "nové křídlo (14. 11. noc): podesta schodů na pavlač je v modelu tenká deska (Kol_Podesta y 2,77–2,85, x' 18,95–19,95), která visí nad horním koncem šikmé kolize schodů (Kol_Schody 31°, výšky 2,85 dosáhne až na x' 18,97) – postava do hrany desky narazila (test pavlac_ uvízl ve výšce 2,2–2,7 m); nájezd od paty schodů na vrch podesty před její hranou (≈38°, postava zvládne 50°), souřadnice upraveného modelu",
+    "zebrik": {
+     "nazev": "Žebřík krčma",
+     "pata": [
+      1.54,
+      0.45,
+      -1.17
+     ],
+     "vrchol": [
+      1.54,
+      3.16,
+      0.15
+     ],
+     "nastup": [
+      1.54,
+      0.43,
+      -1.95
+     ],
+     "sestup": [
+      1.54,
+      2.96,
+      1.05
+     ],
+     "zdroj": "Míša 15. 11.: „chci všechny žebříky ve hře, aby byly funkční“; model krčmy (NAVOD_KRCMA_L: černá kuchyně – žebřík na půdu): štěřiny x 1,27–1,81, pata z −1,17 y 0,44, vrch z 0,22 y 3,36 (KrcmaL_Interier_Dum); vrchol a sestup jako u hájovny (sestup 0,9 m za vrcholem na povale)"
+    },
+    "puda": {
+     "popis": "kolize povaly krčmy s otvorem nad žebříkem (jako hájovna; hlavni.gd _puda): Kol_Strop (y 2,90–2,96 přes celý dům) nahrazen kvádry kolem otvoru x 1,0–2,1, z −0,7–0,6; příčka síň/kuchyně (Kol_PricK16/17, PricKN18) oříznuta na vrch povaly",
+     "strop_smazat": "KrcmaL_Kol_Strop",
+     "strop_y": [
+      2.9,
+      2.96
+     ],
+     "strop_kvadry": [
+      [
+       -8.0,
+       1.0,
+       -4.0,
+       4.0
+      ],
+      [
+       2.1,
+       7.0,
+       -4.0,
+       4.0
+      ],
+      [
+       1.0,
+       2.1,
+       -4.0,
+       -0.7
+      ],
+      [
+       1.0,
+       2.1,
+       0.6,
+       4.0
+      ]
+     ],
+     "oriznout": [
+      "KrcmaL_Kol_PricK16",
+      "KrcmaL_Kol_PricK17",
+      "KrcmaL_Kol_PricKN18"
+     ]
+    }
    },
    "Hajovna": {
     "soubor": "res://modely/stavby_h/hajovna.glb",
@@ -446,7 +579,7 @@
       ]
      }
     ],
-    "podlaha_m": 0.45,
+    "podlaha_m": 0.43,
     "stromy": {
      "druh": "jablon",
      "pocet": 2,
@@ -604,7 +737,8 @@
    "pozn_rampy": "podlaha domu +0,45 m (návody modelů) – postava nemá krok nahoru: šikmá kolize z terénu 2,4 m před prahem na podlahu 0,25 m za ním u vnějších dveří (jako hlavni.gd _rampy_dveri u domů vsi); test dum_<místo>_<model>",
    "pozn_stromy": "Míša 14. 11.: „jedna stará jabloň nebo více může být u hájovny a jedna nebo více u hospody“ – mista = kandidáti [x, z] v souřadnicích modelu (jako aabb), použije se prvních pocet, které jsou ≥ od_cesty_m od cesty a ≥ od_toku_m od toku a mimo půdorys; vždy stará jabloň (varianta jablon_1–3)",
    "pozn_dum_aabb": "Míša 14. 11. (foto x 149 z 314 u vchodu hájovny): „tráva ve vstupu a chybí cesta k hlavní cestě“ – půdorys stavby (bez porostu, bez hlíny) byl celý obal modelu včetně dvorku až k plotu, takže dvorek nebyl vyšlapaný; dum_aabb = jen dům s přístřeškem a kůlnou pod střechou (NAVOD_HAJOVNA: jizba x −4,5…0,6, síň …4,5, přístřešek na západě po sloupy −6,8, kůlna za domem po z −5,6) – zbytek obalu je dvorek z udusané hlíny; cesta_k_ceste = cestička z příchodu k nejbližší vozové / hřebenové cestě (k_ulici jako od vrat usedlostí)",
-   "pozn_schod": "Míša 14. 11. (foto x 155 z 311,5, hájovna): „udělej schod do domu, jsou tam výš dveře“ – před vnějšími dveřmi (rampy) kamenné stupně po vyska_m až k prahu (podlaha_m), kámen z podezdívky modelu; nájezdová kolize zůstává (hráč nemá krok nahoru), stupně jsou vidět (Havran domy: kamenný stupeň 0,15 m před prahem)"
+   "pozn_schod": "Míša 14. 11. (foto x 155 z 311,5, hájovna): „udělej schod do domu, jsou tam výš dveře“ – před vnějšími dveřmi (rampy) kamenné stupně po vyska_m až k prahu (podlaha_m), kámen z podezdívky modelu; nájezdová kolize zůstává (hráč nemá krok nahoru), stupně jsou vidět (Havran domy: kamenný stupeň 0,15 m před prahem)",
+   "pozn_ven": "Míša 15. 11.: „když vlezu do hospody, tak už dveřmi ani jedněmi nevylezu“ – horní konec nájezdu (rampy) byl 4 cm nad podlahou a 0,25 m za prahem, postava se o hranu zevnitř zachytila; konec nájezdu teď 0,5 m za prahem pod podlahou (hlavni.gd _celek). Test: mista_rozmisteni.py pro každý celek i trasu ven_<misto>_<model> (z domu přes práh ven) – pruchody_mista.json"
   }
  },
  "mista": [
@@ -1256,6 +1390,164 @@
     "dvur": 0.85
    },
    "hlina_pozn": "síla hlíny v maska_cesty.R; okap slabší (Havran yard_dirt d2 × 0,85, tráva prosvítá)"
+  }
+ },
+ "upravy_modelu": {
+  "popis": "úpravy částí modelů z Disku (blender/upravy_casti.py, originál build/zdroj_celky/<soubor> stáhne nastroje/stavby_z_havrana.sh): casti = [{uzly (sítě), meze kusu (x_min, y_max, oblast [x0, x1, z0, z1] – souřadnice modelu Godot), posun [x, y, z] nebo smazat, kolize (uzly -convcolonly)}]",
+  "kovarna.glb": {
+   "casti": [
+    {
+     "popis": "přístřešek pro koně dál od kovárny",
+     "pozn": "Míša 15. 11. (foto x −63,9 z −156,4): „přístřešek pro uvázání koně u kovárny bych dal kousek dál od kovárny, jedna jeho noha střechy je v bočním vstupu do kovárny, vypadá to divně“ – přístřešek (sloupy x 3,18…5,92, břevno, stříška y ≤ 3,4) posunut o 1,3 m od boku kovárny (x 3,14); dlažba přístřešku se nekreslí (kovarna_skryt)",
+     "uzly": [
+      "Kovarna_Konstrukce",
+      "Kovarna_Strecha",
+      "Kovarna_Dlazba"
+     ],
+     "x_min": 3.15,
+     "y_max": 3.4,
+     "posun": [
+      1.3,
+      0,
+      0
+     ],
+     "kolize": [
+      "Kovarna_Kol_Brevno",
+      "Kovarna_Kol_SloupP2",
+      "Kovarna_Kol_SloupP3",
+      "Kovarna_Kol_SloupP4",
+      "Kovarna_Kol_SloupP5",
+      "Kovarna_Kol_PodlahaPristresek"
+     ]
+    }
+   ]
+  },
+  "hajovna.glb": {
+   "casti": [
+    {
+     "popis": "bez šibenice na zvěř, stolu a špalku před vstupem",
+     "pozn": "Míša 15. 11. (foto x 150,4 z 311,7): „od hájovny umaž ty tři modely před vstupem, zavazí a jsou k ničemu“ (NAVOD_HAJOVNA: šibenice (2,6; 6,3), stůl na vyvrhování, špalek)",
+     "uzly": [
+      "Hajovna_Okoli"
+     ],
+     "oblast": [
+      0.9,
+      5.7,
+      5.2,
+      7.9
+     ],
+     "smazat": true,
+     "kolize": [
+      "Hajovna_Kol_Sibenice22",
+      "Hajovna_Kol_Sibenice23",
+      "Hajovna_Kol_Stul",
+      "Hajovna_Kol_Spalek"
+     ]
+    }
+   ]
+  },
+  "krcma_rada.glb": {
+   "zdroj": "krcma_rada.glb",
+   "pozn_zdroj": "výstup blender/celky_upravy.py (křídlo do řady) – nastroje/stavby_z_havrana.sh ho ukládá do build/zdroj_celky",
+   "casti": [
+    {
+     "popis": "zábradlí schodů na pavlač na vnější stranu, podesta dozábradlená",
+     "pozn": "Míša 15. 11. (foto x −65,5 z 96,9 a −72,5 z 98): „schody nahoru na pavlač nad stájí mají špatné zábradlí a na koncích nejsou dodělané“ – madlo se sloupky bylo u zdi stáje (z −4,1), vnější strana schodů a podesty otevřená → madlo a sloupky na vnější stranu (z −5,0), na čele podesty (x 18,36) dvě příčky se sloupky; kolize zábradlí pro okraj schodů",
+     "uzly": [
+      "KrcmaL_Roubeni_Kridlo"
+     ],
+     "oblast": [
+      18.3,
+      23.35,
+      -4.2,
+      -4.0
+     ],
+     "y_min": 0.1,
+     "posun": [
+      0,
+      0,
+      -0.92
+     ],
+     "pridat": [
+      {
+       "jmeno": "Zabradli_Podesta_S1",
+       "stred": [
+        18.36,
+        3.34,
+        -5.0
+       ],
+       "rozmer": [
+        0.09,
+        1.0,
+        0.09
+       ],
+       "material_z": "KrcmaL_Roubeni_Kridlo",
+       "kolize": false
+      },
+      {
+       "jmeno": "Zabradli_Podesta_S2",
+       "stred": [
+        18.36,
+        3.34,
+        -4.08
+       ],
+       "rozmer": [
+        0.09,
+        1.0,
+        0.09
+       ],
+       "material_z": "KrcmaL_Roubeni_Kridlo",
+       "kolize": false
+      },
+      {
+       "jmeno": "Zabradli_Podesta_P1",
+       "stred": [
+        18.36,
+        3.34,
+        -4.54
+       ],
+       "rozmer": [
+        0.07,
+        0.07,
+        0.97
+       ],
+       "material_z": "KrcmaL_Roubeni_Kridlo",
+       "kolize": false
+      },
+      {
+       "jmeno": "Zabradli_Podesta_P2",
+       "stred": [
+        18.36,
+        3.8099999999999996,
+        -4.54
+       ],
+       "rozmer": [
+        0.07,
+        0.07,
+        0.97
+       ],
+       "material_z": "KrcmaL_Roubeni_Kridlo",
+       "kolize": false
+      },
+      {
+       "jmeno": "Zabradli_Schody",
+       "stred": [
+        20.85,
+        1.9,
+        -5.0
+       ],
+       "rozmer": [
+        5.2,
+        3.6,
+        0.08
+       ],
+       "material_z": "KrcmaL_Roubeni_Kridlo",
+       "kolize": true,
+       "jen_kolize": true
+      }
+     ]
+    }
+   ]
   }
  }
 }

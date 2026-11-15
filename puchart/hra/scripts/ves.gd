@@ -736,6 +736,7 @@ func _listi(n: Node) -> void:
 				var sm := ShaderMaterial.new(); sm.shader = load("res://shaders/listi.gdshader")
 				sm.set_shader_parameter("barva", om.albedo_texture); sm.set_shader_parameter("tint", om.albedo_color)
 				sm.set_shader_parameter("prah", maxf(om.alpha_scissor_threshold, 0.3))
+				sm.set_shader_parameter("bez_ovoce", 1.0)   # jabloň: ovoce jen 3D jablka (Míša 15. 11.)
 				sm.set_shader_parameter("stred", Vector3(c.x, bb.position.y + bb.size.y * 0.62, c.z)); sm.set_shader_parameter("vyska", maxf(bb.end.y, 0.5))
 				sm.set_shader_parameter("sila_vetru", 0.8); sm.set_shader_parameter("objem", 0.65)
 				_listi_mat[key] = sm

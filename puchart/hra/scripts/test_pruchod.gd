@@ -313,13 +313,28 @@ func _test_zebriky() -> void:
 		var pod := Vector3((zb["sestup"] as Vector3).x, (zb["nastup"] as Vector3).y, (zb["sestup"] as Vector3).z)   # místnost pod sestupem (komora): ne „Slézt dolů“
 		var up: Dictionary = Z.nejblizsi(zbs, pod)
 		if not up.is_empty() and bool(up["nahore"]): spatne.append("%s: pod povalou nabízí Slézt dolů" % zb["nazev"])
+		# zvenku přes zeď (Míša 15. 11.: „nemůžu lézt po žebříku, který je uvnitř, zvenku“): hráč za nejbližší vnější stěnou,
+		# dívá se na patu – nabídka nesmí být
+		var pata_pos: Vector3 = Z.mista_pouziti(zb)[0]["pos"]
+		for sm: Vector3 in [Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1), Vector3(0, 0, -1)]:
+			var q := PhysicsRayQueryParameters3D.create(pata_pos, pata_pos + sm * 3.0); var hh := hrac.get_world_3d().direct_space_state.intersect_ray(q)
+			if hh.is_empty(): continue
+			var venku: Vector3 = (hh["position"] as Vector3) + sm * 0.7
+			hlavni.svet.kolize_ihned(venku); hrac.velocity = Vector3.ZERO; hrac.position = Vector3(venku.x, (zb["nastup"] as Vector3).y, venku.z)
+			await get_tree().physics_frame; await get_tree().physics_frame
+			hrac.pohled_na(pata_pos)
+			var zv: Dictionary = Z.nejblizsi(zbs, hrac.global_position, hrac.cam)
+			if not zv.is_empty(): spatne.append("%s: zvenku přes stěnu (%.1f m) nabízí žebřík" % [zb["nazev"], (hh["position"] as Vector3).distance_to(pata_pos)])
+			break
 		for nahoru: bool in [true, false]:
 			var start: Vector3 = zb["nastup"] if nahoru else zb["sestup"]; var cil: Vector3 = zb["sestup"] if nahoru else zb["nastup"]
 			hlavni.svet.kolize_ihned(start)
 			hrac.autopilot = Vector3.INF; hrac.velocity = Vector3.ZERO; hrac.position = start + Vector3(0, 0.1, 0)
 			for i in 60: await get_tree().physics_frame
-			var u: Dictionary = Z.nejblizsi(zbs, hrac.global_position)
 			var jm := "%s %s" % [zb["nazev"], "nahoru" if nahoru else "dolů"]
+			var mp: Array = Z.mista_pouziti(zb)
+			hrac.pohled_na(mp[1 if not nahoru else 0]["pos"]); await get_tree().physics_frame   # zaměřit žebřík (zamer.gd)
+			var u: Dictionary = Z.nejblizsi(zbs, hrac.global_position, hrac.cam)
 			if u.is_empty() or bool(u["nahore"]) == nahoru:
 				spatne.append("%s: u %s není nabídka (hráč y %.2f)" % [jm, "paty" if nahoru else "vrcholu", hrac.position.y]); continue
 			hrac.chyt_zebrik(u["zb"], bool(u["nahore"]))

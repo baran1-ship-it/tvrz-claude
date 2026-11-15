@@ -352,9 +352,9 @@
   "zdroj_pena_kamen_hloubka": "pěna jen u kamenů v proudu (hloubka u kamene nad 8 cm) – kameny na mělkém kraji vody pěnu nedělají (misa_real_01: světlé čárky za kameny v proudnici, kraj klidný); NEOVERENO",
   "pena_zaklad": 0.0,
   "pena_barva": [
-   0.72,
-   0.74,
-   0.7
+   0.44,
+   0.46,
+   0.42
   ],
   "pozn_bila_13_11": "Míša 13. 11. (tablet): „voda je nějaká bílá“ – pěna měla všude základ 8 % (bílý film) a hladká hladina (drsnost 0,15, specular 0,12) dávala na tabletu mléčný odlesk; pěna jen na peřejích a za kameny, drsnost 0,3, specular 0,05, pěna tlumenější (0,72)",
   "melka_pipeta": [
@@ -367,6 +367,11 @@
    0.267,
    0.161
   ],
-  "pozn_barva_13_11": "Míša 13. 11. večer (tablet): „voda je pořád moc bílá“ – pipeta z fotky (melka_pipeta) obsahuje světlé dno viděné vodou; kreslená průsvitně přes dno ho zesvětlila podruhé (mléčný film). Barva vody = pohlcení/tónování (tmavá olivová), dno dodá terén pod ní; měřeno snímkem: plocha brodu ze 90/90/68 (sRGB)"
+  "pozn_barva_13_11": "Míša 13. 11. večer (tablet): „voda je pořád moc bílá“ – pipeta z fotky (melka_pipeta) obsahuje světlé dno viděné vodou; kreslená průsvitně přes dno ho zesvětlila podruhé (mléčný film). Barva vody = pohlcení/tónování (tmavá olivová), dno dodá terén pod ní; měřeno snímkem: plocha brodu ze 90/90/68 (sRGB)",
+  "kameny_jas": [
+   1.05,
+   0.9
+  ],
+  "zdroj_15_11": "Míša 15. 11. (foto x −49,8 z 120,2): „voda je dost bílá i některé kameny“ – pěna 0,72 → 0,44 (světlé čárky za kameny jen naznačené), jas kamenů koryta (drobné 1,75 → 1,05, balvany 1,25 → 0,9; dřív v kódu hlavni.gd _kameny_koryta)"
  }
 }

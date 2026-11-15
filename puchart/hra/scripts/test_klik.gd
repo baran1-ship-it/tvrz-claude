@@ -17,6 +17,7 @@ func _ready() -> void:
 		if String(dv.druh.get(k, "")) == "dvere": g = k; break
 	hrac.global_position = dv.mista[g] - Vector3(0, 1.0, 0) + Vector3(0.3, 0, 0.3)
 	for i in 30: await get_tree().physics_frame
+	hrac.pohled_na(dv.mista[g])   # zaměřit dveře (zamer.gd: nabídka jen na to, na co hráč míří)
 	await get_tree().create_timer(0.5, true).timeout
 	var b: Button = dv.tlacitko
 	print("KLIK_TEST tlacitko viditelne=", b.visible, " text=", b.text, " blizko=", dv._blizko)

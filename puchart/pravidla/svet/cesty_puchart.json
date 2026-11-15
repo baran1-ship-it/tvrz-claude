@@ -2045,6 +2045,43 @@
      212.77
     ],
     [
+     -2.7,
+     208.6
+    ],
+    [
+     -3.0,
+     204.0
+    ],
+    [
+     -3.2,
+     199.4
+    ],
+    [
+     -3.1,
+     195.0
+    ],
+    [
+     -2.9,
+     191.2
+    ],
+    [
+     -2.9,
+     187.8
+    ]
+   ],
+   "pozn": "přerušeno u toků – mosty/brody další krok",
+   "delka_m": 145,
+   "max_rez_m": 1.5,
+   "max_nasyp_m": 2.1,
+   "max_pricny": 0.061,
+   "pozn_most_9_11": "prodlouženo k mostu most_440_3 (most stál uprostřed 57m mezery – test most_navazuje_na_cestu 9. 11.)",
+   "max_uprava_m": 2.0,
+   "_osa_pred_15_11": [
+    [
+     -2.36,
+     212.77
+    ],
+    [
      -1.6,
      206.0
     ],
@@ -2065,13 +2102,7 @@
      187.8
     ]
    ],
-   "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 145,
-   "max_rez_m": 1.5,
-   "max_nasyp_m": 2.1,
-   "max_pricny": 0.061,
-   "pozn_most_9_11": "prodlouženo k mostu most_440_3 (most stál uprostřed 57m mezery – test most_navazuje_na_cestu 9. 11.)",
-   "max_uprava_m": 2.0
+   "pozn_15_11": "Míša 15. 11. (foto x −27,2 z 206,2 shora): „jedna část cesty je zbytečně přes hrb a do zatáčky, šlo by ji dát trochu níže, kde je rovinka a most“ – úsek z 212,8 → most vedl na východ do svahu (x 0,6–2,4, terén −37…−36,8, o 2,5 m výš) a hákem zpět k mostu; teď rovně po rovince podél potoka (x −2,7…−3,2, terén −39,6…−38,5) k nástupu mostu (DMR build/vysek1m_kor)"
   },
   {
    "id": "udoli_440_4",
@@ -21965,5 +21996,14 @@
    "max_uprava_m": 2.0,
    "podle_terenu": true
   }
- }
+ },
+ "spojky_vynechat": [
+  {
+   "mezi": [
+    "osm_track_0",
+    "udoli_440_2"
+   ],
+   "pozn": "Míša 15. 11. (foto x 63,3 z 362 shora): „jak máme brod k hájovně, tak tam máme asi dva zbytečné“ – spojka 24,8 m šikmo přes potok (konec osm_track_0 u x 99 z 374 → údolní cesta) vedle brodu k hájovně"
+  }
+ ]
 }

@@ -6,6 +6,8 @@ extends Node
 ## (stav t 0..1 plynule, dur s), naviják se točí, řetězy mostu se přepočítají (Havran pohyb._update_lines).
 ## Zavřené křídlo / most má kolizi (AnimatableBody3D jako dítě uzlu – pohybuje se s ním).
 const DOSAH := 2.6
+const Zamer := preload("res://scripts/zamer.gd")
+var bez_zameru := false   # testy klepnutí (test_klik*: hráč postavený u dveří bez natočení kamery)
 var hlavni: Node
 var dily := {}        # skupina -> [{uzel, zaklad: Transform3D (glb), e}]
 var stav := {}        # skupina -> true = průchozí (dveře otevřené, most spuštěný)
@@ -160,10 +162,15 @@ func _process(dt: float) -> void:
 	if tlacitko == null or hlavni.hrac == null: return
 	if Engine.get_process_frames() % 6 != 0: return
 	var p: Vector3 = hlavni.hrac.global_position + Vector3(0, 1.0, 0)
-	var nej := ""; var nd := DOSAH
+	var nej := ""; var nd := 1e9; var cam: Camera3D = hlavni.hrac.get("cam")
 	for g in mista:
 		var dd: float = p.distance_to(mista[g])
-		if dd < nd: nd = dd; nej = g
+		if dd >= DOSAH: continue
+		var sc := dd
+		if cam != null and not bez_zameru:   # jen dveře, na které hráč míří a které vidí (zamer.gd, Míša 15. 11.)
+			sc = Zamer.skore(cam, mista[g], DOSAH + 1.0)
+			if sc < 0.0: continue
+		if sc < nd: nd = sc; nej = g
 	_blizko = nej
 	tlacitko.visible = nej != ""
 	if nej != "": tlacitko.text = popis(nej)

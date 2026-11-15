@@ -650,7 +650,7 @@ func _mista() -> void:
 	var dt: Dictionary = md.get("daleko_textury", {}); var dt_cache := {}; var jas_cache := {}
 	for s: Dictionary in d["stavby"]:
 		if s.has("soubor"):   # celá stavba z Disku (krčma, hájovna – Míša 14. 11.): vlastní glb, posun počátku, LOD1, vnitřek zblízka
-			_celek(uzel, s, float(lod["vnitrek_do_m"]), obal_do, dt.get("jas", {}))
+			_celek(uzel, s, float(lod["vnitrek_do_m"]), obal_do, dt.get("jas", {}), float(md.get("jas_podrobny", 1.0)))
 			continue
 		var vzor := sc.get_node_or_null(String(s["model"])) as Node3D
 		if vzor == null: continue
@@ -660,6 +660,11 @@ func _mista() -> void:
 		uzel.add_child(dum)
 		_rampy_dveri(dum)
 		_ztlum(dum, float(md.get("jas_podrobny", 1.0)), jas_cache)   # Míša 14. 11.: „domy… až moc vypadají bílé“
+		var zbd: Array = (md.get("zebriky", {}) as Dictionary).get(String(s["model"]), [])
+		if zbd.size() == 4:   # žebřík na půdu v síni (Havran DUM_ZEBRIK; Míša 15. 11.: „chci všechny žebříky ve hře funkční“)
+			var zw := {"nazev": "Žebřík %s" % dum.name}
+			for k_ in 4: zw[["pata", "vrchol", "nastup", "sestup"][k_]] = dum.transform * Vector3(float(zbd[k_][0]), float(zbd[k_][1]), float(zbd[k_][2]))
+			zebriky.append(zw)
 		var st_vzor: MeshInstance3D = ssc.find_child(String(s["model"]) + "_Stredni", true, false) as MeshInstance3D if ssc else null
 		var se_st := st_vzor != null and blizko < st_do
 		if se_st:
@@ -757,7 +762,7 @@ static func Ztmav_daleko(koren: Node, jas: Dictionary) -> void:
 
 ## Celek (mista_rozmisteni CELKY): model postavený na střed půdorysu s posunem počátku posun_x podél osy x modelu; podrobný model
 ## do lod1_od_m, dál LOD1 (návod modelu), vnitřní skupina jen do vnitrek_do_m (návod: „Interier_skupina jde zvenku vypnout“).
-func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas: Dictionary) -> void:
+func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas: Dictionary, jas_celku := 1.0) -> void:
 	if not ResourceLoader.exists(String(s["soubor"])): return
 	var n: Node3D = (load(String(s["soubor"])) as PackedScene).instantiate()
 	n.name = "%s_%s_%d" % [s["misto"], s["model"], uzel.get_child_count()]   # skupina dveří dvere.gd = dveře@instance
@@ -780,13 +785,22 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas:
 		if dv == null: continue
 		var ab := dv.get_aabb(); var c := dv.position + ab.position + ab.size * 0.5   # střed křídla v souřadnicích modelu
 		var ven := Vector3(float(r["ven"][0]), 0, float(r["ven"][1])); var bok := Vector3(ven.z, 0, -ven.x)
-		var p0 := Vector3(c.x, -0.02, c.z) + ven * 2.4; var p1 := Vector3(c.x, float(s.get("podlaha_m", 0.45)) + 0.02, c.z) - ven * 0.25
+		var p0 := Vector3(c.x, -0.02, c.z) + ven * 2.4; var p1 := Vector3(c.x, float(s.get("podlaha_m", 0.45)) - 0.02, c.z) - ven * 0.5   # konec pod podlahou (Míša 15. 11.: „z hospody už dveřmi nevylezu“ – horní hrana rampy 4 cm nad podlahou zachytila postavu zevnitř)
 		var cs := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(1.0, 0.12, (p1 - p0).length()); cs.shape = bx
 		var dz := (p1 - p0).normalized(); cs.transform = Transform3D(Basis(bok, dz.cross(bok).normalized(), dz).orthonormalized(), (p0 + p1) * 0.5 - dz.cross(bok).normalized() * 0.06)
 		kb.add_child(cs)
 	if kb.get_child_count() > 0: n.add_child(kb)
 	else: kb.free()
 	_schody_dveri(n, s)
+	if jas_celku < 0.999:   # vnějšek celku tlumený jako domy (Míša 15. 11. foto krčmy: kamenná stáj skoro bílá)
+		for g in n.find_children("*", "MeshInstance3D", true, false):
+			var mi := g as MeshInstance3D
+			if mi.mesh == null or String(mi.name).contains("Interier"): continue
+			for i in mi.mesh.get_surface_count():
+				var mt := mi.mesh.surface_get_material(i) as BaseMaterial3D
+				if mt == null: continue
+				var m2 := mt.duplicate() as BaseMaterial3D; m2.albedo_color = mt.albedo_color * Color(jas_celku, jas_celku, jas_celku)
+				mi.set_surface_override_material(i, m2)
 	if s.get("puda") != null: _puda(n, s["puda"])
 	if s.get("najezdy") != null: _puda(n, {"najezdy": s["najezdy"]})   # jen nájezdy (schody na pavlač krčmy)
 	if s.get("zebrik") != null:   # žebřík na půdu (Míša 14. 11.): body modelu → svět
@@ -853,8 +867,8 @@ func _rampy_dveri(dum: Node3D) -> void:
 		if absf(mi.position.x) < xmax - 0.05: continue   # vnitřní dveře
 		var sg := signf(mi.position.x); var ab := mi.get_aabb()
 		var zc := mi.position.z + ab.position.z + ab.size.z * 0.5
-		var x0 := mi.position.x + sg * 2.8; var x1 := mi.position.x - sg * 0.25   # venku na terénu → za prahem na podlaze (nad hranou stupně 1,05 m před stěnou je rampa 0,17 m – nad stupněm 0,15)
-		var y0 := -0.02; var y1 := 0.32
+		var x0 := mi.position.x + sg * 2.8; var x1 := mi.position.x - sg * 0.5   # konec 0,5 m za prahem pod podlahou (Míša 15. 11.: z hospody nešlo vyjít – hrana rampy nad podlahou)   # venku na terénu → za prahem na podlaze (nad hranou stupně 1,05 m před stěnou je rampa 0,17 m – nad stupněm 0,15)
+		var y0 := -0.02; var y1 := 0.28
 		var L := Vector2(x1 - x0, y1 - y0).length(); var uh := atan2(y1 - y0, absf(x1 - x0))
 		var cs := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(L, 0.12, 0.9); cs.shape = bx
 		cs.position = Vector3((x0 + x1) * 0.5, (y0 + y1) * 0.5 - 0.06, zc)
@@ -910,10 +924,13 @@ func _kameny_koryta() -> void:
 	var tex: Texture2D = load("res://modely/hrady/skaly_droba_Diffuse.jpg") if ResourceLoader.exists("res://modely/hrady/skaly_droba_Diffuse.jpg") else null
 	var tn: Texture2D = load("res://modely/hrady/skaly_droba_nor_gl.jpg") if ResourceLoader.exists("res://modely/hrady/skaly_droba_nor_gl.jpg") else null
 	var mats := []
+	var _kam_jas: Array = [1.05, 0.9]
+	if FileAccess.file_exists("res://data/voda_hra.json"):
+		_kam_jas = (JSON.parse_string(FileAccess.get_file_as_string("res://data/voda_hra.json")) as Dictionary).get("vzhled_13_11", {}).get("kameny_jas", _kam_jas)
 	for v in 2:
 		var m := ShaderMaterial.new(); m.shader = load("res://shaders/skala.gdshader")
 		m.set_shader_parameter("tex_a", tex); m.set_shader_parameter("tex_n", tn); m.set_shader_parameter("meritko", 1.0 / 1.5)
-		m.set_shader_parameter("mech", 1.0 if v == 1 else -3.0); m.set_shader_parameter("jas", 1.75 if v == 0 else 1.25)   # omletá droba světle šedá (fotky potok_01–02)
+		m.set_shader_parameter("mech", 1.0 if v == 1 else -3.0); m.set_shader_parameter("jas", float(_kam_jas[v]))   # voda_hra.json vzhled_13_11.kameny_jas (Míša 15. 11.: „i některé kameny“ bílé)
 		mats.append(m)
 	var bm := float(d["bunka_m"]); var skup := {}
 	var raw := FileAccess.get_file_as_bytes("res://data/koryto_kameny.bin").to_float32_array()

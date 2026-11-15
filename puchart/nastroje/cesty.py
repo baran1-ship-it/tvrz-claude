@@ -101,6 +101,7 @@ for i, c in enumerate(C["cesty"]):
         if min(np.hypot(m_["u_bodu"][0] - mid[0], m_["u_bodu"][1] - mid[1]) for m_ in _VH.get("mosty", [])) < 15: continue
         if any(np.hypot(*(np.array(sp["osa"][0]) - best[2])) < 3 and np.hypot(*(np.array(sp["osa"][1]) - p_)) < 3 for sp in SPOJKY): continue   # opačný směr už je
         if any(sp["id"] == "spojka_%s_%s" % (c["id"], C["cesty"][best[1]]["id"]) for sp in SPOJKY): continue   # jedna spojka na dvojici cest
+        if any({c["id"], C["cesty"][best[1]]["id"]} == set(v_["mezi"]) for v_ in C.get("spojky_vynechat", [])): continue   # zbytečný brod (Míša 15. 11.)
         typ = min((c["typ"], C["cesty"][best[1]]["typ"]), key=lambda t_: PORADI_.get(t_, 0))
         brod = float(np.hypot(_tok[:, 0] - mid[0], _tok[:, 1] - mid[1]).min()) < 8.0
         SPOJKY.append({"id": "spojka_%s_%s" % (c["id"], C["cesty"][best[1]]["id"]), "typ": typ, "osa": [p_.tolist(), best[2].tolist()],

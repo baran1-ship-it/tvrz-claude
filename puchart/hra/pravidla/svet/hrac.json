@@ -225,5 +225,13 @@
   "u_vrcholu": 0.4,
   "nad_vrcholu_m": 0.6,
   "zdroj": "Havran větev claude/new-session-0dtk58: scripts/player.gd (LEZENI 1,1 m/s, 0,32 m, 0,15 m, 0,96, 0,6), scripts/svet.gd zebrik_use (r 2,2 m, +1,0 / +0,6 m, 0,5 / 0,4)"
+ },
+ "zamer": {
+  "popis": "zaměření interakcí (hra/scripts/zamer.gd; Míša 15. 11.: „vše, co je interaktivní, na to musí být umístěn kurzor“; „nemůžu lézt po žebříku, který je uvnitř, zvenku“): nabídne se jen cíl, na který míří střed obrazovky, a jen když na něj hráč vidí (paprsek z očí k cíli nenarazí dřív než tolerance_m před ním)",
+  "zdroj": "Havran scripts/life.gd usable: fwd · směr ≥ 0,6 (≈ 53°), skóre = kolmá vzdálenost od paprsku + 0,15 × vzdálenost; tečka uprostřed obrazovky (KCD)",
+  "min_cos": 0.6,
+  "bez_miru_m": 0.7,
+  "tolerance_m": 0.45,
+  "vaha_vzdalenosti": 0.15
  }
 }

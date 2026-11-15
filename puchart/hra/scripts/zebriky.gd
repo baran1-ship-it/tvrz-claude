@@ -5,6 +5,7 @@ extends Node
 ## hlavni.gd _celek je převede do světa do hlavni.zebriky – jiná stavba se žebříkem = jen záznam v datech.
 ## Tlačítko ve stylu dveří (dvere.gd, svitek Styl), nad tlačítkem dveří, aby se nepřekrývala.
 const Pravidla := preload("res://scripts/pravidla.gd")
+const Zamer := preload("res://scripts/zamer.gd")
 var hlavni: Node
 var tlacitko: Button
 var _blizko: Dictionary = {}   # {zb, nahore, d} nejbližší místo použití do dosahu, prázdné = nic
@@ -29,14 +30,21 @@ static func mista_pouziti(zb: Dictionary) -> Array:
 
 ## Nejbližší místo použití do dosah_m od hráče (nohy + 1 m): {zb, nahore, d} nebo {}. Jen ze stejného patra – nohy do patro_m
 ## (hrac.json volne_misto) od podlahy nástupu / sestupu (v komoře pod povalou nesmí nabídnout „Slézt dolů“).
-static func nejblizsi(zebriky: Array, nohy: Vector3) -> Dictionary:
-	var nd := float(Pravidla.cti("hrac", "lezeni", "dosah_m")); var out := {}
+## S kamerou (hra) jen místo, na které hráč míří a které vidí (zamer.gd – Míša 15. 11.: „nemůžu lézt po žebříku, který je
+## uvnitř, zvenku“, „na interaktivní věc musí být umístěn kurzor“); vybere se nejmenší skóre zaměření.
+static func nejblizsi(zebriky: Array, nohy: Vector3, cam: Camera3D = null) -> Dictionary:
+	var dosah := float(Pravidla.cti("hrac", "lezeni", "dosah_m")); var out := {}; var best := 1e9
 	var patro := float(Pravidla.cti("hrac", "volne_misto", "patro_m")); var p := nohy + Vector3(0, 1.0, 0)
 	for zb: Dictionary in zebriky:
 		for m: Dictionary in mista_pouziti(zb):
 			if absf(nohy.y - float((zb["sestup"] if m["nahore"] else zb["nastup"]).y)) > patro: continue
 			var d := p.distance_to(m["pos"])
-			if d < nd: nd = d; out = {"zb": zb, "nahore": m["nahore"], "d": d}
+			if d >= dosah: continue
+			var sc := d
+			if cam != null:
+				sc = Zamer.skore(cam, m["pos"], dosah + 1.0)
+				if sc < 0.0: continue
+			if sc < best: best = sc; out = {"zb": zb, "nahore": m["nahore"], "d": d}
 	return out
 
 func pouzij() -> void:
@@ -49,6 +57,6 @@ func _process(_dt: float) -> void:
 	if tlacitko == null or hlavni.hrac == null: return
 	if Engine.get_process_frames() % 6 != 0: return
 	var h: CharacterBody3D = hlavni.hrac
-	_blizko = {} if (h.leze or h.leti) else nejblizsi(hlavni.zebriky, h.global_position)
+	_blizko = {} if (h.leze or h.leti) else nejblizsi(hlavni.zebriky, h.global_position, h.cam)
 	tlacitko.visible = not _blizko.is_empty()
 	if tlacitko.visible: tlacitko.text = "Slézt dolů" if bool(_blizko["nahore"]) else "Lézt nahoru"

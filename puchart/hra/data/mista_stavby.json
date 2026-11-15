@@ -243,7 +243,7 @@
   {
    "stavba": "KrcmaL",
    "misto": "krcma",
-   "y": -35.254,
+   "y": -35.253,
    "body": []
   },
   {
@@ -302,7 +302,77 @@
     "jas_pozn": "násobek barvy textury [R, G, B] hrubých stupňů (obal nemá normálovou mapu – bez ztmavení byl šindel skoro bílý, snímek 14. 11. d2_srov); Míša 14. 11.: „jsou šedé, nemohly by být hnědé? míň to razí“ → teplý hnědý tón jako ztmavlé dřevo (KCD: střechy a roubení z dálky hnědé)"
    },
    "jas_podrobny": 0.8,
-   "jas_podrobny_pozn": "Míša 14. 11. (foto x −65 z −141, Dum1): „domy jsou hezké světlé, ale až moc vypadají bílé“ – textury domů Havrana jsou při převodu zesvětlené na průměrný jas 0,5 (nastroje/havran/stavby_export.gd JAS_CIL, KCD1 ves_2); ve hře násobek barvy podrobného modelu (vnějšek, ne vnitřek) – ~0,4 jako hospodářské stavby (JAS_PREDMETY 0,42); hrubé stupně mají vlastní daleko_textury.jas"
+   "jas_podrobny_pozn": "Míša 14. 11. (foto x −65 z −141, Dum1): „domy jsou hezké světlé, ale až moc vypadají bílé“ – textury domů Havrana jsou při převodu zesvětlené na průměrný jas 0,5 (nastroje/havran/stavby_export.gd JAS_CIL, KCD1 ves_2); ve hře násobek barvy podrobného modelu (vnějšek, ne vnitřek) – ~0,4 jako hospodářské stavby (JAS_PREDMETY 0,42); hrubé stupně mají vlastní daleko_textury.jas",
+   "zebriky": {
+    "popis": "žebřík na půdu v síni domů z Havrana [pata, vrchol, nástup, sestup] v souřadnicích modelu (hlavni.gd _mista → zebriky.gd)",
+    "zdroj": "Havran scripts/svet.gd DUM_ZEBRIK (lezení 0.76, Míša: „žebříky v domech, na půdy“); Míša 15. 11. (foto x −56 z −145,3): „chci všechny žebříky ve hře, aby byly funkční“",
+    "Dum1": [
+     [
+      1.72,
+      0.3,
+      0.27
+     ],
+     [
+      0.62,
+      2.84,
+      0.27
+     ],
+     [
+      2.35,
+      0.3,
+      0.27
+     ],
+     [
+      -1.0,
+      2.64,
+      0.25
+     ]
+    ],
+    "Dum2": [
+     [
+      1.72,
+      0.25,
+      0.47
+     ],
+     [
+      0.62,
+      2.79,
+      0.47
+     ],
+     [
+      2.35,
+      0.25,
+      0.47
+     ],
+     [
+      -1.0,
+      2.59,
+      0.35
+     ]
+    ],
+    "Rychta": [
+     [
+      2.24,
+      0.3,
+      -0.98
+     ],
+     [
+      0.95,
+      2.84,
+      -0.98
+     ],
+     [
+      2.8,
+      0.3,
+      -0.98
+     ],
+     [
+      -0.8,
+      2.64,
+      -1.03
+     ]
+    ]
+   }
   },
   "mlyn": {
    "soubor": "res://modely/stavby_h/mlyn.glb",
@@ -494,7 +564,7 @@
     "lod1": "res://modely/stavby_h/krcma_rada_lod1.glb",
     "aabb": [
      -8.59,
-     23.91,
+     23.31,
      -5.1,
      5.9
     ],
@@ -540,7 +610,7 @@
      ],
      "otoceni_deg": -90.0,
      "posun": [
-      11.8,
+      11.2,
       -13.85
      ],
      "smazat": [
@@ -559,7 +629,7 @@
       5.6
      ],
      "dvur_za_domem_z": 4.6,
-     "posun_pozn": "nové křídlo (obal x 8,79…18,93, z −12,11…1,84) otočené o −90° a posunuté: x 9,96…23,91 (za vraty do dvora x 7,32…9,77), z −5,06…5,08 (souměrně s domem)"
+     "posun_pozn": "nové křídlo (obal x 8,79…18,93, z −12,11…1,84) otočené o −90° a posunuté: x 9,96…23,91 (za vraty do dvora x 7,32…9,77), z −5,06…5,08 (souměrně s domem); Míša 15. 11. (foto x −84,9 z 105,3): „nelíbí se mi, že mezi stříškou a stájí je mezera“ – zeď stáje byla 0,63 m od sloupu vrat (x 9,97) → křídlo o 0,6 m blíž (posun x 11,2)"
     },
     "rampy": [
      {
@@ -577,7 +647,7 @@
       ]
      }
     ],
-    "podlaha_m": 0.45,
+    "podlaha_m": 0.43,
     "stromy": {
      "druh": "jablon",
      "pocet": 2,
@@ -612,32 +682,32 @@
     "trasy": {
      "pavlac": [
       [
-       25.2,
+       24.6,
        0.0,
        -4.55
       ],
       [
-       23.6,
+       23.0,
        0.1,
        -4.55
       ],
       [
-       19.45,
+       18.85,
        2.85,
        -4.55
       ],
       [
-       19.45,
+       18.85,
        2.85,
        -2.95
       ],
       [
-       19.62,
+       19.02,
        2.85,
        -1.9
       ],
       [
-       20.8,
+       20.2,
        2.85,
        -0.35
       ]
@@ -647,19 +717,82 @@
     "najezdy": [
      {
       "od": [
-       23.88,
+       23.28,
        -0.05,
        -4.55
       ],
       "do": [
-       20.05,
+       19.45,
        2.9,
        -4.55
       ],
       "sirka_m": 0.9
      }
     ],
-    "najezdy_pozn": "nové křídlo (14. 11. noc): podesta schodů na pavlač je v modelu tenká deska (Kol_Podesta y 2,77–2,85, x' 18,95–19,95), která visí nad horním koncem šikmé kolize schodů (Kol_Schody 31°, výšky 2,85 dosáhne až na x' 18,97) – postava do hrany desky narazila (test pavlac_ uvízl ve výšce 2,2–2,7 m); nájezd od paty schodů na vrch podesty před její hranou (≈38°, postava zvládne 50°), souřadnice upraveného modelu"
+    "najezdy_pozn": "nové křídlo (14. 11. noc): podesta schodů na pavlač je v modelu tenká deska (Kol_Podesta y 2,77–2,85, x' 18,95–19,95), která visí nad horním koncem šikmé kolize schodů (Kol_Schody 31°, výšky 2,85 dosáhne až na x' 18,97) – postava do hrany desky narazila (test pavlac_ uvízl ve výšce 2,2–2,7 m); nájezd od paty schodů na vrch podesty před její hranou (≈38°, postava zvládne 50°), souřadnice upraveného modelu",
+    "zebrik": {
+     "nazev": "Žebřík krčma",
+     "pata": [
+      1.54,
+      0.45,
+      -1.17
+     ],
+     "vrchol": [
+      1.54,
+      3.16,
+      0.15
+     ],
+     "nastup": [
+      1.54,
+      0.43,
+      -1.95
+     ],
+     "sestup": [
+      1.54,
+      2.96,
+      1.05
+     ],
+     "zdroj": "Míša 15. 11.: „chci všechny žebříky ve hře, aby byly funkční“; model krčmy (NAVOD_KRCMA_L: černá kuchyně – žebřík na půdu): štěřiny x 1,27–1,81, pata z −1,17 y 0,44, vrch z 0,22 y 3,36 (KrcmaL_Interier_Dum); vrchol a sestup jako u hájovny (sestup 0,9 m za vrcholem na povale)"
+    },
+    "puda": {
+     "popis": "kolize povaly krčmy s otvorem nad žebříkem (jako hájovna; hlavni.gd _puda): Kol_Strop (y 2,90–2,96 přes celý dům) nahrazen kvádry kolem otvoru x 1,0–2,1, z −0,7–0,6; příčka síň/kuchyně (Kol_PricK16/17, PricKN18) oříznuta na vrch povaly",
+     "strop_smazat": "KrcmaL_Kol_Strop",
+     "strop_y": [
+      2.9,
+      2.96
+     ],
+     "strop_kvadry": [
+      [
+       -8.0,
+       1.0,
+       -4.0,
+       4.0
+      ],
+      [
+       2.1,
+       7.0,
+       -4.0,
+       4.0
+      ],
+      [
+       1.0,
+       2.1,
+       -4.0,
+       -0.7
+      ],
+      [
+       1.0,
+       2.1,
+       0.6,
+       4.0
+      ]
+     ],
+     "oriznout": [
+      "KrcmaL_Kol_PricK16",
+      "KrcmaL_Kol_PricK17",
+      "KrcmaL_Kol_PricKN18"
+     ]
+    }
    },
    "Hajovna": {
     "soubor": "res://modely/stavby_h/hajovna.glb",
@@ -699,7 +832,7 @@
       ]
      }
     ],
-    "podlaha_m": 0.45,
+    "podlaha_m": 0.43,
     "stromy": {
      "druh": "jablon",
      "pocet": 2,
@@ -857,7 +990,8 @@
    "pozn_rampy": "podlaha domu +0,45 m (návody modelů) – postava nemá krok nahoru: šikmá kolize z terénu 2,4 m před prahem na podlahu 0,25 m za ním u vnějších dveří (jako hlavni.gd _rampy_dveri u domů vsi); test dum_<místo>_<model>",
    "pozn_stromy": "Míša 14. 11.: „jedna stará jabloň nebo více může být u hájovny a jedna nebo více u hospody“ – mista = kandidáti [x, z] v souřadnicích modelu (jako aabb), použije se prvních pocet, které jsou ≥ od_cesty_m od cesty a ≥ od_toku_m od toku a mimo půdorys; vždy stará jabloň (varianta jablon_1–3)",
    "pozn_dum_aabb": "Míša 14. 11. (foto x 149 z 314 u vchodu hájovny): „tráva ve vstupu a chybí cesta k hlavní cestě“ – půdorys stavby (bez porostu, bez hlíny) byl celý obal modelu včetně dvorku až k plotu, takže dvorek nebyl vyšlapaný; dum_aabb = jen dům s přístřeškem a kůlnou pod střechou (NAVOD_HAJOVNA: jizba x −4,5…0,6, síň …4,5, přístřešek na západě po sloupy −6,8, kůlna za domem po z −5,6) – zbytek obalu je dvorek z udusané hlíny; cesta_k_ceste = cestička z příchodu k nejbližší vozové / hřebenové cestě (k_ulici jako od vrat usedlostí)",
-   "pozn_schod": "Míša 14. 11. (foto x 155 z 311,5, hájovna): „udělej schod do domu, jsou tam výš dveře“ – před vnějšími dveřmi (rampy) kamenné stupně po vyska_m až k prahu (podlaha_m), kámen z podezdívky modelu; nájezdová kolize zůstává (hráč nemá krok nahoru), stupně jsou vidět (Havran domy: kamenný stupeň 0,15 m před prahem)"
+   "pozn_schod": "Míša 14. 11. (foto x 155 z 311,5, hájovna): „udělej schod do domu, jsou tam výš dveře“ – před vnějšími dveřmi (rampy) kamenné stupně po vyska_m až k prahu (podlaha_m), kámen z podezdívky modelu; nájezdová kolize zůstává (hráč nemá krok nahoru), stupně jsou vidět (Havran domy: kamenný stupeň 0,15 m před prahem)",
+   "pozn_ven": "Míša 15. 11.: „když vlezu do hospody, tak už dveřmi ani jedněmi nevylezu“ – horní konec nájezdu (rampy) byl 4 cm nad podlahou a 0,25 m za prahem, postava se o hranu zevnitř zachytila; konec nájezdu teď 0,5 m za prahem pod podlahou (hlavni.gd _celek). Test: mista_rozmisteni.py pro každý celek i trasu ven_<misto>_<model> (z domu přes práh ven) – pruchody_mista.json"
   }
  },
  "stavby": [
@@ -957,12 +1091,12 @@
    "x": -84.0,
    "z": 95.27,
    "yaw": -0.4525,
-   "y": -35.254,
-   "teren_y": -35.254,
-   "prevyseni": 1.49,
+   "y": -35.253,
+   "teren_y": -35.253,
+   "prevyseni": 1.44,
    "soubor": "res://modely/stavby_h/krcma_rada.glb",
    "lod1": "res://modely/stavby_h/krcma_rada_lod1.glb",
-   "posun_x": -7.66,
+   "posun_x": -7.36,
    "vnitrek": [
     "KrcmaL_Interier_skupina"
    ],
@@ -983,7 +1117,7 @@
      ]
     }
    ],
-   "podlaha_m": 0.45,
+   "podlaha_m": 0.43,
    "schod_material": "KrcmaL_Podezdivka",
    "schod": {
     "vyska_m": 0.15,
@@ -991,22 +1125,85 @@
     "sirka_m": 1.4
    },
    "prichod": [
-    -93.36,
-    98.5
+    -93.1,
+    98.63
    ],
    "pohled": [
-    -92.0,
-    95.68
+    -91.73,
+    95.81
    ],
+   "zebrik": {
+    "nazev": "Žebřík krčma",
+    "pata": [
+     1.54,
+     0.45,
+     -1.17
+    ],
+    "vrchol": [
+     1.54,
+     3.16,
+     0.15
+    ],
+    "nastup": [
+     1.54,
+     0.43,
+     -1.95
+    ],
+    "sestup": [
+     1.54,
+     2.96,
+     1.05
+    ],
+    "zdroj": "Míša 15. 11.: „chci všechny žebříky ve hře, aby byly funkční“; model krčmy (NAVOD_KRCMA_L: černá kuchyně – žebřík na půdu): štěřiny x 1,27–1,81, pata z −1,17 y 0,44, vrch z 0,22 y 3,36 (KrcmaL_Interier_Dum); vrchol a sestup jako u hájovny (sestup 0,9 m za vrcholem na povale)"
+   },
+   "puda": {
+    "popis": "kolize povaly krčmy s otvorem nad žebříkem (jako hájovna; hlavni.gd _puda): Kol_Strop (y 2,90–2,96 přes celý dům) nahrazen kvádry kolem otvoru x 1,0–2,1, z −0,7–0,6; příčka síň/kuchyně (Kol_PricK16/17, PricKN18) oříznuta na vrch povaly",
+    "strop_smazat": "KrcmaL_Kol_Strop",
+    "strop_y": [
+     2.9,
+     2.96
+    ],
+    "strop_kvadry": [
+     [
+      -8.0,
+      1.0,
+      -4.0,
+      4.0
+     ],
+     [
+      2.1,
+      7.0,
+      -4.0,
+      4.0
+     ],
+     [
+      1.0,
+      2.1,
+      -4.0,
+      -0.7
+     ],
+     [
+      1.0,
+      2.1,
+      0.6,
+      4.0
+     ]
+    ],
+    "oriznout": [
+     "KrcmaL_Kol_PricK16",
+     "KrcmaL_Kol_PricK17",
+     "KrcmaL_Kol_PricKN18"
+    ]
+   },
    "najezdy": [
     {
      "od": [
-      23.88,
+      23.28,
       -0.05,
       -4.55
      ],
      "do": [
-      20.05,
+      19.45,
       2.9,
       -4.55
      ],
@@ -1039,7 +1236,7 @@
      ]
     }
    ],
-   "podlaha_m": 0.45,
+   "podlaha_m": 0.43,
    "schod_material": "Hajovna_Podezdivka",
    "schod": {
     "vyska_m": 0.15,
@@ -8405,20 +8602,20 @@
   },
   {
    "druh": "jablon",
-   "x": -103.89,
-   "y": -35.07,
-   "z": 88.93,
-   "yaw": 3.422,
-   "meritko": 1.072,
+   "x": -103.62,
+   "y": -35.104,
+   "z": 89.06,
+   "yaw": 3.855,
+   "meritko": 1.075,
    "stara": true
   },
   {
    "druh": "jablon",
-   "x": -66.13,
-   "y": -35.87,
-   "z": 106.18,
-   "yaw": 3.34,
-   "meritko": 0.988,
+   "x": -65.86,
+   "y": -35.938,
+   "z": 106.31,
+   "yaw": 3.629,
+   "meritko": 0.933,
    "stara": true
   },
   {
@@ -8455,20 +8652,20 @@
    {
     "poly": [
      [
-      -93.76,
-      78.18
+      -93.49,
+      78.31
      ],
      [
-      -64.53,
-      92.39
+      -64.8,
+      92.26
      ],
      [
-      -72.84,
-      109.48
+      -73.11,
+      109.35
      ],
      [
-      -102.07,
-      95.27
+      -101.8,
+      95.4
      ]
     ],
     "hlina": 0.85,
@@ -8477,76 +8674,76 @@
    {
     "poly": [
      [
-      -90.56,
-      96.38
+      -90.29,
+      96.51
      ],
      [
-      -90.4,
-      95.77
+      -90.13,
+      95.91
      ],
      [
-      -90.49,
-      95.15
+      -90.22,
+      95.29
      ],
      [
-      -90.81,
+      -90.53,
+      94.75
+     ],
+     [
+      -91.03,
+      94.37
+     ],
+     [
+      -91.63,
+      94.21
+     ],
+     [
+      -92.25,
+      94.3
+     ],
+     [
+      -92.79,
       94.61
      ],
      [
-      -91.3,
-      94.24
+      -93.17,
+      95.11
      ],
      [
-      -91.91,
-      94.08
+      -94.54,
+      97.93
      ],
      [
-      -92.53,
-      94.17
+      -94.7,
+      98.53
      ],
      [
-      -93.07,
-      94.49
+      -94.61,
+      99.15
      ],
      [
-      -93.44,
-      94.98
-     ],
-     [
-      -94.8,
-      97.8
-     ],
-     [
-      -94.96,
-      98.41
-     ],
-     [
-      -94.87,
-      99.03
-     ],
-     [
-      -94.55,
-      99.57
-     ],
-     [
-      -94.06,
-      99.94
-     ],
-     [
-      -93.45,
-      100.1
-     ],
-     [
-      -92.83,
-      100.01
-     ],
-     [
-      -92.29,
+      -94.3,
       99.69
      ],
      [
-      -91.92,
-      99.2
+      -93.8,
+      100.07
+     ],
+     [
+      -93.2,
+      100.23
+     ],
+     [
+      -92.58,
+      100.14
+     ],
+     [
+      -92.04,
+      99.83
+     ],
+     [
+      -91.66,
+      99.33
      ]
     ],
     "hlina": 0.9,
@@ -11246,52 +11443,52 @@
    {
     "body": [
      [
-      -93.36,
-      98.5
+      -93.1,
+      98.63
      ],
      [
-      -93.71,
-      99.22
+      -93.45,
+      99.35
      ],
      [
-      -94.03,
-      99.89
+      -93.78,
+      100.02
      ],
      [
-      -94.33,
-      100.51
+      -94.09,
+      100.63
      ],
      [
-      -94.6,
-      101.07
+      -94.37,
+      101.18
      ],
      [
-      -94.84,
-      101.58
+      -94.63,
+      101.68
      ],
      [
-      -95.06,
-      102.03
+      -94.87,
+      102.13
      ],
      [
-      -95.25,
-      102.43
+      -95.08,
+      102.52
      ],
      [
-      -95.41,
-      102.78
+      -95.27,
+      102.85
      ],
      [
-      -95.55,
-      103.07
+      -95.43,
+      103.13
      ],
      [
-      -95.66,
-      103.31
+      -95.58,
+      103.35
      ],
      [
-      -95.74,
-      103.5
+      -95.7,
+      103.52
      ],
      [
       -95.79,
@@ -13950,20 +14147,20 @@
   ],
   [
    [
-    -96.52339372635487,
-    83.1775598171959
+    -96.25358666362855,
+    83.30872440427258
    ],
    [
-    -66.75468113888451,
-    97.64938592465667
+    -67.02448820161082,
+    97.51822133757999
    ],
    [
-    -71.82637850584962,
-    108.0819256834076
+    -72.09618556857593,
+    107.95076109633092
    ],
    [
-    -101.59509109331998,
-    93.61009957594683
+    -101.32528403059366,
+    93.74126416302352
    ]
   ],
   [

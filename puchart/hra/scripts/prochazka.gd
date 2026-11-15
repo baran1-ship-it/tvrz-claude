@@ -68,6 +68,11 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 		_obraz_volby = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json"))["obraz_3d"]["volby"]
 	var dv: Node = load("res://scripts/dvere.gd").new(); dv.name = "Dvere"; add_child(dv); dv.zacni(h, self); dvere = dv   # vrata a dveře
 	var zbr: Node = load("res://scripts/zebriky.gd").new(); zbr.name = "Zebriky"; add_child(zbr); zbr.zacni(h, self); zebriky = zbr   # žebříky (hájovna)
+	# tečka uprostřed obrazovky (KCD; Míša 15. 11.: „na interaktivní věc musí být umístěn kurzor“ – zamer.gd míří středem)
+	var tk := ColorRect.new(); tk.name = "Tecka"; tk.color = Color(1, 1, 1, 0.55); tk.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tk.anchor_left = 0.5; tk.anchor_right = 0.5; tk.anchor_top = 0.5; tk.anchor_bottom = 0.5
+	tk.offset_left = -3; tk.offset_right = 3; tk.offset_top = -3; tk.offset_bottom = 3
+	add_child(tk)
 	var ak: Control = load("res://scripts/akce.gd").new(); ak.name = "Akce"; add_child(ak); ak.zacni(self)   # akce předmětů jako Havran (zapálit, otevřít…)
 	var pd: Node = load("res://scripts/pad.gd").new(); pd.name = "Pad"; pd.proch = self; pd.hrac = p; add_child(pd)
 	var vp := get_viewport().get_visible_rect().size

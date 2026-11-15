@@ -8,6 +8,7 @@ render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled;   // Puchart
 uniform sampler2D barva : source_color, filter_linear_mipmap, repeat_enable;
 uniform vec4 tint : source_color = vec4(1.0);
 uniform float prah = 0.5;
+uniform float bez_ovoce = 0.0;   // 1 = jablka namalovaná v kartách listí přebarvit na list (Míša 15. 11.: „jablka na stromech by zblízka měla být jablka, ne listy“ – 3D jablka zůstanou)
 uniform vec3 stred = vec3(0.0, 6.0, 0.0);     // stred koruny v souradnicich modelu
 uniform float vyska = 10.0;                   // vyska modelu (m)
 uniform float sila_vetru = 1.0;
@@ -76,6 +77,11 @@ void fragment() {
 		if (f < bayer4(FRAGCOORD.xy)) discard;
 	}
 	vec4 t = texture(barva, UV);
+	if (bez_ovoce > 0.0) {   // načervenalé až žluté skvrny (ovoce) → zeleň listu se stejným jasem
+		float cerv = smoothstep(0.05, 0.2, t.r - t.g);
+		float j = dot(t.rgb, vec3(0.3, 0.55, 0.15));
+		t.rgb = mix(t.rgb, vec3(j * 0.8, j * 1.1, j * 0.55), clamp(cerv, 0.0, 1.0) * bez_ovoce);
+	}
 	ALBEDO = t.rgb * tint.rgb * v_tint * mix(0.5, 1.0, v_ao);
 	// mipmapy prumeruji alfu ridkych listu pod prah (novy dub: z 15 m holy strom) -> alfa roste s urovni mipmapy
 	vec2 tsz = vec2(textureSize(barva, 0));

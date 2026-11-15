@@ -480,10 +480,12 @@ for s__ in stavby:
     vv_ = vstupy_stavby(s__["model"], s__["x"], s__["z"], s__["yaw"])   # všechny dveře domu (vstup i do dvora)
     for v_ in vv_:
         _TRM["dum_%s_%s_%d" % (s__["misto"], s__["model"], len(_TRM))] = [[round(float(q[0]), 2), round(float(q[1]), 2), None] for q in (v_["c"] + v_["n"] * 2.5, v_["c"] + v_["n"] * 0.8, v_["c"] - v_["n"] * 1.2)]
+        _TRM["ven_%s_%s_%d" % (s__["misto"], s__["model"], len(_TRM))] = [[round(float(q[0]), 2), round(float(q[1]), 2), None] for q in (v_["c"] - v_["n"] * 1.2, v_["c"] + v_["n"] * 0.8, v_["c"] + v_["n"] * 2.5)]
 for s__ in stavby:   # celky (krčma, hájovna): z příchodu přes práh dveří Vchod 1,5 m dovnitř (jméno bez pořadí – stálé pro tabulku chyb)
     if "prichod" not in s__: continue
     pr_ = np.array(s__["prichod"], float); po_ = np.array(s__["pohled"], float); n_ = (pr_ - po_) / (np.linalg.norm(pr_ - po_) or 1.0)
     _TRM["dum_%s_%s" % (s__["misto"], s__["model"])] = [[round(float(q[0]), 2), round(float(q[1]), 2), None] for q in (pr_, po_ + n_ * 0.8, po_ - n_ * 1.5)]
+    _TRM["ven_%s_%s" % (s__["misto"], s__["model"])] = [[round(float(q[0]), 2), round(float(q[1]), 2), None] for q in (po_ - n_ * 1.5, po_ + n_ * 0.8, pr_)]   # z domu ven (Míša 15. 11.: z hospody nešlo vyjít)
 for s__ in stavby:   # půda celku (Míša 14. 11.: „na půdě je trám a hráč ho nepřekročí“): trasa puda.trasa [x, y, z] modelu → svět
     for jm_, tq_ in (CELKY.get(s__["model"], {}).get("trasy") or {}).items():   # další trasy celku (pavlač krčmy) – stejný převod
         co_, si_ = math.cos(s__["yaw"]), math.sin(s__["yaw"]); px_ = s__.get("posun_x", 0.0)
