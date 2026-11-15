@@ -15,7 +15,7 @@ var _blizko: Dictionary = {}   # {m: místo, d} zaměřené místo k sezení do 
 ## kolize (BoxShape3D / ConvexPolygonShape3D, v souřadnicích tvaru), delší vodorovná osa = podél lavice, 1–mist_max míst
 ## po rozestup_m, výška = horní plocha, čelem po normále delší strany ke středu stavby (počátek instance) – zády ke stěně.
 ## Místo: {pos (sed na horní ploše), yaw, vstat (podlaha před lavicí), lavice (jméno), rid (kolize lavice – zaměření ji přeskočí)}.
-static func mista(n: Node3D, vzor: String) -> Array:
+static func mista(n: Node3D, vzor: String, stred: Variant = null) -> Array:   # stred: k čemu sedí čelem (stůl venku), jinak střed stavby
 	var sz: Dictionary = Pravidla.cti("hrac", "sezeni")
 	var out: Array = []
 	for sb in n.find_children(vzor, "StaticBody3D", true, false):
@@ -35,13 +35,13 @@ static func mista(n: Node3D, vzor: String) -> Array:
 			var delka := maxf(ab.size.x, ab.size.z)
 			var u := (gt.basis * podel).normalized()
 			var nrm := (gt.basis * Vector3(podel.z, 0, podel.x)); nrm.y = 0.0; nrm = nrm.normalized()
-			var stred := gt * c
-			var k_stredu := n.global_position - stred; k_stredu.y = 0.0
+			var stred_l := gt * c
+			var k_stredu: Vector3 = (stred as Vector3 if stred != null else n.global_position) - stred_l; k_stredu.y = 0.0
 			if nrm.dot(k_stredu) < 0.0: nrm = -nrm
 			var vrch := (gt * Vector3(c.x, ab.end.y, c.z)).y; var spod := (gt * Vector3(c.x, ab.position.y, c.z)).y
 			var pocet := clampi(int(floor((delka - 2.0 * float(sz["okraj_m"])) / float(sz["rozestup_m"]))) + 1, 1, int(sz["mist_max"]))
 			for i in pocet:
-				var p := stred + u * ((i - (pocet - 1) * 0.5) * float(sz["rozestup_m"]))
+				var p := stred_l + u * ((i - (pocet - 1) * 0.5) * float(sz["rozestup_m"]))
 				out.append({"pos": Vector3(p.x, vrch, p.z), "yaw": atan2(-nrm.x, -nrm.z), "vstat": Vector3(p.x, spod, p.z) + nrm * float(sz["vstat_m"]),
 					"lavice": "%s/%s" % [n.name, sb.name], "rid": (sb as StaticBody3D).get_rid(), "oci": float(sz["oci_nad_sedu_m"])})
 	return out

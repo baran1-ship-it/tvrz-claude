@@ -1,0 +1,41 @@
+{
+ "popis": "Přepínač vykreslování Compatibility (OpenGL ES 3) ↔ Vulkan (Mobile) v jedné testovací APK bez nového exportu (Míša 15. 11.: „Vulkan chci vyzkoušet“, její jiné hry na tabletu běží ve Vulkanu). Volbu zapisuje hra do user://override.cfg, který Godot čte při startu PŘED vytvořením rendereru (project.godot application/config/project_settings_override). Změna platí po restartu hry. Čte hra/scripts/vykreslovani.gd (autoload Vykreslovani), menu.gd (Nastavení → Vykreslování), diag.gd (panel), mereni.gd (výsledek).",
+ "zdroj": "Godot 4.7.2-stable zdroják: core/config/project_settings.cpp ProjectSettings::setup() – po _setup() načte soubor z application/config/project_settings_override (_load_settings_text, chybějící soubor tiše přeskočí; vypnuto jen sestavením s disable_overrides=yes, oficiální šablony ho mají zapnuté – SConstruct ř. 1098 OVERRIDE_ENABLED); main/main.cpp Main::setup() – globals->setup (ř. 2107) PŘED čtením rendering/renderer/rendering_method (ř. 2653) a rendering_device/driver (ř. 2664); platform/android/java_godot_lib_jni.cpp getRendererInfo + Godot.kt getNativeRenderer – Android volí Vulkan/GL pohled podle už načteného nastavení; fallback_to_opengl3 (main.cpp ř. 2398, výchozí true) jen když zařízení nesplní Vulkan 1.1 (Godot.kt meetsVulkanRequirements), NE při pádu ovladače. Restart: OS.set_restart_on_exit → Main::cleanup → OS_Android::create_instance → GodotActivity.onNewGodotInstanceRequested → ProcessPhoenix (nový proces); parametry příkazové řádky z intentu exportovaná aktivita ignoruje (GodotActivity.retrieveCommandLineParamsFromLaunchIntent) → přepnutí jen přes override.cfg. Ověřeno v kontejneru 15. 11.: user://override.cfg s renderer/rendering_method.<feature> přepne Godot 4.7.2 z gl_compatibility/opengl3 na mobile/vulkan (lavapipe); bez Vulkanu fallback na gl_compatibility/opengl3. Odkazy: https://github.com/godotengine/godot/blob/4.7.2-stable/core/config/project_settings.cpp , .../main/main.cpp , .../platform/android/java/lib/src/main/java/org/godotengine/godot/Godot.kt , .../GodotActivity.kt , https://docs.godotengine.org/en/stable/classes/class_projectsettings.html#class-projectsettings-property-application-config-project-settings-override , https://docs.godotengine.org/en/stable/tutorials/rendering/renderers.html",
+ "override_soubor": "user://override.cfg",
+ "pozn_override_soubor": "musí se shodovat s project.godot application/config/project_settings_override (Godot čte cestu z project.godot, ne odsud)",
+ "stav_soubor": "user://vykreslovani.cfg",
+ "volby": [
+  {"id": "compatibility", "nazev": "Compatibility (OpenGL)", "kratce": "GL Compatibility", "metoda": "gl_compatibility", "ovladac": "opengl3", "override": {}},
+  {"id": "vulkan", "nazev": "Vulkan (Mobile) – zkušební", "kratce": "Vulkan Mobile", "metoda": "mobile", "ovladac": "vulkan",
+   "override": {
+    "rendering/renderer/rendering_method": "mobile",
+    "rendering/renderer/rendering_method.mobile": "mobile",
+    "rendering/rendering_device/driver": "vulkan",
+    "rendering/rendering_device/driver.android": "vulkan",
+    "rendering/rendering_device/fallback_to_opengl3": true
+   },
+   "pozn": "rendering_method i .mobile: na Androidu platí klíč s příznakem .mobile (project.godot ho má = gl_compatibility), na PC holý klíč – stejný soubor přepne obojí (zkouška v kontejneru)"}
+ ],
+ "vychozi": "compatibility",
+ "pojistka": {
+  "pady_max": 2,
+  "potvrzeni_s": 60,
+  "popis": "Havran (Godot 4.4) ve Vulkanu padal při vstupu do hry, ne při startu. Každý start ve Vulkanu zvýší čítač nedokončených startů (stav_soubor vulkan/nedokoncene); po potvrzeni_s sekundách běžící hry (strom bez pauzy – hra nebo měření) nebo po návratu ze hry do nabídky se čítač nuluje. Čisté ukončení a odchod do pozadí start nepočítá (čítač zpět, při návratu z pozadí znovu). Když čítač dosáhne pady_max, override.cfg se smaže hned při startu (běžící Vulkan už je načtený) – další pád tedy naběhne v Compatibility i kdyby Vulkan padal dřív, než se spustí skript; obnoví se jen po potvrzení. Start v Compatibility s volbou Vulkan a čítačem ≥ pady_max = Vulkan spadl → volba zpět na Compatibility, důvod do stav_soubor, hláška v nabídce. Žádný cyklus pádů: nejvýš pady_max pádů za sebou.",
+  "zbytkove_riziko": "Pád ovladače při úplně PRVNÍM startu Vulkanu ještě před skriptem (inicializace rendereru) se zevnitř hry vrátit nedá – override.cfg je načtený dřív než jakýkoli skript. Náprava: adb shell run-as <balík> rm files/override.cfg (APK je debug – export_apk.sh --export-debug), nebo Nastavení Androidu → Aplikace → Vymazat data (smaže i uložené hry a stažená data). Havran padal až při vstupu do hry, takže tento případ je méně pravděpodobný (NEOVERENO na Adrenu 825)."
+ },
+ "texty": {
+  "radek_nastaveni": "Vykreslování: %s",
+  "vysvetleni": [
+   "Compatibility (OpenGL ES 3) je ověřená cesta hry na tabletu. Vulkan (Mobile) je zkušební: jiný ovladač grafiky, jiné stínování a kompilace shaderů – může být plynulejší, nebo spadnout (Havran v Godotu 4.4 ve Vulkanu padal při vstupu do hry, příčina nezjištěna).",
+   "Přepnutí hru restartuje – neuložený postup nejdřív ulož (Nabídka → Uložit).",
+   "Pojistka: když hra ve Vulkanu dvakrát za sebou spadne dřív, než se minutu hraje, sama se vrátí na Compatibility.",
+   "Měření výkonu zapíše, ve kterém vykreslování běželo – změř trasu v Compatibility, přepni na Vulkan a změř znovu."
+  ],
+  "bezi": "Teď běží: %s · %s · %s",
+  "hlaska_pad": "Vulkan spadl (%d× za sebou) – vráceno na Compatibility.",
+  "hlaska_fallback": "Vulkan se na tomto zařízení nespustil (Godot přešel na OpenGL) – vráceno na Compatibility.",
+  "hlaska_bez_override": "Volba Vulkan se při startu nenačetla – běží Compatibility.",
+  "restart": "Restart hry…",
+  "mereni_jine": "— poslední měření v jiném vykreslování (%s) —"
+ }
+}

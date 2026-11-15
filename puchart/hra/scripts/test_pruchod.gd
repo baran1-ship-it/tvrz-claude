@@ -308,8 +308,18 @@ func _test_mapa() -> void:
 ## vystoupit nahoře na podlaze (±0,5 m od sestupu, na zemi); pak nabídka nahoře, dotyk dolů – zpět na podlahu u nástupu.
 func _test_zebriky() -> void:
 	var Z: GDScript = load("res://scripts/zebriky.gd")
-	var spatne: Array = []
+	var spatne: Array = []; var zvenku_n := 0
 	var zbs: Array = hlavni.zebriky
+	# počet (Míša 15. 11.: „chci všechny žebříky ve hře funkční“): každý vložený dům, jehož model má žebřík v mista.json
+	# modely.domy.zebriky, a každý celek se záznamem zebrik musí mít žebřík v hlavni.zebriky
+	var ms: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mista_stavby.json"))
+	var zd: Dictionary = (ms["modely"]["domy"] as Dictionary).get("zebriky", {}); var cekano := 0
+	for st: Dictionary in ms["stavby"]:
+		if st.has("soubor"):
+			if st.get("zebrik") != null and ResourceLoader.exists(String(st["soubor"])): cekano += 1
+		elif (zd.get(String(st["model"]), []) as Array).size() == 4: cekano += 1
+	if zbs.size() != cekano: spatne.append("žebříků ve hře %d, v datech %d" % [zbs.size(), cekano])
+	print("PRUCHOD zebrik počet: ve hře %d, v datech (domy s modelem v modely.domy.zebriky + celky se zebrik) %d" % [zbs.size(), cekano])
 	for zb: Dictionary in zbs:
 		var pod := Vector3((zb["sestup"] as Vector3).x, (zb["nastup"] as Vector3).y, (zb["sestup"] as Vector3).z)   # místnost pod sestupem (komora): ne „Slézt dolů“
 		var up: Dictionary = Z.nejblizsi(zbs, pod)
@@ -317,9 +327,11 @@ func _test_zebriky() -> void:
 		# zvenku přes zeď (Míša 15. 11.: „nemůžu lézt po žebříku, který je uvnitř, zvenku“): hráč za nejbližší vnější stěnou,
 		# dívá se na patu – nabídka nesmí být
 		var pata_pos: Vector3 = Z.mista_pouziti(zb)[0]["pos"]
+		var stena := false   # paprsek musí v některém směru najít stěnu – jinak kontrola neproběhla (CHYBA, ne tiché přeskočení)
 		for sm: Vector3 in [Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1), Vector3(0, 0, -1)]:
 			var q := PhysicsRayQueryParameters3D.create(pata_pos, pata_pos + sm * 3.0); var hh := hrac.get_world_3d().direct_space_state.intersect_ray(q)
 			if hh.is_empty(): continue
+			stena = true; zvenku_n += 1
 			var venku: Vector3 = (hh["position"] as Vector3) + sm * 0.7
 			hlavni.svet.kolize_ihned(venku); hrac.velocity = Vector3.ZERO; hrac.position = Vector3(venku.x, (zb["nastup"] as Vector3).y, venku.z)
 			await get_tree().physics_frame; await get_tree().physics_frame
@@ -327,6 +339,7 @@ func _test_zebriky() -> void:
 			var zv: Dictionary = Z.nejblizsi(zbs, hrac.global_position, hrac.cam)
 			if not zv.is_empty(): spatne.append("%s: zvenku přes stěnu (%.1f m) nabízí žebřík" % [zb["nazev"], (hh["position"] as Vector3).distance_to(pata_pos)])
 			break
+		if not stena: spatne.append("%s: kontrola zvenku přes stěnu – paprsek od paty v žádném směru nenašel stěnu do 3 m" % zb["nazev"])
 		for nahoru: bool in [true, false]:
 			var start: Vector3 = zb["nastup"] if nahoru else zb["sestup"]; var cil: Vector3 = zb["sestup"] if nahoru else zb["nastup"]
 			hlavni.svet.kolize_ihned(start)
@@ -347,6 +360,7 @@ func _test_zebriky() -> void:
 			var ok: bool = not hrac.leze and hrac.is_on_floor() and absf(hrac.position.y - cil.y) < 0.5 and Vector2(hrac.position.x - cil.x, hrac.position.z - cil.z).length() < 1.5
 			print("PRUCHOD zebrik %s: %d snímků, konec [%.2f, %.2f, %.2f], cíl [%.2f, %.2f, %.2f], na zemi %s -> %s" % [jm, n, hrac.position.x, hrac.position.z, hrac.position.y, cil.x, cil.z, cil.y, hrac.is_on_floor(), "OK" if ok else "CHYBA"])
 			if not ok: spatne.append("%s: konec y %.2f místo %.2f (leze %s, na zemi %s)" % [jm, hrac.position.y, cil.y, hrac.leze, hrac.is_on_floor()])
+	print("PRUCHOD zebrik zvenku přes stěnu zkontrolováno %d z %d" % [zvenku_n, zbs.size()])
 	vysledek["zebrik_lezeni"] = "OK" if spatne.is_empty() and not zbs.is_empty() else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádný žebřík v datech")
 	print("PRUCHOD zebrik_lezeni ", vysledek["zebrik_lezeni"])
 

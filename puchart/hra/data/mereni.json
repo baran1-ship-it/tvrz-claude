@@ -113,5 +113,18 @@
   }
  ],
  "pozn_varianty": "Míša 10. 11.: „jediný pokles byl u stromů“ – cena vrstev lesa na tabletu přímo (Havran: les p50 57 při 100 %, příčina neizolovaná). Plný obraz 100 %; 'les znovu' na konci = drift teplem.",
- "pozn_scale": "Míša 12. 11.: hra v 75 % – trasa i varianty lesa v 75 %"
+ "pozn_scale": "Míša 12. 11.: hra v 75 % – trasa i varianty lesa v 75 %",
+ "varianty_vykreslovani": [
+  {
+   "jmeno": "compatibility",
+   "metoda": "gl_compatibility",
+   "popis": "výchozí – trasa a varianty výše v Compatibility (OpenGL ES 3)"
+  },
+  {
+   "jmeno": "vulkan",
+   "metoda": "mobile",
+   "popis": "JEN POPIS, mereni.gd ji nespouští: přepnutí vyžaduje restart. Postup (Míša): 1) Nastavení → Spustit test výkonu v Compatibility, vyfotit; 2) Nastavení → Vykreslování → Vulkan (Mobile) – hra se restartuje; 3) znovu Spustit test výkonu, vyfotit. Výsledek nese řádek „vykreslování:“, poslední výsledek každého režimu zůstává v user://mereni_<id>.txt a nabídka Měření ukáže oba."
+  }
+ ],
+ "pozn_vykreslovani": "Míša 15. 11.: „Vulkan chci vyzkoušet“ – stejná trasa v obou režimech (pravidla/svet/vykreslovani.json, hra/scripts/vykreslovani.gd); první průchod ve Vulkanu kompiluje pipeline – úsek „hrad“ porovnávat s opatrností (záseky), rozhodují les a voda."
 }

@@ -183,6 +183,8 @@ func show_menu(game_running: bool) -> void:
 	_title.modulate.a = 1.0
 	_sub.modulate.a = 0.0 if game_running else 1.0
 	_shade.color = Color(0, 0, 0, 0.62 if game_running else 0.35)
+	var vk := _vyk()
+	if game_running and vk: vk.navrat_do_menu()   # pojistka Vulkanu: vstup do hry proběhl (vykreslovani.gd)
 	show_page("main")
 
 
@@ -202,6 +204,8 @@ func show_page(page: String) -> void:
 	var first: Button
 	match page:
 		"main":
+			var vk := _vyk()
+			if vk and vk.hlaska != "": _note(vk.hlaska)   # „Vulkan spadl, vráceno na Compatibility“ (vykreslovani.gd pojistka)
 			# celá herní nabídka jako v Havranovi (Míša 10. 11.: „udělej celé herní menu, ať můžu ukládat“)
 			if in_game:
 				first = _btn("Pokračovat ve hře", "resume")
@@ -227,7 +231,27 @@ func show_page(page: String) -> void:
 		"mereni":   # poslední výsledek testovacího měření (user://mereni.txt z mereni.gd)
 			for line: String in FileAccess.get_file_as_string("user://mereni.txt").split("\n"):
 				_note(line)
+			var vk := _vyk()   # pro srovnání i poslední měření v druhém vykreslování (mereni.gd user://mereni_<id>.txt)
+			if vk:
+				for v: Dictionary in vk.cfg.get("volby", []):
+					var f := "user://mereni_%s.txt" % v["id"]
+					if String(v["metoda"]) == vk.metoda or not FileAccess.file_exists(f): continue
+					_note(String(vk.text("mereni_jine")) % v["nazev"])
+					for line: String in FileAccess.get_file_as_string(f).split("\n"):
+						_note(line)
 			first = _btn("Zpět", "page:main", true)
+		"vykreslovani":   # přepínač s vysvětlením; volba = zápis user://override.cfg a restart hry
+			var vk := _vyk()
+			for line: String in vk.text("vysvetleni"):
+				_note(line)
+			_note(String(vk.text("bezi")) % [vk.bezici()["nazev"], vk.adapter, vk.api])
+			if vk.duvod() != "": _note(vk.duvod())
+			for v: Dictionary in vk.cfg.get("volby", []):
+				var bezi := String(v["metoda"]) == vk.metoda
+				var b := _btn(("✓ " if bezi else "") + String(v["nazev"]), "vyk:" + String(v["id"]), true)
+				b.disabled = bezi
+				if not bezi: first = _maybe(first, b)
+			first = _maybe(first, _btn("Zpět", "page:settings", true))
 		"credits":
 			for line: String in CREDITS:
 				_note(line)
@@ -238,10 +262,17 @@ func show_page(page: String) -> void:
 				var bb := _btn(String(settings_text.get(key, key)), "set:" + key, true)
 				first = _maybe(first, bb)
 			_slider("Hlasitost hudby", "vol:hudba", float(settings_text.get("vol:hudba", 1.0)))
+			var vk := _vyk()   # Obraz: vykreslování Compatibility / Vulkan (vykreslovani.gd, Míša 15. 11.)
+			if vk: _btn(String(vk.text("radek_nastaveni")) % vk.bezici()["nazev"], "page:vykreslovani", true)
 			if FileAccess.file_exists("res://data/mereni.json"): _btn("Spustit test výkonu", "mereni_spust", true)   # jen na přání (Míša 14. 11.)
 			_btn("Zpět", "page:main", true)
 	if first:
 		first.call_deferred("grab_focus")
+
+
+## Autoload Vykreslovani (project.godot) – přes cestu, aby skript šel načíst i bez autoloadů (nástroje --script).
+func _vyk() -> Node:
+	return get_node_or_null("/root/Vykreslovani")
 
 
 func refresh_settings(texts: Dictionary) -> void:
@@ -321,5 +352,12 @@ func _slider(t: String, what: String, v: float) -> void:
 func _press(what: String, arg: Variant) -> void:
 	if what.begins_with("page:"):
 		show_page(what.substr(5))
+		return
+	if what.begins_with("vyk:"):   # přepnutí vykreslování: zápis volby a restart (vykreslovani.gd prepni)
+		var vk := _vyk()
+		if vk:
+			for c in _box.get_children(): c.queue_free()
+			_note(String(vk.text("restart")))
+			vk.prepni.call_deferred(what.substr(4))
 		return
 	action.emit(what, arg)

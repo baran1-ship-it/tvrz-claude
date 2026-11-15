@@ -24,6 +24,8 @@ var i_var := -1
 var _skryte: Array = []
 var _slunce: DirectionalLight3D
 var _hra_3d := 0.75
+var vykreslovani := ""   # renderer · ovladač · GPU · API (vykreslovani.gd popis)
+var _vyk_id := ""
 signal konec
 
 func zacni(s: Node3D, kamera: Camera3D) -> void:
@@ -31,6 +33,9 @@ func zacni(s: Node3D, kamera: Camera3D) -> void:
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mereni.json"))
 	trasa = cfg["useky"]; verze = cfg.get("verze", "") + " / Godot " + Engine.get_version_info()["string"]
 	varianty = cfg.get("varianty", [])
+	var vk := get_node_or_null("/root/Vykreslovani")   # vykreslování do výsledku (Compatibility / Vulkan – stejná trasa v obou, vykreslovani.gd)
+	_vyk_id = String(vk.bezici()["id"]) if vk and not vk.cfg.is_empty() else RenderingServer.get_current_rendering_method()
+	vykreslovani = vk.popis() if vk and not vk.cfg.is_empty() else "%s (%s) · %s" % [RenderingServer.get_current_rendering_method(), RenderingServer.get_current_rendering_driver_name(), RenderingServer.get_video_adapter_name()]
 	_hra_3d = get_viewport().scaling_3d_scale   # rozlišení hry (rozpocty.json obraz_3d) – po měření se vrátí (12. 11.: zůstalo 100 %)
 	skaly = cfg.get("scale_3d", [_hra_3d]); get_viewport().scaling_3d_scale = float(skaly[0])
 	if FileAccess.file_exists("res://data/sestava.json"):
@@ -63,7 +68,7 @@ func _process(d: float) -> void:
 		kres += RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 		troj += RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
 		vzorku += 1
-	lbl.text = "MĚŘENÍ %s\n3D %d %%  úsek %d/%d: %s  %.0f s" % [verze, roundi(float(skaly[i_sk]) * 100), i_usek + 1, trasa.size(), u["jmeno"], celk - t]
+	lbl.text = "MĚŘENÍ %s\n%s\n3D %d %%  úsek %d/%d: %s  %.0f s" % [verze, vykreslovani, roundi(float(skaly[i_sk]) * 100), i_usek + 1, trasa.size(), u["jmeno"], celk - t]
 	if t >= celk:
 		var s := casy.duplicate(); s.sort()
 		var n := s.size()
@@ -114,12 +119,14 @@ func _konec() -> void:
 	# variantu – chyba každý snímek, čas do minusu a kamera se přetahovala s hráčem = obraz poskakoval na místě)
 	trasa = []; set_process(false)
 	get_viewport().scaling_3d_scale = _hra_3d
-	var txt := "VÝSLEDEK %s\n%s\n" % [verze, Time.get_datetime_string_from_system()]
+	var txt := "VÝSLEDEK %s\nvykreslování: %s\n%s\n" % [verze, vykreslovani, Time.get_datetime_string_from_system()]
 	txt += "úsek            3D px       p50   p95   max  záseky  snímků  kreslení  troj M  VRAM MB\n"
 	for u in useky:
 		txt += "%-14s %-10s %5.1f %5.1f %5.0f %6d %7d %8.0f %7.2f %8.0f\n" % [u["jmeno"], u["px"], u["p50"], u["p95"], u["max"], u["zaseky"], u["snimku"], u["kresleni"], u["troj_m"], u["vram_mb"]]
 	var f0 := FileAccess.open("user://mereni.txt", FileAccess.WRITE)   # uložit hned (Míša 12. 11.: výsledek zmizel pod nabídkou)
 	if f0: f0.store_string(txt); f0.close()
+	var f1 := FileAccess.open("user://mereni_%s.txt" % _vyk_id, FileAccess.WRITE)   # poslední výsledek každého vykreslování zvlášť – srovnání v nabídce Měření
+	if f1: f1.store_string(txt); f1.close()
 	lbl.text = txt + "\n(ms na snímek; vyfoť obrazovku a pošli – KLEPNI pro pokračování; znovu: nabídka → Měření)"
 	# výsledek zůstává, dokud se neklepne (dřív 20 s a pak ho překryla nabídka – Míša 12. 11.: „nemám data z měření“)
 	var kryt := ColorRect.new(); kryt.color = Color(0, 0, 0, 0.55); kryt.set_anchors_preset(Control.PRESET_FULL_RECT); add_child(kryt); move_child(kryt, 0)

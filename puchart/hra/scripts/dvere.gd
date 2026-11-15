@@ -94,13 +94,12 @@ func _pridej(u: Node3D, e: Dictionary, g: String) -> void:
 	if not _zvuk.has(g): _zvuk[g] = {}
 	var hp := AudioStreamPlayer3D.new(); hp.max_distance = 60.0; hp.unit_size = 8.0 if k != "navijak" else 3.0; u.add_child(hp)
 	_zvuk[g]["navijak" if k == "navijak" else "dil"] = hp   # Havran pohyb.gd: zvuk u dílu, rohatka u navijáku
-	if e.has("lano"):   # lano od bubnu rumpálu k uchu vědra (Havran pohyb.gd ropes), přepočítá se s pohybem
+	for la: Array in ([e["lano"]] if e.has("lano") else []) + e.get("ropes", []):   # lano od bubnu rumpálu k uchu vědra (ves.gd lano, hrad Havran pohyb.gd ropes [kotva svět, konec místně]), přepočítá se s pohybem
 		var cm := CylinderMesh.new(); cm.top_radius = 0.012; cm.bottom_radius = 0.012; cm.height = 1.0; cm.radial_segments = 5; cm.rings = 1
 		if e.get("lano_mat") != null: cm.material = e["lano_mat"]
 		var lmi := MeshInstance3D.new(); lmi.mesh = cm; lmi.top_level = true; lmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		if dd > 0.0: lmi.visibility_range_end = dd
 		add_child(lmi)
-		var la: Array = e["lano"]
 		lana.append({"mi": lmi, "a": Vector3(la[0][0], la[0][1], la[0][2]), "uzel": u, "e": Vector3(la[1][0], la[1][1], la[1][2])})
 	for ch: Array in e.get("chains", []):
 		var mmi := MultiMeshInstance3D.new(); mmi.top_level = true

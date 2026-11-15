@@ -61,7 +61,7 @@
   "rychlost": 0.0
  },
  "studna": {
-  "popis": "Studna na návsi (ves.gd _studny): rumpál s klikou a vědro na laně jsou samostatné uzly Pohyb_ves_studna_rumpal_<i> a Pohyb_ves_studna_vedro_<i> – pohyblivé díly dvere.gd (Havran pohyb.gd): rumpál druh navijak (otacek otáček kolem své osy), vědro druh vedro (posun svisle dolů o hloubku k hladině, doba dur_s), skupina ves_studna_<i>, nabídka u kliky. Vědro visí vedro_pod_osou_m pod osou rumpálu nad středem šachty; lano od bubnu k uchu vědra se přepočítá. Šachta (líc dovnitř) do hladina_m pod korunou, temná hladina dole.",
+  "popis": "Studna na návsi (ves.gd _studny): rumpál s klikou a vědro na laně jsou samostatné uzly Pohyb_ves_studna_rumpal_<i> a Pohyb_ves_studna_vedro_<i> – pohyblivé díly dvere.gd (Havran pohyb.gd): rumpál druh navijak (otacek otáček kolem své osy), vědro druh vedro (posun svisle dolů o hloubku k hladině, doba dur_s), skupina ves_studna_<i>, nabídka u kliky. Vědro visí vedro_pod_osou_m pod osou rumpálu nad středem šachty; lano od bubnu k uchu vědra se přepočítá. hladina_m = hloubka hladiny pod terénem (vědro sjede až k ní); terén pod studnou díru nemá – šachtu kreslí temný kruh nad terénem (ves.gd), vědro do tmy zajede a z ní vyjede.",
   "zdroj": "Havran blender/studna.py (dynamic: kit.movable studna_rumpal navijak turns 9, studna_vedro vedro lift −(osa + 2,55), dur 6, vědro 0,62 m pod osou, lano od bubnu, voda 3 m pod terénem), scripts/pohyb.gd (vedro: dopad_drevo na hladině, zapadka nahoře; vrzani2 při spuštění)",
   "otacek": 9.0,
   "dur_s": 6.0,

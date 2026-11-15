@@ -562,13 +562,11 @@ func _studny() -> void:
 			var dy := 0.0125 if k % 2 == 0 else -0.0125
 			var tgk := tg.rotated(Vector3.UP, rng.randf_range(-0.12, 0.12))
 			sit.kvadr("valoun", Vector3(c.x, c.y + h + 0.04 + dy, c.z) + dr * rm, tgk, Vector3.UP.rotated(tgk, rng.randf_range(-0.04, 0.04)), Vector3.ZERO, Vector3(0.46 * rng.randf_range(0.92, 1.05), 0.1, tl + 0.08))
-		# šachta (Havran studna.py: voda 3 m pod terénem): líc dovnitř od hladiny k jádru roubení, dole temná hladina
-		var fs: Dictionary = Pravidla.cti("funkce", "studna"); var hl := float(fs["hladina_m"])
-		_valec_plast(sit, "spara", c + Vector3(0, -hl - 0.1, 0), hl + 0.35, rm - 0.08, x, z, 20, -1.0)
-		var t := sit.s("tma")   # hladina hluboko dole: tma
+		var fs: Dictionary = Pravidla.cti("funkce", "studna")   # rumpál a vědro (níže)
+		var t := sit.s("tma")   # hladina hluboko dole: tma (terén díru nemá – temný kruh nad ním; vědro do něj zajede)
 		for i in 16:
 			var f0 := TAU * i / 16.0; var f1 := TAU * (i + 1) / 16.0
-			var q0 := c + Vector3(0, -hl, 0); var q1 := q0 + (x * cos(f0) + z * sin(f0)) * (ri + 0.06); var q2 := q0 + (x * cos(f1) + z * sin(f1)) * (ri + 0.06)
+			var q0 := c + Vector3(0, 0.3, 0); var q1 := q0 + (x * cos(f0) + z * sin(f0)) * (ri + 0.06); var q2 := q0 + (x * cos(f1) + z * sin(f1)) * (ri + 0.06)
 			var tri := [q0, q1, q2] if Vector3.UP.dot((q1 - q0).cross(q2 - q0)) < 0 else [q0, q2, q1]   # přední strana nahoru (jako Sit.quad: vektorový součin proti normále)
 			for p: Vector3 in tri:
 				t.set_normal(Vector3.UP); t.set_uv(Vector2.ZERO); t.add_vertex(p - c)
@@ -655,8 +653,19 @@ func _sezeni() -> void:
 		if info.has("rozmer"):
 			var r: Array = info["rozmer"]; var kb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var bs := BoxShape3D.new()
 			bs.size = Vector3(float(r[0]) * 0.95, float(r[1]), float(r[2]) * 0.95); cs.shape = bs; cs.position.y = float(r[1]) * 0.5
+			if mid.contains("lavice"): kb.name = mid + "_Kol_Lavice"   # sedí se na ní (lavice.gd, vzor modely.lavice.uzel_vzor)
 			kb.add_child(cs); n.add_child(kb)
 		uzel.add_child(n)
+	# lavice venku do hlavni.lavice (Míša 15. 11.: každá lavice funkční), čelem ke stolu, u kterého stojí
+	var hl := get_parent(); var vz := String((d["modely"].get("lavice", {}) as Dictionary).get("uzel_vzor", ""))
+	if hl == null or hl.get("lavice") == null or vz == "": return
+	for n in uzel.get_children():
+		if not String(n.name).contains("lavice"): continue
+		var stul: Variant = null; var nd := 1e9
+		for t in uzel.get_children():
+			if String(t.name).contains("stul") and (t as Node3D).global_position.distance_to((n as Node3D).global_position) < nd:
+				nd = (t as Node3D).global_position.distance_to((n as Node3D).global_position); stul = (t as Node3D).global_position
+		hl.lavice.append_array(preload("res://scripts/lavice.gd").mista(n, vz, stul))
 
 
 ## ------------------------------------------------------------------ drobnosti a proutěné ploty (MultiMesh po buňkách)

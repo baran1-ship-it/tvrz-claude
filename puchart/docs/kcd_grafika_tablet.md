@@ -36,6 +36,12 @@
    shadery (podezřelé: MSAA zapnuté na Vulkanu – Havran main.gd, velké textury, počet vzorkovačů) → najít přesný krok;
    (3) zachytit log pádu přímo v aplikaci (zápis do user:// + okno po restartu, jako Havran „okno o pádu“) – bez PC/adb.
    Do té doby zůstáváme na Compatibility; světlo pečeme v Blenderu (funguje v obou).
+   **15. 11. – přepínač v jedné APK** (Míša: „Vulkan chci vyzkoušet“; jiná APK „Forest100-Vulkan“ na jejím Padu 8 ve Vulkanu
+   běží → Vulkan na zařízení funguje, pád Havrana byl specifický): Nastavení → Vykreslování zapíše `user://override.cfg`
+   (project.godot `application/config/project_settings_override`), Godot ho čte před vytvořením rendereru, hra se restartuje.
+   Pojistka: 2 nedokončené starty ve Vulkanu za sebou → zpět Compatibility + hláška (autoload `hra/scripts/vykreslovani.gd`).
+   Panel i výsledek měření ukazují běžící renderer/ovladač/GPU. Zdroje a postup: `pravidla/svet/vykreslovani.json`.
+   Rozdíly Mobile × Compatibility v našich shaderech/prostředí: `docs/chyby.md` #300.
 
 ## Doporučený postup
 1. Zapečené světlo: světnice paláce A + nádvoří A (Blender Cycles → UV2 → shader zdivo/textura násobí lightmapou). Snímek vs. KCD fotky.
