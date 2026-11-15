@@ -450,8 +450,30 @@ hostinec 22/21/31/22, věž 29/26/24/28. Špičky > 200 ms jen 2 (206, 209), zá
   **naměřená příčina** jednoho druhu záseku: trojúhelníková kolize hostince je pro hráče drahá (řádek 17 K2 plánu).
 - `_process` 26 ms s „předměty 20“ v hostinci (1238 s) – skript předmětů občas 8–20 ms = naměřený vliv, příčina NEZNÁMÁ.
 
-## 0.999998 (commit f97a7381, 15. 11. 07:08) – NEOVĚŘENO NA ZAŘÍZENÍ
+## 0.999998 (commit f97a7381, 15. 11. 07:08) – měřeno 15. 11. 09:26 (Míša, tablet, 3D 75 %)
 Změny proti 0.999997: kaskáda potoka z kopce (stupně, pěna, balvany), krčma do L (zábradlí schodů/podesty/konců pavlače
 ze zdroje, jas textur jako ves), chýše v lomu na zemi (nábytek na síti terénu), levitace (kamínky u brodu a na valu,
 borovice na smazané skále, zavěšené předměty), břeh kaskády, louka: rozpočet nahrávání do GPU (záseky – NEZMĚŘENO na tabletu).
 Čeká na Měřicí trasu od Míši.
+
+### 0.999998 – Měřicí trasa 15. 11. 09:26 (sestavení 152bfd4e, manifest c12d5231)
+p50 vše / bez_vnitrku / déšť / vše znovu (v závorce 0.999997 bez GPU trávy 14. 11. 20:37): tvrz-cesta 25/35/45/30
+(18/31/35/30), louka 24/35/32/38 (27/32/31/33), les 33/26/30/29 (20/29/29/30), skály 27/23/33/30 (23/28/31/30),
+ves 27/28/28/31 (28/22/26/24), mlýn 18/21/23/28 (18/22/26/18), ves-vjezd 36/42/37/27 (31/30/23/29),
+ves-dvory 34/24/31/45 (32/33/30/31), krcma-kovarna 25/37/30/27 (24/24/25/25), hostinec 27/25/26/34 (22/21/31/22),
+věž 27/25/30/29 (29/26/24/28). Koňské úseky (kun-les, kun-louka-otoc, kun-les-mimo, kun-louka-trava) 19–34 ms.
+Paměť: VRAM 894 MB (textury 609, buffery 286), halda 1782 MB, uzlů 28 702.
+- **p50 celkově v šumu** proti 0.999997 (±5 ms oběma směry), horší jednotlivě: tvrz-cesta déšť 45 (35),
+  ves-dvory vše znovu 45 (31, 213 snímků > 40 ms), ves-vjezd bez_vnitrku 42 (30, 203× > 40 ms). NAMĚŘENO, příčina NEZNÁMÁ.
+- **Špičky > 200 ms: 11** (0.999997 20:37: 2, ale to byla 2. trasa po instalaci; 20:20 1. trasa měla 2 975 ms).
+  Ve všech špičkách skripty 3–18 ms, fyzika 1–8 ms, počet kreslení (kresl) jako v okolí → čas je mimo skripty,
+  fyziku i počet kreslení; GPU čas zařízení neměří (gpu 0).
+- **Série na louce kun-louka-otoc (bez_vnitrku) u (103–129, 447–463): 838, 560, 511, 1 361 ms** za sebou při otáčení
+  koně; uzlů přibývá 29 533 → 29 707 (+174) → v tu chvíli se něco vytváří/nahrává (PODEZŘENÍ: nahrávání buněk
+  louky/rostlin – v 0.999998 změněn „rozpočet nahrávání do GPU“ na louce). V průjezdu vše/déšť/znovu tamtéž max 68–105 ms.
+- **krcma-kovarna 1. průjezd u (434, 827): 1 095 ms**, kreslení 678 (úsek běžně 520–540) – jednorázově, dál max 50–263 ms.
+  PODEZŘENÍ: první vykreslení krčmy/kovárny (sestavení shaderů nebo nahrání textur), v Compatibility NEMĚŘITELNÉ čítačem.
+- Zahřívací průjezd mlýn (558–561, 881–882) 530 a 442 ms, louka (57, 192) 497 ms, les (208, 269) 527 ms – 1. průjezdy.
+- Další krok: varianta trasy, která na louce u (103–129, 447–463) zastaví koně a zapíše přírůstek uzlů a nahrání do GPU
+  po snímcích (izolovaný test podezření, ne oprava).
+
