@@ -372,6 +372,14 @@
       -1.03
      ]
     ]
+   },
+   "lod": {
+    "podrobny_do_m": 25.0,
+    "stredni_do_m": 140.0,
+    "stredni_do_m_mobil": 110.0,
+    "vnitrek_do_m": 35.0,
+    "lod_bias": 50.0,
+    "pozn": "15. 11.: střední stupeň má 1,5–5 tis. troj. (blender/stredni_lod.py, dřív 37–61 tis.) → podrobný jen do 25 m, střední do 110 m (tablet) / 140 m, dál hrubý obal _Daleko s texturou"
    }
   },
   "mlyn": {

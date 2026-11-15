@@ -119,6 +119,14 @@
       -1.03
      ]
     ]
+   },
+   "lod": {
+    "podrobny_do_m": 25.0,
+    "stredni_do_m": 140.0,
+    "stredni_do_m_mobil": 110.0,
+    "vnitrek_do_m": 35.0,
+    "lod_bias": 50.0,
+    "pozn": "15. 11.: střední stupeň má 1,5–5 tis. troj. (blender/stredni_lod.py, dřív 37–61 tis.) → podrobný jen do 25 m, střední do 110 m (tablet) / 140 m, dál hrubý obal _Daleko s texturou"
    }
   },
   "mlyn": {
@@ -1549,5 +1557,36 @@
     }
    ]
   }
+ },
+ "lod_stredni": {
+  "popis": "střední stupeň staveb (blender/stredni_lod.py): vnějšek podrobného modelu zjednodušený na cil troj., stejné materiály (hra je přiřadí podle jména z podrobného modelu), kreslí se od podrobny_do_m do stredni_do_m",
+  "zdroj": "Míša 15. 11.: „dodělej ty střední zobrazení domů a další optimalizace“; KCD/Havran: 3 stupně (podrobný – střední – obal); předchozí domy_stredni.glb měl 53 tis. troj. jako podrobný",
+  "soubory": [
+   {
+    "vstup": "hra/modely/stavby_h/domy.glb",
+    "vystup": "hra/modely/stavby_h/domy_stredni.glb",
+    "vynechat": [
+     "Daleko",
+     "Interier",
+     "Drobne",
+     "Kol_"
+    ],
+    "modely": {
+     "Dum1": null,
+     "Dum2": null,
+     "Rychta": null,
+     "ChyseKura": null,
+     "ChysePrkna": null
+    },
+    "vynechat_materialy": [
+     "Sindel",
+     "Dosky",
+     "Kura",
+     "Vnitrni"
+    ],
+    "strecha_z": "_Daleko",
+    "pozn": "15. 11.: zjednodušení (Decimate) rozmazalo UV šindelů a došků (střecha růžová) → střední stupeň = vnějšek bez střešní krytiny a bez vnitřních líců stěn (60–70 % troj.) + hladká střecha z hrubého obalu s texturou krytiny; stěny beze změny"
+   }
+  ]
  }
 }

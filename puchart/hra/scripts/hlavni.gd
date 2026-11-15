@@ -640,11 +640,10 @@ func _mista() -> void:
 	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mista_stavby.json"))
 	var md: Dictionary = d["modely"]["domy"]
 	if (d["stavby"] as Array).is_empty() or not ResourceLoader.exists(String(md["soubor"])): return
-	var lod: Dictionary = d.get("lod", {"podrobny_do_m": 30.0, "stredni_do_m": 130.0, "stredni_do_m_mobil": 75.0, "vnitrek_do_m": 35.0, "lod_bias": 50.0})
+	var lod: Dictionary = md.get("lod", {"podrobny_do_m": 30.0, "stredni_do_m": 130.0, "stredni_do_m_mobil": 75.0, "vnitrek_do_m": 35.0, "lod_bias": 50.0})
 	var blizko := float(lod["podrobny_do_m"]); var st_do := float(lod["stredni_do_m_mobil" if OS.has_feature("mobile") else "stredni_do_m"])
 	var sc: Node = (load(String(md["soubor"])) as PackedScene).instantiate()
 	var ssc: Node = (load(String(md["stredni"])) as PackedScene).instantiate() if ResourceLoader.exists(String(md["stredni"])) else null
-	var st_mat := StandardMaterial3D.new(); st_mat.vertex_color_use_as_albedo = true; st_mat.roughness = 0.9
 	var uzel := Node3D.new(); uzel.name = "Mista"; add_child(uzel)
 	var obal_do := float((d.get("lod_ves", {}) as Dictionary).get("obal_do_m", 900.0))
 	var dt: Dictionary = md.get("daleko_textury", {}); var dt_cache := {}; var jas_cache := {}
@@ -669,7 +668,19 @@ func _mista() -> void:
 		var se_st := st_vzor != null and blizko < st_do
 		if se_st:
 			var st := MeshInstance3D.new(); st.name = String(s["model"]) + "_Stredni"; st.mesh = st_vzor.mesh; st.transform = st_vzor.transform
-			st.material_override = st_mat; st.lod_bias = float(lod["lod_bias"])   # bez automatického LOD (rozpustil šindele – Havran)
+			st.lod_bias = float(lod["lod_bias"])   # bez automatického LOD (rozpustil šindele – Havran)
+			# materiály podle jména z podrobného modelu (už ztlumené _ztlum) – stejné textury (blender/stredni_lod.py); dřív
+			# jednobarevný materiál z barvy vrcholů (kreslil se černě, Míša 15. 11.: „dodělej ty střední zobrazení domů“)
+			var mt_ := {}
+			for ch_ in dum.get_children():
+				if ch_ is MeshInstance3D and (ch_ as MeshInstance3D).mesh and not String(ch_.name).ends_with("_Daleko"):
+					for i_ in (ch_ as MeshInstance3D).mesh.get_surface_count():
+						var am_ := (ch_ as MeshInstance3D).get_active_material(i_)
+						if am_: mt_[String((ch_ as MeshInstance3D).mesh.surface_get_material(i_).resource_name if (ch_ as MeshInstance3D).mesh.surface_get_material(i_) else "")] = am_
+			_daleko_textury(st, vzor, String(s["model"]), dt, dt_cache)   # hladká střecha z obalu (*_daleko_Sindel) – textura krytiny jako obal
+			for i_ in st.mesh.get_surface_count():
+				var sm_ := st.mesh.surface_get_material(i_)
+				if sm_ and mt_.has(String(sm_.resource_name)): st.set_surface_override_material(i_, mt_[String(sm_.resource_name)])
 			st.visibility_range_begin = blizko; st.visibility_range_end = st_do; st.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			dum.add_child(st)
 		var dal := st_do if se_st else (75.0 if OS.has_feature("mobile") else 130.0)
