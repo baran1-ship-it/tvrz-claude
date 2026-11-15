@@ -255,8 +255,8 @@ static func _jesle_bod(tv: Dictionary, x: float, s: float, sum: FastNoiseLite) -
 		var t := (s - 0.5) / 0.5   # 0 u horního břevna → 1 u roubení
 		var top := Vector2(float(n[0]), float(n[1])) - ven * pred
 		var z := lerpf(top.y + float(tv["kupa_ven_m"]) * sin(t * PI) * 0.6, float(tv["stena_z"]), t)
-		var oblouk := sin(pow(t, 0.7) * PI) * 0.85 + t * 0.35   # vrchol blíž čelu, u roubení kupa opřená výš
-		p = Vector2(top.x + float(tv["kupa_m"]) * oblouk * (0.35 + 0.65 * kraj), z)
+		var oblouk := sin(pow(t, 0.5) * PI) * 0.85 + t * 0.35   # vrchol blíž čelu (kupa hned za břevnem vysoko), u roubení opřená výš
+		p = Vector2(top.x + float(tv["kupa_m"]) * oblouk * (0.7 + 0.3 * kraj), z)   # u čel jen mírně nižší – placka M_Slama u krajních příček sahá do y 2,05
 		nrm = Vector2(1.0, (0.5 - t) * 1.2).normalized()
 	var a := float(tv["sum_m"]) * sum.get_noise_2d(x, s * 3.0) * (0.4 + 0.6 * kraj)
 	return [Vector3(x, p.x + nrm.x * a, p.y + nrm.y * a), Vector3(0.0, nrm.x, nrm.y)]
@@ -284,16 +284,20 @@ static func jesle_site(tv: Dictionary, je: Dictionary) -> Array:
 				var v: Vector3 = mrz[ij[0]][ij[1]]
 				var s := float(ij[1]) / ns
 				st.set_color(Color.WHITE * lerpf(ao_dole, 1.0, smoothstep(0.0, 0.55, s)))   # spodek čela ve stínu koše
-				st.set_uv(Vector2(v.x / uvm, float(delky[ij[1]]) / uvm)); st.add_vertex(v)
+				# vlákna textury natočená podle šumu (pomalé víření) – jinak „učesaná“ jedním směrem jako došek (snímek 15. 11.)
+				var uv := Vector2(v.x / uvm, float(delky[ij[1]]) / uvm)
+				st.set_uv(uv.rotated(sum.get_noise_2d(v.x * 0.3 + 40.0, (v.y + v.z) * 0.3) * PI * float(si["viri"]))); st.add_vertex(v)
 	st.generate_normals(); st.generate_tangents()
 	var objem := st.commit()
 	# --- karty stébel
 	var rnd := RandomNumberGenerator.new(); rnd.seed = int(stc["seed"])
 	var ks := SurfaceTool.new(); ks.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var tex_m := float(stc["textura_sirka_m"]); var ao_p := float(stc["ao_pata"])
+	var nb := int(stc["bunky"]); var ao_p := float(stc["ao_pata"])
+	var trsy: Array = []
+	for t in stc["trsy"]: trsy.append(int(t))   # JSON čísla jsou float – „in“ by int buňku nenašel
 	for c in int(stc["pocet"]):
 		var x := rnd.randf_range(x0 + 0.03, x1 - 0.03)
-		var s := pow(rnd.randf(), 0.8) * 0.5 + 0.5 if rnd.randf() < 0.55 else rnd.randf_range(0.04, 0.5)   # víc na vrchu (je vidět)
+		var s := pow(rnd.randf(), 0.8) * 0.5 + 0.5 if rnd.randf() < float(stc["vrch_podil"]) else rnd.randf_range(0.04, 0.5)   # víc na vrchu (je vidět)
 		var bn: Array = _jesle_bod(tv, x, s, sum)
 		var b: Vector3 = bn[0]
 		var e := 0.004
@@ -317,7 +321,10 @@ static func jesle_site(tv: Dictionary, je: Dictionary) -> Array:
 		var pata := b - nn * float(stc["zanor_m"])
 		var stred := pata + smer * L * 0.5 + Vector3.DOWN * L * float(stc["previs_m"]) * 0.3
 		var konec := pata + smer * L + Vector3.DOWN * L * float(stc["previs_m"])
-		var u0 := rnd.randf() * maxf(0.0, 1.0 - w / tex_m); var u1 := u0 + minf(1.0, w / tex_m)
+		var bunky: Array = []   # karta = celá buňka atlasu (stébla nejsou useknutá): trsy z paty pro trčící, volná stébla pro ležící
+		for bi in nb: if (bi in trsy) != lezi: bunky.append(bi)
+		var bu := int(bunky[rnd.randi() % bunky.size()])
+		var u0 := float(bu) / nb; var u1 := float(bu + 1) / nb
 		var ton := rnd.randf_range(0.88, 1.1)
 		var radky := [[pata, 1.0, ao_p], [stred, 0.5, lerpf(ao_p, 1.0, 0.6)], [konec, 0.0, 1.0]]
 		for r in 2:

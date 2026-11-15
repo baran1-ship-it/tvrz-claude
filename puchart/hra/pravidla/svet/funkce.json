@@ -109,7 +109,7 @@
    "Dum2_Kol_Zlab"
   ],
   "nabidka": "Nasypat seno",
-  "tvar_pozn": "v souřadnicích modelu domu: x [od, do] délka jeslí (čela 2 cm od krajních příček), pricky_dole/pricky_nahore [y, z] osa příček, pred_prickami_m – čelo kupy za osou příček (poloměr příčky 2 cm + 1 cm), stena_z – roubení za jeslemi, kupa_m – výška kupy nad horním koncem příček uprostřed hloubky, kupa_ven_m – jak daleko kupa přečnívá přes horní břevno do chléva, sum_m – nepravidelnost povrchu (amplituda šumu), sum_vlna_m – vlnová délka šumu",
+  "tvar_pozn": "v souřadnicích modelu domu: x [od, do] délka jeslí (čela 2 cm od krajních příček), pricky_dole/pricky_nahore [y, z] osa příček, pred_prickami_m – čelo kupy za osou příček (poloměr příčky 2 cm + 1 cm), stena_z – roubení za jeslemi, kupa_m – výška kupy nad horním koncem příček (0,3 m: stará placka M_Slama sahá do y 2,12, kupa ji musí překrýt – snímek 15. 11.), kupa_ven_m – jak daleko kupa přečnívá přes horní břevno do chléva, sum_m – nepravidelnost povrchu (amplituda šumu), sum_vlna_m – vlnová délka šumu",
   "tvar": {
    "Dum2_Kol_Zlab": {
     "x": [
@@ -126,10 +126,10 @@
     ],
     "pred_prickami_m": 0.03,
     "stena_z": -4.39,
-    "kupa_m": 0.17,
+    "kupa_m": 0.3,
     "kupa_ven_m": 0.07,
-    "sum_m": 0.045,
-    "sum_vlna_m": 0.35,
+    "sum_m": 0.07,
+    "sum_vlna_m": 0.25,
     "bod": [
      -0.5,
      2.0,
@@ -140,18 +140,20 @@
   "sit": {
    "delka_krok_m": 0.1,
    "profil_bodu": 14,
-   "uv_m": 0.45
+   "uv_m": 0.45,
+   "viri": 0.25
   },
   "stebla": {
-   "pocet": 1200,
-   "lezi_podil": 0.6,
+   "pocet": 1650,
+   "lezi_podil": 0.65,
+   "vrch_podil": 0.72,
    "delka_m": [
     0.16,
     0.42
    ],
    "sirka_m": [
     0.06,
-    0.13
+    0.14
    ],
    "trci_sklon_st": [
     25.0,
@@ -163,19 +165,24 @@
    ],
    "previs_m": 0.12,
    "zanor_m": 0.03,
-   "textura_sirka_m": 0.4,
+   "bunky": 4,
+   "trsy": [
+    0,
+    1
+   ],
    "ao_pata": 0.6,
    "ao_cela_dole": 0.55,
    "seed": 1393
   },
-  "stebla_pozn": "pocet karet (po 4 troj.) + objem ≈ 5,9 tis. troj. (rozpočet koordinátora 6–8 tis. u jeslí); lezi_podil = karty skoro podél povrchu (vrstvy stébel), ostatní trčí (sklon od normály); previs_m – konec stébla klesne o tolik × délka (tíha); textura_sirka_m – kolik metrů karty odpovídá celé šířce textury stébel (vybírá se náhodný úsek); ao_pata – jas paty karty (konec 1,0), ao_cela_dole – jas spodku čela kupy v jeslích (stín koše). NEOVERENO – laděno snímkem docs/screens/funkce_jesle_seno.png vedle předlohy",
+  "stebla_pozn": "pocet karet (po 4 troj.) + objem ≈ 7,8 tis. troj. (test 15. 11.: 7776) (rozpočet koordinátora 6–8 tis. u jeslí); vrch_podil – podíl karet na vrchu kupy (zbytek na čele za příčkami, to je ve stínu koše; 0,55 nechávalo vrch jako hladkou plochu – snímek 15. 11.); lezi_podil = karty skoro podél povrchu (vrstvy stébel), ostatní trčí (sklon od normály); previs_m – konec stébla klesne o tolik × délka (tíha); bunky – buněk atlasu seno_stebla.png vedle sebe (karta bere celou buňku – výřezy z jedné plochy stébel dávaly rovné hrany karet, snímek 15. 11.), trsy – buňky se stébly z paty (trčící karty), ostatní volná stébla (ležící karty); ao_pata – jas paty karty (konec 1,0), ao_cela_dole – jas spodku čela kupy v jeslích (stín koše). NEOVERENO – laděno snímkem docs/screens/funkce_jesle_seno.png vedle předlohy",
   "material": "res://textury/seno/seno.tres",
   "material_stebla": "res://textury/seno/seno_stebla.tres",
   "viditelnost_m": {
    "objem": 30.0,
    "stebla": 14.0
   },
-  "viditelnost_pozn": "kreslit jen zblízka (Visibility Range; renderer Compatibility neumí prolínání) – stébla do 14 m, objem do 30 m (dál je chlév zavřený a kupu přes dveře nevidět)"
+  "viditelnost_pozn": "kreslit jen zblízka (Visibility Range; renderer Compatibility neumí prolínání) – stébla do 14 m, objem do 30 m (dál je chlév zavřený a kupu přes dveře nevidět)",
+  "sit_pozn": "delka_krok_m – rozestup řezů podél jeslí, profil_bodu – bodů na profil (čelo + vrch), uv_m – metry na opakování textury objemu, viri – natočení vláken textury objemu podle šumu (× π; 0 = vlákna jedním směrem – „učesané“ jako došek; 0,8 dávalo na snímku 15. 11. lomené švy)"
  },
  "studna": {
   "popis": "Studna na návsi (ves.gd _studny): rumpál s klikou a vědro na laně jsou samostatné uzly Pohyb_ves_studna_rumpal_<i> a Pohyb_ves_studna_vedro_<i> – pohyblivé díly dvere.gd (Havran pohyb.gd): rumpál druh navijak (otacek otáček kolem své osy), vědro druh vedro (posun svisle dolů o hloubku k hladině, doba dur_s), skupina ves_studna_<i>, nabídka u kliky. Vědro visí vedro_pod_osou_m pod osou rumpálu nad středem šachty; lano od bubnu k uchu vědra se přepočítá. hladina_m = hloubka hladiny pod terénem (vědro sjede až k ní); terén pod studnou díru nemá – šachtu kreslí temný kruh nad terénem (ves.gd), vědro do tmy zajede a z ní vyjede.",
