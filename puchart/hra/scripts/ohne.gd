@@ -24,6 +24,8 @@ var tlacitko: Button
 var _blizko := -1             # index ohně, na který hráč míří (nabídka)
 var _mat_plamen: ShaderMaterial
 var _mat_uhliky: ShaderMaterial
+var _mat_popel: StandardMaterial3D = null
+var _mat_ohnisko: ShaderMaterial   # uhlíky kamínkového ohniště před ústím pece (slabší – leží na osvětleném materiálu modelu)
 var _site := {}               # druh -> ArrayMesh plamene
 var _disk := {}               # poloměr -> mesh disku uhlíků
 var _t_kontrola := 0.0
@@ -67,6 +69,7 @@ func _materialy() -> void:
 		var c: Array = p[k]; _mat_plamen.set_shader_parameter(k, Color(c[0], c[1], c[2]))
 	_mat_uhliky = _mat_plamen.duplicate() as ShaderMaterial; _mat_uhliky.set_shader_parameter("rezim", 1)
 	_mat_uhliky.set_shader_parameter("uhliky_meritko", float(u["meritko"])); _mat_uhliky.set_shader_parameter("uhliky_pulz", float(u["pulz"]))
+	_mat_ohnisko = _mat_uhliky.duplicate() as ShaderMaterial; _mat_ohnisko.set_shader_parameter("sila", float(u.get("ohnisko_sila", 1.0)))
 
 
 ## Síť plamene: karet svislých karet křížených kolem osy y, základna v 0, UV.y 0 dole → 1 nahoře, barva vrcholu R = fáze karty.
@@ -196,9 +199,18 @@ func _pridej(m: Dictionary, n: Node3D) -> void:
 		if (usti["ohnisko"] as Array).size() == 4:
 			var oq: Array = usti["ohnisko"]; var r_ := float(oq[3])
 			if not _disk.has(r_): _disk[r_] = _sit_disku(r_)
-			var od_ := MeshInstance3D.new(); od_.name = "UhlikyOhniste"; od_.mesh = _disk[r_]; od_.material_override = _mat_uhliky
+			var od_ := MeshInstance3D.new(); od_.name = "UhlikyOhniste"; od_.mesh = _disk[r_]; od_.material_override = _mat_ohnisko
 			_geom(od_); add_child(od_); od_.global_position = (usti["dum"] as Node3D).global_transform * Vector3(oq[0], oq[1], oq[2]) + Vector3.UP * 0.012
 			od_.global_basis = (usti["dum"] as Node3D).global_basis; o["uhliky2"] = od_
+			# žár modelu (M_Zhar* v síti <Dům>_Interier) svítí sám do bíla (emise modelu Havrana) – pod disk uhlíků popel
+			if _mat_popel == null:
+				var pc_: Array = cfg["uhliky"].get("ohnisko_popel", [0.05, 0.04, 0.035])
+				_mat_popel = StandardMaterial3D.new(); _mat_popel.albedo_color = Color(pc_[0], pc_[1], pc_[2]); _mat_popel.roughness = 1.0
+			for ch in (usti["dum"] as Node).get_children():
+				if ch is MeshInstance3D and String(ch.name).ends_with("Interier") and (ch as MeshInstance3D).mesh:
+					for i_ in (ch as MeshInstance3D).mesh.get_surface_count():
+						var sm_ := (ch as MeshInstance3D).mesh.surface_get_material(i_)
+						if sm_ and String(sm_.resource_name).begins_with("M_Zhar"): (ch as MeshInstance3D).set_surface_override_material(i_, _mat_popel)
 	if zhar:   # žár výhně: překryv sítě modelu (druhý průchod se stejným shaderem)
 		zhar.material_overlay = _mat_uhliky; o["zhar"] = zhar
 	var l := OmniLight3D.new(); l.name = "Svetlo"

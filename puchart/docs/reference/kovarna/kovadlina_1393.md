@@ -28,8 +28,11 @@ byla běžnější špalková bez rohu. Tvar podle KCD2 na výslovné přání M
 - Kovadlina: dráha 0,78 m nad zemí (tělo 0,47 m – vyšší kvůli nižšímu špalku), šířka dráhy 0,15 m, dráha 0,58 + patka 0,17 + roh 0,36 m;
   pata 0,58 × 0,34 m sedí celou plochou (oblouk mezi patkami jen 12 mm), pas 0,40 × 0,15 m, boky skoro svislé; kramle vynechány (v KCD2 nejsou).
 - Sperhák: x −0,45, z +0,20, 0,40 m nad špalkem.
-- Barvy: dráha světlá šedá ocel (sRGB 0,60–0,70), kov 0,32, drsnost 0,36–0,50 – v 1. kole kov 0,6 + albedo 0,5 zrcadlil modrou oblohu
-  (dráha tmavě modrá); boky hnědé okuje a rez (1. kolo téměř černé).
+- Barvy (3. kolo, Míša 15. 11.): dráha tmavší šedá ocel (sRGB 0,40–0,46, drsnost 0,5–0,62, kov 0,3), lesk (drsnost 0,36) jen v pruhu
+  7 cm uprostřed dráhy, kde se kove – ve hře na odpoledním světle byla dráha 2. kola bílá; boky hnědé okuje s jemným zrnem, 28 otluků hran.
+- Špalek (3. kolo): tmavé ohlazené dubové dřevo (tmavohnědé až černošedé od sazí), letokruhy na čele, okolí kovadliny začouzené se šupinkami
+  okují – 2. kolo působilo jako světlý kámen (barvy čela byly zadané lineárně 0,40 = sRGB 0,67).
+- High-poly voxel 2 mm (`high_voxel_m`; 1,6 mm potřebovalo ~2,2 GB paměti a při souběžných bězích Godotu ho zabíjel nedostatek paměti).
 
 ## Osazení ve hře
 - `pravidla/svet/funkce.json` kovadlina: model + `_stredni` (od 8 m) + `_daleko` (od 22 m, do 60 m), značka `Kovarna_Kovadlina_misto`,
@@ -49,5 +52,7 @@ Kolize: jeden uzel `Kovadlina_1393_kolize-convcolonly` (konvexní obal špalku, 
 
 ## Srovnání s KCD2 (docs/screens/kovadlina_1393_srovnani_kcd2.png)
 - 1. kolo: tvar sedí, ale tělo štíhlé (londýnský tvar), špalek vysoký s páskem, dráha modrá, boky černé.
-- 2. kolo: mohutné svislé tělo se širokým pasem, pata přímo na špalku, nízký široký kamenitě rozpraskaný špalek bez pásku, světlá šedá dráha,
-  hnědé boky. Zbývá: boky v KCD2 mají jemnější zrnitou strukturu okují; na odpoledním světle hry v otevřené kovárně je dráha přesvícená.
+- 2. kolo: mohutné svislé tělo se širokým pasem, pata přímo na špalku, nízký široký rozpraskaný špalek bez pásku – ale špalek světlý jako kámen
+  a dráha ve hře bílá.
+- 3. kolo: tmavý začouzený dubový špalek, tmavší dráha s úzkým pruhem lesku, jemné zrno okují. Zbývá: na přímém odpoledním slunci v otevřené
+  kovárně jsou boky rezavě oranžovější než v KCD2 (tam teplé šero výhně).

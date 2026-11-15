@@ -70,9 +70,15 @@
   ]
  },
  "uhliky": {
-  "_popis": "Žhavé uhlíky: plochý disk (ohniště, pec) nebo překryv sítě žáru modelu (kovárna Kovarna_Zhar, material_overlay). meritko = buněk žáru na metr, pulz = Hz pomalého dýchání žáru. Pec domu: navíc disk uhlíků v kamínkovém ohništi před ústím (mista[].usti.ohnisko [x, y, z, poloměr] v souřadnicích domu; domy.glb – plocha M_Zhar uprostřed kruhu kamenů; 1. pokus překrýt materiál modelu shaderem nebyl vidět – UV modelu mimo 0–1, snímek 15. 11.).",
+  "_popis": "Žhavé uhlíky: plochý disk (ohniště, pec) nebo překryv sítě žáru modelu (kovárna Kovarna_Zhar, material_overlay). meritko = buněk žáru na metr, pulz = Hz pomalého dýchání žáru. Pec domu: navíc disk uhlíků v kamínkovém ohništi před ústím (mista[].usti.ohnisko [x, y, z, poloměr] v souřadnicích domu; domy.glb – plocha M_Zhar uprostřed kruhu kamenů; 1. pokus překrýt materiál modelu shaderem nebyl vidět – UV modelu mimo 0–1, snímek 15. 11.). ohnisko_sila: jas disku v kamínkovém ohništi; ohnisko_popel: barva, kterou dostane plocha žáru modelu (M_Zhar svítí sama do bíla – emise modelu Havrana, snímky 15. 11.) – žhne jen disk uhlíků.",
   "meritko": 6.0,
-  "pulz": 0.6
+  "pulz": 0.6,
+  "ohnisko_sila": 0.8,
+  "ohnisko_popel": [
+   0.05,
+   0.04,
+   0.035
+  ]
  },
  "zvuk": {
   "_popis": "Praskání ohně: Havran zvuky/prostredi/krb.ogg (CC0, antumdeluge + pagdev, opengameart; Havran zvuky/seznam.txt), smyčka 90 s. Havran _add_fire_loop: unit_size 2,5, max_distance 22.",

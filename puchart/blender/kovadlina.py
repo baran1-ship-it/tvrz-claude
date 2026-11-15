@@ -777,7 +777,7 @@ def mat_drevo_autorsky(prekryv, vyska):
     ao2 = U.u("ShaderNodeAmbientOcclusion", samples=16, only_local=True); ao2.inputs["Distance"].default_value = 0.012
     alb = U.mix(U.math("SUBTRACT", 1.0, ao2.outputs["AO"]), alb, (0.03, 0.025, 0.02))   # rýhy trhlin (high-poly) tmavé
     nep = U.u("ShaderNodeTexNoise"); nep.inputs["Scale"].default_value = 60.0; nep.inputs["Detail"].default_value = 6.0
-    alb = U.mix(U.math("MULTIPLY", U.mr(nep.outputs["Fac"], 0.55, 0.7), 0.25), alb, (0.32, 0.28, 0.23))   # ohlazené světlejší plošky dřeva
+    alb = U.mix(U.math("MULTIPLY", U.mr(nep.outputs["Fac"], 0.35, 0.75), 0.18), alb, (0.06, 0.05, 0.045))   # 3. kolo: jen tmavé mapy sazí (světlé plošky dávaly na čele pravidelné tečky)
     dr = U.mix(celo, U.math("ADD", 0.55, U.math("MULTIPLY", wR.outputs[0], 0.4)), U.math("ADD", 0.62, U.math("MULTIPLY", vy.outputs[0], 0.3)))
     nm = U.u("ShaderNodeNormalMap", uv_map="tex"); nm.inputs["Strength"].default_value = 1.0; U.ln(wN.outputs[0], nm.inputs["Color"])
     bump = U.u("ShaderNodeBump"); bump.inputs["Distance"].default_value = 0.004; bump.inputs["Strength"].default_value = 1.0

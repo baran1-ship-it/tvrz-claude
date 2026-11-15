@@ -76,7 +76,7 @@
    "volny_prostor": "š 1,4 (x −2,91…−1,50) × h 2,1 (z 1,01…3,10) × v 2,29",
    "kourovod": "kouřová jizba: žádný komín, kouř z ústí pece stoupá pod začouzený záklop (M_PovalaZacouzena y 2,59, horní věnce roubení M_RoubeniZacouzene od y 2,4) a odchází dveřmi / dymníkem do síně a pod střechu (Havran ves_domy.py); nový model pece to má zachovat (bez komína)",
    "znacka": "Dum2_Pec_Usti",
-   "snimek": "docs/screens/pec_stav_dum2.png"
+   "snimek": "docs/screens/pec_stav_dum2.jpg"
   },
   {
    "id": "pec_rychta",
@@ -89,7 +89,7 @@
    "volny_prostor": "š 1,5 (x −3,70…−2,20) × h 2,1 (z −0,45…1,65) × v 2,29",
    "kourovod": "kouřová jizba: žádný komín, kouř z ústí pece stoupá pod začouzený záklop (M_PovalaZacouzena y 2,59, horní věnce roubení M_RoubeniZacouzene od y 2,4) a odchází dveřmi / dymníkem do síně a pod střechu (Havran ves_domy.py); nový model pece to má zachovat (bez komína); krb Rychty (vlozit rychta_krb) má vlastní komín",
    "znacka": "Rychta_Pec_Usti",
-   "snimek": "docs/screens/pec_stav_rychta.png"
+   "snimek": "docs/screens/pec_stav_rychta.jpg"
   },
   {
    "id": "krcma_kuchyne",
@@ -100,7 +100,7 @@
    "natoceni": "–",
    "volny_prostor": "viz NAVOD_KRCMA_L.md (model z Disku)",
    "kourovod": "dle modelu krčmy (dymník nad ohništěm)",
-   "snimek": "docs/screens/pec_stav_krcma_kuchyne.png"
+   "snimek": "docs/screens/pec_stav_krcma_kuchyne.jpg"
   },
   {
    "id": "krcma_pec_senkovna",
@@ -111,7 +111,7 @@
    "natoceni": "–",
    "volny_prostor": "obal kolize",
    "kourovod": "kuchyní",
-   "snimek": "docs/screens/pec_stav_krcma.png"
+   "snimek": "docs/screens/pec_stav_krcma.jpg"
   },
   {
    "id": "krcma_pec_jizba",
@@ -132,7 +132,7 @@
    "soucasny_stav": "kolize Hajovna_Kol_Ohniste x 0,80…2,10, y 0,45…0,89, z −2,70…−1,30; značka Hajovna_Ohen_Sin (1,45; 1,05; −2,00)",
    "volny_prostor": "obal kolize + 0,5 m",
    "kourovod": "dle modelu (NAVOD_HAJOVNA.md)",
-   "snimek": "docs/screens/pec_stav_hajovna.png"
+   "snimek": "– (snímek v noci černý, místnost bez světla z otvorů)"
   },
   {
    "id": "hajovna_pec",
@@ -151,7 +151,7 @@
    "druh": "výheň",
    "soucasny_stav": "Kovarna_Kol_Vyhen x −2,10…−0,30, y 0…2,55, z −2,13…−1,00; žár Kovarna_Zhar x −1,50…−0,87, y 0,81–0,91; značka Kovarna_Ohen_bod (−1,19; 0,95; −1,65)",
    "kourovod": "dymník výhně v modelu",
-   "snimek": "docs/screens/pec_stav_kovarna.png"
+   "snimek": "docs/screens/pec_stav_kovarna.jpg"
   },
   {
    "id": "hradA_kuchyne",
@@ -163,7 +163,7 @@
    "volny_prostor": "kuchyně 5,45 × 5,8 m, výška 3,26 m (F0 39,10 → strop 42,36)",
    "kourovod": "dýmník do podkroví (Žebrák) – kouř pod střechu",
    "znacka": "HradA_Ohen_Kuchyne (ohniště, hoří pořád)",
-   "snimek": "docs/screens/pec_stav_hrad_kuchyne.png"
+   "snimek": "docs/screens/pec_stav_hrad_kuchyne.jpg"
   },
   {
    "id": "hradA_kamna",
@@ -175,7 +175,7 @@
    "volny_prostor": "roh světnice u hradby a příčky: 1,5 × 1,5 × 3,26 m",
    "kourovod": "kouř topeništěm zpět do síně (kamna přikládaná zvenku, Žebrák/Radyně) → síň/podkroví; žádný komín",
    "znacka": "HradA_Ohen_Kamna",
-   "snimek": "docs/screens/pec_stav_hrad_kamna.png"
+   "snimek": "docs/screens/pec_stav_hrad_kamna.jpg"
   },
   {
    "id": "hradA_krb_navrh",
@@ -185,23 +185,23 @@
    "soucasny_stav": "krb v modelu není; holá kamenná zeď hradby",
    "poloha": "střed přední hrany ohniště na podlaze (−8,68; 42,60; −1,36) ve hře = W(u 6,7; v −3,0; F1), na zdi hradby",
    "natoceni": "krb čelem do síně: yaw 98° (směr +s)",
-   "volny_prostor": "š 1,6 (u 5,9…7,5; vlevo 0,9 m k topeništi kamen v příčce u 5,0, vpravo horní část schodů do podkroví u příčky 8,9) × h 0,9 × v 3,26 (strop F2 46,1 − 0,24)",
+   "volny_prostor": "š 1,6 (u 5,9…7,5) × h 0,9 × v 3,26 (podlaha 42,60, strop 45,86); zeď hradby v u 5,1–8,5 bez oken (paprsky v puchart.glb 15. 11.), schody do podkroví začínají u 7,8 (první stupeň u 8,0 v −1,5)",
    "kourovod": "komín v tloušťce zdi hradby (1,1 m) nebo přizděný plášť přes podkroví; střecha začíná v koruně hradby → ústí komína nad korunou u okapu",
    "jistota": "NAVRH (14. st. na hradech převládají kachlová kamna, krb síně doložen typově – Valdek)",
-   "snimek": "docs/screens/ohen_krb_hrad.png, docs/screens/hradA_sin_den.png"
+   "snimek": "docs/screens/ohen_krb_hrad.png (síň patra ve dne s lampou – holá zeď hradby vlevo od schodů = místo krbu)"
   },
   {
    "id": "hradB_krb_navrh",
    "stavba": "hrad B, palác (hrad_puchart.json palac, osa x 49,0–58,8 z 146,6)",
-   "mistnost": "1. patro – síň (stolování, příjem hostů): x 49,55…58,25, z 143,15…150,05, podlaha y 14,63, strop y 18,55; schody podél západní stěny, okna ve východním čele a severní stěně",
+   "mistnost": "1. patro – síň (stolování, příjem hostů): x 49,55…58,25, z 143,15…150,05, podlaha y 14,63, strop y 18,55 (rozbor paprsky v puchart.glb 15. 11.): severní stěna (z 143,15) = schody do 2. patra (pata x ~51), jižní stěna (z 150,05) okna x 51,0–51,8 a 54,6–55,4 a otvor schodů z přízemí podél ní (z ~149,5, x 51–57,5, zábradlí), západní okna z 144,6–145,4 a 148,2–149,0, východní čelo (hradba nad skalou) okna z 144,0–144,9 a 147,6–148,5",
    "druh": "NÁVRH: velký krb s pláštěm a římsou",
    "soucasny_stav": "krb není; stůl (56,2; 14,63; 146,6)",
-   "poloha": "na jižní stěně (z 143,15) uprostřed x 53,9: střed přední hrany ohniště (53,9; 14,63; 143,15)",
-   "natoceni": "čelem na sever do síně (yaw 0°, +z)",
-   "volny_prostor": "š 2,2 (x 52,8…55,0) × h 1,0 (z 143,15…144,15) × v 3,9",
-   "kourovod": "komín ve zdi / přizděný přes 2. patro (komnata, podlaha 18,63) a podkroví nad střechu",
+   "poloha": "východní čelo mezi okny: střed přední hrany ohniště (57,32; 14,63; 146,25) – zadní stěna krbu na líci x 58,22",
+   "natoceni": "čelem na západ do síně: yaw −90° (+Z modelu krbu = −x hry)",
+   "volny_prostor": "š 1,8 (z 145,35…147,15; plné zdivo z 145,0…147,5 mezi okenními nikami) × h 0,9 (x 57,32…58,22) × v 3,9 (14,63…18,55)",
+   "kourovod": "komín v tloušťce východního čela (hradba nad skalní stěnou) přes 2. patro (komnata, podlaha 18,63) a podkroví nad střechu; v komnatě 2. patra plášť komína u čela",
    "jistota": "NAVRH",
-   "snimek": "docs/screens/hradB_sin_jih.png"
+   "snimek": "docs/screens/hradB_sin.png (pohled na východ, krb mezi dvěma okny)"
   }
  ],
  "navrhy_hrad": "viz mista_pro_modelare hradA_krb_navrh, hradB_krb_navrh – v modelu hradu (blender/puchart_hrad.py) dnes žádný krb není; modelář dodá krb jako glb se značkou HradA_Krb_Ohen1 / HradB_Krb_Ohen1 (ohne.json krb_obecny), vložení do hradu doplnit po dodání (stejně jako vlozit u Rychty)",
