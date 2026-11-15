@@ -58,6 +58,7 @@ Chalupní pec: hliněná klenutá pec na kamenné podezdívce, ústí s čelem, 
 a trojnožkou, začouzené okolí ústí a strop, lavice kolem, zápecí. Hradní kamna: kachle 14. st.
 (miskové/nádobkové) v hliněném plášti. Ohniště černé kuchyně: vyvýšené kamenné, dýmník, trojnožka a kotel.
 Snímky současného stavu: docs/screens/pec_stav_*.jpg.
+**Dodáno 15. 11.** (Topeni_1400 + Doplněk, Disk): osazeno podle `pravidla/svet/topeni.json` (vlozit, proc u každého místa) – pece chalup a hájovny Pec_Chalupni, krčma Pec_Krcma + Topeniste_Kuchynske_Siroke, hrad A kuchyně Topeniste (bez odtahu) a Kamna_Hradni_Nadobkova, hrad B Krb_Sinovy_Vysoky, Rychta Krb_Rychta + 5× Komin_Rychta_Dil_1m (síňový krb je na jizbu vysoký), krb síně hradu A nevložen (blokoval by schody do podkroví – chyby.md 341), Zacouzeni_Stropu nevloženo (omítka na dřevěném záklopu – 343); snímky docs/screens/topeni_*.png.
 
 ## 8) Seno (předloha docs/reference/seno/kcd1_seno_staj_misa_15_11.jpg)
 Fotorealistické suché luční seno, bledé slámově béžovo-šedé, matné; hustá spleť tenkých zvlněných stébel,
