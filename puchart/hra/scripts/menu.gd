@@ -247,7 +247,7 @@ func show_page(page: String) -> void:
 			_note(String(vk.text("bezi")) % [vk.bezici()["nazev"], vk.adapter, vk.api])
 			if vk.duvod() != "": _note(vk.duvod())
 			for v: Dictionary in vk.cfg.get("volby", []):
-				var bezi := String(v["metoda"]) == vk.metoda
+				var bezi: bool = String(v["metoda"]) == vk.metoda
 				var b := _btn(("✓ " if bezi else "") + String(v["nazev"]), "vyk:" + String(v["id"]), true)
 				b.disabled = bezi
 				if not bezi: first = _maybe(first, b)

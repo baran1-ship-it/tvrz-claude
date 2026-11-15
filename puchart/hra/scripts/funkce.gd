@@ -6,6 +6,7 @@ extends Node
 ## - měch kovárny (Kovarna_Paka, Kovarna_Mech, Kovarna_Paka_uchop): „Foukat měchem“ – páka a měch pumpují, výheň se rozhoří (ohne.gd)
 ## - místa spánku (Hajovna_Spani_Hrac, KrcmaL_Spani_Hrac, pryčny chýší): „Lehnout si“ – lehne si a vybere, do kdy spát (menu_hrace)
 ## - žlab (Dum2_Kol_Zlab): „Nalít vodu“ – ve žlabu se objeví hladina (shader vody potoků), zůstane
+## - jesle nad žlabem (dům najde přes Dum2_Kol_Zlab, tvar z dat): „Nasypat seno“ – v jeslích kupa sena (objem + karty stébel), zůstane
 ## Tlačítko ve stylu dveří (svitek) nad ostatními tlačítky, jen zaměřená věc (zamer.gd) – jako lavice.gd.
 const Pravidla := preload("res://scripts/pravidla.gd")
 const Zamer := preload("res://scripts/zamer.gd")
@@ -91,6 +92,15 @@ static func polozky(h: Node) -> Array:
 				var ab := aabb_kolize(sb, dum)
 				out.append({"druh": "zlab", "nazev": String(zl["nabidka"]), "pos": dum.global_transform * Vector3(ab.get_center().x, ab.end.y, ab.get_center().z),
 					"vlastni": [(sb as CollisionObject3D).get_rid()], "dum": dum, "aabb": ab, "kolize": String(jm), "voda": null})
+	var je: Dictionary = cfg("jesle")
+	for jm in je["kolize"]:
+		var tv: Dictionary = je["tvar"][jm]
+		for k: Node in _koreny(h):
+			for sb in k.find_children(String(jm), "StaticBody3D", true, false):
+				var dum := sb.get_parent() as Node3D
+				var b: Array = tv["bod"]
+				out.append({"druh": "jesle", "nazev": String(je["nabidka"]), "pos": dum.global_transform * Vector3(b[0], b[1], b[2]),
+					"vlastni": [], "dum": dum, "kolize": String(jm), "seno": null})
 	return out
 
 
@@ -115,6 +125,7 @@ static func nejblizsi(pol: Array, cam: Camera3D) -> Dictionary:
 	var dosah := float(cfg("nabidka")["dosah_m"]); var out := {}; var best := 1e9
 	for p: Dictionary in pol:
 		if p["druh"] == "zlab" and p["voda"] != null: continue   # voda už je
+		if p["druh"] == "jesle" and p["seno"] != null: continue  # seno už je
 		var d := cam.global_position.distance_to(p["pos"])
 		var ds := float(cfg("mech")["dosah_m"]) if p["druh"] == "mech" else dosah
 		if d >= ds: continue
@@ -135,6 +146,7 @@ func pouzij_polozku(p: Dictionary) -> void:
 		"mech": foukej(p)
 		"spani": lehni(p)
 		"zlab": nalij(p)
+		"jesle": nasyp(p)
 
 
 ## ---------------------------------------------------------------- měch (Havran kovarna_mech.gd pumpuj + main.gd boost výhně)
@@ -221,6 +233,119 @@ func nalij(p: Dictionary) -> void:
 		for k: String in zl["shader"]: m2.set_shader_parameter(k, float(zl["shader"][k]))   # stojatá zakalená voda v korytě
 	(p["dum"] as Node3D).add_child(mi)
 	p["voda"] = mi
+
+
+## ---------------------------------------------------------------- jesle (kupa sena: objem po profilu jeslí + karty stébel)
+## Profil kupy v rovině (y, z) modelu domu pro parametr s 0..1: čelo za příčkami odspodu nahoru (s 0..0,5), pak vrch kupy
+## od horního břevna k roubení (s 0,5..1). Výška vrchu = kupa_m × tvar oblouku × útlum u čel × (1 + šum); čelo i vrch
+## posune šum podél normály profilu. Vrací [bod, normála profilu (bez šumu)].
+static func _jesle_bod(tv: Dictionary, x: float, s: float, sum: FastNoiseLite) -> Array:
+	var d: Array = tv["pricky_dole"]; var n: Array = tv["pricky_nahore"]
+	var x0 := float(tv["x"][0]); var x1 := float(tv["x"][1])
+	var kraj := clampf(minf(x - x0, x1 - x) / 0.25, 0.0, 1.0); kraj = kraj * kraj * (3.0 - 2.0 * kraj)   # útlum kupy k čelům jeslí (0,25 m)
+	var pricka := Vector2(float(n[0]) - float(d[0]), float(n[1]) - float(d[1]))   # (dy, dz) osy příček
+	var ven := Vector2(-pricka.y, pricka.x).normalized()                       # normála čela (do chléva: +z, dolů)
+	if ven.y < 0.0: ven = -ven
+	var pred := float(tv["pred_prickami_m"])
+	var p: Vector2; var nrm: Vector2
+	if s <= 0.5:
+		var t := s / 0.5
+		p = Vector2(float(d[0]), float(d[1])) + pricka * t - ven * pred; nrm = ven
+	else:
+		var t := (s - 0.5) / 0.5   # 0 u horního břevna → 1 u roubení
+		var top := Vector2(float(n[0]), float(n[1])) - ven * pred
+		var z := lerpf(top.y + float(tv["kupa_ven_m"]) * sin(t * PI) * 0.6, float(tv["stena_z"]), t)
+		var oblouk := sin(pow(t, 0.7) * PI) * 0.85 + t * 0.35   # vrchol blíž čelu, u roubení kupa opřená výš
+		p = Vector2(top.x + float(tv["kupa_m"]) * oblouk * (0.35 + 0.65 * kraj), z)
+		nrm = Vector2(1.0, (0.5 - t) * 1.2).normalized()
+	var a := float(tv["sum_m"]) * sum.get_noise_2d(x, s * 3.0) * (0.4 + 0.6 * kraj)
+	return [Vector3(x, p.x + nrm.x * a, p.y + nrm.y * a), Vector3(0.0, nrm.x, nrm.y)]
+
+
+## Síť kupy sena v souřadnicích modelu domu: [ArrayMesh objem, ArrayMesh stébla] (bez materiálu).
+static func jesle_site(tv: Dictionary, je: Dictionary) -> Array:
+	var si: Dictionary = je["sit"]; var stc: Dictionary = je["stebla"]
+	var sum := FastNoiseLite.new(); sum.seed = int(stc["seed"]); sum.frequency = 1.0 / float(tv["sum_vlna_m"])
+	var x0 := float(tv["x"][0]); var x1 := float(tv["x"][1])
+	var nx := maxi(2, int(ceil((x1 - x0) / float(si["delka_krok_m"])))); var ns := int(si["profil_bodu"])
+	var mrz: Array = []
+	for i in nx + 1:
+		var rad: Array = []
+		for j in ns + 1: rad.append(_jesle_bod(tv, lerpf(x0, x1, float(i) / nx), float(j) / ns, sum)[0])
+		mrz.append(rad)
+	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var uvm := float(si["uv_m"]); var ao_dole := float(stc["ao_cela_dole"])
+	var delky: Array = [0.0]
+	for j in ns: delky.append(float(delky[j]) + (mrz[0][j] as Vector3).distance_to(mrz[0][j + 1]))
+	for i in nx:
+		for j in ns:
+			var q := [[i, j], [i + 1, j + 1], [i + 1, j], [i, j], [i, j + 1], [i + 1, j + 1]]   # po směru hodinových ručiček zvenku (přední strana Godotu)
+			for ij: Array in q:
+				var v: Vector3 = mrz[ij[0]][ij[1]]
+				var s := float(ij[1]) / ns
+				st.set_color(Color.WHITE * lerpf(ao_dole, 1.0, smoothstep(0.0, 0.55, s)))   # spodek čela ve stínu koše
+				st.set_uv(Vector2(v.x / uvm, float(delky[ij[1]]) / uvm)); st.add_vertex(v)
+	st.generate_normals(); st.generate_tangents()
+	var objem := st.commit()
+	# --- karty stébel
+	var rnd := RandomNumberGenerator.new(); rnd.seed = int(stc["seed"])
+	var ks := SurfaceTool.new(); ks.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var tex_m := float(stc["textura_sirka_m"]); var ao_p := float(stc["ao_pata"])
+	for c in int(stc["pocet"]):
+		var x := rnd.randf_range(x0 + 0.03, x1 - 0.03)
+		var s := pow(rnd.randf(), 0.8) * 0.5 + 0.5 if rnd.randf() < 0.55 else rnd.randf_range(0.04, 0.5)   # víc na vrchu (je vidět)
+		var bn: Array = _jesle_bod(tv, x, s, sum)
+		var b: Vector3 = bn[0]
+		var e := 0.004
+		var nn: Vector3 = (_jesle_bod(tv, x + e, s, sum)[0] as Vector3 - (_jesle_bod(tv, x - e, s, sum)[0] as Vector3)).cross(
+			(_jesle_bod(tv, x, minf(s + e, 1.0), sum)[0] as Vector3) - (_jesle_bod(tv, x, maxf(s - e, 0.0), sum)[0] as Vector3))
+		var nrm: Vector3 = bn[1]
+		nn = nn.normalized() if nn.length() > 1e-6 else nrm
+		if nn.dot(nrm) < 0.0: nn = -nn
+		var lezi := rnd.randf() < float(stc["lezi_podil"])
+		var sk: Array = stc["lezi_sklon_st"] if lezi else stc["trci_sklon_st"]
+		var sklon := deg_to_rad(rnd.randf_range(float(sk[0]), float(sk[1])))
+		var t1 := nn.cross(Vector3.UP if absf(nn.y) < 0.9 else Vector3.RIGHT).normalized(); var t2 := nn.cross(t1)
+		var az := rnd.randf() * TAU
+		var smer := (nn * cos(sklon) + (t1 * cos(az) + t2 * sin(az)) * sin(sklon)).normalized()
+		var L := rnd.randf_range(float(stc["delka_m"][0]), float(stc["delka_m"][1]))
+		var w := rnd.randf_range(float(stc["sirka_m"][0]), float(stc["sirka_m"][1]))
+		var bok := smer.cross(nn).normalized()   # ležící: karta v tečné rovině povrchu; trčící: natočená náhodně kolem stébla
+		if bok.length() < 0.5: bok = t1
+		var toc := 0.35 if lezi else PI * 0.5
+		bok = bok.rotated(smer, rnd.randf_range(-toc, toc))
+		var pata := b - nn * float(stc["zanor_m"])
+		var stred := pata + smer * L * 0.5 + Vector3.DOWN * L * float(stc["previs_m"]) * 0.3
+		var konec := pata + smer * L + Vector3.DOWN * L * float(stc["previs_m"])
+		var u0 := rnd.randf() * maxf(0.0, 1.0 - w / tex_m); var u1 := u0 + minf(1.0, w / tex_m)
+		var ton := rnd.randf_range(0.88, 1.1)
+		var radky := [[pata, 1.0, ao_p], [stred, 0.5, lerpf(ao_p, 1.0, 0.6)], [konec, 0.0, 1.0]]
+		for r in 2:
+			var a: Array = radky[r]; var bb: Array = radky[r + 1]
+			var wa := w * (1.0 if r == 0 else 0.8); var wb := w * (0.8 if r == 0 else 0.6)
+			var v4 := [[a[0] - bok * wa * 0.5, u0, a[1], a[2]], [a[0] + bok * wa * 0.5, u1, a[1], a[2]],
+				[bb[0] + bok * wb * 0.5, u1, bb[1], bb[2]], [bb[0] - bok * wb * 0.5, u0, bb[1], bb[2]]]
+			for k in [0, 1, 2, 0, 2, 3]:
+				var q4: Array = v4[k]
+				ks.set_color(Color.WHITE * float(q4[3]) * ton); ks.set_normal(nn); ks.set_uv(Vector2(float(q4[1]), float(q4[2])))
+				ks.add_vertex(q4[0])
+	return [objem, ks.commit()]
+
+
+func nasyp(p: Dictionary) -> void:
+	if p["seno"] != null: return
+	var je: Dictionary = cfg("jesle")
+	var site := jesle_site(je["tvar"][p["kolize"]], je)
+	var uz := Node3D.new(); uz.name = "SenoJesle"
+	var vid: Dictionary = je["viditelnost_m"]
+	for i in 2:
+		var mi := MeshInstance3D.new(); mi.name = ["Objem", "Stebla"][i]; mi.mesh = site[i]
+		mi.material_override = load(String(je["material"] if i == 0 else je["material_stebla"]))
+		mi.visibility_range_end = float(vid["objem"] if i == 0 else vid["stebla"])
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if i == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		uz.add_child(mi)
+	(p["dum"] as Node3D).add_child(uz)
+	p["seno"] = uz
 
 
 func _process(dt: float) -> void:

@@ -24,9 +24,11 @@
     "rendering/renderer/rendering_method.mobile": "mobile",
     "rendering/rendering_device/driver": "vulkan",
     "rendering/rendering_device/driver.android": "vulkan",
-    "rendering/rendering_device/fallback_to_opengl3": true
+    "rendering/rendering_device/fallback_to_opengl3": true,
+    "threading/worker_pool/max_threads": 16
    },
-   "pozn": "rendering_method i .mobile: na Androidu platí klíč s příznakem .mobile (project.godot ho má = gl_compatibility), na PC holý klíč – stejný soubor přepne obojí (zkouška v kontejneru)"
+   "pozn": "rendering_method i .mobile: na Androidu platí klíč s příznakem .mobile (project.godot ho má = gl_compatibility), na PC holý klíč – stejný soubor přepne obojí (zkouška v kontejneru)",
+   "pozn_vlakna": "Kontejner 15. 11. (lavapipe, 4 jádra → 4 pracovní vlákna): hra v Mobile/Vulkan ZAMRZLA při načítání (hlavni.gd _hrad_lod → load puchart_daleko.glb, první „Shader cache miss SceneForwardMobileShaderRD“): hlavní vlákno drží rekurzivní mutex Godotu a čeká na skupinovou úlohu (kompilace shaderu ShaderRD::_compile_version_end → wait_for_group_task_completion), všechna 4 pracovní vlákna čekají na tentýž mutex (gdb: owner = hlavní vlákno, 0 % CPU) = vyhladovění poolu. Se 16 vlákny (threading/worker_pool/max_threads) prošlo dál 2× ze 2. Compatibility kompiluje shadery synchronně na hlavním vlákně, tam se to stát nemůže. Tablet Pad 8 má 8 jader → výchozí 8 vláken – zamrznutí NEOVERENO, Android by ho po ~5 s ukázal jako „aplikace neodpovídá“ = vypadá jako pád při vstupu do hry (možná i Havran). Proto 16 vláken jen ve volbě Vulkan (Compatibility beze změny)."
   }
  ],
  "vychozi": "compatibility",

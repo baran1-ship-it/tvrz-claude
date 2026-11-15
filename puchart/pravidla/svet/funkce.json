@@ -1,5 +1,5 @@
 {
- "popis": "Funkční věci ve stavbách (Míša 15. 11.: „co může mít funkci, tak ji mít bude – vrátka, branky, vrata, dmychadlo v kovárně apod.“; spánek „ano, jako Havran“; žlab „nalít vodu“). hra/scripts/funkce.gd najde ve vložených stavbách uzly z dat (měch kovárny, místa spánku, žlab) a nabídne je tlačítkem ve stylu dveří jen zaměřené (zamer.gd); studnu (rumpál a vědro) staví ves.gd jako pohyblivé díly dvere.gd (druh navijak + vedro). Kopie v hra/pravidla/svet/funkce.json (hra čte res://pravidla/svet).",
+ "popis": "Funkční věci ve stavbách (Míša 15. 11.: „co může mít funkci, tak ji mít bude – vrátka, branky, vrata, dmychadlo v kovárně apod.“; spánek „ano, jako Havran“; žlab „nalít vodu“; jesle „nasypat seno“). hra/scripts/funkce.gd najde ve vložených stavbách uzly z dat (měch kovárny, místa spánku, žlab, jesle) a nabídne je tlačítkem ve stylu dveří jen zaměřené (zamer.gd); studnu (rumpál a vědro) staví ves.gd jako pohyblivé díly dvere.gd (druh navijak + vedro). Kopie v hra/pravidla/svet/funkce.json (hra čte res://pravidla/svet).",
  "zdroj": "Havran větev claude/new-session-0dtk58: scripts/kovarna_mech.gd, scripts/svet.gd _kovarna_dil / _krcma_dil (spani_hrac), scripts/main.gd _on_use (kovarna_mech, bed), offer_sleep, sleep_until, scripts/menu_hrace.gd SPANEK, scripts/pohyb.gd (vedro, navijak), blender/studna.py; pravidla/svet/lokace.json kovarna_ves",
  "nabidka": {
   "popis": "Tlačítko svitku (Styl) nad tlačítky dveří, žebříku a lavice; dosah_m od očí k místu použití (jako lavice hrac.json sezeni.dosah_m)",
@@ -101,6 +101,81 @@
    "hloubka_barvy": 0.1
   },
   "shader_pozn": "parametry shaderu vody přepsané pro koryto (ostatní z voda_hra.json vzhled_13_11): rychlost 0 = stojatá; cirost 0,12 m a hloubka_barvy 0,1 m – voda v korytě stojí, je zakalená (píce, dno ze dřeva) a v 10 cm musí hladinu být vidět (s čirostí potoka 0,5 m krytí jen 18 % – na snímku 15. 11. hladina nebyla vidět vůbec). NEOVERENO – laděno snímkem docs/screens/funkce_zlab_voda.png"
+ },
+ "jesle": {
+  "popis": "Jesle v chlévě Dum2 (žebřinový koš nad žlabem, šikmé příčky v síti Dum2_Interier): nabídka „Nasypat seno“ (bod zaměření bod [x, y, z] modelu – čelo kupy nad horním břevnem) → v jeslích se objeví kupa sena, zůstane (nabídka zmizí). Kupa = objem (síť po profilu jeslí: čelo těsně za příčkami, nahoře kupa nad horním břevnem k roubení, nepravidelná podle šumu) + karty stébel (2 články, ohnuté, různé délky a sklony; část leží po povrchu, část trčí a přesahuje přes příčky a horní břevno). Barva vrcholů = ztmavení do hloubky (AO): pata karty a spodek čela tmavší, konce stébel světlé (předloha KCD1). Materiály hra/textury/seno/seno.tres (objem) a seno_stebla.tres (karty, alfa nůžky + alfa do pokrytí jako stebla.gdshader) jdou použít i jinde (stodoly, půdy). Kreslí se jen zblízka (viditelnost_m). Uzel hledá funkce.gd přes kolizi žlabu (stejný dům), tvar je v souřadnicích modelu domu.",
+  "zdroj": "Míša 15. 11.: jesle „nasypat seno“, „seno ale fotorealistické“, předloha kvality docs/reference/seno/kcd1_seno_staj_misa_15_11.jpg (KCD1 stáj, kupa sena: měkký objem, tisíce stébel, světlé konce, tmavá hloubka, okraje se rozpadají do stébel, bledě slámová béžová – medián sRGB 143,130,107); tvar podle modelu domy.glb (rozbor vrcholů 15. 11.): příčky jeslí Dum2_Interier M_RoubeniVnitrni_001 od (y 1,30; z −4,36) k (y 1,90; z −3,85), rozteč 0,14 m, x −2,65…1,60, dolní břevno y 1,26…1,34 u roubení z −4,41, horní břevno y 1,88…1,96 z −3,81…−3,90; stará placka sena M_Slama v jeslích z (1,35; −4,32) k (2,0–2,12; −3,92) – kupa ji překryje; textury ambientCG ThatchedRoof001A (CC0) přebarvené na seno (nastroje/seno_textury.py, LICENCE v hra/textury/seno/)",
+  "kolize": [
+   "Dum2_Kol_Zlab"
+  ],
+  "nabidka": "Nasypat seno",
+  "tvar_pozn": "v souřadnicích modelu domu: x [od, do] délka jeslí (čela 2 cm od krajních příček), pricky_dole/pricky_nahore [y, z] osa příček, pred_prickami_m – čelo kupy za osou příček (poloměr příčky 2 cm + 1 cm), stena_z – roubení za jeslemi, kupa_m – výška kupy nad horním koncem příček uprostřed hloubky, kupa_ven_m – jak daleko kupa přečnívá přes horní břevno do chléva, sum_m – nepravidelnost povrchu (amplituda šumu), sum_vlna_m – vlnová délka šumu",
+  "tvar": {
+   "Dum2_Kol_Zlab": {
+    "x": [
+     -2.6,
+     1.56
+    ],
+    "pricky_dole": [
+     1.3,
+     -4.36
+    ],
+    "pricky_nahore": [
+     1.9,
+     -3.85
+    ],
+    "pred_prickami_m": 0.03,
+    "stena_z": -4.39,
+    "kupa_m": 0.17,
+    "kupa_ven_m": 0.07,
+    "sum_m": 0.045,
+    "sum_vlna_m": 0.35,
+    "bod": [
+     -0.5,
+     2.0,
+     -4.0
+    ]
+   }
+  },
+  "sit": {
+   "delka_krok_m": 0.1,
+   "profil_bodu": 14,
+   "uv_m": 0.45
+  },
+  "stebla": {
+   "pocet": 1200,
+   "lezi_podil": 0.6,
+   "delka_m": [
+    0.16,
+    0.42
+   ],
+   "sirka_m": [
+    0.06,
+    0.13
+   ],
+   "trci_sklon_st": [
+    25.0,
+    65.0
+   ],
+   "lezi_sklon_st": [
+    68.0,
+    88.0
+   ],
+   "previs_m": 0.12,
+   "zanor_m": 0.03,
+   "textura_sirka_m": 0.4,
+   "ao_pata": 0.6,
+   "ao_cela_dole": 0.55,
+   "seed": 1393
+  },
+  "stebla_pozn": "pocet karet (po 4 troj.) + objem ≈ 5,9 tis. troj. (rozpočet koordinátora 6–8 tis. u jeslí); lezi_podil = karty skoro podél povrchu (vrstvy stébel), ostatní trčí (sklon od normály); previs_m – konec stébla klesne o tolik × délka (tíha); textura_sirka_m – kolik metrů karty odpovídá celé šířce textury stébel (vybírá se náhodný úsek); ao_pata – jas paty karty (konec 1,0), ao_cela_dole – jas spodku čela kupy v jeslích (stín koše). NEOVERENO – laděno snímkem docs/screens/funkce_jesle_seno.png vedle předlohy",
+  "material": "res://textury/seno/seno.tres",
+  "material_stebla": "res://textury/seno/seno_stebla.tres",
+  "viditelnost_m": {
+   "objem": 30.0,
+   "stebla": 14.0
+  },
+  "viditelnost_pozn": "kreslit jen zblízka (Visibility Range; renderer Compatibility neumí prolínání) – stébla do 14 m, objem do 30 m (dál je chlév zavřený a kupu přes dveře nevidět)"
  },
  "studna": {
   "popis": "Studna na návsi (ves.gd _studny): rumpál s klikou a vědro na laně jsou samostatné uzly Pohyb_ves_studna_rumpal_<i> a Pohyb_ves_studna_vedro_<i> – pohyblivé díly dvere.gd (Havran pohyb.gd): rumpál druh navijak (otacek otáček kolem své osy), vědro druh vedro (posun svisle dolů o hloubku k hladině, doba dur_s), skupina ves_studna_<i>, nabídka u kliky. Vědro visí vedro_pod_osou_m pod osou rumpálu nad středem šachty; lano od bubnu k uchu vědra se přepočítá. hladina_m = hloubka hladiny pod terénem (vědro sjede až k ní); terén pod studnou díru nemá – šachtu kreslí temný kruh nad terénem (ves.gd), vědro do tmy zajede a z ní vyjede.",

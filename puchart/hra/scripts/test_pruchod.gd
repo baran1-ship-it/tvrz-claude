@@ -530,6 +530,44 @@ func _test_zlab() -> void:
 	vysledek["zlab_voda"] = "OK" if spatne.is_empty() and n > 0 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádný žlab ve světě")
 	print("PRUCHOD zlab_voda ", vysledek["zlab_voda"], " (žlabů %d)" % n)
 
+## jesle_seno (Míša 15. 11.: jesle „nasypat seno“, „seno ale fotorealistické“): u jeslí nad žlabem nabídka „Nasypat seno“, po stisku
+## kupa sena (objem + karty stébel, materiály seno.tres / seno_stebla.tres) v jeslích: v délce jeslí, vrch nad horním koncem příček,
+## čelo za příčkami (kromě stébel), za roubením nic; síť kreslí jen zblízka; rozpočet troj. ≤ 8 tis.; nabídka pak zmizí, seno zůstane.
+func _test_jesle() -> void:
+	var fu := _funkce(); var spatne: Array = []; var n := 0
+	var je: Dictionary = Pravidla.cti("funkce", "jesle")
+	for p: Dictionary in fu.polozky_:
+		if p["druh"] != "jesle": continue
+		n += 1
+		var dum: Node3D = p["dum"]; var tv: Dictionary = je["tvar"][p["kolize"]]
+		var u: Dictionary = await _k_veci(p["pos"], _pred(p["pos"], dum, dum.global_position.y, 1.3))
+		if u.is_empty() or u["p"] != p:
+			spatne.append("%s: není nabídka %s (hráč [%.2f, %.2f, %.2f])" % [dum.name, je["nabidka"], hrac.position.x, hrac.position.z, hrac.position.y]); continue
+		fu.pouzij_polozku(p)
+		await get_tree().process_frame
+		var uz: Node3D = p["seno"]
+		var ok := uz != null and uz.get_child_count() == 2
+		var ab := AABB(); var abo := AABB(); var troj := 0; var mat_ok := false; var vid_ok := false
+		if ok:
+			var ob := uz.get_child(0) as MeshInstance3D; var stb := uz.get_child(1) as MeshInstance3D
+			abo = ob.mesh.get_aabb(); ab = abo.merge(stb.mesh.get_aabb())
+			for m: Mesh in [ob.mesh, stb.mesh]:
+				for si in m.get_surface_count(): troj += (m.surface_get_arrays(si)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+			mat_ok = ob.material_override != null and String(ob.material_override.resource_path) == String(je["material"]) \
+				and stb.material_override != null and String(stb.material_override.resource_path) == String(je["material_stebla"])
+			vid_ok = ob.visibility_range_end > 0.0 and stb.visibility_range_end > 0.0
+		var nah: Array = tv["pricky_nahore"]; var dol: Array = tv["pricky_dole"]
+		var tvar_ok := ok and abo.position.x >= float(tv["x"][0]) - 0.01 and abo.end.x <= float(tv["x"][1]) + 0.01 \
+			and abo.end.y > float(nah[0]) and abo.position.y >= float(dol[0]) - 0.05 and abo.position.z >= float(tv["stena_z"]) - 0.06 \
+			and abo.end.z <= float(nah[1]) + float(tv["kupa_ven_m"]) + 0.05
+		var znovu: Dictionary = fu.nejblizsi(fu.polozky_, hrac.cam)
+		ok = ok and mat_ok and vid_ok and tvar_ok and troj > 0 and troj <= 8000 and (znovu.is_empty() or znovu["p"] != p)
+		print("PRUCHOD jesle %s: seno %s, objem x %.2f..%.2f y %.2f..%.2f z %.2f..%.2f, troj. %d, materiály %s, viditelnost %s -> %s" % [dum.name, uz != null,
+			abo.position.x, abo.end.x, abo.position.y, abo.end.y, abo.position.z, abo.end.z, troj, mat_ok, vid_ok, "OK" if ok else "CHYBA"])
+		if not ok: spatne.append("%s: seno %s, tvar %s, troj. %d, materiály %s, viditelnost %s" % [dum.name, uz != null, tvar_ok, troj, mat_ok, vid_ok])
+	vysledek["jesle_seno"] = "OK" if spatne.is_empty() and n > 0 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádné jesle ve světě")
+	print("PRUCHOD jesle_seno ", vysledek["jesle_seno"], " (jeslí %d)" % n)
+
 ## studna_vedro (Míša 15. 11.: „co může mít funkci, tak ji mít bude“; Havran blender/studna.py + pohyb.gd vedro): u kliky studny
 ## nabídka (dvere.gd, zaměřená), „Spustit vědro“ – rumpál se točí, vědro sjede o hloubku k hladině (dvere.gd druh vedro), lano
 ## končí u ucha vědra; „Vytáhnout vědro“ – vědro zpět nahoru na původní místo.
@@ -590,6 +628,7 @@ func _konec() -> void:
 	if jen == "" or "mech" in jen: await _test_mech()
 	if jen == "" or "spanek" in jen: await _test_spanek()
 	if jen == "" or "zlab" in jen: await _test_zlab()
+	if jen == "" or "jesle" in jen: await _test_jesle()
 	if jen == "" or "studna" in jen: await _test_studna()
 	hrac.autopilot = Vector3.INF
 	var f := FileAccess.open(OS.get_environment("PUCHART_VYSTUP") if OS.has_environment("PUCHART_VYSTUP") else "user://pruchod.json", FileAccess.WRITE); f.store_string(JSON.stringify(vysledek, " "))

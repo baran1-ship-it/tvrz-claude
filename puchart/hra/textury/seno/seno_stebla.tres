@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://shaders/seno_stebla.gdshader" id="1_sh"]
+[ext_resource type="Texture2D" path="res://textury/seno/seno_stebla.png" id="2_st"]
+
+[resource]
+resource_name = "seno_stebla"
+shader = ExtResource("1_sh")
+shader_parameter/stebla = ExtResource("2_st")
+shader_parameter/prah = 0.4
+shader_parameter/prosvit = 0.3
