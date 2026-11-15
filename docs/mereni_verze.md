@@ -494,3 +494,13 @@ hostinec 26/34/33/41 (27/25/26/34), věž 24/24/24/23 (27/25/30/29). Paměť VRA
   počítá skript 35+ ms (PODEZŘENÍ: postavy hostince – výběr činnosti/cesty). Jediný úsek, kde vede skript.
 - **Teplo:** panel ukazuje vlny 20–25 FPS (prům. 40–47 ms) střídané 45–56 FPS; „vše znovu“ louka 39, hostinec 41 = zahřátí.
 
+
+
+## 0.999999 – NEOVĚŘENO NA ZAŘÍZENÍ (vydání 15. 11. noc)
+Změny proti 0.999998: krčma dvůr (déšť pod střechami, cesty ze dvora, schody), tráva v hostinci/u dveří (jeden zákaz
+trávy), kostel = zřícenina z Disku (kolize zdi podle sítě, střední LOD s barvou vrcholů), zaniklá ves Doubrava z dílů,
+rybník v2 z jednoho záznamu (vlastní vzhled hladiny), vodopád/kaskáda, ves hnědá + vyšlapaná hlína podle Pucharta, lavice
+k sezení (sedáky modelů), schody mlýnice jako žebřík, oděvy svařené, tři stupně LOD dílů, jeden plánovač snímku (kolize,
+rostliny, louka, kupy), lehký monitor měření, strop 8 kroků animace postav, odpojené modifikátory koster.
+Měřicí trasa: vše, bez_postav, dohled_kratsi, les_bez_korun, rostliny, stavby, vše znovu (≈25 min).
+Míša: měřit po instalaci 2× (1. trasa = keš shaderů), bez aplikací na pozadí a bez wifi, tablet vychladlý.
