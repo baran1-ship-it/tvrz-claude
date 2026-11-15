@@ -6,4 +6,4 @@ Stažení: curl "https://drive.usercontent.google.com/download?id=ID&export=down
 
 ## Rozhodnutí Míši 15. 11.
 - Štola: ANO – „průzkumná štola ve stráni“ (hypotéza H/NAVRH, ne na místě Soudkovy štoly 19. st.), zmenšit pro tablet, otevřít vstup v terénu.
-- Kostel, zaniklá ves: bez rozhodnutí – zatím nestavět (podklady zde).
+- Kostel, zaniklá ves: Míša 15. 11.: „další věci mají smysl, až rozšíříme svět“ – stavět až při rozšíření světa za výsek 2×2 km.
