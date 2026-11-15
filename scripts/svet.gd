@@ -2597,6 +2597,15 @@ func _na_povrch_skal(site: Dictionary, mriz: Dictionary) -> void:
 var _na_zem_arg: Array = []
 
 
+## Uvnitr vnejsiho lice hradeb tvrze (lokace.json tvrz_hradby - stejny zaznam jako Blender fort.py): nadvori ma vlastni
+## teren (Nadvori*). 15. 11. (test visici): drive pevny obdelnik o 3-5 m vetsi nez hradby - kameny a trsy na valu za
+## zdi nikdy nedosedly (0,3-0,6 m nad zemi).
+func v_hradbach(x: float, z: float) -> bool:
+	var hr: Dictionary = Pravidla.cti("lokace", "tvrz_hradby")
+	var ox := float(hr["vnejsi_lic"][0])
+	return x < ox and x > -(ox + float(hr["rozsireni_zapad_m"])) and absf(z) < float(hr["vnejsi_lic"][1])
+
+
 func _na_zem(site: Dictionary, mriz: Dictionary) -> void:
 	var r: Dictionary = data["rostliny"]
 	var n := 0
@@ -2610,7 +2619,7 @@ func _na_zem(site: Dictionary, mriz: Dictionary) -> void:
 			# okoli tvrze ma vlastni teren (val, prikop - mrizka louky ho nezna); kameny export dal na cesty a dlazbu,
 			# ktere mrizka taky nezna (zakopal by je)
 			# nadvori tvrze ma vlastni teren (Nadvori*), za hradbou val a prikop - vyska ze site terenu, ne z mrizky louky
-			if absf(q.x + 4.5) < 24.0 and absf(q.y - 0.4) < 19.0:
+			if v_hradbach(q.x, q.y):
 				continue
 			var ter := _vyska(q.x, q.y)
 			if Vector2(q.x + 4.0, q.y).length() < 75.0:
@@ -2874,7 +2883,7 @@ func _na_povrch(parent: Node3D) -> void:
 			var x := float(t[3])
 			var z := float(t[11])
 			var y := float(t[7])
-			if absf(x + 4.5) < 24.0 and absf(z - 0.4) < 19.0:
+			if v_hradbach(x, z):
 				zust.append(t)                                # nadvori tvrze
 				continue
 			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, y + NA_POVRCH_NAD, z), Vector3(x, y - 80.0, z)))
