@@ -269,73 +269,41 @@ def _wall_prof(P, a, b, hfun, t, gaps=(), okna=(), mat="zdivo_hole"):
 
 
 def kostel(P):
-    """Zriceny romansko-goticky kostelik na lesni mytine (vlastni stavba ze zdiva): lod 12 x 7 m bez strechy,
-    zapadni stit se vstupem, v bocnich zdech okna, na vychode polokruhovy presbytar; za nim hrbituvek."""
+    """Zricenina gotickeho kostela (Misa 15. 11.: nahrada za nas kostel, Disk kostel_ruiny.zip, NAVOD_KOSTEL.md): model
+    stavi hra (svet._kostel_dil, lokace.json ruiny kostel model), tady jen porost - „at je taky hezky zarostly“:
+    nalet a ker na znackach modelu (rostliny_lok), kopriva, bez, kapradi a vysoka trava kolem zdi a na hrbitove mimo
+    pudorys zdi (stavba_lok) a volne pruchody (pruchody_lok); na okraji mytiny buky a duby (_kraj_ruiny)."""
     id_, cx, cz, yaw, r = _ruina("kostel")
     F = _F(cx, cz, yaw)
-    t = 0.95
-    u0, u1, v0, v1 = -6.0, 6.0, -3.5, 3.5
-    # zapadni stit: uprostred az 7 m, k okrajum 3 m; vstup uprostred
-    _wall_prof(P, F.p(u0, v0), F.p(u0, v1), lambda q: 3.0 + 4.0 * (1 - abs(q - 0.5) * 2), t, gaps=[(0.42, 0.58)])
-    # bocni zdi: postupne se rozpadaji k vychodu, okna (parapet 1.6, nadprazi 3.2), jedno proboreni
-    _wall_prof(P, F.p(u0, v0), F.p(u1, v0), lambda q: 4.5 - 2.6 * q, t, gaps=[(0.62, 0.74)], okna=[(0.25, 0.33, 1.6, 3.2), (0.48, 0.56, 1.6, 3.2)])
-    _wall_prof(P, F.p(u0, v1), F.p(u1, v1), lambda q: 4.2 - 3.4 * q * q, t, okna=[(0.25, 0.33, 1.6, 3.2), (0.48, 0.56, 1.6, 3.2), (0.8, 0.88, 1.4, 2.8)])
-    # presbytar: polokruh na vychode, nizke zbytky, vitezny oblouk jen jako dva pilire
-    n = 9
-    pts = [F.p(u1 + math.sin(k / n * math.pi) * 3.3, -3.3 * math.cos(k / n * math.pi)) for k in range(n + 1)]
-    for k in range(n):
-        if k == 4:
-            continue                                      # proboreni v zaveru
-        _wall_prof(P, pts[k], pts[k + 1], lambda q, k=k: 1.0 + 1.6 * math.sin(k / n * math.pi), t * 0.9)
-    for vv in (v0 + 0.7, v1 - 0.7):
-        _wall_prof(P, F.p(u1 - 0.4, vv), F.p(u1 + 0.4, vv), lambda q: 4.0, 1.0)
-    # zbytek oltarni menzy a sut uvnitr
-    from lib import M
-    x, z = F.p(u1 + 1.6, 0.0)
-    P.box(M((x, _land(x, z) + 0.45, z), math.degrees(yaw)), (0.9, 1.0, 1.7), "kvadr_sedy", collide=True)
     import nove
-    for _ in range(18):
-        x, z = F.p(R.uniform(u0 + 1, u1 + 2), R.uniform(v0 + 0.8, v1 - 0.8) * (1.0 if R.random() < 0.5 else 1.1))
-        pid = R.choice(nove.KAMENY_POLE + nove.KAMINKY)
-        nove.misto(pid, x, _land(x, z), z, R.uniform(0.4, 0.8), R.uniform(0, 2 * math.pi), P, sink=0.35)
-    # nalet uvnitr lodi: dve mlade brizy a ker bezu v koutech
-    _plant(F, -4.6, 2.4, "briza", R.uniform(5.0, 7.0))
-    _plant(F, 3.8, -2.5, "briza", R.uniform(3.5, 5.0))
-    for u_, v_ in ((-4.8, -2.6), (4.5, 2.6), (8.2, 1.5)):
-        for _ in range(6):
-            _plant(F, u_ + R.uniform(-0.8, 0.8), v_ + R.uniform(-0.6, 0.6), R.choice(["nettle_plant", "fern_02", "divoka_trava"]), R.uniform(0.4, 0.9))
-    # hrbitov za kostelem (v + 11): ohradni zed 16 x 11 m s branou ke kostelu
-    _rect(P, F, -8.0, 8.0, 7.0, 18.0, 0.3, 1.1, 0.6, door=(0, 0.5))
-    for i in range(9):
-        u, v = R.uniform(-6.5, 6.5), R.uniform(9.0, 16.5)
-        x, z = F.p(u, v)
-        y = _land(x, z)
-        lean = R.uniform(-14, 14)
-        if R.random() < 0.2:
-            continue                                    # uz jen hrob bez krize
-        h = R.uniform(0.8, 1.3)
-        ry = math.degrees(yaw) + R.uniform(-8, 8)
-        m = M((x, y, z), ry) @ __import__("mathutils").Matrix.Rotation(math.radians(lean), 4, "Z")
-        P.box(m @ M((0, h / 2 - 0.15, 0)), (0.08, h + 0.3, 0.07), "dub_ven")
-        P.box(m @ M((0, h * 0.72, 0)), (0.5, 0.07, 0.06), "dub_ven")
-        # hrobovy rov: nizka vyvysenina z hliny a kamenu
-        for _ in range(3):
-            import krajina
-            krajina.rock(P, (x + R.uniform(-0.3, 0.3), y, z + R.uniform(0.3, 1.4)), (R.uniform(0.2, 0.35), 0.12, R.uniform(0.2, 0.3)), 0.4,
-                         collide=False)
+    rec = [e for e in kraj._LOKACE_J["ruiny"] if e["id"] == "kostel"][0]
+    for druh, u, v, h in rec.get("rostliny_lok", []):
+        if druh == "bez":
+            x, z = F.p(u, v)
+            nove.misto(R.choice(["bez_cerny_1", "bez_cerny_2", "bez_cerny_3"]), x, _land(x, z), z, h, R.uniform(0, 2 * math.pi), None, sink=0.0)
+        else:
+            _plant(F, u, v, druh, h)
+    stavba = rec.get("stavba_lok", [])
+    pruchody = rec.get("pruchody_lok", [])
+
+    def v_pruchodu(u, v):
+        for u0, v0, u1, v1, w in pruchody:
+            du, dv = u1 - u0, v1 - v0
+            t = max(0.0, min(1.0, ((u - u0) * du + (v - v0) * dv) / max(du * du + dv * dv, 1e-6)))
+            if math.hypot(u - (u0 + du * t), v - (v0 + dv * t)) < w:
+                return True
+        return False
 
     def keep_out(u, v):
-        # uvnitr lodi a presbytare, pristup k zapadnimu vstupu a branka hrbitova volne; hroby jen zcasti zarostle
-        return ((-7.0 < u < 10.0 and abs(v) < 4.3) or (u < -6.0 and abs(v) < 1.6) or (abs(u) < 1.5 and 3.5 < v < 8.0)
-                or (abs(u) < 7.5 and 7.5 < v < 17.5 and R.random() < 0.7))
-    _kraj_ruiny(F, r + 6, 120, 60, 12, 16, keep_out)
+        return any(a - 0.4 < u < c + 0.4 and b - 0.4 < v < e + 0.4 for a, b, c, e in stavba) or v_pruchodu(u, v)
+    # hodne zarostle: kolem zdi a na hrbitove (Misa „hezky zarostly“) - vic koprivy, bezu a naletu nez stary kostelik
+    _kraj_ruiny(F, r, 160, 70, 18, 14, keep_out)
     NAZVY.append({"name": kraj.RUINY_NAZVY[id_], "x": cx, "z": cz, "r": r + 12})
 
 
 def zanikla_ves(P):
     """Zanikla ves: pet usedlosti radou podel nekdejsi navsi (cesty) - nizke kamenne podezdivky domu se vstupem,
     ohorele tramy, kamenna studna uprostred. Okolo kopriva a bez (dusik po lidech), v nekterych domech nalet briz."""
-    from lib import M
     id_, cx, cz, yaw, r = _ruina("zanikla_ves")
     F = _F(cx, cz, yaw)
     import nove

@@ -55,8 +55,142 @@
     40.0
    ],
    "natoceni": 0.6,
-   "myti_r_m": 15.0,
-   "rovina_r_m": 15.0
+   "myti_r_m": 26.0,
+   "rovina_r_m": 22.0,
+   "model": "res://modely/kostel/kostel_ruiny.glb",
+   "lod1": "res://modely/kostel/kostel_ruiny_lod1.glb",
+   "dosah_m": 90.0,
+   "lod1_od_m": 90.0,
+   "interier_skupina": "Kostel_Interier_skupina",
+   "interier_do_m": 35.0,
+   "dvere_prefixy": [
+    [
+     "Kostel_Dvere_",
+     "kostel"
+    ]
+   ],
+   "kryti_lok": [
+    [
+     9.6,
+     -3.6,
+     14.2,
+     3.6
+    ],
+    [
+     6.0,
+     -6.8,
+     9.6,
+     -3.3
+    ]
+   ],
+   "_kryti_lok": "zaklenutý závěr presbytáře (1. pole klenby x 6…9,6 je zřícené – tam prší) a sakristie s valenou klenbou; [x0, z0, x1, z1] v rámci modelu – střecha pro déšť a bez trávy, zbytek zříceniny bez střechy (prší, roste tráva)",
+   "rostliny_lok": [
+    [
+     "briza",
+     -1.6,
+     -2.3,
+     6.5
+    ],
+    [
+     "briza",
+     -8.4,
+     -0.6,
+     4.5
+    ],
+    [
+     "bez",
+     1.0,
+     -6.4,
+     1.0
+    ],
+    [
+     "bez",
+     2.6,
+     -6.0,
+     0.9
+    ],
+    [
+     "bez",
+     -6.5,
+     -4.6,
+     0.9
+    ],
+    [
+     "shrub_02",
+     -4.5,
+     2.6,
+     1.2
+    ]
+   ],
+   "_rostliny_lok": "značky modelu Kostel_Strom_Lod (bříza v lodi), Kostel_Strom_Vez (nálet ve věži), Kostel_Kerovi_Sever (bez na sutinovém valu) + bez u sesuté severní zdi a keř v koutě lodi: [druh, x, z, výška m / měřítko bezu] v rámci modelu (NAVOD_KOSTEL.md)",
+   "pruchody_lok": [
+    [
+     -3.2,
+     4.0,
+     -3.2,
+     14.5,
+     1.6
+    ],
+    [
+     -14.0,
+     0.0,
+     -10.9,
+     0.0,
+     1.4
+    ],
+    [
+     -5.5,
+     0.0,
+     5.0,
+     0.0,
+     1.4
+    ],
+    [
+     5.0,
+     0.0,
+     12.0,
+     0.0,
+     1.4
+    ]
+   ],
+   "_pruchody_lok": "volné průchody bez keřů a náletu (úsečka [x0, z0, x1, z1, poloviční šířka] v rámci modelu): brána hřbitova → portál, dveře věže, osa lodi, vítězný oblouk → oltář; tráva a nízké byliny smí",
+   "zed_lok": [
+    [
+     -17.0,
+     -11.0,
+     20.0,
+     12.5
+    ]
+   ],
+   "_zed_lok": "obdélník hřbitovní zdi (x −17…20, z −11…12,5 modelu) – zarostlý pás podél zdi a sutin (kopřiva, bez, kapradí) jen uvnitř/okolo, mimo průchody",
+   "popis": "Míša 15. 11.: náhrada za náš kostel (Disk kostel_ruiny.zip, NAVOD_KOSTEL.md): zřícenina gotického kostela kolem 1340 – západní věž zlomená, loď bez střechy, presbytář s pětibokým závěrem (1. pole klenby zřícené), sakristie, hřbitov se zdí a kříži; ≈270 tis. troj., LOD1 132 troj. „Starý smaž a dej nový, ať je taky hezky zarostlý.“ Model staví hra (svet._kostel_dil) na rovině rovina_r_m (Blender kraj.RUINY), Blender ruiny.kostel jen rovina, porost a název místa (stará stavba ze zdiva pryč). Počátek modelu na terénu, vstup (jih) +Z, oltář (východ) +X.",
+   "stavba_lok": [
+    [
+     -11.2,
+     -3.0,
+     -5.2,
+     3.0
+    ],
+    [
+     -5.5,
+     -4.1,
+     5.2,
+     4.1
+    ],
+    [
+     5.0,
+     -3.9,
+     15.2,
+     3.9
+    ],
+    [
+     5.8,
+     -7.1,
+     9.9,
+     -3.0
+    ]
+   ],
+   "_stavba_lok": "půdorys zdí stavby [x0, z0, x1, z1] v rámci modelu (věž, loď se zdmi, presbytář se závěrem a opěráky, sakristie): Blender sem nesází keře ani nálet (jen rostliny_lok), tráva louky smí (zarostlá zřícenina)"
   },
   {
    "id": "zanikla_ves",

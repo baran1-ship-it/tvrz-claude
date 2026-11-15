@@ -768,6 +768,8 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_kovarna_dil")
 	_krcma_dil(root, parent)
 	_krok_cas("_krcma_dil")
+	_kostel_dil(root, parent)
+	_krok_cas("_kostel_dil")
 	_staj_kone(parent)
 	_ves_domy(root)
 	_krok_cas("_ves_domy")
@@ -10301,6 +10303,53 @@ func _krcma_dil(root: Node3D, parent: Node3D) -> void:
 	print("krcma: u (%.0f, %.0f) y %.2f, interier %s, postel %s" % [x, z, xf.origin.y, interier != null, sp != null])
 
 
+## Zaznam ruiny z lokace.json ruiny (id)
+func _ruina_zaznam(id: String) -> Dictionary:
+	for e: Dictionary in Pravidla.cti("lokace", "ruiny"):
+		if String(e.get("id", "")) == id:
+			return e
+	return {}
+
+
+## Zricenina kostela (Misa 15. 11.: nahrada za nas kostel, Disk kostel_ruiny.zip, NAVOD_KOSTEL.md, lokace.json ruiny
+## kostel): dil z modely/kostel/kostel_ruiny.glb na rovine Blenderu (kraj.RUINY_ROVINA), LOD1 od lod1_od_m, vnitrek
+## (Kostel_Interier_skupina) jen do interier_do_m, kolize z uzlu -convcolonly / -colonly (import), dvere sakristie jako
+## u mlyna. Strecha a zakaz travy jen pod klenbou (kryti_lok v _plants) - lod bez strechy: prsi a roste trava.
+func _kostel_dil(root: Node3D, parent: Node3D) -> void:
+	var ko := _ruina_zaznam("kostel")
+	if not ko.has("model"):
+		return
+	if not ResourceLoader.exists(String(ko["model"])):
+		print("kostel: model %s chybi (balik z_kostel)" % ko["model"])
+		return
+	var x := float(ko["stred"][0])
+	var z := float(ko["stred"][1])
+	var xf := Transform3D(Basis(Vector3.UP, float(ko["natoceni"])), Vector3(x, _vyska(x, z), z))
+	var sc := (load(String(ko["model"])) as PackedScene).instantiate() as Node3D
+	sc.name = "Kostel_dil"
+	sc.transform = xf
+	parent.add_child(sc)
+	var interier := sc.find_child(String(ko["interier_skupina"]), true, false)
+	for nd in sc.find_children("*", "GeometryInstance3D", true, false):
+		var gi := nd as GeometryInstance3D
+		var vnitr := interier != null and interier.is_ancestor_of(gi)
+		gi.visibility_range_end = float(ko["interier_do_m"]) if vnitr else float(ko["dosah_m"])
+		if vnitr or gi.get_aabb().size.length() < 1.0:
+			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if ResourceLoader.exists(String(ko["lod1"])):
+		var l1 := (load(String(ko["lod1"])) as PackedScene).instantiate() as Node3D
+		l1.name = "Kostel_lod1"
+		l1.transform = xf
+		parent.add_child(l1)
+		for nd in l1.find_children("*", "GeometryInstance3D", true, false):
+			(nd as GeometryInstance3D).visibility_range_begin = float(ko["lod1_od_m"])
+		for cn in l1.find_children("*", "CollisionObject3D", true, false):
+			(cn as Node).queue_free()
+	for dp: Array in ko.get("dvere_prefixy", []):
+		_mlyn_dvere(sc, root, xf, ko, String(dp[0]), String(dp[1]))
+	print("kostel: u (%.0f, %.0f) y %.2f, interier %s" % [x, z, xf.origin.y, interier != null])
+
+
 ## Pytle ve mlyne (Misa 0.99 „pytle ve mlyne jsou na hovno“ - sit modelu Mlyn_PytleMouka s nataženou texturou): kazdy
 ## souvisly kus site (pytel) nahradi predmet katalogu pytel_mouky (stejny jako v komorach domu) na jeho miste a ve smeru
 ## jeho delsi osy; sit a jeji kolize pryc.
@@ -13626,6 +13675,13 @@ func _plants(parent: Node3D, quality: int) -> void:
 				for kr4: Array in kryti_d:
 					_kryti.append([inv_d, AABB(Vector3(float(kr4[0]), -50.0, float(kr4[1])),
 							Vector3(float(kr4[2]) - float(kr4[0]), 100.0, float(kr4[3]) - float(kr4[1])))])
+	# Misa 15. 11.: zricenina kostela - pod klenbou (kryti_lok) strecha i bez travy, zbytek zriceniny bez strechy a zarostly
+	var kdil := parent.find_child("Kostel_dil", true, false) as Node3D
+	if kdil:
+		var kinv := kdil.global_transform.affine_inverse()
+		for kr4: Array in _ruina_zaznam("kostel").get("kryti_lok", []):
+			var ab4 := AABB(Vector3(float(kr4[0]), -50.0, float(kr4[1])), Vector3(float(kr4[2]) - float(kr4[0]), 100.0, float(kr4[3]) - float(kr4[1])))
+			uvnitr.append([kinv, ab4])
 	# dil mlyna (vlastni teren, dvur, budova): zadna trava ani rozsev uvnitr ctverce dilu (jako budova)
 	if _mlyn_inv != Transform3D():
 		uvnitr.append([_mlyn_inv, AABB(Vector3(-22.0, -30.0, -25.0), Vector3(40.0, 60.0, 40.0)), "dil"])     # louka: trava z terenu dilu
