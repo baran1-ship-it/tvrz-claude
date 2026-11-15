@@ -3085,8 +3085,34 @@ func _visici() -> void:
 			body.append([_druh(key), Vector3(float(t[3]), float(t[7]), float(t[11]))])
 	for r: Dictionary in sv.data.get("vybaveni", []):
 		body.append(["predmet:" + String(r["id"]), Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))])
+	# opora skalou/balvanem (rostlina na vrcholu skalni veze - kolize skaly nahoru nesaha): pudorys site x meritko,
+	# stejne jako svet._dosednuti_dat
+	var skaly := {}
+	for key2: String in sv.data["rostliny"]:
+		if not (key2.begins_with("skala_") or key2.begins_with("balvan_")) or key2.contains("_daleko"):
+			continue
+		var me: Mesh = sv._skala_sit(key2)
+		if me == null:
+			continue
+		var ab := me.get_aabb()
+		for t2: Array in sv.data["rostliny"][key2]:
+			var r2 := maxf(ab.size.x, ab.size.z) * 0.5 * Vector3(float(t2[0]), float(t2[4]), float(t2[8])).length()
+			var kc := Vector2i(floori(float(t2[3]) / 16.0), floori(float(t2[11]) / 16.0))
+			for i in range(-2, 3):
+				for j in range(-2, 3):
+					var k2 := kc + Vector2i(i, j)
+					if not skaly.has(k2):
+						skaly[k2] = []
+					(skaly[k2] as Array).append(Vector4(float(t2[3]), float(t2[11]), r2, float(t2[7]) + ab.end.y * Vector3(float(t2[1]), float(t2[5]), float(t2[9])).length()))
 	for b: Array in body:
 		var pos: Vector3 = b[1]
+		var na_skale := false
+		for sk: Vector4 in skaly.get(Vector2i(floori(pos.x / 16.0), floori(pos.z / 16.0)), []):
+			if Vector2(pos.x - sk.x, pos.z - sk.y).length() < sk.z and pos.y <= sk.w + 0.3:
+				na_skale = true
+				break
+		if na_skale:
+			continue
 		celkem += 1
 		var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.5, 0), pos - Vector3(0, 60, 0)))
 		# zem = vyssi z viditelneho terenu (hotova sit, _teren_y) a kolize pod bodem (skala, dlazba, podlaha) - kolize
