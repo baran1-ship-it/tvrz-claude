@@ -689,7 +689,7 @@ func _mista() -> void:
 		_lavice_rucni(dum, String(s["model"]))
 		if _lavice_vzor != "": lavice.append_array(load("res://scripts/lavice.gd").mista(dum, _lavice_vzor))   # lavice z modelu (Míša 15. 11.)
 		_rampy_dveri(dum)
-		_krb(dum, String(s["model"]), float(lod["vnitrek_do_m"]), blizko if ssc else (75.0 if OS.has_feature("mobile") else 130.0))   # krb Rychty (krby.json; glb až od modeláře)
+		_krb(dum, String(s["model"]), float(lod["vnitrek_do_m"]), st_do)   # krb Rychty (krby.json; glb až od modeláře)
 		_ztlum(dum, float(md.get("jas_podrobny", 1.0)), jas_cache)   # Míša 14. 11.: „domy… až moc vypadají bílé“
 		var zbd: Array = (md.get("zebriky", {}) as Dictionary).get(String(s["model"]), [])
 		if zbd.size() == 4:   # žebřík na půdu v síni (Havran DUM_ZEBRIK; Míša 15. 11.: „chci všechny žebříky ve hře funkční“)
