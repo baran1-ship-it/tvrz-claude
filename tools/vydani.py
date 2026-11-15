@@ -43,6 +43,9 @@ if True:
 import glob as _glob
 _stare = []
 for _g in _glob.glob("modely/**/*.gltf", recursive=True):
+    # 15. 11.: --jen bez z_postavy - postavy se nebali, stary import postav nevadi (balik z minula zustava)
+    if JEN and "z_postavy" not in JEN and _g.startswith("modely/postavy/"):
+        continue
     _scn = _glob.glob(".godot/imported/%s-*.scn" % os.path.basename(_g))
     _bin = _g[:-5] + ".bin"
     if _scn and os.path.exists(_bin) and os.path.getmtime(_bin) > max(os.path.getmtime(s) for s in _scn) + 1:

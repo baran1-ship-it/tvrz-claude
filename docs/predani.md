@@ -1483,3 +1483,9 @@ Hotovo v kódu a datech (testy u každého):
   `timeout` 7200000 v nástroji (nejen BEH_LIMIT), nebo nejvýš 3–4 snímky v jednom běhu.
 - **Otisk exportu (15. 11.):** úprava `voda.json`/`lokace.json`/`cesty.json`… po exportu = „nevydávat, znovu exportovat“.
   Herní vzhled bez vlivu na Blender patří do `prostredi.json` (není vstupem exportu, `tools/otisk_exportu.py VSTUPY`).
+- **Postavy 15. 11. – rozbitá přestavba oděvů (sestav.sh):** 15 sad (anežka, bára, dorota, eliška, hoch, hostinská,
+  hostinský, jakub, kateřina, kovář, linhart, markéta, matěj, pasačka, petr) má `.bin` z 15:58, ale `.gltf` z 10:28–10:36
+  → import ERR_PARSE_ERROR (buffer, inverse_binds), `.import valid=false`. Vydání 0.999999 BEZ z_postavy (zůstává balík
+  0.999998). Oprava: znovu `tools/postavy_q/sestav.sh` (zdroje z větve assets) a ověřit, že .gltf i .bin mají stejný čas;
+  pak `--import`, test_svy_odevu, z_postavy. `valid=false` v .import Godot při --import sám nezkusí znovu → smazat řádek
+  `valid=false` a .md5 v .godot/imported, pak --import.
