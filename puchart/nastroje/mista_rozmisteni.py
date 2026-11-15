@@ -476,11 +476,13 @@ np.save(out + ".npy", (Y + P["H"]).astype(np.float32)); json.dump(M, open(out + 
 _rr, _cc = np.nonzero(MSK_MISTA); np.savez(out + "_plosiny_mista.npz", r=_rr, c=_cc)
 # trasy průchodu dovnitř domů (Míša 13. 11.: „všechny budovy musí být vstupné“): hlavní vstup z venku přes práh do síně
 _TRM = {}
+_VEN = {}
 for s__ in stavby:
     vv_ = vstupy_stavby(s__["model"], s__["x"], s__["z"], s__["yaw"])   # všechny dveře domu (vstup i do dvora)
     for v_ in vv_:
         _TRM["dum_%s_%s_%d" % (s__["misto"], s__["model"], len(_TRM))] = [[round(float(q[0]), 2), round(float(q[1]), 2), None] for q in (v_["c"] + v_["n"] * 2.5, v_["c"] + v_["n"] * 0.8, v_["c"] - v_["n"] * 1.2)]
-        _TRM["ven_%s_%s_%d" % (s__["misto"], s__["model"], len(_TRM))] = [[round(float(q[0]), 2), round(float(q[1]), 2), None] for q in (v_["c"] - v_["n"] * 1.2, v_["c"] + v_["n"] * 0.8, v_["c"] + v_["n"] * 2.5)]
+        _VEN["ven_%s_%s_%d" % (s__["misto"], s__["model"], len(_TRM) - 1)] = [[round(float(q[0]), 2), round(float(q[1]), 2), None] for q in (v_["c"] - v_["n"] * 1.2, v_["c"] + v_["n"] * 0.8, v_["c"] + v_["n"] * 2.5)]   # stejné číslo jako dum_ (jména tras stálá pro tabulku chyb)
+_TRM.update(_VEN)
 for s__ in stavby:   # celky (krčma, hájovna): z příchodu přes práh dveří Vchod 1,5 m dovnitř (jméno bez pořadí – stálé pro tabulku chyb)
     if "prichod" not in s__: continue
     pr_ = np.array(s__["prichod"], float); po_ = np.array(s__["pohled"], float); n_ = (pr_ - po_) / (np.linalg.norm(pr_ - po_) or 1.0)
