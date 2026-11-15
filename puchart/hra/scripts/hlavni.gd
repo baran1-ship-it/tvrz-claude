@@ -107,7 +107,9 @@ func _start() -> void:
 	if FileAccess.file_exists("res://data/mista_stavby.json"): _mista()   # Předhradí, krčma, hájovna (Míša 11. 11.; domy z Havrana)
 	var hr_ := get_node_or_null("Hrad")
 	if hr_ and _lavice_vzor != "":   # sedátka v nikách oken paláců (hrady.py okno: OknoN_Sedatka = rodič kolize OknoN_Kol_Lavice, 1,5 m v místnosti → sedí se zády k oknu)
-		for s_ in hr_.find_children("*_Sedatka", "Node3D", true, false): lavice.append_array(load("res://scripts/lavice.gd").mista(s_, _lavice_vzor))
+		for s_ in hr_.find_children("*_Sedatka", "Node3D", true, false):
+			var ms_: Array = load("res://scripts/lavice.gd").mista(s_, _lavice_vzor)
+			_sedatka_hradu.append_array(ms_); lavice.append_array(ms_)
 	if FileAccess.file_exists("res://data/mista_stavby.json"): add_child(preload("res://scripts/ves.gd").new())   # usedlosti: stodoly, kůlny, ploty, zahrady, studna, stromy (ves.gd)
 	Denik.zapis("kameny v korytech")
 	if FileAccess.file_exists("res://data/koryto_kameny.json"): _kameny_koryta()   # valouny a balvany v korytech (Míša 10. 11.)   # kapradí, tráva, mech, semenáčky na římsách skal
@@ -238,6 +240,18 @@ func chce_mereni(spotrebuj := false) -> bool:
 		cf2.set_value("test", "pri_startu", false); cf2.save("user://nastaveni.cfg")
 	return _chce_mereni == 1
 
+## Sedátka v nikách oken (hrady.py okno_palace): kvádr leží na dně niky ~1 m nad podlahou místnosti, lavice.gd dá místo vstání
+## do výšky spodku kvádru (u lavice na podlaze = podlaha) – tady se vstává na podlahu místnosti pod ním (paprsek dolů, až jsou
+## kolize hradu). Jinak postav_na_volne hledala volné místo v úrovni niky (parapety, sousední niky).
+var _sedatka_hradu: Array = []
+func _vstat_sedatek() -> void:
+	for i in 2: await get_tree().physics_frame
+	var ss := get_world_3d().direct_space_state
+	for m: Dictionary in _sedatka_hradu:
+		var v: Vector3 = m["vstat"]
+		var r := ss.intersect_ray(PhysicsRayQueryParameters3D.create(v + Vector3.UP * 0.2, v - Vector3.UP * 3.0))
+		if not r.is_empty(): m["vstat"] = r["position"]
+
 ## Kolize hradu pro procházku: trojúhelníková kolize ze sítí modelu (zdi, mosty, schody) – jedno statické těleso.
 signal kolize_hotovo
 var kolize_hotove := false
@@ -246,6 +260,7 @@ func _kolize_hradu() -> void:
 		var h := get_node_or_null(jm)
 		if h != null: _kolize_uzlu(h)
 	kolize_hotove = true; kolize_hotovo.emit()   # ohne.gd čeká (značky ohňů hradu hledají ohniště a místnost paprskem)
+	if not _sedatka_hradu.is_empty(): _vstat_sedatek()
 	# louče a svícny až po kolizích (hledají podlahu a zeď paprskem; 11. 11.: voláno dřív = 0/20 při běžném startu)
 	if not _k_svicnum.is_empty(): _svicny()
 

@@ -537,7 +537,7 @@ def mat_zelezo_autorsky():
     xyz = U.u("ShaderNodeSeparateXYZ"); U.ln(geo.outputs["Position"], xyz.inputs[0])
     nxyz = U.u("ShaderNodeSeparateXYZ"); U.ln(geo.outputs["Normal"], nxyz.inputs[0])
     tc = U.u("ShaderNodeTexCoord")
-    mp = U.u("ShaderNodeMapping"); mp.inputs["Scale"].default_value = (4.2, 4.2, 4.2); U.ln(tc.outputs["Object"], mp.inputs[0])
+    mp = U.u("ShaderNodeMapping"); mp.inputs["Scale"].default_value = (2.3, 2.3, 2.3); mp.inputs["Rotation"].default_value = (0.43, 0.71, 0.29)   # pootočeno – bez mřížky skvrn podél os; U.ln(tc.outputs["Object"], mp.inputs[0])
     rD = U.obr(img("rust_coarse_01_Diffuse"), mp.outputs[0], box=True)
     rH = U.obr(img("rust_coarse_01_Displacement", False), mp.outputs[0], box=True)
     rR = U.obr(img("rust_coarse_01_Rough", False), mp.outputs[0], box=True)
@@ -572,7 +572,7 @@ def mat_zelezo_autorsky():
     rez = U.math("MULTIPLY", rez, U.math("SUBTRACT", 1.0, U.math("MAXIMUM", lesk, U.math("MULTIPLY", hrana, 0.8))), clamp=True)
     # barvy
     BV = KV["barvy_srgb"]                                   # 2. kolo: hnědé okuje a rez jako KCD2 (1. kolo téměř černé)
-    okuje = U.mix(0.55, tuple(BV["okuje"]), rD.outputs[0])
+    okuje = U.mix(0.38, tuple(BV["okuje"]), rD.outputs[0])
     okuje = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.5), okuje, tuple(c * 0.7 for c in BV["okuje"]))
     rez_b = U.mix(0.5, rD.outputs[0], tuple(BV["rez"]))
     skr = U.u("ShaderNodeMapping"); skr.inputs["Scale"].default_value = (3.0, 160.0, 3.0); U.ln(geo.outputs["Position"], skr.inputs[0])

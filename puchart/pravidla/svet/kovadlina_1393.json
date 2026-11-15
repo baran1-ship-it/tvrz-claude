@@ -16,7 +16,7 @@
   "obruc_sirka_m": 0.045,
   "povrch": {
    "trhliny_bunka_m": 0.06,
-   "trhliny_hloubka_m": 0.005,
+   "trhliny_hloubka_m": 0.007,
    "hrbolky_m": 0.005,
    "hrbolky_vlna_m": 0.035,
    "obrys_m": 0.005
@@ -60,14 +60,14 @@
     0.5
    ],
    "okuje": [
-    0.27,
-    0.22,
-    0.17
+    0.23,
+    0.185,
+    0.145
    ],
    "rez": [
-    0.4,
-    0.23,
-    0.12
+    0.34,
+    0.205,
+    0.11
    ],
    "hrana": [
     [
@@ -82,7 +82,7 @@
     ]
    ]
   },
-  "barvy_pozn": "sRGB jako na fotce. Dráha světlá šedá ocel (KCD2), kov jen 0,32 a drsnost 0,36–0,5: s kovem 0,6 a albedem 0,5 (1. kolo) dráha v Godotu zrcadlila modrou oblohu (reflected light ze sky) a vypadala tmavě modrá; boky hnědé okuje a rez (KCD2), 1. kolo bylo téměř černé (medián sRGB 51,32,23)",
+  "barvy_pozn": "sRGB jako na fotce. Dráha světlá šedá ocel (KCD2), kov jen 0,32 a drsnost 0,36–0,5: s kovem 0,6 a albedem 0,5 (1. kolo) dráha v Godotu zrcadlila modrou oblohu (reflected light ze sky) a vypadala tmavě modrá; boky hnědé okuje a rez (KCD2), 1. kolo bylo téměř černé (medián sRGB 51,32,23); snímek ve hře 15. 11. odpoledne: boky s okujemi 0,27 a rzí 0,40 vycházely na slunci oranžové s mřížkou skvrn (textura rzi podél os) → tmavší hnědé, textura pootočená",
   "kramle": false,
   "kramle_pozn": "kramle přes patky (1. kolo) vynechány – v KCD2 nejsou a zblízka působily jako drátky; kovadlina drží vahou (~100 kg)"
  },

@@ -151,7 +151,7 @@
    "delka_krok_m": 0.1,
    "profil_bodu": 14,
    "uv_m": 0.6,
-   "viri": 0.25
+   "viri": 0.08
   },
   "stebla": {
    "atlas": {
@@ -162,7 +162,7 @@
    },
    "vrstva": {
     "pocet": 4300,
-    "vrch_podil": 0.75,
+    "vrch_podil": 0.65,
     "delka_m": [
      0.08,
      0.17
@@ -199,7 +199,7 @@
    "stebla": 14.0
   },
   "viditelnost_pozn": "kreslit jen zblízka (Visibility Range; renderer Compatibility neumí prolínání) – stébla do 14 m, objem do 30 m (dál je chlév zavřený a kupu přes dveře nevidět)",
-  "sit_pozn": "delka_krok_m – rozestup řezů podél jeslí, profil_bodu – bodů na profil (čelo + vrch), uv_m – metry na opakování textury objemu, viri – natočení vláken textury objemu podle šumu (× π; 0 = vlákna jedním směrem – „učesané“ jako došek; 0,8 dávalo na snímku 15. 11. lomené švy)",
+  "sit_pozn": "delka_krok_m – rozestup řezů podél jeslí, profil_bodu – bodů na profil (čelo + vrch), uv_m – metry na opakování textury objemu, viri – natočení vláken textury objemu podle šumu (× π; 0 = vlákna jedním směrem – „učesané“ jako došek; 0,8 dávalo na snímku 15. 11. lomené švy); 2. kolo: textura objemu je spleť v náhodných směrech (seno_textury.py), víření 0,08 jen proti opakování (0,25 dávalo šmouhy)",
   "troj_max": 12000,
   "troj_max_pozn": "rozpočet kupy (koordinátor 15. 11., 2. kolo: „až ~12 tis. troj., jen zblízka, LOD“) – hlídá test jesle_seno; stébla se kreslí jen do viditelnost_m.stebla"
  },

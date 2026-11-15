@@ -21,22 +21,33 @@ byla běžnější špalková bez rohu. Tvar podle KCD2 na výslovné přání M
   `kovadlina_1393_stredni.glb`, `kovadlina_1393_daleko.glb`; licence `hra/modely/predmety_h/LICENCE_kovadlina_1393.txt`.
 - Snímky z Godotu: `docs/screens/kovadlina_1393_*.png` (srovnání s KCD2: `kovadlina_1393_srovnani_kcd2.png`).
 
-## Rozměry (Godot: Y nahoru, dráha a roh podél +X, počátek na zemi uprostřed špalku)
-- Špalek: Ø ~0,96 m (nepravidelný kmen), výška 0,42 m, zaoblená horní hrana, železný pásek 0,07 m pod vrchem, 7 hřebů.
-- Kovadlina: dráha 0,78 m nad zemí, šířka dráhy 0,14 m, celková délka ~1,02 m (x −0,44 … +0,58: patka 0,17 + dráha 0,52 + roh 0,33), pata 0,46 × 0,31 m,
-  pas 0,22 × 0,12 m; v patce hranatý otvor pro sperhák 26 mm a kulatý průbojník Ø 17 mm; 4 kramle přes patky.
-- Sperhák: x −0,37, z +0,16 (před kovadlinou), 0,33 m nad špalkem.
+## Rozměry (Godot: Y nahoru, dráha a roh podél +X, počátek na zemi uprostřed špalku) – 2. kolo 15. 11.
+- Špalek: Ø ~1,1 m (poloměr 0,55, nepravidelný otlučený obrys), výška 0,32 m, zaoblená hrana 5 cm, **bez pásku** (pasek false);
+  povrch z high-poly (síť trhlin voronoi F2−F1 v pokřivených souřadnicích jen místy, hrbolky fbm) zapečený do normály a AO –
+  drsný, kamenitě rozpraskaný jako KCD2; šedohnědý, letokruhy tlumené.
+- Kovadlina: dráha 0,78 m nad zemí (tělo 0,47 m – vyšší kvůli nižšímu špalku), šířka dráhy 0,15 m, dráha 0,58 + patka 0,17 + roh 0,36 m;
+  pata 0,58 × 0,34 m sedí celou plochou (oblouk mezi patkami jen 12 mm), pas 0,40 × 0,15 m, boky skoro svislé; kramle vynechány (v KCD2 nejsou).
+- Sperhák: x −0,45, z +0,20, 0,40 m nad špalkem.
+- Barvy: dráha světlá šedá ocel (sRGB 0,60–0,70), kov 0,32, drsnost 0,36–0,50 – v 1. kole kov 0,6 + albedo 0,5 zrcadlil modrou oblohu
+  (dráha tmavě modrá); boky hnědé okuje a rez (1. kolo téměř černé).
+
+## Osazení ve hře
+- `pravidla/svet/funkce.json` kovadlina: model + `_stredni` (od 8 m) + `_daleko` (od 22 m, do 60 m), značka `Kovarna_Kovadlina_misto`,
+  natočení bokem dráhy (model −Z) ke značce `Kovarna_Kovar_stani` – kovář stojí mezi výhní a kovadlinou, roh má po levé ruce (KCD2).
+- `hra/scripts/funkce.gd` `osad_kovadliny()` (volá `zacni`), kolize z uzlu `*-convcolonly`. Test `kovadlina_osazena` (PUCHART_JEN=kovadlina).
+- Stavba: glb jsou v .gitignore – `nastroje/postav_vse.sh` je zatím nestaví (viz předání), ručně
+  `/opt/bl/bin/python blender/kovadlina.py .` (~45 min, Cycles CPU) a import Godotu.
 
 ## Stupně a textury
 | Stupeň | Trojúhelníky | Materiály / textury |
 |---|---|---|
-| podrobný | 15 340 | `kovadlina_zelezo` + `kovadlina_drevo`, každý albedo + normal + ORM 2048 px (3 vzorkovače na materiál) |
-| střední `_stredni` | 2 812 | barva vrcholů (predmety.gd) + textury 512 |
-| daleko `_daleko` | 461 | barva vrcholů + textury 256, bez pásku a kramlí |
+| podrobný | 16 160 | `kovadlina_zelezo` + `kovadlina_drevo`, každý albedo + normal + ORM 2048 px (3 vzorkovače na materiál) |
+| střední `_stredni` | 2 716 | barva vrcholů + textury 512 |
+| daleko `_daleko` | 462 | barva vrcholů + textury 256 |
 
-Kolize: jeden uzel `Kovadlina_1393_kolize-convcolonly` (konvexní obal špalku, kovadliny a sperháku, 82 troj.).
+Kolize: jeden uzel `Kovadlina_1393_kolize-convcolonly` (konvexní obal špalku, kovadliny a sperháku, 84 troj.).
 
-## Srovnání s KCD2 (docs/screens/kovadlina_1393_srovnani_kcd2.png) – co ještě zbývá
-- Tvar sedí: jeden kónický roh, pas, patka s otvory, sperhák, světlá vyleštěná dráha × tmavé boky s rzí.
-- KCD2 má mohutnější svislé tělo (pas širší) a nižší, plošší špalek s kamenitě rozpraskaným povrchem;
-  náš špalek je vyšší (0,42 m dle zadání 0,4–0,5) a má pásek (KCD1). Úprava = čísla v kovadlina_1393.json a znovu postavit.
+## Srovnání s KCD2 (docs/screens/kovadlina_1393_srovnani_kcd2.png)
+- 1. kolo: tvar sedí, ale tělo štíhlé (londýnský tvar), špalek vysoký s páskem, dráha modrá, boky černé.
+- 2. kolo: mohutné svislé tělo se širokým pasem, pata přímo na špalku, nízký široký kamenitě rozpraskaný špalek bez pásku, světlá šedá dráha,
+  hnědé boky. Zbývá: boky v KCD2 mají jemnější zrnitou strukturu okují; na odpoledním světle hry v otevřené kovárně je dráha přesvícená.

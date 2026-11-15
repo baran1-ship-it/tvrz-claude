@@ -381,6 +381,10 @@ func _test_lavice() -> void:
 		var jm := "%s [%.1f, %.1f]" % [m["lavice"], (m["pos"] as Vector3).x, (m["pos"] as Vector3).z]
 		var stoj: Vector3 = m["vstat"]
 		hlavni.svet.kolize_ihned(stoj)
+		# podlaha pod místem vstání: lavice na podlaze = spodek kvádru; sedátko v nice okna hradu (hrady.py okno_palace) leží na
+		# dně niky nad podlahou místnosti – vstává se na podlahu pod ním (Míša 15. 11.: sedátka v nikách jako lavice)
+		var pod_ := hrac.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(stoj + Vector3.UP * 0.2, stoj - Vector3.UP * 3.0, 0xFFFFFFFF, [hrac.get_rid()]))
+		if not pod_.is_empty(): stoj = pod_["position"]
 		hrac.autopilot = Vector3.INF; hrac.velocity = Vector3.ZERO
 		hrac.postav_na_volne(stoj + Vector3(0, 0.05, 0))
 		for i in 20: await get_tree().physics_frame
