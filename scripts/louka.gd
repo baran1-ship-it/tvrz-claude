@@ -985,6 +985,28 @@ func _pocet(hs: PackedByteArray, h: float) -> int:
 	return lo
 
 
+## Test (Misa 15. 11., audit: hostinec_trava cetl polohu z transformace instance, ta je jednotkova - poloha je v custom data
+## a headless ji nevraci): skutecne trsy louky v obdelniku r (svet x, z) primo ze zaznamu _rozsej - co by kazda kvalita
+## kreslila (kvalita jen orezava podle hashe). Vrati polohy pat (x, y, z).
+func trsy_v_oblasti(r: Rect2) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	for cx in range(floori(r.position.x / BUNKA), floori(r.end.x / BUNKA) + 1):
+		for cz in range(floori(r.position.y / BUNKA), floori(r.end.y / BUNKA) + 1):
+			var by := _rozsej(Vector2i(cx, cz))
+			if by.is_empty():
+				continue
+			var celk := 0
+			for k in VRSTVY:
+				celk += by.decode_u32(k * 4)
+			for i in celk:
+				var o := VRSTVY * 4 + i * ZAZNAM
+				var p := Vector3(cx * BUNKA + by.decode_u16(o) / 65535.0 * BUNKA, by.decode_s16(o + 4) / 100.0,
+						cz * BUNKA + by.decode_u16(o + 2) / 65535.0 * BUNKA)
+				if r.has_point(Vector2(p.x, p.z)):
+					out.append(p)
+	return out
+
+
 ## Vlakno: soubor bunky -> hotove buffery MultiMeshe (transformace + custom), nic ze sceny.
 ## custom = (druh + hash, poloha paty x, y, z v soustave bunky): shader podle ni zmensuje trs ke pate.
 func _nacti(c: Vector2i, lv := 0, lim := PackedInt32Array()) -> void:

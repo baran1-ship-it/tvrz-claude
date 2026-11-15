@@ -6955,6 +6955,21 @@ func _hostinec_trava() -> void:
 						print("HOSTINEC_TRAVA %s (%.2f, %.2f, %.2f) misto (%.1f, %.1f) %s uzel %s" % [mm.mesh.resource_name if mm.mesh else "?", p.x, p.y, p.z, l.x, l.z,
 								"v obrysu" if v_obrysu else "u dveri", str(mmi.get_path()).right(50)])
 					spatne.append(p)
+	# Misa 15. 11. (audit): MultiMesh louky ma polohu trsu v custom data (transformace jednotkova, headless nic) - kontrola
+	# vyse byla slepa. Skutecne zaznamy rozsevu (louka.trsy_v_oblasti), stejne pro vsechny kvality.
+	if louka and louka.has_method("trsy_v_oblasti"):
+		var tr0: PackedVector3Array = louka.trsy_v_oblasti(Rect2(stred.x - 20.0, stred.y - 20.0, 40.0, 40.0))
+		inst += tr0.size()
+		for p0: Vector3 in tr0:
+			var l0: Vector3 = inv * p0
+			var v_ob: bool = l0.x > bb.position.x and l0.x < bb.end.x and l0.z > bb.position.z and l0.z < bb.end.z and p0.y < 37.5
+			var u_dv := false
+			for dv: Vector2 in dvere:
+				u_dv = u_dv or dv.distance_to(Vector2(p0.x, p0.z)) < r_dv
+			if v_ob or u_dv:
+				if spatne.size() < 40:
+					print("HOSTINEC_TRAVA zaznam louky (%.2f, %.2f, %.2f) %s" % [p0.x, p0.y, p0.z, "v obrysu" if v_ob else "u dveri"])
+				spatne.append(p0)
 	# 14. 11.: i samostatne site rostlin (MeshInstance3D: trs, trava, kapradi, ker) uvnitr obrysu - Misa videla travu u dveri a u stolu
 	var sl_rostl: Array = Pravidla.cti("modely", "rostliny_jmena")
 	for mi: Node in get_tree().root.find_children("*", "MeshInstance3D", true, false):
@@ -8891,6 +8906,7 @@ func _vstupy_bez_travy() -> void:
 	var r := float(sv.pasma()["budova"]["pruchod_m"])
 	var spatne: Array = []
 	var n := 0
+	var trsy_bunky := {}
 	var mriz := {}
 	for key: String in sv.data["rostliny"]:
 		if key.contains("_daleko") or key.begins_with("kamen") or key.begins_with("balvan") or key.begins_with("skala"):
@@ -8912,6 +8928,21 @@ func _vstupy_bez_travy() -> void:
 			if louka and (louka._vzorek(q.x, q.y) as Vector3).x > 0.0 and not louka._v_budove(q.x, q.y):
 				spatne.append("%s (%.1f, %.1f)" % [nm, q.x, q.y])
 				break
+		# Misa 15. 11. (tráva pred dvermi chysi v lomu - _vzorek rikal 0, ale pas u cesty v _rozsej ji prepsal): skutecne
+		# zaznamy rozsevu louky v pruchodu (bunka 32 m jednou, mezipamet)
+		if louka and louka.has_method("trsy_v_oblasti"):
+			var bk := Vector2i(floori(c.x / 32.0), floori(c.y / 32.0))
+			if not trsy_bunky.has(bk):
+				trsy_bunky[bk] = louka.trsy_v_oblasti(Rect2(bk.x * 32.0, bk.y * 32.0, 31.999, 31.999))
+			for d0 in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var bk2: Vector2i = bk + d0
+				if Rect2(bk2.x * 32.0 - r, bk2.y * 32.0 - r, 32.0 + 2.0 * r, 32.0 + 2.0 * r).has_point(c):
+					if not trsy_bunky.has(bk2):
+						trsy_bunky[bk2] = louka.trsy_v_oblasti(Rect2(bk2.x * 32.0, bk2.y * 32.0, 31.999, 31.999))
+					for tp: Vector3 in trsy_bunky[bk2]:
+						if Vector2(tp.x, tp.z).distance_to(c) < r:
+							spatne.append("%s: trs louky (%.1f, %.1f)" % [nm, tp.x, tp.z])
+							break
 		# i rostliny z dat (export, rozsev): trava, byliny a kere v pruchodu (Misa: trava pred dvermi chyse)
 		var cc := Vector2i(floori(c.x / 8.0), floori(c.y / 8.0))
 		for kk: Vector2i in [cc, cc + Vector2i(1, 0), cc + Vector2i(-1, 0), cc + Vector2i(0, 1), cc + Vector2i(0, -1), cc + Vector2i(1, 1), cc + Vector2i(-1, -1), cc + Vector2i(1, -1), cc + Vector2i(-1, 1)]:
