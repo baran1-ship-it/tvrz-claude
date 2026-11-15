@@ -742,6 +742,30 @@ for _sk in (s_ for b_ in _pp["bunky"].values() for s_ in b_):
     if any(_l.intersects(v_) for v_ in _vyp): _pv += 1
 TEST("pred_vstupem_bez_rostlin", _vyp and _pv == 0, "skvrn pásu u paty v plochách před vstupy a před kovárnou: %d (ploch %d)" % (_pv, len(_vyp)))
 
+# Míša 15. 11. (19 fotek): bílá voda a kameny, přístřešek kovárny, předměty před hájovnou, cesta u skály, hradba po valu
+_vh = json.load(open(K + "/hra/data/voda_hra.json"))["vzhled_13_11"]; _c15 = []
+if sum(_vh["pena_barva"]) / 3 > 0.5: _c15.append("pěna vody světlejší než 0,5")
+if max(_vh.get("kameny_jas", [9])) > 1.1: _c15.append("kameny koryta jas > 1,1")
+TEST("voda_kameny_nejsou_bile", not _c15, "; ".join(_c15) if _c15 else "pěna %s, kameny %s" % (_vh["pena_barva"], _vh["kameny_jas"]))
+def _glb_uzly(f):
+    import struct as _st
+    b = open(f, "rb").read(); n_ = _st.unpack("<I", b[12:16])[0]; j_ = json.loads(b[20:20 + n_])
+    return {nd["name"]: nd for nd in j_["nodes"]}
+_ku = _glb_uzly(K + "/hra/modely/stavby_h/kovarna.glb"); _hu = _glb_uzly(K + "/hra/modely/stavby_h/hajovna.glb"); _c16 = []
+_p4 = _ku.get("Kovarna_Kol_SloupP4-convcolonly", {}).get("translation", [0, 0, 0])[0]
+if _p4 < 4.3: _c16.append("sloup přístřešku kovárny x %.2f (bok kovárny 3,14, má být ≥ 4,3)" % _p4)
+for _jm in ("Hajovna_Kol_Sibenice22", "Hajovna_Kol_Stul", "Hajovna_Kol_Spalek"):
+    if _jm + "-convcolonly" in _hu: _c16.append("hájovna má %s" % _jm)
+TEST("upravy_modelu_disk", not _c16, "; ".join(_c16) if _c16 else "přístřešek kovárny dál (sloup x %.2f), před hájovnou bez šibenice, stolu a špalku" % _p4)
+_c17 = []
+_u3 = [c_ for c_ in json.load(open(K + "/pravidla/svet/cesty_puchart.json"))["cesty"] if c_["id"] == "udoli_440_3"][0]
+_hrb = [q for q in _u3["osa"] if 188 < q[1] < 213 and q[0] > 0.0]
+if _hrb: _c17.append("cesta k mostu u skály vede přes hrb (x > 0): %s" % _hrb[:3])
+_hvj = json.load(open(K + "/pravidla/svet/hrad_puchart.json"))["A"]["hradba_val"]
+if _hvj.get("plynula_koruna") or _hvj.get("rovna_koruna") != "ochoz": _c17.append("hradba po valu nemá rovnou korunu")
+if float(_hvj.get("ochoz_od_branky_m", 0)) <= 0: _c17.append("hradba po valu bez ochozu")
+TEST("cesta_skala_hradba_val", not _c17, "; ".join(_c17) if _c17 else "cesta k mostu po rovince, hradba po valu rovná s ochozem")
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

@@ -62,6 +62,7 @@ def _husta(o):
 # určují osu mostu (blender/voda.py); posledních ROVNE_M metrů každé z nich se položí do té osy (plynulý přechod)
 ROVNE_M = 6.0; OBLOUK_M = 26.0
 for m_ in _VH.get("mosty", []):
+    ROVNE_M = float(m_.get("najezd_rovne_m", 6.0)); OBLOUK_M = float(m_.get("najezd_oblouk_m", 26.0))   # most_440_3: kratší (Míša 15. 11.)
     u_ = np.array(m_["u_bodu"], float); kon_ = []
     for c in C["cesty"]:
         for kon in (0, -1):
@@ -228,7 +229,7 @@ for c in C["cesty"]:
             if 0 <= xi < nx and 0 <= zi < ny: hs.append(H[zi, xi])
         if len(hs) == 2 and abs(hs[1] - hs[0]) / (2 * hw * 0.8) > mx: mx = abs(hs[1] - hs[0]) / (2 * hw * 0.8); c["_pricny_kde"] = [round(float(px[i]), 1), round(float(pz[i]), 1)]
     c["max_pricny"] = round(float(mx), 3)
-    if mx > 0.08: print("PRICNY", c["id"], round(float(mx), 3), c.get("_pricny_kde"))
+    if mx > 0.08: print("PRICNY", c["id"], round(float(mx), 3), c.get("_pricny_kde"), flush=True)
 # koleje vozových cest (Míša 5. 11.: „vozová cesta jako z Havrana“ – Havran zem.gdshader: dvě vyjeté koleje, travnatý hřbet
 # mezi nimi, prach a kamínky na krajích): textura 0,5 m s příčnou vzdáleností od osy (A = 1 − |d|/4 m, 0 mimo vozovou cestu)
 KR = 2; kol = np.zeros((ny * KR, nx * KR), np.float32)

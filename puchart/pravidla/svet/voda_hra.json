@@ -120,7 +120,10 @@
    "delka_nad_m": 3.0,
    "jarmo_po_m": 3.5,
    "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
-   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)"
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)",
+   "najezd_rovne_m": 2.5,
+   "najezd_oblouk_m": 10.0,
+   "pozn_najezd_15_11": "Míša 15. 11. (foto x −27,2 z 206,2): „cesta zbytečně přes hrb a do zatáčky, dát níže, kde je rovinka a most“ – výchozí nájezd 6 m rovně v ose mostu + oblouk 26 m vytlačil cestu z rovinky podél potoka na východ do svahu (+2,5 m); tady nájezd 2,5 m + oblouk 10 m (cesty.py)"
   },
   {
    "id": "most_440_4",
