@@ -175,6 +175,8 @@ func _varianta(zap: bool) -> void:
 		var q0 := int(ProjectSettings.get_setting_with_override("rendering/lights_and_shadows/directional_shadow/soft_shadow_filter_quality"))
 		var q := int(_par(v).get("kvalita", 1)) if zap else q0
 		RenderingServer.directional_soft_shadow_filter_set_quality(q as RenderingServer.ShadowQuality)
+	elif v == "dohled_kratsi":                 # 15. 11. (Misa: zpusobuje sekani dalka?): far kamery a dosahy viditelnosti x faktor
+		_dohled(zap)
 	elif v == "diag_plny":                     # 15. 11. bod 1: plny monitor jako drive (prepina _monitor)
 		pass
 	elif v == "dest":                          # 13. 11.: cena deste (pocasi.gd z Pucharta) - plny dest po celou variantu
@@ -214,6 +216,55 @@ func _varianta(zap: bool) -> void:
 		main.life.set_quality(0 if zap else main.quality)
 	elif v != "" and _skup.has(v):
 		(_skup[v] as Callable).call(not zap)
+
+
+var _dohled0 := {}                       # varianta dohled_kratsi: GeometryInstance3D -> [begin, end] puvodni
+var _far0 := 0.0
+
+
+## Varianta dohled_kratsi (Misa 15. 11.: „dělají sekání dálky?“; varianty_parametry.dohled_kratsi): far kamery a
+## visibility_range (begin i end, LOD prechody) vsech uzlu s koncem nad od_m nasobene faktor - vcetne uzlu, ktere
+## vzniknou behem varianty (streamovani rostlin, louky, dilu; node_added). Rozdil proti „vse“ = vliv dalky.
+func _dohled(zap: bool) -> void:
+	var cam: Camera3D = main.player.cam
+	if zap:
+		_far0 = cam.far
+		cam.far = _far0 * float(_par("dohled_kratsi").get("faktor", 0.6))
+		for n in main.get_tree().root.find_children("*", "GeometryInstance3D", true, false):
+			_dohled_uzel(n)
+		if not main.get_tree().node_added.is_connected(_dohled_novy):
+			main.get_tree().node_added.connect(_dohled_novy)
+		print("TRASA dohled_kratsi: far %.0f -> %.0f m, uzlu %d" % [_far0, cam.far, _dohled0.size()])
+	else:
+		if main.get_tree().node_added.is_connected(_dohled_novy):
+			main.get_tree().node_added.disconnect(_dohled_novy)
+		if _far0 > 0.0:
+			cam.far = _far0
+		for g: Variant in _dohled0:
+			if is_instance_valid(g):
+				(g as GeometryInstance3D).visibility_range_begin = float(_dohled0[g][0])
+				(g as GeometryInstance3D).visibility_range_end = float(_dohled0[g][1])
+		_dohled0.clear()
+
+
+func _dohled_novy(n: Node) -> void:
+	if n is GeometryInstance3D:
+		_dohled_uzel.call_deferred(n)            # dosah se casto nastavuje az po add_child
+
+
+func _dohled_uzel(n: Variant) -> void:
+	if not is_instance_valid(n) or _dohled0.has(n):
+		return
+	var g := n as GeometryInstance3D
+	if g == null:
+		return
+	var pp: Dictionary = _par("dohled_kratsi")
+	if g.visibility_range_end <= float(pp.get("od_m", 40.0)):
+		return
+	var f := float(pp.get("faktor", 0.6))
+	_dohled0[g] = [g.visibility_range_begin, g.visibility_range_end]
+	g.visibility_range_begin *= f
+	g.visibility_range_end *= f
 
 
 var _koruny0 := {}                        # varianta les_bez_korun: MultiMeshInstance3D -> [puvodni sit, viditelnost]
@@ -318,6 +369,8 @@ func _jm(v: String) -> String:
 		return "louka Puch"
 	if v == "stin_filtr_1":
 		return "filtr st.1"
+	if v == "dohled_kratsi":
+		return "dohled x%.1f" % float(_par(v).get("faktor", 0.6))
 	if v.begins_with("trava_"):
 		return "tráva " + v.substr(6) + "m"
 	return String(main.AB_NAZVY.get(v, v)).substr(0, 10)

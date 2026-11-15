@@ -253,6 +253,7 @@
  ],
  "varianty": [
   "",
+  "bez_postav",
   "diag_plny",
   "bez_stropu_koster",
   "modif_pripojene",
@@ -260,6 +261,7 @@
   "louka_bez_stinu",
   "louka_puchart",
   "stin_filtr_1",
+  "dohled_kratsi",
   ""
  ],
  "samo_na_tabletu": false,
@@ -297,7 +299,11 @@
   "stin_filtr_1": {
    "kvalita": 1
   },
-  "_pozn": "15. 11. parametry variant: louka_puchart = louka jako Puchart (trs 0,5 m, plna do 14 m, ridne do 60 m; louka.nastav_puchart), stin_filtr_1 = RenderingServer.directional_soft_shadow_filter_set_quality (Compatibility: >= 2 PCF 5 vzorku, 1 = jeden vzorek; rasterizer_scene_gles3.cpp:3331)"
+  "dohled_kratsi": {
+   "faktor": 0.6,
+   "od_m": 40.0
+  },
+  "_pozn": "15. 11. parametry variant: louka_puchart = louka jako Puchart (trs 0,5 m, plna do 14 m, ridne do 60 m; louka.nastav_puchart), stin_filtr_1 = RenderingServer.directional_soft_shadow_filter_set_quality (Compatibility: >= 2 PCF 5 vzorku, 1 = jeden vzorek; rasterizer_scene_gles3.cpp:3331); dohled_kratsi = far kamery (player.gd 2200 m) a visibility_range begin/end vsech uzlu s koncem nad od_m (dalkove dily, LOD prechody, rostliny, louka - i nove vznikle behem varianty) x faktor"
  },
- "_varianty_15_11": "15. 11. (docs/rozpracovane/vykon_postavy_puchart_15_11.md, body 1, 2, 4, 5, 6, 8): vse = nove vychozi (lehky monitor, strop kroku animace postavy.json anim_strop_snimek 8, modifikatory odpojene od kostry u postav bez zapnuteho modifikatoru - modif_odpojit); diag_plny = drivejsi plny monitor; bez_stropu_koster = bez stropu (drive); modif_pripojene = modifikatory stale na kostre (drive); postavy_daleko = za 45 m bez animace, dohled 50 m (jen varianta); louka_bez_stinu = trava bez stinoveho pruchodu slunce (bunky stin nevrhaji uz drive); louka_puchart = trs 0,5 m, plna do 14 m, do 60 m; stin_filtr_1 = filtr stinu slunce 2 -> 1; vse znovu = teplo. bez_vnitrku_vsi a dest z kodu nezmizely (vratit do seznamu podle potreby). Vse NEOVERENO NA ZARIZENI."
+ "_varianty_15_11": "15. 11. (docs/rozpracovane/vykon_postavy_puchart_15_11.md, body 1, 2, 4, 5, 6, 8): vse = nove vychozi (lehky monitor, strop kroku animace postavy.json anim_strop_snimek 8, modifikatory odpojene od kostry u postav bez zapnuteho modifikatoru - modif_odpojit); bez_postav (Misa 15. 11.: ves se seka kvuli postavam, pred nimi byla skoro v poradku) = Lide skryti a bez zpracovani, primo proti vse ve stejnem behu; diag_plny = drivejsi plny monitor; bez_stropu_koster = bez stropu (drive); modif_pripojene = modifikatory stale na kostre (drive); postavy_daleko = za 45 m bez animace, dohled 50 m (jen varianta); louka_bez_stinu = trava bez stinoveho pruchodu slunce (bunky stin nevrhaji uz drive); louka_puchart = trs 0,5 m, plna do 14 m, do 60 m; stin_filtr_1 = filtr stinu slunce 2 -> 1; dohled_kratsi (Misa 15. 11.: „dělají sekání dálky?“) = far kamery a dosahy viditelnosti nad 40 m na 60 % - izolace vlivu dalky na spicky (louka pri otoceni na koni, prvni pruchod krcmy); planovac rostlin (rozpocty.planovac.rostliny_dosah_m) nacita dal beze zmeny, jen se nekresli; vse znovu = teplo. bez_vnitrku_vsi a dest z kodu nezmizely (vratit do seznamu podle potreby). Vse NEOVERENO NA ZARIZENI."
 }

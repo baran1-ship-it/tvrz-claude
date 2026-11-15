@@ -8661,8 +8661,13 @@ func _postavy_modif() -> void:
 					if (md as SkeletonModifier3D).active and chyby_k.size() < 5:
 						chyby_k.append("%s: odpojeny %s zapnuty" % [c["id"], md.name])
 	kroku_max = maxi(kroku_max, kroku_ves)
-	print("POSTAVY_MODIF ves: kroku animace za snimek max %d, prumer %.1f, odlozeno %d, odpojenych koster %d" % [kroku_ves, kroku_sum / 240.0,
-			int(li.get("anim_odlozeno")) - odl0, int(li.get("modif_odpojeno"))])
+	var vid := 0
+	var dmin := INF
+	for c: Dictionary in li.get("_lide"):
+		vid += 1 if (c["uzel"] as Node3D).visible else 0
+		dmin = minf(dmin, (c["uzel"] as Node3D).global_position.distance_to(main.player.global_position))
+	print("POSTAVY_MODIF ves: kroku animace za snimek max %d, prumer %.1f, odlozeno %d, odpojenych koster %d, viditelnych %d, nejblizsi %.0f m, hodina %.1f, hrac %s" % [kroku_ves, kroku_sum / 240.0,
+			int(li.get("anim_odlozeno")) - odl0, int(li.get("modif_odpojeno")), vid, dmin, main.day.hour if main.day else -1.0, str(main.player.global_position.round())])
 	var ok: bool = nejvic[0] <= int(mm["sukne"]) and nejvic[1] <= int(mm["sukne"]) and nejvic[2] <= 2 * int(mm["hlava"])
 	ok = ok and chyby_k.is_empty() and (strop <= 0 or kroku_max <= strop)
 	if bool(Pravidla.cti("postavy", "modif_odpojit")["zapnuto"]) and odpoj_max == 0:
