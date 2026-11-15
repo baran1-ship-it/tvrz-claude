@@ -1373,3 +1373,7 @@ Hotovo v kódu a datech (testy u každého):
 - Záseky: rozbor `docs/rozpracovane/zaseky_rozbor_system.md` („shadery +0“ v GL Compatibility nic nedokazuje!),
   měřiče v řádku záseku (pre/draw/swap, události, draw calls), louka nahrává po dávkách (rozpočet bajtů) – NEOVĚŘENO
   NA ZAŘÍZENÍ. ZBÝVÁ: kupy (celý buffer najednou), plánovač snímku pro rostliny/kolize, hostinec kolize konvexní.
+- 15. 11. noc: **přeplánovat tok kvůli stavbě nejde spolehlivě** – `odtok_mimo_ves.py` počítá s terénem `vysky.json`
+  (před exportem), test smyslu po exportu s terénem Blenderu (údolí, sražené svahy) → tok na náspu 7 a 17 míst. Stavbu,
+  která leží v koridoru toku, posunout (výpočet odstupu: plácka + koryto + břeh + přechod), tok nechat. Blender
+  `fort.land` – `stavba_pad` bere terén BEZ vody (jinak cyklus voda_tvar → _pads → stavba_pad, RecursionError).
