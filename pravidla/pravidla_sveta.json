@@ -1699,6 +1699,12 @@
   "test": {
    "popis": "meze testu zasazeni (tools/test_svet.gd _zasazeni): visi_m strom/ker nad terenem; pricny_max sklon ulice vsi na kraji rovne plochy (dy / vzdalenost); podlaha_teren_m teren u zdi pod podezdivkou stanoviste_max_podil: test smyslu - nejvic tolik kusu druhu mimo jeho stanoviste (druhy.json). rastr_skok / rastr_max_podil: test smyslu rastr - vrchol site vsi, jehoz maska travy se od vsech 4 sousedu lisi o vic nez rastr_skok stejnym smerem (osamely ctverec), smi byt nejvic rastr_max_podil vrcholu.",
    "visi_m": 0.3,
+   "prochod_cil_m": [
+    0.5,
+    1.5
+   ],
+   "prochod_cil_podil": 0.5,
+   "_prochod_cil_m": "test prochod (15. 11., schody na ochoz bokem): bod trasy je dosazen v polomeru podil x kratsi z obou sousednich useku, v mezich [min, max]; driv pevne 1,5 m - u kratkych useku (zatacka na mezipodeste 1,2 m) se bod pocital za dosazeny jeste za koncem zabradli dolniho ramene a chodec mirl na horni rameno skrz zabradli",
    "trava_dorust_m": 20.0,
    "louka_nahravani_s": 30.0,
    "_louka_nahravani_s": "test louka_nahravani (14. 11., rozbor zaseku F4): jak dlouho (s) hrac jede cvalem pres louku; kazdy snimek nahrani louky do GPU (louka.nahrano_b) <= rozpocty.json louka_nahravani nahrani_b_snimek",

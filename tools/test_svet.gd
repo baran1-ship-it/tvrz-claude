@@ -4271,7 +4271,17 @@ func _jdi(body: Array) -> Array:
 			var last := player.global_position
 			if OS.has_environment("TVRZ_PROCHOD"):
 				print("PROCHOD k ", wp, " z ", player.global_position)
-			var tol := 1.5 if not OS.has_environment("TVRZ_PROCHOD") else 0.5
+			# polomer dosazeni bodu z pasma.test.prochod_cil_* (podil kratsiho sousedniho useku): pevnych 1,5 m u zatacky
+			# na mezipodeste (usek 1,2 m) pocitalo bod za dosazeny jeste pred koncem zabradli a chodec mirl skrz nej
+			var pt_c: Dictionary = sv.pasma()["test"]
+			var meze: Array = pt_c["prochod_cil_m"]
+			var us := c.distance_to(d) / n
+			var dal: float = us
+			if m == n:
+				dal = d.distance_to(body[j + 1]) if j + 1 < body.size() else INF
+			var tol := clampf(float(pt_c["prochod_cil_podil"]) * minf(us, dal), float(meze[0]), float(meze[1]))
+			if OS.has_environment("TVRZ_PROCHOD"):
+				tol = float(meze[0])
 			while Vector2(wp.x - player.global_position.x, wp.y - player.global_position.z).length() > tol:
 				var to := Vector2(wp.x - player.global_position.x, wp.y - player.global_position.z)
 				player.yaw = atan2(-to.x, -to.y)

@@ -3026,6 +3026,19 @@
    "ChysePrkna_Kol_Prycna1"
   ],
   "na_terenu": true,
-  "teren_pod_prahem_m": 0.02
+  "teren_pod_prahem_m": 0.02,
+  "mista": [
+   [
+    166.5,
+    964.5
+   ],
+   [
+    175.5,
+    964.5
+   ]
+  ],
+  "rovina_r_m": 4.5,
+  "plac_r_m": 4.0,
+  "_mista": "15. 11.: stredy chysi u lomu jako zaznam (drive hledane za behu svet._chyse_k_lomu) - Blender pod nimi srovna jemny teren (kraj.MISTA, stavba_pad) a udusanou hlinu (PLACKY); bez toho hruba sit terenu (vrcholy po 5 m) nechala podlahu 12-16 cm pod luzkem (test lide_chovani). Hra bere polohy odtud."
  }
 }

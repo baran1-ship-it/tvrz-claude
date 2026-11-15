@@ -1377,3 +1377,9 @@ Hotovo v kódu a datech (testy u každého):
   (před exportem), test smyslu po exportu s terénem Blenderu (údolí, sražené svahy) → tok na náspu 7 a 17 míst. Stavbu,
   která leží v koridoru toku, posunout (výpočet odstupu: plácka + koryto + břeh + přechod), tok nechat. Blender
   `fort.land` – `stavba_pad` bere terén BEZ vody (jinak cyklus voda_tvar → _pads → stavba_pad, RecursionError).
+- 15. 11.: **test prochod „schody na ochoz bokem“ ZASEKL po exportu – příčina v chodci testu, ne v exportu.** Hradby
+  z `lokace.json tvrz_hradby` mají přesně staré konstanty (17/14, 18,8/15,8, 8), `wall_stair`/`stairs` beze změny
+  geometrie od 23. 10., kolize schodů v `svet.json` sedí (rampa horního ramene = Box @ (4,6; 4,7; 8,2) po zesílení 0,6 m).
+  Chodec bral bod trasy za dosažený v pevných 1,5 m: bod (4,95; 7,2) „dosáhl“ z (5,49; 5,92) ještě za koncem zábradlí
+  dolního ramene (x ≥ 5,24, z 6,20–6,32) a mířil na horní rameno skrz něj. S body na 0,5 m tatáž trasa OK 23 m.
+  Poloměr dosažení teď `pravidla_sveta.json pasma.test.prochod_cil_m` / `prochod_cil_podil` (½ kratšího úseku, 0,5–1,5 m).

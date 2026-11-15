@@ -295,6 +295,10 @@ if _KOV.get("stred"):
     MISTA.append(("kovarna_ves", _KOV["stred"][0], _KOV["stred"][1], _KOV["natoceni"], _KOV["rovina_r_m"]))
     PLACKY.append((_KOV["stred"][0], _KOV["stred"][1], _KOV["plac_r_m"]))      # vyslapana hlina kolem kovarny
     MISTA.append(("kovarna_dum", _KOV["dum"]["stred"][0], _KOV["dum"]["stred"][1], _KOV["dum"]["natoceni"], _KOV["dum"]["rovina_r_m"]))
+# chyse u lomu na udusane hline (Misa 14. 11., lokace.json lom_chyse mista): rovina a placka pod kazdou chysi
+for _i, _m in enumerate(_LOKACE_J.get("lom_chyse", {}).get("mista", [])):
+    MISTA.append(("lom_chyse_%d" % _i, _m[0], _m[1], 0.0, _LOKACE_J["lom_chyse"]["rovina_r_m"]))
+    PLACKY.append((_m[0], _m[1], _LOKACE_J["lom_chyse"]["plac_r_m"]))
 # krcma do L u odbocky k rybniku (Misa 14. 11., lokace.json krcma_l): rovina a vegetace pryc, model stavi hra (svet._krcma_dil)
 _KRC = _LOKACE_J.get("krcma_l", {})
 if _KRC.get("stred"):

@@ -6162,8 +6162,7 @@ func _chyse_k_lomu() -> void:
 			z += 1.5
 		x += 1.5
 	if mista.is_empty():
-		push_warning("chyse u lomu: zadne volne misto mimo cesty")
-		return
+		mista.append([0.0, Vector2.ZERO])               # zaznam lokace lom_chyse mista prepise nize
 	mista.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	var a: Vector2 = mista[0][1]
 	var b := Vector2.INF
@@ -6175,6 +6174,15 @@ func _chyse_k_lomu() -> void:
 		if d >= 8.0 and d <= 11.0 and absf(((m[1] as Vector2) - a).normalized().dot(k0)) < 0.5:
 			b = m[1]
 			break
+	# polohy ze zaznamu (lokace lom_chyse mista, 15. 11.): Blender pod nimi srovna teren a placku - hledani nahore jen
+	# kdyz zaznam chybi (srovnany teren by hledani posunul jinam)
+	var lm: Array = (Pravidla.cti("lokace", "lom_chyse") as Dictionary).get("mista", [])
+	if lm.size() >= 2:
+		a = Vector2(float(lm[0][0]), float(lm[0][1]))
+		b = Vector2(float(lm[1][0]), float(lm[1][1]))
+	elif a == Vector2.ZERO:
+		push_warning("chyse u lomu: zadne volne misto mimo cesty")
+		return
 	if b == Vector2.INF:
 		push_warning("chyse u lomu: druhe misto nenalezeno")
 		return
