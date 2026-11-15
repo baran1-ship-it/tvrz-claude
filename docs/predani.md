@@ -1469,3 +1469,5 @@ Hotovo v kódu a datech (testy u každého):
 - **Export v nové session – textury potoka (15. 11., 8. pád, rc 11):** reka_dist/reka_flow.png vznikají až předpečením
   potoka (krok 12) – kontrola datových textur běžela dřív a padala na chybějícím zdroji. Oprava: kontrola chybějící
   zdroj přeskočí, export.sh po předpečení pustí datove_textury_import + import + kontrolu znovu; .import bez [params] se doplní.
+- **Test smyslu breh_toku u výpusti rybníka v2 (15. 11., 9. pád exportu):** odtok lhota_odtok u čela výpusti 48 st. = kamenné
+  čelo a křídla (stavba), ne svah. Test přeskočí zónu čela (půl šířky čela + výška čela / sklon svahu hráze, z voda.json).

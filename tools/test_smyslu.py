@@ -566,6 +566,13 @@ if "--po" in sys.argv:
                     x_, z_ = t.osa[k_]
                     if kraj.v_dilu_mlyna(x_, z_) or any(math.hypot(x_ - b_[0], z_ - b_[1]) < b_[2] + 1.0 for b_ in kraj._BRODY_TOKU):
                         continue
+                    # 15. 11. (rybnik v2): u cela vypusti tvori breh kamenne celo s kridly 45 st. (stavba jako brod), ne svah -
+                    # zona = pul sirky cela + delka kridla (vyska cela / sklon svahu hraze), cisla ze zaznamu rybnika
+                    if any("vypust" in r_ and r_["vypust"].get("tok") == t.id and "celo" in r_["vypust"]
+                           and math.hypot(x_ - r_["vypust"]["celo"][0], z_ - r_["vypust"]["celo"][1])
+                           < r_["vypust"]["celo_sirka_m"] / 2.0 + r_["vypust"]["celo_vyska_m"] / r_["hraz"]["sklon_svahu"]
+                           for r_ in kraj.RYBNIKY):
+                        continue
                     # v pasu napojeni (dil_dolina_vaha < 1) mez = stena koryta dilu, jinde breh_max_st
                     tg = math.tan(math.radians(dil_st if kraj.dil_dolina_vaha(x_, z_) < 1.0 else tt_["breh_max_st"]))
                     # jez u vtoku nahonu (toky_hladina: hladina vzduta na uroven nahonu) je stavba mlyna jako brod
