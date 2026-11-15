@@ -267,8 +267,10 @@ def build(body, kroj, NAME):
             # límec (pravidla svy_odevu.kape), průramky límce spojené se spodním lemem (bez úzkých pásků, bez_mustku).
             KP = cl.pravidla_svu()["kape"]
             ln = KP["limec_delka_m"]
-            m_cp = ((torso + headw + arms_u > 0.3) & ~hand & (z < z_neck + 0.02) & (z > z_neck - ln)
-                    & ~((arms_u > 0.5) & (np.abs(x) > 0.2)))
+            # horní mez límce nad krkem s přesahem do kapuce (limec_nad_krkem_m): na boku krku (svah ramene, malá váha
+            # hlavy) jinak zůstaly mezi maskou kapuce a límce dvě díry 8 hran; obličej vždy volný
+            m_cp = ((torso + headw + arms_u > 0.3) & ~hand & (z < z_neck + KP["limec_nad_krkem_m"]) & (z > z_neck - ln)
+                    & ~((arms_u > 0.5) & (np.abs(x) > 0.2)) & ~face)
             z_h, z_l = z_neck + KP["prechod_nad_krkem_m"], z_neck - KP["prechod_pod_krkem_m"]
             o_h, o_l = KP["kapuce_odsazeni_m"], KP["limec_odsazeni_m"]
             def _odsaz(c, o):
@@ -277,7 +279,7 @@ def build(body, kroj, NAME):
             kp = cl.shell(body, co, no, m_hd | m_cp, o_h, f"{NAME}_kapuce", smooth=5, smooth_border=4, offset_fn=_odsaz)
             print("KAPE mustky pryc ploch", cl.bez_mustku(kp))
             print("KAPE nad vrstvou posunuto", cl.nad_vrstvou(kp, [top, sh], kroj.get("vrstva_mezera_m", 0.006)))
-            print("KAPE kusu", cl.kusy(kp))
+            print("KAPE kusu", cl.kusy(kp), "smycek okraje", cl.smycky(kp))
             K["kape"] = [kp]; HIDE["kape"] = []; MAT["kape"] = ("vlna", kroj.get("kape_barva", [0.3, 0.28, 0.2]))
     if female and (kroj.get("kape", False) or kroj.get("rouska", True)):
         hd = cl.shell(body, co, no, m_hd, 0.018, f"{NAME}_rouska", smooth=5,

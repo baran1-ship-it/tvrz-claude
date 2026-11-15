@@ -1440,3 +1440,9 @@ Hotovo v kódu a datech (testy u každého):
   vrstvení límce/kápě na výstřih kotle (ne šev), vlastní rozbor; tmavší skvrna na límci purkrabího. Postavy do hry balíkem
   `z_postavy` (při vydání znovu import pro Android, `.etc2.ctex`). opencv do `/opt/bl` instalace zamítnuta – pomocník použil cv2 ze
   scratch adresáře; `tools/foto_postava.gd` umí viset při chybě načtení modelu a logovat každý snímek (hlídat log).
+- **Tři úrovně LOD (15. 11., misa_28 ř. 151 „bílé kostky z dálky“):** příčiny – `_Daleko` domů vsi jen plochá barva bez textury
+  (po zesvětlení bledé kvádry), díly z Disku bez středního stupně (krčma LOD1 krabice 36 troj.), větrák bez LOD (do 450 m). Teď
+  `svet._dil_lod` (krčma, kostel, kovárna, mlýn, větrák): podrobný do `podrobny_do_m`, střední `<Dil>_Stredni` sloučený při načtení
+  (barva materiálu × průměr textury do barev vrcholů, 1 kreslení), daleký = LOD1 od `lod1_od_m` (větrák: obal 2 barevné kvádry);
+  domy vsi `_Daleko` s texturou střechy/zdi (triplanár). Čísla `modely.json dily_lod`, test `lod_urovne`. Střední stupeň snižuje
+  kreslení, ne trojúhelníky (krčma 164 tis., kostel 245 tis.) – to až decimací zdrojových .glb (jen na Disku). Tablet NEOVĚŘENO.

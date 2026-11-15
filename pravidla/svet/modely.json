@@ -5689,10 +5689,10 @@
   "stredni_do_m": 130.0,
   "stredni_do_m_mobil": 75.0,
   "lod_bias": 50.0,
-  "daleko_textury": {"Sindel": ["Sindel", "Dosky", "Krytina", "Strecha"], "Roubeni": ["Roubeni", "Omitka", "Podezdivka", "Stena"]},
+  "daleko_textury": {"Sindel": ["Sindel", "Dosky", "Krytina", "Strecha", "Kura", "reed_roof", "thatch", "riet", "bark", "wood_sin", "dosky"], "Roubeni": ["Roubeni", "Omitka", "Podezdivka", "Stena", "plaster", "wood_tram", "stone_wall"]},
   "daleko_triplanar_m": 2.0,
   "daleko_prumer_min": 0.05,
-  "_daleko_textury": "Míša 14. 11. (misa_28_chyby ř. 151 „bílé kostky z dálky“; Puchart modely.domy.daleko_textury): hrubý obal _Daleko měl jen barvu materiálu (po zesvětlení vsi světlý) - povrch obalu <koren>_daleko_<klíč> dostane texturu největšího povrchu podrobného vnějšku, jehož materiál obsahuje některé slovo seznamu, triplanárně po daleko_triplanar_m; barva = barva obalu (hnědý tón ves_jas.stredni_daleko beze změny) / průměr textury (nejméně daleko_prumer_min na kanál) - průměrná barva stejná, textura přidá kresbu. svet._daleko_textura."
+  "_daleko_textury": "Míša 14. 11. (misa_28_chyby ř. 151 „bílé kostky z dálky“; Puchart modely.domy.daleko_textury): hrubý obal _Daleko měl jen barvu materiálu (po zesvětlení vsi světlý) - povrch obalu <koren>_daleko_<klíč> dostane texturu největšího povrchu podrobného vnějšku, jehož materiál nebo soubor textury obsahuje některé slovo seznamu (nic = největší povrch s texturou, který neodpovídá jinému klíči), triplanárně po daleko_triplanar_m; barva = barva obalu (hnědý tón ves_jas.stredni_daleko beze změny) / průměr textury (nejméně daleko_prumer_min na kanál) - průměrná barva stejná, textura přidá kresbu. svet._daleko_textura."
  },
  "dily_lod": {
   "podrobny_do_m": 35.0,

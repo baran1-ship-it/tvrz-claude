@@ -198,6 +198,8 @@ func _priprav(u: Node3D, kostra: Skeleton3D) -> Dictionary:
 			# hrany po svaru stejnych poloh; okraj = hrana jedne plochy
 			var hrany := {}
 			var nt := ii.size() / 3 if not ii.is_empty() else vv.size() / 3
+			for t in nt * 3:
+				troj.append(base + (ii[t] if not ii.is_empty() else t))
 			for t in nt:
 				for e in 3:
 					var a := svar[ii[t * 3 + e]] if not ii.is_empty() else svar[t * 3 + e]

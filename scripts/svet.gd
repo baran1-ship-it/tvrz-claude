@@ -6892,7 +6892,8 @@ func _daleko_textura(mi: MeshInstance3D, dum: Node3D, lod: Dictionary) -> void:
 			var vmt := vn.get_active_material(vi) as BaseMaterial3D
 			if vmt == null or vmt.albedo_texture == null:
 				continue
-			if not (dt[zn] as Array).any(func(t: String) -> bool: return String(vmt.resource_name).contains(t)):
+			var kde := String(vmt.resource_name) + " " + vmt.albedo_texture.resource_path.get_file()
+			if not (dt[zn] as Array).any(func(t: String) -> bool: return kde.contains(t)):
 				continue
 			if vm.surface_get_array_index_len(vi) > bn:
 				bn = vm.surface_get_array_index_len(vi)
@@ -6906,7 +6907,8 @@ func _daleko_textura(mi: MeshInstance3D, dum: Node3D, lod: Dictionary) -> void:
 					continue
 				var jiny := false
 				for kl2: String in dt:
-					if kl2 != zn and (dt[kl2] as Array).any(func(t: String) -> bool: return String(vmt2.resource_name).contains(t)):
+					var kde2 := String(vmt2.resource_name) + " " + vmt2.albedo_texture.resource_path.get_file()
+					if kl2 != zn and (dt[kl2] as Array).any(func(t: String) -> bool: return kde2.contains(t)):
 						jiny = true
 				if not jiny and vm.surface_get_array_index_len(vi) > bn:
 					bn = vm.surface_get_array_index_len(vi)

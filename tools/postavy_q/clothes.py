@@ -231,6 +231,20 @@ def bez_mustku(ob, sirka=None, kol_okraj=3, min_ploch=30):
     bm.normal_update(); bm.to_mesh(ob.data); bm.free(); ob.data.update()
     return len(kill) + len(zb)
 
+def smycky(ob):
+    """Počet smyček okraje (otvorů) sítě - kontrola kukle (svy_odevu.kape.smycek: obličej + spodní lem)."""
+    me = ob.data; par = {}
+    def f(x):
+        par.setdefault(x, x)
+        while par[x] != x: par[x] = par[par[x]]; x = par[x]
+        return x
+    pocet = {}
+    for p in me.polygons:
+        for ek in p.edge_keys: pocet[ek] = pocet.get(ek, 0) + 1
+    for (a, b), n in pocet.items():
+        if n == 1: par[f(a)] = f(b)
+    return len({f(x) for x in par})
+
 def kusy(ob):
     """Počet souvislých kusů sítě (po hranách)."""
     me = ob.data; par = list(range(len(me.vertices)))

@@ -193,6 +193,11 @@ for k, objs in GAR.items():
     for o in objs:
         oh = _cl.otevrene_hrany(o, arm, SVY["oblast"]) if k in SVY["kontrola_kusy"] else []; ks_ = _cl.kusy(o)
         SVY_OTEV[o.name] = len(oh) + (max(0, ks_ - 1) if k in SVY["jeden_kus"] else 0)   # kus navíc = nesvařený oděv
+        if k == "kape":
+            # 15. 11.: kukle = jedna slupka jen s otvorem obličeje a spodním lemem (průramky spojené s lemem) - smyčka
+            # navíc = díra mezi kapucí a límcem nebo úzký pásek u podpaží (tmavé trojúhelníky v chůzi)
+            sm_ = _cl.smycky(o); SVY_OTEV[o.name] += abs(sm_ - SVY["kape"]["smycek"])
+            print("SVY", o.name, "smycek okraje", sm_, "(ma byt", SVY["kape"]["smycek"], ")")
         print("SVY", o.name, "kusu", ks_, "otevrenych hran v ramenou", len(oh),
               [tuple(round(c, 3) for c in x) for x in oh[:4]])
 print("SVY CELKEM", sum(SVY_OTEV.values()))

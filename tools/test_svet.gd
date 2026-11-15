@@ -9943,6 +9943,8 @@ func _lod_urovne() -> void:
 		if l1 == null:
 			l1 = sc.find_child(jm + "_lod1", false, false)        # obal dilu bez LOD1 modelare (svet._dil_lod)
 		if l1:
+			if l1 is GeometryInstance3D:
+				(st[2][1] as Array).append(l1)
 			for g in l1.find_children("*", "GeometryInstance3D", true, false):
 				(st[2][1] as Array).append(g)
 		stavby.append([jm + "_dil", st])

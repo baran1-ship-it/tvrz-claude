@@ -155,7 +155,9 @@
    "limec_odsazeni_m": 0.03,
    "limec_delka_m": 0.16,
    "prechod_nad_krkem_m": 0.02,
-   "prechod_pod_krkem_m": 0.04
+   "prechod_pod_krkem_m": 0.04,
+   "limec_nad_krkem_m": 0.08,
+   "smycek": 2
   }
  },
  "_svy_odevu": "Míša 15. 11. ř. 3 (potrhané oblečení – tmavé trojúhelníky na ramenou a zádech). PŘÍČINA ZMĚŘENA: tělo Quaternius je po importu glTF 26 kusů (vrcholy rozdělené na švech UV/normál; svařené = 1 uzavřená skořepina), slupky oděvu (clothes.shell) je kopírovaly → oděv 23–31 nesvařených kusů, kusy < 30 ploch se mazaly (díry), vyhlazení a decimace hýbaly okraji kusů zvlášť. PRAVIDLO (tools/postavy_q): každý oděv svařit do jedné skořepiny (svar_m) před vyhlazením a decimací (clothes.shell, clothes.svar s průměrem vah shodných vrcholů), při decimaci okraje a švy UV zamčené (váha zamek_svu), váhy nejvýš max_kosti kostí (pod min_vaha pryč) a znormované v Blenderu. KONTROLA: q_export2 – otevřené hrany kusů kontrola_kusy v oblasti ramen a horních zad (oblast, mimo otvory krku, rukávů a lemu) = 0 (sada.json svy_otevrene, sestav.sh CHYBA); Godot tools/test_svy_odevu.gd – každá sada v test_snimku fázích test_klipy, skinování na CPU: vrcholy se stejnou klidovou polohou (do test_par_m) od sebe nejvýš test_partner_m a oblast ramen bez otevřených hran. jeden_kus: oděvy, jejichž každý objekt musí být po svaru jeden kus (košile ne – pod kotlemi z ní zůstávají jen viditelné části: límec a předloktí, záměrně 3 kusy; škorně 2 = dvě boty)."
