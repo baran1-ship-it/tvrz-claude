@@ -3083,7 +3083,12 @@ func _visici() -> void:
 			continue
 		for t: Array in sv.data["rostliny"][key]:
 			body.append([_druh(key), Vector3(float(t[3]), float(t[7]), float(t[11]))])
+	# predmet zaveseny na zdi / strope / vrcholu veze (katalog zed, stav zed, upevneno) nestoji na zemi - nevisi
+	var kat_p: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
 	for r: Dictionary in sv.data.get("vybaveni", []):
+		var kz: Dictionary = kat_p.get(String(r["id"]), {})
+		if bool(kz.get("zed", false)) or String(kz.get("stav", "")) == "zed" or kz.has("upevneno"):
+			continue
 		body.append(["predmet:" + String(r["id"]), Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))])
 	# opora skalou/balvanem (rostlina na vrcholu skalni veze - kolize skaly nahoru nesaha): pudorys site x meritko,
 	# stejne jako svet._dosednuti_dat
@@ -3113,6 +3118,12 @@ func _visici() -> void:
 				break
 		if na_skale:
 			continue
+		if String(b[0]) == "borovice" and int(po_druhu.get("bor_vzorek", 0)) < 4:
+			po_druhu["bor_vzorek"] = int(po_druhu.get("bor_vzorek", 0)) + 1
+			for sk2: Vector4 in skaly.get(Vector2i(floori(pos.x / 16.0), floori(pos.z / 16.0)), []):
+				var dd := Vector2(pos.x - sk2.x, pos.z - sk2.y).length()
+				if dd < 6.0:
+					print("VISI borovice (%.1f, %.2f, %.1f): skala (%.1f, %.1f) vzdal %.2f r %.2f vrchol %.2f" % [pos.x, pos.y, pos.z, sk2.x, sk2.y, dd, sk2.z, sk2.w])
 		celkem += 1
 		var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.5, 0), pos - Vector3(0, 60, 0)))
 		# zem = vyssi z viditelneho terenu (hotova sit, _teren_y) a kolize pod bodem (skala, dlazba, podlaha) - kolize

@@ -327,7 +327,7 @@ KATALOG.update({
     "plutek_vetve": ("ext:withe_fence.glb", "Plůtek z větví", None, "venku", 20.0, 3, {"max": 2.0, "troj": 1000, "tex": 1024, "oboustranne": True}),
     # havrani erb (obrazky/erb): stit nad branou a v sini, prapor na vezi nad branou
     "stit_havran": ("@", "Štít s havraním erbem", None, "zed", 6.0, 80, {"troj": 1500}),
-    "korouhev_havran": ("@", "Prapor rodu z Havraní", None, "venku", 8.0, 60, {"troj": 3000}),
+    "korouhev_havran": ("@", "Prapor rodu z Havraní", None, "venku", 8.0, 60, {"troj": 3000, "upevneno": "vrchol veze"}),
     # dvorec vsi (Misa 29. 10. predlohy KCD: stodola, kulna; kompozice mapy - stodola za domem zavre pohled napric vsi)
     "stodola": ("@", "Stodola", None, "venku", 4000.0, 400, {"troj": 30000, "presne": True, "tex": 1024, "zem0": True}),
     "stodola_mala": ("@", "Malá stodola", None, "venku", 3000.0, 300, {"troj": 25000, "presne": True, "tex": 1024, "zem0": True}),
@@ -396,7 +396,7 @@ KATALOG.update({
     "noze_lzice": ("ext:medieval_cutlery.glb", "Nože a lžíce", "naradi", "dekorace", 0.3, 6, {"max": 0.34}),
     "kniha_otevrena": ("ext:medieval_open_book_2.glb", "Otevřená kniha", None, "dekorace", 2.0, 300, {"max": 0.48}),
     "lis": ("ext:medieval_wine_press_free.glb", "Lis na víno a ovoce", None, "remeslo", 250.0, 400, {"vyska": 2.1}),
-    "lustr": ("ext:medieval_chandelier.glb", "Kruhový lustr", None, "dekorace", 20.0, 200, {"vyska": 0.9}),
+    "lustr": ("ext:medieval_chandelier.glb", "Kruhový lustr", None, "dekorace", 20.0, 200, {"vyska": 0.9, "upevneno": "strop"}),
     # z kitu krcmy (AI skeny, kazdy kus jen jedna nizsi uroven detailu)
     "jeleni_trofej": (KIT, "Jelení trofej", None, "dekorace", 8.0, 150, {"troj": 25000, "dil_presne": ["Deer trophy.001_Material.001_0", "Deer trophy.001_Material.001_0.001"], "max": 1.3, "zed": True}),
     "lucerna_kovana": (KIT, "Kovaná lucerna", "ostatni", "dekorace", 1.5, 40, {"troj": 25000, "dil_presne": ["Lantern_Material.009_0", "Lantern_Material.009_0.001"], "vyska": 0.45}),
