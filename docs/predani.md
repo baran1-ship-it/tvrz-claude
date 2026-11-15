@@ -1451,3 +1451,8 @@ Hotovo v kódu a datech (testy u každého):
   a buffer on a Multimesh…“ po „rostliny po bunkach“ jen headless (s rendererem 0) – na tabletu nečekáno, ověřit souhrnem z tabletu.
   **Před vydáním z nové session spustit `python3 tools/gen_tex.py`** – `textures/` (p_flame, p_soft… pro oheň) není v gitu ani
   v balících, APK 0.999998 je obsahovalo; bez nich oheň bez textury a chyba při každém zapálení.
+- **Kápě (15. 11.):** kápě a límec = jedna svařená skořepina, žádný můstek užší než `svy_odevu.kape.mustek_min_m` (průramky
+  splynou s lemem), kápě ≥ 15 mm nad kotlí, límec bere váhy kotle; 11 sad přestavěno (`SVY CELKEM 0`). Test: šev OK ve všech pózách
+  (4 sady), nová kontrola „spodní oděv nesmí prolézt kusem přes hlavu“ – chůze čistá, klek/sed 4–25 vrcholů do 3 cm u ramene a týla
+  (3 pokusy o vrstvení → podle CLAUDE.md nový rozbor příčiny, ne další oprava; hypotéza: paže pod okrajem límce). Snímek
+  `build/svy/kape_straz_chuze_zada.png`: bez děr, ale ostrý přehyb kápě v týle; vlasy prolézají vrškem kápě stráže (staré).
