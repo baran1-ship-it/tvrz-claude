@@ -2600,10 +2600,17 @@ var _na_zem_arg: Array = []
 ## Uvnitr vnejsiho lice hradeb tvrze (lokace.json tvrz_hradby - stejny zaznam jako Blender fort.py): nadvori ma vlastni
 ## teren (Nadvori*). 15. 11. (test visici): drive pevny obdelnik o 3-5 m vetsi nez hradby - kameny a trsy na valu za
 ## zdi nikdy nedosedly (0,3-0,6 m nad zemi).
+var _hradby_obd := Rect2()                      # vnejsi lic hradeb (x, z) - cteno jednou (volani pro kazdou rostlinu)
+
+
 func v_hradbach(x: float, z: float) -> bool:
-	var hr: Dictionary = Pravidla.cti("lokace", "tvrz_hradby")
-	var ox := float(hr["vnejsi_lic"][0])
-	return x < ox and x > -(ox + float(hr["rozsireni_zapad_m"])) and absf(z) < float(hr["vnejsi_lic"][1])
+	if _hradby_obd.size == Vector2.ZERO:
+		var hr: Dictionary = Pravidla.cti("lokace", "tvrz_hradby")
+		var ox := float(hr["vnejsi_lic"][0])
+		var oz := float(hr["vnejsi_lic"][1])
+		var x0 := -(ox + float(hr["rozsireni_zapad_m"]))
+		_hradby_obd = Rect2(x0, -oz, ox - x0, 2.0 * oz)
+	return x > _hradby_obd.position.x and x < _hradby_obd.end.x and z > _hradby_obd.position.y and z < _hradby_obd.end.y
 
 
 func _na_zem(site: Dictionary, mriz: Dictionary) -> void:

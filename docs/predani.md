@@ -1393,3 +1393,4 @@ Hotovo v kódu a datech (testy u každého):
 - Pravidlo jasu vsi (`ves_jas.textury`) platí pro každou budovu z vesnické výroby – nová budova = přidat vzor textur, jinak je černá.
 - Brána exportu chce ≥ 1000 MB volna; vydání potřebuje navíc ~3× velikost přestavěných balíků (data + git + dočasné) – rezerva: `/root/.rustup` (624 MB, projekt ho nepoužívá).
 - Testy přes `beh.sh testy` mají hlídače `TVRZ_TEST_LIMIT` (výchozí 300 s); se stavbou světa 150 s a testem `prochod` nestačí – pro sadu s `prochod` dávat `TVRZ_TEST_LIMIT=1200`.
+- Odloženo z nezávislé kontroly 15. 11. (před 0.999998, nízké): `_pesiny_volne` – okraj 0,5 / pata +1,0 / nad terénem 0,5 m natvrdo (stejně jako `_usad_skaly` plošiny) → přesunout oboje do `pasma` (vstup exportu = nový export); `lokace.krcma_l.kolize_rampy` a poznámka `_kolize_rampy` jsou po opravě schodů ve zdroji zbytečné (rampa neškodí); nábytek chýší na terénu bere výšku jen ze středu kusu.

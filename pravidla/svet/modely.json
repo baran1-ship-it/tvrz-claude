@@ -5944,7 +5944,8 @@
    "omitka",
    "stone_wall",
    "krcma_L_rock_surface",
-   "krcma_L_clay_plaster_pec2_"
+   "krcma_L_clay_plaster_pec2_",
+   "krcma_L_broken_wall"
   ],
   "hneda": {
    "pripony": [
