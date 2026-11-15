@@ -526,6 +526,7 @@ def mat_zelezo_autorsky():
     sum2 = U.u("ShaderNodeTexNoise"); sum2.inputs["Scale"].default_value = 38.0; sum2.inputs["Detail"].default_value = 4.0
     U.ln(geo.outputs["Position"], sum2.inputs["Vector"])
     dutiny = U.math("SUBTRACT", 1.0, ao_f, clamp=True)
+    pihy = U.math("MULTIPLY", U.mr(sum2.outputs["Fac"], 0.58, 0.66), 0.5)        # jemná rez – pihy
     rez_zaklad = U.math("MAXIMUM", U.mr(sum1.outputs["Fac"], 0.48, 0.64), pihy)
     u_dreva = U.mr(z, B + 0.07, B + 0.005, 0.0, 0.3)                            # vlhko od dřeva
     pas_k = U.math("MULTIPLY", U.mr(z, B + 0.10, B + 0.13), U.mr(z, B + 0.24, B + 0.20))   # jemná rez v pasu
@@ -536,7 +537,6 @@ def mat_zelezo_autorsky():
     # barvy
     okuje = U.mix(0.5, (0.125, 0.115, 0.105), rD.outputs[0], "MULTIPLY")
     okuje = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.6), okuje, (0.15, 0.135, 0.12))
-    pihy = U.math("MULTIPLY", U.mr(sum2.outputs["Fac"], 0.58, 0.66), 0.5)        # jemná rez – pihy
     rez_b = U.mix(0.25, rD.outputs[0], (0.20, 0.11, 0.06), "MULTIPLY")
     rez_b = U.mix(0.5, rez_b, rD.outputs[0])
     skr = U.u("ShaderNodeMapping"); skr.inputs["Scale"].default_value = (3.0, 160.0, 3.0); U.ln(geo.outputs["Position"], skr.inputs[0])

@@ -123,6 +123,8 @@ func _test_povrch() -> void:
 			var mi := m as MeshInstance3D
 			if mi.mesh == null or String(mi.name).begins_with("KOLIZE") or (String(mi.get_parent().name).begins_with("Pohyb") and not String(mi.get_parent().name).begins_with("Pohyb_most")):   # padací most se chodí (spuštěný) – je to povrch
 				continue
+			if mi.visibility_range_begin > float(cfg.get("lod_od_max_m", 1.0)) or not mi.is_visible_in_tree() or mi.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:   # + kopie jen pro stín (_Daleko_Stin) – není vidět   # vzdálený/střední stupeň (Dum2_Daleko od 110 m) zblízka není vidět – hráč u vchodu ho nevidí (15. 11.: falešné „projde viditelným“ u Dum2 po přidání vrstvy Mista)
+				continue
 			for si in mi.mesh.get_surface_count():   # hladina se neprochází po povrchu (brodí se) – bez ní
 				var mat := mi.get_active_material(si)
 				if mat != null and String(mat.resource_name) in cfg["bez_materialu"]: continue

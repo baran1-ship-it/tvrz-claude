@@ -57,6 +57,8 @@
   "projit_smi_pozn": "železné kování, kruhy a řetězy (tenké, visící) – kolizi nemají v žádné hře, postava jimi projde bez rušení; vše ostatní viditelné musí mít kolizi",
   "relief_bok_m": 0.12,
   "relief_popis": "výstupek, vedle kterého (±12 cm) je do vidět+0,3 m kolize, je reliéf zdi (kameny do 10 cm) – ne průchozí věc",
-  "vrstvy_pozn_15_11": "audit hlídačů 15. 11.: kolize domů vsi, krčmy, hájovny (Mista) a stodol a plotů (Ves) se přeskakovaly jako stromy – trasy dum_/ven_ nikdy neporovnaly viditelnou síť s kolizí"
+  "vrstvy_pozn_15_11": "audit hlídačů 15. 11.: kolize domů vsi, krčmy, hájovny (Mista) a stodol a plotů (Ves) se přeskakovaly jako stromy – trasy dum_/ven_ nikdy neporovnaly viditelnou síť s kolizí",
+  "lod_od_max_m": 1.0,
+  "lod_od_max_pozn": "sítě s visibility_range_begin nad tuto mez (střední a vzdálené stupně domů, obaly) se do povrchu nepočítají – zblízka se nekreslí (15. 11.: Dum2_Daleko dával falešné „projde viditelným“)"
  }
 }
