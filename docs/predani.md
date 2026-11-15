@@ -1392,3 +1392,4 @@ Hotovo v kódu a datech (testy u každého):
 - Skála smazaná pěšinou (`pesiny volne: skal pryc`) musí vzít s sebou i to, co na ní stojí (borovice z vrcholu visela 15 m).
 - Pravidlo jasu vsi (`ves_jas.textury`) platí pro každou budovu z vesnické výroby – nová budova = přidat vzor textur, jinak je černá.
 - Brána exportu chce ≥ 1000 MB volna; vydání potřebuje navíc ~3× velikost přestavěných balíků (data + git + dočasné) – rezerva: `/root/.rustup` (624 MB, projekt ho nepoužívá).
+- Testy přes `beh.sh testy` mají hlídače `TVRZ_TEST_LIMIT` (výchozí 300 s); se stavbou světa 150 s a testem `prochod` nestačí – pro sadu s `prochod` dávat `TVRZ_TEST_LIMIT=1200`.
