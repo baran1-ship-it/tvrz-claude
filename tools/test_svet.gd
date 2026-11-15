@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -10059,6 +10059,29 @@ func _lod_urovne() -> void:
 ## (RuinyVes_<i>_<soubor>), rohy jeho zdi (pudorysy zdi) do 0,4 m od terenu v pocatku dilu (zdi 0,35 m pod nulu), svah pod
 ## pudorysem (max - min / uhlopricka) do plochy.json teren stavba_max_sklon (rovina Blenderu kraj.MISTA ruiny_ves_N) a
 ## ve dverich, sini, brane, pruchodu stodoly a vchodu sklepa (pudorysy pruchody) zadna rostlina krome travy.
+## 15. 11. (hlidac povrch, 70 nalezu u hrbitovni zdi): kolize rozpadle zdi nesmi byt nad viditelnou zdi (lokace ruiny
+## kostel kolize_podle_site). Paprsek shora v souradnicich modelu: mezera v jizni zdi (x 8,5; 0,3-0,4 m) a cela zed (x -15,5; 1,2 m).
+func _kostel_zed() -> void:
+	var dil := get_tree().root.find_child("Kostel_dil", true, false) as Node3D
+	if dil == null:
+		_vysledek("kostel_zed", false, "Kostel_dil ve scene neni")
+		return
+	var chyby: Array = []
+	if dil.find_child("Kostel_Kol_HrbZed5*", true, false) is StaticBody3D and not String(dil.find_child("Kostel_Kol_HrbZed5*", true, false).name).ends_with("_useky"):
+		chyby.append("puvodni kvadr zdi zustal")
+	var xf := dil.global_transform
+	var ds := dil.get_world_3d().direct_space_state
+	var vys := []
+	for pr: Array in [["mezera", 8.5, -11.0, 0.0, 0.6], ["cela zed", -15.5, -11.0, 1.0, 1.5]]:
+		var q := PhysicsRayQueryParameters3D.create(xf * Vector3(float(pr[1]), 5.0, float(pr[2])), xf * Vector3(float(pr[1]), -1.0, float(pr[2])))
+		var h := ds.intersect_ray(q)
+		var y := (xf.affine_inverse() * Vector3(h["position"])).y if not h.is_empty() else -9.0
+		vys.append("%s %.2f" % [pr[0], y])
+		if y < float(pr[3]) or y > float(pr[4]):
+			chyby.append("%s: kolize %.2f m (ma byt %.1f-%.1f)" % [pr[0], y, pr[3], pr[4]])
+	_vysledek("kostel_zed", chyby.is_empty(), "%s; %s" % [", ".join(vys), "; ".join(chyby)])
+
+
 func _ruiny_ves() -> void:
 	var rv: Dictionary = {}
 	for e: Dictionary in Pravidla.cti("lokace", "ruiny"):

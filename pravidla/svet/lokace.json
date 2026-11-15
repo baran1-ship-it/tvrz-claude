@@ -199,7 +199,15 @@
     "M_DlazbaPolniKamen",
     "M_HlinaKostel"
    ],
-   "_barva_vrcholu_materialy": "NAVOD_KOSTEL: saze, mech, stékance a vlhko v barvě vrcholů – Vertex Color → Use as Albedo (svet._barva_vrcholu)"
+   "_barva_vrcholu_materialy": "NAVOD_KOSTEL: saze, mech, stékance a vlhko v barvě vrcholů – Vertex Color → Use as Albedo (svet._barva_vrcholu)",
+   "kolize_podle_site": [
+    [
+     "Kostel_Kol_HrbZed",
+     "Kostel_HrbitovniZed"
+    ]
+   ],
+   "kolize_krok_m": 0.5,
+   "_kolize_podle_site": "Míša 15. 11. / hlídač povrch (70 nálezů u hřbitovní zdi): kolize zdi z modelu jsou kvádry 1,4 m po celé délce, zeď je místy rozpadlá na 0,3–1,0 m → hráč stál na neviditelné hraně. Kvádry s prefixem [0] se nahradí úseky po kolize_krok_m s výškou = nejvyšší vrchol viditelné sítě [1] v půdorysu úseku (svet._kolize_podle_site), mezery bez sítě bez kolize."
   },
   {
    "id": "zanikla_ves",

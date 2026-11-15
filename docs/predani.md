@@ -1461,3 +1461,5 @@ Hotovo v kódu a datech (testy u každého):
   normální); borovice z Disku (`pine_tree.glb` id 15CZ-2994EOUWPM-1BNIuBCyJ-CUbED76 → `blender/tex_cache/nove/borovice.glb`); textury dveří:
   `git clone --depth 1 --filter=blob:none --sparse …/tvrz-modely /home/user/tvrz-modely-git && git sparse-checkout set textury/medieval_door_pack`;
   `git fetch --depth 1 origin main` (nove.py čte `origin/main:modely/nove/*.glb`); `tools/krok_b/vysky.json` (viz výše); `python3 tools/gen_tex.py`.
+- **Export světa – jablon (15. 11., 6. pád):** `modely/nove/jablon.glb` není v origin/main ani v repu → před exportem
+  `/opt/bl/bin/python blender/strom2.py -- jablon` (vytvoří modely/nove/jablon.glb + _daleko.glb).

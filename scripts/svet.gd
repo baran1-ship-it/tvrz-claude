@@ -10709,7 +10709,80 @@ func _kostel_dil(root: Node3D, parent: Node3D) -> void:
 			(cn as Node).queue_free()
 	for dp: Array in ko.get("dvere_prefixy", []):
 		_mlyn_dvere(sc, root, xf, ko, String(dp[0]), String(dp[1]))
+	for kp: Array in ko.get("kolize_podle_site", []):
+		_kolize_podle_site(sc, String(kp[0]), String(kp[1]), float(ko["kolize_krok_m"]))
 	print("kostel: u (%.0f, %.0f) y %.2f, interier %s" % [x, z, xf.origin.y, interier != null])
+
+
+## Kolize rozpadle zdi podle viditelne site (lokace ruiny kostel kolize_podle_site, 15. 11.): kvadry z modelu (prefix)
+## maji plnou vysku po cele delce, zed je mistami rozpadla -> kazdy kvadr se rozdeli na useky po krok_m podel delsi osy,
+## vyska useku = nejvyssi vrchol site v jeho pudorysu, usek bez site = bez kolize. Vse v souradnicich modelu (sc).
+func _kolize_podle_site(sc: Node3D, prefix: String, sit_jm: String, krok: float) -> void:
+	var mi := sc.find_child(sit_jm, true, false) as MeshInstance3D
+	if mi == null or mi.mesh == null:
+		print("kolize_podle_site: sit %s chybi" % sit_jm)
+		return
+	var mx := _rel_xf(mi, sc)
+	var body := PackedVector3Array()
+	for si in mi.mesh.get_surface_count():
+		for v: Vector3 in mi.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+			body.append(mx * v)
+	var n_nove := 0
+	for sb0 in sc.find_children(prefix + "*", "StaticBody3D", true, false):
+		var sb := sb0 as StaticBody3D
+		var bx := _rel_xf(sb, sc)
+		var lo := Vector3.INF
+		var hi := -Vector3.INF
+		for cs0 in sb.find_children("*", "CollisionShape3D", true, false):
+			var cs := cs0 as CollisionShape3D
+			var cx := bx * _rel_xf(cs, sb)
+			var pts: PackedVector3Array = (cs.shape as ConvexPolygonShape3D).points if cs.shape is ConvexPolygonShape3D else PackedVector3Array()
+			if cs.shape is BoxShape3D:
+				var h := (cs.shape as BoxShape3D).size * 0.5
+				for i in 8:
+					pts.append(Vector3(h.x * (1 if i & 1 else -1), h.y * (1 if i & 2 else -1), h.z * (1 if i & 4 else -1)))
+			for p in pts:
+				var w := cx * p
+				lo = lo.min(w)
+				hi = hi.max(w)
+		if lo == Vector3.INF:
+			continue
+		var podel_x := hi.x - lo.x >= hi.z - lo.z
+		var delka := (hi.x - lo.x) if podel_x else (hi.z - lo.z)
+		var n := maxi(1, ceili(delka / krok))
+		var nove := StaticBody3D.new()
+		nove.name = String(sb.name) + "_useky"
+		nove.collision_layer = sb.collision_layer
+		nove.collision_mask = sb.collision_mask
+		var t0 := lo.x if podel_x else lo.z
+		var o0 := lo.z if podel_x else lo.x
+		var o1 := hi.z if podel_x else hi.x
+		var vrchy := PackedFloat32Array()
+		vrchy.resize(n)
+		vrchy.fill(-INF)
+		for v: Vector3 in body:
+			var o := v.z if podel_x else v.x
+			var k := int(floor(((v.x if podel_x else v.z) - t0) / delka * n))
+			if o >= o0 and o <= o1 and k >= 0 and k < n:
+				vrchy[k] = maxf(vrchy[k], v.y)
+		for i in n:
+			var a := t0 + delka * i / n
+			var b := t0 + delka * (i + 1) / n
+			var top := vrchy[i]
+			if top <= lo.y:
+				continue
+			var cs := CollisionShape3D.new()
+			var bs := BoxShape3D.new()
+			bs.size = Vector3(b - a, top - lo.y, hi.z - lo.z) if podel_x else Vector3(hi.x - lo.x, top - lo.y, b - a)
+			cs.shape = bs
+			var st := (a + b) * 0.5
+			cs.position = Vector3(st, (lo.y + top) * 0.5, (lo.z + hi.z) * 0.5) if podel_x else Vector3((lo.x + hi.x) * 0.5, (lo.y + top) * 0.5, st)
+			nove.add_child(cs)
+			n_nove += 1
+		sc.add_child(nove)
+		sb.get_parent().remove_child(sb)
+		sb.free()
+	print("kolize_podle_site %s: useku %d" % [prefix, n_nove])
 
 
 ## Zanikla ves Doubrava po dilech (Misa 15. 11., Disk vesnice_ruiny.zip, NAVOD_VES.md, lokace.json ruiny zanikla_ves dily):
