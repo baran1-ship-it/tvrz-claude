@@ -196,12 +196,348 @@
    "id": "zanikla_ves",
    "nazev": "Doubrava",
    "stred": [
-    300.0,
-    340.0
+    302.0,
+    349.0
    ],
-   "natoceni": -0.3,
-   "myti_r_m": 24.0,
-   "rovina_r_m": 0.0
+   "natoceni": -1.9722,
+   "myti_r_m": 60.0,
+   "rovina_r_m": 0.0,
+   "dily_slozka": "res://modely/ruiny_ves/",
+   "dily": [
+    [
+     "ves_zidka_rovna",
+     -36.0,
+     -29.0,
+     0.0
+    ],
+    [
+     "ves_dum3",
+     33.0,
+     -16.0,
+     90.0
+    ],
+    [
+     "ves_stodola",
+     -24.0,
+     -36.0,
+     0.0
+    ],
+    [
+     "ves_dum3",
+     -11.0,
+     16.0,
+     -90.0
+    ],
+    [
+     "ves_dum2",
+     -31.0,
+     13.5,
+     -90.0
+    ],
+    [
+     "ves_dum2",
+     8.0,
+     13.5,
+     -86.6
+    ],
+    [
+     "ves_zidka_roh",
+     41.0,
+     -28.0,
+     0.0
+    ],
+    [
+     "ves_zidka_rovna",
+     -4.0,
+     -29.5,
+     1.7
+    ],
+    [
+     "ves_stodola",
+     28.0,
+     17.0,
+     2.3
+    ],
+    [
+     "ves_dum3",
+     -24.0,
+     -16.0,
+     90.0
+    ],
+    [
+     "ves_usedlost",
+     13.0,
+     -17.5,
+     180.0
+    ],
+    [
+     "ves_snos",
+     -40.0,
+     -40.0,
+     22.9
+    ],
+    [
+     "ves_studna",
+     3.0,
+     -3.6,
+     0.0
+    ],
+    [
+     "ves_sklep",
+     -47.0,
+     -2.0,
+     90.0
+    ],
+    [
+     "ves_dum2",
+     -5.0,
+     -13.5,
+     90.0
+    ]
+   ],
+   "_dily": "díly zaniklé vsi [soubor, x, z, natočení °] v rámci vsi (Godot x, z; rozvržení z ves_celek.glb, uzly Ves_*: Blender (x, y) -> (x, -y)); pořadí = pořadí rovin v Blenderu (kraj.MISTA ruiny_ves_N, pozdější rovina přepíše přechod dřívější – zvoleno tak, aby rohy všech dílů byly do 0,25 m od terénu počátku dílu); hra staví každý díl na výšce terénu v jeho počátku (svet._ruiny_ves_dil)",
+   "vypustene": [
+    [
+     "ves_zidka_rovna",
+     -20.0,
+     31.0,
+     0.0
+    ],
+    [
+     "ves_zidka_rovna",
+     14.0,
+     31.5,
+     -1.1
+    ],
+    [
+     "ves_zidka_roh",
+     -44.0,
+     30.0,
+     -90.0
+    ],
+    [
+     "ves_snos",
+     46.0,
+     38.0,
+     68.8
+    ],
+    [
+     "ves_snos",
+     10.0,
+     -40.0,
+     114.6
+    ]
+   ],
+   "_vypustene": "díly celku vynechané kvůli svahu: půdorys na terénu před stavbou (tools/krok_b/vysky.json) nad plochy.json teren stavba_max_sklon 0,15 (zídky 0,20/0,20, roh 0,25, snosy 0,26/0,18); všechny ponechané díly do 0,13",
+   "pudorysy": {
+    "ves_dum3": {
+     "zdi": [
+      [
+       -9.25,
+       -3.55,
+       9.25,
+       3.55
+      ]
+     ],
+     "pruchody": [
+      [
+       -0.25,
+       5.5,
+       0.5,
+       -5.5,
+       0.8
+      ],
+      [
+       -2.4,
+       1.9,
+       -4.5,
+       1.9,
+       0.6
+      ],
+      [
+       2.0,
+       -1.4,
+       4.0,
+       -1.4,
+       0.6
+      ]
+     ]
+    },
+    "ves_dum2": {
+     "zdi": [
+      [
+       -5.8,
+       -3.3,
+       5.8,
+       3.3
+      ]
+     ],
+     "pruchody": [
+      [
+       -2.1,
+       5.0,
+       -2.1,
+       0.0,
+       0.7
+      ],
+      [
+       0.8,
+       -4.0,
+       0.8,
+       -2.0,
+       0.5
+      ]
+     ]
+    },
+    "ves_usedlost": {
+     "zdi": [
+      [
+       -9.61,
+       -8.39,
+       10.49,
+       9.0
+      ]
+     ],
+     "pruchody": [
+      [
+       -13.0,
+       3.2,
+       2.0,
+       4.0,
+       1.3
+      ],
+      [
+       -2.76,
+       0.0,
+       -2.76,
+       -4.0,
+       0.6
+      ]
+     ]
+    },
+    "ves_stodola": {
+     "zdi": [
+      [
+       -7.5,
+       -4.5,
+       7.5,
+       4.5
+      ]
+     ],
+     "pruchody": [
+      [
+       1.0,
+       -7.0,
+       1.0,
+       7.0,
+       2.0
+      ]
+     ]
+    },
+    "ves_sklep": {
+     "zdi": [
+      [
+       -4.74,
+       -5.1,
+       4.5,
+       2.25
+      ]
+     ],
+     "pruchody": [
+      [
+       0.0,
+       4.5,
+       0.0,
+       -4.5,
+       1.0
+      ]
+     ]
+    },
+    "ves_studna": {
+     "zdi": [
+      [
+       -0.99,
+       -0.98,
+       0.99,
+       0.98
+      ]
+     ],
+     "pruchody": []
+    },
+    "ves_zidka_rovna": {
+     "zdi": [
+      [
+       -3.97,
+       -0.33,
+       3.95,
+       0.33
+      ]
+     ],
+     "pruchody": []
+    },
+    "ves_zidka_roh": {
+     "zdi": [
+      [
+       -5.0,
+       -0.38,
+       0.35,
+       0.38
+      ],
+      [
+       -0.38,
+       -5.0,
+       0.38,
+       0.35
+      ]
+     ],
+     "pruchody": []
+    },
+    "ves_snos": {
+     "zdi": [
+      [
+       -2.26,
+       -1.57,
+       2.04,
+       1.46
+      ]
+     ],
+     "pruchody": []
+    }
+   },
+   "_pudorysy": "podle souboru dílu (v rámci dílu, Godot x, z; z kolizí -convcolonly a sítí Zdivo): zdi = obdélníky zdí [x0, z0, x1, z1] (bez keřů a náletu, tráva smí; rovina Blenderu poloměru rovina_k × půlúhlopříčka obálky zdí), pruchody = dveře, síň, brána, průjezd stodoly, vchod sklepa [x0, z0, x1, z1, poloviční šířka] bez rostlin kromě trávy",
+   "rovina_k": 0.9,
+   "pruchody_lok": [
+    [
+     -60.0,
+     0.0,
+     60.0,
+     0.0,
+     2.0
+    ]
+   ],
+   "_pruchody_lok": "osa návsi (Ves_Cesta_Zapad -60 → Ves_Cesta_Vychod +60, z 0) bez keřů a náletu",
+   "cesta_lok": [
+    [
+     -60.0,
+     0.0
+    ],
+    [
+     60.0,
+     0.0
+    ]
+   ],
+   "_cesta_lok": "značky Ves_Cesta_Zapad a Ves_Cesta_Vychod – sem končí pěšiny cesty.json tvrz_doubrava a doubrava_ves",
+   "dosah_m": 60.0,
+   "lod1_od_m": 55.0,
+   "drobne": [
+    "ves_zidka_rovna",
+    "ves_zidka_roh",
+    "ves_snos"
+   ],
+   "drobne_dosah_m": 35.0,
+   "drobne_lod1_od_m": 32.0,
+   "_dosah": "NAVOD_VES.md Výkon: díly 0–60 m, LOD1 od 55 m; zídky a snosy do 35 m",
+   "popis": "Míša 15. 11. (Disk vesnice_ruiny.zip, NAVOD_VES.md): „mám novou vesnici ruin, mrkni, myslím, že je lepší“ – zaniklá ves podle Pfaffenschlagu, Mstěnic, Konůvek a Bystřece: trojdílné domy, usedlost do L, stodoly, studna, sklep v mezi, zídky a snosy. Celek 100 × 80 m nejde položit naplocho (terén 3–15 m), proto po dílech: Blender (kraj.MISTA ruiny_ves_N) srovná rovinku pod každým dílem, hra (svet._ruiny_ves_dil) ho posadí na terén v jeho počátku (zdi 0,35 m pod nulu). Ves posunuta o (2, 9) m a natočena −113° (dřív −0,3 rad), aby žádný ponechaný díl nestál na svahu nad 0,15. Studna: terén nemá díry, šachta je zasypaná v úrovni terénu (zaniklá ves). Blender ruiny.zanikla_ves jen porost a název místa (staré podezdívky, trámy a studna z Blenderu pryč)."
   },
   {
    "id": "hradek",

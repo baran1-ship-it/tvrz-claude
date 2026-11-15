@@ -779,6 +779,8 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_krcma_dil")
 	_kostel_dil(root, parent)
 	_krok_cas("_kostel_dil")
+	_ruiny_ves_dil(parent)
+	_krok_cas("_ruiny_ves_dil")
 	_staj_kone(parent)
 	_ves_domy(root)
 	_krok_cas("_ves_domy")
@@ -10706,6 +10708,56 @@ func _kostel_dil(root: Node3D, parent: Node3D) -> void:
 		_mlyn_dvere(sc, root, xf, ko, String(dp[0]), String(dp[1]))
 	print("kostel: u (%.0f, %.0f) y %.2f, interier %s" % [x, z, xf.origin.y, interier != null])
 
+
+## Zanikla ves Doubrava po dilech (Misa 15. 11., Disk vesnice_ruiny.zip, NAVOD_VES.md, lokace.json ruiny zanikla_ves dily):
+## celek 100 x 80 m nejde polozit naplocho, kazdy dil (domy, usedlost, stodoly, studna, sklep, zidky, snosy) stoji na
+## rovince Blenderu (kraj.MISTA ruiny_ves_N) ve vysce terenu sveho pocatku (zdi 0,35 m pod nulu). Dosah a LOD1 podle
+## navodu (dily do dosah_m, LOD1 od lod1_od_m; zidky a snosy kratsi), kolize z uzlu -convcolonly / -colonly (import),
+## LOD1 bez kolizi; valy a kameni bez stinu (lezi na zemi).
+func _ruiny_ves_dil(parent: Node3D) -> void:
+	var rv := _ruina_zaznam("zanikla_ves")
+	if not rv.has("dily"):
+		return
+	var slozka := String(rv["dily_slozka"])
+	var cx := float(rv["stred"][0])
+	var cz := float(rv["stred"][1])
+	var yaw := float(rv["natoceni"])
+	var b0 := Basis(Vector3.UP, yaw)
+	var drobne: Array = rv.get("drobne", [])
+	var n := 0
+	for i in (rv["dily"] as Array).size():
+		var d: Array = rv["dily"][i]
+		var sb := String(d[0])
+		var cesta := slozka + sb + ".glb"
+		if not ResourceLoader.exists(cesta):
+			print("ruiny_ves: model %s chybi (balik z_ruiny_ves)" % cesta)
+			continue
+		var w := Vector3(cx, 0.0, cz) + b0 * Vector3(float(d[1]), 0.0, float(d[2]))
+		var xf := Transform3D(Basis(Vector3.UP, yaw + deg_to_rad(float(d[3]))), Vector3(w.x, _vyska(w.x, w.z), w.z))
+		var drob := drobne.has(sb)
+		var dosah := float(rv["drobne_dosah_m"] if drob else rv["dosah_m"])
+		var l1_od := float(rv["drobne_lod1_od_m"] if drob else rv["lod1_od_m"])
+		var sc := (load(cesta) as PackedScene).instantiate() as Node3D
+		sc.name = "RuinyVes_%d_%s" % [i, sb]
+		sc.transform = xf
+		parent.add_child(sc)
+		for nd in sc.find_children("*", "GeometryInstance3D", true, false):
+			var gi := nd as GeometryInstance3D
+			gi.visibility_range_end = dosah
+			if not String(gi.name).contains("Zdivo"):
+				gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var c1 := slozka + sb + "_lod1.glb"
+		if ResourceLoader.exists(c1):
+			var l1 := (load(c1) as PackedScene).instantiate() as Node3D
+			l1.name = "RuinyVes_%d_lod1" % i
+			l1.transform = xf
+			parent.add_child(l1)
+			for nd in l1.find_children("*", "GeometryInstance3D", true, false):
+				(nd as GeometryInstance3D).visibility_range_begin = l1_od
+			for cn in l1.find_children("*", "CollisionObject3D", true, false):
+				(cn as Node).queue_free()
+		n += 1
+	print("ruiny_ves: %d dilu zanikle vsi u (%.0f, %.0f)" % [n, cx, cz])
 
 ## Pytle ve mlyne (Misa 0.99 „pytle ve mlyne jsou na hovno“ - sit modelu Mlyn_PytleMouka s nataženou texturou): kazdy
 ## souvisly kus site (pytel) nahradi predmet katalogu pytel_mouky (stejny jako v komorach domu) na jeho miste a ve smeru

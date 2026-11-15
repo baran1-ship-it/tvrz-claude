@@ -269,12 +269,13 @@
     "max_obal_m": 0.5
   },
   "volne_hrany": {
-    "_popis": "test volne_hrany (Puchart test_smyslu volne_hrany, Míša 4. 11. „zábradlí, kde má být, chybí“): na plochách staveb (kolize cíle z povrch.cile) víc než pad_m nad terénem, kde postava stojí, sonda o sonda_m do 4 směrů – když tam pod okrajem není podlaha do pad_m níž, musí v pase (vyska_m) do sonda_m + 0,3 m stát kolize (zábradlí, zeď). Jinak volná hrana bez zábradlí.",
+    "_popis": "test volne_hrany (Puchart test_smyslu volne_hrany, Míša 4. 11. „zábradlí, kde má být, chybí“): na plochách staveb (kolize cíle z povrch.cile) víc než pad_m nad terénem, kde postava stojí, sonda o sonda_m do 4 směrů – když tam pod okrajem není podlaha do pad_m níž, musí v pase (vyska_m) do sonda_m + 0,3 m stát kolize (zábradlí, zeď). Jinak volná hrana bez zábradlí. Jen body pod střechou (paprsek nahoru do strop_m zasáhne kolizi) – vrchy zdí zříceniny a střechy hráč nechodí.",
     "pad_m": 1.0,
     "sonda_m": 0.5,
     "vyska_m": 0.7,
     "krok_m": 0.5,
-    "vypis_max": 20
+    "vypis_max": 20,
+    "strop_m": 3.5
   },
   "spoje": {
     "_popis": "tools/kontrola_spoju.py (Puchart kontrola_spoju): zábradlí spojité (mezera mezi kusy zábradlí po délce do max_mezera_m) a ploty navazují (konce plotů do max_mezera_m od jiného plotu, sloupu nebo zdi).",

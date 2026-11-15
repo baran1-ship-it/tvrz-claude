@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -9455,6 +9455,8 @@ func _potok_kaskada() -> void:
 ## (vidi zed, kolize dal) / "nevidtelna stena" (kolize, nic videt). Schvalene nalezy kontroly.json schvalene.povrch
 ## (rohatka, shoda rohatka.shoda_m); vse do build/povrch.json.
 func _povrch() -> void:
+	const VIS := 1 << 19                      # vrstva 20: jen viditelne site tohoto testu
+	const MASKA_HRY := 0xFFFFFFFF & ~(1 << 19)
 	var K := "kontroly"
 	var tol := float(Pravidla.cti(K, "povrch", "tolerance_m"))
 	var nad_m := float(Pravidla.cti(K, "povrch", "nad_m"))
@@ -9515,8 +9517,10 @@ func _povrch() -> void:
 		var chyb_cil := 0
 		for uz: Node in uzly:
 			var cn := uz as Node3D
-			# viditelne site cile: [TriangleMesh, inv, xf, aabb sveta, material, jmeno, smi projit]
+			# viditelne site cile (Godot 4.4 TriangleMesh nema intersect_ray): kazdy povrch site = StaticBody3D s ConcavePolygonShape3D
+			# na vlastni vrstve VIS (hra ji nepouziva), dotazy na kolizi hry ji maskou vynechavaji; [_, _, _, aabb sveta, material, jmeno, smi projit]
 			var site: Array = []
+			var tela: Array = []
 			var obal := AABB()
 			var ma_obal := false
 			for m in cn.find_children("*", "MeshInstance3D", true, false):
@@ -9543,15 +9547,41 @@ func _povrch() -> void:
 					var mn := String(mat.resource_name) if mat != null else ""
 					var am := ArrayMesh.new()
 					am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mi.mesh.surface_get_arrays(si))
-					var tm := am.generate_triangle_mesh()
-					if tm == null:
+					var fc := am.get_faces()
+					if fc.is_empty():
 						continue
 					var sb := gx * am.get_aabb()
-					site.append([tm, gx.affine_inverse(), gx, sb.grow(0.5), mn, nm, obsahuje.call(mn + " " + nm, projit)])
+					var telo := StaticBody3D.new()
+					telo.collision_layer = VIS
+					telo.collision_mask = 0
+					var csh := CollisionShape3D.new()
+					var shp := ConcavePolygonShape3D.new()
+					shp.set_faces(fc)
+					csh.shape = shp
+					telo.add_child(csh)
+					telo.set_meta("povrch", [mn, nm, obsahuje.call(mn + " " + nm, projit)])
+					main.world.add_child(telo)
+					telo.global_transform = gx
+					tela.append(telo)
+					site.append([null, null, gx, sb.grow(0.5), mn, nm, obsahuje.call(mn + " " + nm, projit)])
 					obal = sb if not ma_obal else obal.merge(sb)
 					ma_obal = true
 			if not ma_obal:
 				continue
+			for _f in 2:
+				await get_tree().physics_frame
+			# paprsek jen do viditelnych siti (lic, zadni strany ne); bez_projit: vynechat site, kterymi se smi projit
+			var vray := func(od: Vector3, do_: Vector3, bez_projit: bool) -> Dictionary:
+				var q := PhysicsRayQueryParameters3D.create(od, do_, VIS)
+				q.hit_back_faces = false
+				var ex: Array[RID] = []
+				for _k in 6:
+					q.exclude = ex
+					var h := space.intersect_ray(q)
+					if h.is_empty() or not bez_projit or not bool(((h["collider"] as Node).get_meta("povrch") as Array)[2]):
+						return h
+					ex.append((h["collider"] as CollisionObject3D).get_rid())
+				return {}
 			var x0 := obal.position.x - okraj
 			var x1 := obal.end.x + okraj
 			var z0 := obal.position.z - okraj
@@ -9579,7 +9609,7 @@ func _povrch() -> void:
 					return 1
 				return 0
 			var paprsek := func(od: Vector3, do_: Vector3, zezadu: bool) -> Dictionary:
-				var q := PhysicsRayQueryParameters3D.create(od, do_)
+				var q := PhysicsRayQueryParameters3D.create(od, do_, MASKA_HRY)
 				q.hit_back_faces = zezadu
 				var ex: Array[RID] = ex_hrac.duplicate()
 				q.exclude = ex
@@ -9598,14 +9628,9 @@ func _povrch() -> void:
 				var pet: Array = []
 				for o5: Vector3 in [Vector3.ZERO, Vector3(0.05, 0, 0.05), Vector3(-0.05, 0, 0.05), Vector3(0.05, 0, -0.05), Vector3(-0.05, 0, -0.05)]:
 					var v5 := zakl
-					for s: Array in blizko:
-						var lo: Vector3 = (s[1] as Transform3D) * (o_od + o5)
-						var ld: Vector3 = ((s[1] as Transform3D) * (o_do + o5)) - lo
-						var r: Dictionary = (s[0] as TriangleMesh).intersect_ray(lo, ld.normalized())
-						if not r.is_empty():
-							var w: Vector3 = (s[2] as Transform3D) * (r["position"] as Vector3)
-							if w.y <= o_od.y and w.y >= o_do.y:
-								v5 = maxf(v5, w.y)
+					var r: Dictionary = vray.call(o_od + o5, o_do + o5, false)
+					if not r.is_empty():
+						v5 = maxf(v5, (r["position"] as Vector3).y)
 					pet.append(v5)
 				pet.sort()
 				return float(pet[2])
@@ -9630,6 +9655,7 @@ func _povrch() -> void:
 						pq.shape = kapsle
 						pq.transform = Transform3D(Basis(), Vector3(x, hp.y + 0.05 + telo_v * 0.5, z))
 						pq.exclude = ex_hrac
+						pq.collision_mask = MASKA_HRY
 						var volno := space.intersect_shape(pq, 1).is_empty()
 						if volno:
 							var vis: float = vid_y.call(Vector3(x, hp.y, z), hp.y, blizko)
@@ -9657,17 +9683,18 @@ func _povrch() -> void:
 											var pin := PhysicsPointQueryParameters3D.new()
 											pin.position = zb
 											pin.exclude = ex_hrac
+											pin.collision_mask = MASKA_HRY
 											if not space.intersect_point(pin, 1).is_empty():
 												continue
-											for s: Array in blizko:
-												var lo: Vector3 = (s[1] as Transform3D) * zb
-												var r: Dictionary = (s[0] as TriangleMesh).intersect_ray(lo, ((s[1] as Transform3D).basis * sm).normalized())
-												if not r.is_empty() and ((s[2] as Transform3D).basis * (r["normal"] as Vector3)).dot(sm) < 0.0:
-													var dd: float = zb.distance_to((s[2] as Transform3D) * (r["position"] as Vector3))
-													dv_vse = minf(dv_vse, dd)
-													if dd < dv_min and v >= steny_od and not bool(s[6]):
-														dv_min = dd
-														dmat = "%s/%s" % [s[5], s[4]]
+											var rv: Dictionary = vray.call(zb, zb + sm * dosah, false)
+											if not rv.is_empty():
+												dv_vse = minf(dv_vse, zb.distance_to(rv["position"]))
+											if v >= steny_od:
+												var rp: Dictionary = vray.call(zb, zb + sm * dosah, true)
+												if not rp.is_empty() and zb.distance_to(rp["position"]) < dv_min:
+													dv_min = zb.distance_to(rp["position"])
+													var mt: Array = (rp["collider"] as Node).get_meta("povrch")
+													dmat = "%s/%s" % [mt[1], mt[0]]
 											var hs: Dictionary = paprsek.call(zb, zb + sm * dosah, true)
 											if not hs.is_empty() and int(prijmi.call(hs["collider"])) == 1:
 												var dk_ := zb.distance_to(hs["position"])
@@ -9687,12 +9714,8 @@ func _povrch() -> void:
 											chyba = "neviditelna stena"
 											var hpk := Vector3(x, hp.y, z) + sm * (dk_min + 0.06)
 											for o5: Vector3 in [Vector3.ZERO, sm * 0.08, -sm * 0.08]:
-												for s: Array in blizko:
-													var lo: Vector3 = (s[1] as Transform3D) * (hpk + o5 + Vector3(0, 2.0, 0))
-													var ld: Vector3 = ((s[1] as Transform3D) * (hpk + o5 - Vector3(0, 0.3, 0))) - lo
-													var r: Dictionary = (s[0] as TriangleMesh).intersect_ray(lo, ld.normalized())
-													if not r.is_empty() and ((s[2] as Transform3D) * (r["position"] as Vector3)).y > hp.y - 0.3:
-														chyba = ""
+												if not (vray.call(hpk + o5 + Vector3(0, 2.0, 0), hpk + o5 - Vector3(0, 0.3, 0), false) as Dictionary).is_empty():
+													chyba = ""
 										if chyba != "":
 											chyb_cil += 1
 											vse.append({"druh": "zed", "chyba": chyba, "cil": String(cn.name), "p": [snappedf(x, 0.01), snappedf(hp.y, 0.01), snappedf(z, 0.01)],
@@ -9702,6 +9725,8 @@ func _povrch() -> void:
 							break                     # teren je dno
 					z += krok
 				x += krok
+			for tl: Node in tela:
+				tl.free()
 		n_celkem += n_cil
 		souhrn.append("%s: bodu %d, nalezu %d" % [cil.get("uzel", cil.get("vzor")), n_cil, chyb_cil])
 		print("POVRCH %s uzlu %d bodu %d nalezu %d (%d ms)" % [cil.get("uzel", cil.get("vzor")), uzly.size(), n_cil, chyb_cil, Time.get_ticks_msec() - t0])
@@ -9783,6 +9808,7 @@ func _volne_hrany() -> void:
 	var pas := float(Pravidla.cti("kontroly", "volne_hrany", "vyska_m"))
 	var krok := float(Pravidla.cti("kontroly", "volne_hrany", "krok_m"))
 	var vyp := int(Pravidla.cti("kontroly", "volne_hrany", "vypis_max"))
+	var strop := float(Pravidla.cti("kontroly", "volne_hrany", "strop_m"))
 	var space := player.get_world_3d().direct_space_state
 	var kapsle := CapsuleShape3D.new()
 	kapsle.radius = float(Pravidla.cti("kontroly", "povrch", "telo_r_m"))
@@ -9837,6 +9863,10 @@ func _volne_hrany() -> void:
 						pq.exclude = ex
 						if not space.intersect_shape(pq, 1).is_empty():
 							continue
+						var qs := PhysicsRayQueryParameters3D.create(hp + Vector3(0, 0.3, 0), hp + Vector3(0, strop, 0))
+						qs.exclude = ex
+						if space.intersect_ray(qs).is_empty():
+							continue                  # bez strechy nad sebou (vrch zdi zriceniny, strecha) - hrac tam nechodi
 						n += 1
 						for sm: Vector3 in [Vector3.RIGHT, Vector3.LEFT, Vector3.FORWARD, Vector3.BACK]:
 							var o := hp + sm * sonda
@@ -9950,3 +9980,71 @@ func _lod_urovne() -> void:
 			popis.append("%s %.0f-%.0f m %d troj." % [nazev, zac, kon, troj])
 		print("LOD_UROVNE %s: %s" % [sb[0], ", ".join(popis)])
 	_vysledek("lod_urovne", chyby.is_empty() and n > 0, "staveb %d, %d chyb %s" % [n, chyby.size(), chyby.slice(0, 6)])
+
+
+## Zanikla ves Doubrava po dilech (Misa 15. 11., lokace.json ruiny zanikla_ves dily): kazdy dil stoji ve hre
+## (RuinyVes_<i>_<soubor>), rohy jeho zdi (pudorysy zdi) do 0,4 m od terenu v pocatku dilu (zdi 0,35 m pod nulu), svah pod
+## pudorysem (max - min / uhlopricka) do plochy.json teren stavba_max_sklon (rovina Blenderu kraj.MISTA ruiny_ves_N) a
+## ve dverich, sini, brane, pruchodu stodoly a vchodu sklepa (pudorysy pruchody) zadna rostlina krome travy.
+func _ruiny_ves() -> void:
+	var rv: Dictionary = {}
+	for e: Dictionary in Pravidla.cti("lokace", "ruiny"):
+		if String(e.get("id", "")) == "zanikla_ves":
+			rv = e
+	var chyby: Array = []
+	if not rv.has("dily"):
+		_vysledek("ruiny_ves", false, "zaznam zanikla_ves bez dily")
+		return
+	var smax := float(Pravidla.cti("plochy", "teren", "stavba_max_sklon"))
+	var cx := float(rv["stred"][0])
+	var cz := float(rv["stred"][1])
+	var b0 := Basis(Vector3.UP, float(rv["natoceni"]))
+	var pruchody: Array = []                         # [a, b, polosirka] ve svete (x, z)
+	var n := 0
+	var nejvic := 0.0
+	for i in (rv["dily"] as Array).size():
+		var d: Array = rv["dily"][i]
+		var sb := String(d[0])
+		var w := Vector3(cx, 0.0, cz) + b0 * Vector3(float(d[1]), 0.0, float(d[2]))
+		var bz := Basis(Vector3.UP, float(rv["natoceni"]) + deg_to_rad(float(d[3])))
+		var uzel := get_tree().root.find_child("RuinyVes_%d_%s" % [i, sb], true, false) as Node3D
+		if uzel == null:
+			chyby.append("%s %d chybi ve hre" % [sb, i])
+			continue
+		n += 1
+		var y0 := uzel.global_position.y
+		var pud: Dictionary = (rv["pudorysy"] as Dictionary)[sb]
+		for zb: Array in pud["zdi"]:
+			var hs: Array = []
+			for k: Vector2 in [Vector2(zb[0], zb[1]), Vector2(zb[2], zb[1]), Vector2(zb[2], zb[3]), Vector2(zb[0], zb[3])]:
+				var q := w + bz * Vector3(k.x, 0.0, k.y)
+				var h: float = sv._vyska(q.x, q.z)
+				hs.append(h)
+				nejvic = maxf(nejvic, absf(h - y0))
+				if absf(h - y0) > 0.4:
+					chyby.append("%s %d roh (%.0f, %.0f) teren %.2f m od pocatku" % [sb, i, q.x, q.z, h - y0])
+			var uhl := Vector2(float(zb[2]) - float(zb[0]), float(zb[3]) - float(zb[1])).length()
+			var s := (float(hs.max()) - float(hs.min())) / maxf(uhl, 0.1)
+			if s > smax:
+				chyby.append("%s %d na svahu %.0f %% (max %.0f %%)" % [sb, i, s * 100.0, smax * 100.0])
+		for pr: Array in pud["pruchody"]:
+			var a := w + bz * Vector3(float(pr[0]), 0.0, float(pr[1]))
+			var b := w + bz * Vector3(float(pr[2]), 0.0, float(pr[3]))
+			pruchody.append([Vector2(a.x, a.z), Vector2(b.x, b.z), float(pr[4])])
+	var v_pruchodu := 0
+	for key: String in sv.data["rostliny"]:
+		if key.contains("trava") or key.contains("grass"):
+			continue                                     # trava smi (zarostla ves)
+		for t: Array in sv.data["rostliny"][key]:
+			var p := Vector2(float(t[3]), float(t[11]))
+			if p.distance_to(Vector2(cx, cz)) > 80.0:
+				continue
+			for pr: Array in pruchody:
+				var c := Geometry2D.get_closest_point_to_segment(p, pr[0], pr[1])
+				if c.distance_to(p) < float(pr[2]):
+					v_pruchodu += 1
+					if v_pruchodu <= 6:
+						chyby.append("%s v pruchodu (%.1f, %.1f)" % [key, p.x, p.y])
+					break
+	print("RUINY_VES dilu %d, nejvetsi odchylka rohu %.2f m, rostlin v pruchodech %d" % [n, nejvic, v_pruchodu])
+	_vysledek("ruiny_ves", chyby.is_empty() and n == (rv["dily"] as Array).size(), "dilu %d, roh max %.2f m, v pruchodech %d, %d chyb %s" % [n, nejvic, v_pruchodu, chyby.size(), chyby.slice(0, 6)])

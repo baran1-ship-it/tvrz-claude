@@ -7,7 +7,7 @@ extends SceneTree
 ##  par    – vrcholy se stejnou klidovou polohou (do test_par_m; export glTF je dělí na švech UV) nesmí být v žádné
 ##           fázi od sebe víc než test_partner_m (stejné váhy = švy se nerozevřou);
 ##  sev    – v oblasti ramen a horních zad (svy_odevu.oblast, mimo otvory krku, rukávů a lemu) žádná otevřená hrana,
-##           naproti které je do test_sev_dosah_m okraj jiného kusu (nesvařený šov = rukáv zasunutý pod trup, kusy
+##           naproti které je do test_sev_dosah_m okraj jiné smyčky hranice (jiný kus nebo roztržení) (nesvařený šov = rukáv zasunutý pod trup, kusy
 ##           k sobě, v rovině látky do test_sev_normala_m; okraj bez protějšku nebo protějšek v jiné vrstvě = lem
 ##           kápě/roušky nad kotlemi, ten smí být). Povrchy s alfou (vlasy) ne.
 ## Spuštění: tools/beh.sh svy cmd godot --headless --path . -s res://tools/test_svy_odevu.gd   (BEH_SDILENE=1)
@@ -220,22 +220,23 @@ func _priprav(u: Node3D, kostra: Skeleton3D) -> Dictionary:
 				var zad := ax < float(ob["krk_x_m"]) and m.z <= -float(ob["zada_y_m"]) and m.y < nz - float(ob["zada_pod_krkem_m"])
 				if ram or zad:
 					okraje.append([a, b])
-	# okoli kazdeho okraje po hranici (krok_okraje kroku) - jeho vlastni lem, ne protejsek
-	var kroku := int(R.get("test_okoli_kroku", 8))
-	var okoli: Array = []
-	for e: Array in okraje:
-		var vid := {e[0]: true, e[1]: true}
-		var fr: Array = [e[0], e[1]]
-		for s in kroku:
-			var nf: Array = []
-			for x: int in fr:
-				for y: int in sousede.get(x, []):
-					if not vid.has(y):
-						vid[y] = true
-						nf.append(y)
-			fr = nf
-		okoli.append(vid)
-	return {"v": V, "pary": pary, "okraje": okraje, "hranice": hranice.keys(), "okoli": okoli}
+	# smycky okraju (souvisle casti hranice): protejsek svu lezi na JINE smycce (dva kusy / roztrzeni), lem kape
+	# skladany do zahybu je jedna smycka a nepocita se
+	var smycka := {}
+	var ns := 0
+	for s0: int in hranice.keys():
+		if smycka.has(s0):
+			continue
+		var st: Array = [s0]
+		smycka[s0] = ns
+		while not st.is_empty():
+			var x: int = st.pop_back()
+			for y: int in sousede.get(x, []):
+				if not smycka.has(y):
+					smycka[y] = ns
+					st.append(y)
+		ns += 1
+	return {"v": V, "pary": pary, "okraje": okraje, "hranice": hranice.keys(), "smycka": smycka}
 
 
 func _normala(z: Array) -> Vector3:
@@ -285,7 +286,8 @@ func _zmer(sit: Dictionary) -> Array:
 		var e: Array = okr[ei]
 		var m: Vector3 = ((cache[e[0]] as Vector3) + (cache[e[1]] as Vector3)) * 0.5
 		var c := Vector3i((m / d).floor())
-		var vl: Dictionary = sit["okoli"][ei]
+		var sm: Dictionary = sit["smycka"]
+		var moje: int = sm[e[0]]
 		var ne := _normala(V[e[0]])
 		var hn := float(R.get("test_sev_normala_m", 0.004))
 		var nasel := false
@@ -294,7 +296,7 @@ func _zmer(sit: Dictionary) -> Array:
 				for dz in range(-1, 2):
 					for j: int in mr.get(c + Vector3i(dx, dy, dz), []):
 						# protejsek svu = okraj v rovine latky (ne vrstva nad/pod - lem kape nad kotlemi)
-						if not vl.has(j) and (cache[j] as Vector3).distance_to(m) < d and absf(((cache[j] as Vector3) - m).dot(ne)) < hn:
+						if int(sm[j]) != moje and (cache[j] as Vector3).distance_to(m) < d and absf(((cache[j] as Vector3) - m).dot(ne)) < hn:
 							nasel = true
 							break
 					if nasel:

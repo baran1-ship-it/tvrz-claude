@@ -32,3 +32,9 @@ blender/kostel_ruiny/nahledy_kostel/
 blender/kostel_ruiny/*.glb
 blender/kostel_ruiny/*.blend
 blender/kostel_ruiny/*.blend1
+blender/ves_ruiny/nahledy_ves/
+blender/ves_ruiny/foto/
+blender/ves_ruiny/textury/
+blender/ves_ruiny/*.glb
+blender/ves_ruiny/*.blend
+blender/ves_ruiny/*.blend1

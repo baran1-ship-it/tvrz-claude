@@ -302,39 +302,75 @@ def kostel(P):
 
 
 def zanikla_ves(P):
-    """Zanikla ves: pet usedlosti radou podel nekdejsi navsi (cesty) - nizke kamenne podezdivky domu se vstupem,
-    ohorele tramy, kamenna studna uprostred. Okolo kopriva a bez (dusik po lidech), v nekterych domech nalet briz."""
+    """Zanikla ves Doubrava (Misa 15. 11.: Disk vesnice_ruiny.zip, NAVOD_VES.md „mam novou vesnici ruin, myslim, ze je
+    lepsi“): dily (domy, usedlost, stodoly, studna, sklep, zidky, snosy) stavi hra (svet._ruiny_ves_dil, lokace.json
+    ruiny zanikla_ves dily) na rovince pod kazdym dilem (kraj.MISTA ruiny_ves_N). Model je bez vegetace - tady porost:
+    kopriva, bez, kapradi a nalet briz kolem zdi (dusik po lidech), ne v pudorysu zdi (pudorysy zdi), ne ve dverich,
+    sini, brane, pruchodu stodoly a vchodu sklepa (pudorysy pruchody) ani na ose navsi (pruchody_lok); trava smi."""
     id_, cx, cz, yaw, r = _ruina("zanikla_ves")
     F = _F(cx, cz, yaw)
-    import nove
-    for i in range(5):
-        u = -18.0 + i * 9.0 + R.uniform(-0.8, 0.8)
-        side = 1 if i % 2 == 0 else -1
-        v0 = side * R.uniform(4.0, 5.0)
-        v1 = v0 + side * R.uniform(5.0, 6.5)
-        L = R.uniform(7.0, 8.5)
-        _rect(P, F, u - L / 2, u + L / 2, min(v0, v1), max(v0, v1), 0.15, 0.8, 0.55, door=(0 if side > 0 else 2, R.uniform(0.3, 0.7)))
-        # ohorele tramy a kameny ze zdi
-        for _ in range(R.randint(2, 4)):
-            a = F.p(u + R.uniform(-L / 3, L / 3), (v0 + v1) / 2 + R.uniform(-1.5, 1.5))
-            d = R.uniform(0, 2 * math.pi)
-            ln = R.uniform(1.2, 3.0)
-            y = _land(*a)
-            P.beam((a[0], y + 0.1, a[1]), (a[0] + math.cos(d) * ln, y + R.uniform(0.05, 0.4), a[1] + math.sin(d) * ln),
-                   R.uniform(0.14, 0.22), R.uniform(0.12, 0.2), "tma", j=0.8)
-        for _ in range(R.randint(4, 8)):
-            x, z = F.p(u + R.uniform(-L / 2 - 1, L / 2 + 1), v0 + side * R.uniform(-1.0, 7.0))
-            pid = R.choice(nove.KAMENY_POLE + nove.KAMINKY)
-            nove.misto(pid, x, _land(x, z), z, R.uniform(0.4, 0.9), R.uniform(0, 2 * math.pi), P, sink=0.35)
-        if R.random() < 0.6:
-            _plant(F, u + R.uniform(-1.5, 1.5), (v0 + v1) / 2 + R.uniform(-1, 1), "briza", R.uniform(4.0, 8.0))   # nalet v dome
-    # studna uprostred nekdejsi navsi: kulaty kamenny venec, misty vylomeny, uvnitr tma; kameny kolem
-    x, z = F.p(1.0, 0.0)
-    _studna(P, x, z)
+    rec = [e for e in kraj._LOKACE_J["ruiny"] if e["id"] == "zanikla_ves"][0]
+    stavba = []                    # obdelniky zdi dilu v souradnicich vsi: (u, v stredu, cos, sin, x0, z0, x1, z1)
+    pruchody = [tuple(p) for p in rec.get("pruchody_lok", [])]
+    for sb, du, dv, st in rec.get("dily", []):
+        a = math.radians(st)
+        c, s = math.cos(a), math.sin(a)
+        pud = rec["pudorysy"][sb]
+        for b in pud["zdi"]:
+            stavba.append((du, dv, c, s) + tuple(b))
+        for x0, z0, x1, z1, w in pud["pruchody"]:
+            pruchody.append((du + x0 * c + z0 * s, dv - x0 * s + z0 * c, du + x1 * c + z1 * s, dv - x1 * s + z1 * c, w))
+
+    def v_zdi(u, v, m):
+        for du, dv, c, s, x0, z0, x1, z1 in stavba:
+            lu, lv = u - du, v - dv
+            lx, lz = lu * c - lv * s, lu * s + lv * c          # zpet do souradnic dilu (inverze otoceni kolem Y)
+            if x0 - m < lx < x1 + m and z0 - m < lz < z1 + m:
+                return True
+        return False
+
+    def v_pruchodu(u, v):
+        for u0, v0, u1, v1, w in pruchody:
+            du, dv = u1 - u0, v1 - v0
+            t = max(0.0, min(1.0, ((u - u0) * du + (v - v0) * dv) / max(du * du + dv * dv, 1e-6)))
+            if math.hypot(u - (u0 + du * t), v - (v0 + dv * t)) < w:
+                return True
+        return False
 
     def keep_out(u, v):
-        return math.hypot(u - 1.0, v) < 1.5                          # jen studna; ves je cela zarostla
-    _kraj_ruiny(F, r + 6, 420, 140, 34, 60, keep_out)
+        return v_zdi(u, v, 0.4) or v_pruchodu(u, v)
+    # porost hlavne u zdi: _kraj_ruiny sazi po cele mytine, u kazdeho dilu navic kopriva a bez kolem obvodu
+    _kraj_ruiny(F, r, 260, 90, 26, 30, keep_out)
+    import nove
+    for du, dv, c, s, x0, z0, x1, z1 in stavba:
+        obvod = 2 * ((x1 - x0) + (z1 - z0))
+        for _ in range(int(obvod / 2.5)):
+            k = R.uniform(0, obvod)
+            d = R.uniform(0.5, 1.6)
+            if k < x1 - x0:
+                lx, lz = x0 + k, z0 - d
+            elif k < (x1 - x0) * 2:
+                lx, lz = x0 + k - (x1 - x0), z1 + d
+            elif k < (x1 - x0) * 2 + (z1 - z0):
+                lx, lz = x0 - d, z0 + k - 2 * (x1 - x0)
+            else:
+                lx, lz = x1 + d, z0 + k - 2 * (x1 - x0) - (z1 - z0)
+            u, v = du + lx * c + lz * s, dv - lx * s + lz * c
+            if keep_out(u, v):
+                continue
+            q = R.random()
+            if q < 0.45:
+                _plant(F, u, v, "nettle_plant", R.uniform(0.5, 1.0))
+            elif q < 0.65:
+                _plant(F, u, v, "fern_02", R.uniform(0.6, 1.0))
+            elif q < 0.8:
+                _plant(F, u, v, "divoka_trava", R.uniform(0.6, 1.1))
+            elif q < 0.93:
+                x, z = F.p(u, v)
+                nove.misto(R.choice(["bez_cerny_1", "bez_cerny_2", "bez_cerny_3"]), x, _land(x, z), z, R.uniform(0.6, 0.9),
+                           R.uniform(0, 2 * math.pi), None, sink=0.0)
+            else:
+                _plant(F, u, v, "briza", R.uniform(2.5, 5.5))   # mlady nalet briz u zdi
     NAZVY.append({"name": kraj.RUINY_NAZVY[id_], "x": cx, "z": cz, "r": r + 14})
 
 

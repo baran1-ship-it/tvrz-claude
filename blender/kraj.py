@@ -309,6 +309,16 @@ if _KRC.get("stred"):
     for _lx, _lz, _lr in _KRC.get("placky_lok", []):      # dvur za domem a staji (v ramci modelu, natoceni jako ve hre)
         _c, _s = math.cos(_KRC["natoceni"]), math.sin(_KRC["natoceni"])
         PLACKY.append((_KRC["stred"][0] + _lx * _c + _lz * _s, _KRC["stred"][1] - _lx * _s + _lz * _c, _lr))
+# zanikla ves Doubrava po dilech (Misa 15. 11., Disk vesnice_ruiny.zip, lokace.json ruiny zanikla_ves dily): rovinka pod
+# kazdym dilem (stavba_pad, polomer rovina_k x pulupropricka obalky zdi pudorysy), poradi = poradi dilu (pozdejsi prepise
+# prechod drivejsiho); dil stavi hra (svet._ruiny_ves_dil) na vysce terenu v jeho pocatku
+_RVS = next((e for e in _LOKACE_J["ruiny"] if e["id"] == "zanikla_ves" and e.get("dily")), None)
+if _RVS:
+    _c, _s = math.cos(_RVS["natoceni"]), math.sin(_RVS["natoceni"])
+    for _i, (_sb, _lx, _lz, _st) in enumerate(_RVS["dily"]):
+        _zd = _RVS["pudorysy"][_sb]["zdi"]
+        _r = _RVS["rovina_k"] * math.hypot(max(max(abs(b[0]), abs(b[2])) for b in _zd), max(max(abs(b[1]), abs(b[3])) for b in _zd))
+        MISTA.append(("ruiny_ves_%d" % _i, _RVS["stred"][0] + _lx * _c + _lz * _s, _RVS["stred"][1] - _lx * _s + _lz * _c, 0.0, _r))
 
 
 def mlyn_lok(x, z):
