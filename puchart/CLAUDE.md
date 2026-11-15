@@ -6,6 +6,7 @@ a kluk ze vsi“ 1.0 (shrnutí `docs/NAVRH_HRA_A_GRAFIKA.md`). Předání a stav
 
 ## Záloha po každém velkém updatu (Míša 15. 11.)
 - Po vydání velkého updatu plný instalátor s daty uvnitř (bez exclude dat, ~900 MB, hra nic nestahuje – data.gd pozná data podle ZNAK) na Míšin Disk: složka „Puchart – zálohy“ (id 1sabzvOPIma25lQ5SYUPOKLsc4KJktAtz) → podsložka s datem RRRR-MM-DD. Konektor Disku bere jen malé soubory, poslat přes SendUserFile (limit 400 MB) → 7z po 350 MB (py7zr + multivolumefile, přípony .7z.001…), Míša je uloží na Disk; návod CTI_ME v kořeni složky.
+- Zálohu vždy nejdřív odsouhlasit (Míša 15. 11.: „zálohu si vždy odsouhlasíme, buď já sám, nebo se připomeň“) – po vydání velkého updatu se zeptat, jestli udělat zálohu; plný instalátor vzniká až po souhlasu (stahování 900 MB pro Míšu).
 - **Klíč podpisu**: APK se podepisuje /root/.local/share/godot/keystores/debug.keystore (heslo android, alias androiddebugkey, SHA-256 66:DA:E4:D5…3B:9F). Kontejner je dočasný – záloha klíče je na Disku ve „Puchart – zálohy / Klíč podpisu (nemazat)“ (id souboru 1lG2HBGAXykjd-MH7aykXDyjGCbB-7Yip). **Před prvním exportem v nové session ověřit otisk a případně klíč obnovit z Disku** (jinak se nová APK nedá nainstalovat přes starou a Míša přijde o uložené pozice).
 
 ## Zadání Míši (29. 10.)
