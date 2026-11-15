@@ -1395,3 +1395,4 @@ Hotovo v kódu a datech (testy u každého):
 - Testy přes `beh.sh testy` mají hlídače `TVRZ_TEST_LIMIT` (výchozí 300 s); se stavbou světa 150 s a testem `prochod` nestačí – pro sadu s `prochod` dávat `TVRZ_TEST_LIMIT=1200`.
 - Z nezávislé kontroly 15. 11.: „na skále“ (okraj, pata, nad terénem) je `pasma.dosednuti.na_skale` pro `_usad_skaly` i `_pesiny_volne`; poznámka `_kolize_rampy` aktualizovaná; odloženo: nábytek chýší na terénu bere výšku jen ze středu kusu.
 - Výstupy exportu (vč. `modely/ves/zesvetleno.json`) nikdy ručně – brána vydání (otisk) to správně zastaví; oprava pravidla → nový export.
+- Úprava JSON pravidel jen přes načtení a přesnou náhradu hodnoty (nebo json.dumps), nikdy řez textu po další `",\n` – 15. 11. tak zmizel záznam `kovarna_tvrz` (JSON zůstal platný, spadl až Blender export). Po úpravě porovnat množinu klíčů s předchozí verzí.
