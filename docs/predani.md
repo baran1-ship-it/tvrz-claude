@@ -1479,3 +1479,5 @@ Hotovo v kódu a datech (testy u každého):
   během importu, domy_stredni.glb je čte dřív) → před exportem jeden samostatný `godot --headless --import`, pak export.
 - **Rychlé testy po exportu (15. 11.):** 16 testů v jednom běhu = watchdog 300 s (`rychle_testy.sh`, TVRZ_TEST_LIMIT). Pouštět po
   skupinách 3–5 testů souběžně (sdílená místa beh.sh) s `TVRZ_TEST_LIMIT=1500`.
+- **Snímky na pozadí (15. 11.):** Bash na pozadí má výchozí limit 30 min → foto se 6–7 snímky zabito (2×). U foto vždy
+  `timeout` 7200000 v nástroji (nejen BEH_LIMIT), nebo nejvýš 3–4 snímky v jednom běhu.
