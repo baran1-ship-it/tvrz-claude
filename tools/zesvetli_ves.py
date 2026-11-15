@@ -38,7 +38,7 @@ def md5(p):
 
 
 # 1) textury
-for f in sorted(glob.glob("modely/ves/domy_*_diff*.jpg") + glob.glob("modely/ves/domy_*albedo*.jpg")):
+for f in sorted(f for v in R["textury"] for f in glob.glob(v)):
     jm = os.path.basename(f)
     cil, mx = cil_pro(jm)
     if cil is None or zn.get(jm) == md5(f):
@@ -204,7 +204,7 @@ def hneda(a):
 
 
 import io
-for f in sorted(glob.glob("modely/ves/domy_*_diff*.jpg") + glob.glob("modely/ves/domy_*albedo*.jpg")):
+for f in sorted(f for v in R["textury"] for f in glob.glob(v)):
     jm = os.path.basename(f)
     if not je_drevo(jm):
         continue

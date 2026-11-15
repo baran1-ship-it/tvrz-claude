@@ -5917,6 +5917,12 @@
  ],
  "_rostliny_jmena": "14. 11.: části jména sítě rostliny (test hostinec_trava hledá rostliny i mezi samostatnými sítěmi uvnitř staveb)",
  "ves_jas": {
+  "textury": [
+   "modely/ves/domy_*_diff*.jpg",
+   "modely/ves/domy_*albedo*.jpg",
+   "modely/krcma/krcma_L_*_diff.jpg"
+  ],
+  "_textury": "15. 11. (snimek krcmy: strecha a steny skoro cerne, sindel jas 72/255): krcma do L (Misa 14. 11., stejna vyroba jako domy vsi) pod stejne pravidlo jasu jako domy vsi",
   "cil": 0.5,
   "max_x": 2.6,
   "sytost": 0.9,
@@ -5936,7 +5942,9 @@
    "clay_plaster_pec_",
    "dirt_floor_hl_",
    "omitka",
-   "stone_wall"
+   "stone_wall",
+   "krcma_L_rock_surface",
+   "krcma_L_clay_plaster_pec2_"
   ],
   "hneda": {
    "pripony": [
