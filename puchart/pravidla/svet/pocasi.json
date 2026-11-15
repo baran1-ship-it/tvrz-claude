@@ -87,5 +87,13 @@
  "mokro": {
   "nabeh_h": 0.4,
   "pozn": "povrchy (zem, zdivo, skály, dřevo – uniform mokro) tmavší a lesklejší"
+ },
+ "strechy": {
+  "popis": "Míša 15. 11.: „rozumím, že v budovách neprší, ale na budovu musí pršet, a když se podívám z okna, tak taky uvidím venku déšť, a když jsem pod přístřeškem, tak taky musím vidět déšť – logicky z hlediska fyziky“. Dřív se celý déšť vypnul, jakmile byla nad kamerou střecha. Teď déšť padá vždy; mapa střech kolem kamery (paprsek shora dolů v mřížce krok_m do polomer_m, první zásah = střecha nebo terén) a shader dest.gdshader zahodí kapky pod nejvyšší plochou – pod střechou a přístřeškem neprší, na střechu a venku za oknem ano. Mapa se přepočítá po paprsku_na_snimek, když se kamera posune o posun_m.",
+  "krok_m": 1.0,
+  "polomer_m": 13,
+  "paprsku_na_snimek": 80,
+  "posun_m": 3.0,
+  "nad_m": 30.0
  }
 }

@@ -12,6 +12,11 @@ uniform float delka = 0.1;         // délka čáry (podíl výšky)
 uniform float jas = 0.4;
 uniform vec3 barva : source_color = vec3(0.75, 0.8, 0.86);
 uniform vec2 vitr = vec2(0.04, 0.0); // sklon čar (posun UV.x na výšku)
+// mapa střech kolem kamery (pocasi.gd _strechy): výška první plochy shora (střecha / terén) – pod ní neprší (Míša 15. 11.)
+uniform sampler2D strechy : filter_nearest, repeat_disable;
+uniform vec3 mapa = vec3(0.0, 0.0, 0.0);   // x0, z0 (svět), velikost m; velikost 0 = bez mapy
+varying vec3 wpos;
+void vertex() { wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
 
 float h1(float x) { return fract(sin(x * 127.1) * 43758.5453); }
 
@@ -30,6 +35,10 @@ void fragment() {
 	float vidi = smoothstep(0.0, 0.12, UV.y) * smoothstep(1.0, 0.85, UV.y); // konce válce mizí
 	float a = sirka * kapka * vidi * sila * jas * (0.55 + 0.45 * r2);
 	if (a < 0.004) discard;
+	if (mapa.z > 0.0) {
+		vec2 mu = (wpos.xz - mapa.xy) / mapa.z;
+		if (mu.x > 0.0 && mu.x < 1.0 && mu.y > 0.0 && mu.y < 1.0 && wpos.y < texture(strechy, mu).r - 0.05) discard;
+	}
 	ALBEDO = barva;
 	ALPHA = a;
 }

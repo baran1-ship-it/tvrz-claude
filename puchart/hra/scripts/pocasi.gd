@@ -133,11 +133,12 @@ func _process(dt: float) -> void:
 	_uvnitr = move_toward(_uvnitr, _uvnitr_cil, dt * 2.0)
 	var venku := sila * (1.0 - _uvnitr)
 	var p := cam.global_position
-	for v in _vrstvy:
+	if sila > 0.004: _strechy(p)
+	for v in _vrstvy:   # déšť padá i když je hráč pod střechou – vidí ho oknem, dveřmi, zpod přístřešku (mapa střech v shaderu)
 		var mi: MeshInstance3D = v[0]
-		mi.visible = venku > 0.004
+		mi.visible = sila > 0.004
 		if mi.visible:
-			mi.global_position = p; (v[1] as ShaderMaterial).set_shader_parameter("sila", venku)
+			mi.global_position = p; (v[1] as ShaderMaterial).set_shader_parameter("sila", sila)
 	_dopady.emitting = venku > 0.15
 	if _dopady.emitting:
 		var hr: Node3D = get_tree().current_scene.get("hrac")
@@ -167,3 +168,37 @@ func _hlas(p: AudioStreamPlayer, h: float, db0: float) -> void:
 		return
 	p.volume_db = db0 + linear_to_db(h)
 	if not p.playing: p.play()
+
+
+## Mapa střech kolem kamery (pocasi.json strechy; Míša 15. 11.: na budovu prší, z okna a zpod přístřešku je déšť vidět):
+## mřížka paprsků shora dolů, první zásah (střecha, koruna zdi, terén) = výška, pod kterou neprší. Počítá se po kouscích
+## (paprsku_na_snimek), hotová mapa se předá shaderu deště; nová, když se kamera posune o posun_m.
+var _sm_img: Image; var _sm_tex: ImageTexture; var _sm_stred := Vector2(INF, INF); var _sm_i := -1; var _sm_novy := Vector2.ZERO
+func _strechy(p: Vector3) -> void:
+	var sc: Dictionary = cfg.get("strechy", {})
+	if sc.is_empty(): return
+	var k := float(sc["krok_m"]); var r := int(sc["polomer_m"]); var n := 2 * r + 1
+	if _sm_img == null:
+		_sm_img = Image.create(n, n, false, Image.FORMAT_RF); _sm_img.fill(Color(-1e4, 0, 0))
+	var st := Vector2(snappedf(p.x, k), snappedf(p.z, k))
+	if _sm_i < 0:
+		if st.distance_to(_sm_stred) < float(sc["posun_m"]): return
+		_sm_novy = st; _sm_i = 0
+	var ss := get_world_3d().direct_space_state; var hr: Node = get_tree().current_scene.get("hrac")
+	var ex: Array[RID] = []
+	if hr is CollisionObject3D: ex.append((hr as CollisionObject3D).get_rid())
+	var konec := mini(_sm_i + int(sc["paprsku_na_snimek"]), n * n)
+	for i in range(_sm_i, konec):
+		var x := _sm_novy.x + (i % n - r) * k; var z := _sm_novy.y + (i / n - r) * k
+		var q := PhysicsRayQueryParameters3D.create(Vector3(x, p.y + float(sc["nad_m"]), z), Vector3(x, p.y - 60.0, z)); q.exclude = ex
+		var h := ss.intersect_ray(q)
+		_sm_img.set_pixel(i % n, i / n, Color((h["position"] as Vector3).y if not h.is_empty() else -1e4, 0, 0))
+	_sm_i = konec
+	if _sm_i >= n * n:   # hotovo: shader dostane mapu (levý horní roh = střed buňky − k/2)
+		_sm_i = -1; _sm_stred = _sm_novy
+		if _sm_tex == null: _sm_tex = ImageTexture.create_from_image(_sm_img)
+		else: _sm_tex.update(_sm_img)
+		var o := Vector3(_sm_stred.x - (r + 0.5) * k, _sm_stred.y - (r + 0.5) * k, n * k)
+		for v in _vrstvy:
+			(v[1] as ShaderMaterial).set_shader_parameter("strechy", _sm_tex); (v[1] as ShaderMaterial).set_shader_parameter("mapa", o)
+

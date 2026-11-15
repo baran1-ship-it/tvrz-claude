@@ -766,6 +766,14 @@ if _hvj.get("plynula_koruna") or _hvj.get("rovna_koruna") != "ochoz": _c17.appen
 if float(_hvj.get("ochoz_od_branky_m", 0)) <= 0: _c17.append("hradba po valu bez ochozu")
 TEST("cesta_skala_hradba_val", not _c17, "; ".join(_c17) if _c17 else "cesta k mostu po rovince, hradba po valu rovná s ochozem")
 
+# Míša 15. 11.: „na budovu musí pršet, z okna a zpod přístřešku uvidím déšť“ – déšť se nevypíná pod střechou, shader zahazuje
+# kapky jen pod mapou střech (pocasi.gd _strechy)
+_dg = open(K + "/hra/scripts/pocasi.gd").read(); _ds = open(K + "/hra/shaders/dest.gdshader").read(); _c18 = []
+if "mi.visible = venku" in _dg: _c18.append("déšť se pod střechou vypíná celý")
+if "strechy" not in _ds or "_strechy(" not in _dg: _c18.append("chybí mapa střech v dešti")
+if not json.load(open(K + "/hra/data/pocasi.json")).get("strechy"): _c18.append("pocasi.json bez strechy")
+TEST("dest_pod_strechou", not _c18, "; ".join(_c18) if _c18 else "déšť vidět oknem, dveřmi a zpod přístřešku, pod střechou neprší")
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)
