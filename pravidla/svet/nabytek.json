@@ -806,5 +806,72 @@
   "posun_podel": 0.12,
   "od_mist_m": 2.0,
   "_od_mist_m": "Misa 11. 11. (spravce/dvorka stali s lavickou pod nohama): sedaci plocha lavice (usecka delky) nejmene tolik od kazdeho mista postav s p (postavy.json mista: dvere ubytoven, studna, brana, palac) - lavice se odsune v hledat_m"
- }
+ },
+ "sedaky_modelu": {
+  "Dum1": [
+   [
+    4.0,
+    2.5,
+    0.4,
+    -90,
+    "lavice u vstupu"
+   ],
+   [
+    3.22,
+    2.9,
+    0.7,
+    90,
+    "rohová lavice v jizbě"
+   ]
+  ],
+  "Dum2": [
+   [
+    3.5,
+    2.5,
+    0.4,
+    -90,
+    "lavice u vstupu"
+   ],
+   [
+    2.73,
+    2.7,
+    0.65,
+    90,
+    "rohová lavice v jizbě"
+   ]
+  ],
+  "Rychta": [
+   [
+    4.25,
+    2.0,
+    0.4,
+    -90,
+    "lavice u vstupu"
+   ],
+   [
+    3.53,
+    1.7,
+    0.7,
+    90,
+    "rohová lavice v jizbě"
+   ]
+  ],
+  "mlyn": [
+   [
+    3.5,
+    3.25,
+    0.4,
+    -90,
+    "lavice u mlýna"
+   ],
+   [
+    2.93,
+    3.5,
+    0.7,
+    90,
+    "lavice ve světnici mlynáře"
+   ]
+  ]
+ },
+ "_sedaky_modelu": "Míša 15. 11. „u všech staveb je nějaká lavička, chci aby se na ni dalo sednout i u mlýna, projdi všechny“: lavice, které jsou součástí modelu (domy.glb Dum1/Dum2/Rychta – usedlosti 1–7 i dům kováře, mlyn.glb), neměly záznam sed (sedat šlo jen na kusy z katalogu se sed). Stejně jako zapecene u lůžek: [x, z, výška sedáku y, natočení sedícího ° v rámci modelu, popis] → svet.data pouziti kind sed (hráč i postavy). Polohy z rozboru geometrie modelů 15. 11. (plochy ve výšce sedu, *_Kol_Lavice); natočení: zády ke zdi (venku +x modelu ven, v jizbě −x). Kovárna, krčma L a větrný mlýn lavici v modelu nemají. Natočení NEOVĚŘENO snímkem."
 }

@@ -5915,9 +5915,36 @@ func _nabytek_budov() -> void:
 		_postel_zapis(String(r["id"]), String(r["budova"]), Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2])),
 				deg_to_rad(float(r["natoceni_st"])), int(r.get("mist", 1)))
 	_nabytek_venku()
+	_sedaky_modelu()
 	print("nabytek budov: %d luzek" % (data.get("postele", []) as Array).size())
 	for e: String in luzka_bez_luzek():
 		push_error("nabytek: " + e)
+
+
+## Lavice v modelech budov (nabytek.json sedaky_modelu, Misa 15. 11. „na kazdou lavicku se musi dat sednout, i u mlyna“):
+## domy vsi podle typu modelu (Dum1, Dum2, Rychta) a dil mlyna -> pouziti kind sed jako sedatka z Blenderu (hrac i postavy).
+func _sedaky_modelu() -> void:
+	var sd: Dictionary = Pravidla.cti("nabytek", "sedaky_modelu")
+	var h_sed := float(Pravidla.cti("postavy", "sedani")["vyska_klipu_m"]) if Pravidla.cti("postavy", "sedani") is Dictionary else 0.45
+	var ramce: Array = []                       # [Transform3D modelu, klic v sedaky_modelu, nazev]
+	for d: Dictionary in _domy:
+		if d.has("xf") and sd.has(String(d["typ"])):
+			ramce.append([d["xf"], String(d["typ"]), "%s_%d" % [d["typ"], d["k"]]])
+	if _mlyn_inv != Transform3D() and sd.has("mlyn"):
+		ramce.append([_mlyn_inv.affine_inverse(), "mlyn", "mlyn"])
+	if not data.has("pouziti"):
+		data["pouziti"] = []
+	var n := 0
+	for rm: Array in ramce:
+		var xf: Transform3D = rm[0]
+		var yaw0 := xf.basis.get_euler().y
+		for s5: Array in sd[rm[1]]:
+			var seat := xf * Vector3(float(s5[0]), float(s5[2]), float(s5[1]))
+			var sit := seat - Vector3(0.0, h_sed, 0.0)
+			data["pouziti"].append({"kind": "sed", "nazev": "%s %s" % [rm[2], s5[4]], "pos": [seat.x, seat.y + 0.3, seat.z], "r": 1.4,
+					"sit": [sit.x, sit.y, sit.z], "h": h_sed, "yaw": yaw0 + deg_to_rad(float(s5[3]))})
+			n += 1
+	print("sedaky modelu: %d (%d ramcu)" % [n, ramce.size()])
 
 
 ## Venkovni lavice (Misa 10. 11.: „lide kolem stolu jen chodi“ - venku zadny sedak, vse bylo v jizbach): nabytek.json
@@ -10363,6 +10390,15 @@ func _schody_kolize(sc: Node3D) -> void:
 			var nahoru_kladne := osa_sv.dot(k_stredu) > 0.0               # horni konec na +ose
 			var n := maxi(1, ceili(ab.size.y / vyska_schodu))
 			var dl := ab.size[podel] / float(n)
+			var uhel := rad_to_deg(atan2(ab.size.y, ab.size[podel]))
+			# Misa 15. 11. (schody ve mlynici „postava je vybehne sama a dole me uveznily“): rozhoduje i sirka stupne - stupen
+			# uzsi nez hrac.json schody_zebrik_stupen_pod_m (polomer kapsle) dela z hran svah a krok na schod (schod_m)
+			# hrace vysune nahoru pri kazdem otreni (mlyn 45 st., stupen 0,195 m). Zebrikove schody: plny blok (bez schodu,
+			# o ktere se zachytit), lezeni jen akci (zaznam zebrik nize).
+			var zebrikove := uhel > float(Pravidla.cti("hrac", "schody_zebrik_nad_st")) \
+					or dl < float(Pravidla.cti("hrac", "schody_zebrik_stupen_pod_m"))
+			if zebrikove:
+				n = 1
 			for s in n:
 				var b := BoxShape3D.new()
 				var vel := ab.size
@@ -10378,13 +10414,12 @@ func _schody_kolize(sc: Node3D) -> void:
 				nc.transform = (cs as CollisionShape3D).transform * Transform3D(Basis(), c)
 				(cs as Node).get_parent().add_child(nc)
 			(cs as CollisionShape3D).disabled = true
-			var uhel := rad_to_deg(atan2(ab.size.y, ab.size[podel]))
-			print("schody: %s klin %.1f st. -> %d schodu po %.2f m" % [sb.name, uhel, n, ab.size.y / n])
+			print("schody: %s klin %.1f st., stupen %.2f m -> %s" % [sb.name, uhel, dl, "zebrikove (plny blok)" if zebrikove else "%d schodu po %.2f m" % [n, ab.size.y / n]])
 			# Misa 0.99994 r. 69 „schody vetrneho mlyna: nahoru vybehne, dolu jen skokem“: schody strmejsi nez hrac.json
 			# schody_zebrik_nad_st (vetrak 56 st.: stupen 0,13 m je uzsi nez polomer kapsle hrace 0,28 - hrany schodu
 			# tvori svah nad floor_max_angle, chuze ani krok na schod nefunguje) jsou zebrikove schody: zaznam pouziti
 			# jako zebrik (lezeni nahoru i dolu), kvadry schodu zustavaji
-			if uhel > float(Pravidla.cti("hrac", "schody_zebrik_nad_st")):
+			if zebrikove:
 				var dole := ab.get_center()
 				var nahore := ab.get_center()
 				dole[podel] = ab.position[podel] if nahoru_kladne else ab.end[podel]

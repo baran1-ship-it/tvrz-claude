@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "louka_nahravani", "potok_kaskada"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -9055,6 +9055,42 @@ func _krcma_schody() -> void:
 			zab_chybi.append(pr[0])
 	ok = ok and zab_chybi.is_empty()
 	_vysledek("krcma_schody", ok, "%s; konec y %.2f, patro %.2f; bez zabradli %s" % [r[1], y_kon, patro, str(zab_chybi)])
+
+
+## Misa 15. 11. (r. 12 „na kazdou lavicku se musi dat sednout, i u mlyna, projdi vsechny“): kazdy dum vsi typu se
+## sedaky_modelu a mlyn ma tolik sedaku sed, kolik zaznamu; sedak lezi na plose (paprsek z 0,3 m nad sedakem dolu narazi
+## do 0,12 m od vysky sedaku) - lavice modelu ma pod sedem viditelnou desku (venkovni bez kolize: paprsek na sit
+## nejde, proto i vyska nad terenem = vyska sedaku +-0,12).
+func _lavice_sedaky() -> void:
+	var sd: Dictionary = Pravidla.cti("nabytek", "sedaky_modelu")
+	var ocek := 0
+	for d: Dictionary in sv._domy:
+		if sd.has(String(d["typ"])):
+			ocek += (sd[String(d["typ"])] as Array).size()
+	if sv.get("_mlyn_inv") != Transform3D() and sd.has("mlyn"):
+		ocek += (sd["mlyn"] as Array).size()
+	var sedy: Array = []
+	for u: Dictionary in sv.data.get("pouziti", []):
+		if String(u.get("kind", "")) == "sed" and String(u.get("nazev", "")).contains("lavice"):
+			sedy.append(u)
+	var chyby: Array = []
+	if sedy.size() < ocek:
+		chyby.append("sedaku lavic %d < %d" % [sedy.size(), ocek])
+	var sp := get_tree().root.get_world_3d().direct_space_state
+	for u: Dictionary in sedy:
+		var seat := Vector3(float(u["sit"][0]), float(u["sit"][1]) + float(u["h"]), float(u["sit"][2]))
+		await main.fast_travel(Vector3(seat.x, 0.0, seat.z), Vector3(seat.x + 2.0, seat.y + 1.0, seat.z), 0.0, "test")
+		for i in 20:
+			await get_tree().physics_frame
+		var q := PhysicsRayQueryParameters3D.create(seat + Vector3(0, 0.3, 0), seat - Vector3(0, 1.0, 0))
+		q.exclude = [player.get_rid()]
+		var h := sp.intersect_ray(q)
+		var ty := float(sv._teren_y(seat.x, seat.z))
+		var na_desce := not h.is_empty() and absf((h["position"] as Vector3).y - seat.y) < 0.12
+		var nad_terenem := absf(seat.y - ty - float(u["h"])) < 0.12
+		if not (na_desce or nad_terenem):
+			chyby.append("%s: sedak %.2f, zasah %s, teren %.2f" % [u["nazev"], seat.y, str((h["position"] as Vector3).y) if not h.is_empty() else "-", ty])
+	_vysledek("lavice_sedaky", chyby.is_empty(), "sedaku lavic %d (ocekavano %d) %s" % [sedy.size(), ocek, str(chyby.slice(0, 6))])
 
 
 ## Misa 15. 11. (misa_15_11_chyby.md r. 5-7): dvur krcmy nepustil ven ani ke schodum k pokojum (vynechany uzel KrcmaL_Dvur

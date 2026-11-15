@@ -314,6 +314,40 @@ func _schody() -> void:
 			if c.disabled or not (c.shape is BoxShape3D):
 				continue
 			boxy.append([(c.shape as BoxShape3D).size.y, c.global_transform])
+		if boxy.size() == 1:
+			# Misa 15. 11.: zebrikove schody (stupen uzsi nez schody_zebrik_stupen_pod_m) = jeden plny blok + zaznam zebrik.
+			# Nahoru i dolu lezenim; chuze proti bloku od nastupu 2 s nesmi hrace vysunout nahoru (samo „vybehne“).
+			var bt: Transform3D = boxy[0][1]
+			var zb1: Dictionary = {}
+			for u: Dictionary in main.info["use"]:
+				if String(u.get("kind", "")) == "zebrik" and not bool(u["nahore"]) and Vector2((u["zb"]["pata"] as Vector3).x - bt.origin.x, (u["zb"]["pata"] as Vector3).z - bt.origin.z).length() < 3.0:
+					zb1 = u["zb"]
+			n += 1
+			if zb1.is_empty():
+				spatne.append("%s: zebrikove schody bez zaznamu zebrik" % sb.name)
+				continue
+			var ns: Vector3 = zb1["nastup"]
+			var k_pate := Vector3((zb1["pata"] as Vector3).x - ns.x, 0.0, (zb1["pata"] as Vector3).z - ns.z).normalized()
+			var sam := [true, 0.0]
+			for bok in [Vector3.ZERO, k_pate.cross(Vector3.UP) * 0.5, -k_pate.cross(Vector3.UP) * 0.5]:
+				player.place(ns + bok + Vector3(0, 0.3, 0), ns + bok + k_pate + Vector3(0, 1.6, 0))
+				for i in 20:
+					await get_tree().physics_frame
+				var y0 := player.global_position.y
+				player.yaw = atan2(-k_pate.x, -k_pate.z)
+				for i in 120:
+					player.move_input = Vector2(0.0, 1.0)
+					await get_tree().physics_frame
+				player.move_input = Vector2.ZERO
+				if player.global_position.y - y0 > 0.15:
+					sam = [false, player.global_position.y - y0]
+			var nah1: Array = await _lez(zb1, true)
+			var dol1: Array = await _lez(zb1, false)
+			var txt1 := "%s (zebrikove): samo nahoru %s, nahoru %s, dolu %s" % [sb.name, str(sam), str(nah1), str(dol1)]
+			print("SCHODY " + txt1)
+			if not (bool(sam[0]) and bool(nah1[0]) and bool(dol1[0])):
+				spatne.append(txt1)
+			continue
 		if boxy.size() < 2:
 			continue
 		boxy.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) < float(b[0]))

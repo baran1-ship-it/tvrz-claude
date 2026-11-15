@@ -134,6 +134,8 @@
  },
  "schod_kolize_m": 0.2,
  "schody_zebrik_nad_st": 50.0,
+ "schody_zebrik_stupen_pod_m": 0.28,
+ "_schody_zebrik_stupen_pod_m": "Míša 15. 11. (schody ve mlýnici „postava je vyběhne sama, aniž bych chtěl, a když jsem šel dolů, uvěznilo mě to tam“, rozbor geometrie): Mlyn_Kol_Schody 45 st. → 11 kvádrů se stupněm 0,195 m < poloměr kapsle hráče 0,28 (player.gd) – hrany tvoří pochozí svah a krok na schod (schod_m 0,45) vysunul hráče nahoru při každém otření o bok či patu; u paty slepá kapsa 0,46 m od stěny (kapsle 0,56). Schody se stupněm užším než tato mez jsou žebříkové (jako nad schody_zebrik_nad_st): kolize jeden plný blok, lezení nahoru i dolů jen akcí (zaznam zebrik, nastup/sestup ze schody_zebrik).",
  "schody_zebrik": {
   "nastup_m": 0.5,
   "sestup_m": 0.6
