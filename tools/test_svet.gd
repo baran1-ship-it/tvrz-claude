@@ -9540,17 +9540,22 @@ func _povrch() -> void:
 				var bb := gx * mi.mesh.get_aabb()
 				if svet_kol and not obl.intersects(Rect2(bb.position.x, bb.position.z, bb.size.x, bb.size.z)):
 					continue
-				for si in mi.mesh.get_surface_count():
-					if mi.mesh.surface_get_primitive_type(si) != Mesh.PRIMITIVE_TRIANGLES:
+				var arr := mi.mesh is ArrayMesh
+				for si in (mi.mesh.get_surface_count() if arr else 1):
+					if arr and (mi.mesh as ArrayMesh).surface_get_primitive_type(si) != Mesh.PRIMITIVE_TRIANGLES:
 						continue
 					var mat := mi.get_active_material(si)
 					var mn := String(mat.resource_name) if mat != null else ""
-					var am := ArrayMesh.new()
-					am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mi.mesh.surface_get_arrays(si))
-					var fc := am.get_faces()
+					var fc := mi.mesh.get_faces()          # primitivni sit (valec, kvadr) cela
+					if arr:
+						var am := ArrayMesh.new()
+						am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mi.mesh.surface_get_arrays(si))
+						fc = am.get_faces()
 					if fc.is_empty():
 						continue
-					var sb := gx * am.get_aabb()
+					var sb := gx * AABB(fc[0], Vector3.ZERO)
+					for fv: Vector3 in fc:
+						sb = sb.expand(gx * fv)
 					var telo := StaticBody3D.new()
 					telo.collision_layer = VIS
 					telo.collision_mask = 0

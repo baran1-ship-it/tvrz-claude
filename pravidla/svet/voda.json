@@ -1504,7 +1504,7 @@
        "sloupcu": 8,
        "pena_hore": 0.3,
        "pena_od": 0.35,
-       "okraj_podil": 0.3,
+       "okraj_podil": 0.4,
        "zahodit_normala_y": 0.97,
        "zahodit_okraj_m": 0.3,
        "_zahodit": "pas reky ve stope padu (od bodu k do k+1, napric pul sirka pasu + zahodit_okraj_m): trojuhelnik pryc, je-li |normala.y| < zahodit_normala_y (tun s min_spad ma 1,0; nejmensi pad 0,3 m na 1 m osy ma sikminu ~0,92-0,96)",
@@ -1523,7 +1523,7 @@
         "pena": [0.6, 0.63, 0.58],
         "rychlost_m_s": 1.8,
         "rychlost_okap_m_s": 0.45,
-        "meritko_pruhu": [2.2, 0.3],
+        "meritko_pruhu": [1.5, 0.3],
         "prolinani_hore_m": 0.5,
         "pruhlednost": 0.82,
         "okap_kryti": 0.45

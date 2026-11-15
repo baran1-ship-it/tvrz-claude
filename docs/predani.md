@@ -1429,3 +1429,14 @@ Hotovo v kódu a datech (testy u každého):
   `kraj.ryb2_vegetace` (veg.py), pěšina končí u lávky. Test `rybnik_dil` vyřazen (díl není), hlídá `ryb_napojeni` + `voda_v_korytu`.
 - **`tools/krok_b/vysky.json`** = terén PŘED vodou (`fort.land(..., voda=False)`) – s vodou hlásil test smyslu falešný sklon
   cesty k mlýnu 14 % přes zářez odtoku. Soubor není v gitu: v nové session `cd blender && /opt/bl/bin/python ../tools/krok_b/vysky.py ../tools/krok_b/vysky.json`.
+- **Potrhané oblečení (15. 11., ř. 3) – příčina a pravidlo:** tělo Quaterniusu je po importu glTF 26 kusů (dělené na švech UV);
+  `clothes.shell` je kopíroval do každého oděvu → oděv 23–31 nesvařených kusů, kusy < 30 ploch se mazaly (díry), vyhlazení,
+  odsazení a decimace hýbaly okraji kusů zvlášť → švy na ramenou se v pohybu rozevřely (tmavý vnitřek oboustranného materiálu).
+  Pravidlo (`tools/postavy_q/clothes.py`, `q_export2.py`, čísla `postavy_vzhled.json svy_odevu`): oděv se svaří do jedné skořepiny
+  před ořezem, vyhlazením a decimací (švy UV a otvory zamčené), páry vrcholů švu stejné váhy, 4 kosti + normalizace v Blenderu;
+  kontrola `SVY CELKEM` v sestav.sh (`CHYBA svy`). Test v pózách: `godot --headless --path . -s tools/test_svy_odevu.gd`
+  (staré balíky: purkrabí 144 otevřených hran; nové: páry ≤ 0,2 mm, 15 sad bez kápě 0 hran). **Otevřené:** 11 sad s kápí
+  (bartoš, bílek, havel, martin, mikuláš, pastýř, ponocný, rychtář, štěpán, stráž, vávra) hlásí 1–7 hran při chůzi – podezření
+  vrstvení límce/kápě na výstřih kotle (ne šev), vlastní rozbor; tmavší skvrna na límci purkrabího. Postavy do hry balíkem
+  `z_postavy` (při vydání znovu import pro Android, `.etc2.ctex`). opencv do `/opt/bl` instalace zamítnuta – pomocník použil cv2 ze
+  scratch adresáře; `tools/foto_postava.gd` umí viset při chybě načtení modelu a logovat každý snímek (hlídat log).
