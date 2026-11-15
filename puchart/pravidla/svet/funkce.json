@@ -13,7 +13,11 @@
   "tvar": "Nadech",
   "uchop": "Kovarna_Paka_uchop",
   "ohen_bod": "Kovarna_Ohen_bod",
-  "osa": [0.469, 0.0, 0.883],
+  "osa": [
+   0.469,
+   0.0,
+   0.883
+  ],
   "uhel_rad": 0.278,
   "tempo_rad_s": 2.5,
   "pumpovat_s": 4.0,
@@ -21,7 +25,11 @@
   "nabidka": "Foukat měchem",
   "zvuk": "res://zvuky/predmety/mech.ogg",
   "zvuk_db": -4.0,
-  "rozhoreni": {"svetlo": 0.9, "plamen": 0.5, "pokles_s": 7.0}
+  "rozhoreni": {
+   "svetlo": 0.9,
+   "plamen": 0.5,
+   "pokles_s": 7.0
+  }
  },
  "kovadlina": {
   "popis": "Kovadlina kovárny na značce bod (Kovarna_Kovadlina_misto v kovarna.glb). Míša 15. 11.: „kovadlinu chci NOVOU, ne kovarna_kovadlina.glb z Havrana“ – model zatím není; model = cesta k .glb (res://…), prázdný = neosazuje se. Až bude model, osadí se jako pevný díl s kolizí (Havran svet.gd _kovarna_dil: vybavení na značce, natočení kovárny).",
@@ -33,12 +41,32 @@
   "popis": "Spánek jako Havran (main.gd bed, offer_sleep, sleep_until; menu_hrace.gd stránka spanek): nabídka „Lehnout si“ u místa spánku (značka uzel modelu, kolize lůžka vynechána ze zaměření), hráč si lehne (hrac.sit: bod lehu = značka + nad_znackou_m − leh_pod_m, oči oci_m nad ním, pohled pohled_nahoru_st nad vodorovnou), otevře se výběr do kdy spát (Do rána … Jen chvíli poležet); zatmění zatmeni_s, posun denní doby (den.gd set_time), vstát, uložit hru, rozednění rozednit_s. Místa: značky modelů (Hajovna_Spani_Hrac na posteli Hajovna_Kol_Postel; KrcmaL_Spani_Hrac – pokoj 1 v křídle krčmy, lůžko v modelu není, nábytek rozmisťuje Míša) a pryčny chýší (ChyseKura/ChysePrkna_Kol_Prycna0/1 – chýše zatím ve světě nejsou vložené, záznam se uplatní, až budou).",
   "zdroj": "Havran scripts/svet.gd _krcma_dil (pouziti bed: značka + 0,25 m), scripts/main.gd _on_use bed: player.sit(pos − 0,5 m, oči 0,62, pohled 55°), offer_sleep → menu_hrace spanek, sleep_until (hud.fade_through, day.set_time, stand_up, uložení); docs/reference/hajovna/NAVOD_HAJOVNA.md (Hajovna_Spani_Hrac), docs/reference/krcma_L/NAVOD_KRCMA_L.md (KrcmaL_Spani_Hrac)",
   "mista": [
-   {"uzel": "Hajovna_Spani_Hrac", "kolize": "Hajovna_Kol_Postel", "nazev": "postel v hájovně"},
-   {"uzel": "KrcmaL_Spani_Hrac", "kolize": "", "nazev": "lůžko v krčmě"},
-   {"kolize": "ChyseKura_Kol_Prycna0", "nazev": "pryčna v chýši"},
-   {"kolize": "ChyseKura_Kol_Prycna1", "nazev": "pryčna v chýši"},
-   {"kolize": "ChysePrkna_Kol_Prycna0", "nazev": "pryčna v chýši"},
-   {"kolize": "ChysePrkna_Kol_Prycna1", "nazev": "pryčna v chýši"}
+   {
+    "uzel": "Hajovna_Spani_Hrac",
+    "kolize": "Hajovna_Kol_Postel",
+    "nazev": "postel v hájovně"
+   },
+   {
+    "uzel": "KrcmaL_Spani_Hrac",
+    "kolize": "",
+    "nazev": "lůžko v krčmě"
+   },
+   {
+    "kolize": "ChyseKura_Kol_Prycna0",
+    "nazev": "pryčna v chýši"
+   },
+   {
+    "kolize": "ChyseKura_Kol_Prycna1",
+    "nazev": "pryčna v chýši"
+   },
+   {
+    "kolize": "ChysePrkna_Kol_Prycna0",
+    "nazev": "pryčna v chýši"
+   },
+   {
+    "kolize": "ChysePrkna_Kol_Prycna1",
+    "nazev": "pryčna v chýši"
+   }
   ],
   "nad_znackou_m": 0.25,
   "leh_pod_m": 0.5,
@@ -51,14 +79,23 @@
   "hlaska": "Hra uložena"
  },
  "zlab": {
-  "popis": "Žlab v chlévě (Dum2_Kol_Zlab, kolizní kvádr žlabu): nabídka „Nalít vodu“ nad žlabem → hladina vody (rovina se shaderem vody Puchartu shaders/voda.gdshader, materiál potoků hlavni.mat_voda, stojatá: rychlost) v půdorysu kolize zmenšeném o okraj_m (stěny žlabu), hloubka_pod_vrchem_m pod horní hranou, hloubka vody hloubka_m (krytí a barva shaderu). Voda zůstane (nabídka zmizí).",
-  "zdroj": "Míša 15. 11.: žlab „nalít vodu“; tvar podle kolize modelu domy.glb Dum2_Kol_Zlab (x −2,65…1,6, y 0,25…0,89, z −4,33…−3,83) a viditelného koryta (prkno dna y 0,57, rozbor sítě Dum2_Interier 15. 11.)",
-  "kolize": ["Dum2_Kol_Zlab"],
+  "popis": "Žlab v chlévě (Dum2_Kol_Zlab, kolizní kvádr žlabu a jeslí): nabídka „Nalít vodu“ nad žlabem (bod zaměření = střed horní plochy kolize) → hladina vody (rovina se shaderem vody Puchartu shaders/voda.gdshader, materiál potoků hlavni.mat_voda, stojatá: rychlost) v korytě: hladina [x0, x1, y, z0, z1] v souřadnicích modelu (vnitřek vydlabaného koryta v dané výšce), hloubka vody hloubka_m (krytí a barva shaderu). Voda zůstane (nabídka zmizí).",
+  "zdroj": "Míša 15. 11.: žlab „nalít vodu“; tvar podle modelu domy.glb: kolize Dum2_Kol_Zlab (x −2,65…1,6, y 0,25…0,89, z −4,33…−3,83 – i jesle nad korytem), viditelné koryto z kulatiny v síti Dum2_Interier (rozbor vrcholů 15. 11., materiál M_Kura_001: horní hrana koryta y 0,70 z −4,25…−3,91, dno výdlabu y 0,56 z −4,08, čela x −2,65 / 1,60); hladina 4 cm pod hranou, vnitřek výdlabu v této výšce z −4,20…−3,96",
+  "kolize": [
+   "Dum2_Kol_Zlab"
+  ],
   "nabidka": "Nalít vodu",
-  "okraj_m": 0.07,
-  "hloubka_pod_vrchem_m": 0.12,
-  "hloubka_m": 0.2,
-  "rychlost": 0.0
+  "hloubka_m": 0.1,
+  "rychlost": 0.0,
+  "hladina": {
+   "Dum2_Kol_Zlab": [
+    -2.6,
+    1.55,
+    0.66,
+    -4.2,
+    -3.96
+   ]
+  }
  },
  "studna": {
   "popis": "Studna na návsi (ves.gd _studny): rumpál s klikou a vědro na laně jsou samostatné uzly Pohyb_ves_studna_rumpal_<i> a Pohyb_ves_studna_vedro_<i> – pohyblivé díly dvere.gd (Havran pohyb.gd): rumpál druh navijak (otacek otáček kolem své osy), vědro druh vedro (posun svisle dolů o hloubku k hladině, doba dur_s), skupina ves_studna_<i>, nabídka u kliky. Vědro visí vedro_pod_osou_m pod osou rumpálu nad středem šachty; lano od bubnu k uchu vědra se přepočítá. hladina_m = hloubka hladiny pod terénem (vědro sjede až k ní); terén pod studnou díru nemá – šachtu kreslí temný kruh nad terénem (ves.gd), vědro do tmy zajede a z ní vyjede.",

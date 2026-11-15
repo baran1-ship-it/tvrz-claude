@@ -90,7 +90,7 @@ static func polozky(h: Node) -> Array:
 				var dum := sb.get_parent() as Node3D
 				var ab := aabb_kolize(sb, dum)
 				out.append({"druh": "zlab", "nazev": String(zl["nabidka"]), "pos": dum.global_transform * Vector3(ab.get_center().x, ab.end.y, ab.get_center().z),
-					"vlastni": [(sb as CollisionObject3D).get_rid()], "dum": dum, "aabb": ab, "voda": null})
+					"vlastni": [(sb as CollisionObject3D).get_rid()], "dum": dum, "aabb": ab, "kolize": String(jm), "voda": null})
 	return out
 
 
@@ -204,14 +204,14 @@ func spi_do(kdy: String, ulozit := Callable()) -> void:
 func nalij(p: Dictionary) -> void:
 	if p["voda"] != null: return
 	var zl: Dictionary = cfg("zlab")
-	var ab: AABB = p["aabb"]; var ok := float(zl["okraj_m"])
-	var x0 := ab.position.x + ok; var x1 := ab.end.x - ok; var z0 := ab.position.z + ok; var z1 := ab.end.z - ok
-	var y := ab.end.y - float(zl["hloubka_pod_vrchem_m"])
-	# rovina: UV.x = metry podél (vlny), UV.y = 1 − hloubka (shader voda.gdshader: h = 1 − UV.y), barva vrcholu bílá (kraj 1)
+	var q: Array = zl["hladina"][p["kolize"]]   # [x0, x1, y, z0, z1] modelu – vnitřek koryta
+	var x0 := float(q[0]); var x1 := float(q[1]); var y := float(q[2]); var z0 := float(q[3]); var z1 := float(q[4])
+	# rovina: UV.x = metry podél (vlny), UV.y = 1 − hloubka (shader voda.gdshader: h = 1 − UV.y), barva vrcholu bílá (kraj 1);
+	# pořadí vrcholů jako Sit.quad (Godot: přední strana po směru hodinových ručiček – normála nahoru)
 	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var v := [Vector3(x0, y, z0), Vector3(x1, y, z0), Vector3(x1, y, z1), Vector3(x0, y, z1)]
 	var uvy := 1.0 - float(zl["hloubka_m"])
-	for i in [0, 2, 1, 0, 3, 2]:
+	for i in [0, 1, 2, 0, 2, 3]:
 		st.set_color(Color(1, 1, 1, 1)); st.set_normal(Vector3.UP); st.set_uv(Vector2((v[i] as Vector3).x - x0, uvy)); st.add_vertex(v[i])
 	var mi := MeshInstance3D.new(); mi.name = "VodaZlab"; mi.mesh = st.commit()
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

@@ -24,7 +24,7 @@ func _ready() -> void:
 				for d: Dictionary in dv.dily[g]:
 					if String(d["e"]["kind"]) == "vedro": vedro = d["uzel"]
 				var c: Vector3 = vedro.get_parent().global_position
-				cam.look_at_from_position(c + Vector3(0.55, 2.0, 0.75), c + Vector3(0, -2.6, 0), Vector3.UP)
+				cam.look_at_from_position(c + Vector3(1.3, 2.3, 1.5), c + Vector3(0, 0.7, 0), Vector3.UP)
 				dv.prepni(g)
 				await get_tree().create_timer(float(dv.doba[g]) + 1.0).timeout
 		"zlab":

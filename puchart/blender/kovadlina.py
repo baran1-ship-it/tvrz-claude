@@ -358,10 +358,15 @@ def obruc(n=96, tl=0.006):
     for z, dr in prof:
         rows.append([bm.verts.new(((r_spalku(2 * math.pi * i / n, z) + dr) * math.cos(2 * math.pi * i / n),
                                    (r_spalku(2 * math.pi * i / n, z) + dr) * math.sin(2 * math.pi * i / n), z)) for i in range(n)])
-    for a, b in zip(rows, rows[1:] + rows[:1]):
+    dil = bm.faces.layers.int.new("dil"); uvl = bm.loops.layers.uv.new("bake")
+    knot = [0.0, tl, tl + SP["obruc_sirka_m"], 2 * tl + SP["obruc_sirka_m"], 2 * tl + 2 * SP["obruc_sirka_m"]]
+    for k, (a, b) in enumerate(zip(rows, rows[1:] + rows[:1])):
         for i in range(n):
             j = (i + 1) % n
-            bm.faces.new((a[i], a[j], b[j], b[i]))
+            f = bm.faces.new((a[i], a[j], b[j], b[i])); f[dil] = 2
+            dl = i * 6 // n; seg = n / 6
+            for lp, (ii, kk) in zip(f.loops, ((i, k), (i + 1, k), (i + 1, k + 1), (i, k + 1))):
+                lp[uvl].uv = (dl * 0.7 + (ii - dl * seg) / seg * (2 * math.pi * R0 / 6), knot[kk])
     # hřeby (kovaná hlava)
     for k in range(7):
         t = 2 * math.pi * (k + 0.3) / 7
@@ -372,6 +377,9 @@ def obruc(n=96, tl=0.006):
         bmesh.ops.rotate(bm, verts=vs, cent=(0, 0, 0), matrix=__import__("mathutils").Matrix.Rotation(math.pi / 2, 3, "Y"))
         bmesh.ops.rotate(bm, verts=vs, cent=(0, 0, 0), matrix=__import__("mathutils").Matrix.Rotation(t, 3, "Z"))
         bmesh.ops.translate(bm, verts=vs, vec=(r * math.cos(t), r * math.sin(t), z))
+    for f in bm.faces:
+        if f[dil] != 2:
+            f[dil] = 3
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     o = obj_z_bm(bm, "obruc")
     return o
@@ -391,7 +399,16 @@ def kramle(xb, hw_pata):
                 p.co = (*c, 1)
             o = bpy.data.objects.new("kr", cu); bpy.context.scene.collection.objects.link(o)
             aktivni(o); bpy.ops.object.convert(target="MESH"); objs.append(bpy.context.object)
-    return spoj(objs, "kramle")
+    o = spoj(objs, "kramle")
+    while o.data.uv_layers:
+        o.data.uv_layers.remove(o.data.uv_layers[0])
+    nastav_dil(o, 3)
+    return o
+
+
+def nastav_dil(o, hodnota):
+    a = o.data.attributes.get("dil") or o.data.attributes.new("dil", "INT", "FACE")
+    a.data.foreach_set("value", [hodnota] * len(o.data.polygons))
 
 
 def decimuj(o, cil):
@@ -514,8 +531,8 @@ def mat_zelezo_autorsky():
                  U.math("ADD", U.math("ADD", u_dreva, U.math("MULTIPLY", pas_k, 0.35)), dal))
     rez = U.math("MULTIPLY", rez, U.math("SUBTRACT", 1.0, U.math("MAXIMUM", lesk, U.math("MULTIPLY", hrana, 0.8))), clamp=True)
     # barvy
-    okuje = U.mix(0.35, (0.040, 0.039, 0.040), rD.outputs[0], "MULTIPLY")
-    okuje = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.5), okuje, (0.055, 0.050, 0.046))
+    okuje = U.mix(0.55, (0.085, 0.081, 0.078), rD.outputs[0], "MULTIPLY")
+    okuje = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.6), okuje, (0.105, 0.098, 0.092))
     rez_b = U.mix(0.25, rD.outputs[0], (0.20, 0.11, 0.06), "MULTIPLY")
     rez_b = U.mix(0.5, rez_b, rD.outputs[0])
     skr = U.u("ShaderNodeMapping"); skr.inputs["Scale"].default_value = (3.0, 160.0, 3.0); U.ln(geo.outputs["Position"], skr.inputs[0])
@@ -525,19 +542,19 @@ def mat_zelezo_autorsky():
     jamky = U.mr(rH.outputs[0], 0.30, 0.18)
     lesk_b = U.mix(U.math("MULTIPLY", skrab, 0.25), (0.52, 0.515, 0.50), (0.62, 0.62, 0.61))
     lesk_b = U.mix(U.math("MULTIPLY", jamky, 0.7), lesk_b, (0.16, 0.15, 0.14))
-    hrana_b = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.4), (0.25, 0.245, 0.24), (0.33, 0.325, 0.32))
+    hrana_b = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.4), (0.22, 0.215, 0.21), (0.30, 0.295, 0.29))
     alb = U.mix(rez, okuje, rez_b)
     alb = U.mix(opotr, alb, hrana_b)
     alb = U.mix(lesk, alb, lesk_b)
     alb = U.mix(U.math("SUBTRACT", 1.0, U.math("ADD", 0.45, U.math("MULTIPLY", ao_f, 0.55))), alb, (0, 0, 0))
     # drsnost a kov
-    dr_ok = U.math("ADD", 0.50, U.math("MULTIPLY", rR.outputs[0], 0.25))
+    dr_ok = U.math("ADD", 0.62, U.math("MULTIPLY", rR.outputs[0], 0.22))
     dr = U.mix(rez, dr_ok, 0.9)
-    dr = U.mix(opotr, dr, 0.42)
-    dr = U.mix(lesk, dr, U.math("ADD", 0.16, U.math("MULTIPLY", skrab, 0.22)))
-    kov = U.mix(rez, 0.55, 0.0)
-    kov = U.mix(opotr, kov, 0.88)
-    kov = U.mix(lesk, kov, 1.0)
+    dr = U.mix(opotr, dr, 0.5)
+    dr = U.mix(lesk, dr, U.math("ADD", 0.28, U.math("MULTIPLY", skrab, 0.16)))
+    kov = U.mix(rez, 0.3, 0.0)
+    kov = U.mix(opotr, kov, 0.7)
+    kov = U.mix(lesk, kov, 0.88)
     # reliéf
     vyska = U.math("MULTIPLY", rH.outputs[0], U.math("SUBTRACT", 1.0, U.math("MULTIPLY", lesk, 0.9)))
     vyska = U.math("ADD", vyska, U.math("MULTIPLY", rez, U.math("MULTIPLY", sum2.outputs["Fac"], 0.6)))
@@ -593,12 +610,12 @@ def textura_dreva(anvil_rect, sperhak_xy):
     tt = np.arctan2(y, x); rr = np.hypot(x, y)
     rmax = r_spalku(tt, H, np.sin) - FIL
     rp = r * (1 + 0.035 * np.sin(3 * fi + 2.0) + 0.02 * np.sin(5 * fi + 0.5)) + 0.004 * (sumA - 0.5)
-    roky = rp / 0.0034 + 3.0 * np.sin(rp * 21.0)
+    roky = rp / 0.0048 + 3.0 * np.sin(rp * 21.0)
     fr = roky - np.floor(roky)
     pozdni = np.clip((fr - 0.55) / 0.2, 0, 1) * np.clip((1.0 - fr) / 0.1, 0, 1)
     jarni_p = np.clip(1 - np.abs(fr - 0.05) / 0.06, 0, 1)          # póry jarního dřeva (dub – kruhovitě pórovitý)
     zakl = np.stack([0.33 + 0.0 * r, 0.255 + 0.0 * r, 0.185 + 0.0 * r], -1)
-    pozd_c = np.array([0.215, 0.160, 0.115])
+    pozd_c = np.array([0.255, 0.195, 0.145])
     col = zakl * (1 - pozdni[..., None]) + pozd_c * pozdni[..., None]
     col *= (1 - 0.25 * jarni_p * (sumC > 0.45))[..., None]
     # dřeňové paprsky (dub): tenké světlé radiální čárky
@@ -612,7 +629,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
     bel = np.clip((r - (rmax - 0.045)) / 0.02, 0, 1)
     col = col * (1 - bel[..., None] * 0.4) + np.array([0.36, 0.33, 0.29]) * bel[..., None] * 0.4
     # stáří, saze, špína (KCD2: tmavé, ohlazené)
-    col *= (0.62 + 0.30 * sumA + 0.12 * sumB)[..., None]
+    col *= (0.72 + 0.30 * sumA + 0.12 * sumB)[..., None]
     # kolem kovadliny: saze, okuje (černé šupinky), spáleniny od žhavého železa
     ax0, ax1, ay = anvil_rect
     ddx = np.maximum(np.maximum(ax0 - x, x - ax1), 0); ddy = np.maximum(np.abs(y) - ay, 0)
@@ -661,7 +678,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
         sel = (uu >= bu0 - 0.002) & (uu <= bu0 + T_UV + 0.002) & (vv >= bv0 - 0.002) & (vv <= bv0 + T_UV + 0.002)
         tdl = (k + (uu - bu0) / T_UV) * 2 * np.pi / DLAZD
         s = (vv - bv0) / T_UV * 0.5
-        mul = (0.50 + 0.25 * sumA + 0.1 * sumB)
+        mul = (0.62 + 0.25 * sumA + 0.1 * sumB)
         mul = mul * (1 - 0.35 * np.clip((s - (S_BOK - 0.10)) / 0.08, 0, 1))      # saze u horní hrany
         mul = mul * (1 - 0.25 * np.clip((0.06 - s) / 0.06, 0, 1))               # hlína a vlhko dole
         trm = np.zeros((W, W))
@@ -851,25 +868,36 @@ def main():
     an_l = decimuj(kopie(an_h, "kovadlina_low"), 9000)
     sp_l = decimuj(kopie(sp_h, "sperhak_low"), 1400)
     ob_l = kopie(ob, "obruc_low"); kr_l = kopie(kr, "kramle_low")
+    nastav_dil(an_l, 0); nastav_dil(sp_l, 1)
     zel = spoj([an_l, sp_l, ob_l, kr_l], "Kovadlina_zelezo")
     for p in zel.data.polygons:
         p.use_smooth = True
-    while zel.data.uv_layers:
-        zel.data.uv_layers.remove(zel.data.uv_layers[0])
-    zel.data.uv_layers.active = zel.data.uv_layers.new(name="bake")
-    aktivni(zel); bpy.ops.object.mode_set(mode="EDIT"); bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.smart_project(angle_limit=math.radians(58), island_margin=0.003, area_weight=0.0)
+    for u in [u for u in zel.data.uv_layers if u.name != "bake"]:
+        zel.data.uv_layers.remove(u)
+    zel.data.uv_layers.active = zel.data.uv_layers["bake"]
+    dil = [0] * len(zel.data.polygons); zel.data.attributes["dil"].data.foreach_get("value", dil)
+    aktivni(zel)
+    bpy.ops.object.mode_set(mode="EDIT"); bpy.ops.mesh.select_mode(type="FACE"); bpy.ops.mesh.select_all(action="DESELECT")
     bpy.ops.object.mode_set(mode="OBJECT")
-    # pásek a kramle na atlasu menší (z blízka je skoro nevidět)
-    bm = bmesh.new(); bm.from_mesh(zel.data); uvl = bm.loops.layers.uv["bake"]
+    for p, d in zip(zel.data.polygons, dil):
+        p.select = d != 2
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.uv.smart_project(angle_limit=math.radians(58), island_margin=0.003, area_weight=0.0)
+    bpy.ops.mesh.select_all(action="SELECT"); bpy.ops.uv.select_all(action="SELECT")
+    bpy.ops.uv.average_islands_scale()
+    bpy.ops.object.mode_set(mode="OBJECT")
+    # pásek, hřeby a kramle na atlasu menší (zblízka je skoro nevidět)
+    bm = bmesh.new(); bm.from_mesh(zel.data); uvl = bm.loops.layers.uv["bake"]; dl = bm.faces.layers.int["dil"]
     for f in bm.faces:
-        c = f.calc_center_median()
-        if math.hypot(c.x, c.y) > 0.40 or c.z < H + 0.06 and math.hypot(c.x - SH["poloha_m"][0], c.y - SH["poloha_m"][1]) > 0.06:
+        if f[dl] >= 2:
             for lp in f.loops:
                 lp[uvl].uv *= 0.45
     bm.to_mesh(zel.data); bm.free()
-    aktivni(zel); bpy.ops.object.mode_set(mode="EDIT"); bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.pack_islands(rotate=True, margin=0.002)
+    aktivni(zel); bpy.ops.object.mode_set(mode="EDIT"); bpy.ops.mesh.select_all(action="SELECT"); bpy.ops.uv.select_all(action="SELECT")
+    try:
+        bpy.ops.uv.pack_islands(rotate=True, margin=0.003, scale=True, shape_method="CONCAVE")
+    except TypeError:
+        bpy.ops.uv.pack_islands(rotate=True, margin=0.003)
     bpy.ops.object.mode_set(mode="OBJECT")
     # high sada železa (pásek a kramle samy sebou)
     ob_h = kopie(ob, "obruc_high"); kr_h = kopie(kr, "kramle_high")
