@@ -6422,6 +6422,8 @@ func _lide_chovani() -> void:
 			lamac = c
 	if not lamac.is_empty():
 		var cn0: Dictionary = lamac["cn"]
+		var vp0: bool = bool(lamac.get("v_posteli", false))
+		lamac["v_posteli"] = false                  # test vnuti klip prace - spici lamac by ho v posteli (spravne) odmitl
 		lamac["cn"] = P["cinnosti"]["prace_lom"]
 		lamac["klip"] = ""
 		lide.call("_klip", lamac, String((P["cinnosti"]["prace_lom"]["klipy"] as Array)[0]), 1.0)
@@ -6432,6 +6434,7 @@ func _lide_chovani() -> void:
 			var ba: Node = (ruce["r_uzel"] as Node).get_parent()
 			print("LIDE predmet v ruce: %s na %s (%s)" % [ruce["r_id"], ba.get_class(), (ba as BoneAttachment3D).bone_name])
 		lamac["cn"] = cn0
+		lamac["v_posteli"] = vp0
 	# 2) sed: kazdy blok se sedem - sedak z vybaveni (id ze sedani.sedaky, vyska v toleranci) pod panvi, nebo stoji
 	var sd: Dictionary = P["sedani"]
 	var sedi := 0
