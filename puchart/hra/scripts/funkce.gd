@@ -76,7 +76,9 @@ static func polozky(h: Node) -> Array:
 					znacky.append(zn)
 			for zn: Node3D in znacky:
 				var vl: Array = []
-				var kol: Node = zn.get_parent().find_child(String(m.get("kolize", "")), true, false) if String(m.get("kolize", "")) != "" else null
+				var inst: Node = zn
+				while inst.get_parent() != k: inst = inst.get_parent()   # vložená stavba (dítě Mista / Ves) – kolize lůžka nemusí být sourozenec značky
+				var kol: Node = inst.find_child(String(m.get("kolize", "")), true, false) if String(m.get("kolize", "")) != "" else null
 				if kol is CollisionObject3D: vl.append((kol as CollisionObject3D).get_rid())
 				var p := zn.global_position + Vector3.UP * float(sp["nad_znackou_m"])
 				out.append({"druh": "spani", "nazev": String(sp["nabidka"]), "pos": p, "vlastni": vl, "misto": String(m["nazev"]),

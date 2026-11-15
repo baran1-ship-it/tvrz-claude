@@ -391,6 +391,129 @@ func _test_lavice() -> void:
 	vysledek["lavice_sezeni"] = "OK" if spatne.is_empty() and not mista_.is_empty() else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádná lavice v modelech")
 	print("PRUCHOD lavice_sezeni ", vysledek["lavice_sezeni"], " (lavic %d, míst %d)" % [lavic.size(), mista_.size()])
 
+## Funkční věci (funkce.gd) jako ve hře: uzel s vlastní vrstvou tlačítek, položky ze světa
+var _fu: Node = null
+func _funkce() -> Node:
+	if _fu == null:
+		var cl := CanvasLayer.new(); add_child(cl)
+		_fu = load("res://scripts/funkce.gd").new(); cl.add_child(_fu); _fu.zacni(hlavni, cl)
+	return _fu
+
+## Postavit hráče na podlahu u bodu cil (paprsek dolů bez vyjma, pak postav_na_volne) a zamířit na něj; vrátí nabídku funkce.gd
+func _k_veci(cil: Vector3, od: Vector3, vyjma: Array = []) -> Dictionary:
+	var F: GDScript = load("res://scripts/funkce.gd")
+	hlavni.svet.kolize_ihned(od)
+	hrac.autopilot = Vector3.INF; hrac.velocity = Vector3.ZERO
+	var q := PhysicsRayQueryParameters3D.create(od + Vector3(0, 0.5, 0), od - Vector3(0, 3.0, 0)); q.exclude = vyjma + [hrac.get_rid()]
+	var hh := hrac.get_world_3d().direct_space_state.intersect_ray(q)
+	var pod: Vector3 = (hh["position"] as Vector3) if not hh.is_empty() else od
+	hrac.postav_na_volne(pod + Vector3(0, 0.05, 0))
+	for i in 20: await get_tree().physics_frame
+	hrac.pohled_na(cil); await get_tree().physics_frame
+	return F.nejblizsi(_funkce().polozky_, hrac.cam)
+
+## Bod podlahy 0,9 m od věci směrem ke středu stavby (kořen instance) – tam stojí hráč, který věc používá
+static func _pred(p: Vector3, koren: Node3D, y_podlahy: float, od_m := 0.9) -> Vector3:
+	var k := koren.global_position - p; k.y = 0.0
+	var q := p + k.normalized() * od_m
+	return Vector3(q.x, y_podlahy, q.z)
+
+## kovarna_mech (Míša 15. 11.: „dmychadlo v kovárně“; Havran kovarna_mech.gd): u úchopu páky nabídka „Foukat měchem“, po stisku
+## se páka otáčí a měch nadechuje (tvar Nadech), výheň kovárny se rozhoří (ohne.gd boost, plamen větší), po pumpovat_s se měch vrátí do klidu.
+func _test_mech() -> void:
+	var fu := _funkce(); var spatne: Array = []; var n := 0
+	var me: Dictionary = Pravidla.cti("funkce", "mech")
+	for p: Dictionary in fu.polozky_:
+		if p["druh"] != "mech": continue
+		n += 1
+		var kor: Node3D = p["koren"]
+		var u: Dictionary = await _k_veci(p["pos"], _pred(p["pos"], kor, kor.global_position.y))
+		if u.is_empty() or u["p"] != p:
+			spatne.append("%s: není nabídka %s (hráč [%.2f, %.2f, %.2f])" % [kor.name, me["nabidka"], hrac.position.x, hrac.position.z, hrac.position.y]); continue
+		fu.pouzij_polozku(p)
+		var mx := 0.0; var uh := 0.0; var boost := 0.0; var plamen := 1.0
+		for i in 60:   # 3 s (víc než jeden tah: 2π / tempo_rad_s)
+			await get_tree().create_timer(0.05).timeout
+			mx = maxf(mx, (p["mech"] as MeshInstance3D).get_blend_shape_value(int(p["tvar"])) if int(p["tvar"]) >= 0 else 0.0)
+			uh = maxf(uh, ((p["paka"] as Node3D).transform.basis.get_rotation_quaternion().angle_to((p["zaklad"] as Basis).get_rotation_quaternion())))
+			var oh: Node = hlavni.get_node_or_null("Ohne")
+			if oh:
+				for o: Dictionary in oh.ohne:
+					if is_instance_valid(o.get("uzel")) and kor.is_ancestor_of(o["uzel"]):
+						boost = maxf(boost, float(o["boost"]))
+						if o.has("plamen"): plamen = maxf(plamen, (o["plamen"] as Node3D).scale.y)
+		await get_tree().create_timer(float(me["pumpovat_s"]) + 2.0).timeout
+		var klid: bool = not fu.mech_bezi(p) and ((p["mech"] as MeshInstance3D).get_blend_shape_value(int(p["tvar"])) < 0.05 if int(p["tvar"]) >= 0 else true)
+		var ok: bool = int(p["tvar"]) >= 0 and mx > 0.5 and uh > float(me["uhel_rad"]) * 0.5 and boost > 0.0 and plamen > 1.05 and klid
+		print("PRUCHOD mech %s: nadech max %.2f, páka %.3f rad, výheň rozhoření %.2f, plamen ×%.2f, klid po pumpování %s -> %s" % [kor.name, mx, uh, boost, plamen, klid, "OK" if ok else "CHYBA"])
+		if not ok: spatne.append("%s: nadech %.2f, páka %.3f, rozhoření %.2f, plamen %.2f, klid %s" % [kor.name, mx, uh, boost, plamen, klid])
+	vysledek["kovarna_mech"] = "OK" if spatne.is_empty() and n > 0 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádný měch ve světě")
+	print("PRUCHOD kovarna_mech ", vysledek["kovarna_mech"], " (měchů %d)" % n)
+
+## spanek (Míša 15. 11.: spánek „ano, jako Havran“): u každého místa spánku nabídka „Lehnout si“ (zaměřené), hráč si lehne
+## (seated, oči oci_m nad bodem lehu), přespí do rána (funkce.gd spi_do: den.gd doba rano), pak stojí na podlaze bez kolize.
+func _test_spanek() -> void:
+	var fu := _funkce(); var spatne: Array = []; var n := 0
+	var sp: Dictionary = Pravidla.cti("funkce", "spanek")
+	for p: Dictionary in fu.polozky_:
+		if p["druh"] != "spani": continue
+		n += 1
+		var zn: Node3D = p["znacka"]; var jm := "%s %s" % [p["misto"], zn.get_parent().name]
+		var q := PhysicsRayQueryParameters3D.create(zn.global_position, zn.global_position - Vector3(0, 3.0, 0)); q.exclude = p["vlastni"] + [hrac.get_rid()]
+		var hh := hrac.get_world_3d().direct_space_state.intersect_ray(q)
+		var podlaha: float = (hh["position"] as Vector3).y if not hh.is_empty() else zn.global_position.y - 0.6
+		var inst: Node3D = zn
+		while not (inst.get_parent() is Node3D) or not String(inst.get_parent().name) in ["Mista", "Ves"]: inst = inst.get_parent()
+		var u: Dictionary = await _k_veci(p["pos"], _pred(zn.global_position, inst, podlaha, 1.4) if not (p["vlastni"] as Array).is_empty() else Vector3(zn.global_position.x, podlaha, zn.global_position.z), p["vlastni"])   # lůžko s kolizí: stát vedle něj směrem do stavby
+		if u.is_empty() or u["p"] != p:
+			spatne.append("%s: není nabídka %s (hráč [%.2f, %.2f, %.2f])" % [jm, sp["nabidka"], hrac.position.x, hrac.position.z, hrac.position.y]); continue
+		var stal := hrac.global_position
+		fu.lehni(p)
+		for i in 60: await get_tree().physics_frame
+		var oci: float = hrac.cam.global_position.y - (p["leh"] as Vector3).y
+		var lezi: bool = hrac.seated and absf(oci - float(sp["oci_m"])) < 0.05
+		await fu.spi_do("rano")
+		for i in 40: await get_tree().physics_frame
+		var den: Node = hlavni.get("den")
+		var rano: bool = den != null and String(den.current) == "rano"
+		var qs := PhysicsShapeQueryParameters3D.new(); qs.shape = hrac._col.shape; qs.exclude = [hrac.get_rid()]
+		qs.transform = Transform3D(Basis(), hrac.global_position + hrac._col.position + Vector3(0, 0.02, 0))
+		var v_kolizi: bool = not hrac.get_world_3d().direct_space_state.intersect_shape(qs, 1).is_empty()
+		var ok: bool = lezi and rano and not hrac.seated and hrac.is_on_floor() and not v_kolizi and absf(hrac.position.y - stal.y) < 0.5
+		print("PRUCHOD spanek %s: leží %s (oči %.2f), ráno %s (%s), vstal [%.2f, %.2f, %.2f], na zemi %s, v kolizi %s -> %s" % [jm, lezi, oci, rano, den.clock_text() if den else "?", hrac.position.x, hrac.position.z, hrac.position.y, hrac.is_on_floor(), v_kolizi, "OK" if ok else "CHYBA"])
+		if not ok: spatne.append("%s: leží %s, ráno %s, seated %s, na zemi %s, v kolizi %s" % [jm, lezi, rano, hrac.seated, hrac.is_on_floor(), v_kolizi])
+		if den: den.set_time("odpoledne", 0.01)
+	vysledek["spanek"] = "OK" if spatne.is_empty() and n >= 2 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "málo míst spánku (%d)" % n)
+	print("PRUCHOD spanek ", vysledek["spanek"], " (míst %d)" % n)
+
+## zlab_voda (Míša 15. 11.: žlab „nalít vodu“): u žlabu nabídka „Nalít vodu“, po stisku hladina (shader vody) uvnitř půdorysu kolize
+## žlabu pod jeho horní hranou; nabídka pak zmizí, voda zůstane.
+func _test_zlab() -> void:
+	var fu := _funkce(); var spatne: Array = []; var n := 0
+	var zl: Dictionary = Pravidla.cti("funkce", "zlab")
+	for p: Dictionary in fu.polozky_:
+		if p["druh"] != "zlab": continue
+		n += 1
+		var dum: Node3D = p["dum"]; var ab: AABB = p["aabb"]
+		var u: Dictionary = await _k_veci(p["pos"], _pred(p["pos"], dum, (dum.global_transform * ab.position).y), p["vlastni"])
+		if u.is_empty() or u["p"] != p:
+			spatne.append("%s: není nabídka %s (hráč [%.2f, %.2f, %.2f])" % [dum.name, zl["nabidka"], hrac.position.x, hrac.position.z, hrac.position.y]); continue
+		fu.pouzij_polozku(p)
+		await get_tree().process_frame
+		var mi: MeshInstance3D = p["voda"]
+		var ok := mi != null and mi.material_override is ShaderMaterial and String((mi.material_override as ShaderMaterial).shader.resource_path).ends_with("voda.gdshader")
+		var vab := AABB()
+		if mi != null:
+			vab = mi.mesh.get_aabb(); vab.position = mi.transform * vab.position   # síť v souřadnicích domu
+			ok = ok and vab.position.x >= ab.position.x and vab.end.x <= ab.end.x and vab.position.z >= ab.position.z and vab.end.z <= ab.end.z \
+				and vab.position.y > ab.position.y and vab.position.y < ab.end.y
+		var znovu: Dictionary = fu.nejblizsi(fu.polozky_, hrac.cam)
+		ok = ok and (znovu.is_empty() or znovu["p"] != p)
+		print("PRUCHOD zlab %s: voda %s, hladina y %.2f (žlab %.2f..%.2f) -> %s" % [dum.name, mi != null, vab.position.y, ab.position.y, ab.end.y, "OK" if ok else "CHYBA"])
+		if not ok: spatne.append("%s: voda %s, hladina %.2f" % [dum.name, mi != null, vab.position.y])
+	vysledek["zlab_voda"] = "OK" if spatne.is_empty() and n > 0 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádný žlab ve světě")
+	print("PRUCHOD zlab_voda ", vysledek["zlab_voda"], " (žlabů %d)" % n)
+
 func _chyba(t: String) -> void:
 	for i in hrac.get_slide_collision_count():
 		var c := hrac.get_slide_collision(i)
@@ -406,6 +529,9 @@ func _konec() -> void:
 	if jen == "" or "mapa" in jen: await _test_mapa()
 	if jen == "" or "zebrik" in jen: await _test_zebriky()
 	if jen == "" or "lavice" in jen: await _test_lavice()
+	if jen == "" or "mech" in jen: await _test_mech()
+	if jen == "" or "spanek" in jen: await _test_spanek()
+	if jen == "" or "zlab" in jen: await _test_zlab()
 	hrac.autopilot = Vector3.INF
 	var f := FileAccess.open(OS.get_environment("PUCHART_VYSTUP") if OS.has_environment("PUCHART_VYSTUP") else "user://pruchod.json", FileAccess.WRITE); f.store_string(JSON.stringify(vysledek, " "))
 	var ok := vysledek.values().all(func(v): return v == "OK")

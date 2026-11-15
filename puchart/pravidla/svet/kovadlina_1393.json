@@ -1,0 +1,39 @@
+{
+ "popis": "Kovadlina vesnické kovárny 1393 na dubovém špalku se sperhákem (blender/kovadlina.py → hra/modely/predmety_h/kovadlina_1393.glb, _stredni.glb, _daleko.glb). Míša 15. 11.: „kovadlinu chci novou, ale musí být vymazlená, krásný fotorealistický model … já chci čistou“ (bez meče a nářadí) a „podívej se na KCD“ – závazná předloha tvaru je fotka KCD2. Rozměry v metrech, Blender osa Z nahoru (v Godotu Y), dráha a roh podél +X, počátek na zemi uprostřed špalku.",
+ "zdroj": {
+  "zavazna_predloha": "docs/reference/kovarna/kcd2_kovadlina_misa_15_11.jpg (KCD2, kovárna – Míša 15. 11.): masivní kovadlina s jedním kónickým rohem, zúžený pas, široká pata, plochá dráha s ostrou hranou, krátká hranatá patka vzadu s otvory, nízký široký špalek ~1 m, vedle sperhák zaražený do špalku; dráha světlejší a lesklejší, boky tmavé okuje s jemnou rzí",
+  "kcd1": "Havran docs/reference/kcd_13_11/kovar_kcd1.jpg (KCD1, kovář na tržišti): kovadlina na nízkém širokém dubovém pařezu stažená železnou páskou u horní hrany, vedle sperhák ve špalku",
+  "pramen": "Hausbuch der Mendelschen Zwölfbrüderstiftung, Nürnberg, kolem 1425, Amb. 317.2° fol. 47r (Mendel I, kovář Hans Smid; public domain; https://www.allaboutlean.com/wp-content/uploads/2018/06/Smith_Color.jpg): kovadlina na kulatém špalku, dráha kovadliny ve výšce kovářova zápěstí/boků, špalek přibližně dvakrát širší než kovadlina",
+  "muzea": "Worcester Art Museum (Higgins Armory), kovadlina 14. st., inv. 2014.1031, a kovadlina 1400–1500 s otvorem pro sperhák (https://worcester.emuseum.com/objects/49251/anvil) – kovaná (svářková) železná kovadlina, otvor pro zasazení sperháku; rozměry na webu neuvedeny (NEOVERENO)",
+  "historie": "REKONSTRUKCE/NAVRH: jednorohá kovadlina s patkou je v ikonografii doložena až v 15. st. (Mendel – kovadliny podle druhu práce, i rohaté), roku 1393 běžnější špalková bez rohu; tvar podle KCD2 na přání Míši (15. 11.: „řiď se fotkou KCD2“)"
+ },
+ "spalek": {
+  "polomer_m": 0.48,
+  "vyska_m": 0.42,
+  "zaobleni_hrany_m": 0.035,
+  "obruc_od_vrchu_m": 0.07,
+  "obruc_sirka_m": 0.045,
+  "zdroj": "KCD2 (špalek ~1 m průměr, 0,4–0,5 m vysoký, tmavý ohlazený, rozpraskaný), KCD1 (pásek u horní hrany)"
+ },
+ "kovadlina": {
+  "drah_vyska_nad_zemi_m": 0.78,
+  "zapusteni_do_spalku_m": 0.01,
+  "drah_sirka_m": 0.14,
+  "drah_delka_m": 0.56,
+  "roh_delka_m": 0.33,
+  "patka_delka_m": 0.17,
+  "pata_m": [0.46, 0.31],
+  "pas_m": [0.22, 0.12],
+  "stred_x_m": 0.02,
+  "zdroj": "výška dráhy 0,75–0,8 m = zápěstí kováře (Míša 15. 11., Mendel fol. 47r); proporce délka : výška ≈ 2,3 : 1 a roh ~ 0,4 celkové délky odměřeny z kcd2_kovadlina_misa_15_11.jpg"
+ },
+ "sperhak": {
+  "poloha_m": [-0.37, -0.16],
+  "vyska_nad_spalkem_m": 0.33,
+  "sloupek_m": 0.042,
+  "pata_m": 0.075,
+  "zdroj": "KCD2 (hranatý sloupek s patkou a zužující se hlavou vlevo od patky kovadliny), KCD1 (sperhák ve špalku)"
+ },
+ "trojuhelniky": {"podrobny_max": 20000, "stredni_max": 3500, "daleko_max": 600, "zdroj": "Míša 15. 11. (podrobný 15–20 tis., střední ~3 tis., daleko ~500)"},
+ "textury_px": {"podrobny": 2048, "stredni": 512, "daleko": 256, "zdroj": "Míša 15. 11.: 2048 px pro železo i dřevo (výjimka z rozpocty.json textury_px bezna – je to dominanta kovárny)"}
+}
