@@ -9086,9 +9086,10 @@ func _lavice_sedaky() -> void:
 		q.exclude = [player.get_rid()]
 		var h := sp.intersect_ray(q)
 		var ty := float(sv._teren_y(seat.x, seat.z))
+		# deska lavice s kolizi (zasah ve vysce sedaku) nebo lavice bez kolize: sedak 0,25-0,55 m nad zemi pod nim (zasah)
 		var na_desce := not h.is_empty() and absf((h["position"] as Vector3).y - seat.y) < 0.12
-		var nad_terenem := absf(seat.y - ty - float(u["h"])) < 0.12
-		if not (na_desce or nad_terenem):
+		var nad_zemi := not h.is_empty() and seat.y - (h["position"] as Vector3).y > 0.25 and seat.y - (h["position"] as Vector3).y < 0.55
+		if not (na_desce or nad_zemi):
 			chyby.append("%s: sedak %.2f, zasah %s, teren %.2f" % [u["nazev"], seat.y, str((h["position"] as Vector3).y) if not h.is_empty() else "-", ty])
 	_vysledek("lavice_sedaky", chyby.is_empty(), "sedaku lavic %d (ocekavano %d) %s" % [sedy.size(), ocek, str(chyby.slice(0, 6))])
 

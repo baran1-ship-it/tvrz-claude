@@ -1409,3 +1409,17 @@ Hotovo v kódu a datech (testy u každého):
   rostlin/kolizí, konvexní kolize hostince), záblesk před kamerou na začátku měřicí trasy (podezření břízy), hostinský
   u krbu (až Míša dodělá hospodu), zbytky okraje tůní kaskády; břeh test prochází těsně (58 z limitu 59).
 - Zdroj krčmy do L je v `blender/krcma_L` (CTI_ME.md) – úpravy modelu dělat tam, ne v .glb.
+
+### 15. 11. odpoledne – poučení (chyby Míši z tabletu 0.999998, `docs/rozpracovane/misa_15_11_chyby.md`)
+- **Nový model dílu (krčma) se v testu neprojeví**, dokud ho přepisuje balík `z_krcma` (z_* se načítá poslední s přepisem,
+  `data.gd`). Pro lokální test: PCKPacker skript (`.import` + `.godot/imported/krcma_L*` bez `.s3tc.ctex`), doplnit nulami na
+  velikost z manifestu a dát místo odkazu v `user://data` (NIKDY nepřepisovat `data/*.pck.000` v repu – v `user://data` jsou to
+  symbolické odkazy). Do hry až přes `tools/vydani.py --jen z_krcma`.
+- **Varování = chyba:** `var x := {…}.get(…)` (typ z Variantu) shodí překlad všech skriptů → testy běží 25 min do watchdogu.
+  U slovníků a `get` vždy explicitní typ.
+- **Disk:** běh Godotu s výpisem po snímcích/vrcholech napsal 5 GB log (`build/beh/obl_dump2.log`) → disk plný, beh.sh nic
+  nespustí. Výpisy jen souhrn nebo `grep`; po odeslání zálohy smazat `build/zaloha`.
+- **Zdroj krčmy v nové session:** `bash blender/krcma_L/stahni_foto.sh` (fotky nejsou v gitu), export píše `.glb` vedle zdroje → přesunout
+  do `modely/krcma/`; segfault na konci Blenderu je normální.
+- **Tráva v budovách (opakovaná chyba) – skutečná příčina:** pás krytí cesty v `louka._rozsej` přepisoval tvrdé zákazy; testy byly
+  slepé (poloha trsu je v custom data, ne v transformaci). Teď `louka._zakaz_travy` (jedno místo) a testy čtou `louka.trsy_v_oblasti`.
