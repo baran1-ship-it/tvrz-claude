@@ -273,12 +273,15 @@ def build(body, kroj, NAME):
                     & ~((arms_u > 0.5) & (np.abs(x) > 0.2)) & ~face)
             z_h, z_l = z_neck + KP["prechod_nad_krkem_m"], z_neck - KP["prechod_pod_krkem_m"]
             o_h, o_l = KP["kapuce_odsazeni_m"], KP["limec_odsazeni_m"]
+            def _limec(c):                 # 0 kapuce (nad krkem) .. 1 límec (pod krkem), plynule
+                t = min(1.0, max(0.0, (z_h - c.z) / (z_h - z_l))); return t * t * (3 - 2 * t)
             def _odsaz(c, o):
-                t = min(1.0, max(0.0, (z_h - c.z) / (z_h - z_l))); t = t * t * (3 - 2 * t)
-                return o_h + (o_l - o_h) * t
+                return o_h + (o_l - o_h) * _limec(c)
             kp = cl.shell(body, co, no, m_hd | m_cp, o_h, f"{NAME}_kapuce", smooth=5, smooth_border=4, offset_fn=_odsaz)
             print("KAPE mustky pryc ploch", cl.bez_mustku(kp))
             print("KAPE nad vrstvou posunuto", cl.nad_vrstvou(kp, [top, sh], kroj.get("vrstva_mezera_m", 0.006)))
+            print("KAPE vahy z kotle", cl.vahy_z_vrstvy(kp, [top], KP["vahy_vrstvy_plne_m"], KP["vahy_vrstvy_nic_m"],
+                                                               podil_fn=_limec))
             print("KAPE kusu", cl.kusy(kp), "smycek okraje", cl.smycky(kp))
             K["kape"] = [kp]; HIDE["kape"] = []; MAT["kape"] = ("vlna", kroj.get("kape_barva", [0.3, 0.28, 0.2]))
     if female and (kroj.get("kape", False) or kroj.get("rouska", True)):

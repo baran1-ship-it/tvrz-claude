@@ -12,6 +12,8 @@ extends SceneTree
 ##           kápě/roušky nad kotlemi, ten smí být). Povrchy s alfou (vlasy) ne.
 ## Spuštění: tools/beh.sh svy cmd godot --headless --path . -s res://tools/test_svy_odevu.gd   (BEH_SDILENE=1)
 ## Volitelně TVRZ_SVY_SADY="npc_ponocny,npc_matej" jen vybrané sady. Výstup: SVY ... řádky, TEST SVY OK/CHYBA.
+## Ladění: TVRZ_SVY_LADIT=1 vypíše u každého nálezu klidové polohy okraje a protějšku (které smyčky se potkávají);
+## TVRZ_SVY_OBJ=<složka> uloží skinovanou síť povrchů (klid a každá fáze) jako OBJ pro rozbor vrstev mimo Godot.
 
 const Lide := preload("res://scripts/lide.gd")
 const Vzhled := preload("res://scripts/vzhled.gd")

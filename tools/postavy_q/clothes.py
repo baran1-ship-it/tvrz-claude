@@ -381,6 +381,47 @@ def tube(obj, co, sel_mask, z_top, z_bot, name, N=64, rows=None, ease=0.012, fla
     ob = bpy.data.objects.new(name, me)
     return ob, center, R, zs
 
+def vahy_z_vrstvy(ob, pod, dosah_plne, dosah_nic, k=4, podil_fn=None):
+    """15. 11. (Míša ř. 3, tmavý trojúhelník na zádech pod kapucí 02.jpg, tmavší skvrna na límci purkrabího; změřeno
+    test_svy_odevu TVRZ_SVY_OBJ: límec kukle se v klidu, chůzi, kleku i sedu nořil 1,4–2,9 cm pod kotli, protože obě
+    vrstvy měly váhy kostí z těla každá z jiných vrcholů a ohýbaly se jinak): vrchní vrstva přebírá váhy kostí spodní
+    vrstvy, na které leží (průměr k nejbližších vrcholů pod), do dosah_plne plně, do dosah_nic plynule zpět k vlastním
+    vahám (kapuce na hlavě). Obě vrstvy se pak ohýbají stejně a odstup mezi nimi zůstane. podil_fn(co) ∈ [0, 1] omezí
+    převzetí jen na část kusu (límec, ne kapuce kolem krku). Vrací počet vrcholů."""
+    pv = [(o, v) for o in pod for v in o.data.vertices]
+    if not pv: return 0
+    kd = kdtree.KDTree(len(pv))
+    for i, (o, v) in enumerate(pv): kd.insert(o.matrix_world @ v.co, i)
+    kd.balance()
+    jm = sorted({g.name for o in pod for g in o.vertex_groups if g.name in BONE_NAMES or g.name.startswith(("index_", "middle_", "ring_", "pinky_", "thumb_"))}
+                | {g.name for g in ob.vertex_groups if g.name in BONE_NAMES})
+    for j in jm:
+        if j not in ob.vertex_groups: ob.vertex_groups.new(name=j)
+    gi = {j: ob.vertex_groups[j].index for j in jm}
+    mw = ob.matrix_world; n = 0
+    for v in ob.data.vertices:
+        res = kd.find_n(mw @ v.co, k)
+        d = res[0][2]
+        t = 1.0 if d <= dosah_plne else max(0.0, 1.0 - (d - dosah_plne) / (dosah_nic - dosah_plne))
+        if podil_fn is not None: t *= podil_fn(v.co)
+        if t <= 0: continue
+        acc = {}; tw = 0.0
+        for (_, i, dd) in res:
+            o, pv_ = pv[i]; w = 1.0 / (dd + 0.005); tw += w
+            for g in pv_.groups:
+                nm = o.vertex_groups[g.group].name
+                if nm in gi: acc[nm] = acc.get(nm, 0.0) + w * g.weight
+        vl = {j: 0.0 for j in jm}
+        for g in v.groups:
+            nm = ob.vertex_groups[g.group].name
+            if nm in vl: vl[nm] = g.weight
+        for j in jm:
+            nw = (1 - t) * vl[j] + t * acc.get(j, 0.0) / max(tw, 1e-9)
+            if nw > 0.01: ob.vertex_groups[gi[j]].add([v.index], nw, 'REPLACE')
+            elif vl[j] > 0: ob.vertex_groups[gi[j]].remove([v.index])
+        n += 1
+    return n
+
 def nad_vrstvou(ob, pod, mezera, kol=3):
     """Vrstvení oděvu (12. 11., límec kápě: vyhlazená slupka se nořila až 18 mm pod svrchnici a ta prosvítala fleky):
     každý vrchol ob musí ležet aspoň mezera nad povrchem všech oděvů pod ním (pod = seznam objektů), jinak se posune

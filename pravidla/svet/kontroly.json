@@ -1,298 +1,300 @@
 {
-  "popis": "Hlídači převzatí z Pucharta (docs/rozpracovane/hlidaci_z_pucharta.md, Míša 3. 11. „má Puchart lepší hlídače? pak si je taky vem“): prahy a seznamy kontrol na jednom místě. povrch čte hra (tools/test_svet.gd _povrch), ostatní sekce jen Python nástroje (jen_blender).",
-  "jen_blender": [
-    "geometrie",
-    "rohatka",
-    "tabulky",
-    "teren_shoda",
-    "lod_navaznost",
-    "spoje",
-    "schvalene",
-    "dobra_verze"
-  ],
-  "povrch": {
-    "_popis": "test povrch (Puchart test_pruchod _test_povrch): v půdorysu každé stavby mřížka bodů, na každé vodorovné ploše kolize, kde postava stojí (kapsle se vejde), se porovná viditelná síť s kolizí – boří se / stojí nad viditelným; po směrech kolem bodu projde viditelným / neviditelná stěna. Body jen tam, kde je stavba (kolize stavby nebo viditelná síť stavby v okně), terén sám řeší teren_shoda. Body víc než pod_strechou_nad_m nad terénem jen pod střechou (paprsek nahoru do strop_m zasáhne kolizi) – na střechy a vrchy zdí hráč nechodí. kolize_sveta: kolize cíle jsou v buňkách světa (Kolize*), ne pod uzlem.",
-    "cile": [
-      {
-        "uzel": "Krcma_dil",
-        "krok_m": 0.5,
-        "okraj_m": 2.0
-      },
-      {
-        "uzel": "Kovarna_dil",
-        "krok_m": 0.5,
-        "okraj_m": 2.0
-      },
-      {
-        "uzel": "Mlyn_dil",
-        "krok_m": 0.5,
-        "okraj_m": 2.0
-      },
-      {
-        "uzel": "Vetrak_dil",
-        "krok_m": 0.5,
-        "okraj_m": 2.0
-      },
-      {
-        "uzel": "Kostel_dil",
-        "krok_m": 0.5,
-        "okraj_m": 2.0
-      },
-      {
-        "vzor": "Staticky_hostinec*",
-        "krok_m": 0.5,
-        "okraj_m": 2.0
-      },
-      {
-        "vzor": "Dum_ves_*",
-        "krok_m": 0.5,
-        "okraj_m": 1.5,
-        "kazdy": 1,
-        "kolize_sveta": true
-      },
-      {
-        "uzel": "Tvrz",
-        "krok_m": 0.75,
-        "okraj_m": 0.0,
-        "oblast": [
-          -40.0,
-          -22.0,
-          24.0,
-          22.0
-        ]
-      }
-    ],
-    "tolerance_m": 0.15,
-    "nad_m": 0.25,
-    "pod_m": 0.6,
-    "okno_m": 0.3,
-    "telo_r_m": 0.3,
-    "telo_vyska_m": 1.7,
-    "max_vrstev": 6,
-    "min_normala_y": 0.7,
-    "steny_kazdy": 3,
-    "steny_vysky_m": [
-      0.3,
-      0.9,
-      1.5
-    ],
-    "steny_od_m": 0.4,
-    "steny_dosah_m": 1.5,
-    "steny_blizko_m": 0.6,
-    "steny_tolerance_m": 0.25,
-    "relief_bok_m": 0.12,
-    "vynechat_site": [
-      "Teren",
-      "Reka",
-      "Potok",
-      "Okluzor",
-      "Rakos",
-      "Slama",
-      "Hladina",
-      "Voda",
-      "Kour",
-      "Plamen"
-    ],
-    "teren_kolize": [
-      "Teren",
-      "Nadvori"
-    ],
-    "projit_smi": [
-      "Slama",
-      "Rakos",
-      "Brectan",
-      "List",
-      "Trava",
-      "Pavucin",
-      "Zaves",
-      "Provaz",
-      "Kour",
-      "Plamen",
-      "Voda",
-      "Hladina",
-      "Sit"
-    ],
-    "min_bodu": 200,
-    "vypis_max": 30,
-    "pod_strechou_nad_m": 1.0,
-    "strop_m": 3.5
-  },
-  "geometrie": {
-    "_popis": "tools/kontrola_geometrie.py (Puchart blender/kontrola_geometrie.py): souvislé kusy sítí hotových modelů musí stát na terénu nebo se opírat o kus, který stojí (řetěz opor). Visí ≥ min_velikost_m bez opory = chyba; celý kus víc než pod_terenem_m pod terénem = chyba. Modely dílů (krčma, kostel…) jsou v místních souřadnicích, terén = rovina y 0 (díl stojí na rovině kraj.MISTA); svět (tvrz.glb) proti tools/krok_b/vysky.json.",
-    "soubory": [
-      {
-        "soubor": "modely/tvrz.glb",
-        "teren": "vysky"
-      },
-      {
-        "soubor": "modely/ves/domy.glb",
-        "teren": "rovina"
-      },
-      {
-        "soubor": "modely/mlyn/mlyn.glb",
-        "teren": "rovina"
-      },
-      {
-        "soubor": "modely/kovarna/kovarna.glb",
-        "teren": "rovina"
-      },
-      {
-        "soubor": "modely/krcma/krcma_L.glb",
-        "teren": "rovina"
-      },
-      {
-        "soubor": "modely/kostel/kostel_ruiny.glb",
-        "teren": "rovina"
-      }
-    ],
-    "vynechat_objekty": [
-      "Teren",
-      "Reka",
-      "Okluzor",
-      "Kour",
-      "Plamen"
-    ],
-    "vynechat_obsahuje": [
-      "colonly",
-      "_Kol_",
-      "_kolize",
-      "_Stredni",
-      "lod1"
-    ],
-    "tolerance_teren_m": 0.1,
-    "tolerance_dotyk_m": 0.03,
-    "min_velikost_m": 0.25,
-    "pod_terenem_m": 0.3,
-    "svar_mm": 1,
-    "vzorek_bodu": 300
-  },
-  "rohatka": {
-    "_popis": "tools/rohatka.py (Puchart: schválené nálezy, shoda do shoda_m; nový nález = chyba, zmizelý schválený = vypsat k odebrání). Schválené nálezy jsou v sekci schvalene ve formátu vztahy.json povoleni (id, duvod, schvalil, plati_do).",
-    "shoda_m": 1.5
-  },
-  "schvalene": {
-    "_popis": "kontrola -> seznam schválených nálezů {id, misto [x, y, z], druh, duvod, schvalil, plati_do (verze)}; nález bez schválení = chyba. Prázdné = žádná výjimka.",
-    "geometrie": [],
-    "povrch": [],
-    "strom_na_zemi": [],
-    "teren_shoda": []
-  },
-  "tabulky": {
-    "_popis": "tools/kontrola_tabulek.py: stavy řádků tabulek chyb – otevřené (vypíší se se sčítáním), hotové (musí mít kontrolu, a když je to jméno testu, má být v posledním běhu OK). Nejnovější tabulka: otevřený řádek bez důvodu = chyba.",
-    "otevrene": [
-      "čeká",
-      "ceka",
-      "rozbor",
-      "navrženo",
-      "navrzeno",
-      "otevřeno",
-      "otevreno",
-      "rozpracováno",
-      "rozpracovano",
-      "neověřeno",
-      "neovereno"
-    ],
-    "hotove": [
-      "opraven",
-      "hotovo",
-      "v kódu",
-      "v datech",
-      "v kodu",
-      "ověřeno",
-      "overeno"
-    ],
-    "duvod": [
-      "proč",
-      "proc",
-      "důvod",
-      "duvod",
-      "protože",
-      "protoze",
-      "čeká na",
-      "ceka na",
-      "blokuje",
-      "→",
-      "->"
-    ],
-    "logy_testu": [
-      "build/beh/*.log",
-      "/tmp/rychle_testy.log"
-    ]
-  },
-  "strom_na_zemi": {
-    "_popis": "test_smyslu --po strom_na_zemi (Puchart): pata kmene stromu proti nejnižšímu z bodu obvodu kořenů (polomer_m, 8 směrů) – mezera pod kmenem na svahu nad max_mezera_m = chyba.",
-    "predpony": [
-      "strom_",
-      "dub",
-      "buk",
-      "smrk",
-      "borovice",
-      "bríza",
-      "briza",
-      "jablon",
-      "lipa",
-      "jedle",
-      "olse",
-      "vrba",
-      "habr",
-      "jasan",
-      "javor"
-    ],
-    "polomer_m": 0.6,
-    "smeru": 8,
-    "max_mezera_m": 0.12,
-    "vypis_max": 20
-  },
-  "teren_shoda": {
-    "_popis": "test_smyslu --po teren_shoda (Puchart): viditelná síť Teren* v modely/tvrz.glb proti výškám terénu (tools/krok_b/vysky.json, ze kterých je kolize) ve středech trojúhelníků – rozdíl nad max_m = boření / schod.",
-    "max_m": 0.25,
-    "vzorek_kazdy": 7,
-    "vypis_max": 20
-  },
-  "lod_navaznost": {
-    "_popis": "tools/kontrola_lod.py: LOD1 dílu (modely/<dil>/<x>_lod1.glb) má obal jako LOD0 (rozdíl rohů obalu do max_obal_m) – jinak dům při přepnutí poskočí.",
-    "pary": [
-      [
-        "modely/krcma/krcma_L.glb",
-        "modely/krcma/krcma_L_lod1.glb"
-      ],
-      [
-        "modely/kostel/kostel_ruiny.glb",
-        "modely/kostel/kostel_ruiny_lod1.glb"
-      ],
-      [
-        "modely/mlyn/mlyn.glb",
-        "modely/mlyn/mlyn_lod1.glb"
-      ],
-      [
-        "modely/kovarna/kovarna.glb",
-        "modely/kovarna/kovarna_lod1.glb"
-      ]
-    ],
-    "max_obal_m": 0.5
-  },
-  "volne_hrany": {
-    "_popis": "test volne_hrany (Puchart test_smyslu volne_hrany, Míša 4. 11. „zábradlí, kde má být, chybí“): na plochách staveb (kolize cíle z povrch.cile) víc než pad_m nad terénem, kde postava stojí, sonda o sonda_m do 4 směrů – když tam pod okrajem není podlaha do pad_m níž, musí v pase (vyska_m) do sonda_m + 0,3 m stát kolize (zábradlí, zeď). Jinak volná hrana bez zábradlí. Jen body pod střechou (paprsek nahoru do strop_m zasáhne kolizi) – vrchy zdí zříceniny a střechy hráč nechodí.",
-    "pad_m": 1.0,
-    "sonda_m": 0.5,
-    "vyska_m": 0.7,
+ "popis": "Hlídači převzatí z Pucharta (docs/rozpracovane/hlidaci_z_pucharta.md, Míša 3. 11. „má Puchart lepší hlídače? pak si je taky vem“): prahy a seznamy kontrol na jednom místě. povrch čte hra (tools/test_svet.gd _povrch), ostatní sekce jen Python nástroje (jen_blender).",
+ "jen_blender": [
+  "geometrie",
+  "rohatka",
+  "tabulky",
+  "teren_shoda",
+  "lod_navaznost",
+  "spoje",
+  "schvalene",
+  "dobra_verze"
+ ],
+ "povrch": {
+  "_popis": "test povrch (Puchart test_pruchod _test_povrch): v půdorysu každé stavby mřížka bodů, na každé vodorovné ploše kolize, kde postava stojí (kapsle se vejde), se porovná viditelná síť s kolizí – boří se / stojí nad viditelným; po směrech kolem bodu projde viditelným / neviditelná stěna. Body jen tam, kde je stavba (kolize stavby nebo viditelná síť stavby v okně), terén sám řeší teren_shoda. Body víc než pod_strechou_nad_m nad terénem jen pod střechou (paprsek nahoru do strop_m zasáhne kolizi) – na střechy a vrchy zdí hráč nechodí. kolize_sveta: kolize cíle jsou v buňkách světa (Kolize*), ne pod uzlem.",
+  "cile": [
+   {
+    "uzel": "Krcma_dil",
     "krok_m": 0.5,
-    "vypis_max": 20,
-    "strop_m": 3.5
-  },
-  "spoje": {
-    "_popis": "tools/kontrola_spoju.py (Puchart kontrola_spoju): zábradlí spojité (mezera mezi kusy zábradlí po délce do max_mezera_m) a ploty navazují (konce plotů do max_mezera_m od jiného plotu, sloupu nebo zdi).",
-    "zabradli": [
-      "Zabr",
-      "Zabradli"
-    ],
-    "ploty": [
-      "Plot"
-    ],
-    "max_mezera_m": 0.15
-  },
-  "dobra_verze": {
-    "_popis": "tools/posledni_dobra.py (Puchart): po průchodu hlídačů se uloží výsledky a commit do build/dobra_verze.json (a kopie pravidla/dobra_verze.json při --zapis); při neprůchodu se vypíše, co bylo v dobré verzi OK a teď ne + git diff.",
-    "soubor": "pravidla/dobra_verze.json"
-  }
+    "okraj_m": 2.0
+   },
+   {
+    "uzel": "Kovarna_dil",
+    "krok_m": 0.5,
+    "okraj_m": 2.0
+   },
+   {
+    "uzel": "Mlyn_dil",
+    "krok_m": 0.5,
+    "okraj_m": 2.0
+   },
+   {
+    "uzel": "Vetrak_dil",
+    "krok_m": 0.5,
+    "okraj_m": 2.0
+   },
+   {
+    "uzel": "Kostel_dil",
+    "krok_m": 0.5,
+    "okraj_m": 2.0
+   },
+   {
+    "vzor": "Staticky_hostinec*",
+    "krok_m": 0.5,
+    "okraj_m": 2.0
+   },
+   {
+    "vzor": "Dum_ves_*",
+    "krok_m": 0.5,
+    "okraj_m": 1.5,
+    "kazdy": 1,
+    "kolize_sveta": true
+   },
+   {
+    "uzel": "Tvrz",
+    "krok_m": 0.75,
+    "okraj_m": 0.0,
+    "oblast": [
+     -40.0,
+     -22.0,
+     24.0,
+     22.0
+    ]
+   }
+  ],
+  "tolerance_m": 0.15,
+  "nad_m": 0.25,
+  "pod_m": 0.6,
+  "okno_m": 0.3,
+  "telo_r_m": 0.3,
+  "telo_vyska_m": 1.7,
+  "max_vrstev": 6,
+  "min_normala_y": 0.7,
+  "steny_kazdy": 3,
+  "steny_vysky_m": [
+   0.3,
+   0.9,
+   1.5
+  ],
+  "steny_od_m": 0.4,
+  "steny_dosah_m": 1.5,
+  "steny_blizko_m": 0.6,
+  "steny_tolerance_m": 0.25,
+  "relief_bok_m": 0.12,
+  "vynechat_site": [
+   "Teren",
+   "Reka",
+   "Potok",
+   "Okluzor",
+   "Rakos",
+   "Slama",
+   "Hladina",
+   "Voda",
+   "Kour",
+   "Plamen"
+  ],
+  "teren_kolize": [
+   "Teren",
+   "Nadvori"
+  ],
+  "projit_smi": [
+   "Slama",
+   "Rakos",
+   "Brectan",
+   "List",
+   "Trava",
+   "Pavucin",
+   "Zaves",
+   "Provaz",
+   "Kour",
+   "Plamen",
+   "Voda",
+   "Hladina",
+   "Sit"
+  ],
+  "min_bodu": 200,
+  "vypis_max": 30,
+  "pod_strechou_nad_m": 1.0,
+  "strop_m": 3.5
+ },
+ "geometrie": {
+  "_popis": "tools/kontrola_geometrie.py (Puchart blender/kontrola_geometrie.py): souvislé kusy sítí hotových modelů musí stát na terénu nebo se opírat o kus, který stojí (řetěz opor). Visí ≥ min_velikost_m bez opory = chyba; celý kus víc než pod_terenem_m pod terénem = chyba. Modely dílů (krčma, kostel…) jsou v místních souřadnicích, terén = rovina y 0 (díl stojí na rovině kraj.MISTA); svět (tvrz.glb) proti tools/krok_b/vysky.json.",
+  "soubory": [
+   {
+    "soubor": "modely/tvrz.glb",
+    "teren": "vysky"
+   },
+   {
+    "soubor": "modely/ves/domy.glb",
+    "teren": "rovina"
+   },
+   {
+    "soubor": "modely/mlyn/mlyn.glb",
+    "teren": "rovina"
+   },
+   {
+    "soubor": "modely/kovarna/kovarna.glb",
+    "teren": "rovina"
+   },
+   {
+    "soubor": "modely/krcma/krcma_L.glb",
+    "teren": "rovina"
+   },
+   {
+    "soubor": "modely/kostel/kostel_ruiny.glb",
+    "teren": "rovina"
+   }
+  ],
+  "vynechat_objekty": [
+   "Teren",
+   "Reka",
+   "Okluzor",
+   "Kour",
+   "Plamen"
+  ],
+  "vynechat_obsahuje": [
+   "colonly",
+   "_Kol_",
+   "_kolize",
+   "_Stredni",
+   "lod1",
+   "Brectan"
+  ],
+  "tolerance_teren_m": 0.1,
+  "tolerance_dotyk_m": 0.03,
+  "min_velikost_m": 0.25,
+  "pod_terenem_m": 0.3,
+  "svar_mm": 1,
+  "vzorek_bodu": 300,
+  "_vynechat_brectan": "Míša 15. 11. „kostel je ruina, tam moc hlídačů nepomůže“: břečťan visí ze zdí z podstaty (zříceniny kostela a vsi) – pravidlo pro druh, ne výjimka místa. U zřícenin dál platí jen to, co hráči vadí: neviditelná stěna, propad, kus ve vzduchu bez opory (ne list)."
+ },
+ "rohatka": {
+  "_popis": "tools/rohatka.py (Puchart: schválené nálezy, shoda do shoda_m; nový nález = chyba, zmizelý schválený = vypsat k odebrání). Schválené nálezy jsou v sekci schvalene ve formátu vztahy.json povoleni (id, duvod, schvalil, plati_do).",
+  "shoda_m": 1.5
+ },
+ "schvalene": {
+  "_popis": "kontrola -> seznam schválených nálezů {id, misto [x, y, z], druh, duvod, schvalil, plati_do (verze)}; nález bez schválení = chyba. Prázdné = žádná výjimka.",
+  "geometrie": [],
+  "povrch": [],
+  "strom_na_zemi": [],
+  "teren_shoda": []
+ },
+ "tabulky": {
+  "_popis": "tools/kontrola_tabulek.py: stavy řádků tabulek chyb – otevřené (vypíší se se sčítáním), hotové (musí mít kontrolu, a když je to jméno testu, má být v posledním běhu OK). Nejnovější tabulka: otevřený řádek bez důvodu = chyba.",
+  "otevrene": [
+   "čeká",
+   "ceka",
+   "rozbor",
+   "navrženo",
+   "navrzeno",
+   "otevřeno",
+   "otevreno",
+   "rozpracováno",
+   "rozpracovano",
+   "neověřeno",
+   "neovereno"
+  ],
+  "hotove": [
+   "opraven",
+   "hotovo",
+   "v kódu",
+   "v datech",
+   "v kodu",
+   "ověřeno",
+   "overeno"
+  ],
+  "duvod": [
+   "proč",
+   "proc",
+   "důvod",
+   "duvod",
+   "protože",
+   "protoze",
+   "čeká na",
+   "ceka na",
+   "blokuje",
+   "→",
+   "->"
+  ],
+  "logy_testu": [
+   "build/beh/*.log",
+   "/tmp/rychle_testy.log"
+  ]
+ },
+ "strom_na_zemi": {
+  "_popis": "test_smyslu --po strom_na_zemi (Puchart): pata kmene stromu proti nejnižšímu z bodu obvodu kořenů (polomer_m, 8 směrů) – mezera pod kmenem na svahu nad max_mezera_m = chyba.",
+  "predpony": [
+   "strom_",
+   "dub",
+   "buk",
+   "smrk",
+   "borovice",
+   "bríza",
+   "briza",
+   "jablon",
+   "lipa",
+   "jedle",
+   "olse",
+   "vrba",
+   "habr",
+   "jasan",
+   "javor"
+  ],
+  "polomer_m": 0.6,
+  "smeru": 8,
+  "max_mezera_m": 0.12,
+  "vypis_max": 20
+ },
+ "teren_shoda": {
+  "_popis": "test_smyslu --po teren_shoda (Puchart): viditelná síť Teren* v modely/tvrz.glb proti výškám terénu (tools/krok_b/vysky.json, ze kterých je kolize) ve středech trojúhelníků – rozdíl nad max_m = boření / schod.",
+  "max_m": 0.25,
+  "vzorek_kazdy": 7,
+  "vypis_max": 20
+ },
+ "lod_navaznost": {
+  "_popis": "tools/kontrola_lod.py: LOD1 dílu (modely/<dil>/<x>_lod1.glb) má obal jako LOD0 (rozdíl rohů obalu do max_obal_m) – jinak dům při přepnutí poskočí.",
+  "pary": [
+   [
+    "modely/krcma/krcma_L.glb",
+    "modely/krcma/krcma_L_lod1.glb"
+   ],
+   [
+    "modely/kostel/kostel_ruiny.glb",
+    "modely/kostel/kostel_ruiny_lod1.glb"
+   ],
+   [
+    "modely/mlyn/mlyn.glb",
+    "modely/mlyn/mlyn_lod1.glb"
+   ],
+   [
+    "modely/kovarna/kovarna.glb",
+    "modely/kovarna/kovarna_lod1.glb"
+   ]
+  ],
+  "max_obal_m": 0.5
+ },
+ "volne_hrany": {
+  "_popis": "test volne_hrany (Puchart test_smyslu volne_hrany, Míša 4. 11. „zábradlí, kde má být, chybí“): na plochách staveb (kolize cíle z povrch.cile) víc než pad_m nad terénem, kde postava stojí, sonda o sonda_m do 4 směrů – když tam pod okrajem není podlaha do pad_m níž, musí v pase (vyska_m) do sonda_m + 0,3 m stát kolize (zábradlí, zeď). Jinak volná hrana bez zábradlí. Jen body pod střechou (paprsek nahoru do strop_m zasáhne kolizi) – vrchy zdí zříceniny a střechy hráč nechodí.",
+  "pad_m": 1.0,
+  "sonda_m": 0.5,
+  "vyska_m": 0.7,
+  "krok_m": 0.5,
+  "vypis_max": 20,
+  "strop_m": 3.5
+ },
+ "spoje": {
+  "_popis": "tools/kontrola_spoju.py (Puchart kontrola_spoju): zábradlí spojité (mezera mezi kusy zábradlí po délce do max_mezera_m) a ploty navazují (konce plotů do max_mezera_m od jiného plotu, sloupu nebo zdi).",
+  "zabradli": [
+   "Zabr",
+   "Zabradli"
+  ],
+  "ploty": [
+   "Plot"
+  ],
+  "max_mezera_m": 0.15
+ },
+ "dobra_verze": {
+  "_popis": "tools/posledni_dobra.py (Puchart): po průchodu hlídačů se uloží výsledky a commit do build/dobra_verze.json (a kopie pravidla/dobra_verze.json při --zapis); při neprůchodu se vypíše, co bylo v dobré verzi OK a teď ne + git diff.",
+  "soubor": "pravidla/dobra_verze.json"
+ }
 }
