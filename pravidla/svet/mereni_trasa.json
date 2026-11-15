@@ -253,8 +253,13 @@
  ],
  "varianty": [
   "",
-  "bez_vnitrku_vsi",
-  "dest",
+  "diag_plny",
+  "bez_stropu_koster",
+  "modif_pripojene",
+  "postavy_daleko",
+  "louka_bez_stinu",
+  "louka_puchart",
+  "stin_filtr_1",
   ""
  ],
  "samo_na_tabletu": false,
@@ -277,5 +282,22 @@
  "_varianty_13_11b": "0.999991 (13. 11. 14:56): bez sukne / bez uchopu / bez modifikatoru = vse (modifikatory nejsou cena); bez postav -8..-11 ms. Dalsi izolace: bez_animace (AnimationPlayer postav stoji, kostra se neprepocitava) a chuze_lod (jdouci postavy opet usporna animace, pred fe4e4039)",
  "_varianty_13_11c": "0.999993: bez postav -7..-9 ms (3/4 behy), bez animace/modifikatoru nepomaha; PC: stare modely z 0.99998 stoji stejne jako nove. Rozdeleni: postavy_skryte (neviditelne, logika bezi) x postavy_stoji (viditelne, Lide bez zpracovani)",
  "_varianty_14_11": "14. 11. (0.999996: ves-dvory 2,4 s u usedlosti 6, skripty 11, fyzika 2): postavy_stoji → bez_vnitrku_vsi (izolovaný test podezření „první vykreslení vnitřku domů“; postavy ve vsi ověřeny 0.999995)",
- "_useky_14_11": "Míša 14. 11. („všechny modely jsou těžké, bude to v pohodě se sekáním?“): úsek krcma-kovarna – od zatáčky návsi podél krčmy do L (172 tis. troj.) ke kovárně na konci ulice"
+ "_useky_14_11": "Míša 14. 11. („všechny modely jsou těžké, bude to v pohodě se sekáním?“): úsek krcma-kovarna – od zatáčky návsi podél krčmy do L (172 tis. troj.) ke kovárně na konci ulice",
+ "lehky_monitor": {
+  "zapnuto": true,
+  "popisek_s": 1.0,
+  "_pozn": "15. 11. (Misa „monitor mereni dost bere“, docs/rozpracovane/vykon_postavy_puchart_15_11.md bod 1): behem trasy diag.lehky - radek diag.log a PSS jen na hranici useku (po mereni), node_added jen citac, „pod křížem“ vypnuto, popisek trasy nejvys 1x za popisek_s. Odebira jen rezii mereni; varianta diag_plny = drivejsi plny monitor (rozdil = cena monitoru)."
+ },
+ "varianty_parametry": {
+  "louka_puchart": {
+   "krok_m": 0.5,
+   "od_m": 14.0,
+   "do_m": 60.0
+  },
+  "stin_filtr_1": {
+   "kvalita": 1
+  },
+  "_pozn": "15. 11. parametry variant: louka_puchart = louka jako Puchart (trs 0,5 m, plna do 14 m, ridne do 60 m; louka.nastav_puchart), stin_filtr_1 = RenderingServer.directional_soft_shadow_filter_set_quality (Compatibility: >= 2 PCF 5 vzorku, 1 = jeden vzorek; rasterizer_scene_gles3.cpp:3331)"
+ },
+ "_varianty_15_11": "15. 11. (docs/rozpracovane/vykon_postavy_puchart_15_11.md, body 1, 2, 4, 5, 6, 8): vse = nove vychozi (lehky monitor, strop kroku animace postavy.json anim_strop_snimek 8, modifikatory odpojene od kostry u postav bez zapnuteho modifikatoru - modif_odpojit); diag_plny = drivejsi plny monitor; bez_stropu_koster = bez stropu (drive); modif_pripojene = modifikatory stale na kostre (drive); postavy_daleko = za 45 m bez animace, dohled 50 m (jen varianta); louka_bez_stinu = trava bez stinoveho pruchodu slunce (bunky stin nevrhaji uz drive); louka_puchart = trs 0,5 m, plna do 14 m, do 60 m; stin_filtr_1 = filtr stinu slunce 2 -> 1; vse znovu = teplo. bez_vnitrku_vsi a dest z kodu nezmizely (vratit do seznamu podle potreby). Vse NEOVERENO NA ZARIZENI."
 }

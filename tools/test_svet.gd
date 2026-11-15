@@ -8610,10 +8610,30 @@ func _postavy_modif() -> void:
 	await main.fast_travel(Vector3(-58.0, 0.0, 918.0), Vector3(-66.0, 1.6, 926.0), 0.0, "test")
 	var mm: Dictionary = Pravidla.cti("postavy", "modif_max")
 	var nejvic := [0, 0, 0]
+	# 15. 11. (body 2 a 4): strop kroku animace za snimek; odpojene modifikatory (mimo kostru) nesmi byt zapnute a zapnuty
+	# modifikator musi byt na kostre
+	var strop := int(Pravidla.cti("postavy", "anim_strop_snimek"))
+	var kroku_max := 0
+	var odpoj_max := 0
+	var chyby_k: Array = []
 	for i in 240:
+		var k0 := int(li.get("anim_kroku"))
 		await get_tree().process_frame
+		kroku_max = maxi(kroku_max, int(li.get("anim_kroku")) - k0)
+		odpoj_max = maxi(odpoj_max, int(li.get("modif_odpojeno")))
 		var n := [0, 0, 0]
 		for c: Dictionary in li.get("_lide"):
+			var mods: Array = (c.get("hlava_mod", []) as Array).duplicate()
+			for kk: String in ["nohy_ik", "sukne_ridic", "sukne"]:
+				if c.has(kk) and is_instance_valid(c[kk]):
+					mods.append(c[kk])
+			if (c["ruce"] as Dictionary).has("mod"):
+				mods.append(c["ruce"]["mod"])
+			for md: SkeletonModifier3D in mods:
+				if md.active and md.get_parent() != c["kostra"] and chyby_k.size() < 5:
+					chyby_k.append("%s: zapnuty %s mimo kostru" % [c["id"], md.name])
+				if c.has("modif_pryc") and md.get_parent() != null and chyby_k.size() < 5:
+					chyby_k.append("%s: odpojena, ale %s na kostre" % [c["id"], md.name])
 			if c.has("sukne_ridic") and is_instance_valid(c["sukne_ridic"]) and (c["sukne_ridic"] as SkeletonModifier3D).active:
 				n[0] += 1
 			if c.has("sukne") and is_instance_valid(c["sukne"]) and (c["sukne"] as SkeletonModifier3D).active:
@@ -8623,8 +8643,12 @@ func _postavy_modif() -> void:
 		for k in 3:
 			nejvic[k] = maxi(nejvic[k], n[k])
 	var ok: bool = nejvic[0] <= int(mm["sukne"]) and nejvic[1] <= int(mm["sukne"]) and nejvic[2] <= 2 * int(mm["hlava"])
-	_vysledek("postavy_modif", ok, "nejvic aktivnich: ridic sukne %d, pruzina %d, LookAt %d (meze %d / %d / %d), postav %d" % [nejvic[0], nejvic[1], nejvic[2],
-			int(mm["sukne"]), int(mm["sukne"]), 2 * int(mm["hlava"]), (li.get("_lide") as Array).size()])
+	ok = ok and chyby_k.is_empty() and (strop <= 0 or kroku_max <= strop)
+	if bool(Pravidla.cti("postavy", "modif_odpojit")["zapnuto"]) and odpoj_max == 0:
+		ok = false
+		chyby_k.append("zadna postava nema modifikatory odpojene")
+	_vysledek("postavy_modif", ok, "nejvic aktivnich: ridic sukne %d, pruzina %d, LookAt %d (meze %d / %d / %d), postav %d; kroku animace za snimek max %d (strop %d), odlozeno %d, odpojenych koster max %d %s" % [nejvic[0], nejvic[1], nejvic[2],
+			int(mm["sukne"]), int(mm["sukne"]), 2 * int(mm["hlava"]), (li.get("_lide") as Array).size(), kroku_max, strop, int(li.get("anim_odlozeno")), odpoj_max, str(chyby_k)])
 
 
 ## Generalni kontrola sveta (Misa 14. 11.: „jestli nemame nekde neco, co spolu koliduje a dela zbytecne zaseky nebo
