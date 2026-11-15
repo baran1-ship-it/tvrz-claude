@@ -1394,3 +1394,4 @@ Hotovo v kódu a datech (testy u každého):
 - Brána exportu chce ≥ 1000 MB volna; vydání potřebuje navíc ~3× velikost přestavěných balíků (data + git + dočasné) – rezerva: `/root/.rustup` (624 MB, projekt ho nepoužívá).
 - Testy přes `beh.sh testy` mají hlídače `TVRZ_TEST_LIMIT` (výchozí 300 s); se stavbou světa 150 s a testem `prochod` nestačí – pro sadu s `prochod` dávat `TVRZ_TEST_LIMIT=1200`.
 - Z nezávislé kontroly 15. 11.: „na skále“ (okraj, pata, nad terénem) je `pasma.dosednuti.na_skale` pro `_usad_skaly` i `_pesiny_volne`; poznámka `_kolize_rampy` aktualizovaná; odloženo: nábytek chýší na terénu bere výšku jen ze středu kusu.
+- Výstupy exportu (vč. `modely/ves/zesvetleno.json`) nikdy ručně – brána vydání (otisk) to správně zastaví; oprava pravidla → nový export.
