@@ -1735,6 +1735,13 @@ func _stavby_na_zemi() -> void:
 				# dum: podezdivka -0,45..podlaha; chyse prkenna: zidka 0..0,5 (do svahu zapustena); kurova: kuly 0,29 v zemi
 				var dno := -0.45 if d["m"].has("ix") else (-0.03 if pod > 0.2 else -0.28)
 				var vrch := pod - 0.02 if d["m"].has("ix") else (0.47 if pod > 0.2 else 0.16)
+				# chyse na terenu (lokace lom_chyse na_terenu, Misa 14. 11.): podezdivka v zemi, teren u zdi na urovni prahu
+				# (pod - teren_pod_prahem_m) +- prechod terenu (hruba sit, svah)
+				var lch: Dictionary = Pravidla.cti("lokace", "lom_chyse")
+				if bool(lch.get("na_terenu", false)) and String(d["typ"]) == String(lch["typ"]):
+					var prah := pod - float(lch["teren_pod_prahem_m"])
+					dno = prah - 0.25
+					vrch = prah + 0.2
 				if nad < dno or nad > vrch:
 					spatne.append("%s_%d (%.0f,%.0f) teren %+.2f" % [d["typ"], d["k"], w.x, w.z, nad])
 	_vysledek("stavby_na_zemi", spatne.is_empty() and n > 0, "%d bodu u %d staveb, spatne %d %s" % [n, sv._domy.size(), spatne.size(), str(spatne.slice(0, 6))])
