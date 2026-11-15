@@ -1,7 +1,7 @@
 extends Node
 ## Test ohňů (Míša 15. 11., chyby.md 274): PUCHART_SKRIPT=res://scripts/test_ohne.gd – počet ohňů z dat, světla v rozpočtu
 ## (u krčmy: nejvýš svetel_max, žádné se stínem), zapnutí / vypnutí jednoho ohně (plamen, světlo); hrad A (koren Hrad): černá
-## kuchyně hoří v 6:00 a 17:00, ne ve 14:00 a 22:00 (hori casy), kamna v noci (22:00), ne ve 14:00; u kuchyně hradu nejvýš
+## kuchyně hoří celý den (hori vzdy, Míša 15. 11.), kamna v noci (22:00), ne ve 14:00; u kuchyně hradu nejvýš
 ## svetel_max světel ohňů a nejvýš svetel_objekt_max světel celkem (Compatibility: 8 na objekt). Výpis OHNE_TEST … OK / CHYBA.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # hlavní nabídka pozastaví strom
@@ -44,7 +44,7 @@ func _ready() -> void:
 	if ik < 0 or ia < 0: chyby.append("hrad: kuchyně %d / kamna %d nenalezena (značky HradA_Ohen_* pod uzlem Hrad)" % [ik, ia])
 	else:
 		var ok_k: Dictionary = oh.ohne[ik]; var ok_a: Dictionary = oh.ohne[ia]
-		for hc: Array in [[6.0, true, true], [14.0, false, false], [17.0, true, true], [22.0, false, true]]:
+		for hc: Array in [[6.0, true, true], [14.0, true, false], [17.0, true, true], [22.0, true, true]]   # Míša 15. 11.: kuchyně hradu hoří celý den (hori vzdy):
 			oh._noc(false, float(hc[0]))
 			print("OHNE_TEST hrad %02d:00 kuchyně hoří %s, kamna hoří %s" % [int(hc[0]), ok_k["hori"], ok_a["hori"]])
 			if bool(ok_k["hori"]) != bool(hc[1]): chyby.append("kuchyně hradu v %s h hoří %s (čekám %s)" % [hc[0], ok_k["hori"], hc[1]])

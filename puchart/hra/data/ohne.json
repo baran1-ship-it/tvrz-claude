@@ -73,7 +73,7 @@
   {"id": "dum_pec", "nazev": "pec v domě", "pec_kolize": "Dum1_Kol_Pec", "druh": "pec", "hori": "noc"},
   {"id": "dum_pec", "nazev": "pec v domě", "pec_kolize": "Dum2_Kol_Pec", "druh": "pec", "hori": "noc"},
   {"id": "rychta_pec", "nazev": "pec na rychtě", "pec_kolize": "Rychta_Kol_Pec", "druh": "pec", "hori": "noc"},
-  {"id": "hradA_kuchyne", "nazev": "oheň v černé kuchyni hradu", "uzel": "HradA_Ohen_Kuchyne", "koren": "Hrad", "druh": "ohniste", "hori": "casy", "hodiny": [[5.0, 13.5], [16.0, 21.0]], "zdroj": "Havran docs/rozpracovane/choreografie_postav.md (kuchařka: 5–9 vaří snídani, 10–13:30 oběd, 16–21 večeři) – oheň v černé kuchyni ráno až po oběd a večer; mimo tyto hodiny vyhaslý (pokud ho hráč nezapálí)"},
+  {"id": "hradA_kuchyne", "nazev": "oheň v černé kuchyni hradu", "uzel": "HradA_Ohen_Kuchyne", "koren": "Hrad", "druh": "ohniste", "hori": "vzdy", "hori_pozn": "Míša 15. 11.: „kuchyně hoří celý den, ať je světlo“ (dřív casy 5–13:30 a 16–21 podle rozvrhu kuchařky)", "zdroj": "Havran docs/rozpracovane/choreografie_postav.md (kuchařka: 5–9 vaří snídani, 10–13:30 oběd, 16–21 večeři) – oheň v černé kuchyni ráno až po oběd a večer; mimo tyto hodiny vyhaslý (pokud ho hráč nezapálí)"},
   {"id": "hradA_kamna", "nazev": "kachlová kamna ve světnici hradu", "uzel": "HradA_Ohen_Kamna", "koren": "Hrad", "druh": "kamna", "hori": "noc", "zdroj": "Havran scripts/life.gd _build_fires (krb hearth: hoří, hráč může zapálit/přiložit) + domy_noc (večer a v noci); topí se k večeru"}
  ]
 }
