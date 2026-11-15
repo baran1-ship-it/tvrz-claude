@@ -12,6 +12,7 @@ var kruhy: Control          # Běh a Let vpravo dole (Havran hud.gd)
 var mapa: CanvasLayer
 var dvere: Node
 var zebriky: Node            # žebříky (zebriky.gd): Lézt nahoru / Slézt dolů
+var lavice: Node             # lavice z modelů staveb (lavice.gd): Sednout si / Vstát
 var menu: CanvasLayer       # menu.gd: úvod + pauza
 var menu_hrace: CanvasLayer   # Havranovo menu hráče (hv_most.gd)
 var hv: Node                  # propojka na Havranovy skripty: předměty, dovednosti, menu hráče, režim hry
@@ -54,14 +55,25 @@ func _process(_d: float) -> void:   # Havranovo menu se zavírá samo (B, dotyk)
 	if nabidka: nabidka.visible = not _mh_otevreno   # horní lišta (Brašna, Nabídka) přes Havranovo menu neprosvítá
 	if kruhy: kruhy.visible = not _mh_otevreno
 
-func pouzij() -> void:   # A: vrata a dveře na dosah, žebřík (bližší z obou)
-	var zb: Dictionary = zebriky._blizko if zebriky else {}
+func pouzij() -> void:   # A: vsedě vstát; jinak nejbližší z dveří a vrat, žebříku, ohně a lavice (každý jen zaměřený – zamer.gd)
+	if hrac.seated: hrac.stand_up(); return
+	var oko := hrac.global_position + Vector3(0, 1.0, 0)
+	var nej := ""; var nd := 1e9
 	if dvere and dvere._blizko != "":
-		var dd: float = (hrac.global_position + Vector3(0, 1.0, 0)).distance_to(dvere.mista[dvere._blizko])
-		if zb.is_empty() or dd <= float(zb["d"]): dvere.prepni(dvere._blizko); return
-	if not zb.is_empty(): zebriky.pouzij(); return
+		nd = oko.distance_to(dvere.mista[dvere._blizko]); nej = "dvere"
+	var zb: Dictionary = zebriky._blizko if zebriky else {}
+	if not zb.is_empty() and float(zb["d"]) < nd: nd = float(zb["d"]); nej = "zebrik"
 	var oh: Node = hlavni.get_node_or_null("Ohne")   # oheň na dosah (ohne.gd): Zapálit / Uhasit
-	if oh and int(oh._blizko) >= 0: oh.pouzij()
+	if oh and int(oh._blizko) >= 0:
+		var od: float = hrac.cam.global_position.distance_to(oh.ohne[int(oh._blizko)]["zaklad"])
+		if od < nd: nd = od; nej = "ohen"
+	var lv: Dictionary = lavice._blizko if lavice else {}
+	if not lv.is_empty() and float(lv["d"]) < nd: nd = float(lv["d"]); nej = "lavice"
+	match nej:
+		"dvere": dvere.prepni(dvere._blizko)
+		"zebrik": zebriky.pouzij()
+		"ohen": oh.pouzij()
+		"lavice": lavice.pouzij()
 
 func zacni(h: Node, p: CharacterBody3D) -> void:
 	hlavni = h; hrac = p
@@ -70,6 +82,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 		_obraz_volby = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json"))["obraz_3d"]["volby"]
 	var dv: Node = load("res://scripts/dvere.gd").new(); dv.name = "Dvere"; add_child(dv); dv.zacni(h, self); dvere = dv   # vrata a dveře
 	var zbr: Node = load("res://scripts/zebriky.gd").new(); zbr.name = "Zebriky"; add_child(zbr); zbr.zacni(h, self); zebriky = zbr   # žebříky (hájovna)
+	var lvc: Node = load("res://scripts/lavice.gd").new(); lvc.name = "Lavice"; add_child(lvc); lvc.zacni(h, self); lavice = lvc   # lavice z modelů domů a hájovny
 	# tečka uprostřed obrazovky (KCD; Míša 15. 11.: „na interaktivní věc musí být umístěn kurzor“ – zamer.gd míří středem)
 	var tk := ColorRect.new(); tk.name = "Tecka"; tk.color = Color(1, 1, 1, 0.55); tk.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tk.anchor_left = 0.5; tk.anchor_right = 0.5; tk.anchor_top = 0.5; tk.anchor_bottom = 0.5

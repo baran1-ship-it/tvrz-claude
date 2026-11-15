@@ -9,9 +9,35 @@ var cam: Camera3D
 var _yaw := 0.0
 var yaw: float:   # Havranovy předměty (pokládání v pískovišti) čtou player.yaw
 	get: return _yaw
-var seated := false
 var vydrz_max := 100.0
-func stand_up() -> void: seated = false
+# sezení (Havran player.gd sit/stand_up; Míša 15. 11.: „ať jsou lavičky funkční“ – lavice.gd, predmety.gd): postava připoutaná
+# k sedu bez kolize a gravitace, kamera plynule na výšku očí vsedě, pohyb páčkou/WASD/dotykem nebo „Vstát“ (A) = vstát
+# a postavit se na volné místo (postav_na_volne). Čísla hrac.json sezeni.
+var seated := false
+var _sed_p := Vector3.ZERO
+var _vstat_p := Vector3.ZERO
+var _sed_oci := 0.78
+var _oci_stoj := 1.65          # výška kamery vestoje (hlavni.gd: Kamera y) – přečte se v _ready
+## Sednout (Havran player.sit): p = bod sedu (poloha postavy), eye_h = oči nad p, stand_p = kam vstát, face_yaw = pohled.
+func sit(p: Vector3, eye_h: float, stand_p: Vector3, face_yaw: float, look_pitch := 0.0) -> void:
+	if leti: prepni_let()
+	if leze: _konec_lezeni(Vector3.INF)
+	seated = true
+	_sed_p = p; _vstat_p = stand_p; _sed_oci = eye_h
+	autopilot = Vector3.INF; _pohyb = Vector2.ZERO; _tah_pohyb = -1
+	if _col: _col.disabled = true
+	global_position = p; velocity = Vector3.ZERO
+	_yaw = face_yaw; _pitch = look_pitch
+	rotation.y = _yaw; cam.rotation.x = _pitch
+	reset_physics_interpolation()
+## Vstát (Havran player.stand_up): kolize zpět, postavit na volné místo u stand_p, kamera zpět na výšku vestoje.
+func stand_up() -> void:
+	if not seated: return
+	seated = false
+	if _col: _col.disabled = false
+	postav_na_volne(_vstat_p)
+	velocity = Vector3.ZERO; _pitch = 0.0
+	reset_physics_interpolation()
 ## natočí postavu a kameru na bod (testy zaměření – zamer.gd)
 func pohled_na(cil: Vector3) -> void:
 	var d := cil - cam.global_position
@@ -38,6 +64,7 @@ var _col: CollisionShape3D
 
 func _ready() -> void:
 	cam = $Kamera
+	_oci_stoj = cam.position.y
 	_yaw = rotation.y
 	for c in get_children():
 		if c is CollisionShape3D: _col = c; break
@@ -83,6 +110,7 @@ func _packa(ax: JoyAxis, ay: JoyAxis) -> Vector2:
 	return v / m * minf(1.0, (m - 0.16) / 0.84)
 
 func prepni_let() -> void:
+	if seated: stand_up()
 	if leze: _konec_lezeni(Vector3.INF)
 	leti = not leti
 	collision_layer = 0 if leti else 1; collision_mask = 0 if leti else 1
@@ -104,6 +132,13 @@ func _physics_process(dt: float) -> void:
 	if Input.is_key_pressed(KEY_S): v.z += 1
 	if Input.is_key_pressed(KEY_A): v.x -= 1
 	if Input.is_key_pressed(KEY_D): v.x += 1
+	var oci := _sed_oci if seated else _oci_stoj   # kamera plynule vsedě / vestoje (Havran _eye_y lerp)
+	if absf(cam.position.y - oci) > 0.001:
+		cam.position.y = lerpf(cam.position.y, oci, minf(1.0, dt * float(Pravidla.cti("hrac", "sezeni", "rychlost_kamery"))))
+	if seated:   # Havran _fyz_krok: vsedě jen rozhled, pohyb = vstát
+		global_position = _sed_p; velocity = Vector3.ZERO
+		if v.length() > float(Pravidla.cti("hrac", "sezeni", "pohyb_vstat")): stand_up()
+		return
 	if leze:
 		_lez(dt, v)
 		return
@@ -130,6 +165,7 @@ func _physics_process(dt: float) -> void:
 
 ## Chytit se žebříku (Havran player.climb): zb {pata, vrchol, nastup, sestup} ve světě; nahore = začít od vrcholu (slézání).
 func chyt_zebrik(zb: Dictionary, nahore: bool) -> void:
+	if seated: stand_up()
 	if leti: prepni_let()
 	var lz: Dictionary = Pravidla.cti("hrac", "lezeni")
 	_zb = zb

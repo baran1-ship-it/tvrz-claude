@@ -12,6 +12,8 @@ const Denik := preload("res://scripts/denik.gd")   # deník běhu: poslední kro
 
 var svet: Node3D
 var hrac: CharacterBody3D
+var lavice: Array = []    # místa k sezení na lavicích z modelů staveb (_mista/_celek → lavice.gd mista; prochazka.gd nabídka „Sednout si“)
+var _lavice_vzor := ""    # mista_stavby.json modely.lavice.uzel_vzor – kolizní uzly lavic v modelech
 var zebriky: Array = []   # žebříky ve světě {pata, vrchol, nastup, sestup, nazev} (_celek ze záznamu zebrik; zebriky.gd, hrac.chyt_zebrik)
 var _foto := ""
 var _snimek := 0
@@ -640,6 +642,7 @@ func _vzory_bunek() -> Array:
 func _mista() -> void:
 	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mista_stavby.json"))
 	var md: Dictionary = d["modely"]["domy"]
+	_lavice_vzor = String((d["modely"].get("lavice", {}) as Dictionary).get("uzel_vzor", ""))
 	if (d["stavby"] as Array).is_empty() or not ResourceLoader.exists(String(md["soubor"])): return
 	var lod: Dictionary = md.get("lod", {"podrobny_do_m": 30.0, "stredni_do_m": 130.0, "stredni_do_m_mobil": 75.0, "vnitrek_do_m": 35.0, "lod_bias": 50.0})
 	var blizko := float(lod["podrobny_do_m"]); var st_do := float(lod["stredni_do_m_mobil" if OS.has_feature("mobile") else "stredni_do_m"])
@@ -658,6 +661,7 @@ func _mista() -> void:
 		dum.name = "%s_%s_%d" % [s["misto"], s["model"], uzel.get_child_count()]   # jedinečné jméno instance: skupina dveří dvere.gd = dveře@dům
 		dum.transform = Transform3D(Basis(Vector3.UP, float(s["yaw"])), Vector3(float(s["x"]), float(s["teren_y"]), float(s["z"])))
 		uzel.add_child(dum)
+		if _lavice_vzor != "": lavice.append_array(load("res://scripts/lavice.gd").mista(dum, _lavice_vzor))   # lavice z modelu (Míša 15. 11.)
 		_rampy_dveri(dum)
 		_ztlum(dum, float(md.get("jas_podrobny", 1.0)), jas_cache)   # Míša 14. 11.: „domy… až moc vypadají bílé“
 		var zbd: Array = (md.get("zebriky", {}) as Dictionary).get(String(s["model"]), [])
@@ -781,6 +785,7 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas:
 	var b := Basis(Vector3.UP, float(s["yaw"]))
 	n.transform = Transform3D(b, Vector3(float(s["x"]), float(s["teren_y"]), float(s["z"])) + b * Vector3(float(s.get("posun_x", 0.0)), 0, 0))
 	uzel.add_child(n)
+	if _lavice_vzor != "": lavice.append_array(load("res://scripts/lavice.gd").mista(n, _lavice_vzor))   # lavice z modelu (hájovna)
 	var od1 := float(s["lod1_od_m"]) if s.get("lod1_od_m") != null else 60.0
 	for g in n.find_children("*", "GeometryInstance3D", true, false):
 		(g as GeometryInstance3D).visibility_range_end = od1 + 5.0

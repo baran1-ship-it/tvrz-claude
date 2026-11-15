@@ -2,6 +2,7 @@ extends Node
 ## Test průchodu hradem (PUCHART_TEST=pruchod): postava sama projde trasy z data/pruchody.json (generuje je stavitel
 ## hradu ze stejné geometrie) – mosty, brány, nádvoří, schody, ochozy, věže. U každého bodu musí být do 0,6 m
 ## vodorovně (nebo podle 4. čísla bodu) a ve výšce podlahy (±0,5 m); když 3 s nepostoupí o 5 cm, uvízla. Výsledek: stdout + user://pruchod.json.
+const Pravidla := preload("res://scripts/pravidla.gd")
 var hlavni: Node
 var hrac: CharacterBody3D
 var trasy: Dictionary
@@ -349,6 +350,47 @@ func _test_zebriky() -> void:
 	vysledek["zebrik_lezeni"] = "OK" if spatne.is_empty() and not zbs.is_empty() else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádný žebřík v datech")
 	print("PRUCHOD zebrik_lezeni ", vysledek["zebrik_lezeni"])
 
+## lavice_sezeni (Míša 15. 11.: „u modelů domů jsou někdy součástí modelu lavičky, tak ať jsou taky funkční“): pro každé místo
+## k sezení z hlavni.lavice (lavice.gd z kolizí modelů) hráč stojí před lavicí, dívá se na místo – nabídka „Sednout si“ musí být
+## (lavice.gd nejblizsi se zaměřením), sedne (seated, kamera oci_nad_sedu_m nad sedem ±0,05 m), pohne páčkou – vstane, stojí
+## na podlaze (is_on_floor, ±0,5 m od podlahy lavice) a kapsle nikde nenarazí.
+func _test_lavice() -> void:
+	var L: GDScript = load("res://scripts/lavice.gd")
+	var spatne: Array = []
+	var mista_: Array = hlavni.lavice
+	var oci := float(Pravidla.cti("hrac", "sezeni", "oci_nad_sedu_m"))
+	var lavic := {}
+	for m: Dictionary in mista_:
+		lavic[m["lavice"]] = true
+		var jm := "%s [%.1f, %.1f]" % [m["lavice"], (m["pos"] as Vector3).x, (m["pos"] as Vector3).z]
+		var stoj: Vector3 = m["vstat"]
+		hlavni.svet.kolize_ihned(stoj)
+		hrac.autopilot = Vector3.INF; hrac.velocity = Vector3.ZERO
+		hrac.postav_na_volne(stoj + Vector3(0, 0.05, 0))
+		for i in 20: await get_tree().physics_frame
+		hrac.pohled_na(m["pos"]); await get_tree().physics_frame
+		var u: Dictionary = L.nejblizsi(mista_, hrac.global_position, hrac.cam)
+		if u.is_empty() or (u["m"] as Dictionary)["lavice"] != m["lavice"]:
+			spatne.append("%s: není nabídka Sednout si (hráč [%.2f, %.2f, %.2f])" % [jm, hrac.position.x, hrac.position.z, hrac.position.y]); continue
+		L.sedni(hrac, u["m"])
+		for i in 60: await get_tree().physics_frame
+		var sed: Vector3 = (u["m"] as Dictionary)["pos"]
+		var vk: float = hrac.cam.global_position.y - sed.y
+		if not hrac.seated or absf(vk - oci) > 0.05 or Vector2(hrac.position.x - sed.x, hrac.position.z - sed.z).length() > 0.05:
+			spatne.append("%s: nesedí (seated %s, oči %.2f m nad sedem)" % [jm, hrac.seated, vk]); hrac.stand_up(); continue
+		hrac._pohyb = Vector2(0, -1.0)   # páčka = vstát (Havran)
+		for i in 3: await get_tree().physics_frame
+		hrac._pohyb = Vector2.ZERO
+		for i in 40: await get_tree().physics_frame
+		var q := PhysicsShapeQueryParameters3D.new(); q.shape = hrac._col.shape; q.exclude = [hrac.get_rid()]
+		q.transform = Transform3D(Basis(), hrac.global_position + hrac._col.position + Vector3(0, 0.02, 0))
+		var v_kolizi: bool = not hrac.get_world_3d().direct_space_state.intersect_shape(q, 1).is_empty()
+		var ok: bool = not hrac.seated and hrac.is_on_floor() and not v_kolizi and absf(hrac.position.y - stoj.y) < 0.5
+		print("PRUCHOD lavice %s: oči %.2f, vstal [%.2f, %.2f, %.2f], na zemi %s, v kolizi %s -> %s" % [jm, vk, hrac.position.x, hrac.position.z, hrac.position.y, hrac.is_on_floor(), v_kolizi, "OK" if ok else "CHYBA"])
+		if not ok: spatne.append("%s: po vstání seated %s, na zemi %s, v kolizi %s, y %.2f (podlaha %.2f)" % [jm, hrac.seated, hrac.is_on_floor(), v_kolizi, hrac.position.y, stoj.y])
+	vysledek["lavice_sezeni"] = "OK" if spatne.is_empty() and not mista_.is_empty() else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádná lavice v modelech")
+	print("PRUCHOD lavice_sezeni ", vysledek["lavice_sezeni"], " (lavic %d, míst %d)" % [lavic.size(), mista_.size()])
+
 func _chyba(t: String) -> void:
 	for i in hrac.get_slide_collision_count():
 		var c := hrac.get_slide_collision(i)
@@ -363,6 +405,7 @@ func _konec() -> void:
 	if jen == "" or "vrata" in jen: await _test_vrata()
 	if jen == "" or "mapa" in jen: await _test_mapa()
 	if jen == "" or "zebrik" in jen: await _test_zebriky()
+	if jen == "" or "lavice" in jen: await _test_lavice()
 	hrac.autopilot = Vector3.INF
 	var f := FileAccess.open(OS.get_environment("PUCHART_VYSTUP") if OS.has_environment("PUCHART_VYSTUP") else "user://pruchod.json", FileAccess.WRITE); f.store_string(JSON.stringify(vysledek, " "))
 	var ok := vysledek.values().all(func(v): return v == "OK")
