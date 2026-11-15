@@ -3445,8 +3445,8 @@ func pod_strechou_tvrze(x: float, z: float) -> bool:
 func pod_strechou(p: Vector3) -> bool:
 	if pod_strechou_tvrze(p.x, p.z) or v_dome(p) >= 0:
 		return true
-	for st: Array in _uvnitr:
-		if st.size() > 2:
+	for st: Array in _uvnitr + _kryti:
+		if st.size() > 2 or st in _uvnitr_bez_strechy:
 			continue
 		var q: Vector3 = (st[0] as Transform3D) * Vector3(p.x, 0.0, p.z)
 		var b: AABB = st[1]
@@ -10902,6 +10902,10 @@ var _st_ch: Array[PackedFloat32Array] = []
 var _st_n := Vector2i.ZERO
 var _kolize_body: StaticBody3D
 var _uvnitr: Array = []
+## Misa 15. 11. (dest na dvore krcmy nebyl): pudorys dilu pro travu (_uvnitr, cely model i s dvorem) neni strecha. Dil s
+## lokace kryti_lok ma kryti jen z techto obdelniku [x0, z0, x1, z1 modelu]; pod_strechou jeho pudorys v _uvnitr preskoci.
+var _kryti: Array = []          # [inverze dilu, AABB strechy]
+var _uvnitr_bez_strechy: Array = []    # zaznamy _uvnitr, ktere nejsou strecha (dil s kryti_lok)
 var _stat := {}
 var stan_rect := Rect2()
 
@@ -13557,6 +13561,8 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_nacti_kryti()
 	_cesta_do_kryti()
 	# Misa 14. 11.: kovarna a krcma do L (dily z Disku) - pudorys modelu jako staticke stavby (krcma i s dvorem)
+	_kryti.clear()
+	_uvnitr_bez_strechy.clear()
 	var dily_staveb: Array = parent.find_children("Staticky_*", "Node3D", true, false)
 	for jd: String in ["Kovarna_dil", "Krcma_dil"]:
 		var nd0 := parent.find_child(jd, true, false)
@@ -13570,7 +13576,15 @@ func _plants(parent: Node3D, quality: int) -> void:
 			bb = b if prvni else bb.merge(b)
 			prvni = false
 		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
-			uvnitr.append([(n as Node3D).global_transform.affine_inverse(), bb.grow(-0.1)])
+			var inv_d := (n as Node3D).global_transform.affine_inverse()
+			uvnitr.append([inv_d, bb.grow(-0.1)])
+			var lok_d := {"Krcma_dil": "krcma_l", "Kovarna_dil": "kovarna_ves"}.get(String(n.name), "")
+			var kryti_d: Array = Pravidla.cti("lokace", lok_d).get("kryti_lok", []) if lok_d != "" else []
+			if not kryti_d.is_empty():
+				_uvnitr_bez_strechy.append(uvnitr[-1])
+				for kr4: Array in kryti_d:
+					_kryti.append([inv_d, AABB(Vector3(float(kr4[0]), -50.0, float(kr4[1])),
+							Vector3(float(kr4[2]) - float(kr4[0]), 100.0, float(kr4[3]) - float(kr4[1])))])
 	# dil mlyna (vlastni teren, dvur, budova): zadna trava ani rozsev uvnitr ctverce dilu (jako budova)
 	if _mlyn_inv != Transform3D():
 		uvnitr.append([_mlyn_inv, AABB(Vector3(-22.0, -30.0, -25.0), Vector3(40.0, 60.0, 40.0)), "dil"])     # louka: trava z terenu dilu

@@ -275,7 +275,11 @@ def palisade(p0, p1, h=1.6):
     for zz in (0.45, h - 0.35):
         pole(DV, a + Vector((0, 0, zz)) + Vector((0, 0, 0)), b + Vector((0, 0, zz)), 0.04, key="tram_d", bend=0.02, seg=6)
 YARD_Y1 = 12.8
-palisade((X0 - 0.2, Y1 + 0.2), (X0 - 0.2, YARD_Y1)); palisade((X0 - 0.2, YARD_Y1), (PVX0 - 0.2, YARD_Y1))
+# Misa 15. 11. „pozemek me nepustil na schody k pokojum“: pata schodu (x 8,85…9,75) a zabradli (x 8,78) zaplnily mezeru
+# v zadnim plotu (x 8,4…9,8) - od konce plotu k zabradli 0,52 m < hrac 0,56 m. Plot konci o PRUCHOD_M driv nez zabradli.
+PRUCHOD_M = 1.2
+PLOT_S1_X1 = STA.x - (0.85 / 2 + 0.05) - 0.05 - PRUCHOD_M     # vnejsi lic kolize zabradli schodu (KrcmaL_Kol_ZabrSchodu) - 1,2 m
+palisade((X0 - 0.2, Y1 + 0.2), (X0 - 0.2, YARD_Y1)); palisade((X0 - 0.2, YARD_Y1), (PLOT_S1_X1, YARD_Y1))
 palisade((PVX0 + 1.2, YARD_Y1), (SX1, YARD_Y1)); palisade((SX1, YARD_Y1), (SX1, SY1 + 0.05))
 GX0, GX1 = X1 + 0.35, SX0 - 0.05                 # vrata z ulice do dvora mezi domem a křídlem
 for x in (GX0 - 0.1, GX1 + 0.1):
@@ -345,7 +349,7 @@ bpy.ops.object.transform_apply(location=False, rotation=True, scale=True); o_.hi
 bpy.ops.mesh.primitive_cube_add(size=1, location=(STA + STB) / 2 + Vector((-(0.85 / 2 + 0.05), 0, 0.55)))
 o_ = bpy.context.active_object; o_.name = "KrcmaL_Kol_ZabrSchodu-convcolonly"; o_.scale = (0.1, (STB - STA).length, 1.0); o_.rotation_euler = (-ang, 0, 0)
 bpy.ops.object.transform_apply(location=False, rotation=True, scale=True); o_.hide_render = True; KOL.append(o_)
-colbox("PlotZ", (X0 - 0.3, Y1, 0), (X0 - 0.1, YARD_Y1, 1.6)); colbox("PlotS1", (X0 - 0.3, YARD_Y1 - 0.1, 0), (PVX0 - 0.2, YARD_Y1 + 0.1, 1.6))
+colbox("PlotZ", (X0 - 0.3, Y1, 0), (X0 - 0.1, YARD_Y1, 1.6)); colbox("PlotS1", (X0 - 0.3, YARD_Y1 - 0.1, 0), (PLOT_S1_X1, YARD_Y1 + 0.1, 1.6))
 colbox("PlotS2", (PVX0 + 1.2, YARD_Y1 - 0.1, 0), (SX1, YARD_Y1 + 0.1, 1.6)); colbox("PlotV", (SX1 - 0.1, SY1, 0), (SX1 + 0.1, YARD_Y1, 1.6))
 for x in (GX0 - 0.1, GX1 + 0.1): colbox("VrataSloup%d" % len(KOL), (x - 0.12, Y0 - 0.12, 0), (x + 0.12, Y0 + 0.12, 2.9))
 for (x, y) in ((-7.4, 10.2), (-3.4, 10.2)): colbox("Kulna%d" % len(KOL), (x - 0.1, y - 0.1, 0), (x + 0.1, y + 0.1, 2.3))

@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "louka_nahravani", "potok_kaskada"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "louka_nahravani", "potok_kaskada"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -9022,6 +9022,45 @@ func _krcma_schody() -> void:
 			zab_chybi.append(pr[0])
 	ok = ok and zab_chybi.is_empty()
 	_vysledek("krcma_schody", ok, "%s; konec y %.2f, patro %.2f; bez zabradli %s" % [r[1], y_kon, patro, str(zab_chybi)])
+
+
+## Misa 15. 11. (misa_15_11_chyby.md r. 5-7): dvur krcmy nepustil ven ani ke schodum k pokojum (vynechany uzel KrcmaL_Dvur
+## vzal plot, jeho kolize zustaly; zadni plot konci 0,52 m od zabradli schodu) a na dvore neprselo (pudorys pro travu bral
+## pod_strechou jako strechu). Projde: hrac dojde ze dvora mezerou za kridlem ven na SZ louku, ze dvora na schody az na
+## patro, a pod_strechou je ne na dvore / v SZ rohu pozemku, ano v senkovne a ve stáji (mistne souradnice dilu).
+func _krcma_dvur() -> void:
+	var dil := get_tree().root.find_child("Krcma_dil", true, false) as Node3D
+	if dil == null:
+		_vysledek("krcma_dvur", false, "Krcma_dil ve scene neni")
+		return
+	var xf := dil.global_transform
+	var bod := func(x: float, z: float) -> Vector2:
+		var w := xf * Vector3(x, 0.0, z)
+		return Vector2(w.x, w.z)
+	var chyby: Array = []
+	# 1) strecha: dvur a SZ roh ne, dum a stáj ano
+	for pr: Array in [["dvur stred", 4.0, -8.0, false], ["dvur u plotu", -6.0, -6.0, false], ["dvur u staje", 7.5, -10.0, false],
+			["SZ roh pozemku", -9.5, -13.5, false], ["senkovna", -4.0, 0.0, true], ["staj", 14.0, -5.0, true], ["kulna", -5.4, -11.5, true]]:
+		var w := xf * Vector3(float(pr[1]), 0.0, float(pr[2]))
+		if bool(sv.pod_strechou(w)) != bool(pr[3]):
+			chyby.append("strecha %s: %s" % [pr[0], str(not bool(pr[3]))])
+	# 2) ze dvora ven mezerou za kridlem (konec plotu x 7,58 .. zabradli 8,78) na SZ louku
+	var b0: Vector2 = bod.call(4.0, -8.0)
+	await main.fast_travel(Vector3(b0.x, 0.0, b0.y), Vector3(b0.x, 1.6, b0.y + 2.0), 0.0, "test")
+	for i in 60:
+		await get_tree().physics_frame
+	player.set_flying(false)
+	var y0 := float(sv._teren_y(b0.x, b0.y))
+	var r: Array = await _jdi_poschodi([b0, bod.call(8.15, -11.0), bod.call(8.15, -13.4), bod.call(-6.0, -15.5)], y0, 0.3)
+	if not bool(r[0]):
+		chyby.append("ven ze dvora: %s" % r[1])
+	# 3) ze dvora na schody a na patro
+	r = await _jdi_poschodi([b0, bod.call(8.15, -11.0), bod.call(8.15, -13.4), bod.call(9.3, -13.4), bod.call(9.3, -11.6),
+			bod.call(9.3, -7.6), bod.call(10.6, -7.65)], y0, 0.3)
+	var patro := (xf * Vector3(0.0, 2.85, 0.0)).y
+	if not bool(r[0]) or player.global_position.y < patro - 0.3:
+		chyby.append("na schody: %s, y %.2f / patro %.2f" % [r[1], player.global_position.y, patro])
+	_vysledek("krcma_dvur", chyby.is_empty(), "OK" if chyby.is_empty() else "; ".join(chyby))
 
 
 ## 14. 11. (docs/rozpracovane/zaseky_rozbor_system.md F4): louka nesmi nahrat do GPU v jednom snimku vic, nez dovoli

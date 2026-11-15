@@ -2627,9 +2627,7 @@
    "krcma_vrata"
   ],
   "_lod": "nezávislá kontrola 14. 11.: LOD1 od konce plného dílu (bez prolínání = bez pásma, kde se kreslí oba); vnitřní dveře jen do interier_do_m; vrata L/P jednou skupinou",
-  "vynechat_uzly": [
-   "KrcmaL_Dvur"
-  ],
+  "vynechat_uzly": [],
   "placky_lok": [
    [
     8.0,
@@ -2637,7 +2635,7 @@
     9.5
    ]
   ],
-  "_vynechat": "Míša 14. 11. (stejně jako kovárna): model dvora (hlína v modelu) pryč, dvůr = naše udusaná hlína: plac_r_m kolem středu + placky_lok [x, z modelu, poloměr] na dvůr za domem a stájí (dvůr x 0…17, z −13…−4 modelu)",
+  "_vynechat": "Míša 14. 11. chtěla pryč hlínu dvora z modelu – uzel KrcmaL_Dvur ale hlínu nemá (krcma_L.py: plot, sloupy a stříška vrat, kůlna, vích); jeho odebráním zmizel plot, kolize Kol_Plot*/VrataSloup/Kulna zůstaly → Míša 15. 11. „neviditelné ploty“, dvůr nešel opustit. 15. 11.: nic se nevynechává (plot je vidět i má kolizi), dvůr = naše udusaná hlína (plac_r_m + placky_lok, dvůr x 0…17, z −13…−4 modelu).",
   "_dvere_vnitrni": "pokoje a nocležna mají dveře na pavlač (venku pod střechou) – viditelné ze dvora, proto ne mezi vnitřními",
   "kolize_rampy": [
    {
@@ -2656,7 +2654,28 @@
     "tloustka_m": 0.11
    }
   ],
-  "_kolize_rampy": "Misa 14. 11. „zamer se na schody, na puvodnim modelu nefungovaly“: v modelu z Disku konci schodnice v z -7,24 a podesta zacina v z -8,15 (schod 0,5 m). 15. 11. oprava ve zdroji (blender/krcma_L, schody konci na hrane podesty z -8,15, zabradli na volne strane) - rampa uz jen hladsi chuze po schodech (stejny sklon jako schodnice), test krcma_schody"
+  "_kolize_rampy": "Misa 14. 11. „zamer se na schody, na puvodnim modelu nefungovaly“: v modelu z Disku konci schodnice v z -7,24 a podesta zacina v z -8,15 (schod 0,5 m). 15. 11. oprava ve zdroji (blender/krcma_L, schody konci na hrane podesty z -8,15, zabradli na volne strane) - rampa uz jen hladsi chuze po schodech (stejny sklon jako schodnice), test krcma_schody",
+  "kryti_lok": [
+   [
+    -8.6,
+    -4.9,
+    7.6,
+    4.9
+   ],
+   [
+    8.8,
+    -11.9,
+    18.9,
+    1.9
+   ],
+   [
+    -7.9,
+    -12.9,
+    -2.9,
+    -9.7
+   ]
+  ],
+  "_kryti_lok": "Míša 15. 11. (na dvoře krčmy nepršelo): střechy v rámci modelu [x0, z0, x1, z1] – dům, křídlo se stájí a pavlačí, kůlna v rohu dvora (rozbor kolizí 15. 11.: dům x −8,6…7,6 z −4,9…4,9, křídlo x 8,8…18,9 z −11,9…1,9; kůlna x −7,7…−3,1 z −12,8…−9,8 + přesah). pod_strechou bere jen tyto obdélníky, půdorys celého modelu (i s dvorem) dál drží jen trávu."
  },
  "kovarna_tvrz": {
   "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",
