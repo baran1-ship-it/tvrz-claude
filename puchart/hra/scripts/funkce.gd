@@ -6,7 +6,7 @@ extends Node
 ## - měch kovárny (Kovarna_Paka, Kovarna_Mech, Kovarna_Paka_uchop): „Foukat měchem“ – páka a měch pumpují, výheň se rozhoří (ohne.gd)
 ## - místa spánku (Hajovna_Spani_Hrac, KrcmaL_Spani_Hrac, pryčny chýší): „Lehnout si“ – lehne si a vybere, do kdy spát (menu_hrace)
 ## - žlab (Dum2_Kol_Zlab): „Nalít vodu“ – ve žlabu se objeví hladina (shader vody potoků), zůstane
-## - jesle nad žlabem (dům najde přes Dum2_Kol_Zlab, tvar z dat): „Nasypat seno“ – v jeslích kupa sena (objem + karty stébel), zůstane
+## - jesle nad žlabem (dům najde přes Dum2_Kol_Zlab, osazení z dat): „Nasypat seno“ – v jeslích model sena (Seno_Jesle_420), zůstane
 ## - kovadlina kovárny (Kovarna_Kovadlina_misto): pevný díl s kolizí a stupni podle vzdálenosti, osadí osad_kovadliny() při startu
 ## Tlačítko ve stylu dveří (svitek) nad ostatními tlačítky, jen zaměřená věc (zamer.gd) – jako lavice.gd.
 const Pravidla := preload("res://scripts/pravidla.gd")
@@ -274,141 +274,21 @@ func nalij(p: Dictionary) -> void:
 	p["voda"] = mi
 
 
-## ---------------------------------------------------------------- jesle (kupa sena: objem po profilu jeslí + karty stébel)
-## Profil kupy v rovině (y, z) modelu domu pro parametr s 0..1: čelo za příčkami odspodu nahoru (s 0..0,5), pak vrch kupy
-## od horního břevna k roubení (s 0,5..1). Výška vrchu = kupa_m × tvar oblouku × útlum u čel × (1 + šum); čelo i vrch
-## posune šum podél normály profilu. Vrací [bod, normála profilu (bez šumu)].
-static func _jesle_bod(tv: Dictionary, x: float, s: float, sum: FastNoiseLite) -> Array:
-	var d: Array = tv["pricky_dole"]; var n: Array = tv["pricky_nahore"]
-	var x0 := float(tv["x"][0]); var x1 := float(tv["x"][1])
-	var kraj := clampf(minf(x - x0, x1 - x) / 0.25, 0.0, 1.0); kraj = kraj * kraj * (3.0 - 2.0 * kraj)   # útlum kupy k čelům jeslí (0,25 m)
-	var pricka := Vector2(float(n[0]) - float(d[0]), float(n[1]) - float(d[1]))   # (dy, dz) osy příček
-	var ven := Vector2(-pricka.y, pricka.x).normalized()                       # normála čela (do chléva: +z, dolů)
-	if ven.y < 0.0: ven = -ven
-	var pred := float(tv["pred_prickami_m"])
-	var p: Vector2; var nrm: Vector2
-	if s <= 0.5:
-		var t := s / 0.5
-		p = Vector2(float(d[0]), float(d[1])) + pricka * t - ven * pred; nrm = ven
-	else:
-		var t := (s - 0.5) / 0.5   # 0 u horního břevna → 1 u roubení
-		var top := Vector2(float(n[0]), float(n[1])) - ven * pred
-		var z := lerpf(top.y + float(tv["kupa_ven_m"]) * sin(t * PI) * 0.6, float(tv["stena_z"]), t)
-		var oblouk := sin(pow(t, 0.5) * PI) * 0.85 + t * 0.35   # vrchol blíž čelu (kupa hned za břevnem vysoko), u roubení opřená výš
-		p = Vector2(top.x + float(tv["kupa_m"]) * oblouk * (0.7 + 0.3 * kraj), z)   # u čel jen mírně nižší – placka M_Slama u krajních příček sahá do y 2,05
-		nrm = Vector2(1.0, (0.5 - t) * 1.2).normalized()
-	var a := float(tv["sum_m"]) * sum.get_noise_2d(x, s * 3.0) * (0.4 + 0.6 * kraj)
-	return [Vector3(x, p.x + nrm.x * a, p.y + nrm.y * a), Vector3(0.0, nrm.x, nrm.y)]
-
-
-## Síť kupy sena v souřadnicích modelu domu: [ArrayMesh objem, ArrayMesh stébla] (bez materiálu).
-static func jesle_site(tv: Dictionary, je: Dictionary) -> Array:
-	var si: Dictionary = je["sit"]; var stc: Dictionary = je["stebla"]
-	var sum := FastNoiseLite.new(); sum.seed = int(stc["seed"]); sum.frequency = 1.0 / float(tv["sum_vlna_m"])
-	var x0 := float(tv["x"][0]); var x1 := float(tv["x"][1])
-	var nx := maxi(2, int(ceil((x1 - x0) / float(si["delka_krok_m"])))); var ns := int(si["profil_bodu"])
-	var mrz: Array = []
-	for i in nx + 1:
-		var rad: Array = []
-		for j in ns + 1: rad.append(_jesle_bod(tv, lerpf(x0, x1, float(i) / nx), float(j) / ns, sum)[0])
-		mrz.append(rad)
-	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var uvm := float(si["uv_m"]); var ao_dole := float(stc["ao_cela_dole"])
-	var delky: Array = [0.0]
-	for j in ns: delky.append(float(delky[j]) + (mrz[0][j] as Vector3).distance_to(mrz[0][j + 1]))
-	for i in nx:
-		for j in ns:
-			var q := [[i, j], [i + 1, j + 1], [i + 1, j], [i, j], [i, j + 1], [i + 1, j + 1]]   # po směru hodinových ručiček zvenku (přední strana Godotu)
-			for ij: Array in q:
-				var v: Vector3 = mrz[ij[0]][ij[1]]
-				var s := float(ij[1]) / ns
-				st.set_color(Color.WHITE * lerpf(ao_dole, 1.0, smoothstep(0.0, 0.55, s)))   # spodek čela ve stínu koše
-				# vlákna textury natočená podle šumu (pomalé víření) – jinak „učesaná“ jedním směrem jako došek (snímek 15. 11.)
-				var uv := Vector2(v.x / uvm, float(delky[ij[1]]) / uvm)
-				st.set_uv(uv.rotated(sum.get_noise_2d(v.x * 0.3 + 40.0, (v.y + v.z) * 0.3) * PI * float(si["viri"]))); st.add_vertex(v)
-	st.generate_normals(); st.generate_tangents()
-	var objem := st.commit()
-	# --- karty stébel (2. kolo): spleť = ležící karty po povrchu ve vrstvách (krok po povrchu v parametrech x, s – karta
-	# sleduje zakřivení kupy), trsy = krátké trčící karty; buňky atlasu sloupce × řady (pata karty dole v buňce)
-	var rnd := RandomNumberGenerator.new(); rnd.seed = int(stc["seed"])
-	var ks := SurfaceTool.new(); ks.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var at: Dictionary = stc["atlas"]; var nc := int(at["sloupce"]); var nr := int(at["rady"])
-	var lprof := float(delky[ns])
-	var vr: Dictionary = stc["vrstva"]; var tr: Dictionary = stc["trsy"]
-	var pocty := [int(vr["pocet"]), int(tr["pocet"])]
-	for druh in 2:
-		var d: Dictionary = vr if druh == 0 else tr
-		var rada := int(at["rada_vrstva"] if druh == 0 else at["rada_trsy"])
-		for c in pocty[druh]:
-			var x := rnd.randf_range(x0 + 0.02, x1 - 0.02)
-			var s := pow(rnd.randf(), 0.8) * 0.5 + 0.5 if rnd.randf() < float(d["vrch_podil"]) else rnd.randf_range(0.03, 0.5)   # víc na vrchu (je vidět)
-			var L := rnd.randf_range(float(d["delka_m"][0]), float(d["delka_m"][1]))
-			var w := L * float(d["pomer"]) * rnd.randf_range(0.85, 1.2)
-			var bu := rnd.randi() % nc
-			var u0 := float(bu) / nc; var u1 := float(bu + 1) / nc
-			var v0 := float(rada) / nr; var v1 := float(rada + 1) / nr
-			var ton := rnd.randf_range(0.95, 1.05)
-			var radky: Array = []   # [bod, v, jas]
-			var bok := Vector3.ZERO; var nn := Vector3.UP
-			if druh == 0:
-				# vrstvy nad tmavým jádrem (objem): výška nad povrchem zanor_m … vrstva_m, spodní vrstvy tmavší; karta leží v tečné
-				# rovině, směr náhodný
-				var hl := pow(rnd.randf(), 0.7)
-				var pod := -(float(d["vrstva_m"]) * (1.0 - hl) + float(d["zanor_m"]))
-				var jas := lerpf(1.0, float(d["ao_spodni"]), hl)
-				var az := rnd.randf() * TAU
-				for k in 3:
-					var t := (float(k) - 1.0) * 0.5   # −0,5 … 0,5 délky (střed karty na bodě)
-					var xk := clampf(x + cos(az) * L * t, x0, x1); var sk := clampf(s + sin(az) * L * t / lprof, 0.0, 1.0)
-					var bn: Array = _jesle_bod(tv, xk, sk, sum)
-					var e := 0.004
-					var n2: Vector3 = ((_jesle_bod(tv, xk + e, sk, sum)[0] as Vector3) - (_jesle_bod(tv, xk - e, sk, sum)[0] as Vector3)).cross(
-						(_jesle_bod(tv, xk, minf(sk + e, 1.0), sum)[0] as Vector3) - (_jesle_bod(tv, xk, maxf(sk - e, 0.0), sum)[0] as Vector3))
-					n2 = n2.normalized() if n2.length() > 1e-6 else (bn[1] as Vector3)
-					if n2.dot(bn[1]) < 0.0: n2 = -n2
-					if k == 1: nn = n2
-					radky.append([(bn[0] as Vector3) - n2 * pod + n2 * rnd.randf_range(-0.004, 0.004), v1 - (v1 - v0) * (float(k) * 0.5), jas])
-				var tang := ((radky[2][0] as Vector3) - (radky[0][0] as Vector3))
-				bok = tang.cross(nn).normalized() if tang.length() > 1e-5 else nn.cross(Vector3.RIGHT).normalized()
-			else:
-				var bn: Array = _jesle_bod(tv, x, s, sum)
-				nn = bn[1]
-				var t1 := nn.cross(Vector3.UP if absf(nn.y) < 0.9 else Vector3.RIGHT).normalized(); var t2 := nn.cross(t1)
-				var az := rnd.randf() * TAU
-				var sklon := deg_to_rad(rnd.randf_range(float(d["sklon_st"][0]), float(d["sklon_st"][1])))
-				var smer := (nn * cos(sklon) + (t1 * cos(az) + t2 * sin(az)) * sin(sklon)).normalized()
-				var pata := (bn[0] as Vector3) - nn * float(d["zanor_m"])
-				var ao_p := float(d["ao_pata"])
-				radky = [[pata, v1, ao_p], [pata + smer * L * 0.5 + Vector3.DOWN * L * float(d["previs_m"]) * 0.3, (v0 + v1) * 0.5, lerpf(ao_p, 1.0, 0.6)],
-					[pata + smer * L + Vector3.DOWN * L * float(d["previs_m"]), v0, 1.0]]
-				bok = smer.cross(nn).normalized()
-				if bok.length() < 0.5: bok = t1
-				bok = bok.rotated(smer, rnd.randf_range(-PI * 0.5, PI * 0.5))
-			if druh == 0: radky = [radky[0], radky[2]]   # ležící karta = jeden čtyřúhelník (konce na povrchu), rozpočet na víc karet
-			for r in radky.size() - 1:
-				var a: Array = radky[r]; var bb: Array = radky[r + 1]
-				var wa := w * (1.0 if druh == 0 or r == 0 else 0.85); var wb := w * (1.0 if druh == 0 else (0.85 if r == 0 else 0.7))
-				var v4 := [[a[0] - bok * wa * 0.5, u0, a[1], a[2]], [a[0] + bok * wa * 0.5, u1, a[1], a[2]],
-					[bb[0] + bok * wb * 0.5, u1, bb[1], bb[2]], [bb[0] - bok * wb * 0.5, u0, bb[1], bb[2]]]
-				for k in [0, 1, 2, 0, 2, 3]:
-					var q4: Array = v4[k]
-					ks.set_color(Color.WHITE * float(q4[3]) * ton); ks.set_normal(nn); ks.set_uv(Vector2(float(q4[1]), float(q4[2])))
-					ks.add_vertex(q4[0])
-	return [objem, ks.commit()]
+## ---------------------------------------------------------------- jesle (model sena Míšina modeláře, funkce.json jesle)
+## Transformace modelu sena v souřadnicích modelu domu (osazeni[kolize]: poloha, sklon kolem x, měřítko).
+static func jesle_xf(je: Dictionary, kolize: String) -> Transform3D:
+	var o: Dictionary = je["osazeni"][kolize]
+	var m: Array = o["meritko"]; var po: Array = o["poloha"]
+	var b := Basis(Vector3.RIGHT, deg_to_rad(float(o["natoceni_x_st"]))) * Basis.from_scale(Vector3(float(m[0]), float(m[1]), float(m[2])))
+	return Transform3D(b, Vector3(float(po[0]), float(po[1]), float(po[2])))
 
 
 func nasyp(p: Dictionary) -> void:
 	if p["seno"] != null: return
 	var je: Dictionary = cfg("jesle")
-	var site := jesle_site(je["tvar"][p["kolize"]], je)
-	var uz := Node3D.new(); uz.name = "SenoJesle"
-	var vid: Dictionary = je["viditelnost_m"]
-	for i in 2:
-		var mi := MeshInstance3D.new(); mi.name = ["Objem", "Stebla"][i]; mi.mesh = site[i]
-		mi.material_override = load(String(je["material"] if i == 0 else je["material_stebla"]))
-		mi.visibility_range_end = float(vid["objem"] if i == 0 else vid["stebla"])
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if i == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		uz.add_child(mi)
+	if not ResourceLoader.exists(String(je["model"])): push_warning("FUNKCE jesle: model %s chybí (nastroje/seno_modely.py)" % je["model"]); return
+	var uz := (load(String(je["model"])) as PackedScene).instantiate() as Node3D
+	uz.name = "SenoJesle"; uz.transform = jesle_xf(je, String(p["kolize"]))
 	(p["dum"] as Node3D).add_child(uz)
 	p["seno"] = uz
 

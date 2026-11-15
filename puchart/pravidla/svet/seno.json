@@ -1,0 +1,17 @@
+{
+ "popis": "Seno od Míšina modeláře (sada Seno_1400, 15. 11.): jesle (funkce.json jesle model – „Nasypat seno“), kupa na zemi, vrstva na půdu, rozhozený chomáč a dřevěné vidle jen do katalogu předmětů pískoviště (NEROZMISŤOVAT – Míša si výbavu rozmisťuje sama). nastroje/seno_modely.py zkopíruje z dodané sady nativní scény Godotu (.tscn s LOD0/LOD1 přes Visibility Range, sítě _mesh.res, sdílený materiál Seno_Atlas_1K.tres, textury) do vystup, materiál sena dostane albedo modulaci (barva níž), do hra/modely/predmety_h/ zapíše obalové scény seno_<Model>.tscn a záznamy katalogu predmety_h.json. Dodané .glb (každý s vlastní kopií textur ~3,5 MB) se nepoužívají – zůstávají ve zdroji.",
+ "zdroj": "build/zdroj_modelar/Seno_1400 (NAVOD_SENO.md, CTI_ME.md, PODKLADY_A_LICENCE.md: fotka „Hay“ – RedBirdTheCardinal, opengameart.org, CC0; dřevo vidlí Poly Haven Rough Wood, CC0); předloha barvy docs/reference/seno/kcd1_seno_staj_misa_15_11.jpg (KCD1, bledě slámově béžová, medián kupy sRGB 143,130,107)",
+ "slozka": "build/zdroj_modelar/Seno_1400",
+ "vystup": "hra/modely/seno",
+ "sceny": ["Seno_Jesle_420", "Seno_Kupa_Zem", "Seno_Puda_Vrstva", "Seno_Rozhazeny_Chomac", "Vidle_Drevene"],
+ "materialy": ["Seno_Atlas_1K.tres", "Vidle_Drevo_1K.tres"],
+ "albedo_modulace": [1.0, 0.93, 0.78],
+ "albedo_modulace_pozn": "násobí albedo atlasu sena (ORMMaterial3D albedo_color, sRGB): dodaný materiál je na rendru bílo-šedý, KCD1 bledě slámově béžová – ubrat modrou a trochu zelenou (Míša přes koordinátora 15. 11.: „laď barvu v materiálu, ne přepis textury“). NEOVERENO na tabletu – laděno snímkem docs/screens/funkce_jesle_seno_srovnani.png",
+ "katalog": {
+  "_popis": "záznam katalogu pískoviště (hra/modely/predmety_h.json, id seno_<Model>, scéna predmety_h/seno_<Model>.tscn = instance nativní scény ze sady); nazev, kat, stav, vaha, cena jako podobné předměty Havrana (kupka_sena venku 120 kg / 10, vidle 1,5 kg / 6); rozmer = rozměry z ASSETY.json v osách Godotu [x délka, y výška, z hloubka]",
+  "Seno_Kupa_Zem": {"nazev": "Kupa sena (stáj)", "kat": null, "stav": "uvnitr", "vaha": 60.0, "cena": 8, "rozmer": [2.5, 1.2, 1.8]},
+  "Seno_Puda_Vrstva": {"nazev": "Vrstva sena na půdu", "kat": null, "stav": "uvnitr", "vaha": 80.0, "cena": 10, "rozmer": [3.0, 0.6, 2.0]},
+  "Seno_Rozhazeny_Chomac": {"nazev": "Chomáč sena", "kat": null, "stav": "uvnitr", "vaha": 0.5, "cena": 1, "rozmer": [0.5, 0.13, 0.45]},
+  "Vidle_Drevene": {"nazev": "Dřevěné vidle (tříhroté)", "kat": "naradi", "stav": "venku", "vaha": 1.5, "cena": 6, "rozmer": [0.3, 1.72, 0.1]}
+ }
+}

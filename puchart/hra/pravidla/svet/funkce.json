@@ -113,13 +113,14 @@
   "shader_pozn": "parametry shaderu vody přepsané pro koryto (ostatní z voda_hra.json vzhled_13_11): rychlost 0 = stojatá; cirost 0,12 m a hloubka_barvy 0,1 m – voda v korytě stojí, je zakalená (píce, dno ze dřeva) a v 10 cm musí hladinu být vidět (s čirostí potoka 0,5 m krytí jen 18 % – na snímku 15. 11. hladina nebyla vidět vůbec). NEOVERENO – laděno snímkem docs/screens/funkce_zlab_voda.png"
  },
  "jesle": {
-  "popis": "Jesle v chlévě Dum2 (žebřinový koš nad žlabem, šikmé příčky v síti Dum2_Interier): nabídka „Nasypat seno“ (bod zaměření bod [x, y, z] modelu – čelo kupy nad horním břevnem) → v jeslích se objeví kupa sena, zůstane (nabídka zmizí). Kupa = objem (síť po profilu jeslí: čelo těsně za příčkami, nahoře kupa nad horním břevnem k roubení, nepravidelná podle šumu) + karty stébel (2 články, ohnuté, různé délky a sklony; část leží po povrchu, část trčí a přesahuje přes příčky a horní břevno). Barva vrcholů = ztmavení do hloubky (AO): pata karty a spodek čela tmavší, konce stébel světlé (předloha KCD1). Materiály hra/textury/seno/seno.tres (objem) a seno_stebla.tres (karty, alfa nůžky + alfa do pokrytí jako stebla.gdshader) jdou použít i jinde (stodoly, půdy). Kreslí se jen zblízka (viditelnost_m). Uzel hledá funkce.gd přes kolizi žlabu (stejný dům), tvar je v souřadnicích modelu domu.",
-  "zdroj": "Míša 15. 11.: jesle „nasypat seno“, „seno ale fotorealistické“, předloha kvality docs/reference/seno/kcd1_seno_staj_misa_15_11.jpg (KCD1 stáj, kupa sena: měkký objem, tisíce stébel, světlé konce, tmavá hloubka, okraje se rozpadají do stébel, bledě slámová béžová – medián sRGB 143,130,107); tvar podle modelu domy.glb (rozbor vrcholů 15. 11.): příčky jeslí Dum2_Interier M_RoubeniVnitrni_001 od (y 1,30; z −4,36) k (y 1,90; z −3,85), rozteč 0,14 m, x −2,65…1,60, dolní břevno y 1,26…1,34 u roubení z −4,41, horní břevno y 1,88…1,96 z −3,81…−3,90; stará placka sena M_Slama v jeslích z (1,35; −4,32) k (2,0–2,12; −3,92) – kupa ji překryje; textury vlastní kresbou (nastroje/seno_textury.py: spleť zvlněných stébel, paleta z KCD1; 1. kolo ambientCG ThatchedRoof001A – pryč, „učesané“ jako došek)",
+  "popis": "Jesle v chlévě Dum2 (žebřinový koš nad žlabem, šikmé příčky v síti Dum2_Interier): nabídka „Nasypat seno“ (bod zaměření bod [x, y, z] modelu domu – čelo kupy nad horním břevnem) → v jeslích se objeví model sena Míšina modeláře (Seno_Jesle_420, sada Seno_1400 – nastroje/seno_modely.py, pravidla/svet/seno.json), zůstane (nabídka zmizí). Osazení v souřadnicích modelu domu: osazeni[kolize] poloha [x, y, z] počátku modelu (střed spodní strany), natoceni_x_st – sklon kolem osy x (vrch k chlévu: jesle mají šikmé příčky, ne svislé jako rozměrová pomůcka modeláře), meritko [x, y, z]. LOD0/LOD1 přepíná nativní scéna sady (Visibility Range 6 m). Uzel hledá funkce.gd přes kolizi žlabu (stejný dům).",
+  "zdroj": "Míša 15. 11.: jesle „nasypat seno“, „seno ale fotorealistické“, předloha docs/reference/seno/kcd1_seno_staj_misa_15_11.jpg; model build/zdroj_modelar/Seno_1400/NAVOD_SENO.md (Seno_Jesle_420: 4,20 × 0,60 × 0,90 m, počátek uprostřed spodní strany, doporučeně Y 1,30 pro svislé jesle s horním břevnem 1,90); tvar jeslí podle modelu domy.glb (rozbor vrcholů 15. 11.): příčky Dum2_Interier od (y 1,30; z −4,36) k (y 1,90; z −3,85), rozteč 0,14 m, x −2,65…1,60, roubení z −4,39, horní břevno y 1,88…1,96",
   "kolize": [
    "Dum2_Kol_Zlab"
   ],
   "nabidka": "Nasypat seno",
-  "tvar_pozn": "v souřadnicích modelu domu: x [od, do] délka jeslí (čela 2 cm od krajních příček), pricky_dole/pricky_nahore [y, z] osa příček, pred_prickami_m – čelo kupy za osou příček (poloměr příčky 2 cm + 1 cm), stena_z – roubení za jeslemi, kupa_m – výška kupy nad horním koncem příček (0,3 m: stará placka M_Slama sahá do y 2,12, kupa ji musí překrýt – snímek 15. 11.), kupa_ven_m – jak daleko kupa přečnívá přes horní břevno do chléva, sum_m – nepravidelnost povrchu (amplituda šumu), sum_vlna_m – vlnová délka šumu",
+  "model": "res://modely/seno/Seno_Jesle_420.tscn",
+  "tvar_pozn": "v souřadnicích modelu domu: x [od, do] délka jeslí, pricky_dole / pricky_nahore [y, z] osa šikmých příček, stena_z – roubení za jeslemi, bod – kde se nabízí „Nasypat seno“ (test jesle_seno z nich ověří, že seno je v koši)",
   "tvar": {
    "Dum2_Kol_Zlab": {
     "x": [
@@ -134,12 +135,7 @@
      1.9,
      -3.85
     ],
-    "pred_prickami_m": 0.03,
     "stena_z": -4.39,
-    "kupa_m": 0.3,
-    "kupa_ven_m": 0.07,
-    "sum_m": 0.07,
-    "sum_vlna_m": 0.25,
     "bod": [
      -0.5,
      2.0,
@@ -147,61 +143,24 @@
     ]
    }
   },
-  "sit": {
-   "delka_krok_m": 0.1,
-   "profil_bodu": 14,
-   "uv_m": 0.6,
-   "viri": 0.08
-  },
-  "stebla": {
-   "atlas": {
-    "sloupce": 4,
-    "rady": 2,
-    "rada_vrstva": 0,
-    "rada_trsy": 1
-   },
-   "vrstva": {
-    "pocet": 4300,
-    "vrch_podil": 0.65,
-    "delka_m": [
-     0.08,
-     0.17
+  "osazeni": {
+   "Dum2_Kol_Zlab": {
+    "poloha": [
+     -0.52,
+     1.475,
+     -4.3
     ],
-    "pomer": 0.5,
-    "zanor_m": 0.003,
-    "vrstva_m": 0.035,
-    "ao_spodni": 0.72
-   },
-   "trsy": {
-    "pocet": 420,
-    "vrch_podil": 0.7,
-    "delka_m": [
-     0.04,
-     0.13
-    ],
-    "pomer": 0.5,
-    "sklon_st": [
-     15.0,
-     70.0
-    ],
-    "previs_m": 0.15,
-    "zanor_m": 0.015,
-    "ao_pata": 0.55
-   },
-   "ao_cela_dole": 0.55,
-   "seed": 1393
+    "natoceni_x_st": 25.0,
+    "meritko": [
+     0.99,
+     0.9,
+     0.7
+    ]
+   }
   },
-  "stebla_pozn": "2. kolo (Míša 15. 11.: „hladký objem a dlouhá rovná příliš žlutá stébla v řídkých svazcích“ → povrch kupy = hustá spleť krátkých zvlněných stébel v náhodných směrech, objem jen tmavé jádro, trčící stébla kratší a tenčí, různé délky). atlas – buňky seno_stebla.png (nastroje/seno_textury.py): řada 0 spleť (ovál krátkých zvlněných stébel, okraj řídne), řada 1 trsy (pár stébel z paty). vrstva – ležící karty spleti: střed karty na povrchu, karta jde po povrchu kupy (body v parametrech x, s – sleduje zakřivení), směr náhodný, výška nad povrchem jádra zanor_m … zanor_m + vrstva_m (víc vrstev nad sebou, spodní ztmavené až na ao_spodni – tmavnutí do hloubky jako KCD1), pomer = šířka/délka karty (buňka 1 : 2); trsy – trčící karty (sklon od normály, previs_m = konec klesne o tolik × délka). vrch_podil – podíl karet na vrchu kupy (čelo je za příčkami ve stínu). ležící karta = 1 čtyřúhelník (2 troj., konce na povrchu), trčící 2 články (4 troj.). Rozpočet: objem ~1,2 tis. + 4300 × 2 + 420 × 4 ≈ 11,5 tis. troj. (troj_max); snímek 15. 11. s 2250 kartami 0,13–0,28 m: jednotlivé „lístky“ s tmavými mezerami – teď víc menších. NEOVERENO na tabletu – laděno snímkem docs/screens/funkce_jesle_seno_srovnani.png",
-  "material": "res://textury/seno/seno.tres",
-  "material_stebla": "res://textury/seno/seno_stebla.tres",
-  "viditelnost_m": {
-   "objem": 30.0,
-   "stebla": 14.0
-  },
-  "viditelnost_pozn": "kreslit jen zblízka (Visibility Range; renderer Compatibility neumí prolínání) – stébla do 14 m, objem do 30 m (dál je chlév zavřený a kupu přes dveře nevidět)",
-  "sit_pozn": "delka_krok_m – rozestup řezů podél jeslí, profil_bodu – bodů na profil (čelo + vrch), uv_m – metry na opakování textury objemu, viri – natočení vláken textury objemu podle šumu (× π; 0 = vlákna jedním směrem – „učesané“ jako došek; 0,8 dávalo na snímku 15. 11. lomené švy); 2. kolo: textura objemu je spleť v náhodných směrech (seno_textury.py), víření 0,08 jen proti opakování (0,25 dávalo šmouhy)",
+  "osazeni_pozn": "Model je kvádrová kupa 0,6 m hluboká se svislým čelem (pro svislé jesle); naše jesle mají příčky šikmo (V u roubení: v y 1,30 jen 3 cm, v y 1,90 0,54 m). Osazení spočtené z vrcholů LOD0 (15. 11.): sklon 25° vrchem k chlévu, hloubka × 0,7, výška × 0,9, délka 4,20 → 4,16 m (× 0,99), počátek y 1,475 z −4,30 – před příčky (pod horním břevnem) vyčnívá 1,5 % vrcholů (stébla mezi příčkami, jak počítá NAVOD_SENO), za roubení 0,6 %, vrchol kupy y 2,22 (horní břevno 1,90 + ~0,3 m jako návod), nejnižší bod y 1,42 (spodek V jeslí pod ním je za příčkami ve stínu). NEOVERENO – laděno snímkem docs/screens/funkce_jesle_seno_srovnani.png",
   "troj_max": 12000,
-  "troj_max_pozn": "rozpočet kupy (koordinátor 15. 11., 2. kolo: „až ~12 tis. troj., jen zblízka, LOD“) – hlídá test jesle_seno; stébla se kreslí jen do viditelnost_m.stebla"
+  "troj_max_pozn": "rozpočet sena v jeslích (koordinátor 15. 11.: do ~12 tis. troj.; model LOD0 5 350, LOD1 510) – hlídá test jesle_seno"
  },
  "studna": {
   "popis": "Studna na návsi (ves.gd _studny): rumpál s klikou a vědro na laně jsou samostatné uzly Pohyb_ves_studna_rumpal_<i> a Pohyb_ves_studna_vedro_<i> – pohyblivé díly dvere.gd (Havran pohyb.gd): rumpál druh navijak (otacek otáček kolem své osy), vědro druh vedro (posun svisle dolů o hloubku k hladině, doba dur_s), skupina ves_studna_<i>, nabídka u kliky. Vědro visí vedro_pod_osou_m pod osou rumpálu nad středem šachty; lano od bubnu k uchu vědra se přepočítá. hladina_m = hloubka hladiny pod terénem (vědro sjede až k ní); terén pod studnou díru nemá – šachtu kreslí temný kruh nad terénem (ves.gd), vědro do tmy zajede a z ní vyjede.",
