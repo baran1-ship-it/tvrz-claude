@@ -401,3 +401,11 @@ Ostatní je podezření nebo návrh. Po dvou neúspěšných pokusech o tutéž 
   (podrost, okraje, průseky) i na loukách (meze, remízky, kolem cest), **ne na všech** loukách (otevřené louky a výhledy
   zůstanou). Houština tedy není jen clona u vsi, ale stálá vrstva krajiny podle stanoviště (`druhy.json`) s jádrem
   okluzoru tam, kde je opravdu hustá (pravidla bodu b).
+
+## Předlohy od Míši 15. 11. večer (`docs/reference/sceny_15_11/`)
+| snímek | co je vidět | pro nás |
+|---|---|---|
+| `kcd1_les_posed.jpg` | les zblízka plný: kmeny, podrost a keře do výšky očí; za ~25–40 m už jen zelená stěna podrostu a korun, žádný dlouhý průhled | houština v lese = clona; za ní stačí hmota (krok c), plné stromy jen blízko |
+| `kcd1_ves_cesta_svah.jpg` | vjezd do vsi: cesta mezi plotem, vysokou trávou a pásem keřů/sutí na svahu; ves odkryta jen v ose cesty; svahy v dálce = textura terénu + řídké shluky stromů, hřbet lesa nahoře jako jedna tmavá hmota | clona u vjezdu (krok a), dálka ochuzená: terén + hmota, ne jednotlivé stromy |
+| `les100_hmota_dalka.jpg` | Míšina pokusná hra: v dálce za kmeny jedna hmota korun | totéž |
+Míša: „les je plný a dálka je dost ochuzená, takže asi moc nestojí“ – souhlasí s plánem: cena jde do blízka, dálka levná.
