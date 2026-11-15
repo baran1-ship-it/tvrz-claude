@@ -1,16 +1,16 @@
 {
  "popis": "hern\u00ed data mimo APK po skupin\u00e1ch (nastroje/data_balik.py, scripts/data.gd) \u2013 stahuj\u00ed se jen zm\u011bn\u011bn\u00e9",
  "vetev": "ccr-f2d32673-9fi7m5",
- "zdroj": "caf9562cf231aee8dec7346e42faeb3c",
+ "zdroj": "fd9215df136412ad9b521fb9fd42a558",
  "packs": {
   "puchart_zaklad": {
-   "md5": "349b8bc049e482baec8baa90a8c0de47",
-   "size": 20744220,
+   "md5": "2ca8f41e39f9ac828ebe4d39681de04f",
+   "size": 20761644,
    "parts": [
     {
-     "file": "puchart_zaklad-349b8bc049.pck.000",
-     "size": 20744220,
-     "md5": "349b8bc049e482baec8baa90a8c0de47"
+     "file": "puchart_zaklad-2ca8f41e39.pck.000",
+     "size": 20761644,
+     "md5": "2ca8f41e39f9ac828ebe4d39681de04f"
     }
    ]
   },
@@ -31,13 +31,13 @@
    ]
   },
   "puchart_hrady": {
-   "md5": "c8f84726086eb9cc69e224587354226e",
-   "size": 49961624,
+   "md5": "54648ac97c1db5c213873ad4dcd273d3",
+   "size": 49995576,
    "parts": [
     {
-     "file": "puchart_hrady-c8f8472608.pck.000",
-     "size": 49961624,
-     "md5": "c8f84726086eb9cc69e224587354226e"
+     "file": "puchart_hrady-54648ac97c.pck.000",
+     "size": 49995576,
+     "md5": "54648ac97c1db5c213873ad4dcd273d3"
     }
    ]
   },
@@ -63,33 +63,28 @@
    ]
   },
   "puchart_stavby": {
-   "md5": "5e2681189e2cab6b9c8b9ce6139ffd5c",
-   "size": 430665696,
+   "md5": "11a058e9a0c9971742a073052df06bb1",
+   "size": 363909748,
    "parts": [
     {
-     "file": "puchart_stavby-5e2681189e.pck.000",
+     "file": "puchart_stavby-11a058e9a0.pck.000",
      "size": 94371840,
-     "md5": "9718f542c1662f09d0d522975c654b47"
+     "md5": "73c480e9f715121aa8970503630bd3ba"
     },
     {
-     "file": "puchart_stavby-5e2681189e.pck.001",
+     "file": "puchart_stavby-11a058e9a0.pck.001",
      "size": 94371840,
      "md5": "73fc3084bfbf1c619a251d56491cbbda"
     },
     {
-     "file": "puchart_stavby-5e2681189e.pck.002",
+     "file": "puchart_stavby-11a058e9a0.pck.002",
      "size": 94371840,
-     "md5": "bb0760ef13d6aa605d6cc0dab9b95480"
+     "md5": "bc822899eb4824251bc22b9f88e70e04"
     },
     {
-     "file": "puchart_stavby-5e2681189e.pck.003",
-     "size": 94371840,
-     "md5": "b3bcd2fc8a6e544117f88f755d7ee7fa"
-    },
-    {
-     "file": "puchart_stavby-5e2681189e.pck.004",
-     "size": 53178336,
-     "md5": "362e44f61624418790ca44b85204be56"
+     "file": "puchart_stavby-11a058e9a0.pck.003",
+     "size": 80794228,
+     "md5": "6bc757ec6e9e2255175bb073c9952b3e"
     }
    ]
   },
@@ -105,13 +100,13 @@
    ]
   },
   "puchart_teren": {
-   "md5": "857f3717be9beeab6a147ed98ceb9908",
-   "size": 32314448,
+   "md5": "f03286c4a3dcfe7d51d5c5f66ae5e9a5",
+   "size": 32314816,
    "parts": [
     {
-     "file": "puchart_teren-857f3717be.pck.000",
-     "size": 32314448,
-     "md5": "857f3717be9beeab6a147ed98ceb9908"
+     "file": "puchart_teren-f03286c4a3.pck.000",
+     "size": 32314816,
+     "md5": "f03286c4a3dcfe7d51d5c5f66ae5e9a5"
     }
    ]
   }
