@@ -242,7 +242,7 @@ func priprav(vyska: Callable) -> bool:
 					schody.append({"p": body[k], "smer": smer, "pad": float(tune[stupen[k]]) - float(tune[stupen[k + 1]]), "w": sirky[k], "k": k})
 		for k in range(1, n):
 			hladiny[k] = minf(hladiny[k], hladiny[k - 1] - spad * body[k].distance_to(body[k - 1]))
-	# vyska brehu v bode = nejvyssi z razu v okoli raz_toku.breh_prolinani_m podel osy (v metrech, ne v bodech - ridka
+	# vyska brehu v bode = nejvyssi z razu primych sousedu a okoli raz_toku.breh_prolinani_m podel osy (v metrech, ne v bodech - ridka
 	# osa klidneho useku by jinak vysoky breh kaskady roztahla na desitky m): plynule bez snizeni brehu kaskady na hranici
 	var r_pr := float(Pravidla.cti("voda", "potok", "raz_toku")["breh_prolinani_m"])
 	breh_bod.resize(n)
@@ -252,7 +252,7 @@ func priprav(vyska: Callable) -> bool:
 		var j := k - 1
 		while j >= 0:
 			dl += body[j + 1].distance_to(body[j])
-			if dl > r_pr:
+			if dl > r_pr and j < k - 1:            # primy soused vzdy (prolinani k -> k-1 nesnizi breh)
 				break
 			bm = maxf(bm, breh_nad[raz[j]])
 			j -= 1
@@ -260,7 +260,7 @@ func priprav(vyska: Callable) -> bool:
 		j = k + 1
 		while j < n:
 			dl += body[j].distance_to(body[j - 1])
-			if dl > r_pr:
+			if dl > r_pr and j > k + 1:
 				break
 			bm = maxf(bm, breh_nad[raz[j]])
 			j += 1

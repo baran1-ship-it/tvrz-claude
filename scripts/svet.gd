@@ -3203,18 +3203,44 @@ func _pesiny_volne() -> void:
 					if nad > 0.3 and nad < 2.0:
 						smazane[Vector2i(roundi(float(t[3]) * 4.0), roundi(float(t[11]) * 4.0))] = true
 						break
+	# co stoji na smazane skale (borovice na vrcholu veze), jde pryc s ni - jinak visi ve vzduchu (test visici 15. 11.:
+	# borovice 15 m nad zemi u (-144, 711)); na skale = nad patou, v pudorysu a nad terenem jako _usad_skaly plosiny
+	var na_smazane: Array = []                      # [stred xz, polomer, pata y]
 	for key: String in r.keys():
 		if not key.begins_with("skala_"):
 			continue
+		var me2: Mesh = _skala_sit(key) if not key.contains("_daleko") else null
 		var zs: Array = []
 		for t: Array in r[key]:
 			if smazane.has(Vector2i(roundi(float(t[3]) * 4.0), roundi(float(t[11]) * 4.0))):
 				skal += 1
+				if me2 != null:
+					var ab2 := me2.get_aabb()
+					var rmax := maxf(maxf(absf(ab2.position.x), absf(ab2.end.x)), maxf(absf(ab2.position.z), absf(ab2.end.z)))
+					na_smazane.append([Vector2(float(t[3]), float(t[11])), rmax * Vector3(t[0], t[4], t[8]).length() + 0.5, float(t[7]) + 1.0])
 			else:
 				zs.append(t)
 		r[key] = zs
+	var s_nimi := 0
+	if not na_smazane.is_empty():
+		for key: String in r.keys():
+			if key.begins_with("skala_"):
+				continue
+			var zs2: Array = []
+			for t: Array in r[key]:
+				var q := Vector2(float(t[3]), float(t[11]))
+				var pryc2 := false
+				for sm: Array in na_smazane:
+					if q.distance_to(sm[0]) < float(sm[1]) and float(t[7]) > float(sm[2]) and float(t[7]) > _vyska(q.x, q.y) + 0.5:
+						pryc2 = true
+						break
+				if pryc2:
+					s_nimi += 1
+				else:
+					zs2.append(t)
+			r[key] = zs2
 	if skal > 0:
-		print("pesiny volne: skal pryc ", skal)
+		print("pesiny volne: skal pryc %d, s nimi rostlin a kamenu %d" % [skal, s_nimi])
 	for key: String in r:
 		var tvrde := key.begins_with("balvan_") or key.begins_with("dead_tree") or key.begins_with("tree_stump") \
 				or key.begins_with("root_cluster") or _imp_druh(key.substr(0, key.rfind("_"))) != ""
