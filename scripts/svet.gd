@@ -6896,6 +6896,21 @@ func _daleko_textura(mi: MeshInstance3D, dum: Node3D, lod: Dictionary) -> void:
 				bn = vm.surface_get_array_index_len(vi)
 				best = vmt.albedo_texture
 		if best == null:
+			# zadny material podrobneho vnejsku neodpovida slovum (chyse: krytina jinak pojmenovana) - nejvetsi povrch
+			# s texturou, ktery neodpovida zadnemu jinemu klici (ne stena pro strechu)
+			for vi in vm.get_surface_count():
+				var vmt2 := vn.get_active_material(vi) as BaseMaterial3D
+				if vmt2 == null or vmt2.albedo_texture == null:
+					continue
+				var jiny := false
+				for kl2: String in dt:
+					if kl2 != zn and (dt[kl2] as Array).any(func(t: String) -> bool: return String(vmt2.resource_name).contains(t)):
+						jiny = true
+				if not jiny and vm.surface_get_array_index_len(vi) > bn:
+					bn = vm.surface_get_array_index_len(vi)
+					best = vmt2.albedo_texture
+			print("ves: %s %s bez materialu podle daleko_textury - nejvetsi jiny povrch s texturou %s" % [dum.name, mt.resource_name, best.resource_path if best else "zadny"])
+		if best == null:
 			continue
 		var pr := _tex_prumer(best)
 		var c := mt.albedo_color
@@ -10486,10 +10501,9 @@ func _dil_lod(sc: Node3D, zaz: Dictionary, interier: Node, jm: String) -> float:
 		var o := MeshInstance3D.new()
 		o.name = jm + "_lod1"
 		o.mesh = om
-		o.transform = sc.transform
 		o.visibility_range_begin = hruby
 		o.visibility_range_end = dosah
-		sc.get_parent().add_child(o)
+		sc.add_child(o)                                   # v soustave dilu (jako stredni)
 	print("%s: stredni stupen %d povrchu -> 1 material, %d troj., %.0f-%.0f m, hruby od %.0f m%s" % [jm, n, troj, podr, hruby, hruby,
 			(" (obal %d kvadru do %.0f m)" % [n_obal, dosah]) if n_obal > 0 else ""])
 	return hruby

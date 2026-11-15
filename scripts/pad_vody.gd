@@ -78,10 +78,14 @@ static func postav(parent: Node3D, kor: RefCounted) -> int:
 	var sh: Dictionary = pv["shader"]
 	var tr: Dictionary = pv["trist"]
 	var tex: Texture2D = null
-	for cesta: String in ["res://modely/reka/foam_noise.png", "res://addons/waterways/textures/foam_noise.png"]:
+	# addons/ v APK neni (export_presets exclude) - tablet bere kopii z baliku z_reka; na PC se textury z baliku
+	# nenactou (chybi importy), proto napred zdroj Waterways
+	for cesta: String in ["res://addons/waterways/textures/foam_noise.png", "res://modely/reka/foam_noise.png"]:
 		if ResourceLoader.exists(cesta):
 			tex = load(cesta)
 			break
+	if tex == null:
+		push_warning("pady: foam_noise chybi - zaclona bez pruhu")
 	var sd := load("res://shaders/pad.gdshader") as Shader
 	var mat := func(druh: int, alfa: float) -> ShaderMaterial:
 		var m := ShaderMaterial.new()
@@ -134,7 +138,7 @@ static func postav(parent: Node3D, kor: RefCounted) -> int:
 		ti.visibility_range_end = dosah
 		parent.add_child(ti)
 		i += 1
-	print("pady: %d zaclon (%d vrch.), trist do %.0f m; %s" % [(kor.pady as Array).size(), zaklad, dosah,
+	print("pady: %d zaclon (%d vrch.), pena %s, trist do %.0f m; %s" % [(kor.pady as Array).size(), zaklad, tex.resource_path if tex else "-", dosah,
 			str((kor.pady as Array).map(func(p: Dictionary) -> String: return "(%.1f, %.1f) pad %.2f L %.2f pul %.2f/%.2f" % [
 				(p["a"] as Vector2).x, (p["a"] as Vector2).y, float(p["y_hore"]) - float(p["y_dole"]), float(p["L"]), float(p["pul"]), float(p["pul_pas"])]))])
 	return (kor.pady as Array).size()

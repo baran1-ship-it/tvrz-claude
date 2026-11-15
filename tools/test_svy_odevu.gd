@@ -157,6 +157,8 @@ func _priprav(u: Node3D, kostra: Skeleton3D) -> Dictionary:
 			var mat := mi.mesh.surface_get_material(si) as BaseMaterial3D
 			if mat and mat.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
 				continue                       # vlasy, oboci (alfa vyrez) - karty maji okraje vsude
+			if mat and mat.albedo_texture and String(mat.albedo_texture.resource_path).contains("_hlava_"):
+				continue                       # hlava + dekolt (kuze, ne odev) - jen povrch tela a odevu
 			var ar: Array = mi.mesh.surface_get_arrays(si)
 			var vv: PackedVector3Array = ar[Mesh.ARRAY_VERTEX]
 			var nn: PackedVector3Array = ar[Mesh.ARRAY_NORMAL]
