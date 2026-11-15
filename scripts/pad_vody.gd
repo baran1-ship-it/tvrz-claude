@@ -96,6 +96,7 @@ static func postav(parent: Node3D, kor: RefCounted) -> int:
 		m.set_shader_parameter("meritko_pruhu", Vector2(float(mp[0]), float(mp[1])))
 		m.set_shader_parameter("prolinani_hore_m", float(sh["prolinani_hore_m"]))
 		m.set_shader_parameter("pruhlednost", float(sh["pruhlednost"]))
+		m.set_shader_parameter("okap_kryti", float(sh["okap_kryti"]))
 		m.set_shader_parameter("alfa_max", alfa)
 		return m
 	# zaclony: jedna sit

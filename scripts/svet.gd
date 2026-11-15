@@ -1302,6 +1302,8 @@ func _reka(parent: Node3D) -> void:
 	mi.mesh = PadVody.oriz_pas(load("res://modely/reka/reka.res"), koryto)
 	mi.material_override = m
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# ladeni snimku padu (PC kresli pas reky svetle sedy - bez nej je videt jen zaclona Pady)
+	mi.visible = not OS.has_environment("TVRZ_FOTO_BEZ_PASU")
 	parent.add_child(mi)
 	reka_mat = m
 
@@ -14587,19 +14589,33 @@ func _dily_deska(sb: StaticBody3D, own: int, sez: Array, f: PackedVector3Array, 
 		for e in 3:
 			p3.append(f[t * 3 + e])
 			p2.append(Vector2(u.dot(f[t * 3 + e]), w.dot(f[t * 3 + e])))
-	var obal := Geometry2D.convex_hull(p2)
-	var po := 0.0
-	for i in obal.size() - 1:
-		po += obal[i].x * obal[i + 1].y - obal[i + 1].x * obal[i].y
-	po = absf(po) * 0.5
+	var po := _plocha_obalu(p2)
 	var posun := Vector3(0.0, -tl, 0.0) if absf(n.y) >= vod else n * tl
 	var od := Vector3.ZERO if absf(n.y) >= vod else -n * tl * 0.5
 	var kusy: Array = []
 	if sez.size() == 1 or po <= pl * 1.01 + 1e-4:
 		kusy.append(p3)
 	else:
+		# nekonvexni skupina (stena s otvorem, podlaha do L): trojuhelniky v poradi sousedu (BFS) slucovat, dokud je kus
+		# konvexni (plocha obalu = plocha kusu) - mene vnitrnich hran mezi tvary, po kterych kapsle drhne
+		var k2 := PackedVector2Array()
+		var k3 := PackedVector3Array()
+		var kpl := 0.0
 		for i in range(0, p3.size(), 3):
-			kusy.append(p3.slice(i, i + 3))
+			var tpl := (p3[i + 1] - p3[i]).cross(p3[i + 2] - p3[i]).length() * 0.5
+			if not k3.is_empty():
+				var z2 := k2 + p2.slice(i, i + 3)
+				if _plocha_obalu(z2) <= (kpl + tpl) * 1.01 + 1e-4:
+					k2 = z2
+					k3.append_array(p3.slice(i, i + 3))
+					kpl += tpl
+					continue
+				kusy.append(k3)
+			k2 = p2.slice(i, i + 3)
+			k3 = p3.slice(i, i + 3)
+			kpl = tpl
+		if not k3.is_empty():
+			kusy.append(k3)
 	for k: PackedVector3Array in kusy:
 		var cp := PackedVector3Array()
 		for p: Vector3 in k:
@@ -14609,6 +14625,14 @@ func _dily_deska(sb: StaticBody3D, own: int, sez: Array, f: PackedVector3Array, 
 		sh.points = cp
 		sb.shape_owner_add_shape(own, sh)
 	return kusy.size()
+
+
+static func _plocha_obalu(p2: PackedVector2Array) -> float:
+	var obal := Geometry2D.convex_hull(p2)
+	var po := 0.0
+	for i in obal.size() - 1:
+		po += obal[i].x * obal[i + 1].y - obal[i + 1].x * obal[i].y
+	return absf(po) * 0.5
 
 
 ## Pevne predmety z katalogu (bozi muka na krizovatce): model z modely/predmety, kolize kvadrem.

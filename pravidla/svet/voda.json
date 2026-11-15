@@ -1519,13 +1519,14 @@
         "viditelnost_m": 45.0
        },
        "shader": {
-        "voda": [0.30, 0.33, 0.27],
-        "pena": [0.78, 0.80, 0.76],
+        "voda": [0.15, 0.18, 0.13],
+        "pena": [0.6, 0.63, 0.58],
         "rychlost_m_s": 1.8,
         "rychlost_okap_m_s": 0.45,
-        "meritko_pruhu": [0.55, 0.1],
+        "meritko_pruhu": [2.2, 0.3],
         "prolinani_hore_m": 0.5,
-        "pruhlednost": 0.82
+        "pruhlednost": 0.82,
+        "okap_kryti": 0.45
        }
       }
      },

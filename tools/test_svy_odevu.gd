@@ -8,7 +8,8 @@ extends SceneTree
 ##           fázi od sebe víc než test_partner_m (stejné váhy = švy se nerozevřou);
 ##  sev    – v oblasti ramen a horních zad (svy_odevu.oblast, mimo otvory krku, rukávů a lemu) žádná otevřená hrana,
 ##           naproti které je do test_sev_dosah_m okraj jiného kusu (nesvařený šov = rukáv zasunutý pod trup, kusy
-##           k sobě; okraj jen jednoho kusu bez protějšku = lem kápě/roušky, ten smí být). Povrchy s alfou (vlasy) ne.
+##           k sobě, v rovině látky do test_sev_normala_m; okraj bez protějšku nebo protějšek v jiné vrstvě = lem
+##           kápě/roušky nad kotlemi, ten smí být). Povrchy s alfou (vlasy) ne.
 ## Spuštění: tools/beh.sh svy cmd godot --headless --path . -s res://tools/test_svy_odevu.gd   (BEH_SDILENE=1)
 ## Volitelně TVRZ_SVY_SADY="npc_ponocny,npc_matej" jen vybrané sady. Výstup: SVY ... řádky, TEST SVY OK/CHYBA.
 
@@ -79,6 +80,7 @@ func _beh() -> void:
 		var h := _zmer(sit)
 		var horsi_par: float = h[0]
 		var sevy: int = h[1]
+		print("SVY %s klid: nejhorsi par %s" % [sada, h[3]])
 		print("SVY %s klid: par %.4f m, nesvarene okraje v ramenou %d (%d paru, %d okraju v oblasti)" % [sada, h[0], h[1], sit["pary"].size() / 2, sit["okraje"].size()])
 		if h[1] > 0:
 			print("SVY CHYBA %s klid: nesvareny sev v ramenou/zadech, %d okraju, napr. %s" % [sada, h[1], str(h[2])])
@@ -103,6 +105,8 @@ func _beh() -> void:
 				kp = maxf(kp, float(r[0]))
 				ks = maxi(ks, int(r[1]))
 				if float(r[0]) > float(R["test_partner_m"]) or int(r[1]) > 0:
+					if float(r[0]) > float(R["test_partner_m"]):
+						print("SVY %s %s par: %s" % [sada, kl, r[3]])
 					print("SVY CHYBA %s %s faze %d/%d: par %.4f m (max %.4f), nesvarene okraje %d, napr. %s" % [sada, kl, f, nf, r[0], R["test_partner_m"], r[1], str(r[2])])
 			print("SVY %s %s: par nejvic %.4f m, nesvarene okraje nejvic %d" % [sada, kl, kp, ks])
 			horsi_par = maxf(horsi_par, kp)
@@ -155,6 +159,7 @@ func _priprav(u: Node3D, kostra: Skeleton3D) -> Dictionary:
 				continue                       # vlasy, oboci (alfa vyrez) - karty maji okraje vsude
 			var ar: Array = mi.mesh.surface_get_arrays(si)
 			var vv: PackedVector3Array = ar[Mesh.ARRAY_VERTEX]
+			var nn: PackedVector3Array = ar[Mesh.ARRAY_NORMAL]
 			var bb: PackedInt32Array = ar[Mesh.ARRAY_BONES]
 			var ww: PackedFloat32Array = ar[Mesh.ARRAY_WEIGHTS]
 			var ii: PackedInt32Array = ar[Mesh.ARRAY_INDEX]
@@ -176,7 +181,7 @@ func _priprav(u: Node3D, kostra: Skeleton3D) -> Dictionary:
 					uch.append(_kost(kostra, jmena[bb[vi * k + j]]))
 					bind.append(sk.get_bind_pose(bb[vi * k + j]))
 					vah.append(w)
-				V.append([vv[vi], uch, bind, vah])
+				V.append([vv[vi], uch, bind, vah, nn[vi] if vi < nn.size() else Vector3.UP])
 				var kk := Vector3i((vv[vi] / q).round())
 				if klic.has(kk):
 					pary.append(base + vi)
@@ -231,6 +236,14 @@ func _priprav(u: Node3D, kostra: Skeleton3D) -> Dictionary:
 	return {"v": V, "pary": pary, "okraje": okraje, "hranice": hranice.keys(), "okoli": okoli}
 
 
+func _normala(z: Array) -> Vector3:
+	var n := Vector3.ZERO
+	var uch: Array = z[1]
+	for j in uch.size():
+		n += ((uch[j] as BoneAttachment3D).global_basis * (z[2][j] as Transform3D).basis * (z[4] as Vector3)) * float(z[3][j])
+	return n.normalized()
+
+
 func _poloha(z: Array) -> Vector3:
 	var p := Vector3.ZERO
 	var uch: Array = z[1]
@@ -245,6 +258,7 @@ func _zmer(sit: Dictionary) -> Array:
 	var cache := {}
 	var pary: PackedInt32Array = sit["pary"]
 	var hp := 0.0
+	var hp_kde := ""
 	for i in range(0, pary.size(), 2):
 		var a := pary[i]
 		var b := pary[i + 1]
@@ -252,7 +266,9 @@ func _zmer(sit: Dictionary) -> Array:
 		var pb: Vector3 = cache.get(b) if cache.has(b) else _poloha(V[b])
 		cache[a] = pa
 		cache[b] = pb
-		hp = maxf(hp, pa.distance_to(pb))
+		if pa.distance_to(pb) > hp:
+			hp = pa.distance_to(pb)
+			hp_kde = "%s kosti %s / %s" % [(V[a][0] as Vector3).snapped(Vector3.ONE * 0.001), _kosti_txt(V[a]), _kosti_txt(V[b])]
 	# mrizka okrajovych vrcholu
 	var d := float(R.get("test_sev_dosah_m", 0.03))
 	var mr := {}
@@ -268,12 +284,15 @@ func _zmer(sit: Dictionary) -> Array:
 		var m: Vector3 = ((cache[e[0]] as Vector3) + (cache[e[1]] as Vector3)) * 0.5
 		var c := Vector3i((m / d).floor())
 		var vl: Dictionary = sit["okoli"][ei]
+		var ne := _normala(V[e[0]])
+		var hn := float(R.get("test_sev_normala_m", 0.004))
 		var nasel := false
 		for dx in range(-1, 2):
 			for dy in range(-1, 2):
 				for dz in range(-1, 2):
 					for j: int in mr.get(c + Vector3i(dx, dy, dz), []):
-						if not vl.has(j) and (cache[j] as Vector3).distance_to(m) < d:
+						# protejsek svu = okraj v rovine latky (ne vrstva nad/pod - lem kape nad kotlemi)
+						if not vl.has(j) and (cache[j] as Vector3).distance_to(m) < d and absf(((cache[j] as Vector3) - m).dot(ne)) < hn:
 							nasel = true
 							break
 					if nasel:
@@ -285,4 +304,11 @@ func _zmer(sit: Dictionary) -> Array:
 		if nasel:
 			n += 1
 			pr = m
-	return [hp, n, pr]
+	return [hp, n, pr, hp_kde]
+
+
+func _kosti_txt(z: Array) -> String:
+	var s := ""
+	for j in (z[1] as Array).size():
+		s += "%s:%.2f " % [(z[1][j] as BoneAttachment3D).bone_name, float(z[3][j])]
+	return s

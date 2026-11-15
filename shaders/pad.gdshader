@@ -15,6 +15,7 @@ uniform float rychlost_okap = 0.45;    // m/s na okapu (pred lomem)
 uniform vec2 meritko_pruhu = vec2(0.55, 0.1);   // opakovani textury na metr napric / po proudu (pruhy po proudu)
 uniform float prolinani_hore_m = 0.5;  // okap se od zacatku plynule ztraci do tune
 uniform float pruhlednost = 0.82;      // nejvyssi kryti ciste vody (pena kryje plne)
+uniform float okap_kryti = 0.45;      // okap (pred lomem, COLOR.g 0) je tenka voda nad tuni - kryje min
 uniform float alfa_max = 1.0;
 
 varying vec4 barva;
@@ -37,7 +38,7 @@ void fragment() {
 		float pf = clamp(barva.r * 0.85 + (pruhy - 0.45) * 1.1 * (0.4 + barva.g), 0.0, 1.0);
 		alb = mix(voda, pena, pf);
 		a = mix(pruhlednost * (0.55 + 0.45 * pruhy), 1.0, pf);
-		a *= barva.a * smoothstep(0.0, prolinani_hore_m, uv.y);
+		a *= barva.a * smoothstep(0.0, prolinani_hore_m, uv.y) * mix(okap_kryti, 1.0, barva.g);
 	} else if (druh == 1) {
 		// pena u paty: dva vzorky rozbihajici se od padu
 		n1 = texture(pena_tex, vec2(uv.x * 0.9, uv.y * 0.9 - TIME * 0.25)).r;

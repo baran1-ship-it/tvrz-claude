@@ -9345,6 +9345,8 @@ func _planovac_snimek() -> void:
 	player.set_flying(false)
 	if not tridy.has("louka") or not tridy.has("rostliny"):
 		chyby.append("tezke ulohy jen %s (louka nebo rostliny hladovi)" % str(tridy))
+	print("PLANOVAC_SNIMEK rostliny: bunek %d, chybi %d, rozestavena %s, data %d, rost_vse %s" % [sv._rost_uzly.size(), sv._rost_chybi, str(sv._rost_rozest),
+			sv._rost_data.size(), str(sv.rost_vse)])
 	var txt := "%d snimku, cas nejvic %.1f ms (mez %.1f), GPU nejvic %.0f kB (mez %.0f) prumer %.1f kB, nad: cas %d, GPU %d, tezke %d; tezke ulohy %s, uvolneno uzlu %d, fronta mazani %d, %d ms" % [
 			snimku, nej_us / 1000.0, lim_us / 1000.0, nej_b / 1024.0, lim_b / 1024.0, sum_b / 1024.0 / maxf(1.0, snimku), nad_us, nad_b, nad_t,
 			str(tridy), ruseno, P.ceka_ruseni(), Time.get_ticks_msec() - t0]
