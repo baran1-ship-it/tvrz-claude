@@ -33,6 +33,39 @@ func _ready() -> void:
 	# daleko (200 m): žádné světlo
 	oh._rozpocet(p0 + Vector3(200, 0, 0))
 	if oh.pocet_svetel() != 0: chyby.append("světla svítí i 200 m od ohňů (%d)" % oh.pocet_svetel())
+	# nabídka: hráč 1,8 m od ohně v kuchyni krčmy, míří na něj → „Uhasit oheň“, stisk uhasí, znovu → „Zapálit oheň“
+	var hr: CharacterBody3D = h.hrac
+	var pr: Node = null
+	for c in h.get_children():
+		if c is CanvasLayer and c.get("zebriky") != null: pr = c
+	if pr == null:
+		await get_tree().create_timer(1.0).timeout
+		for c in h.get_children():
+			if c is CanvasLayer and c.get("zebriky") != null: pr = c
+	if pr != null:
+		get_tree().paused = false
+		if pr.get("menu") and pr.menu.has_method("hide_menu"): pr.menu.hide_menu()
+		hr.set_physics_process(false)
+		var cil: Vector3 = p0 + Vector3.UP * 0.15
+		var smer := Vector3(1.8, 0, 0)
+		for k in 8:   # strana ohně, ze které je vidět (ne přes zeď)
+			var a := k * TAU / 8.0; var kde := cil + Vector3(cos(a), 0, sin(a)) * 1.8
+			var q := PhysicsRayQueryParameters3D.create(cil + Vector3.UP * 1.0, kde + Vector3.UP * 1.0)
+			if get_viewport().get_world_3d().direct_space_state.intersect_ray(q).is_empty(): smer = Vector3(cos(a), 0, sin(a)) * 1.8; break
+		hr.global_position = Vector3(cil.x + smer.x, p0.y, cil.z + smer.z)
+		hr.cam.global_position = hr.global_position + Vector3.UP * 1.65
+		hr.cam.look_at(cil, Vector3.UP)
+		for k in 12: await get_tree().process_frame
+		var t: Button = oh.tlacitko
+		if t == null or not t.visible: chyby.append("nabídka ohně se neukázala (hráč u ohně, míří na něj)")
+		else:
+			var t0 := t.text
+			t.pressed.emit()
+			for k in 8: await get_tree().process_frame
+			if t0 != String(cfg["nabidka"]["uhasit"]) or bool(o0["hori"]) or t.text != String(cfg["nabidka"]["zapalit"]): chyby.append("nabídka: %s → %s, hoří %s" % [t0, t.text, o0["hori"]])
+			t.pressed.emit()
+			print("OHNE_TEST nabídka %s / %s, hoří %s" % [t0, t.text, o0["hori"]])
+	else: chyby.append("procházka (tlačítka) nenalezena")
 	for o: Dictionary in oh.ohne:
 		print("OHNE_TEST oheň %s %s hoří %s zaklad %s" % [o["nazev"], o["druh"], o["hori"], o["zaklad"]])
 	_konec(chyby, n, sv)
