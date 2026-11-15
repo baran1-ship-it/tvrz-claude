@@ -70,9 +70,10 @@
   ]
  },
  "uhliky": {
-  "_popis": "Žhavé uhlíky: plochý disk (ohniště, pec) nebo překryv sítě žáru modelu (kovárna Kovarna_Zhar, material_overlay). meritko = buněk žáru na metr, pulz = Hz pomalého dýchání žáru.",
+  "_popis": "Žhavé uhlíky: plochý disk (ohniště, pec) nebo překryv sítě žáru modelu (kovárna Kovarna_Zhar, material_overlay). meritko = buněk žáru na metr, pulz = Hz pomalého dýchání žáru. material_modelu: povrch sítě <Dům>_Interier s tímto materiálem (domy.glb: kamínkové ohniště před ústím pece a žár uvnitř) dostane při hoření shader uhlíků místo materiálu modelu (snímek ohen_pec_usti 15. 11.: materiál modelu pod světlem pece přepálený do bíla).",
   "meritko": 6.0,
-  "pulz": 0.6
+  "pulz": 0.6,
+  "material_modelu": "M_Zhar"
  },
  "zvuk": {
   "_popis": "Praskání ohně: Havran zvuky/prostredi/krb.ogg (CC0, antumdeluge + pagdev, opengameart; Havran zvuky/seznam.txt), smyčka 90 s. Havran _add_fire_loop: unit_size 2,5, max_distance 22.",
@@ -93,7 +94,7 @@
   "hori_do_h": 7.5
  },
  "druhy": {
-  "_popis": "Velikost podle druhu: plamen [šířka, výška] m, uhliky_r m (0 = bez disku), svetlo_v = výška světla nad základnou plamene, svetlo_ven = posun světla do místnosti (směr nejdelšího volného paprsku), energie, dosah_m. Pec: bez viditelného plamene (plamen [0, 0]) – pec v jizbě se topí z kuchyně / síně (krčma: ústí pece šenkovny je za stěnou u ohniště kuchyně, snímek 15. 11.; klenba nemá ústí do šenkovny), svítí jen světlem od líce klenby; bod nabídky na líci (usti_v = podíl výšky pece nad její spodní hranou, usti_od_stredu = podíl půlrozměru kolize od středu ve směru do místnosti – líc klenby nad podstavcem; snímek ohen_pec 15. 11.). Kovárna (vyhen): plamen nízký nad žárem. Pec s ústím (Míša 15. 11.: „místo pecí bych možná dal krby, jsou hezčí na oko“ → pece mají viditelný oheň v ústí jako chalupy KCD): ústí = značka modelu <Dům>_Pec_Usti (počátek = střed spodní hrany ústí, osa +Z do místnosti; až dodá modelář) nebo data mista[].usti (střed spodní hrany, směr, šířka a výška otvoru v souřadnicích modelu domu); plamen = jedna karta v rovině ústí (usti_plamen = podíl šířky a výšky otvoru), před ní pruh žhavých uhlíků (usti_uhliky_v m), odsazení před líc usti_odsazeni m; pec bez ústí (krčma: ústí za stěnou v kuchyni) svítí jen světlem. Krb (značka *_Krb_Ohen na ohništi krbu, budoucí modely): velký plamen ze 3 karet, uhlíky, silnější světlo.",
+  "_popis": "Velikost podle druhu: plamen [šířka, výška] m, uhliky_r m (0 = bez disku), svetlo_v = výška světla nad základnou plamene, svetlo_ven = posun světla do místnosti (směr nejdelšího volného paprsku), energie, dosah_m. Pec: bez viditelného plamene (plamen [0, 0]) – pec v jizbě se topí z kuchyně / síně (krčma: ústí pece šenkovny je za stěnou u ohniště kuchyně, snímek 15. 11.; klenba nemá ústí do šenkovny), svítí jen světlem od líce klenby; bod nabídky na líci (usti_v = podíl výšky pece nad její spodní hranou, usti_od_stredu = podíl půlrozměru kolize od středu ve směru do místnosti – líc klenby nad podstavcem; snímek ohen_pec 15. 11.). Kovárna (vyhen): plamen nízký nad žárem. Pec s ústím (Míša 15. 11.: „místo pecí bych možná dal krby, jsou hezčí na oko“ → pece mají viditelný oheň v ústí jako chalupy KCD): ústí = značka modelu <Dům>_Pec_Usti (počátek = střed spodní hrany ústí, osa +Z do místnosti; až dodá modelář) nebo data mista[].usti (střed spodní hrany, směr, šířka a výška otvoru v souřadnicích modelu domu); plamen = jedna karta v rovině ústí (usti_plamen = podíl šířky a výšky otvoru), před ní pruh žhavých uhlíků (usti_uhliky_v m), odsazení před líc usti_odsazeni m; pec bez ústí (krčma: ústí za stěnou v kuchyni) svítí jen světlem. Krb (značka *_Krb_Ohen na ohništi krbu, budoucí modely): velký plamen ze 3 karet, uhlíky, silnější světlo. Světlo pece s ústím: svetlo_v 0,5 nad spodní hranou ústí a svetlo_ven 0,3 m do místnosti (níž a dál přepalovalo kamínkové ohniště před ústím – snímek 15. 11.).",
   "ohniste": {
    "plamen": [
     0.85,
@@ -119,9 +120,9 @@
    ],
    "usti_uhliky_v": 0.07,
    "usti_odsazeni": 0.012,
-   "svetlo_v": 0.3,
-   "svetlo_ven": 0.45,
-   "energie": 2.4,
+   "svetlo_v": 0.5,
+   "svetlo_ven": 0.3,
+   "energie": 2.2,
    "dosah_m": 7.0
   },
   "vyhen": {

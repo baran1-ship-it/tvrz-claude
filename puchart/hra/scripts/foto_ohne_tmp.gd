@@ -71,8 +71,15 @@ func _ready() -> void:
 		var W := func(u: float, v: float, y: float) -> Vector3: return p0 + D * u + S * v + Vector3.UP * y
 		print("FOTO_INFO hradA návrh krbu síň patra W(7,2; −3,0; F1) = %s" % [W.call(7.2, -3.0, F)])
 		sh.append(["ohen_krb_hrad", W.call(7.2, 2.2, F + 1.6), W.call(7.2, -3.0, F + 1.1), 22.0])
-	sh.append(["hradB_sin", Vector3(50.3, 16.3, 146.6), Vector3(57.5, 15.4, 146.6), 22.0])
+		sh.append(["hradA_sin_svetlo", W.call(5.6, 2.3, F + 1.7), W.call(8.0, -3.0, F + 0.9), 12.0, true])
+	sh.append(["hradB_sin_v", Vector3(50.3, 16.3, 146.6), Vector3(57.5, 15.4, 146.6), 12.0, true])
+	sh.append(["hradB_sin_z", Vector3(57.5, 16.3, 144.0), Vector3(50.0, 15.4, 149.5), 12.0, true])
+	sh.append(["hradB_sin_j", Vector3(53.9, 16.3, 144.0), Vector3(53.9, 15.4, 150.0), 12.0, true])
+	var lamp := OmniLight3D.new(); lamp.omni_range = 14.0; lamp.light_energy = 2.0; lamp.visible = false; cam.add_child(lamp)
+	var jen := OS.get_environment("PUCHART_FOTO_JEN").split(",", false)
 	for s in sh:
+		if not jen.is_empty() and not jen.has(String(s[0])): continue
+		lamp.visible = s.size() > 4
 		if h.get("den"): h.den.set_hour(float(s[3]), 0.0)
 		oh._noc(false, float(s[3]))
 		cam.look_at_from_position(s[1], s[2], Vector3.UP)

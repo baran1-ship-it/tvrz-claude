@@ -696,7 +696,6 @@ func _mista() -> void:
 			var zw := {"nazev": "Žebřík %s" % dum.name}
 			for k_ in 4: zw[["pata", "vrchol", "nastup", "sestup"][k_]] = dum.transform * Vector3(float(zbd[k_][0]), float(zbd[k_][1]), float(zbd[k_][2]))
 			zebriky.append(zw)
-			_kolize_zebriku(dum, Vector3(float(zbd[0][0]), float(zbd[0][1]), float(zbd[0][2])), Vector3(float(zbd[1][0]), float(zbd[1][1]), float(zbd[1][2])), float((md.get("zebriky", {}) as Dictionary).get("sirka_m", {}).get(String(s["model"]), 0.47)))
 		var st_vzor: MeshInstance3D = ssc.find_child(String(s["model"]) + "_Stredni", true, false) as MeshInstance3D if ssc else null
 		var se_st := st_vzor != null and blizko < st_do
 		if se_st:
@@ -885,7 +884,6 @@ func _celek(uzel: Node3D, s: Dictionary, vnitrek_do: float, obal_do: float, jas:
 		var z_: Dictionary = s["zebrik"]; var zw := {"nazev": String(z_.get("nazev", "Žebřík"))}
 		for k_ in ["pata", "vrchol", "nastup", "sestup"]: zw[k_] = n.transform * Vector3(float(z_[k_][0]), float(z_[k_][1]), float(z_[k_][2]))
 		zebriky.append(zw)
-		_kolize_zebriku(n, Vector3(float(z_["pata"][0]), float(z_["pata"][1]), float(z_["pata"][2])), Vector3(float(z_["vrchol"][0]), float(z_["vrchol"][1]), float(z_["vrchol"][2])), float(z_.get("sirka_m", 0.47)))
 	if s.get("lod1") != null and ResourceLoader.exists(String(s["lod1"])):
 		var l1: Node3D = (load(String(s["lod1"])) as PackedScene).instantiate(); l1.name = "LOD1"; n.add_child(l1)
 		for g in l1.find_children("*", "GeometryInstance3D", true, false):
@@ -931,18 +929,6 @@ func _puda(n: Node3D, pd: Dictionary) -> void:
 		cs.transform = Transform3D(Basis(bok, nh, dz).orthonormalized(), (p0 + p1) * 0.5 - nh * 0.06)
 		kb.add_child(cs)
 	n.add_child(kb)
-
-
-## Kolize žebříku na půdu (č. 314; povrch_kolize 15. 11.: postava procházela příčlemi žebříku v síni Dum2): deska tl. 0,08 m
-## v rovině příčlí od paty k vrcholu, šířka štěřin (mista.json domy.zebriky.sirka_m, celky.<model>.zebrik.sirka_m); při lezení
-## má postava kolizi vypnutou (hrac.gd chyt_zebrik), nástup a sestup stojí mimo desku. Souřadnice modelu (rodič = dům / celek).
-func _kolize_zebriku(rodic: Node3D, pata: Vector3, vrchol: Vector3, sirka: float) -> void:
-	var dz := (vrchol - pata).normalized(); var bok := Vector3(dz.z, 0, -dz.x).normalized()
-	if bok.length() < 0.5: bok = Vector3.RIGHT
-	var kb := StaticBody3D.new(); kb.name = "ZebrikKolize"
-	var cs := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(sirka, 0.08, (vrchol - pata).length()); cs.shape = bx
-	cs.transform = Transform3D(Basis(bok, dz.cross(bok).normalized(), dz).orthonormalized(), (pata + vrchol) * 0.5)
-	kb.add_child(cs); rodic.add_child(kb)
 
 
 ## Šikmá kolize u vnějších dveří domu (Míša 13. 11.: „do hájovny nemůžu vstoupit, všechny budovy musí být vstupné“): domy

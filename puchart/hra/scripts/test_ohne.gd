@@ -7,6 +7,11 @@ extends Node
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # hlavní nabídka pozastaví strom
 	var h := get_parent()
+	# hlídač nesmí viset (koordinátor 15. 11.: test 2× visel 10 i 30 min – příčina: chyba syntaxe v tomto skriptu, skript se
+	# nenačetl a hra běžela dál): pojistka – po limit_s výpis CHYBA a konec
+	get_tree().create_timer(float(OS.get_environment("PUCHART_TEST_LIMIT_S")) if OS.get_environment("PUCHART_TEST_LIMIT_S") != "" else 900.0, true, false, true).timeout.connect(func() -> void:
+		print("OHNE_TEST CHYBA: test nedoběhl v limitu (ohně se nepostavily? Ohne.pripraveno %s)" % [h.get_node_or_null("Ohne") != null and bool(h.get_node("Ohne").pripraveno)])
+		get_tree().quit(1))
 	var oh: Node = h.get_node_or_null("Ohne")
 	var chyby: Array = []
 	if oh == null: _konec(["uzel Ohne chybí"], 0, 0); return
@@ -45,7 +50,7 @@ func _ready() -> void:
 	if ik < 0 or ia < 0: chyby.append("hrad: kuchyně %d / kamna %d nenalezena (značky HradA_Ohen_* pod uzlem Hrad)" % [ik, ia])
 	else:
 		var ok_k: Dictionary = oh.ohne[ik]; var ok_a: Dictionary = oh.ohne[ia]
-		for hc: Array in [[6.0, true, true], [14.0, true, true], [17.0, true, true], [22.0, true, true]]   # Míša 15. 11.: všechny ohně hoří pořád (KCD, hori vzdy)
+		for hc: Array in [[6.0, true, true], [14.0, true, true], [17.0, true, true], [22.0, true, true]]:   # Míša 15. 11.: všechny ohně hoří pořád (KCD, hori vzdy)
 			oh._noc(false, float(hc[0]))
 			var nehori: Array = []
 			for o: Dictionary in oh.ohne:

@@ -51,7 +51,7 @@
    "jas_podrobny": 0.8,
    "jas_podrobny_pozn": "Míša 14. 11. (foto x −65 z −141, Dum1): „domy jsou hezké světlé, ale až moc vypadají bílé“ – textury domů Havrana jsou při převodu zesvětlené na průměrný jas 0,5 (nastroje/havran/stavby_export.gd JAS_CIL, KCD1 ves_2); ve hře násobek barvy podrobného modelu (vnějšek, ne vnitřek) – ~0,4 jako hospodářské stavby (JAS_PREDMETY 0,42); hrubé stupně mají vlastní daleko_textury.jas",
    "zebriky": {
-    "popis": "žebřík na půdu v síni domů z Havrana [pata, vrchol, nástup, sestup] v souřadnicích modelu (hlavni.gd _mista → zebriky.gd)", "sirka_m": {"Dum1": 0.47, "Dum2": 0.46, "Rychta": 0.47}, "sirka_pozn": "šířka žebříku přes štěřiny (m) pro kolizi příčlí (hlavni.gd _kolize_zebriku, č. 314): domy.glb Dum1_Interier z 0,04…0,51, Dum2_Interier z 0,25…0,71, Rychta_Interier z −1,21…−0,74 (rozbor kusů sítě 15. 11.)",
+    "popis": "žebřík na půdu v síni domů z Havrana [pata, vrchol, nástup, sestup] v souřadnicích modelu (hlavni.gd _mista → zebriky.gd)",
     "zdroj": "Havran scripts/svet.gd DUM_ZEBRIK (lezení 0.76, Míša: „žebříky v domech, na půdy“); Míša 15. 11. (foto x −56 z −145,3): „chci všechny žebříky ve hře, aby byly funkční“",
     "Dum1": [
      [
@@ -520,10 +520,10 @@
       2.96,
       1.05
      ],
-     "zdroj": "Míša 15. 11.: „chci všechny žebříky ve hře, aby byly funkční“; model krčmy (NAVOD_KRCMA_L: černá kuchyně – žebřík na půdu): štěřiny x 1,27–1,81, pata z −1,17 y 0,44, vrch z 0,22 y 3,36 (KrcmaL_Interier_Dum); vrchol a sestup jako u hájovny (sestup 0,9 m za vrcholem na povale)", "sirka_m": 0.54
+     "zdroj": "Míša 15. 11.: „chci všechny žebříky ve hře, aby byly funkční“; model krčmy (NAVOD_KRCMA_L: černá kuchyně – žebřík na půdu): štěřiny x 1,27–1,81, pata z −1,17 y 0,44, vrch z 0,22 y 3,36 (KrcmaL_Interier_Dum); vrchol a sestup jako u hájovny (sestup 0,9 m za vrcholem na povale)"
     },
     "puda": {
-     "popis": "kolize povaly krčmy jen pod viditelnou povalou (jako hájovna; hlavni.gd _puda): Kol_Strop (y 2,90–2,96 přes celý dům) nahrazen kvádry strop_kvadry; otvor = celá černá kuchyně x −0,85…2,1, z −0,12…−4 (otevřená do krovu, žebřík z kuchyně na povalu síně) – rozbor 15. 11. (č. 311): viditelná povala hra/modely/stavby_h/krcma_rada.glb paprskem shora po 5 cm (okraje x −0,85 a 2,1, z −0,12), snímek z půdy docs/screens/povrch_krcma_puda_kuchyne.png; dřív otvor jen x 1,0–2,1, z −0,7–0,6 → nad kuchyní neviditelná podlaha (povrch_kolize „stojí nad viditelným“ 2,0–2,5 m) a v povale síně x 1,0–2,1, z −0,12…0,6 díra bez kolize; příčka síň/kuchyně (Kol_PricK16/17, PricKN18) oříznuta na vrch povaly",
+     "popis": "kolize povaly krčmy jen pod viditelnou povalou (jako hájovna; hlavni.gd _puda): Kol_Strop (y 2,90–2,96 přes celý dům) nahrazen kvádry strop_kvadry; otvor = celá černá kuchyně x −0,85…2,1, z −0,12…−4 (otevřená do krovu, žebřík z kuchyně na povalu síně) – rozbor 15. 11. (č. 311): viditelná povala hra/modely/stavby_h/krcma_rada.glb paprskem shora po 5 cm (okraje x −0,85 a 2,1, z −0,12), snímek z půdy docs/screens/povrch_krcma_puda_kuchyne.jpg; dřív otvor jen x 1,0–2,1, z −0,7–0,6 → nad kuchyní neviditelná podlaha (povrch_kolize „stojí nad viditelným“ 2,0–2,5 m) a v povale síně x 1,0–2,1, z −0,12…0,6 díra bez kolize; příčka síň/kuchyně (Kol_PricK16/17, PricKN18) oříznuta na vrch povaly",
      "strop_smazat": "KrcmaL_Kol_Strop",
      "strop_y": [
       2.9,
@@ -631,7 +631,7 @@
       -1.05
      ],
      "nazev": "Žebřík na půdu",
-     "zdroj": "Míša 14. 11. (tablet): „na půdu hájovny se dá vylézt po žebříku v předsíni – vem si z Havrana funkci lezení po žebříku“. Poloha ze sítě Hajovna_Interier (hajovna.glb, NAVOD_HAJOVNA.md: žebřík v síni): štěřiny x 3,64–3,71 a 4,09–4,16 (osa x 3,9), pata y 0,44 z 0,63 na podlaze síně, horní konec y 3,01 z −0,28 opřený o příčku síň/komora (z −0,29…−0,51), 8 příčlí po 0,29 m. Formát a význam jako Havran svet.gd DUM_ZEBRIK (souřadnice modelu): pata a vrchol na ose žebříku (vrchol 0,2 m nad podlahou půdy 2,61), nástup na podlaze síně před žebříkem, sestup na povale komory za horním koncem.", "sirka_m": 0.52
+     "zdroj": "Míša 14. 11. (tablet): „na půdu hájovny se dá vylézt po žebříku v předsíni – vem si z Havrana funkci lezení po žebříku“. Poloha ze sítě Hajovna_Interier (hajovna.glb, NAVOD_HAJOVNA.md: žebřík v síni): štěřiny x 3,64–3,71 a 4,09–4,16 (osa x 3,9), pata y 0,44 z 0,63 na podlaze síně, horní konec y 3,01 z −0,28 opřený o příčku síň/komora (z −0,29…−0,51), 8 příčlí po 0,29 m. Formát a význam jako Havran svet.gd DUM_ZEBRIK (souřadnice modelu): pata a vrchol na ose žebříku (vrchol 0,2 m nad podlahou půdy 2,61), nástup na podlaze síně před žebříkem, sestup na povale komory za horním koncem."
     },
     "puda": {
      "popis": "Kolize půdy (hlavni.gd _puda): v modelu je strop jeden kvádr přes celý dům (Hajovna_Kol_Strop y 2,55–2,61), ale viditelná povala je jen nad jizbou (x −4,2…0,6) a komorou (x 0,6…4,4, z −2,7…−0,4) – síň je otevřená do krovu (dým k dymníku) a do ní vede žebřík. strop_smazat = uzel kolize modelu (jméno po importu Godotu, bez -convcolonly), místo něj kvádry strop_kvadry [x0, x1, z0, z1] v souřadnicích modelu ve výšce strop_y [spodek, vrch]; otvor nad síní = tam, kde kvádr není. oriznout = kolize příček, které končí na podlaze půdy bez viditelného trámu (příčka síň/komora: viditelně končí y 2,51 pod povalou, kolize do 2,9 = neviditelný práh 0,29 m), oříznou se na vrch stropu. najezdy = šikmé desky přes viditelný trám příčky jizba/síň (Roubeni x 0,47–0,72, vrch y 2,87 po celé délce domu – postava nemá krok nahoru, jako rampy dveří): od (na podlaze) → do (na hraně trámu), sirka_m napříč. trasa = test průchodu po půdě [x, y, z] modelu (nastroje/mista_rozmisteni.py → hra/data/pruchody_mista.json puda_<misto>_<model>).",
