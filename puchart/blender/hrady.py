@@ -119,13 +119,14 @@ def okenice(P, m, w, y0, y1, z_lic, uhel, use):
     """Dvě křídla vnitřní okenice světlíku šířky w (m = rám okna, osa z ven) jako pohyblivé díly Pohyb_okeniceN_l/_p (Míša
     15. 11.: okenice „otvírat“): pant na hraně světlíku (+ přesah) na straně do místnosti, z_lic = líc, ke kterému okenice
     doléhá (z místně). Ve glb otevřené o uhel (dvere.gd: zavřeno = −open). Dálková verze: pevné desky otevřené jako dřív."""
-    th = POHYB_OK["tloustka_m"]; pr = POHYB_OK["presah_m"]; wl = w / 2 + pr; h = y1 - y0 + 2 * pr
+    th = POHYB_OK["tloustka_m"]; pr = POHYB_OK["presah_m"]; wl = w / 2 + pr; h = y1 - y0   # přesah jen do stran (svisle by
+    # zavřené křídlo zajelo do trámku dýmníku nad oknem kuchyně a do zábradlí pod okénkem – kontrola okenic v puchart_hrad)
     zh = z_lic - POHYB_OK["odstup_m"] - th   # pant na straně do místnosti (křídlo 0..+th k líci)
     OKENICE_N[0] += 1; gid = "okenice%d" % OKENICE_N[0]
     for sx, kon in ((-1, "l"), (1, "p")):
-        hm = m @ M((sx * (w / 2 + pr), y0 - pr, zh))
+        hm = m @ M((sx * (w / 2 + pr), y0, zh))
         kit.movable("%s_%s" % (gid, kon), "dvere", hm, lambda Q, sx=sx: _kridlo_okenice(Q, wl, h, sx), cols=(), use=list(use), group=gid,
-                    open=round(-sx * uhel, 1), dur=POHYB_OK["doba_s"])
+                    open=round(-sx * uhel, 1), dur=POHYB_OK["doba_s"], _zavreno=hm.copy(), _kridlo=(wl, h, th, POHYB_OK["svlak_m"][1], sx))
 
 def uhel_okenice_nika(w, wn):
     """Největší úhel otevření křídla v nice (nejvýš uhel_nika_max): konec křídla (délka w/2 + přesah) nesmí dojít k boku niky

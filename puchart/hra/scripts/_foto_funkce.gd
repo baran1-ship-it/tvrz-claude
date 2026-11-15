@@ -34,6 +34,9 @@ func _ready() -> void:
 				var c := ab.get_center()
 				cam.look_at_from_position(dum.global_transform * Vector3(c.x + 0.4, ab.end.y + 1.0, c.z + 1.6), dum.global_transform * Vector3(c.x - 0.3, ab.end.y - 0.15, c.z), Vector3.UP)
 				fu.nalij(p)
+				var vm: MeshInstance3D = p["voda"]
+				if OS.get_environment("PUCHART_CERVENA") != "": var cm := StandardMaterial3D.new(); cm.albedo_color = Color.RED; cm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED; vm.material_override = cm
+				print("VODA ", vm.global_transform * vm.mesh.get_aabb().position, " ", vm.global_transform * vm.mesh.get_aabb().end, " mat ", vm.material_override, " vis ", vm.is_visible_in_tree(), " cam ", cam.global_position, " pov ", vm.mesh.get_faces().size())
 				await get_tree().create_timer(1.0).timeout
 				break
 	for i in 10: await get_tree().process_frame

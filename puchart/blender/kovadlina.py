@@ -510,12 +510,14 @@ def mat_zelezo_autorsky():
     ao_f = ao.outputs["AO"]
     # masky
     draha = U.math("MULTIPLY", U.mr(z, F - 0.0045, F - 0.0012), U.mr(nz, 0.82, 0.95))
-    roh_vrch = U.math("MULTIPLY", U.math("MULTIPLY", U.mr(nz, 0.35, 0.85), U.mr(z, F - 0.075, F - 0.02)), U.mr(x, CX + 0.18, CX + 0.24))
+    roh_vrch = U.math("MULTIPLY", U.math("MULTIPLY", U.mr(nz, 0.72, 0.95), U.mr(z, F - 0.045, F - 0.015)), U.mr(x, CX + 0.18, CX + 0.24))
     sp_vrch = U.math("MULTIPLY", U.mr(z, H + SH["vyska_nad_spalkem_m"] - 0.03, H + SH["vyska_nad_spalkem_m"] - 0.005),
                      U.mr(x, SH["poloha_m"][0] + 0.09, SH["poloha_m"][0] + 0.06))
     lesk = U.math("MAXIMUM", draha, U.math("MULTIPLY", U.math("MAXIMUM", roh_vrch, sp_vrch), 0.85))
-    hrana = U.mr(geo.outputs["Pointiness"], 0.53, 0.64)
-    pas_hor = U.math("MULTIPLY", U.mr(z, F - 0.05, F - 0.003), 0.55)          # horní pás boků ohlazený prací
+    atr = U.u("ShaderNodeAttribute", attribute_name="dil")
+    drobne = U.mr(atr.outputs["Fac"], 1.5, 1.6)                                   # pásek, hřeby, kramle
+    hrana = U.math("MULTIPLY", U.mr(geo.outputs["Pointiness"], 0.56, 0.68), U.math("SUBTRACT", 1.0, drobne))
+    pas_hor = U.math("MULTIPLY", U.mr(z, F - 0.015, F - 0.002), 0.3)          # horní hrana boků ohlazená prací
     opotr = U.math("MINIMUM", U.math("MAXIMUM", hrana, pas_hor), U.math("SUBTRACT", 1.0, lesk), clamp=True)
     sum1 = U.u("ShaderNodeTexNoise"); sum1.inputs["Scale"].default_value = 11.0; sum1.inputs["Detail"].default_value = 8.0
     sum1.inputs["Roughness"].default_value = 0.62; U.ln(geo.outputs["Position"], sum1.inputs["Vector"])
@@ -523,10 +525,9 @@ def mat_zelezo_autorsky():
     U.ln(geo.outputs["Position"], sum2.inputs["Vector"])
     dutiny = U.math("SUBTRACT", 1.0, ao_f, clamp=True)
     rez_zaklad = U.mr(sum1.outputs["Fac"], 0.50, 0.66)
-    u_dreva = U.mr(z, B + 0.09, B + 0.005, 0.0, 0.55)                           # vlhko od dřeva
+    u_dreva = U.mr(z, B + 0.07, B + 0.005, 0.0, 0.3)                            # vlhko od dřeva
     pas_k = U.math("MULTIPLY", U.mr(z, B + 0.10, B + 0.13), U.mr(z, B + 0.24, B + 0.20))   # jemná rez v pasu
-    dal = U.math("MULTIPLY", U.mr(U.math("ADD", U.math("POWER", x, 2.0), U.math("POWER", xyz.outputs[1], 2.0)),
-                                  0.40 ** 2, 0.44 ** 2), 0.35)                  # pásek a kramle venku víc
+    dal = U.math("MULTIPLY", drobne, 0.65)                                      # pásek a kramle rezavější
     rez = U.math("ADD", U.math("MULTIPLY", rez_zaklad, U.math("ADD", 0.35, U.math("MULTIPLY", dutiny, 1.6))),
                  U.math("ADD", U.math("ADD", u_dreva, U.math("MULTIPLY", pas_k, 0.35)), dal))
     rez = U.math("MULTIPLY", rez, U.math("SUBTRACT", 1.0, U.math("MAXIMUM", lesk, U.math("MULTIPLY", hrana, 0.8))), clamp=True)
@@ -539,10 +540,12 @@ def mat_zelezo_autorsky():
     skr_n = U.u("ShaderNodeTexNoise"); skr_n.inputs["Scale"].default_value = 1.6; skr_n.inputs["Detail"].default_value = 3.0
     U.ln(skr.outputs[0], skr_n.inputs["Vector"])
     skrab = U.mr(skr_n.outputs["Fac"], 0.56, 0.68)
-    jamky = U.mr(rH.outputs[0], 0.30, 0.18)
-    lesk_b = U.mix(U.math("MULTIPLY", skrab, 0.25), (0.52, 0.515, 0.50), (0.62, 0.62, 0.61))
-    lesk_b = U.mix(U.math("MULTIPLY", jamky, 0.7), lesk_b, (0.16, 0.15, 0.14))
-    hrana_b = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.4), (0.22, 0.215, 0.21), (0.30, 0.295, 0.29))
+    jamky = U.mr(rH.outputs[0], 0.38, 0.2)
+    skvrny = U.mr(sum1.outputs["Fac"], 0.42, 0.62)
+    lesk_b = U.mix(U.math("MULTIPLY", skrab, 0.3), (0.36, 0.35, 0.335), (0.46, 0.455, 0.44))
+    lesk_b = U.mix(U.math("MULTIPLY", skvrny, 0.45), lesk_b, (0.20, 0.18, 0.16))
+    lesk_b = U.mix(U.math("MULTIPLY", jamky, 0.75), lesk_b, (0.09, 0.085, 0.08))
+    hrana_b = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.4), (0.15, 0.145, 0.14), (0.22, 0.215, 0.21))
     alb = U.mix(rez, okuje, rez_b)
     alb = U.mix(opotr, alb, hrana_b)
     alb = U.mix(lesk, alb, lesk_b)
@@ -551,10 +554,11 @@ def mat_zelezo_autorsky():
     dr_ok = U.math("ADD", 0.62, U.math("MULTIPLY", rR.outputs[0], 0.22))
     dr = U.mix(rez, dr_ok, 0.9)
     dr = U.mix(opotr, dr, 0.5)
-    dr = U.mix(lesk, dr, U.math("ADD", 0.28, U.math("MULTIPLY", skrab, 0.16)))
+    dr = U.mix(lesk, dr, U.math("ADD", U.math("ADD", 0.33, U.math("MULTIPLY", skrab, 0.12)),
+                                U.math("ADD", U.math("MULTIPLY", jamky, 0.35), U.math("MULTIPLY", skvrny, 0.15))))
     kov = U.mix(rez, 0.3, 0.0)
-    kov = U.mix(opotr, kov, 0.7)
-    kov = U.mix(lesk, kov, 0.88)
+    kov = U.mix(opotr, kov, 0.6)
+    kov = U.mix(lesk, kov, U.math("SUBTRACT", 0.82, U.math("MULTIPLY", jamky, 0.5)))
     # reliéf
     vyska = U.math("MULTIPLY", rH.outputs[0], U.math("SUBTRACT", 1.0, U.math("MULTIPLY", lesk, 0.9)))
     vyska = U.math("ADD", vyska, U.math("MULTIPLY", rez, U.math("MULTIPLY", sum2.outputs["Fac"], 0.6)))
@@ -615,7 +619,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
     pozdni = np.clip((fr - 0.55) / 0.2, 0, 1) * np.clip((1.0 - fr) / 0.1, 0, 1)
     jarni_p = np.clip(1 - np.abs(fr - 0.05) / 0.06, 0, 1)          # póry jarního dřeva (dub – kruhovitě pórovitý)
     zakl = np.stack([0.33 + 0.0 * r, 0.255 + 0.0 * r, 0.185 + 0.0 * r], -1)
-    pozd_c = np.array([0.255, 0.195, 0.145])
+    pozd_c = np.array([0.285, 0.218, 0.160])
     col = zakl * (1 - pozdni[..., None]) + pozd_c * pozdni[..., None]
     col *= (1 - 0.25 * jarni_p * (sumC > 0.45))[..., None]
     # dřeňové paprsky (dub): tenké světlé radiální čárky
@@ -668,7 +672,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
         sir_r = 0.0035 * np.clip(1 - r / 0.07, 0, 1)
         tr_m = np.maximum(tr_m, np.clip(1 - prc / np.maximum(sir_r, 1e-5), 0, 1))
     col = col * (1 - 0.88 * tr_m[..., None])
-    vys = vys + 0.18 * pozdni - 0.07 * jarni_p - 0.55 * tr_m + 0.06 * (sumB - 0.5)
+    vys = vys + 0.08 * pozdni - 0.04 * jarni_p - 0.55 * tr_m + 0.06 * (sumB - 0.5)
     rgb = np.where(disk[..., None], col, rgb)
     vys_all = np.where(disk, vys, 0.5)
     # --- boky (násobič barvy rough_wood)

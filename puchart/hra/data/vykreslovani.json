@@ -5,8 +5,20 @@
  "pozn_override_soubor": "musí se shodovat s project.godot application/config/project_settings_override (Godot čte cestu z project.godot, ne odsud)",
  "stav_soubor": "user://vykreslovani.cfg",
  "volby": [
-  {"id": "compatibility", "nazev": "Compatibility (OpenGL)", "kratce": "GL Compatibility", "metoda": "gl_compatibility", "ovladac": "opengl3", "override": {}},
-  {"id": "vulkan", "nazev": "Vulkan (Mobile) – zkušební", "kratce": "Vulkan Mobile", "metoda": "mobile", "ovladac": "vulkan",
+  {
+   "id": "compatibility",
+   "nazev": "Compatibility (OpenGL)",
+   "kratce": "GL Compatibility",
+   "metoda": "gl_compatibility",
+   "ovladac": "opengl3",
+   "override": {}
+  },
+  {
+   "id": "vulkan",
+   "nazev": "Vulkan (Mobile) – zkušební",
+   "kratce": "Vulkan Mobile",
+   "metoda": "mobile",
+   "ovladac": "vulkan",
    "override": {
     "rendering/renderer/rendering_method": "mobile",
     "rendering/renderer/rendering_method.mobile": "mobile",
@@ -14,7 +26,8 @@
     "rendering/rendering_device/driver.android": "vulkan",
     "rendering/rendering_device/fallback_to_opengl3": true
    },
-   "pozn": "rendering_method i .mobile: na Androidu platí klíč s příznakem .mobile (project.godot ho má = gl_compatibility), na PC holý klíč – stejný soubor přepne obojí (zkouška v kontejneru)"}
+   "pozn": "rendering_method i .mobile: na Androidu platí klíč s příznakem .mobile (project.godot ho má = gl_compatibility), na PC holý klíč – stejný soubor přepne obojí (zkouška v kontejneru)"
+  }
  ],
  "vychozi": "compatibility",
  "pojistka": {
@@ -37,5 +50,6 @@
   "hlaska_bez_override": "Volba Vulkan se při startu nenačetla – běží Compatibility.",
   "restart": "Restart hry…",
   "mereni_jine": "— poslední měření v jiném vykreslování (%s) —"
- }
+ },
+ "zdroj_zarizeni": "Míša 15. 11.: na jejím Xiaomi Pad 8 (8 GB, Adreno 825) stabilně běží cizí APK „Forest100-Vulkan-2.5.apk“ – Godot 4.6.3, renderer Mobile (Vulkan), oficiální exportní šablony, arm64, ~101 MB; vegetace v MultiMesh skupinách (buňky 12 m blízko, 48 m siluety), vlastní shader vegetace, limit 30 FPS, interní rozlišení 0,8, podrost do 22 m, detailní stromy do 38 m; na tabletu 28–30 FPS, průměr snímku 34,5–39,7 ms; vyvíjeno přes Mesa llvmpipe/lavapipe. Závěr: Mobile renderer na Adrenu Pad 8 v Godotu 4.6 stabilní → 4.7.2 velmi pravděpodobně taky (NEOVERENO na Puchartu); pád Havrana (4.4) byl nejspíš specifický."
 }

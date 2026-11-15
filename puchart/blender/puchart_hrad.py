@@ -2082,6 +2082,36 @@ def zabradli_stavba():
                 P.beam(q + UP * (yq - r["dolu"]), q + UP * (yq + 1.0), 0.1, 0.1, "dub", up=d, j=0.4)   # čep do madla
     ZAB_REC.clear()
 
+OKENICE_LOG = []
+def kontrola_okenic(cols):
+    """Okenice (hrady.okenice, Pohyb_okenice*) nesmí zavřené ani otevřené zajet do kolize hradu (zeď, ostění, trámy, zábradlí):
+    vzorky kvádru křídla (zmenšeného o 1 cm) proti kolizním kvádrům. Otevřené: úhel se zmenšuje po 2° až k 60° (Míša 15. 11.:
+    úhel podle ostění); zavřené do kolize = okno bez okenice (zápis build/okenice.json – chyba stavby okna, ne okenice)."""
+    import bpy
+    okn = [e for e in lib.MOVABLE if e["name"].startswith("Pohyb_okenice")]
+    pryc = set()
+    for e in okn:
+        hm = e["_zavreno"]; wl, h, th, st, sx = e["_kridlo"]; o = hm.translation
+        bl = [(m, sz) for m, sz in cols if (m.translation - o).length < 0.87 * sum(sz) / 2 + 1.0]
+        loc = [Vector((-sx * x, y, z)) for x in np.linspace(0.01, wl - 0.01, 6) for y in np.linspace(0.01, h - 0.01, 6) for z in (-st + 0.01, th - 0.01)]
+        def narazi(uh):
+            mw = hm @ Matrix.Rotation(math.radians(uh), 4, "Y")
+            return any(_v_kvadru(m, sz, mw @ q) for q in loc for m, sz in bl)
+        if narazi(0.0):
+            pryc.add(e["group"]); OKENICE_LOG.append({"skupina": e["group"], "kridlo": e["name"], "stav": "zavrena_v_kolizi", "pant": [round(o.x, 2), round(o.z, 2), round(o.y, 2)]}); continue
+        uh = float(e["open"]); zn = 1.0 if uh > 0 else -1.0
+        while abs(uh) > 60.0 and narazi(uh): uh -= zn * 2.0
+        if narazi(uh):
+            pryc.add(e["group"]); OKENICE_LOG.append({"skupina": e["group"], "kridlo": e["name"], "stav": "otevrena_v_kolizi", "pant": [round(o.x, 2), round(o.z, 2), round(o.y, 2)]}); continue
+        if uh != e["open"]:
+            OKENICE_LOG.append({"skupina": e["group"], "kridlo": e["name"], "stav": "uhel %s -> %s" % (e["open"], uh), "pant": [round(o.x, 2), round(o.z, 2), round(o.y, 2)]})
+            e["open"] = uh; bpy.data.objects[e["name"]].matrix_world = lib.mat_to_bl(hm @ Matrix.Rotation(math.radians(uh), 4, "Y"))
+    for e in [e for e in okn if e["group"] in pryc]:   # skupina bez funkční okenice: křídla pryč (okno se musí opravit u zdroje)
+        bpy.data.objects.remove(bpy.data.objects[e["name"]]); lib.MOVABLE.remove(e)
+    json.dump({"popis": "kontrola okenic (puchart_hrad.kontrola_okenic): zmenšené úhly otevření a okna bez okenice (křídlo zavřené/otevřené v kolizi)", "okenice": OKENICE_LOG},
+              open(os.path.join(K, "build/okenice.json"), "w"), ensure_ascii=False, indent=1)
+    print("OKENICE skupin %d, upraveno/odstraněno %d: %s" % (len({e["group"] for e in okn}), len(OKENICE_LOG), OKENICE_LOG), flush=True)
+
 def stavba(suf):
     H.TRAMY.clear(); POCH.clear(); ZABR.clear(); SCHODY.clear(); BUDOVY.clear(); STUPNE.clear(); portaly.ZAZNAM.clear()
     if _DBG and suf == "_daleko":
@@ -2120,6 +2150,7 @@ def stavba(suf):
             for m_, sz_ in Pq.cols:
                 l_ = m_.inverted() @ Vector((qx_, qy_, qz_))
                 if all(abs(l_[k]) <= sz_[k] / 2 + 0.05 for k in range(3)): print("DBGB", Pq.name if hasattr(Pq, "name") else "", [round(v_, 2) for v_ in m_.translation], sz_, flush=True)
+    if suf == "": kontrola_okenic(PA.cols + PB.cols)
     H.uloz([PA, PB], "puchart" + suf, kolize=(suf == ""), vzhled=VZ if suf == "" else None, vnitrek_pryc=(suf == "_daleko"))
     if suf == "":
         cc = json.load(open(os.path.join(K, "pravidla/svet/cesty_puchart.json")))
