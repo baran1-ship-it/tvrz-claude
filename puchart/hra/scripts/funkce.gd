@@ -217,7 +217,8 @@ func nalij(p: Dictionary) -> void:
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var mv = hlavni.get("mat_voda")
 	if mv is ShaderMaterial:
-		var m2 := (mv as ShaderMaterial).duplicate() as ShaderMaterial; m2.set_shader_parameter("rychlost", float(zl["rychlost"])); mi.material_override = m2
+		var m2 := (mv as ShaderMaterial).duplicate() as ShaderMaterial; mi.material_override = m2
+		for k: String in zl["shader"]: m2.set_shader_parameter(k, float(zl["shader"][k]))   # stojatá zakalená voda v korytě
 	(p["dum"] as Node3D).add_child(mi)
 	p["voda"] = mi
 

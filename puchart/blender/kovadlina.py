@@ -238,7 +238,7 @@ def kovadlina_high():
                                                  location=(xk - r * 0.3, random.uniform(-hw, hw), F - 0.002))
             rez.append(bpy.context.object)
     odecti(o, rez)
-    remesh(o, 0.0018, vyhlad=3, fakt=0.5)
+    remesh(o, 0.0016, vyhlad=1, fakt=0.5)
     g = skupina_mimo_drahu(o)
     displace(o, "CLOUDS", 0.09, 0.004, g, noise_depth=2)           # nerovnosti kování (vlny po kladivu)
     displace(o, "VORONOI", 0.02, -0.0006, g, stred=0.5, distance_metric="DISTANCE")    # ploché fazety po kladivu
@@ -471,8 +471,8 @@ class Uzly:
                 sock.default_value = (v, v, v, 1.0)
             elif isinstance(v, (int, float)):
                 sock.default_value = v
-            elif isinstance(v, tuple):
-                sock.default_value = (*v, 1.0)
+            elif isinstance(v, tuple):          # barvy v kódu jsou sRGB (jako na fotce) → lineární pro uzly
+                sock.default_value = (*[c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4 for c in v], 1.0)
             else:
                 s.ln(v, sock)
         return m.outputs[2]
@@ -516,7 +516,9 @@ def mat_zelezo_autorsky():
     lesk = U.math("MAXIMUM", draha, U.math("MULTIPLY", U.math("MAXIMUM", roh_vrch, sp_vrch), 0.85))
     atr = U.u("ShaderNodeAttribute", attribute_name="dil")
     drobne = U.mr(atr.outputs["Fac"], 1.5, 1.6)                                   # pásek, hřeby, kramle
-    hrana = U.math("MULTIPLY", U.mr(geo.outputs["Pointiness"], 0.56, 0.68), U.math("SUBTRACT", 1.0, drobne))
+    bev = U.u("ShaderNodeBevel", samples=8); bev.inputs["Radius"].default_value = 0.006
+    dotn = U.u("ShaderNodeVectorMath", operation="DOT_PRODUCT"); U.ln(bev.outputs[0], dotn.inputs[0]); U.ln(geo.outputs["Normal"], dotn.inputs[1])
+    hrana = U.math("MULTIPLY", U.mr(dotn.outputs["Value"], 0.97, 0.86), U.math("SUBTRACT", 1.0, drobne))
     pas_hor = U.math("MULTIPLY", U.mr(z, F - 0.015, F - 0.002), 0.3)          # horní hrana boků ohlazená prací
     opotr = U.math("MINIMUM", U.math("MAXIMUM", hrana, pas_hor), U.math("SUBTRACT", 1.0, lesk), clamp=True)
     sum1 = U.u("ShaderNodeTexNoise"); sum1.inputs["Scale"].default_value = 11.0; sum1.inputs["Detail"].default_value = 8.0
@@ -524,16 +526,17 @@ def mat_zelezo_autorsky():
     sum2 = U.u("ShaderNodeTexNoise"); sum2.inputs["Scale"].default_value = 38.0; sum2.inputs["Detail"].default_value = 4.0
     U.ln(geo.outputs["Position"], sum2.inputs["Vector"])
     dutiny = U.math("SUBTRACT", 1.0, ao_f, clamp=True)
-    rez_zaklad = U.mr(sum1.outputs["Fac"], 0.50, 0.66)
+    rez_zaklad = U.math("MAXIMUM", U.mr(sum1.outputs["Fac"], 0.48, 0.64), pihy)
     u_dreva = U.mr(z, B + 0.07, B + 0.005, 0.0, 0.3)                            # vlhko od dřeva
     pas_k = U.math("MULTIPLY", U.mr(z, B + 0.10, B + 0.13), U.mr(z, B + 0.24, B + 0.20))   # jemná rez v pasu
-    dal = U.math("MULTIPLY", drobne, 0.65)                                      # pásek a kramle rezavější
+    dal = U.math("MULTIPLY", drobne, 0.25)                                      # pásek a kramle rezavější
     rez = U.math("ADD", U.math("MULTIPLY", rez_zaklad, U.math("ADD", 0.35, U.math("MULTIPLY", dutiny, 1.6))),
                  U.math("ADD", U.math("ADD", u_dreva, U.math("MULTIPLY", pas_k, 0.35)), dal))
     rez = U.math("MULTIPLY", rez, U.math("SUBTRACT", 1.0, U.math("MAXIMUM", lesk, U.math("MULTIPLY", hrana, 0.8))), clamp=True)
     # barvy
-    okuje = U.mix(0.55, (0.085, 0.081, 0.078), rD.outputs[0], "MULTIPLY")
-    okuje = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.6), okuje, (0.105, 0.098, 0.092))
+    okuje = U.mix(0.5, (0.125, 0.115, 0.105), rD.outputs[0], "MULTIPLY")
+    okuje = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.6), okuje, (0.15, 0.135, 0.12))
+    pihy = U.math("MULTIPLY", U.mr(sum2.outputs["Fac"], 0.58, 0.66), 0.5)        # jemná rez – pihy
     rez_b = U.mix(0.25, rD.outputs[0], (0.20, 0.11, 0.06), "MULTIPLY")
     rez_b = U.mix(0.5, rez_b, rD.outputs[0])
     skr = U.u("ShaderNodeMapping"); skr.inputs["Scale"].default_value = (3.0, 160.0, 3.0); U.ln(geo.outputs["Position"], skr.inputs[0])
@@ -542,7 +545,7 @@ def mat_zelezo_autorsky():
     skrab = U.mr(skr_n.outputs["Fac"], 0.56, 0.68)
     jamky = U.mr(rH.outputs[0], 0.38, 0.2)
     skvrny = U.mr(sum1.outputs["Fac"], 0.42, 0.62)
-    lesk_b = U.mix(U.math("MULTIPLY", skrab, 0.3), (0.36, 0.35, 0.335), (0.46, 0.455, 0.44))
+    lesk_b = U.mix(U.math("MULTIPLY", skrab, 0.3), (0.50, 0.49, 0.47), (0.60, 0.59, 0.57))
     lesk_b = U.mix(U.math("MULTIPLY", skvrny, 0.45), lesk_b, (0.20, 0.18, 0.16))
     lesk_b = U.mix(U.math("MULTIPLY", jamky, 0.75), lesk_b, (0.09, 0.085, 0.08))
     hrana_b = U.mix(U.math("MULTIPLY", sum2.outputs["Fac"], 0.4), (0.15, 0.145, 0.14), (0.22, 0.215, 0.21))
@@ -551,14 +554,14 @@ def mat_zelezo_autorsky():
     alb = U.mix(lesk, alb, lesk_b)
     alb = U.mix(U.math("SUBTRACT", 1.0, U.math("ADD", 0.45, U.math("MULTIPLY", ao_f, 0.55))), alb, (0, 0, 0))
     # drsnost a kov
-    dr_ok = U.math("ADD", 0.62, U.math("MULTIPLY", rR.outputs[0], 0.22))
+    dr_ok = U.math("ADD", 0.66, U.math("MULTIPLY", rR.outputs[0], 0.22))
     dr = U.mix(rez, dr_ok, 0.9)
     dr = U.mix(opotr, dr, 0.5)
     dr = U.mix(lesk, dr, U.math("ADD", U.math("ADD", 0.33, U.math("MULTIPLY", skrab, 0.12)),
                                 U.math("ADD", U.math("MULTIPLY", jamky, 0.35), U.math("MULTIPLY", skvrny, 0.15))))
-    kov = U.mix(rez, 0.3, 0.0)
+    kov = U.mix(rez, 0.15, 0.0)
     kov = U.mix(opotr, kov, 0.6)
-    kov = U.mix(lesk, kov, U.math("SUBTRACT", 0.82, U.math("MULTIPLY", jamky, 0.5)))
+    kov = U.mix(lesk, kov, U.math("SUBTRACT", 0.6, U.math("MULTIPLY", jamky, 0.4)))
     # reliéf
     vyska = U.math("MULTIPLY", rH.outputs[0], U.math("SUBTRACT", 1.0, U.math("MULTIPLY", lesk, 0.9)))
     vyska = U.math("ADD", vyska, U.math("MULTIPLY", rez, U.math("MULTIPLY", sum2.outputs["Fac"], 0.6)))
@@ -682,7 +685,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
         sel = (uu >= bu0 - 0.002) & (uu <= bu0 + T_UV + 0.002) & (vv >= bv0 - 0.002) & (vv <= bv0 + T_UV + 0.002)
         tdl = (k + (uu - bu0) / T_UV) * 2 * np.pi / DLAZD
         s = (vv - bv0) / T_UV * 0.5
-        mul = (0.62 + 0.25 * sumA + 0.1 * sumB)
+        mul = (0.62 + 0.22 * sumA + 0.1 * sumB)
         mul = mul * (1 - 0.35 * np.clip((s - (S_BOK - 0.10)) / 0.08, 0, 1))      # saze u horní hrany
         mul = mul * (1 - 0.25 * np.clip((0.06 - s) / 0.06, 0, 1))               # hlína a vlhko dole
         trm = np.zeros((W, W))
@@ -692,7 +695,7 @@ def textura_dreva(anvil_rect, sperhak_xy):
             od_vrchu = S_BOK - s
             sir_r = sir * np.clip(1 - od_vrchu / bok, 0, 1) ** 0.8
             trm = np.maximum(trm, np.clip(1 - prc / np.maximum(sir_r, 1e-5), 0, 1) * (od_vrchu < bok))
-        tint = np.stack([mul, mul * 0.93, mul * 0.84], -1) * (1 - 0.85 * trm[..., None])
+        tint = np.stack([mul, mul * 0.88, mul * 0.74], -1) * (1 - 0.85 * trm[..., None])
         rgb = np.where(sel[..., None], tint, rgb)
         vys_all = np.where(sel, 0.5 - 0.5 * trm + 0.05 * (sumB - 0.5), vys_all)
     return rgb, vys_all

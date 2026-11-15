@@ -79,14 +79,13 @@
   "hlaska": "Hra uložena"
  },
  "zlab": {
-  "popis": "Žlab v chlévě (Dum2_Kol_Zlab, kolizní kvádr žlabu a jeslí): nabídka „Nalít vodu“ nad žlabem (bod zaměření = střed horní plochy kolize) → hladina vody (rovina se shaderem vody Puchartu shaders/voda.gdshader, materiál potoků hlavni.mat_voda, stojatá: rychlost) v korytě: hladina [x0, x1, y, z0, z1] v souřadnicích modelu (vnitřek vydlabaného koryta v dané výšce), hloubka vody hloubka_m (krytí a barva shaderu). Voda zůstane (nabídka zmizí).",
+  "popis": "Žlab v chlévě (Dum2_Kol_Zlab, kolizní kvádr žlabu a jeslí): nabídka „Nalít vodu“ nad žlabem (bod zaměření = střed horní plochy kolize) → hladina vody (rovina se shaderem vody Puchartu shaders/voda.gdshader, materiál potoků hlavni.mat_voda s parametry shader – stojatá, zakalená) v korytě: hladina [x0, x1, y, z0, z1] v souřadnicích modelu (vnitřek vydlabaného koryta v dané výšce), hloubka vody hloubka_m (krytí a barva shaderu). Voda zůstane (nabídka zmizí).",
   "zdroj": "Míša 15. 11.: žlab „nalít vodu“; tvar podle modelu domy.glb: kolize Dum2_Kol_Zlab (x −2,65…1,6, y 0,25…0,89, z −4,33…−3,83 – i jesle nad korytem), viditelné koryto z kulatiny v síti Dum2_Interier (rozbor vrcholů 15. 11., materiál M_Kura_001: horní hrana koryta y 0,70 z −4,25…−3,91, dno výdlabu y 0,56 z −4,08, čela x −2,65 / 1,60); hladina 4 cm pod hranou, vnitřek výdlabu v této výšce z −4,20…−3,96",
   "kolize": [
    "Dum2_Kol_Zlab"
   ],
   "nabidka": "Nalít vodu",
   "hloubka_m": 0.1,
-  "rychlost": 0.0,
   "hladina": {
    "Dum2_Kol_Zlab": [
     -2.6,
@@ -95,7 +94,13 @@
     -4.2,
     -3.96
    ]
-  }
+  },
+  "shader": {
+   "rychlost": 0.0,
+   "cirost": 0.12,
+   "hloubka_barvy": 0.1
+  },
+  "shader_pozn": "parametry shaderu vody přepsané pro koryto (ostatní z voda_hra.json vzhled_13_11): rychlost 0 = stojatá; cirost 0,12 m a hloubka_barvy 0,1 m – voda v korytě stojí, je zakalená (píce, dno ze dřeva) a v 10 cm musí hladinu být vidět (s čirostí potoka 0,5 m krytí jen 18 % – na snímku 15. 11. hladina nebyla vidět vůbec). NEOVERENO – laděno snímkem docs/screens/funkce_zlab_voda.png"
  },
  "studna": {
   "popis": "Studna na návsi (ves.gd _studny): rumpál s klikou a vědro na laně jsou samostatné uzly Pohyb_ves_studna_rumpal_<i> a Pohyb_ves_studna_vedro_<i> – pohyblivé díly dvere.gd (Havran pohyb.gd): rumpál druh navijak (otacek otáček kolem své osy), vědro druh vedro (posun svisle dolů o hloubku k hladině, doba dur_s), skupina ves_studna_<i>, nabídka u kliky. Vědro visí vedro_pod_osou_m pod osou rumpálu nad středem šachty; lano od bubnu k uchu vědra se přepočítá. hladina_m = hloubka hladiny pod terénem (vědro sjede až k ní); terén pod studnou díru nemá – šachtu kreslí temný kruh nad terénem (ves.gd), vědro do tmy zajede a z ní vyjede.",
