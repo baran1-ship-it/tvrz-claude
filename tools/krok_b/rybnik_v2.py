@@ -144,10 +144,10 @@ def plan(V):
         dn = dx * nx + dz * nz
         if dn > 1e-6:
             tt = (t_voda - ((cx - hx) * nx + (cz - hz0) * nz)) / dn
-            if 0 < tt < r:
+            if 0 < tt:
                 ax_ = (cx + dx * tt - hx) * ux + (cz + dz * tt - hz0) * uz
-                if abs(ax_) <= hz["delka_m"] / 2.0:
-                    r = tt
+                if abs(ax_) <= hz["delka_m"] / 2.0 and tt < r + 4.0:
+                    r = tt                      # podel hraze je kraj vody jeji vodni cara (pozerak stoji ve vode)
         pts.append((cx + dx * r, cz + dz * r))
 
     # 2) vtok: kotva = prvni bod osy pritoku (od pramene), ktery je vtok.prima_m od kraje nebo bliz; bod = nejblizsi bod

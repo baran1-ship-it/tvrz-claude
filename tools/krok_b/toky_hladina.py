@@ -62,6 +62,16 @@ for tj, t in zip(V["toky"], kraj.TOKY):
         na_dilu = kraj._MDIL and kraj._MDIL["tok"] == tj["id"] and any(
             math.hypot(x - q[0], z - q[2]) < 0.05 for q in DIL_BODY)
         dil_bod.append(bool(kraj.v_dilu_mlyna(x, z) or na_dilu))
+        # rybnik v2 (voda.json rybnik_lhota vtok): pevny je jen bod vtoku (hladina rybnika + vtok.skok_m) - drive vsechny
+        # body do 3 m od kraje na hladine + 2 cm (15 m vodorovne nad rybnikem, cerna deska pres koryto, Misa 15. 11. r. 13);
+        # osu u rybnika (rovny kus kolmo do vtoku) a hladinu nad nim planuje tools/krok_b/rybnik_v2.py
+        vt = next((rr["vtok"] for rr in kraj.RYBNIKY if "obrys" in rr and rr["vtok"]["tok"] == tj["id"]), None)
+        if vt is not None:
+            je_vtok = i == n - 1 and math.hypot(x - vt["bod"][0], z - vt["bod"][1]) < 0.05
+            pevny.append(kraj.v_dilu_mlyna(x, z) or na_dilu or je_vtok)
+            if je_vtok:
+                o[i][2] = nadrz[0]["hladina_y"] + vt["skok_m"] if nadrz else o[i][2]
+            continue
         pevny.append(kraj.v_dilu_mlyna(x, z) or na_dilu or (bool(nadrz) and i > n // 2))
         if nadrz and i > n // 2:
             o[i][2] = min(o[i][2], nadrz[0]["hladina_y"] + 0.02)

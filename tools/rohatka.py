@@ -72,6 +72,8 @@ def porovnej(kontrola, nalezy, kontroly=None):
         p = misto(n)
         hit = None
         for i, s in enumerate(schv):
+            if s.get("soubor", n.get("soubor")) != n.get("soubor") or s.get("cil", n.get("cil")) != n.get("cil"):
+                continue                       # misto je v souradnicich souboru / dilu
             if p is not None and s.get("misto") and str(s.get("druh")) == druh(n) and \
                     math.dist(p, [float(c) for c in s["misto"]] + [0.0] * (3 - len(s["misto"]))) <= shoda:
                 hit = i
@@ -98,7 +100,7 @@ def main():
         print("ROHATKA %s NOVY %s %s" % (kontrola, druh(n), json.dumps(n, ensure_ascii=False)[:300]))
     if "--navrh" in sys.argv:
         navrh = [{"id": "%s_%d" % (kontrola, i + 1), "misto": misto(n), "druh": druh(n), "duvod": "(doplnit - proc to neni chyba)",
-                  "schvalil": "(Misa)", "plati_do": "(verze)"} for i, n in enumerate(nove)]
+                  "schvalil": "(Misa)", "plati_do": "(verze)", **({"soubor": n["soubor"]} if "soubor" in n else {})} for i, n in enumerate(nove)]
         print(json.dumps(navrh, ensure_ascii=False, indent=1))
     print("rohatka %s: nalezu %d, schvalenych %d, novych %d, zmizelych schvalenych %d, vadnych schvaleni %d"
           % (kontrola, len(nalezy), len(pouz), len(nove), len(zmiz), len(chyby)))

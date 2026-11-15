@@ -791,9 +791,10 @@ def ryb2_tvar(x, z, h, ryb, prof_toku):
         if de >= 0.0:
             f = min(1.0, de / ryb["dno_svah_m"])
             dno = hl - ryb["hloubka_m"] * (1.0 - (1.0 - f) ** 2)
-            # nizsi puvodni teren (prohlub stareho navesniho rybnicku) jen pod sklonem dna u kraje od kraje vody - kraj
-            # vody zustane na obrysu, ne sraz pod hladinou u brehu (vypocet 15. 11.: 220 st. 2,50 na obrysu, breh 3,50)
-            h = max(min(h, dno), dno - de * 2.0 * ryb["hloubka_m"] / ryb["dno_svah_m"])
+            # nizsi puvodni teren (prohlub stareho navesniho rybnicku) az za melcinou (dno_svah_m) a jen svahem
+            # toky_tvar.svah - kraj vody zustane na obrysu, ne sraz pod hladinou u brehu (vypocet 15. 11.: 220 st. 2,50
+            # na obrysu, breh 3,50)
+            h = max(min(h, dno), dno - max(0.0, de - ryb["dno_svah_m"]) * _TT["svah"])
             # usti: dno pritoku pokracuje za rezem vtoku dolu sklonem dna u kraje (bez prahu mezi korytem a dnem)
             s = ryb2_vtok_rez(ryb, x, z)
             tk = next((t for t in TOKY if t.id == ryb["vtok"]["tok"]), None)
@@ -2517,6 +2518,21 @@ def _bunky_u_vody(rect, inner, step):
             for j in range(n + 1):
                 pridej(ax + (bx - ax) * j / n, az + (bz - az) * j / n, r)
     for ryb in RYBNIKY:
+        if "obrys" in ryb:
+            # rybnik v2: cela plocha do pas od kraje vody jemne (hladina = vrstevnice tohoto terenu; tri kruhy po 2 m
+            # nechaly kraj vody v hrube siti 2 m - zuby)
+            bb = ryb2(ryb)["bb"]
+            hz = ryb["hraz"]
+            r_h = hz["delka_m"] / 2.0 + hz["koruna_sirka_m"] + (hz["koruna_nad_hladinou_m"] + 3.0) / hz["sklon_svahu"]
+            for i in range(int((min(bb[0], hz["stred"][0] - r_h) - pas - rect[0]) // step), int((max(bb[1], hz["stred"][0] + r_h) + pas - rect[0]) // step) + 1):
+                for k in range(int((min(bb[2], hz["stred"][1] - r_h) - pas - rect[2]) // step), int((max(bb[3], hz["stred"][1] + r_h) + pas - rect[2]) // step) + 1):
+                    if 0 <= i < nx and 0 <= k < nz:
+                        qx, qz = rect[0] + (i + 0.5) * step, rect[2] + (k + 0.5) * step
+                        if ryb_de(ryb, qx, qz) > -pas - step or ryb2_hraz(qx, qz, ryb) > -1e8 and \
+                                math.hypot(qx - hz["stred"][0], qz - hz["stred"][1]) < r_h:
+                            if not any(x0 < qx < x1 and z0 < qz < z1 for x0, x1, z0, z1 in inner):
+                                out.add((i, k))
+            continue
         if "polomer_m" in ryb:
             cx, cz = ryb["stred"]
             r = ryb["polomer_m"] * (1.0 + sum(abs(v[1]) for v in ryb.get("okraj_vlny", []))) + pas

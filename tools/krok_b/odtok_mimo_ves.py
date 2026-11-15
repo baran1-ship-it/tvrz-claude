@@ -159,6 +159,11 @@ def hladke(p, krok=1.0):
 def _main():
     tk = [t for t in V["toky"] if t["id"] == "lhota_odtok"][0]
     o = tk["osa_xzy"]
+    vy = V["rybnik_lhota"].get("vypust", {})
+    if "celo" in vy and vy.get("tok") == tk["id"]:
+        # rybnik v2: odtok zacina vypust.zacatek_m za licem cela vypusti v hladine odtoku (tools/krok_b/rybnik_v2.py,
+        # test smyslu vypust) - trasa se planuje od tohoto bodu
+        o[0] = [vy["celo"][0] + vy["smer"][0] * vy["zacatek_m"], vy["celo"][1] + vy["smer"][1] * vy["zacatek_m"], vy["hladina_y"]]
     # prvni bod za vsi smerem po proudu: posledni bod do obalu + okraj, pak az bod dal nez okraj + 10 m
     # 14. 11.: i bod ve stavbe (zakaz) - trasa uz obchazi ves, ale nove stavby lezi na ni (kovarna_ves)
     def nasyp(i):

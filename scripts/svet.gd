@@ -1989,8 +1989,21 @@ static func _breh_sirka(tt: Dictionary, k: float, a: Vector2, b: Vector2, q: Vec
 	return float(tt["breh_sirka_m"]) + (cil - float(tt["breh_sirka_m"])) * o
 
 
-## Polomer brehu rybnika ve smeru bodu (jako blender/kraj.py ryb_polomer, voda.json okraj_vlny).
+## Polomer brehu rybnika ve smeru bodu (jako blender/kraj.py ryb_polomer, voda.json okraj_vlny; rybnik v2: prusecik
+## paprsku od stredu s obrysem - kraj vody, kraj.ryb2_polomer).
 static func _ryb_polomer(ryb: Dictionary, q: Vector2) -> float:
+	var c := Vector2(float(ryb["stred"][0]), float(ryb["stred"][1]))
+	if ryb.has("obrys"):
+		var ob: Array = ryb["obrys"]
+		var dr := (q - c).normalized() if q.distance_to(c) > 1e-6 else Vector2.RIGHT
+		var best := INF
+		for k in ob.size():
+			var a2 := Vector2(float(ob[k][0]), float(ob[k][1]))
+			var b2 := Vector2(float(ob[(k + 1) % ob.size()][0]), float(ob[(k + 1) % ob.size()][1]))
+			var p: Variant = Geometry2D.segment_intersects_segment(c, c + dr * 200.0, a2, b2)
+			if p != null:
+				best = minf(best, c.distance_to(p as Vector2))
+		return best if best != INF else float(ryb["polomer_m"])
 	var a := atan2(q.y - float(ryb["stred"][1]), q.x - float(ryb["stred"][0]))
 	var f := 1.0
 	for v: Array in ryb.get("okraj_vlny", []):
@@ -6839,6 +6852,53 @@ func v_dome(p: Vector3) -> int:
 	return -1
 
 
+## Hruby obal domu vsi (_Daleko) s texturou (Misa 14. 11., misa_28_chyby ř. 151: obal jen barva bez textury = z dalky
+## svetle kostky; Puchart modely.domy.daleko_textury): kazdy povrch obalu (<koren>_daleko_Sindel / _Roubeni z
+## blender/ves_domy.py) dostane texturu nejvetsiho povrchu podrobneho vnejsku s materialem podle ves_domy_lod
+## daleko_textury, nanesenou triplanarne (opakovani po daleko_triplanar_m); barva = barva obalu (hnedy ton
+## ves_jas.stredni_daleko) / prumer textury - prumerna barva zustava, textura pridava jen kresbu.
+func _daleko_textura(mi: MeshInstance3D, dum: Node3D, lod: Dictionary) -> void:
+	var dt: Dictionary = lod["daleko_textury"]
+	var vn := dum.find_child("*_Vnejsek", false, false) as MeshInstance3D
+	if vn == null or not (vn.mesh is ArrayMesh) or mi.mesh == null:
+		return
+	var vm := vn.mesh as ArrayMesh
+	var pmin := float(lod["daleko_prumer_min"])
+	for si in mi.mesh.get_surface_count():
+		var mt := mi.get_active_material(si) as BaseMaterial3D
+		if mt == null or mt.albedo_texture != null:
+			continue
+		var zn := ""
+		for kl: String in dt:
+			if String(mt.resource_name).ends_with("_" + kl):
+				zn = kl
+		if zn == "":
+			continue
+		var best: Texture2D = null
+		var bn := 0
+		for vi in vm.get_surface_count():
+			var vmt := vn.get_active_material(vi) as BaseMaterial3D
+			if vmt == null or vmt.albedo_texture == null:
+				continue
+			if not (dt[zn] as Array).any(func(t: String) -> bool: return String(vmt.resource_name).contains(t)):
+				continue
+			if vm.surface_get_array_index_len(vi) > bn:
+				bn = vm.surface_get_array_index_len(vi)
+				best = vmt.albedo_texture
+		if best == null:
+			continue
+		var pr := _tex_prumer(best)
+		var c := mt.albedo_color
+		var nm := StandardMaterial3D.new()
+		nm.resource_name = mt.resource_name
+		nm.albedo_texture = best
+		nm.albedo_color = Color(c.r / maxf(pr.r, pmin), c.g / maxf(pr.g, pmin), c.b / maxf(pr.b, pmin))
+		nm.uv1_triplanar = true
+		nm.uv1_scale = Vector3.ONE / float(lod["daleko_triplanar_m"])
+		nm.roughness = mt.roughness
+		mi.set_surface_override_material(si, nm)
+
+
 func _ves_domy(root: Node3D) -> void:
 	if _domy.is_empty():
 		return
@@ -6911,6 +6971,7 @@ func _ves_domy(root: Node3D) -> void:
 					dal = st_do
 				if cn.ends_with("_Daleko"):
 					mi.visibility_range_begin = dal
+					_daleko_textura(mi, dum, lod)
 				elif cn.ends_with("Interier") or cn.ends_with("Drobne"):
 					mi.visibility_range_end = 35.0 if cn.ends_with("Interier") else (blizko if se_st else minf(70.0, dal - 15.0))
 				else:
@@ -9264,6 +9325,11 @@ func _ryb_hraz_toky(mi: MeshInstance3D, xf: Transform3D) -> void:
 func _ryb_priprav() -> void:
 	if not RYBNIK_DIL or not ResourceLoader.exists("res://modely/rybnik/rybnik.glb"):
 		return
+	if (Pravidla.cti("voda", "rybnik_lhota") as Dictionary).has("obrys"):
+		# rybnik v2 (Misa 15. 11. r. 13, voda.json rybnik_lhota verze 2): cely rybnik vcetne predmetu (pozerak, vypust,
+		# preliv, kameny, lavka) stavi Blender z jednoho zaznamu (kraj.ryb2_*) - dil rybnik.glb se nevklada, hra nic nemeni
+		print("rybnik: Lhota v2 z Blenderu, dil rybnik.glb nepouzit")
+		return
 	_ryb_scena = (load("res://modely/rybnik/rybnik.glb") as PackedScene).instantiate()
 	_ryb_scena.name = "Rybnik_dil"
 	# vyska: okraj dilu (+0,30) = nizsi kvartil terenu na obvodu ctverce - pas kolem dilu se pak jen snizuje (zvednuty
@@ -9672,10 +9738,11 @@ func ryb_voda(x: float, z: float) -> bool:
 	return h < _ryb_y + 0.12
 
 
-## Kruh vody a brehu rybnika Lhota (voda_polomer_m + toky_tvar.breh_sirka_m od stredu).
+## Voda a breh rybnika Lhota (obrys + toky_tvar.breh_sirka_m od stredu, rybnik v2).
 func ryb_v_kruhu(x: float, z: float) -> bool:
 	var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
-	return Vector2(x, z).distance_to(Vector2(float(rl["stred"][0]), float(rl["stred"][1]))) <= float(rl["voda_polomer_m"]) + float(Pravidla.cti("voda", "toky_tvar")["breh_sirka_m"])
+	var q := Vector2(x, z)
+	return q.distance_to(Vector2(float(rl["stred"][0]), float(rl["stred"][1]))) <= _ryb_polomer(rl, q) + float(Pravidla.cti("voda", "toky_tvar")["breh_sirka_m"])
 
 
 func _rybnik_dil(root: Node3D, parent: Node3D) -> void:
@@ -10106,13 +10173,14 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 		var lp: Array = ov[dr[1]]
 		var wp := xf * Vector3(float(lp[0]), float(lp[1]), float(lp[2]))
 		data["pouziti"].append({"kind": dr[0], "pos": [wp.x, wp.y, wp.z], "r": float(ov["dosah_m"]) / 0.62, "nazev": dr[2]})
+	var hruby_m := _dil_lod(sc, d, interier, "Mlyn")         # tri stupne (modely.json dily_lod)
 	if ResourceLoader.exists(String(d["lod1"])):
 		var l1 := (load(String(d["lod1"])) as PackedScene).instantiate() as Node3D
 		l1.name = "Mlyn_lod1"
 		l1.transform = xf
 		parent.add_child(l1)
 		for nd in l1.find_children("*", "MeshInstance3D", true, false):
-			(nd as MeshInstance3D).visibility_range_begin = float(d["lod1_od_m"])
+			(nd as MeshInstance3D).visibility_range_begin = hruby_m
 		for nd in l1.find_children("*", "CollisionShape3D", true, false):
 			nd.queue_free()
 	print("mlyn: dil u (%.0f, %.0f) y %.2f, %d siti, material terenu %s" % [xf.origin.x, xf.origin.z, xf.origin.y, n, tm != null])
@@ -10148,6 +10216,7 @@ func _vetrak_dil(root: Node3D, parent: Node3D) -> void:
 		kr.set_process(true)
 	_mlyn_dvere(sc, root, xf, ve, "Vetrak_Dvere", "vetrak")
 	_schody_kolize(sc)
+	_dil_lod(sc, ve, null, "Vetrak")                          # podrobny + stredni do dosahu (LOD1 modelar nedodal)
 	_mlyn_pytle(sc, "vetrak")
 	# zebrik ze spodniho patra do horniho (Misa 0.991 „nejde vylezt“ - zebrik bez zaznamu pouziti): z modelu
 	# (Vetrak_Kol_ZebrikIn x 0,95, y 3,05-6,57, z +0,35 dole k -1,05 u otvoru; horni podlaha Podlaha11 y 6,0)
@@ -10179,13 +10248,14 @@ func _kovarna_dil(parent: Node3D) -> void:
 		var gi := nd as GeometryInstance3D
 		gi.visibility_range_end = float(kv["dosah_m"])
 		gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if gi.get_aabb().size.length() < 1.0 else gi.cast_shadow
+	var hruby_m := _dil_lod(sc, kv, null, "Kovarna")          # tri stupne (modely.json dily_lod)
 	if ResourceLoader.exists(String(kv["lod1"])):
 		var l1 := (load(String(kv["lod1"])) as PackedScene).instantiate() as Node3D
 		l1.name = "Kovarna_lod1"
 		l1.transform = xf
 		parent.add_child(l1)
 		for nd in l1.find_children("*", "GeometryInstance3D", true, false):
-			(nd as GeometryInstance3D).visibility_range_begin = float(kv["lod1_od_m"])
+			(nd as GeometryInstance3D).visibility_range_begin = hruby_m
 		for cn in l1.find_children("*", "CollisionObject3D", true, false):
 			(cn as Node).queue_free()
 	var oh: Dictionary = kv["ohen"]
@@ -10268,13 +10338,14 @@ func _krcma_dil(root: Node3D, parent: Node3D) -> void:
 		# nezavisla kontrola 14. 11. (172 tis. troj. krcmy do 70 m se stiny): vnitrek a drobnosti bez stinu
 		if vnitr or gi.get_aabb().size.length() < 1.0:
 			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var hruby_m := _dil_lod(sc, kr, interier, "Krcma")        # tri stupne (modely.json dily_lod)
 	if ResourceLoader.exists(String(kr["lod1"])):
 		var l1 := (load(String(kr["lod1"])) as PackedScene).instantiate() as Node3D
 		l1.name = "Krcma_lod1"
 		l1.transform = xf
 		parent.add_child(l1)
 		for nd in l1.find_children("*", "GeometryInstance3D", true, false):
-			(nd as GeometryInstance3D).visibility_range_begin = float(kr["lod1_od_m"])
+			(nd as GeometryInstance3D).visibility_range_begin = hruby_m
 		for cn in l1.find_children("*", "CollisionObject3D", true, false):
 			(cn as Node).queue_free()
 	for dp: Array in kr["dvere_prefixy"]:
@@ -10310,6 +10381,198 @@ func _krcma_dil(root: Node3D, parent: Node3D) -> void:
 		var spp := xf * _rel_xf(sp, sc).origin
 		data["pouziti"].append({"kind": "bed", "pos": [spp.x, spp.y + 0.25, spp.z], "r": 2.2})
 	print("krcma: u (%.0f, %.0f) y %.2f, interier %s, postel %s" % [x, z, xf.origin.y, interier != null, sp != null])
+
+
+## Tri stupne dilu od modelare (Misa 14. 11., tabulka misa_28_chyby ř. 151 „bile kostky z dalky“, modely.json dily_lod):
+## podrobny staticky vnejsek jen do podrobny_do_m (vnitrek do interier_do_m jako dosud); od nej <jm>_Stredni = staticky
+## vnejsek jako JEDNA sit s barvou vrcholu (prumer textury x barva materialu - 1 material = 1 kresleni) az do zacatku
+## hrubeho stupne (LOD1 modelare s texturou od zaznamu lod1_od_m, tablet nejvys hruby_od_m_mobil; bez LOD1 do dosahu).
+## Pohyblive casti (dynamicke: dvere, kridla, kolo, mech) zustavaji podrobne az do hrubeho; vynechat = site s vlastnim
+## materialem a rozsahem (teren dilu). Na mezich bez prolinani (konec n = zacatek n+1). Vraci zacatek hrubeho stupne.
+func _dil_lod(sc: Node3D, zaz: Dictionary, interier: Node, jm: String) -> float:
+	var lod: Dictionary = Pravidla.cti("modely", "dily_lod")
+	var ma_l1 := zaz.has("lod1") and ResourceLoader.exists(String(zaz["lod1"]))
+	var dosah := float(zaz["dosah_m"] if zaz.has("dosah_m") else zaz["dil_do_m"])
+	# bez LOD1 modelare (vetrak): hruby stupen = obal dilu (kvadry s barvou) od obal_od_m do dosahu
+	var hruby := float(zaz["lod1_od_m"]) if ma_l1 else minf(float(lod["obal_od_m"]), dosah)
+	if OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL"):
+		hruby = minf(hruby, float(lod["hruby_od_m_mobil"]))
+	var podr := float(lod["podrobny_do_m"])
+	if podr >= hruby:
+		return hruby
+	var dyn: Array = lod["dynamicke"]
+	var vyn: Array = lod["vynechat"]
+	var min_m := float(lod["stredni_min_m"])
+	var obal_min := float(lod["obal_min_m"])
+	var st := SurfaceTool.new()
+	var so := SurfaceTool.new()
+	so.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var n_obal := 0
+	var tmp := ArrayMesh.new()
+	var n := 0
+	var troj := 0
+	for nd in sc.find_children("*", "MeshInstance3D", true, false):
+		var mi := nd as MeshInstance3D
+		if not (mi.mesh is ArrayMesh) or (interier != null and interier.is_ancestor_of(mi)):
+			continue
+		var cesta := String(sc.get_path_to(mi))
+		if vyn.any(func(t: String) -> bool: return cesta.contains(t)):
+			continue
+		if dyn.any(func(t: String) -> bool: return cesta.contains(t)):
+			mi.visibility_range_end = hruby if ma_l1 else dosah
+			continue
+		mi.visibility_range_end = podr
+		if mi.get_aabb().size.length() < min_m:
+			continue
+		var rx := _rel_xf(mi, sc)
+		var am := mi.mesh as ArrayMesh
+		var c_obal := Color(0.0, 0.0, 0.0, 0.0)
+		for si in am.get_surface_count():
+			if am.surface_get_primitive_type(si) != Mesh.PRIMITIVE_TRIANGLES:
+				continue
+			var c := _dil_barva(mi.get_active_material(si), lod)
+			if c.a <= 0.0:
+				continue                                  # pruhledne (listi, brectan) - z dalky ne jako plna deska
+			var a := am.surface_get_arrays(si)
+			if a[Mesh.ARRAY_NORMAL] == null or a[Mesh.ARRAY_INDEX] == null:
+				continue
+			var b: Array = []
+			b.resize(Mesh.ARRAY_MAX)
+			b[Mesh.ARRAY_VERTEX] = a[Mesh.ARRAY_VERTEX]
+			b[Mesh.ARRAY_NORMAL] = a[Mesh.ARRAY_NORMAL]
+			var cl := PackedColorArray()
+			cl.resize((a[Mesh.ARRAY_VERTEX] as PackedVector3Array).size())
+			cl.fill(c)
+			b[Mesh.ARRAY_COLOR] = cl
+			b[Mesh.ARRAY_INDEX] = a[Mesh.ARRAY_INDEX]
+			tmp.clear_surfaces()
+			tmp.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, b)
+			st.append_from(tmp, 0, rx)
+			var ts := (a[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+			troj += ts
+			n += 1
+			c_obal += Color(c.r, c.g, c.b, 1.0) * float(ts)
+		if not ma_l1 and c_obal.a > 0.0 and mi.get_aabb().size.length() >= obal_min:
+			_obal_kvadr(so, rx, mi.get_aabb(), c_obal / c_obal.a)
+			n_obal += 1
+	if n == 0:
+		return hruby
+	var me := st.commit()
+	var mat := StandardMaterial3D.new()
+	mat.vertex_color_use_as_albedo = true
+	mat.vertex_color_is_srgb = true
+	mat.roughness = float(lod["drsnost"])
+	me.surface_set_material(0, mat)
+	var s := MeshInstance3D.new()
+	s.name = jm + "_Stredni"
+	s.mesh = me
+	s.visibility_range_begin = podr
+	s.visibility_range_end = hruby
+	s.lod_bias = float(lod["lod_bias"])
+	sc.add_child(s)
+	if n_obal > 0:
+		var om := so.commit()
+		om.surface_set_material(0, mat)
+		var o := MeshInstance3D.new()
+		o.name = jm + "_lod1"
+		o.mesh = om
+		o.transform = sc.transform
+		o.visibility_range_begin = hruby
+		o.visibility_range_end = dosah
+		sc.get_parent().add_child(o)
+	print("%s: stredni stupen %d povrchu -> 1 material, %d troj., %.0f-%.0f m, hruby od %.0f m%s" % [jm, n, troj, podr, hruby, hruby,
+			(" (obal %d kvadru do %.0f m)" % [n_obal, dosah]) if n_obal > 0 else ""])
+	return hruby
+
+
+## Kvadr obalu site (mistni AABB v soustave rx) s barvou vrcholu - hruby stupen dilu bez LOD1 modelare.
+func _obal_kvadr(so: SurfaceTool, rx: Transform3D, ab: AABB, c: Color) -> void:
+	var r := [Vector3.RIGHT, Vector3.UP, Vector3.BACK]
+	for osa in 3:
+		for zn: float in [-1.0, 1.0]:
+			var nrm: Vector3 = r[osa] * zn
+			var u: Vector3 = r[(osa + 1) % 3]
+			var v: Vector3 = r[(osa + 2) % 3]
+			var stred := ab.get_center() + nrm * ab.size * 0.5
+			var p: Array = []
+			for k: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
+				p.append(rx * (stred + (u * k.x + v * k.y) * ab.size * 0.5))
+			var nw := (rx.basis * nrm).normalized()
+			# poradi vrcholu po smeru hodin pri pohledu zvenku (Godot: predni strana = clockwise)
+			var idx: Array = [0, 2, 1, 0, 3, 2] if zn > 0.0 else [0, 1, 2, 0, 2, 3]
+			for q: int in idx:
+				so.set_color(c)
+				so.set_normal(nw)
+				so.add_vertex(p[q])
+
+
+## Barva povrchu pro stredni stupen dilu: barva materialu x prumer jeho textury; pruhledny material = alfa 0 (vynechat);
+## jiny nez BaseMaterial3D (shader) = dily_lod nahradni_barva.
+func _dil_barva(mt: Material, lod: Dictionary) -> Color:
+	if mt is BaseMaterial3D:
+		var bm := mt as BaseMaterial3D
+		if bm.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
+			return Color(0.0, 0.0, 0.0, 0.0)
+		var c := bm.albedo_color
+		if bm.albedo_texture:
+			c *= _tex_prumer(bm.albedo_texture)
+		c.a = 1.0
+		return c
+	var nb: Array = lod["nahradni_barva"]
+	return Color(float(nb[0]), float(nb[1]), float(nb[2]))
+
+
+var _tex_prumery := {}
+
+
+## Prumerna barva textury (sRGB) z nejmensi mip urovne aspon 4x4 (blok komprese): soubor .ctex se cte primo (hlavicka
+## GST2: na 36. bajtu druh dat, sirka, vyska, pocet mip, format) - bez cteni z GPU (na tabletu ETC2 nejde zpet) a bez
+## rozbaleni cele textury. Jine nez syrova data (PNG/WebP v .ctex) pres get_image zmensene na 4x4.
+func _tex_prumer(t: Texture2D) -> Color:
+	var k := t.resource_path if t.resource_path != "" else str(t.get_instance_id())
+	if _tex_prumery.has(k):
+		return _tex_prumery[k]
+	var im: Image = null
+	if t is CompressedTexture2D:
+		var f := FileAccess.open((t as CompressedTexture2D).load_path, FileAccess.READ)
+		if f and f.get_buffer(4).get_string_from_ascii() == "GST2":
+			f.seek(36)
+			var druh := f.get_32()
+			var w := f.get_16()
+			var h := f.get_16()
+			var mip := f.get_32()
+			var fmt := f.get_32()
+			if druh == 0 and w > 0 and h > 0 and fmt < Image.FORMAT_MAX:
+				# rozlozeni mip urovni z prazdneho obrazu stejneho formatu - ze souboru se cte jen hledana uroven
+				var zac := f.get_position()
+				var vzor := Image.create_empty(w, h, mip > 0, fmt as Image.Format)
+				var lv := 0
+				while lv < vzor.get_mipmap_count() and (w >> (lv + 1)) >= 4 and (h >> (lv + 1)) >= 4:
+					lv += 1
+				var od := vzor.get_mipmap_offset(lv)
+				var do_ := vzor.get_mipmap_offset(lv + 1) if lv < vzor.get_mipmap_count() else vzor.get_data().size()
+				f.seek(zac + od)
+				im = Image.create_from_data(maxi(w >> lv, 1), maxi(h >> lv, 1), false, fmt as Image.Format, f.get_buffer(do_ - od))
+	if im == null or im.is_empty():
+		im = t.get_image()
+	var c := Color(1.0, 1.0, 1.0)
+	if im:
+		if im.is_compressed():
+			im.decompress()
+		if not im.is_compressed():
+			im.convert(Image.FORMAT_RGBA8)
+			im.resize(4, 4, Image.INTERPOLATE_BILINEAR)
+			var s := Vector3.ZERO
+			for y in 4:
+				for x in 4:
+					var p := im.get_pixel(x, y)
+					s += Vector3(p.r, p.g, p.b)
+			s /= 16.0
+			c = Color(s.x, s.y, s.z)
+		else:
+			push_warning("textura %s: prumer barvy nejde (format %d) - bila" % [k, im.get_format()])
+	_tex_prumery[k] = c
+	return c
 
 
 ## Vynechane uzly modelu (lokace/voda vynechat_uzly) - JEDINE misto (Misa 15. 11. „neviditelne ploty“ na dvore krcmy:
@@ -10405,13 +10668,14 @@ func _kostel_dil(root: Node3D, parent: Node3D) -> void:
 		gi.visibility_range_end = float(ko["interier_do_m"]) if vnitr else float(ko["dosah_m"])
 		if vnitr or gi.get_aabb().size.length() < 1.0:
 			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var hruby_m := _dil_lod(sc, ko, interier, "Kostel")       # tri stupne (modely.json dily_lod)
 	if ResourceLoader.exists(String(ko["lod1"])):
 		var l1 := (load(String(ko["lod1"])) as PackedScene).instantiate() as Node3D
 		l1.name = "Kostel_lod1"
 		l1.transform = xf
 		parent.add_child(l1)
 		for nd in l1.find_children("*", "GeometryInstance3D", true, false):
-			(nd as GeometryInstance3D).visibility_range_begin = float(ko["lod1_od_m"])
+			(nd as GeometryInstance3D).visibility_range_begin = hruby_m
 		for cn in l1.find_children("*", "CollisionObject3D", true, false):
 			(cn as Node).queue_free()
 	for dp: Array in ko.get("dvere_prefixy", []):
@@ -12523,15 +12787,14 @@ func od_vody(x: float, z: float, y := INF) -> float:
 						(_voda_mriz[c] as Array).append([a, b, w])
 		var rt: Dictionary = Pravidla.cti("voda", "rybnik_tvrz")
 		var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
-		# dil Lhota: voda = teren pod hladinou jen do voda_polomer_m + breh_sirka_m (driv 60 m: udoli odtoku pod hrazi
-		# je niz nez hladina a bylo „ve vode“ - test zasazeni 28. 10. (504, 889))
+		# rybnik Lhota v2: vzdalenost od kraje vody po obrysu (jako kraj.ve_vode) - driv dil: teren pod hladinou do
+		# voda_polomer_m + breh_sirka_m (udoli odtoku pod hrazi je niz nez hladina, test zasazeni 28. 10. (504, 889))
 		_voda_ryb = [Vector2(float(rt["stred"][0]), float(rt["stred"][1])), float(rt["polomer_m"]),
-				Vector2(float(rl["stred"][0]), float(rl["stred"][1])), float(rl["hladina_y"]),
-				float(rl["voda_polomer_m"]) + float(Pravidla.cti("voda", "toky_tvar")["breh_sirka_m"])]
+				Vector2(float(rl["stred"][0]), float(rl["stred"][1])), rl, float(rl["polomer_m"])]
 	var q := Vector2(x, z)
 	var d := q.distance_to(_voda_ryb[0]) - _ryb_polomer(Pravidla.cti("voda", "rybnik_tvrz"), q)
-	if y != INF and q.distance_to(_voda_ryb[2]) < float(_voda_ryb[4]) and y < float(_voda_ryb[3]):
-		d = minf(d, -0.1)
+	if q.distance_to(_voda_ryb[2]) < float(_voda_ryb[4]) + 30.0:
+		d = minf(d, q.distance_to(_voda_ryb[2]) - _ryb_polomer(_voda_ryb[3], q))
 	for e: Array in _voda_mriz.get(Vector2i(floori(x / 16.0), floori(z / 16.0)), []):
 		d = minf(d, q.distance_to(Geometry2D.get_closest_point_to_segment(q, e[0], e[1])) - float(e[2]))
 	return d
@@ -12541,7 +12804,7 @@ func od_vody(x: float, z: float, y := INF) -> float:
 ## rybniky z hladin Blenderu - nadrz.gd), male toky (voda.json toky osa_xzy, voda do pul sirky), dil rybnika Lhota a
 ## rybnik tvrze (voda.json). Kun (Misa 0.99991 „kun by se nemel bat vody“): hloubka = hladina - povrch pod kopyty.
 var _hladiny_toku := {}                 # bunka 16 m -> [[a, b, ya, yb, pul sirky]]
-var _hl_ryb: Array = []                 # [stred Lhota, polomer vody, hladina Lhota, zaznam rybnika tvrze, stred, hladina]
+var _hl_ryb: Array = []                 # [stred Lhota, zaznam Lhota (obrys), hladina Lhota, zaznam rybnika tvrze, stred, hladina]
 
 
 ## Odraz okoli na hladine (prostredi.json voda_odraz; Misa 9. 11. r. 61/79 „bila ledova plocha“): pod obzorem okoli
@@ -12568,7 +12831,7 @@ func hladina(x: float, z: float) -> float:
 		# pravidla jednou (kontrola 5. 11.: cteni Pravidla.cti v kazdem volani - kun se pta kazdy krok fyziky)
 		var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
 		var rt: Dictionary = Pravidla.cti("voda", "rybnik_tvrz")
-		_hl_ryb = [Vector2(float(rl["stred"][0]), float(rl["stred"][1])), float(rl["voda_polomer_m"]), float(rl["hladina_y"]),
+		_hl_ryb = [Vector2(float(rl["stred"][0]), float(rl["stred"][1])), rl, float(rl["hladina_y"]),
 				rt, Vector2(float(rt["stred"][0]), float(rt["stred"][1])), float(rt["hladina_y"])]
 		_hladiny_toku[Vector2i(1 << 20, 0)] = []
 		for t: Dictionary in Pravidla.cti("voda", "toky"):
@@ -12588,7 +12851,7 @@ func hladina(x: float, z: float) -> float:
 		var t := clampf((q - e[0]).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
 		if q.distance_to(e[0] + ab * t) <= float(e[4]):
 			h = maxf(h, lerpf(float(e[2]), float(e[3]), t))
-	if q.distance_to(_hl_ryb[0]) < float(_hl_ryb[1]):
+	if q.distance_to(_hl_ryb[0]) < _ryb_polomer(_hl_ryb[1], q):          # rybnik Lhota v2: uvnitr obrysu
 		h = maxf(h, float(_hl_ryb[2]))
 	if q.distance_to(_hl_ryb[4]) < _ryb_polomer(_hl_ryb[3], q):
 		h = maxf(h, float(_hl_ryb[5]))

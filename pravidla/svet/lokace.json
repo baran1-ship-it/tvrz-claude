@@ -60,7 +60,7 @@
    "model": "res://modely/kostel/kostel_ruiny.glb",
    "lod1": "res://modely/kostel/kostel_ruiny_lod1.glb",
    "dosah_m": 90.0,
-   "lod1_od_m": 90.0,
+   "lod1_od_m": 130.0,
    "interier_skupina": "Kostel_Interier_skupina",
    "interier_do_m": 35.0,
    "dvere_prefixy": [
@@ -2437,7 +2437,7 @@
   "natoceni": 1.5708,
   "rovina_r_m": 7.0,
   "dosah_m": 60.0,
-  "lod1_od_m": 60.0,
+  "lod1_od_m": 130.0,
   "ohen": {
    "bod": "Kovarna_Ohen_bod",
    "zhar": "Kovarna_Zhar",
@@ -2520,7 +2520,7 @@
   "natoceni": -0.7044,
   "rovina_r_m": 18.0,
   "dosah_m": 70.0,
-  "lod1_od_m": 70.0,
+  "lod1_od_m": 130.0,
   "interier_skupina": "KrcmaL_Interier_skupina",
   "interier_do_m": 25.0,
   "ohne": [
@@ -2821,7 +2821,7 @@
   "kridla_spolu": [
    "krcma_vrata"
   ],
-  "_lod": "nezávislá kontrola 14. 11.: LOD1 od konce plného dílu (bez prolínání = bez pásma, kde se kreslí oba); vnitřní dveře jen do interier_do_m; vrata L/P jednou skupinou",
+  "_lod": "nezávislá kontrola 14. 11.: LOD1 od konce plného dílu (bez prolínání = bez pásma, kde se kreslí oba); vnitřní dveře jen do interier_do_m; vrata L/P jednou skupinou. | 15. 11. (misa_28_chyby ř. 151, tři stupně): lod1_od_m krčmy, kovárny a kostela 130 = začátek hrubého stupně; mezi podrobným (modely.json dily_lod podrobny_do_m) a hrubým střední stupeň <Dil>_Stredni (svet._dil_lod), tablet hrubý nejvýš od dily_lod hruby_od_m_mobil. dosah_m = jen výchozí konec před rozdělením na stupně (statický vnějšek pak do podrobny_do_m, pohyblivé části do hrubého); u dílu bez LOD1 (větrák) konec středního.",
   "vynechat_uzly": [],
   "placky_lok": [
    [

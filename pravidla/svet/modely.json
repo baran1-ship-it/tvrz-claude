@@ -5688,7 +5688,27 @@
   "podrobny_do_m": 30.0,
   "stredni_do_m": 130.0,
   "stredni_do_m_mobil": 75.0,
-  "lod_bias": 50.0
+  "lod_bias": 50.0,
+  "daleko_textury": {"Sindel": ["Sindel", "Dosky", "Krytina", "Strecha"], "Roubeni": ["Roubeni", "Omitka", "Podezdivka", "Stena"]},
+  "daleko_triplanar_m": 2.0,
+  "daleko_prumer_min": 0.05,
+  "_daleko_textury": "Míša 14. 11. (misa_28_chyby ř. 151 „bílé kostky z dálky“; Puchart modely.domy.daleko_textury): hrubý obal _Daleko měl jen barvu materiálu (po zesvětlení vsi světlý) - povrch obalu <koren>_daleko_<klíč> dostane texturu největšího povrchu podrobného vnějšku, jehož materiál obsahuje některé slovo seznamu, triplanárně po daleko_triplanar_m; barva = barva obalu (hnědý tón ves_jas.stredni_daleko beze změny) / průměr textury (nejméně daleko_prumer_min na kanál) - průměrná barva stejná, textura přidá kresbu. svet._daleko_textura."
+ },
+ "dily_lod": {
+  "podrobny_do_m": 35.0,
+  "hruby_od_m_mobil": 75.0,
+  "stredni_min_m": 0.6,
+  "obal_od_m": 130.0,
+  "obal_min_m": 1.5,
+  "dynamicke": ["Dvere", "Vrata", "Kridla", "Kolo", "Cevnik", "Paka", "Mech"],
+  "vynechat": ["Teren", "Cesta"],
+  "drsnost": 0.9,
+  "nahradni_barva": [0.45, 0.38, 0.3],
+  "lod_bias": 50.0,
+  "hruby_troj_max": 3000,
+  "test_bila_jas": 0.85,
+  "test_okraj_m": 0.5,
+  "_pozn": "Míša 14. 11. (misa_28_chyby ř. 151, snímky z Puchartu: tři stupně, „bílé kostky z dálky“; těžké díly od modeláře: krčma 172 tis., kovárna 65 tis. troj.): díl (krčma, kovárna, mlýn, větrák, kostel) má tři stupně bez mezery a bez prolínání - podrobný statický vnějšek do podrobny_do_m (vnitřek do interier_do_m záznamu); střední <Dil>_Stredni od podrobny_do_m do začátku hrubého = statický vnějšek bez dílů menších než stredni_min_m (úhlopříčka) jako jedna síť, barva vrcholů = barva materiálu × průměr textury (1 materiál = 1 kreslení, jako ves_domy_lod; průhledné povrchy - listí, břečťan - vynechány; materiál bez textury/shader = nahradni_barva); hrubý = LOD1 modeláře s texturou od lod1_od_m záznamu (lokace.json, voda.json mlyn.dil), na tabletu nejvýš od hruby_od_m_mobil; díl bez LOD1 (větrák): hrubý = obal dílu z kvádrů (každá statická síť s úhlopříčkou aspoň obal_min_m jako kvádr s průměrnou barvou svých povrchů, <Dil>_lod1) od obal_od_m do dosah_m. dynamicke = části s pohybem (dveře, křídla, kolo, měch) podrobně až do hrubého; vynechat = sítě s vlastním materiálem a rozsahem (terén dílu, cesta). Generuje hra při stavbě (svet._dil_lod) - zdroje kovárny, mlýna a větráku v kontejneru nejsou (balíky jen s .scn). Test lod_urovne: každý stupeň má texturu nebo barvy vrcholů (ne jen bílou: jas barvy pod test_bila_jas), rozsahy navazují (konec n + test_okraj_m ≥ začátek n+1), hrubý ≤ hruby_troj_max troj. Čísla odhad, NEOVĚŘENO na tabletu. Návrat: podrobny_do_m ≥ lod1_od_m vypne střední stupeň."
  },
  "_ves_domy_lod": "Misa 2. 11. (sekani, manual: LOD pro staticke stavby, pocet draw calls): podrobny vnejsek domu vsi (21-25 materialu = 21-25 kresleni) jen do podrobny_do_m; od nej _Stredni (blender/ves_domy_lod.py: tataz geometrie, barva zapecena do barev vrcholu, 1 material = 1 kresleni) do stredni_do_m (tablet stredni_do_m_mobil), dal _Daleko (obal, 2 barvy). Drobne (okna, doplnky) jen do podrobny_do_m (v _Stredni zapecene). Stin vrha _Daleko jako dosud. Cisla: odhad, NEOVERENO na tabletu - A/B mereni kresleni ves_cesta/chlivek a snimek ze 40 m. Navrat: podrobny_do_m = stredni_do_m vypne stredni stupen bez nove verze kodu. | Misa 0.997: na tabletu stredni (plna sit 37-60 tis. troj.) do 110 m misto obalu od 75 m (0.995) = vic trojuhelniku -> stredni_do_m_mobil 75 (jako 0.995 hranice obalu); stredni jen nahrazuje 21-25 materialu podrobneho 30-75 m. | lod_bias (Misa 0.997 „dum nebyl videt, jen stodola, pak se najednou objevil“ (440, 851) - dum 6 ve 37 m): stredni stupen je sindel po sindeli; automaticke LOD importu Godotu (tablet mesh_lod_threshold 10) ho rozpustilo na nic - plna podrobnost jako plutky (zvirata.json plutek_lod_bias 50).",
  "predmety_lod": {

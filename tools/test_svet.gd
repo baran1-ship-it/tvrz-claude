@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -9536,9 +9536,7 @@ func _povrch() -> void:
 				var z := z0
 				while z <= z1:
 					ix += 1
-					var blizko := site.filter(func(e: Array) -> bool:
-						var b: AABB = e[3]
-						return x >= b.position.x and x <= b.end.x and z >= b.position.z and z <= b.end.z)
+					var blizko := site.filter(func(e: Array) -> bool: return x >= (e[3] as AABB).position.x and x <= (e[3] as AABB).end.x and z >= (e[3] as AABB).position.z and z <= (e[3] as AABB).end.z)
 					var yt := y_vrch
 					for _vr in max_vrstev:
 						var h: Dictionary = paprsek.call(Vector3(x, yt, z), Vector3(x, y_dno, z), false)
@@ -9654,3 +9652,220 @@ func _povrch() -> void:
 		fo.store_string(JSON.stringify({"popis": "test povrch (tools/test_svet.gd _povrch)", "bodu": n_celkem, "nalezy": vse, "nove": nove.size()}, " "))
 	_vysledek("povrch", nove.is_empty() and n_celkem >= min_bodu, "bodu %d, novych nalezu %d (schvalenych %d); %s; %s" % [n_celkem, nove.size(), vse.size() - nove.size(),
 			"; ".join(souhrn), str(nove.slice(0, 4))])
+
+
+## strom_na_zemi (Puchart test_smyslu strom_na_zemi, hlidaci_z_pucharta.md #7; kontroly.json strom_na_zemi): pata kmene
+## kazdeho stromu (svet.data rostliny po usazeni hry, bez *_daleko) proti nejnizsimu z `smeru` bodu obvodu korenu
+## (polomer_m x meritko) na terenu hry (_vyska) - mezera pod kmenem na svahu nad max_mezera_m = chyba. Strom vic nez
+## 0,5 m nad terenem v patě (na skale) neni tento pripad (hlida visici).
+func _strom_na_zemi() -> void:
+	var pred: Array = Pravidla.cti("kontroly", "strom_na_zemi", "predpony")
+	var r0 := float(Pravidla.cti("kontroly", "strom_na_zemi", "polomer_m"))
+	var nsm := int(Pravidla.cti("kontroly", "strom_na_zemi", "smeru"))
+	var mx := float(Pravidla.cti("kontroly", "strom_na_zemi", "max_mezera_m"))
+	var vyp := int(Pravidla.cti("kontroly", "strom_na_zemi", "vypis_max"))
+	var n := 0
+	var spatne: Array = []
+	var nejvic := 0.0
+	var r: Dictionary = sv.data["rostliny"]
+	for key: String in r:
+		if key.contains("daleko") or not pred.any(func(p: String) -> bool: return key.begins_with(p)):
+			continue
+		for t: Array in r[key]:
+			var x := float(t[3])
+			var z := float(t[11])
+			var y := float(t[7])
+			var y0 := float(sv.call("_vyska", x, z))
+			if y > y0 + 0.5:
+				continue
+			var s := Vector3(float(t[0]), float(t[4]), float(t[8])).length()
+			var mn := y0
+			for u in nsm:
+				var a := TAU * float(u) / float(nsm)
+				mn = minf(mn, float(sv.call("_vyska", x + cos(a) * r0 * s, z + sin(a) * r0 * s)))
+			n += 1
+			var mez := y - mn
+			if mez > mx:
+				nejvic = maxf(nejvic, mez)
+				if spatne.size() < vyp:
+					spatne.append("%s (%.1f, %.1f) %.2f m" % [key, x, z, mez])
+				else:
+					spatne.append("")
+	var pocet := spatne.size()
+	_vysledek("strom_na_zemi", pocet == 0 and n > 0, "stromu %d, s mezerou pod kmenem %d (nejvic %.2f m) %s" % [n, pocet, nejvic, str(spatne.filter(func(e: String) -> bool: return e != "").slice(0, vyp))])
+
+
+## volne_hrany (Puchart test_smyslu volne_hrany, hlidaci_z_pucharta.md #11; kontroly.json volne_hrany): na plochach
+## staveb (cile z povrch.cile, kolize cile) vic nez pad_m nad terenem, kde postava stoji, sonda o sonda_m do 4 smeru -
+## kdyz pod okrajem do pad_m nic neni, musi v pase (vyska_m) do sonda_m + 0,3 m byt kolize (zabradli, zed).
+func _volne_hrany() -> void:
+	var pad := float(Pravidla.cti("kontroly", "volne_hrany", "pad_m"))
+	var sonda := float(Pravidla.cti("kontroly", "volne_hrany", "sonda_m"))
+	var pas := float(Pravidla.cti("kontroly", "volne_hrany", "vyska_m"))
+	var krok := float(Pravidla.cti("kontroly", "volne_hrany", "krok_m"))
+	var vyp := int(Pravidla.cti("kontroly", "volne_hrany", "vypis_max"))
+	var space := player.get_world_3d().direct_space_state
+	var kapsle := CapsuleShape3D.new()
+	kapsle.radius = float(Pravidla.cti("kontroly", "povrch", "telo_r_m"))
+	kapsle.height = float(Pravidla.cti("kontroly", "povrch", "telo_vyska_m"))
+	var ex: Array[RID] = [player.get_rid()]
+	var n := 0
+	var spatne: Array = []
+	var souhrn: Array = []
+	for cil: Dictionary in Pravidla.cti("kontroly", "povrch", "cile"):
+		if cil.has("oblast"):
+			continue                          # tvrz: ochozy a hradby maji vlastni testy (prikop, steny)
+		var uzly: Array = []
+		if cil.has("uzel"):
+			var u := main.world.find_child(String(cil["uzel"]), true, false)
+			if u != null:
+				uzly.append(u)
+		else:
+			uzly = main.world.find_children(String(cil["vzor"]), "Node3D", true, false)
+		var hran := 0
+		for uz: Node in uzly:
+			var cn := uz as Node3D
+			var obal := AABB()
+			var ma := false
+			for m in cn.find_children("*", "MeshInstance3D", true, false):
+				var mi := m as MeshInstance3D
+				if mi.mesh == null or not mi.is_visible_in_tree() or mi.visibility_range_begin > 0.0:
+					continue
+				var bb := mi.global_transform * mi.mesh.get_aabb()
+				obal = bb if not ma else obal.merge(bb)
+				ma = true
+			if not ma:
+				continue
+			var x := obal.position.x
+			while x <= obal.end.x:
+				var z := obal.position.z
+				while z <= obal.end.z:
+					var yt := obal.end.y + 1.0
+					for _v in 6:
+						var q := PhysicsRayQueryParameters3D.create(Vector3(x, yt, z), Vector3(x, obal.position.y - 1.0, z))
+						q.hit_back_faces = false
+						q.exclude = ex
+						var h := space.intersect_ray(q)
+						if h.is_empty() or not cn.is_ancestor_of(h["collider"] as Node):
+							break
+						var hp: Vector3 = h["position"]
+						yt = hp.y - 0.05
+						if (h["normal"] as Vector3).y < 0.7 or hp.y - float(sv.call("_vyska", x, z)) < pad:
+							continue
+						var pq := PhysicsShapeQueryParameters3D.new()
+						pq.shape = kapsle
+						pq.transform = Transform3D(Basis(), hp + Vector3(0, 0.05 + kapsle.height * 0.5, 0))
+						pq.exclude = ex
+						if not space.intersect_shape(pq, 1).is_empty():
+							continue
+						n += 1
+						for sm: Vector3 in [Vector3.RIGHT, Vector3.LEFT, Vector3.FORWARD, Vector3.BACK]:
+							var o := hp + sm * sonda
+							var qd := PhysicsRayQueryParameters3D.create(o + Vector3(0, 0.3, 0), o - Vector3(0, pad, 0))
+							qd.exclude = ex
+							if not space.intersect_ray(qd).is_empty():
+								continue
+							var qz := PhysicsRayQueryParameters3D.create(hp + Vector3(0, pas, 0), hp + Vector3(0, pas, 0) + sm * (sonda + 0.3))
+							qz.exclude = ex
+							if space.intersect_ray(qz).is_empty():
+								hran += 1
+								if spatne.size() < vyp:
+									spatne.append("%s (%.1f, %.2f, %.1f) smer %s" % [cn.name, hp.x, hp.y, hp.z, sm])
+					z += krok
+				x += krok
+		souhrn.append("%s %d" % [cil.get("uzel", cil.get("vzor")), hran])
+	var celkem := 0
+	for s: String in souhrn:
+		celkem += int(s.get_slice(" ", 1))
+	for s: String in spatne:
+		print("VOLNA_HRANA ", s)
+	_vysledek("volne_hrany", celkem == 0 and n > 0, "bodu nad %.1f m %d, volnych hran bez zabradli %d (%s) %s" % [pad, n, celkem, ", ".join(souhrn), str(spatne.slice(0, 5))])
+
+
+## Misa 14. 11. (misa_28_chyby ř. 151 „bile kostky z dalky“, tri stupne; modely.json dily_lod): kazda stavba s LOD - domy
+## vsi (Dum_ves_*: _Vnejsek / _Stredni / _Daleko) a dily (<X>_dil: podrobny vnejsek / <X>_Stredni / <X>_lod1) - ma tri
+## stupne; kazdy povrch stupne ma texturu nebo barvy vrcholu (stredni a hruby vzdy; podrobny aspon ne plne bily -
+## jas pod test_bila_jas), rozsahy navazuji bez mezery i bez prekryvu (|konec n - zacatek n+1| <= test_okraj_m),
+## hruby stupen <= hruby_troj_max troj. Vypis LOD_UROVNE na stavbu (rozsahy, trojuhelniky).
+func _lod_urovne() -> void:
+	var lod: Dictionary = Pravidla.cti("modely", "dily_lod")
+	var dyn: Array = lod["dynamicke"]
+	var vyn: Array = lod["vynechat"]
+	var okraj := float(lod["test_okraj_m"])
+	var chyby: Array = []
+	var n := 0
+	var stavby: Array = []                 # [jmeno, [[stupen, [GeometryInstance3D]]]]
+	for d in get_tree().root.find_children("Dum_ves_*", "Node3D", true, false):
+		var st: Array = [["podrobny", []], ["stredni", []], ["hruby", []]]
+		for ch in d.get_children():
+			if not (ch is GeometryInstance3D) or (ch as GeometryInstance3D).cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
+				continue
+			var cn := String(ch.name)
+			var i := 0 if cn.ends_with("_Vnejsek") else (1 if cn.ends_with("_Stredni") else (2 if cn.ends_with("_Daleko") else -1))
+			if i >= 0:
+				(st[i][1] as Array).append(ch)
+		stavby.append([String(d.name), st])
+	for jm: String in ["Krcma", "Kovarna", "Mlyn", "Vetrak", "Kostel"]:
+		var sc := get_tree().root.find_child(jm + "_dil", true, false) as Node3D
+		if sc == null:
+			continue
+		var st: Array = [["podrobny", []], ["stredni", []], ["hruby", []]]
+		for g in sc.find_children("*", "GeometryInstance3D", true, false):
+			var cesta := String(sc.get_path_to(g))
+			var gi := g as GeometryInstance3D
+			if String(g.name) == jm + "_Stredni":
+				(st[1][1] as Array).append(g)
+			elif not (dyn.any(func(t: String) -> bool: return cesta.contains(t)) or vyn.any(func(t: String) -> bool: return cesta.contains(t))) \
+					and gi.visibility_range_end > float(Pravidla.cti("modely", "dily_lod", "podrobny_do_m")) - okraj:
+				(st[0][1] as Array).append(g)      # staticky vnejsek (vnitrek konci drive - neni stupen vnejsku)
+		var l1 := sc.get_parent().find_child(jm + "_lod1", false, false)
+		if l1:
+			for g in l1.find_children("*", "GeometryInstance3D", true, false):
+				(st[2][1] as Array).append(g)
+		stavby.append([jm + "_dil", st])
+	for sb: Array in stavby:
+		n += 1
+		var popis: Array = []
+		var konec_pred := 0.0
+		for i in 3:
+			var nazev := String(sb[1][i][0])
+			var gis: Array = sb[1][i][1]
+			if gis.is_empty():
+				chyby.append("%s chybi stupen %s" % [sb[0], nazev])
+				popis.append("%s -" % nazev)
+				continue
+			var zac := INF
+			var kon := 0.0
+			var troj := 0
+			for g: GeometryInstance3D in gis:
+				zac = minf(zac, g.visibility_range_begin)
+				kon = maxf(kon, g.visibility_range_end if g.visibility_range_end > 0.0 else INF)
+				if not (g is MeshInstance3D) or (g as MeshInstance3D).mesh == null:
+					continue
+				var mi := g as MeshInstance3D
+				for si in mi.mesh.get_surface_count():
+					if mi.mesh is ArrayMesh:
+						troj += (mi.mesh as ArrayMesh).surface_get_array_index_len(si) / 3
+					var mt := mi.get_active_material(si)
+					var vcol := mi.mesh is ArrayMesh and ((mi.mesh as ArrayMesh).surface_get_format(si) & Mesh.ARRAY_FORMAT_COLOR) != 0
+					if mt is ShaderMaterial:
+						continue
+					var bm := mt as BaseMaterial3D
+					var tex := bm != null and bm.albedo_texture != null
+					var vc := bm != null and bm.vertex_color_use_as_albedo and vcol
+					if tex or vc:
+						continue
+					var barva := bm.albedo_color if bm else Color(1.0, 1.0, 1.0)
+					var jas := barva.get_luminance()
+					if i > 0 or jas >= float(lod["test_bila_jas"]):
+						chyby.append("%s %s %s povrch %d bez textury a barev vrcholu (barva %s)" % [sb[0], nazev, mi.name, si, barva])
+			if i > 0 and absf(zac - konec_pred) > okraj:
+				chyby.append("%s %s zacina %.1f m, predchozi konci %.1f m" % [sb[0], nazev, zac, konec_pred])
+			if i == 2 and troj > int(lod["hruby_troj_max"]):
+				chyby.append("%s hruby %d troj. > %d" % [sb[0], troj, int(lod["hruby_troj_max"])])
+			konec_pred = kon
+			popis.append("%s %.0f-%.0f m %d troj." % [nazev, zac, kon, troj])
+		if not is_inf(konec_pred) and String(sb[0]).ends_with("_dil"):
+			chyby.append("%s posledni stupen konci v %.0f m" % [sb[0], konec_pred])
+		print("LOD_UROVNE %s: %s" % [sb[0], ", ".join(popis)])
+	_vysledek("lod_urovne", chyby.is_empty() and n > 0, "staveb %d, %d chyb %s" % [n, chyby.size(), chyby.slice(0, 6)])

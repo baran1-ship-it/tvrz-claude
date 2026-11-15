@@ -844,6 +844,118 @@ else:
         if _cs:
             _ves_barva(_nd["name"][:-len("_Daleko")], [sum(c[i] for c in _cs) / len(_cs) for i in range(3)], "daleko")
 
+# ------------------------------------------------------------------ rybnik v2: vtok, hladina bez hrany, voda jen nad dnem, vypust
+# Misa 15. 11. r. 13 („pritok a odtok porad spatne“, 7 oprav vzdy jedne vrstvy): rybnik z jednoho zaznamu voda.json
+# (obrys, vtok, vypust) - kontroly stejnymi funkcemi, jake stavi export (kraj.ryb2_*), na vyslednem terenu fort.land.
+for ryb in kraj.RYBNIKY:
+    if "obrys" not in ryb:
+        continue
+    hl = ryb["hladina_y"]
+    vt, vy = ryb["vtok"], ryb["vypust"]
+    pts_o = kraj.ryb2(ryb)["pts"]
+    # rybnik_vtok: pritok kolmo na kraj vody (+-30 st.), skok hladiny <= 2 cm, na hladinu rybnika az v usti, osa ne podel
+    # brehu, dno koryta proti proudu stoupa
+    tkj = next(t for t in VJ["toky"] if t["id"] == vt["tok"])
+    o_ = tkj["osa_xzy"]
+    bx_, bz_ = vt["bod"]
+    _, seg_i = min((dseg(bx_, bz_, a, b)[0], k) for k, (a, b) in enumerate(zip(pts_o, pts_o[1:] + pts_o[:1])))
+    a_, b_ = pts_o[seg_i], pts_o[(seg_i + 1) % len(pts_o)]
+    tl_ = math.hypot(b_[0] - a_[0], b_[1] - a_[1]) or 1.0
+    nrm = (-(b_[1] - a_[1]) / tl_, (b_[0] - a_[0]) / tl_)
+    if kraj.ryb_de(ryb, bx_ + nrm[0] * 0.3, bz_ + nrm[1] * 0.3) < 0:
+        nrm = (-nrm[0], -nrm[1])                          # normala do vody
+    uhel = lambda u, v: math.degrees(math.acos(max(-1.0, min(1.0, u[0] * v[0] + u[1] * v[1]))))
+    if abs(kraj.ryb_de(ryb, bx_, bz_)) > 0.1:
+        chyba("rybnik_vtok", "(%.0f, %.0f)" % (bx_, bz_), "bod vtoku %.2f m od kraje vody (obrys)" % kraj.ryb_de(ryb, bx_, bz_))
+    if uhel(vt["smer"], nrm) > 30.0:
+        chyba("rybnik_vtok", "(%.0f, %.0f)" % (bx_, bz_), "smer vtoku %.0f st. od kolmice na kraj vody (max 30)" % uhel(vt["smer"], nrm))
+    if math.hypot(o_[-1][0] - bx_, o_[-1][1] - bz_) > 0.1:
+        chyba("rybnik_vtok", vt["tok"], "osa nekonci ve vtoku (%.2f m)" % math.hypot(o_[-1][0] - bx_, o_[-1][1] - bz_))
+    s_, k_ = 0.0, len(o_) - 1
+    while k_ > 0 and s_ < 3.0:
+        s_ += math.hypot(o_[k_][0] - o_[k_ - 1][0], o_[k_][1] - o_[k_ - 1][1])
+        k_ -= 1
+    d_ = ((o_[-1][0] - o_[k_][0]) / (s_ or 1.0), (o_[-1][1] - o_[k_][1]) / (s_ or 1.0))
+    if uhel(d_, nrm) > 30.0:
+        chyba("rybnik_vtok", vt["tok"], "poslednich 3 m osy %.0f st. od kolmice na kraj vody (max 30)" % uhel(d_, nrm))
+    skok = o_[-1][2] - hl
+    if not 0.0 <= skok <= 0.02 + 1e-6:
+        chyba("rybnik_vtok", vt["tok"], "skok hladiny ve vtoku %.3f m (0..0,02)" % skok)
+    s_ = 0.0
+    dno_p = None
+    podel, plocho, dno_dolu = [], [], []
+    for k_ in range(len(o_) - 1, 0, -1):
+        x_, z_, y_ = o_[k_]
+        if s_ > 0.5 and -kraj.ryb_de(ryb, x_, z_) < 0.5 * s_:
+            podel.append((round(x_), round(z_)))
+        if s_ > vt["usti_m"] and y_ <= hl + vt["skok_m"] + 1e-3:
+            plocho.append((round(x_), round(z_)))
+        dno = fort.land(x_, z_)
+        if dno_p is not None and dno < dno_p - 0.02:
+            dno_dolu.append((round(x_), round(z_), round(dno_p - dno, 2)))
+        dno_p = dno
+        s_ += math.hypot(o_[k_][0] - o_[k_ - 1][0], o_[k_][1] - o_[k_ - 1][1])
+        if s_ > 15.0:
+            break
+    if podel:
+        chyba("rybnik_vtok", vt["tok"], "osa vede podel brehu (od kraje mene nez polovina vzdalenosti od vtoku) %s" % podel[:5])
+    if plocho:
+        chyba("rybnik_vtok", vt["tok"], "hladina pritoku na urovni rybnika uz pred ustim (%.1f m) %s" % (vt["usti_m"], plocho[:5]))
+    if dno_dolu:
+        chyba("rybnik_vtok", vt["tok"], "dno koryta proti proudu klesa %s" % dno_dolu[:5])
+    # voda_bez_hrany (Puchart test_smyslu): kazda okrajova hrana hladiny ma vrchol s kryti 0 (hloubka 0), krome rezu vtoku;
+    # kontrola_vody (Puchart): voda jen nad vyhloubenym dnem - vrchol hladiny s hloubkou > 0 nad terenem nad hladinou ne,
+    # a bod mrizky (stredy bunek 0,5 m) pod siti hladiny ma teren pod hladinou; dno pod hladinou uvnitr obrysu ma vodu
+    vs_, tr_, hh_, rez_ = kraj.ryb2_hladina_sit(ryb, fort.land)
+    kr_ = kraj.ryb2_kraj(vs_, tr_, hh_)
+    tvrde = [(round(vs_[i][0], 1), round(vs_[i][2], 1)) for i, j in kr_ if hh_[i] > 0.01 and hh_[j] > 0.01 and not (rez_[i] and rez_[j])]
+    if not tr_ or tvrde:
+        chyba("voda_bez_hrany", "rybnik", "hladina %d troj., tvrdych hran na kraji %d %s" % (len(tr_), len(tvrde), tvrde[:6]))
+    mriz_ = {}
+    for t_ in tr_:
+        xs_ = [vs_[i][0] for i in t_]
+        zs_ = [vs_[i][2] for i in t_]
+        for gi in range(int(math.floor(min(xs_))), int(math.ceil(max(xs_))) + 1):
+            for gj in range(int(math.floor(min(zs_))), int(math.ceil(max(zs_))) + 1):
+                mriz_.setdefault((gi, gj), []).append(t_)
+
+    def pod_hladinou(x, z):
+        for t_ in mriz_.get((int(math.floor(x)), int(math.floor(z))), []):
+            (ax, _, az), (bx, _, bz), (cx_, _, cz_) = (vs_[i] for i in t_)
+            d1 = (x - bx) * (az - bz) - (ax - bx) * (z - bz)
+            d2 = (x - cx_) * (bz - cz_) - (bx - cx_) * (z - cz_)
+            d3 = (x - ax) * (cz_ - az) - (cx_ - ax) * (z - az)
+            if not ((d1 < -1e-9 or d2 < -1e-9 or d3 < -1e-9) and (d1 > 1e-9 or d2 > 1e-9 or d3 > 1e-9)):
+                return True
+        return False
+    nad_brehem, bez_vody = [], []
+    bb_ = kraj.ryb2(ryb)["bb"]
+    zx = bb_[0] - 3.0
+    while zx < bb_[1] + 3.0:
+        zz = bb_[2] - 3.0
+        while zz < bb_[3] + 3.0:
+            y_ = fort.land(zx, zz)
+            pv = pod_hladinou(zx, zz)
+            if pv and y_ > hl + 0.02:
+                nad_brehem.append((round(zx, 1), round(zz, 1), round(y_ - hl, 2)))
+            if not pv and y_ < hl - 0.05 and kraj.ryb_de(ryb, zx, zz) > 0.3 and kraj.ryb2_vtok_rez(ryb, zx, zz) is None:
+                bez_vody.append((round(zx, 1), round(zz, 1), round(hl - y_, 2)))
+            zz += 0.5
+        zx += 0.5
+    if nad_brehem:
+        chyba("kontrola_vody", "rybnik", "hladina nad brehem (teren nad hladinou pod siti vody) v %d bodech %s" % (len(nad_brehem), nad_brehem[:6]))
+    if bez_vody:
+        chyba("kontrola_vody", "rybnik", "dno pod hladinou bez vody v %d bodech %s" % (len(bez_vody), bez_vody[:6]))
+    # vypust: odtok zacina <= 1 m za licem cela vypusti, pred nim (po proudu), v hladine vypusti
+    tko = next(t for t in VJ["toky"] if t["id"] == vy["tok"])
+    p0 = tko["osa_xzy"][0]
+    dv = math.hypot(p0[0] - vy["celo"][0], p0[1] - vy["celo"][1])
+    tv = (p0[0] - vy["celo"][0]) * vy["smer"][0] + (p0[1] - vy["celo"][1]) * vy["smer"][1]
+    if dv > 1.0 or tv <= 0.0 or abs(p0[2] - vy["hladina_y"]) > 0.005:
+        chyba("vypust", vy["tok"], "odtok zacina %.2f m od cela vypusti (max 1 m, pred licem %.2f), hladina %.3f / vypust %.3f" % (dv, tv, p0[2], vy["hladina_y"]))
+    print("SMYSL rybnik v2: vtok %.0f st. od kolmice, skok %.3f m; hladina %d troj., okraj %d hran, tvrdych %d; nad brehem %d, bez vody %d; odtok %.2f m od cela" % (
+        uhel(vt["smer"], nrm), skok, len(tr_), len(kr_), len(tvrde), len(nad_brehem), len(bez_vody), dv))
+
 souhrn = {}
 for c in CHYBY:
     souhrn[c] = souhrn.get(c, 0) + 1

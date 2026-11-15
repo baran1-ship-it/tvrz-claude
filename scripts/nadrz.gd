@@ -343,7 +343,12 @@ func hloubka_hladiny(mi: MeshInstance3D, surf: int, teren := Callable()) -> void
 	var nove := ArrayMesh.new()
 	for s in am.get_surface_count():
 		var arr := am.surface_get_arrays(s)
-		if s == surf:
+		# rybnik v2 (voda.json rybnik_lhota obrys): hladina je vrstevnice terenu z Blenderu a hloubku nese v barve vrcholu
+		# (kraj.ryb2_hladina: kraj site 0, na rezu vtoku hloubka terenu) - jeden zdroj, hra ji neprepisuje (odhad ze
+		# vzdalenosti od brehu dal na kraji krytí > 0 = hrana)
+		var z_blenderu := String(mi.name).begins_with("Rybnik_lhota_voda") and arr[Mesh.ARRAY_COLOR] != null \
+				and (arr[Mesh.ARRAY_COLOR] as PackedColorArray).size() == (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+		if s == surf and not z_blenderu:
 			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 			var col := PackedColorArray()
 			col.resize(v.size())
