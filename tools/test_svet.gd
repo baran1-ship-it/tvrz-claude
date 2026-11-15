@@ -3137,6 +3137,10 @@ func _visici() -> void:
 		if gap > tol and String(b[0]) == "kamen_maly" and int(po_druhu.get("kamen_vzorek", 0)) < 8:
 			po_druhu["kamen_vzorek"] = int(po_druhu.get("kamen_vzorek", 0)) + 1
 			print("VISI kamen_maly vzorek (%.1f, %.2f, %.1f) mezera %.2f nad %s, teren_y %.2f" % [pos.x, pos.y, pos.z, gap, String((h["collider"] as Node).name) if not h.is_empty() else "-", float(sv._teren_y(pos.x, pos.z))])
+		if gap > tol and String(b[0]) == "borovice":
+			for sk2: Vector4 in skaly.get(Vector2i(floori(pos.x / 16.0), floori(pos.z / 16.0)), []):
+				if Vector2(pos.x - sk2.x, pos.z - sk2.y).length() < 8.0:
+					print("VISI borovice (%.1f, %.2f, %.1f): skala (%.1f, %.1f) vzdal %.2f polomer %.2f vrchol %.2f" % [pos.x, pos.y, pos.z, sk2.x, sk2.y, Vector2(pos.x - sk2.x, pos.z - sk2.y).length(), sk2.z, sk2.w])
 		if gap > tol:
 			n += 1
 			var d: String = b[0]
