@@ -78,6 +78,7 @@ func _beh() -> void:
 		for i in 6:
 			await process_frame
 		var h := _zmer(sit)
+		_obj(sit, sada + "_klid")
 		var horsi_par: float = h[0]
 		var sevy: int = h[1]
 		print("SVY %s klid: nejhorsi par %s" % [sada, h[3]])
@@ -102,6 +103,7 @@ func _beh() -> void:
 				for i in 4:
 					await process_frame
 				var r := _zmer(sit)
+				_obj(sit, "%s_%s_%d" % [sada, kl, f])
 				kp = maxf(kp, float(r[0]))
 				ks = maxi(ks, int(r[1]))
 				if float(r[0]) > float(R["test_partner_m"]) or int(r[1]) > 0:
@@ -128,6 +130,7 @@ func _priprav(u: Node3D, kostra: Skeleton3D) -> Dictionary:
 	var okraje: Array = []
 	var hranice := {}
 	var sousede := {}
+	var troj := PackedInt32Array()
 	var q := float(R["test_par_m"])
 	var ob: Dictionary = R["oblast"]
 	for mi0: Node in u.find_children("*", "MeshInstance3D", true, false):
@@ -236,7 +239,23 @@ func _priprav(u: Node3D, kostra: Skeleton3D) -> Dictionary:
 					smycka[y] = ns
 					st.append(y)
 		ns += 1
-	return {"v": V, "pary": pary, "okraje": okraje, "hranice": hranice.keys(), "smycka": smycka}
+	return {"v": V, "pary": pary, "okraje": okraje, "hranice": hranice.keys(), "smycka": smycka, "troj": troj}
+
+
+## Ladeni (TVRZ_SVY_OBJ=slozka): skinovana sit povrchu odevu a tela v dane fazi jako OBJ (rozbor vrstev mimo Godot)
+func _obj(sit: Dictionary, jm: String) -> void:
+	if not OS.has_environment("TVRZ_SVY_OBJ"):
+		return
+	var f := FileAccess.open(OS.get_environment("TVRZ_SVY_OBJ").path_join(jm + ".obj"), FileAccess.WRITE)
+	if f == null:
+		return
+	for z: Array in sit["v"]:
+		var p := _poloha(z)
+		f.store_line("v %.5f %.5f %.5f" % [p.x, p.y, p.z])
+	var t: PackedInt32Array = sit["troj"]
+	for i in range(0, t.size(), 3):
+		f.store_line("f %d %d %d" % [t[i] + 1, t[i + 1] + 1, t[i + 2] + 1])
+	f.close()
 
 
 func _normala(z: Array) -> Vector3:

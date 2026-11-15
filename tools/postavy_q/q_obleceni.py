@@ -284,27 +284,16 @@ def build(body, kroj, NAME):
                       offset_fn=lambda c, o: o + 0.016 * min(1.0, max(0.0, (c.y - (-0.06)) / 0.08)))
         parts = [hd]
         if kroj.get("rouska_cip", True):
-            ln = 0.16 if not female else 0.22
-            if female:
-                cp, *_ = cl.tube(body, co, (torso + headw > 0.3) & ~hand & (z > z_neck - ln - 0.05), z_neck + 0.02, z_neck - ln,
-                                 f"{NAME}_rouska_cip", N=40, ease=0.02, flare=0.05, hang=True, hem_noise=0.004)
-            else:
-                # 12. 11. (snimek build/vsech: limec kukle trubkou o polomeru ramen stal 10 cm pred hrudi jako deska):
-                # limec kukle (gugel) = slupka po tele na ramenou, hrudi a zadech od krku dolu ln (jako kapuce)
-                m_cp = ((torso + headw + arms_u > 0.3) & ~hand & (z < z_neck + 0.02) & (z > z_neck - ln)
-                        & ~((arms_u > 0.5) & (np.abs(x) > 0.2)))
-                cp = cl.shell(body, co, no, m_cp, 0.03, f"{NAME}_limec", smooth=5, smooth_border=4)    # shell sam prenese vahy a vlozi; okraj vyhlazeny, 3 cm nad kotli
-                print("LIMEC nad vrstvou posunuto", cl.nad_vrstvou(cp, [top, sh], kroj.get("vrstva_mezera_m", 0.006)))
-            if female:
-                cl.transfer_weights(cp, body, co, k=10); cl._link(cp, body)
-            if female:
-                # cíp roušky jen vzadu a po stranách
-                b2 = bmesh.new(); b2.from_mesh(cp.data)
-                bmesh.ops.delete(b2, geom=[v for v in b2.verts if v.co.y < 0.015], context='VERTS')
-                b2.to_mesh(cp.data); b2.free()
+            ln = 0.22
+            cp, *_ = cl.tube(body, co, (torso + headw > 0.3) & ~hand & (z > z_neck - ln - 0.05), z_neck + 0.02, z_neck - ln,
+                             f"{NAME}_rouska_cip", N=40, ease=0.02, flare=0.05, hang=True, hem_noise=0.004)
+            cl.transfer_weights(cp, body, co, k=10); cl._link(cp, body)
+            # cíp roušky jen vzadu a po stranách
+            b2 = bmesh.new(); b2.from_mesh(cp.data)
+            bmesh.ops.delete(b2, geom=[v for v in b2.verts if v.co.y < 0.015], context='VERTS')
+            b2.to_mesh(cp.data); b2.free()
             parts.append(cp)
-        kn = "rouska" if female else "kape"
-        K[kn] = parts; HIDE[kn] = []; MAT[kn] = ("len" if female else "vlna", kroj.get(kn + "_barva", [0.86, 0.84, 0.78] if female else [0.3, 0.28, 0.2]))
+        K["rouska"] = parts; HIDE["rouska"] = []; MAT["rouska"] = ("len", kroj.get("rouska_barva", [0.86, 0.84, 0.78]))
     # --- čepice (13. 11., reference kcd_13_11: plstěná/vlněná čapka u mužů bez kápě - kovář, sedláci): slupka temene
     # nad vlasy, vpředu nad čelem, vzadu níž přes týl
     ce = kroj.get("cepice")
