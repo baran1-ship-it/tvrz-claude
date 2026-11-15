@@ -339,3 +339,14 @@ pak oprava. Hypotézu nevydávat za opravu.
 - Jestli okluzní ořez (`use_occlusion_culling`, Embree) na Androidu v Compatibility opravdu běží – panel by mohl ukazovat
   počet okluzorů a vyřazených instancí (K1).
 - Cena ořezu `visibility_range` na instanci (Z7) je odhad. Ověřit lze jen variantou K10 (méně instancí → kreslení CPU).
+
+## Potvrzení z Pucharta (Míša 15. 11. 22:31 – Puchart session porovnal tento rozbor se svým kódem)
+- Terén: Puchart má hotové dlaždice s LOD → **převzít postup, ne vymýšlet**: `origin/ccr-f2d32673-9fi7m5`
+  `puchart/nastroje/teren_dlazdice.py` (pečení dlaždic t_<i>_<j>.glb s uzly LOD0..LOD3 a sukní proti škvírám, obzor.glb
+  s dírou pro výsek, vše offline – „nic se nepočítá na tabletu“), pravidla `puchart/pravidla/svet/teren.json`
+  (dlazdice_m 250, lod krok 2/4/8 m do 200/450/900 m, hystereze), hra `puchart/hra/scripts/svet.gd` (načtení dlaždic).
+  U nás terén staví Blender (kraj.py) a hra ho upravuje (svet.gd) → dlaždicovat AŽ po herních úpravách? NE – pravidlo
+  „pozdější krok nehýbe dřívějším“: herní úpravy terénu přesunout do exportu, pak dlaždice offline jako Puchart.
+- Režim „uvnitř“ (pod střechou kratší dohled / zdi zakryjí): obě hry stejně → K8.
+- Pevná zásoba připravených kusů (louka, les, byliny) místo nové paměti na grafice → K5, Puchart to plánuje taky.
+- Panel sám 7–11 ms (u nás naměřeno 2,1–11,6 ms) → lehký monitor už je výchozí v měřicí trase.
