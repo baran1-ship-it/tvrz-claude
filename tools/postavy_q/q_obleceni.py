@@ -260,10 +260,30 @@ def build(body, kroj, NAME):
         m_hd = (headw > 0.3) & ~face & (z > z_neck - (0.02 if female else 0.06))
         if female:
             m_hd &= (z > E_z - 0.13) | (y > 0.02)            # rouška: temeno, boky, týl, zadní krk
-        hd = cl.shell(body, co, no, m_hd, 0.018 if female else 0.014, f"{NAME}_{'rouska' if female else 'kapuce'}", smooth=5,
-                      offset_fn=(lambda c, o: o + 0.016 * min(1.0, max(0.0, (c.y - (-0.06)) / 0.08))) if female else None)
+        if not female:
+            # 15. 11. (Míša ř. 3, test_svy_odevu u 11 sad s kápí): kapuce a límec byly dvě slupky - spodní lem kapuce a
+            # horní okraj límce ležely na krku 1–3 cm od sebe v jedné vrstvě (v chůzi mezera, tmavé trojúhelníky).
+            # Kukle (gugel) je jeden kus: jedna slupka z masky kapuce ∪ límce, odsazení přechází na krku z kapuce na
+            # límec (pravidla svy_odevu.kape), průramky límce spojené se spodním lemem (bez úzkých pásků, bez_mustku).
+            KP = cl.pravidla_svu()["kape"]
+            ln = KP["limec_delka_m"]
+            m_cp = ((torso + headw + arms_u > 0.3) & ~hand & (z < z_neck + 0.02) & (z > z_neck - ln)
+                    & ~((arms_u > 0.5) & (np.abs(x) > 0.2)))
+            z_h, z_l = z_neck + KP["prechod_nad_krkem_m"], z_neck - KP["prechod_pod_krkem_m"]
+            o_h, o_l = KP["kapuce_odsazeni_m"], KP["limec_odsazeni_m"]
+            def _odsaz(c, o):
+                t = min(1.0, max(0.0, (z_h - c.z) / (z_h - z_l))); t = t * t * (3 - 2 * t)
+                return o_h + (o_l - o_h) * t
+            kp = cl.shell(body, co, no, m_hd | m_cp, o_h, f"{NAME}_kapuce", smooth=5, smooth_border=4, offset_fn=_odsaz)
+            print("KAPE mustky pryc ploch", cl.bez_mustku(kp))
+            print("KAPE nad vrstvou posunuto", cl.nad_vrstvou(kp, [top, sh], kroj.get("vrstva_mezera_m", 0.006)))
+            print("KAPE kusu", cl.kusy(kp))
+            K["kape"] = [kp]; HIDE["kape"] = []; MAT["kape"] = ("vlna", kroj.get("kape_barva", [0.3, 0.28, 0.2]))
+    if female and (kroj.get("kape", False) or kroj.get("rouska", True)):
+        hd = cl.shell(body, co, no, m_hd, 0.018, f"{NAME}_rouska", smooth=5,
+                      offset_fn=lambda c, o: o + 0.016 * min(1.0, max(0.0, (c.y - (-0.06)) / 0.08)))
         parts = [hd]
-        if not female or kroj.get("rouska_cip", True):
+        if kroj.get("rouska_cip", True):
             ln = 0.16 if not female else 0.22
             if female:
                 cp, *_ = cl.tube(body, co, (torso + headw > 0.3) & ~hand & (z > z_neck - ln - 0.05), z_neck + 0.02, z_neck - ln,
