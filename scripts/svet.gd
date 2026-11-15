@@ -12391,9 +12391,7 @@ func uzivani_smi(key: String, x: float, z: float, sc := 1.0) -> bool:
 	if v_pruchodu(x, z, key):
 		return false
 	# strom: koruna nesmi do zdi a mistnosti (pasma.budova koruna_od_zdi_podil; Misa 14. 11. vetve smrku v hostinci)
-	var rk := koruna_od_zdi(key)
-	if rk > float(pasma()["budova"]["rostlina_od_zdi_m"]):
-		rk *= sc                                      # strom: koruna podle meritka instance
+	var rk := koruna_od_zdi(key, sc)
 	# mistnosti (i patro hostince a krcma - pudorys statickych staveb je nepokryva cele; Misa 14. 11. vetve v loznici)
 	if rk > 0.0 and _od_mistnosti(x, z) < rk:
 		return false
@@ -12433,9 +12431,12 @@ func _od_mistnosti(x: float, z: float) -> float:
 ## Odstup od pudorysu stavby pro druh: stromy max(kmen_od_zdi_m, polomer koruny x koruna_od_zdi_podil), ker/trava/bylina
 ## rostlina_od_zdi_m (pul trsu), jine 0.
 ## Polomer koruny = nejdelsi shoda zacatku jmena v modely.json trava_unshaded.koruny (jako stin korun na trave).
-func koruna_od_zdi(key: String) -> float:
-	if key == "" or _koruna_od_zdi.has(key):
-		return float(_koruna_od_zdi.get(key, 0.0))
+func koruna_od_zdi(key: String, sc := 1.0) -> float:
+	if key == "":
+		return 0.0
+	if _koruna_od_zdi.has(key):
+		var c0: Array = _koruna_od_zdi[key]
+		return maxf(float(c0[0]), float(c0[1]) * sc)      # spodni mez kmene + koruna x meritko instance
 	var r := 0.0
 	var sk := skupina(key)
 	if sk in ["ker", "vysoka_bylina", "bylina"]:
@@ -12447,8 +12448,9 @@ func koruna_od_zdi(key: String) -> float:
 			if key.begins_with(dk) and dk.length() > kd.length():
 				kd = dk
 		var pb: Dictionary = pasma()["budova"]
-		r = maxf(float(pb["kmen_od_zdi_m"]), float(kor_dr[kd][0]) * float(pb["koruna_od_zdi_podil"]) if kd != "" else 0.0)
-	_koruna_od_zdi[key] = r
+		_koruna_od_zdi[key] = [float(pb["kmen_od_zdi_m"]), float(kor_dr[kd][0]) * float(pb["koruna_od_zdi_podil"]) if kd != "" else 0.0]
+		return koruna_od_zdi(key, sc)
+	_koruna_od_zdi[key] = [r, 0.0]
 	return r
 
 
@@ -12564,8 +12566,11 @@ func _dosednuti_dat() -> void:
 	var n := 0
 	var po := {}
 	for key: String in data["rostliny"]:
-		# skaly a balvany samy, mech (lezi na kamenech a zdech - _mech_na_zem) vynechat
-		if key.begins_with("skala_") or key.begins_with("balvan_") or key.begins_with("mech_") or key.begins_with("moss_"):
+		# skaly, balvany a mech (lezi na kamenech a zdech) vynechat - pasma.dosednuti nesedat_obsahuje
+		var vynech := false
+		for cast: String in pd["nesedat_obsahuje"]:
+			vynech = vynech or key.contains(cast)
+		if vynech:
 			continue
 		for t: Array in data["rostliny"][key]:
 			var x := float(t[3])
@@ -12808,7 +12813,7 @@ func _krajina() -> void:
 			# podle hustoty druhu toku - vycnivaji nad hladinu, shader kolem nich ceri a peni
 			var bnm := float((Pravidla.cti("voda", "potok", "raz_toku")["druhy"] as Array)[kr.raz[k]]["balvanu_na_m"])
 			if bnm > 0.0:
-				for _ib in int(round(bnm * dl)):
+				for _ib in int(bnm * dl + rng.randf()):           # stredni hodnota bnm x dl (round dal +20 %)
 					var o2 := a.lerp(b, rng.randf())
 					var q2 := o2 + nrm * rng.randf_range(-w * 0.9, w * 0.9)
 					var sb2 := rng.randf_range(0.5, 1.1)

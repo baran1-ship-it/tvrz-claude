@@ -1869,7 +1869,7 @@ var _kupy_fronta: Array[MultiMesh] = []
 func _kupy_nahrej() -> void:
 	while not _kupy_fronta.is_empty():
 		var mm: MultiMesh = _kupy_fronta[0]
-		if mm == null or not is_instance_valid(mm) or mm.get_reference_count() <= 1:
+		if mm == null or not is_instance_valid(mm) or mm.get_reference_count() <= 2:   # fronta + mistni promenna = zrusena bunka
 			_kupy_fronta.pop_front()                     # bunka mezitim zrusena
 			continue
 		var cur := maxi(mm.visible_instance_count, 0)

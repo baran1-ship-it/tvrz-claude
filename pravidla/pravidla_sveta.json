@@ -1924,7 +1924,14 @@
   "dosednuti": {
    "popis": "Misa 14. 11. „projdi, co se ve svete vznasi“: rostliny a kameny z exportu dosednou na HOTOVY viditelny teren v datech (krok vstupu druhu, po zamku terenu) - drive jen svet.dosednout pri startu paprskem proti kolizim, ktere jsou v tu chvili nactene jen kolem hrace (dal od startu vse viselo, test visici byl slepy - headless MultiMesh). visi_m = kolik smi stred instance byt nad terenem, ponor_m = o kolik ji posadit pod povrch. Na skalach (pudorys sity skaly x meritko) se nesedá - rostlina na vrcholu skaly je spravne.",
    "visi_m": 0.25,
-   "ponor_m": 0.05
+   "ponor_m": 0.05,
+   "nesedat_obsahuje": [
+    "mech",
+    "moss",
+    "skala_",
+    "balvan_"
+   ],
+   "_nesedat_obsahuje": "klice obsahujici tyto casti se v datech neposazuji (mech lezi na kamenech a zdech - _mech_na_zem; rock_moss_set; skaly a balvany samy); nezavisla kontrola 15. 11."
   }
  }
 }

@@ -285,7 +285,7 @@ func blizko(x: float, z: float) -> Array:
 			var hb := maxf(hladiny[k], hladiny[k + 1]) if stupen.size() > k + 1 and stupen[k] >= 0 and stupen[k + 1] != stupen[k] else hh
 			out = [d, hh, lerpf(sirky[k], sirky[k + 1], t),
 					clampf(strana * kr / KRIVOST, -1.0, 1.0), lerpf(hloubky[k], hloubky[k + 1], t), lerpf(sklony[k], sklony[k + 1], t), hr, hb,
-					maxf(breh_nad[raz[k]], breh_nad[raz[k + 1]]) if raz.size() > k + 1 else 0.05]
+					lerpf(breh_nad[raz[k]], breh_nad[raz[k + 1]], t) if raz.size() > k + 1 else 0.05]   # plynule mezi razy (kontrola: skok 0,75 m)
 	return out if best < DOSAH else []
 
 
