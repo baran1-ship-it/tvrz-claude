@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "a4f1559",
+ "commit": "336efdb",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -90,7 +90,10 @@
    "stavby_z_dalky": true,
    "jablone": true,
    "kovarna_domy_jas": true,
-   "pred_vstupem_bez_rostlin": true
+   "pred_vstupem_bez_rostlin": true,
+   "voda_kameny_nejsou_bile": true,
+   "upravy_modelu_disk": true,
+   "cesta_skala_hradba_val": true
   },
   "pruchod": {
    "A_branka_patro": true,
@@ -152,32 +155,56 @@
    "povrch_kolize": true,
    "puda_hajovna_Hajovna": true,
    "strom_kolize": true,
+   "ven_hajovna_Hajovna": true,
+   "ven_krcma_KrcmaL": true,
+   "ven_predhradi_Dum1_10": true,
+   "ven_predhradi_Dum1_11": true,
+   "ven_predhradi_Dum1_15": true,
+   "ven_predhradi_Dum1_16": true,
+   "ven_predhradi_Dum1_20": true,
+   "ven_predhradi_Dum1_21": true,
+   "ven_predhradi_Dum1_3": true,
+   "ven_predhradi_Dum1_4": true,
+   "ven_predhradi_Dum2_0": true,
+   "ven_predhradi_Dum2_1": true,
+   "ven_predhradi_Dum2_12": true,
+   "ven_predhradi_Dum2_13": true,
+   "ven_predhradi_Dum2_14": true,
+   "ven_predhradi_Dum2_17": true,
+   "ven_predhradi_Dum2_18": true,
+   "ven_predhradi_Dum2_19": true,
+   "ven_predhradi_Dum2_2": true,
+   "ven_predhradi_Dum2_5": true,
+   "ven_predhradi_Dum2_6": true,
+   "ven_predhradi_Dum2_7": true,
+   "ven_predhradi_Rychta_8": true,
+   "ven_predhradi_Rychta_9": true,
    "vrata_funkce": true,
    "zebrik_lezeni": true
   },
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1241442,
-    "troj_max": 1247140,
-    "kresleni_p95": 370,
+    "troj_p95": 1241298,
+    "troj_max": 1247212,
+    "kresleni_p95": 372,
     "kresleni_m_median": 474.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1608897,
-    "troj_max": 1786819,
-    "kresleni_p95": 783,
-    "kresleni_m_median": 717.0
+    "troj_p95": 1615832,
+    "troj_max": 1835559,
+    "kresleni_p95": 788,
+    "kresleni_m_median": 714.0
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1578885,
-    "troj_max": 1724853,
-    "kresleni_p95": 943,
-    "kresleni_m_median": 1760.0
+    "troj_p95": 1606105,
+    "troj_max": 1754490,
+    "kresleni_p95": 938,
+    "kresleni_m_median": 1758.0
    },
-   "zmena_median": 35.09,
+   "zmena_median": 35.18,
    "doskoky": [],
    "ve_zdi": 2
   },
