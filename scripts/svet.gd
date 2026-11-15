@@ -12850,6 +12850,38 @@ func v_lomu(x: float, z: float) -> float:
 	return maxf(dx, dz)
 
 
+## Volne pruchody zricenin (lokace.json ruiny: pudorysy pruchody dilu + pruchody_lok, [x0, z0, x1, z1, w] v mistnich
+## souradnicich, otoceni jako svet._ruiny_ves_dil a Blender kraj.v_pruchodu_ruiny). 15. 11. test ruiny_ves: les ze hry
+## (_les_hustsi, _lesni_plast) sazel stromy a mech do pruchodu Doubravy - jedno pravidlo pro Blender i hru.
+var _ruiny_pruchody: Array = []
+var _ruiny_pruchody_ok := false
+
+
+func v_pruchodu_ruiny(x: float, z: float) -> bool:
+	if not _ruiny_pruchody_ok:
+		_ruiny_pruchody_ok = true
+		for e: Dictionary in Pravidla.cti("lokace", "ruiny"):
+			var b0 := Basis(Vector3.UP, float(e["natoceni"]))
+			var c0 := Vector3(float(e["stred"][0]), 0.0, float(e["stred"][1]))
+			var loc: Array = []
+			for q: Array in e.get("pruchody_lok", []):
+				loc.append([Vector3(float(q[0]), 0.0, float(q[1])), Vector3(float(q[2]), 0.0, float(q[3])), float(q[4])])
+			for d: Array in e.get("dily", []):
+				var bd := Basis(Vector3.UP, deg_to_rad(float(d[3])))
+				var w := Vector3(float(d[1]), 0.0, float(d[2]))
+				for q: Array in (e.get("pudorysy", {}) as Dictionary).get(String(d[0]), {}).get("pruchody", []):
+					loc.append([w + bd * Vector3(float(q[0]), 0.0, float(q[1])), w + bd * Vector3(float(q[2]), 0.0, float(q[3])), float(q[4])])
+			for q: Array in loc:
+				var a: Vector3 = c0 + b0 * (q[0] as Vector3)
+				var b: Vector3 = c0 + b0 * (q[1] as Vector3)
+				_ruiny_pruchody.append([Vector2(a.x, a.z), Vector2(b.x, b.z), float(q[2])])
+	var p := Vector2(x, z)
+	for q: Array in _ruiny_pruchody:
+		if Geometry2D.get_closest_point_to_segment(p, q[0], q[1]).distance_to(p) < float(q[2]):
+			return true
+	return false
+
+
 func smi_tu_byt(x: float, z: float, druh := "") -> bool:
 	if v_trzisti(x, z) < 1.5:
 		return false
@@ -12859,6 +12891,8 @@ func smi_tu_byt(x: float, z: float, druh := "") -> bool:
 		return false                                  # pravidla druhu (druhy.json) a voda + brehovy pas
 	if v_lomu(x, z) < 1.0 and not druh.begins_with("kamen") and not druh.begins_with("balvan"):
 		return false
+	if not (druh.contains("trava") or druh.contains("grass")) and v_pruchodu_ruiny(x, z):
+		return false                                  # pruchod zriceniny: jen trava (jako Blender kraj.v_pruchodu_ruiny)
 	var c := Vector2i(floori(x / 32.0), floori(z / 32.0))
 	if kryti_tab.has(c):
 		var i := clampi(floori((x - c.x * 32.0) / 0.5), 0, 63)
