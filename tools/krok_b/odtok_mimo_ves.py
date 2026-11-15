@@ -22,6 +22,8 @@ try:
 except (OSError, ValueError, KeyError):
     CESTY = []
 SPAD = V["potok"]["min_spad"]
+TK = [t for t in V["toky"] if t["id"] == "lhota_odtok"][0]
+BOK = TK["sirka_m"] / 2.0 + max(V["toky_tvar"]["breh_sirka_m"], V["toky_tvar"]["breh_sirka_vnitrni_m"]) + 3.0
 ZAREZ_MAX = V["toky_tvar"]["zarez_max_m"]
 OKRAJ = L["ves"]["toky_okraj_m"]
 
@@ -118,6 +120,13 @@ def trasa(a, b, y0):
             zarez = max(0.0, hv - lvl[u])
             if zarez > ZAREZ_MAX:
                 continue
+            # 15. 11. (test smyslu toky_nasyp: tok kolem kovarny po ubochi, teren vedle koryta pod hladinou): teren po obou
+            # stranach koryta (pul sirky + breh + 3 m, jako test) nesmi byt pod hladinou - zadny nasyp na svahu
+            hl_v = min(lvl[u], hv) - TK["hloubka_m"]
+            nl = math.hypot(di, dj)
+            nx_, nz_ = -dj / nl, di / nl
+            if v != sb and min(hy(x + nx_ * BOK, z + nz_ * BOK), hy(x - nx_ * BOK, z - nz_ * BOK)) < hl_v:
+                continue
             Lk = math.hypot(di, dj) * K
             # zarez drahy kvadraticky: tok drzi udolnici (ne kanal ve hrbetu)
             ng = g[u] + Lk * (1 + 4.0 * zarez * zarez) * (6.0 if u_cesty(x, z) else 1.0)
@@ -152,7 +161,15 @@ def _main():
     o = tk["osa_xzy"]
     # prvni bod za vsi smerem po proudu: posledni bod do obalu + okraj, pak az bod dal nez okraj + 10 m
     # 14. 11.: i bod ve stavbe (zakaz) - trasa uz obchazi ves, ale nove stavby lezi na ni (kovarna_ves)
-    posl = max((i for i, q in enumerate(o) if i > 0 and zakaz(q[0], q[1])), default=-1)
+    def nasyp(i):
+        # bod osy, kde je teren vedle koryta (BOK) pod hladinou (q[2]) - jako test smyslu toky_nasyp
+        if i == 0 or i >= len(o) - 1:
+            return False
+        dx_, dz_ = o[i + 1][0] - o[i - 1][0], o[i + 1][1] - o[i - 1][1]
+        nl_ = math.hypot(dx_, dz_) or 1.0
+        nx_, nz_ = -dz_ / nl_, dx_ / nl_
+        return min(hy(o[i][0] + nx_ * BOK, o[i][1] + nz_ * BOK), hy(o[i][0] - nx_ * BOK, o[i][1] - nz_ * BOK)) < o[i][2]
+    posl = max((i for i, q in enumerate(o) if i > 0 and (zakaz(q[0], q[1]) or (nasyp(i) and od_obalu(q[0], q[1]) < 200.0))), default=-1)
     if posl < 0:
         sys.exit("odtok mimo ves: trasa je mimo ves i stavby - beze zmeny")
     # napojeni: z kandidatu za vsi (az 60 bodu po proudu) ten, kde nova trasa prijde nejmin lomene (bez klicky) a krizi
