@@ -6841,11 +6841,7 @@ func _ves_domy(root: Node3D) -> void:
 		# Misa 14. 11.: chyse u lomu bez pryčen a podlahy modelu (lokace lom_chyse vynechat_uzly, i kolize)
 		var lch2: Dictionary = Pravidla.cti("lokace", "lom_chyse")
 		if String(d["typ"]) == String(lch2["typ"]):
-			for jv: String in lch2["vynechat_uzly"]:
-				for vn in dum.find_children(jv + "*", "", true, false):
-					if is_instance_valid(vn) and (String(vn.name) == jv or String(vn.name).begins_with(jv + "-") or String(vn.name).begins_with(jv + "_col")):
-						vn.get_parent().remove_child(vn)
-						vn.free()
+			_vynechat_uzly(dum, lch2["vynechat_uzly"], "lom_chyse")
 		dum.transform = d["xf"]
 		root.add_child(dum)
 		var st_vzor: MeshInstance3D = ssc.find_child(String(d["typ"]) + "_Stredni", true, false) as MeshInstance3D if ssc else null
@@ -10033,11 +10029,7 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 		if tm:
 			break
 	var dil_do := float(d["dil_do_m"])
-	for jm0: String in d.get("vynechat_uzly", []):
-		var vn := sc.find_child(jm0, true, false)
-		if vn:
-			vn.get_parent().remove_child(vn)
-			vn.free()
+	_vynechat_uzly(sc, d.get("vynechat_uzly", []), "mlyn")
 	_lednice_blok(sc, d)
 	_mlyn_dvere(sc, root, xf, d)
 	_schody_kolize(sc, d.get("schody_nastup", []))
@@ -10151,13 +10143,7 @@ func _kovarna_dil(parent: Node3D) -> void:
 	var sc := (load(String(kv["model"])) as PackedScene).instantiate() as Node3D
 	sc.name = "Kovarna_dil"
 	# Misa 14. 11.: dlazba / podlaha / dvur z modelu pryc (i kolize) - na zemi udusana hlina sveta (lokace vynechat_uzly)
-	for jv: String in kv.get("vynechat_uzly", []):
-		for vn in sc.find_children(jv + "*", "", true, false):
-			if not is_instance_valid(vn):
-				continue
-			if String(vn.name) == jv or String(vn.name).begins_with(jv + "-") or String(vn.name).begins_with(jv + "_col"):
-				vn.get_parent().remove_child(vn)
-				vn.free()
+	_vynechat_uzly(sc, kv.get("vynechat_uzly", []), String(sc.name))
 	sc.transform = xf
 	parent.add_child(sc)
 	for nd in sc.find_children("*", "GeometryInstance3D", true, false):
@@ -10224,13 +10210,7 @@ func _krcma_dil(root: Node3D, parent: Node3D) -> void:
 	var sc := (load(String(kr["model"])) as PackedScene).instantiate() as Node3D
 	sc.name = "Krcma_dil"
 	# Misa 14. 11.: dlazba / podlaha / dvur z modelu pryc (i kolize) - na zemi udusana hlina sveta (lokace vynechat_uzly)
-	for jv: String in kr.get("vynechat_uzly", []):
-		for vn in sc.find_children(jv + "*", "", true, false):
-			if not is_instance_valid(vn):
-				continue
-			if String(vn.name) == jv or String(vn.name).begins_with(jv + "-") or String(vn.name).begins_with(jv + "_col"):
-				vn.get_parent().remove_child(vn)
-				vn.free()
+	_vynechat_uzly(sc, kr.get("vynechat_uzly", []), String(sc.name))
 	sc.transform = xf
 	parent.add_child(sc)
 	# kolize schodu jako rampa (lokace krcma_l kolize_rampy: model ma schodnici a podestu v rozporu - schod 0,5 m)
@@ -10301,6 +10281,66 @@ func _krcma_dil(root: Node3D, parent: Node3D) -> void:
 		var spp := xf * _rel_xf(sp, sc).origin
 		data["pouziti"].append({"kind": "bed", "pos": [spp.x, spp.y + 0.25, spp.z], "r": 2.2})
 	print("krcma: u (%.0f, %.0f) y %.2f, interier %s, postel %s" % [x, z, xf.origin.y, interier != null, sp != null])
+
+
+## Vynechane uzly modelu (lokace/voda vynechat_uzly) - JEDINE misto (Misa 15. 11. „neviditelne ploty“ na dvore krcmy:
+## odebrana sit KrcmaL_Dvur, kolize Kol_Plot* zustaly; drive 4 ruzne implementace). Uzel jmeno, jmeno-*, jmeno_col* pryc
+## a s nim kazda kolize dilu, ktera cela lezi v obalu odebrane geometrie (+0,1 m) - kolize bez viditelne site nezustane.
+func _vynechat_uzly(koren: Node3D, jmena: Array, popis: String) -> void:
+	for jv0: Variant in jmena:
+		var jv := String(jv0)
+		var obal := AABB()
+		var ma := false
+		var pryc: Array = []
+		for vn in koren.find_children(jv + "*", "", true, false):
+			if String(vn.name) == jv or String(vn.name).begins_with(jv + "-") or String(vn.name).begins_with(jv + "_col"):
+				pryc.append(vn)
+		for vn: Node in pryc:
+			var site: Array = vn.find_children("*", "MeshInstance3D", true, false)
+			if vn is MeshInstance3D:
+				site.append(vn)
+			for mi: MeshInstance3D in site:
+				var b := (_rel_xf(mi, koren)) * mi.get_aabb()
+				obal = b if not ma else obal.merge(b)
+				ma = true
+		for vn: Node in pryc:
+			if is_instance_valid(vn):
+				vn.get_parent().remove_child(vn)
+				vn.free()
+		if not ma:
+			continue
+		var n_kol := 0
+		var g := obal.grow(0.1)
+		for cs in koren.find_children("*", "CollisionShape3D", true, false):
+			var c3 := cs as CollisionShape3D
+			if c3.shape == null:
+				continue
+			var cb := _rel_xf(c3, koren) * _tvar_aabb(c3.shape)
+			if g.encloses(cb):
+				c3.get_parent().remove_child(c3)
+				c3.free()
+				n_kol += 1
+		print("%s: vynechan uzel %s, s nim %d kolizi" % [popis, jv, n_kol])
+
+
+## Obal tvaru kolize v jeho soustave
+func _tvar_aabb(sh: Shape3D) -> AABB:
+	if sh is BoxShape3D:
+		var sz := (sh as BoxShape3D).size
+		return AABB(-sz * 0.5, sz)
+	if sh is ConvexPolygonShape3D:
+		var pts := (sh as ConvexPolygonShape3D).points
+		var ab := AABB(pts[0], Vector3.ZERO) if pts.size() > 0 else AABB()
+		for p in pts:
+			ab = ab.expand(p)
+		return ab
+	if sh is ConcavePolygonShape3D:
+		var f := (sh as ConcavePolygonShape3D).get_faces()
+		var ab2 := AABB(f[0], Vector3.ZERO) if f.size() > 0 else AABB()
+		for p in f:
+			ab2 = ab2.expand(p)
+		return ab2
+	return AABB(Vector3(-0.5, -0.5, -0.5), Vector3.ONE)
 
 
 ## Zaznam ruiny z lokace.json ruiny (id)
