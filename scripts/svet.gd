@@ -6884,8 +6884,13 @@ func _ves_domy(root: Node3D) -> void:
 					"sestup": xf * (zz[3] as Vector3)})
 		# nabytek a luzka domu (nabytek.json domy podle typu): kus = [id, x, z, natoceni_st, vyska nad podlahou]
 		var nb: Dictionary = (Pravidla.cti("nabytek", "domy") as Dictionary).get(typ, {})
-		for v: Array in nb.get("kusy", []):
+		var kusy_n: Array = nb.get("kusy", [])
+		var kusy_y: Dictionary = d.get("kusy_y", {})       # chyse na terenu: zem pod kusem ze site (_chyse_na_sit)
+		for iv in kusy_n.size():
+			var v: Array = kusy_n[iv]
 			var wp := xf * Vector3(float(v[1]), float(m["pod"]) + float(v[4]), float(v[2]))
+			if kusy_y.has(iv):
+				wp.y = float(kusy_y[iv]) + float(v[4])
 			var yv := yaw + deg_to_rad(float(v[3]))
 			if v.size() > 5 and String(v[5]) == "o_zed":
 				# Misa 0.99994 r. 68 „metla v kazde chalupe lezi na zemi“: kus 6. pole "o_zed" = opreny o nejblizsi zed
@@ -6923,18 +6928,9 @@ func _ves_domy(root: Node3D) -> void:
 
 ## Chyse na skutecnou sit terenu (vyska z trojuhelniku siti Teren*, ne z mrizky 2 m): prkenna zidkou na nejnizsim
 ## bode (do svahu zapustena); kurova (kuly 0,29 m v zemi) mezi dolnim a hornim rohem.
-func _chyse_na_sit(root: Node3D) -> void:
-	var body: Array = []
-	for d: Dictionary in _domy:
-		if not d["m"].has("t_pas"):
-			continue
-		var m: Dictionary = d["m"]
-		for qx in [-1.0, 0.0, 1.0]:
-			for qz in [float(m["b"]), 0.0, float(m["f"]), float(m["ft"])]:
-				var w: Vector3 = (d["xf"] as Transform3D) * Vector3(qx * float(m["hw"]), 0.0, qz)
-				body.append([d, Vector2(w.x, w.z), -INF])
-	if body.is_empty():
-		return
+## Nejvyssi bod hotove site terenu (Teren*, bez obzoru, kamenu cest a sukni) pod kazdym bodem: bod = [.., Vector2 x z,
+## vyska (-INF = nic), ..] - vyska se zapise do pole 2.
+func _vyska_site_bodu(root: Node3D, body: Array) -> void:
 	for t in root.find_children("Teren*", "MeshInstance3D", true, false):
 		var nm := String(t.name)
 		if nm == "Teren_obzor" or nm.begins_with("Teren_cesta_kamen") or nm.ends_with("_sukne"):
@@ -6973,6 +6969,42 @@ func _chyse_na_sit(root: Node3D) -> void:
 				if u < -0.001 or w2 < -0.001 or u + w2 > 1.001:
 					continue
 				b[2] = maxf(float(b[2]), a.y + u * (bb.y - a.y) + w2 * (c.y - a.y))
+
+
+func _chyse_na_sit(root: Node3D) -> void:
+	var body: Array = []
+	for d: Dictionary in _domy:
+		if not d["m"].has("t_pas"):
+			continue
+		var m: Dictionary = d["m"]
+		for qx in [-1.0, 0.0, 1.0]:
+			for qz in [float(m["b"]), 0.0, float(m["f"]), float(m["ft"])]:
+				var w: Vector3 = (d["xf"] as Transform3D) * Vector3(qx * float(m["hw"]), 0.0, qz)
+				body.append([d, Vector2(w.x, w.z), -INF])
+	# kusy nabytku chysi na terenu (lokace lom_chyse na_terenu): podlaha = hruba sit terenu (vrcholy po ~5 m), pod
+	# kusem je zem jinde nez v nejvyssim bode chyse - vyska kusu ze site pod nim (test lide_chovani: luzko 6-9 cm nad zemi)
+	var lch0: Dictionary = Pravidla.cti("lokace", "lom_chyse")
+	var kusy_b: Array = []
+	for d: Dictionary in _domy:
+		if not (d["m"].has("t_pas") and bool(lch0.get("na_terenu", false)) and String(d["typ"]) == String(lch0["typ"])):
+			continue
+		var kusy: Array = ((Pravidla.cti("nabytek", "domy") as Dictionary).get(String(d["typ"]), {}) as Dictionary).get("kusy", [])
+		d["kusy_y"] = {}
+		for i in kusy.size():
+			var v: Array = kusy[i]
+			kusy_b.append([d, Vector2(float(v[1]), float(v[2])), -INF, i])
+	if body.is_empty():
+		return
+	_vyska_site_bodu(root, body)
+	# kusy nabytku: poloha v chysi (xf az po srovnani nize - natoceni a x, z se nemeni, jen y) -> svet, vyska site pod nim
+	if not kusy_b.is_empty():
+		for kb: Array in kusy_b:
+			var wk: Vector3 = (kb[0]["xf"] as Transform3D) * Vector3((kb[1] as Vector2).x, 0.0, (kb[1] as Vector2).y)
+			kb[1] = Vector2(wk.x, wk.z)
+		_vyska_site_bodu(root, kusy_b)
+		for kb: Array in kusy_b:
+			if float(kb[2]) > -INF:
+				(kb[0]["kusy_y"] as Dictionary)[int(kb[3])] = float(kb[2])
 	for d: Dictionary in _domy:
 		if not d["m"].has("t_pas"):
 			continue

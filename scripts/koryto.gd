@@ -35,7 +35,7 @@ var sklony: PackedFloat32Array = PackedFloat32Array()  # nasobek sklonu svahu po
 var stupen: PackedInt32Array = PackedInt32Array()      # kaskada: cislo useku x 1000 + cislo stupne, jinak -1
 var schody: Array = []
 var breh_nad: PackedFloat32Array = PackedFloat32Array()
-var breh_bod: PackedFloat32Array = PackedFloat32Array()  # breh_nad bodu osy rozsireny na +-ROZ_BREH bodu (zadny skok, kaskada drzi)  # vyska brehu nad hladinou podle razu toku (voda.json breh_nad_m)                                 # kaskada: hrany stupnu {p, smer, pad, w, k} (balvany, pena)
+var breh_bod: PackedFloat32Array = PackedFloat32Array()  # breh_nad bodu osy = nejvyssi v okoli raz_toku.breh_prolinani_m (kaskada drzi, zadny skok)
 var raz: PackedInt32Array = PackedInt32Array()        # index do voda.json potok.raz_toku.druhy (0 klidny, pereje, kaskada)
 var krivost: PackedFloat32Array = PackedFloat32Array() # se znamenkem: > 0 zatacka doleva (stred zatacky vlevo od smeru osy)
 var _mriz := {}                                        # bunka 16 m -> [indexy useku]
@@ -242,12 +242,28 @@ func priprav(vyska: Callable) -> bool:
 					schody.append({"p": body[k], "smer": smer, "pad": float(tune[stupen[k]]) - float(tune[stupen[k + 1]]), "w": sirky[k], "k": k})
 		for k in range(1, n):
 			hladiny[k] = minf(hladiny[k], hladiny[k - 1] - spad * body[k].distance_to(body[k - 1]))
-	# vyska brehu v bode = nejvyssi z razu sousedu (+-3 body): plynule prolinani bez snizeni brehu kaskady na hranici
+	# vyska brehu v bode = nejvyssi z razu v okoli raz_toku.breh_prolinani_m podel osy (v metrech, ne v bodech - ridka
+	# osa klidneho useku by jinak vysoky breh kaskady roztahla na desitky m): plynule bez snizeni brehu kaskady na hranici
+	var r_pr := float(Pravidla.cti("voda", "potok", "raz_toku")["breh_prolinani_m"])
 	breh_bod.resize(n)
 	for k in n:
-		var bm := 0.0
-		for j in range(maxi(0, k - 3), mini(n, k + 4)):
+		var bm := breh_nad[raz[k]]
+		var dl := 0.0
+		var j := k - 1
+		while j >= 0:
+			dl += body[j + 1].distance_to(body[j])
+			if dl > r_pr:
+				break
 			bm = maxf(bm, breh_nad[raz[j]])
+			j -= 1
+		dl = 0.0
+		j = k + 1
+		while j < n:
+			dl += body[j].distance_to(body[j - 1])
+			if dl > r_pr:
+				break
+			bm = maxf(bm, breh_nad[raz[j]])
+			j += 1
 		breh_bod[k] = bm
 	var pocty_r := {}
 	for k in n:
