@@ -6978,10 +6978,14 @@ func _chyse_na_sit(root: Node3D) -> void:
 			continue
 		var mn := INF
 		var mx := -INF
+		var mx_in := -INF                             # nejvyssi bod pod chysi bez zaprazi (ft) - podlaha chyse na terenu
 		for b: Array in body:
 			if b[0] == d and float(b[2]) > -INF:
 				mn = minf(mn, float(b[2]))
 				mx = maxf(mx, float(b[2]))
+				var lq: Vector3 = (d["inv"] as Transform3D) * Vector3((b[1] as Vector2).x, 0.0, (b[1] as Vector2).y)
+				if lq.z <= float(d["m"]["f"]) + 0.01:
+					mx_in = maxf(mx_in, float(b[2]))
 		if mn == INF:
 			continue
 		# place_building: podlaha nad nejvyssim bodem (+0,05), svah vetsi nez zidka (0,5) / kuly v zemi (0,29) = varovani
@@ -6995,7 +6999,7 @@ func _chyse_na_sit(root: Node3D) -> void:
 		if bool(lch.get("na_terenu", false)) and String(d["typ"]) == String(lch["typ"]):
 			# podlaha na nejvyssim bode pod chysi (ne prumer): teren pred dvermi nikdy nad prahem - na svahu byl a preklad
 			# dveri (StitFNad) zavrel vstup (test lide_chovani chyse_22); terén kolem se dosype (t_pas)
-			y0 = mx - pod
+			y0 = (mx_in if mx_in > -INF else mx) - pod
 			var m2: Dictionary = (d["m"] as Dictionary).duplicate()
 			m2["t_pas"] = pod - float(lch["teren_pod_prahem_m"])
 			d["m"] = m2
@@ -8771,7 +8775,9 @@ func _cesty_kameny() -> void:
 				if rng.randf() < 0.25 * kmn:
 					sc = rng.randf_range(0.18, 0.35)              # vetsi kamen vystupujici z cesty
 				var dls2: PackedFloat32Array = o.get("dl", PackedFloat32Array())
-				var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x, s, dls2[i] if dls2.size() > i else 0.0) - sc * 0.35
+				# na hotovy teren (cesty i brody uz v mrizce vysek): na brodu (koryto toku) cesta_y kaminek nechal 0,3-0,9 m
+				# nad dnem (test visici 15. 11. (427, 930))
+				var yy := minf(cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x, s, dls2[i] if dls2.size() > i else 0.0), _teren_y(q.x, q.y)) - sc * 0.35
 				(r[druhy[rng.randi() % druhy.size()]] as Array).append(_xf(q.x, yy, q.y, rng.randf() * TAU, sc))
 				n += 1
 	print("cesty: %d kamenku" % n)

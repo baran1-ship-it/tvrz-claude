@@ -34,7 +34,8 @@ var hloubky: PackedFloat32Array = PackedFloat32Array() # hloubka vody uprostred
 var sklony: PackedFloat32Array = PackedFloat32Array()  # nasobek sklonu svahu podel toku (strida strmejsi a mirnejsi)
 var stupen: PackedInt32Array = PackedInt32Array()      # kaskada: cislo useku x 1000 + cislo stupne, jinak -1
 var schody: Array = []
-var breh_nad: PackedFloat32Array = PackedFloat32Array()  # vyska brehu nad hladinou podle razu toku (voda.json breh_nad_m)                                 # kaskada: hrany stupnu {p, smer, pad, w, k} (balvany, pena)
+var breh_nad: PackedFloat32Array = PackedFloat32Array()
+var breh_bod: PackedFloat32Array = PackedFloat32Array()  # breh_nad bodu osy rozsireny na +-ROZ_BREH bodu (zadny skok, kaskada drzi)  # vyska brehu nad hladinou podle razu toku (voda.json breh_nad_m)                                 # kaskada: hrany stupnu {p, smer, pad, w, k} (balvany, pena)
 var raz: PackedInt32Array = PackedInt32Array()        # index do voda.json potok.raz_toku.druhy (0 klidny, pereje, kaskada)
 var krivost: PackedFloat32Array = PackedFloat32Array() # se znamenkem: > 0 zatacka doleva (stred zatacky vlevo od smeru osy)
 var _mriz := {}                                        # bunka 16 m -> [indexy useku]
@@ -241,6 +242,13 @@ func priprav(vyska: Callable) -> bool:
 					schody.append({"p": body[k], "smer": smer, "pad": float(tune[stupen[k]]) - float(tune[stupen[k + 1]]), "w": sirky[k], "k": k})
 		for k in range(1, n):
 			hladiny[k] = minf(hladiny[k], hladiny[k - 1] - spad * body[k].distance_to(body[k - 1]))
+	# vyska brehu v bode = nejvyssi z razu sousedu (+-3 body): plynule prolinani bez snizeni brehu kaskady na hranici
+	breh_bod.resize(n)
+	for k in n:
+		var bm := 0.0
+		for j in range(maxi(0, k - 3), mini(n, k + 4)):
+			bm = maxf(bm, breh_nad[raz[j]])
+		breh_bod[k] = bm
 	var pocty_r := {}
 	for k in n:
 		pocty_r[String(druhy_r[raz[k]]["nazev"])] = int(pocty_r.get(String(druhy_r[raz[k]]["nazev"]), 0)) + 1
@@ -285,7 +293,7 @@ func blizko(x: float, z: float) -> Array:
 			var hb := maxf(hladiny[k], hladiny[k + 1]) if stupen.size() > k + 1 and stupen[k] >= 0 and stupen[k + 1] != stupen[k] else hh
 			out = [d, hh, lerpf(sirky[k], sirky[k + 1], t),
 					clampf(strana * kr / KRIVOST, -1.0, 1.0), lerpf(hloubky[k], hloubky[k + 1], t), lerpf(sklony[k], sklony[k + 1], t), hr, hb,
-					lerpf(breh_nad[raz[k]], breh_nad[raz[k + 1]], t) if raz.size() > k + 1 else 0.05]   # plynule mezi razy (kontrola: skok 0,75 m)
+					lerpf(breh_bod[k], breh_bod[k + 1], t) if breh_bod.size() > k + 1 else 0.05]   # plynule, rozsireno na sousedy
 	return out if best < DOSAH else []
 
 
