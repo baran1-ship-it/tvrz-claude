@@ -497,7 +497,7 @@
       "sirka_m": 0.9
      }
     ],
-    "najezdy_pozn": "nové křídlo (14. 11. noc): podesta schodů na pavlač je v modelu tenká deska (Kol_Podesta y 2,77–2,85, x' 18,95–19,95), která visí nad horním koncem šikmé kolize schodů (Kol_Schody 31°, výšky 2,85 dosáhne až na x' 18,97) – postava do hrany desky narazila (test pavlac_ uvízl ve výšce 2,2–2,7 m); nájezd od paty schodů na vrch podesty před její hranou (≈38°, postava zvládne 50°), souřadnice upraveného modelu",
+    "najezdy_pozn": "15. 11. (č. 315, krok nahoru): nájezd ZŮSTÁVÁ – bez něj postava uvízla 0,67 m pod podestou (test pavlac_krcma_KrcmaL: hrana desky nad koncem šikmé kolize schodů je výš než nejvyšší krok schod_m 0,45). nové křídlo (14. 11. noc): podesta schodů na pavlač je v modelu tenká deska (Kol_Podesta y 2,77–2,85, x' 18,95–19,95), která visí nad horním koncem šikmé kolize schodů (Kol_Schody 31°, výšky 2,85 dosáhne až na x' 18,97) – postava do hrany desky narazila (test pavlac_ uvízl ve výšce 2,2–2,7 m); nájezd od paty schodů na vrch podesty před její hranou (≈38°, postava zvládne 50°), souřadnice upraveného modelu",
     "zebrik": {
      "nazev": "Žebřík krčma",
      "pata": [
@@ -659,34 +659,8 @@
       "Hajovna_Kol_PricK10",
       "Hajovna_Kol_PricKN11"
      ],
-     "najezdy": [
-      {
-       "od": [
-        -0.05,
-        2.61,
-        0.0
-       ],
-       "do": [
-        0.49,
-        2.9,
-        0.0
-       ],
-       "sirka_m": 5.78
-      },
-      {
-       "od": [
-        1.25,
-        2.61,
-        -1.59
-       ],
-       "do": [
-        0.71,
-        2.9,
-        -1.59
-       ],
-       "sirka_m": 2.6
-      }
-     ],
+     "najezdy": [],
+     "najezdy_pozn": "15. 11. (č. 315): nájezdy přes trám (−0,05→0,49 a 1,25→0,71, 2,61→2,90) zrušeny – trám 0,29 m (Hajovna_Kol_PredN2) postava překročí krokem nahoru (hrac.json schod_m); nájezd stál 0,27 m nad viditelnou podlahou (povrch_kolize); test puda_hajovna_Hajovna",
      "trasa": [[3.9, 2.61, -1.3], [2.0, 2.61, -1.2], [0.6, 2.9, -1.0], [-0.63, 2.61, -0.66], [-2.5, 2.61, 1.0], [-0.6, 2.61, -1.3], [2.5, 2.61, -1.3]],
      "trasa_pozn": "15. 11. (č. 312): body komory a nájezdu přes trám posunuty k hřebeni z −1,6/−1,8 → −1,0…−1,3 – plná výška hlavy (1,75 m) nad povalou 2,61 jen pro |z| ≤ 1,69 (krokve 6,05 − |z|), na vrcholu nájezdu 2,9 jen |z| ≤ 1,4; dřív trasa vedla pod krokvemi a hlava jimi procházela",
      "strecha": [{"od": [0.0, 2.78, 3.44], "do": [0.0, 5.92, 0.3], "sirka_m": 9.0}, {"od": [0.0, 2.78, -3.44], "do": [0.0, 5.92, -0.3], "sirka_m": 9.0}],

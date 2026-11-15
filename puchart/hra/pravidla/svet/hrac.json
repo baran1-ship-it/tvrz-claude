@@ -126,9 +126,11 @@
   0.25,
   0.15
  ],
- "_schod_m": "vyska zvednuti pri prekroceni schodu, zkousi se v poradi (plny schod, pod nizkym stropem nizsi - prah, nizky schod). Warhorse KM-A-52: schod 0,20 m - nase 0,45 je nejvyssi prekonatelny, ne norma schodu (warhorse_do_dat.md)",
+ "_schod_m": "Puchart 15. 11. (č. 315, hra/scripts/hrac.gd _krok_nahoru): výška zvednutí při překročení schodu/prahu, zkouší se v pořadí (nejvyšší, pod nízkým stropem nižší). Zdroj: Havran větev claude/new-session-0dtk58 scripts/player.gd _step_up/_zkus_schod a pravidla/svet/hrac.json schod_m [0,45, 0,25, 0,15]; Warhorse KM-A-52: schod 0,20 m – 0,45 je nejvyšší překonatelný, ne norma schodu. Puchart: stupně před dveřmi 0,15 m, podlaha domů 0,25–0,43 m, trám půdy hájovny 0,29 m; podesta pavlače krčmy 0,67 m nad koncem schodů → tam zůstává nájezd (mista.json najezdy)",
  "schod_posun_m": 0.12,
  "schod_hloubka_min_m": 0.2,
+ "_schod_posun_m": "posun dopředu při zkoušce kroku (Havran player.gd: maxf(0,12, rychlost × dt))",
+ "_schod_hloubka_min_m": "č. 315 / 330 („postava nesmí vyskakovat na hrany zdí a zábradlí“): krok jen na pochozí plochu – paprsek shora tolik m za bodem dotyku ve směru chůze musí trefit plochu s normálou do floor_max_angle nejvýš 5 cm pod dotykem (stupeň 0,32 m ano, madlo/hrana zdi ne); test pruchod:nevylezt",
  "schod_kolize_m": 0.2,
  "schody_zebrik_nad_st": 50.0,
  "schody_zebrik": {
