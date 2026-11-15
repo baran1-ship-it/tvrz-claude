@@ -13,6 +13,7 @@ extends Node3D
 ## - stromy (jabloně sadů, lípy u vjezdu a na návsi): podrobný model, LOD1, daleko
 
 const BunkyKolem := preload("res://scripts/bunky_kolem.gd")
+const Pravidla := preload("res://scripts/pravidla.gd")
 const PH := "res://modely/predmety_h/"
 const SH := "res://modely/stavby_h/"
 
@@ -561,10 +562,13 @@ func _studny() -> void:
 			var dy := 0.0125 if k % 2 == 0 else -0.0125
 			var tgk := tg.rotated(Vector3.UP, rng.randf_range(-0.12, 0.12))
 			sit.kvadr("valoun", Vector3(c.x, c.y + h + 0.04 + dy, c.z) + dr * rm, tgk, Vector3.UP.rotated(tgk, rng.randf_range(-0.04, 0.04)), Vector3.ZERO, Vector3(0.46 * rng.randf_range(0.92, 1.05), 0.1, tl + 0.08))
+		# šachta (Havran studna.py: voda 3 m pod terénem): líc dovnitř od hladiny k jádru roubení, dole temná hladina
+		var fs: Dictionary = Pravidla.cti("funkce", "studna"); var hl := float(fs["hladina_m"])
+		_valec_plast(sit, "spara", c + Vector3(0, -hl - 0.1, 0), hl + 0.35, rm - 0.08, x, z, 20, -1.0)
 		var t := sit.s("tma")   # hladina hluboko dole: tma
 		for i in 16:
 			var f0 := TAU * i / 16.0; var f1 := TAU * (i + 1) / 16.0
-			var q0 := c + Vector3(0, 0.3, 0); var q1 := q0 + (x * cos(f0) + z * sin(f0)) * (ri + 0.06); var q2 := q0 + (x * cos(f1) + z * sin(f1)) * (ri + 0.06)
+			var q0 := c + Vector3(0, -hl, 0); var q1 := q0 + (x * cos(f0) + z * sin(f0)) * (ri + 0.06); var q2 := q0 + (x * cos(f1) + z * sin(f1)) * (ri + 0.06)
 			var tri := [q0, q1, q2] if Vector3.UP.dot((q1 - q0).cross(q2 - q0)) < 0 else [q0, q2, q1]   # přední strana nahoru (jako Sit.quad: vektorový součin proti normále)
 			for p: Vector3 in tri:
 				t.set_normal(Vector3.UP); t.set_uv(Vector2.ZERO); t.add_vertex(p - c)
@@ -577,17 +581,32 @@ func _studny() -> void:
 			var bx := (b1 - b0).normalized()
 			sit.kvadr("tram", (b0 + b1) / 2, bx, z.cross(bx).normalized(), z, Vector3(b0.distance_to(b1), 0.09, 0.09))
 		sit.kvadr("tram", c + Vector3(0, hs + 0.05, 0), x, Vector3.UP, z, Vector3(2.0 * xs + 0.5, 0.15, 0.17))
-		# rumpál s klikou a lano s vědrem
+		# rumpál s klikou a vědro na laně – pohyblivé díly dvere.gd (Havran studna.py dynamic: kit.movable navijak + vedro, pohyb.gd;
+		# Míša 15. 11.: „co může mít funkci, tak ji mít bude“): rumpál se točí kolem své osy, vědro sjede na laně k hladině a zpět
 		var ry := float(sp.get("rumpal_y_m", 1.55)); var rr := float(sp.get("rumpal_r_m", 0.11)); var kl := float(sp.get("klika_m", 0.35))
-		sit.valec("kura", c + x * -(xs + 0.12) + Vector3(0, ry, 0), c + x * (xs + 0.14) + Vector3(0, ry, 0), rr, rr, 10)
-		var ka := c + x * (xs + 0.16) + Vector3(0, ry, 0)
-		sit.kvadr("tram", ka + Vector3(0, -kl / 2, 0), z, Vector3.UP, x, Vector3(0.05, kl + 0.05, 0.05))
-		sit.valec("kura", ka + Vector3(0, -kl, 0), ka + Vector3(0, -kl, 0) + x * 0.22, 0.025, 0.025, 6)
+		var osa := c + Vector3(0, ry, 0); var B := Basis(Vector3.UP, yaw)   # místní x = osa rumpálu (x), z = z
+		var rs := Sit.new(osa, _mat)
+		rs.valec("kura", osa + x * -(xs + 0.12), osa + x * (xs + 0.14), rr, rr, 10)
+		var ka := osa + x * (xs + 0.16)
+		rs.kvadr("tram", ka + Vector3(0, -kl / 2, 0), z, Vector3.UP, x, Vector3(0.05, kl + 0.05, 0.05))
+		rs.valec("kura", ka + Vector3(0, -kl, 0), ka + Vector3(0, -kl, 0) + x * 0.22, 0.025, 0.025, 6)
+		var jm_r := "Pohyb_ves_studna_rumpal_%d" % pohyb_dily.size(); var g := "ves_studna_%d" % pohyb_dily.size()
+		var nr := Node3D.new(); nr.name = jm_r; nr.transform = Transform3D(B, osa - c)
+		var mr := MeshInstance3D.new(); mr.mesh = rs.mesh(); mr.transform = Transform3D(B.inverse(), Vector3.ZERO); nr.add_child(mr)
 		var vr := float(sp.get("vedro_r_m", 0.15)); var vh := float(sp.get("vedro_v_m", 0.3))
-		var vd := c + x * 0.28 + z * rm + Vector3(0, h + 0.08, 0)
-		sit.valec("vrata", vd, vd + Vector3(0, vh, 0), vr * 0.88, vr, 10)
-		for yy: float in [0.06, vh - 0.06]: sit.valec("tma", vd + Vector3(0, yy - 0.015, 0), vd + Vector3(0, yy + 0.015, 0), vr * 0.93 + 0.008, vr * 0.95 + 0.008, 10)
-		sit.valec("kura", c + x * 0.28 + Vector3(0, ry - rr, 0), vd + Vector3(0, vh + 0.12, 0), 0.012, 0.012, 4)
+		var vd := osa - Vector3(0, float(fs["vedro_pod_osou_m"]), 0)   # dno vědra pod osou nad středem šachty
+		var vs := Sit.new(vd, _mat)
+		vs.valec("vrata", vd, vd + Vector3(0, vh, 0), vr * 0.88, vr, 10)
+		for yy: float in [0.06, vh - 0.06]: vs.valec("tma", vd + Vector3(0, yy - 0.015, 0), vd + Vector3(0, yy + 0.015, 0), vr * 0.93 + 0.008, vr * 0.95 + 0.008, 10)
+		vs.valec("tma", vd + Vector3(-vr, vh, 0) * 0.98, vd + Vector3(0, vh + float(fs["ucho_m"]), 0), 0.008, 0.008, 4)   # ucho
+		vs.valec("tma", vd + Vector3(vr, vh, 0) * 0.98, vd + Vector3(0, vh + float(fs["ucho_m"]), 0), 0.008, 0.008, 4)
+		var jm_v := "Pohyb_ves_studna_vedro_%d" % pohyb_dily.size()
+		var mv := MeshInstance3D.new(); mv.name = jm_v; mv.mesh = vs.mesh(); mv.position = vd - c
+		var pouzit := ka + Vector3(0, -kl, 0) + x * float(fs["pouziti_od_kliky_m"])
+		var lano_od := c + Vector3(0, ry - rr, 0)
+		pohyb_dily.append({"name": jm_r, "kind": "navijak", "group": g, "turns": float(fs["otacek"])})
+		pohyb_dily.append({"name": jm_v, "kind": "vedro", "group": g, "lift": -(ry - float(fs["vedro_pod_osou_m"]) + float(fs["hladina_m"])), "dur": float(fs["dur_s"]),
+			"use": [pouzit.x, pouzit.y, pouzit.z], "lano": [[lano_od.x, lano_od.y, lano_od.z], [0.0, vh + float(fs["ucho_m"]), 0.0]], "lano_mat": _mat["kura"][0] if _mat.has("kura") else null})
 		# sedlová stříška z prken (šindel) nad pražcem
 		var hr := c + Vector3(0, hs + 0.55, 0); var ss := float(sp.get("strisky_sirka_m", 2.4))
 		for su: float in [-1.0, 1.0]:
@@ -598,6 +617,7 @@ func _studny() -> void:
 		var mi := MeshInstance3D.new(); mi.name = "Studna"; mi.mesh = sit.mesh(); mi.position = c
 		mi.visibility_range_end = _f("ploty_do_m", "ploty_do_m_mobil") * 2.0
 		add_child(mi)
+		mi.add_child(nr); mi.add_child(mv)
 		var kb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var cy := CylinderShape3D.new()
 		cy.radius = ro; cy.height = h + 0.2; cs.shape = cy; cs.position = Vector3(0, (h - 0.2) / 2, 0); kb.add_child(cs)
 		for sx: float in [-1.0, 1.0]:

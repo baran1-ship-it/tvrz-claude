@@ -14,9 +14,10 @@ var stav := {}        # skupina -> true = průchozí (dveře otevřené, most sp
 var t := {}           # skupina -> 0 = jak ve glb .. 1 = zavřeno / zvednuto
 var cil := {}
 var doba := {}
-var druh := {}        # skupina -> "dvere" | "vrata" | "most"
+var druh := {}        # skupina -> "dvere" | "vrata" | "most" | "vedro" (studna: vědro na laně, Havran pohyb.gd)
 var mista := {}       # skupina -> Vector3 (místo ovládání)
 var retezy: Array = []   # {mmi, a (svět), uzel, e (místní)}
+var lana: Array = []     # lano vědra studny {mi (válec), a (svět, buben), uzel (vědro), e (místní ucho)}
 var tlacitko: Button
 var _blizko := ""
 var _clanek: TorusMesh
@@ -93,6 +94,14 @@ func _pridej(u: Node3D, e: Dictionary, g: String) -> void:
 	if not _zvuk.has(g): _zvuk[g] = {}
 	var hp := AudioStreamPlayer3D.new(); hp.max_distance = 60.0; hp.unit_size = 8.0 if k != "navijak" else 3.0; u.add_child(hp)
 	_zvuk[g]["navijak" if k == "navijak" else "dil"] = hp   # Havran pohyb.gd: zvuk u dílu, rohatka u navijáku
+	if e.has("lano"):   # lano od bubnu rumpálu k uchu vědra (Havran pohyb.gd ropes), přepočítá se s pohybem
+		var cm := CylinderMesh.new(); cm.top_radius = 0.012; cm.bottom_radius = 0.012; cm.height = 1.0; cm.radial_segments = 5; cm.rings = 1
+		if e.get("lano_mat") != null: cm.material = e["lano_mat"]
+		var lmi := MeshInstance3D.new(); lmi.mesh = cm; lmi.top_level = true; lmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if dd > 0.0: lmi.visibility_range_end = dd
+		add_child(lmi)
+		var la: Array = e["lano"]
+		lana.append({"mi": lmi, "a": Vector3(la[0][0], la[0][1], la[0][2]), "uzel": u, "e": Vector3(la[1][0], la[1][1], la[1][2])})
 	for ch: Array in e.get("chains", []):
 		var mmi := MultiMeshInstance3D.new(); mmi.top_level = true
 		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = _clanek; mm.instance_count = 90
@@ -113,6 +122,7 @@ func prepni(g: String) -> void:
 					if z.has("smycka_" + kl): (z["smycka_" + kl] as Node).queue_free()
 					z["smycka_" + kl] = sm
 		"vrata": _hraj(z.get("dil"), "vrata_otevrit" if not stav[g] else "vrzani1", 0.5)
+		"vedro": _hraj(z.get("dil"), "vrzani2", 0.55)   # Havran pohyb.toggle (ostatní druhy)
 		_: _hraj(z.get("dil"), "dvere_otevrit" if stav[g] else "vrzani1", randf_range(0.9, 1.05))
 	var pr := get_parent()
 	if druh.get(g, "") == "most" and pr != null and pr.get("hv") != null and pr.hv.get("hud") != null:   # z ochozu most nevidí – nápis
@@ -135,10 +145,12 @@ func _dojel(g: String) -> void:
 	match String(druh.get(g, "dvere")):
 		"most": _hraj(z.get("dil"), "dopad_most" if stav[g] else "zapadka", 1.0 if stav[g] else 0.7)
 		"vrata": _hraj(z.get("dil"), "vrata_zavrit" if not stav[g] else "zapadka", 0.55)
+		"vedro": _hraj(z.get("dil"), "dopad_drevo" if not stav[g] else "zapadka", 1.6 if not stav[g] else 0.9)   # vědro dosedlo na hladinu / nahoře narazilo na buben
 		_: if not stav[g]: _hraj(z.get("dil"), "dvere_zavrit")
 
 func popis(g: String) -> String:
 	if druh.get(g, "") == "most": return "Zvednout padací most" if stav[g] else "Spustit padací most"
+	if druh.get(g, "") == "vedro": return "Spustit vědro" if stav[g] else "Vytáhnout vědro"
 	return "Zavřít" if stav[g] else "Otevřít"
 
 func _process(dt: float) -> void:
@@ -147,7 +159,7 @@ func _process(dt: float) -> void:
 		if absf(float(t[g]) - float(cil[g])) < 1e-4: continue
 		t[g] = move_toward(float(t[g]), float(cil[g]), dt / maxf(0.05, float(doba.get(g, 1.0))))
 		if absf(float(t[g]) - float(cil[g])) < 1e-4: _dojel(g)
-		elif druh.get(g, "") == "most":   # rohatka navijáku během pohybu (Havran: tik po 0,13 s)
+		elif druh.get(g, "") in ["most", "vedro"]:   # rohatka navijáku / rumpálu během pohybu (Havran: tik po 0,13 s)
 			_tik[g] = float(_tik.get(g, 0.0)) + dt
 			if float(_tik[g]) > 0.13: _tik[g] = 0.0; _hraj(_zvuk.get(g, {}).get("navijak"), "rohatka", randf_range(0.55, 0.7) if not stav[g] else randf_range(0.75, 0.9))
 		var k: float = t[g]; k = k * k * (3.0 - 2.0 * k)   # plynulý rozjezd a dojezd (Havran pohyb._apply)
@@ -156,6 +168,7 @@ func _process(dt: float) -> void:
 			match String(e.get("kind", "dvere")):
 				"most": u.transform = z * Transform3D(Basis(Vector3.RIGHT, deg_to_rad(float(e.get("open", -80.0)) * k)), Vector3.ZERO)
 				"navijak": u.transform = z * Transform3D(Basis(Vector3.RIGHT, k * float(e.get("turns", 6.0)) * TAU), Vector3.ZERO)
+				"vedro": u.transform = z * Transform3D(Basis(), Vector3(0, float(e.get("lift", -1.0)) * k, 0))   # Havran pohyb._apply mriz/vedro
 				_: u.transform = z * Transform3D(Basis(Vector3.UP, deg_to_rad(-float(e.get("open", 0.0)) * k)), Vector3.ZERO)
 		hnulo = true
 	if hnulo: _retezy()
@@ -175,8 +188,15 @@ func _process(dt: float) -> void:
 	tlacitko.visible = nej != ""
 	if nej != "": tlacitko.text = popis(nej)
 
-## Řetěz z kotvy ve zdi k oku na mostě, prověšený (Havran pohyb._update_lines).
+## Řetěz z kotvy ve zdi k oku na mostě, prověšený (Havran pohyb._update_lines); lano vědra rovně od bubnu k uchu.
 func _retezy() -> void:
+	for c: Dictionary in lana:
+		var u: Node3D = c["uzel"]
+		if not u.is_inside_tree(): continue
+		var a: Vector3 = c["a"]; var b: Vector3 = u.global_transform * (c["e"] as Vector3)
+		var L := maxf(a.distance_to(b), 0.01); var d := (b - a) / L
+		var x := d.cross(Vector3.FORWARD if absf(d.z) < 0.9 else Vector3.RIGHT).normalized()
+		(c["mi"] as MeshInstance3D).global_transform = Transform3D(Basis(x, d * L, x.cross(d).normalized()), (a + b) * 0.5)
 	for c: Dictionary in retezy:
 		var a: Vector3 = c["a"]; var u: Node3D = c["uzel"]
 		if not u.is_inside_tree(): continue

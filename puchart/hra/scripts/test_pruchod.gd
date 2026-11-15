@@ -514,6 +514,48 @@ func _test_zlab() -> void:
 	vysledek["zlab_voda"] = "OK" if spatne.is_empty() and n > 0 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádný žlab ve světě")
 	print("PRUCHOD zlab_voda ", vysledek["zlab_voda"], " (žlabů %d)" % n)
 
+## studna_vedro (Míša 15. 11.: „co může mít funkci, tak ji mít bude“; Havran blender/studna.py + pohyb.gd vedro): u kliky studny
+## nabídka (dvere.gd, zaměřená), „Spustit vědro“ – rumpál se točí, vědro sjede o hloubku k hladině (dvere.gd druh vedro), lano
+## končí u ucha vědra; „Vytáhnout vědro“ – vědro zpět nahoru na původní místo.
+func _test_studna() -> void:
+	var dv: Node = _dvere(); var spatne: Array = []; var n := 0
+	var Z := preload("res://scripts/zamer.gd")
+	for g: String in dv.dily:
+		if dv.druh.get(g, "") != "vedro": continue
+		n += 1
+		var vedro: Node3D = null; var rumpal: Node3D = null; var lift := 0.0
+		for d: Dictionary in dv.dily[g]:
+			if String(d["e"]["kind"]) == "vedro": vedro = d["uzel"]; lift = float(d["e"]["lift"])
+			else: rumpal = d["uzel"]
+		var m: Vector3 = dv.mista[g]
+		var sm := m - vedro.global_position; sm.y = 0.0
+		var stoj := m + sm.normalized() * 0.7
+		hlavni.svet.kolize_ihned(stoj); hrac.autopilot = Vector3.INF; hrac.velocity = Vector3.ZERO
+		hrac.postav_na_volne(Vector3(stoj.x, hlavni.svet.vyska(stoj.x, stoj.z), stoj.z))
+		for i in 20: await get_tree().physics_frame
+		hrac.pohled_na(m); await get_tree().physics_frame
+		var vidi: bool = Z.skore(hrac.cam, m, dv.DOSAH + 1.0) >= 0.0 and hrac.cam.global_position.distance_to(m) < dv.DOSAH + 1.0
+		var nab: String = dv.popis(g)
+		var y0 := vedro.global_position.y; var r0 := rumpal.global_transform.basis
+		dv.prepni(g)
+		await get_tree().create_timer(float(dv.doba[g]) * 0.5).timeout
+		var toci: bool = rumpal.global_transform.basis.get_rotation_quaternion().angle_to(r0.get_rotation_quaternion()) > 0.05
+		await get_tree().create_timer(float(dv.doba[g]) * 0.5 + 0.5).timeout
+		var dole := vedro.global_position.y
+		var lano_ok := true
+		for c: Dictionary in dv.lana:
+			if c["uzel"] == vedro:
+				var konec: Vector3 = vedro.global_transform * (c["e"] as Vector3); var mi: MeshInstance3D = c["mi"]
+				lano_ok = absf(mi.global_transform.basis.y.length() - (c["a"] as Vector3).distance_to(konec)) < 0.02
+		var nab2: String = dv.popis(g)
+		dv.prepni(g); await get_tree().create_timer(float(dv.doba[g]) + 0.5).timeout
+		var nahore := vedro.global_position.y
+		var ok: bool = vidi and nab == "Spustit vědro" and nab2 == "Vytáhnout vědro" and toci and absf((y0 - dole) + lift) < 0.02 and lano_ok and absf(nahore - y0) < 0.01
+		print("PRUCHOD studna %s: nabídka %s (%s / %s), rumpál se točí %s, vědro %.2f -> %.2f (o %.2f m, má %.2f) -> %.2f, lano %s -> %s" % [g, vidi, nab, nab2, toci, y0, dole, y0 - dole, -lift, nahore, lano_ok, "OK" if ok else "CHYBA"])
+		if not ok: spatne.append("%s: nabídka %s, točí %s, vědro dolů %.2f m (má %.2f), zpět %.2f, lano %s" % [g, vidi, toci, y0 - dole, -lift, nahore - y0, lano_ok])
+	vysledek["studna_vedro"] = "OK" if spatne.is_empty() and n > 0 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádná studna s vědrem")
+	print("PRUCHOD studna_vedro ", vysledek["studna_vedro"], " (studní %d)" % n)
+
 func _chyba(t: String) -> void:
 	for i in hrac.get_slide_collision_count():
 		var c := hrac.get_slide_collision(i)
@@ -532,6 +574,7 @@ func _konec() -> void:
 	if jen == "" or "mech" in jen: await _test_mech()
 	if jen == "" or "spanek" in jen: await _test_spanek()
 	if jen == "" or "zlab" in jen: await _test_zlab()
+	if jen == "" or "studna" in jen: await _test_studna()
 	hrac.autopilot = Vector3.INF
 	var f := FileAccess.open(OS.get_environment("PUCHART_VYSTUP") if OS.has_environment("PUCHART_VYSTUP") else "user://pruchod.json", FileAccess.WRITE); f.store_string(JSON.stringify(vysledek, " "))
 	var ok := vysledek.values().all(func(v): return v == "OK")
