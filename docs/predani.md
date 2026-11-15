@@ -1471,3 +1471,7 @@ Hotovo v kódu a datech (testy u každého):
   zdroj přeskočí, export.sh po předpečení pustí datove_textury_import + import + kontrolu znovu; .import bez [params] se doplní.
 - **Test smyslu breh_toku u výpusti rybníka v2 (15. 11., 9. pád exportu):** odtok lhota_odtok u čela výpusti 48 st. = kamenné
   čelo a křídla (stavba), ne svah. Test přeskočí zónu čela (půl šířky čela + výška čela / sklon svahu hráze, z voda.json).
+- **Zdroje vsi v nové session (15. 11.):** modely/ves (domy.glb, domy_stredni.glb) v kontejneru nejsou → hnědé domy (zesvetli_ves,
+  export krok 16) by se neuplatnily a test smyslu ves_barva je NEOVĚŘENO. Postup: zipy z Disku složka budovy (dum1_lhota
+  1mODP3G-QZ345QThqit1P1xz1hoOnRFP6, dum2_lhota 12zVcOvueQTjWfqhsSc0zt5tiOA81UJct, dum3_rychta 1mLKFBhBa_28I1h7F6lkqbYMTDpnVh6Kr,
+  chyse_A 159G_WkNFJ5xTKJlzybhimoqPOV8h7K_x; curl drive.usercontent …&confirm=t) → `blender/ves_domy.py` → `ves_domy_lod.py` → export.
