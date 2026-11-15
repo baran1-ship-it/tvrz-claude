@@ -609,7 +609,8 @@
    },
    "bez_kulny": [
     4,
-    5
+    5,
+    7
    ],
    "stavby": [
     [
@@ -934,31 +935,6 @@
       [
        450.99,
        899.55
-      ]
-     ]
-    ],
-    [
-     "kolna",
-     7,
-     444.17,
-     910.75,
-     4.48,
-     [
-      [
-       445.63,
-       914.98
-      ],
-      [
-       441.13,
-       914.04
-      ],
-      [
-       442.7,
-       906.51
-      ],
-      [
-       447.2,
-       907.45
       ]
      ]
     ]
@@ -1932,7 +1908,8 @@
     429.68,
     819.05,
     16.0
-   ]
+   ],
+   "_bez_kulny_7": "15. 11.: test smyslu (podklad tools/krok_b/vysky.json) – kůlna usedlosti 7 (444, 911) na svahu 16 % (mez plochy.json stavba_max_sklon 15 %); usedlost 7 má malou stodolu, kůlna na svahu by visela – vypuštěna (záznam, ne výjimka). Míša nemusí poznat, ubyla jedna kůlna."
   },
   "okraj_stavby": {
    "hlina_do_m": 1.0,
