@@ -1477,3 +1477,5 @@ Hotovo v kódu a datech (testy u každého):
   chyse_A 159G_WkNFJ5xTKJlzybhimoqPOV8h7K_x; curl drive.usercontent …&confirm=t) → `blender/ves_domy.py` → `ves_domy_lod.py` → export.
   Po stažení domů: první import Godotu hlásí „Failed loading resource modely/ves/domy_*“ (textury se z domy.glb rozbalí až
   během importu, domy_stredni.glb je čte dřív) → před exportem jeden samostatný `godot --headless --import`, pak export.
+- **Rychlé testy po exportu (15. 11.):** 16 testů v jednom běhu = watchdog 300 s (`rychle_testy.sh`, TVRZ_TEST_LIMIT). Pouštět po
+  skupinách 3–5 testů souběžně (sdílená místa beh.sh) s `TVRZ_TEST_LIMIT=1500`.
