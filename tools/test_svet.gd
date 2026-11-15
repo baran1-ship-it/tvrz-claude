@@ -8133,7 +8133,18 @@ func _nabytek_kontrola(lide: Node, ll: Array, kat: Dictionary, P: Dictionary, ch
 					break
 				fronta.append(nb)
 		if not dosel:
-			ch.call("%s %s: postava k nemu od dveri %s nedojde (%d bunek)" % [jm, p.snapped(Vector3.ONE * 0.01), st.snapped(Vector2.ONE * 0.1), videno.size()])
+			# co blokuje: kolize v bodech na spojnici dvere -> luzko (po 0,5 m)
+			var blok := ""
+			for kk in range(1, int(st.distance_to(p2) / 0.5)):
+				var w2 := st.lerp(p2, kk * 0.5 / st.distance_to(p2))
+				sq2.transform = Transform3D(Basis.IDENTITY, Vector3(w2.x, y0 + 1.15, w2.y))
+				for hh: Dictionary in sp.intersect_shape(sq2, 8):
+					if cizi.call(hh["collider"]):
+						var co := hh["collider"] as CollisionObject3D
+						var on := co.shape_owner_get_owner(co.shape_find_owner(int(hh["shape"]))) as Node if co else null
+						blok += " (%.1f,%.1f):%s/%s" % [w2.x, w2.y, co.name if co else "?", on.name if on else "?"]
+						break
+			ch.call("%s %s: postava k nemu od dveri %s nedojde (%d bunek), y0 %.2f, blokuje%s" % [jm, p.snapped(Vector3.ONE * 0.01), st.snapped(Vector2.ONE * 0.1), videno.size(), y0, blok.left(400)])
 		else:
 			ok += 1
 	print("LIDE nabytek: %d kusu, %d dojiti overeno, %d v patre" % [kusy.size(), ok, patro])
