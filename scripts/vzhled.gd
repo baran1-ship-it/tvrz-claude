@@ -75,6 +75,9 @@ static func model(rodic: Node3D, o: Dictionary, dosah: float) -> Array:
 		var g := mi as GeometryInstance3D
 		g.visibility_range_end = dosah
 		g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		# Misa 15. 11. (potrhane obleceni): odev = nesvarene kusy, automaticke LOD importu (tablet mesh_lod_threshold 10)
+		# muze svy rozevrit - postavy plna podrobnost (postavy.json odev_lod_bias, jako domy a plutky)
+		g.lod_bias = float(Pravidla.cti("postavy", "odev_lod_bias"))
 		geo.append(g)
 	uzel.set_meta("vzhled", k)
 	return [uzel, sk[0], geo]
