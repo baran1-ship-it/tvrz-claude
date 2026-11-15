@@ -10687,6 +10687,7 @@ func _kostel_dil(root: Node3D, parent: Node3D) -> void:
 	sc.name = "Kostel_dil"
 	sc.transform = xf
 	parent.add_child(sc)
+	_barva_vrcholu(sc, ko.get("barva_vrcholu_materialy", []))
 	var interier := sc.find_child(String(ko["interier_skupina"]), true, false)
 	for nd in sc.find_children("*", "GeometryInstance3D", true, false):
 		var gi := nd as GeometryInstance3D
@@ -10714,8 +10715,27 @@ func _kostel_dil(root: Node3D, parent: Node3D) -> void:
 ## rovince Blenderu (kraj.MISTA ruiny_ves_N) ve vysce terenu sveho pocatku (zdi 0,35 m pod nulu). Dosah a LOD1 podle
 ## navodu (dily do dosah_m, LOD1 od lod1_od_m; zidky a snosy kratsi), kolize z uzlu -convcolonly / -colonly (import),
 ## LOD1 bez kolizi; valy a kameni bez stinu (lezi na zemi).
+var _ruiny_kryti: Array = []
+
+
+## Materialy modelu z Disku s mechem, sazemi a vlhkem v barve vrcholu (NAVOD_KOSTEL / NAVOD_VES: „kdyz je Godot
+## nezobrazi, zapni Vertex Color -> Use as Albedo“) - podle seznamu jmen materialu v zaznamu.
+func _barva_vrcholu(sc: Node3D, jmena: Array) -> void:
+	if jmena.is_empty():
+		return
+	for mi0 in sc.find_children("*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		for si in mi.mesh.get_surface_count():
+			var m := mi.mesh.surface_get_material(si) as StandardMaterial3D
+			if m and jmena.has(String(m.resource_name)):
+				m.vertex_color_use_as_albedo = true
+
+
 func _ruiny_ves_dil(parent: Node3D) -> void:
 	var rv := _ruina_zaznam("zanikla_ves")
+	_ruiny_kryti.clear()
 	if not rv.has("dily"):
 		return
 	var slozka := String(rv["dily_slozka"])
@@ -10741,6 +10761,12 @@ func _ruiny_ves_dil(parent: Node3D) -> void:
 		sc.name = "RuinyVes_%d_%s" % [i, sb]
 		sc.transform = xf
 		parent.add_child(sc)
+		_barva_vrcholu(sc, rv.get("barva_vrcholu_materialy", []))
+		# dil pod klenbou (sklep): strecha i bez travy v pudorysu zdi (jako kryti_lok kostela)
+		if (rv.get("kryti_dily", []) as Array).has(sb):
+			for zr: Array in (rv["pudorysy"] as Dictionary).get(sb, {}).get("zdi", []):
+				_ruiny_kryti.append([xf.affine_inverse(), AABB(Vector3(float(zr[0]), -50.0, float(zr[1])),
+						Vector3(float(zr[2]) - float(zr[0]), 100.0, float(zr[3]) - float(zr[1])))])
 		for nd in sc.find_children("*", "GeometryInstance3D", true, false):
 			var gi := nd as GeometryInstance3D
 			gi.visibility_range_end = dosah
@@ -14105,6 +14131,8 @@ func _plants(parent: Node3D, quality: int) -> void:
 		for kr4: Array in _ruina_zaznam("kostel").get("kryti_lok", []):
 			var ab4 := AABB(Vector3(float(kr4[0]), -50.0, float(kr4[1])), Vector3(float(kr4[2]) - float(kr4[0]), 100.0, float(kr4[3]) - float(kr4[1])))
 			uvnitr.append([kinv, ab4])
+	for rk: Array in _ruiny_kryti:
+		uvnitr.append(rk)
 	# dil mlyna (vlastni teren, dvur, budova): zadna trava ani rozsev uvnitr ctverce dilu (jako budova)
 	if _mlyn_inv != Transform3D():
 		uvnitr.append([_mlyn_inv, AABB(Vector3(-22.0, -30.0, -25.0), Vector3(40.0, 60.0, 40.0)), "dil"])     # louka: trava z terenu dilu

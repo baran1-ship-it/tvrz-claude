@@ -298,6 +298,10 @@ func _zmer(sit: Dictionary) -> Array:
 						# protejsek svu = okraj v rovine latky (ne vrstva nad/pod - lem kape nad kotlemi)
 						if int(sm[j]) != moje and (cache[j] as Vector3).distance_to(m) < d and absf(((cache[j] as Vector3) - m).dot(ne)) < hn:
 							nasel = true
+							if OS.has_environment("TVRZ_SVY_LADIT"):
+								print("SVY LADIT okraj %s smycka %d / protejsek %s smycka %d, vzdal %.4f, po normale %.4f" % [
+									(V[e[0]][0] as Vector3).snapped(Vector3.ONE * 0.001), moje, (V[j][0] as Vector3).snapped(Vector3.ONE * 0.001),
+									int(sm[j]), (cache[j] as Vector3).distance_to(m), ((cache[j] as Vector3) - m).dot(ne)])
 							break
 					if nasel:
 						break

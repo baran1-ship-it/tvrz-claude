@@ -190,7 +190,16 @@
      -3.0
     ]
    ],
-   "_stavba_lok": "půdorys zdí stavby [x0, z0, x1, z1] v rámci modelu (věž, loď se zdmi, presbytář se závěrem a opěráky, sakristie): Blender sem nesází keře ani nálet (jen rostliny_lok), tráva louky smí (zarostlá zřícenina)"
+   "_stavba_lok": "půdorys zdí stavby [x0, z0, x1, z1] v rámci modelu (věž, loď se zdmi, presbytář se závěrem a opěráky, sakristie): Blender sem nesází keře ani nálet (jen rostliny_lok), tráva louky smí (zarostlá zřícenina)",
+   "barva_vrcholu_materialy": [
+    "M_ZdivoKamen",
+    "M_ZdivoInterier",
+    "M_OmitkaKostel",
+    "M_Sut",
+    "M_DlazbaPolniKamen",
+    "M_HlinaKostel"
+   ],
+   "_barva_vrcholu_materialy": "NAVOD_KOSTEL: saze, mech, stékance a vlhko v barvě vrcholů – Vertex Color → Use as Albedo (svet._barva_vrcholu)"
   },
   {
    "id": "zanikla_ves",
@@ -537,7 +546,18 @@
    "drobne_dosah_m": 35.0,
    "drobne_lod1_od_m": 32.0,
    "_dosah": "NAVOD_VES.md Výkon: díly 0–60 m, LOD1 od 55 m; zídky a snosy do 35 m",
-   "popis": "Míša 15. 11. (Disk vesnice_ruiny.zip, NAVOD_VES.md): „mám novou vesnici ruin, mrkni, myslím, že je lepší“ – zaniklá ves podle Pfaffenschlagu, Mstěnic, Konůvek a Bystřece: trojdílné domy, usedlost do L, stodoly, studna, sklep v mezi, zídky a snosy. Celek 100 × 80 m nejde položit naplocho (terén 3–15 m), proto po dílech: Blender (kraj.MISTA ruiny_ves_N) srovná rovinku pod každým dílem, hra (svet._ruiny_ves_dil) ho posadí na terén v jeho počátku (zdi 0,35 m pod nulu). Ves posunuta o (2, 9) m a natočena −113° (dřív −0,3 rad), aby žádný ponechaný díl nestál na svahu nad 0,15. Studna: terén nemá díry, šachta je zasypaná v úrovni terénu (zaniklá ves). Blender ruiny.zanikla_ves jen porost a název místa (staré podezdívky, trámy a studna z Blenderu pryč)."
+   "popis": "Míša 15. 11. (Disk vesnice_ruiny.zip, NAVOD_VES.md): „mám novou vesnici ruin, mrkni, myslím, že je lepší“ – zaniklá ves podle Pfaffenschlagu, Mstěnic, Konůvek a Bystřece: trojdílné domy, usedlost do L, stodoly, studna, sklep v mezi, zídky a snosy. Celek 100 × 80 m nejde položit naplocho (terén 3–15 m), proto po dílech: Blender (kraj.MISTA ruiny_ves_N) srovná rovinku pod každým dílem, hra (svet._ruiny_ves_dil) ho posadí na terén v jeho počátku (zdi 0,35 m pod nulu). Ves posunuta o (2, 9) m a natočena −113° (dřív −0,3 rad), aby žádný ponechaný díl nestál na svahu nad 0,15. Studna: terén nemá díry, šachta je zasypaná v úrovni terénu (zaniklá ves). Blender ruiny.zanikla_ves jen porost a název místa (staré podezdívky, trámy a studna z Blenderu pryč).",
+   "barva_vrcholu_materialy": [
+    "M_ZdivoVes",
+    "M_ZidkaNasucho",
+    "M_DrnVal",
+    "M_SutZemina",
+    "M_PecVypalenaHlina"
+   ],
+   "kryti_dily": [
+    "ves_sklep"
+   ],
+   "_kryti_dily": "díly s klenbou (sklep v mezi): v půdorysu zdí střecha pro déšť a bez trávy (svet._ruiny_ves_dil → _plants)"
   },
   {
    "id": "hradek",

@@ -26,7 +26,7 @@ static var MISTA: Array = [
 	# ruiny: v pribehu az po objeveni (dojit k nim), v piskovisti hned
 	{"id": "kostel", "nazev": "Kostelík sv. Jiljí", "erb": "ostatni", "p": Vector2(220.0, 40.0), "ruina": true,
 		"cil": Vector3(210.1, 0.0, 46.8), "pohled": Vector3(220.0, 2.5, 40.0)},
-	{"id": "zanikla_ves", "nazev": "Doubrava", "erb": "ostatni", "p": Vector2(300.0, 340.0), "ruina": true,
+	{"id": "zanikla_ves", "nazev": "Doubrava", "erb": "ostatni", "p": Vector2(302.0, 349.0), "ruina": true,
 		"cil": Vector3(277.1, 0.0, 332.9), "pohled": Vector3(300.0, 2.0, 340.0)},
 	{"id": "hradek", "nazev": "Pustá skála", "erb": "zbrojnice", "p": Vector2(-190.0, 540.0), "ruina": true,
 		"cil": Vector3(-197.2, 0.0, 558.6), "pohled": Vector3(-190.0, 4.0, 540.0)},

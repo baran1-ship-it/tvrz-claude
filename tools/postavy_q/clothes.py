@@ -173,6 +173,64 @@ def svar(ob, dist=None):
     bm.to_mesh(me); bm.free(); me.update()
     return n0 - n1, kusy(ob)
 
+def bez_mustku(ob, sirka=None, kol_okraj=3, min_ploch=30):
+    """15. 11. (Míša ř. 3, test_svy_odevu u 11 sad s kápí): límec kukle z masky těla měl průramky (otvory pro paže)
+    jen 1–3 cm nad spodním lemem vzadu u podpaží - úzký pásek látky mezi dvěma otvory se v chůzi kroutil a lícem dovnitř
+    ukazoval tmavé trojúhelníky. Pravidlo svy_odevu.mustek_min_m: mezi dvěma různými smyčkami okraje jednoho kusu
+    nezůstane pásek užší než sirka - jeho plochy pryč (otvory se spojí), drobné zbytky pryč, nový okraj vyhlazený jako
+    okraj slupky. Vrací počet odstraněných ploch."""
+    sirka = pravidla_svu()["mustek_min_m"] if sirka is None else sirka
+    bm = bmesh.new(); bm.from_mesh(ob.data); bm.verts.ensure_lookup_table()
+    hr = [e for e in bm.edges if e.is_boundary]
+    par = {}
+    def f(x):
+        par.setdefault(x, x)
+        while par[x] != x: par[x] = par[par[x]]; x = par[x]
+        return x
+    for e in hr: par[f(e.verts[0].index)] = f(e.verts[1].index)
+    sm = {}
+    for e in hr:
+        for v in e.verts: sm.setdefault(f(v.index), set()).add(v.index)
+    if len(sm) < 2:
+        bm.free(); return 0
+    # vzdálenost každého vrcholu k nejbližší a druhé nejbližší smyčce (body smyčky + středy jejích hran)
+    stromy = []
+    for r, vs in sm.items():
+        body = [bm.verts[i].co.copy() for i in vs] + [(e.verts[0].co + e.verts[1].co) * 0.5 for e in hr if f(e.verts[0].index) == r]
+        kd = kdtree.KDTree(len(body))
+        for i, c in enumerate(body): kd.insert(c, i)
+        kd.balance(); stromy.append(kd)
+    mustek = set()
+    for v in bm.verts:
+        d = sorted(kd.find(v.co)[2] for kd in stromy)
+        if d[1] < sirka: mustek.add(v.index)
+    kill = [fc for fc in bm.faces if all(v.index in mustek for v in fc.verts)]
+    if kill: bmesh.ops.delete(bm, geom=kill, context='FACES')
+    # zbytky (méně než min_ploch ploch) a volné vrcholy pryč
+    bm.faces.ensure_lookup_table(); seen = set(); zb = []
+    for fc in bm.faces:
+        if fc in seen: continue
+        comp = []; st = [fc]; seen.add(fc)
+        while st:
+            g = st.pop(); comp.append(g)
+            for e in g.edges:
+                for h in e.link_faces:
+                    if h not in seen: seen.add(h); st.append(h)
+        if len(comp) < min_ploch: zb += comp
+    if zb: bmesh.ops.delete(bm, geom=zb, context='FACES')
+    loose = [v for v in bm.verts if not v.link_faces]
+    if loose: bmesh.ops.delete(bm, geom=loose, context='VERTS')
+    # nový okraj vyhladit (zuby po plochách) - jen vrcholy na okraji, jako shell(smooth_border)
+    for _ in range(kol_okraj if kill else 0):
+        newp = {}
+        for v in bm.verts:
+            if not v.is_boundary: continue
+            nb = [e.other_vert(v) for e in v.link_edges if e.is_boundary]
+            if len(nb) == 2: newp[v] = v.co * 0.5 + (nb[0].co + nb[1].co) * 0.25
+        for v, p in newp.items(): v.co = p
+    bm.normal_update(); bm.to_mesh(ob.data); bm.free(); ob.data.update()
+    return len(kill) + len(zb)
+
 def kusy(ob):
     """Počet souvislých kusů sítě (po hranách)."""
     me = ob.data; par = list(range(len(me.vertices)))

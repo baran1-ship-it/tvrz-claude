@@ -9477,6 +9477,8 @@ func _povrch() -> void:
 	var teren_k: Array = Pravidla.cti(K, "povrch", "teren_kolize")
 	var projit: Array = Pravidla.cti(K, "povrch", "projit_smi")
 	var min_bodu := int(Pravidla.cti(K, "povrch", "min_bodu"))
+	var strecha_nad := float(Pravidla.cti(K, "povrch", "pod_strechou_nad_m"))
+	var strop_m := float(Pravidla.cti(K, "povrch", "strop_m"))
 	var vypis_max := int(Pravidla.cti(K, "povrch", "vypis_max"))
 	var schv: Array = Pravidla.cti(K, "schvalene", "povrch")
 	var shoda := float(Pravidla.cti(K, "rohatka", "shoda_m"))
@@ -9508,9 +9510,9 @@ func _povrch() -> void:
 			continue
 		var krok := float(cil["krok_m"])
 		var okraj := float(cil["okraj_m"])
-		var svet_kol := cil.has("oblast")
+		var svet_kol := cil.has("oblast") or bool(cil.get("kolize_sveta", false))
 		var obl := Rect2()
-		if svet_kol:
+		if cil.has("oblast"):
 			var oa: Array = cil["oblast"]
 			obl = Rect2(float(oa[0]), float(oa[1]), float(oa[2]) - float(oa[0]), float(oa[3]) - float(oa[1]))
 		var n_cil := 0
@@ -9538,7 +9540,7 @@ func _povrch() -> void:
 					continue                      # dvere a vrata (otevrene/zavrene) - prochazi test dvere_*
 				var gx := mi.global_transform
 				var bb := gx * mi.mesh.get_aabb()
-				if svet_kol and not obl.intersects(Rect2(bb.position.x, bb.position.z, bb.size.x, bb.size.z)):
+				if cil.has("oblast") and not obl.intersects(Rect2(bb.position.x, bb.position.z, bb.size.x, bb.size.z)):
 					continue
 				var arr := mi.mesh is ArrayMesh
 				for si in (mi.mesh.get_surface_count() if arr else 1):
@@ -9591,7 +9593,7 @@ func _povrch() -> void:
 			var x1 := obal.end.x + okraj
 			var z0 := obal.position.z - okraj
 			var z1 := obal.end.z + okraj
-			if svet_kol:
+			if cil.has("oblast"):
 				x0 = obl.position.x
 				x1 = obl.end.x
 				z0 = obl.position.y
@@ -9662,6 +9664,9 @@ func _povrch() -> void:
 						pq.exclude = ex_hrac
 						pq.collision_mask = MASKA_HRY
 						var volno := space.intersect_shape(pq, 1).is_empty()
+						if volno and hp.y - float(sv.call("_vyska", x, z)) > strecha_nad:
+							# vyvysene misto jen pod strechou (patro, ochoz) - na strechu a vrch zdi hrac nevyleze
+							volno = not (paprsek.call(hp + Vector3(0, 0.3, 0), hp + Vector3(0, strop_m, 0), true) as Dictionary).is_empty()
 						if volno:
 							var vis: float = vid_y.call(Vector3(x, hp.y, z), hp.y, blizko)
 							var jen_teren := druh == 2 and (vis == -INF or absf(vis - float(sv.call("_vyska", x, z))) < 0.01)

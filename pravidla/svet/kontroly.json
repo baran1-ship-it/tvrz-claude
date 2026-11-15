@@ -11,7 +11,7 @@
     "dobra_verze"
   ],
   "povrch": {
-    "_popis": "test povrch (Puchart test_pruchod _test_povrch): v půdorysu každé stavby mřížka bodů, na každé vodorovné ploše kolize, kde postava stojí (kapsle se vejde), se porovná viditelná síť s kolizí – boří se / stojí nad viditelným; po směrech kolem bodu projde viditelným / neviditelná stěna. Body jen tam, kde je stavba (kolize stavby nebo viditelná síť stavby v okně), terén sám řeší teren_shoda.",
+    "_popis": "test povrch (Puchart test_pruchod _test_povrch): v půdorysu každé stavby mřížka bodů, na každé vodorovné ploše kolize, kde postava stojí (kapsle se vejde), se porovná viditelná síť s kolizí – boří se / stojí nad viditelným; po směrech kolem bodu projde viditelným / neviditelná stěna. Body jen tam, kde je stavba (kolize stavby nebo viditelná síť stavby v okně), terén sám řeší teren_shoda. Body víc než pod_strechou_nad_m nad terénem jen pod střechou (paprsek nahoru do strop_m zasáhne kolizi) – na střechy a vrchy zdí hráč nechodí. kolize_sveta: kolize cíle jsou v buňkách světa (Kolize*), ne pod uzlem.",
     "cile": [
       {
         "uzel": "Krcma_dil",
@@ -47,7 +47,8 @@
         "vzor": "Dum_ves_*",
         "krok_m": 0.5,
         "okraj_m": 1.5,
-        "kazdy": 1
+        "kazdy": 1,
+        "kolize_sveta": true
       },
       {
         "uzel": "Tvrz",
@@ -112,7 +113,9 @@
       "Sit"
     ],
     "min_bodu": 200,
-    "vypis_max": 30
+    "vypis_max": 30,
+    "pod_strechou_nad_m": 1.0,
+    "strop_m": 3.5
   },
   "geometrie": {
     "_popis": "tools/kontrola_geometrie.py (Puchart blender/kontrola_geometrie.py): souvislé kusy sítí hotových modelů musí stát na terénu nebo se opírat o kus, který stojí (řetěz opor). Visí ≥ min_velikost_m bez opory = chyba; celý kus víc než pod_terenem_m pod terénem = chyba. Modely dílů (krčma, kostel…) jsou v místních souřadnicích, terén = rovina y 0 (díl stojí na rovině kraj.MISTA); svět (tvrz.glb) proti tools/krok_b/vysky.json.",
