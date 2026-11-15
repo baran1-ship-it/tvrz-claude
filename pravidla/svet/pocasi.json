@@ -121,5 +121,15 @@
  "_strecha_m": "paprsek nad kamerou (Puchart): pod střechou / uvnitř bez kapek a dopadů, zvuk ze střechy (KCD hotfix 1.5.2)",
  "strecha_kontrola_s": 0.25,
  "sber_uzlu_snimek": 600,
- "_sber_uzlu_snimek": "trasa 0.999995: sběr materiálů s dest_mokro přes celou scénu najednou = zásek 357 ms (skripty 109) na začátku deště; teď nejvýš 600 uzlů za snímek od začátku zatahování (26 tis. uzlů ≈ 45 snímků)"
+ "_sber_uzlu_snimek": "trasa 0.999995: sběr materiálů s dest_mokro přes celou scénu najednou = zásek 357 ms (skripty 109) na začátku deště; teď nejvýš 600 uzlů za snímek od začátku zatahování (26 tis. uzlů ≈ 45 snímků)",
+ "strechy": {
+  "popis": "Míša 15. 11. (na dvoře krčmy nepršelo; „udělej na to pravidla podle Pucharta“): převzato z Pucharta 177dc68. Déšť padá vždy, mapa střech kolem kamery – mřížka krok_m do polomer_m, paprsek shora dolů (nad_m nad kamerou), výška první plochy (zeď, podlaha, terén) a kde svet.pod_strechou (střechy bez kolize: kryti tvrze, domy vsi, kryti_lok dílů) ještě + vyska_kryti_m. Shader dest.gdshader zahodí kapky pod touto výškou – pod střechou neprší, na dvůr a za oknem ano. Počítá se po paprsku_na_snimek, nová mapa po posunu kamery o posun_m.",
+  "krok_m": 1.0,
+  "polomer_m": 13,
+  "paprsku_na_snimek": 80,
+  "posun_m": 3.0,
+  "nad_m": 30.0,
+  "vyska_kryti_m": 4.5,
+  "_vyska_kryti_m": "střechy Havrana nemají kolizi → pod krytím (svet.pod_strechou) mapa = zásah paprsku + tato výška (okap přízemních staveb ~3–4 m, patro krčmy a hostince ~5,5); kapky nad střechou se nekreslí taky – venku nevadí, závoj je jen kolem kamery"
+ }
 }

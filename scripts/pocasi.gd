@@ -240,12 +240,16 @@ func _krok(dt: float) -> void:
 	_uvnitr = move_toward(_uvnitr, _uvnitr_cil, dt / float(P["prechod_uvnitr_s"]))
 	var venku := sila * (1.0 - _uvnitr)
 	var p := cam.global_position
+	# Misa 15. 11. (podle Pucharta 177dc68): zavoj pada vzdy, i kdyz je hrac pod strechou - z okna, dveri a zpod pristresku
+	# je dest videt; pod strechou kapky zahodi shader podle mapy strech (_strechy). _uvnitr dal ridi zvuk, mokro a dopady.
+	if sila > 0.004:
+		_strechy(p)
 	for v: Array in _vrstvy:
 		var mi: MeshInstance3D = v[0]
-		mi.visible = venku > 0.004
+		mi.visible = sila > 0.004
 		if mi.visible:
 			mi.global_position = p
-			(v[1] as ShaderMaterial).set_shader_parameter("sila", venku)
+			(v[1] as ShaderMaterial).set_shader_parameter("sila", sila)
 	var dp: Dictionary = P["dopady"]
 	_dopady.emitting = venku > float(dp["od_sily"])
 	if _dopady.emitting:
@@ -277,3 +281,76 @@ func _hlas(p: AudioStreamPlayer, h: float, db0: float) -> void:
 	p.volume_db = db0 + linear_to_db(h)
 	if not p.playing:
 		p.play()
+
+
+## Mapa strech kolem kamery (pocasi.json strechy; z Pucharta 177dc68, Misa 15. 11.): mrizka paprsku shora dolu, prvni zasah
+## (zed, podlaha, teren) = vyska, pod kterou neprsi; strechy Havrana nemaji kolizi -> kde svet.pod_strechou, + vyska_kryti_m.
+## Po kouscich (paprsku_na_snimek), hotova mapa do shaderu; nova, az se kamera posune o posun_m.
+var _sm_img: Image
+var _sm_tex: ImageTexture
+var _sm_stred := Vector2(INF, INF)
+var _sm_i := -1
+var _sm_novy := Vector2.ZERO
+
+
+func _strechy(p: Vector3) -> void:
+	var sc: Dictionary = P.get("strechy", {})
+	if sc.is_empty():
+		return
+	var k := float(sc["krok_m"])
+	var r := int(sc["polomer_m"])
+	var n := 2 * r + 1
+	if _sm_img == null:
+		_sm_img = Image.create(n, n, false, Image.FORMAT_RF)
+		_sm_img.fill(Color(-1e4, 0, 0))
+	var st := Vector2(snappedf(p.x, k), snappedf(p.z, k))
+	if _sm_i < 0:
+		if st.distance_to(_sm_stred) < float(sc["posun_m"]):
+			return
+		_sm_novy = st
+		_sm_i = 0
+	var ss := get_world_3d().direct_space_state
+	var ex: Array[RID] = []
+	var hr: Object = main.get("player")
+	if hr is CollisionObject3D:
+		ex.append((hr as CollisionObject3D).get_rid())
+	var sv: Object = main.get("svet")
+	var vk := float(sc["vyska_kryti_m"])
+	var konec := mini(_sm_i + int(sc["paprsku_na_snimek"]), n * n)
+	for i in range(_sm_i, konec):
+		var x := _sm_novy.x + (i % n - r) * k
+		var z := _sm_novy.y + (i / n - r) * k
+		var q := PhysicsRayQueryParameters3D.create(Vector3(x, p.y + float(sc["nad_m"]), z), Vector3(x, p.y - 60.0, z))
+		q.exclude = ex
+		var h := ss.intersect_ray(q)
+		var y := (h["position"] as Vector3).y if not h.is_empty() else -1e4
+		if sv and not h.is_empty() and sv.pod_strechou(Vector3(x, y, z)):
+			y += vk
+		_sm_img.set_pixel(i % n, i / n, Color(y, 0, 0))
+	_sm_i = konec
+	if _sm_i >= n * n:
+		_sm_i = -1
+		_sm_stred = _sm_novy
+		if _sm_tex == null:
+			_sm_tex = ImageTexture.create_from_image(_sm_img)
+		else:
+			_sm_tex.update(_sm_img)
+		var o := Vector3(_sm_stred.x - (r + 0.5) * k, _sm_stred.y - (r + 0.5) * k, n * k)
+		for v: Array in _vrstvy:
+			(v[1] as ShaderMaterial).set_shader_parameter("strechy", _sm_tex)
+			(v[1] as ShaderMaterial).set_shader_parameter("mapa", o)
+
+
+## Vyska mapy strech v bode (test krcma_dvur / pocasi): -1e4 = mimo mapu
+func strecha_y(x: float, z: float) -> float:
+	var sc: Dictionary = P.get("strechy", {})
+	if _sm_img == null or _sm_stred.x == INF or sc.is_empty():
+		return -1e4
+	var k := float(sc["krok_m"])
+	var r := int(sc["polomer_m"])
+	var i := int(roundf((x - _sm_stred.x) / k)) + r
+	var j := int(roundf((z - _sm_stred.y) / k)) + r
+	if i < 0 or j < 0 or i > 2 * r or j > 2 * r:
+		return -1e4
+	return _sm_img.get_pixel(i, j).r
+

@@ -8461,7 +8461,7 @@ func _pocasi() -> void:
 		chyby.append("nejdelsi dest %.1f h" % nejdelsi)
 	if pred > 0:
 		chyby.append("%d destu bez zatazeni predem" % pred)
-	# venku za deste zavoj kapek, v hostinci (pod strechou, paprsek vzhuru) zadny
+	# venku za deste zavoj kapek a mapa strech pod kamerou, v hostinci mapa nad kamerou (pod strechou neprsi)
 	pc.vynuceno = 1.0
 	await main.fast_travel(Vector3(-40.0, 0.0, 905.0), Vector3(-45.0, 1.6, 910.0), 0.0, "test")
 	# trasa 0.999995: zacatek deste zasek 357 ms (sber materialu najednou) - sber po castech, nejdelsi krok pocasi < limit
@@ -8483,15 +8483,17 @@ func _pocasi() -> void:
 			venku += 1
 	if venku == 0:
 		chyby.append("venku za deste zadna vrstva kapek")
+	# Misa 15. 11. (mapa strech z Pucharta): venku mapa pod kamerou (prsi), v hostinci nad kamerou (kapky zahozeny),
+	# zavoj ale bezi dal (z okna a dveri je dest videt)
+	var cam0 := get_viewport().get_camera_3d().global_position
+	if float(pc.call("strecha_y", cam0.x, cam0.z)) > cam0.y:
+		chyby.append("venku mapa strech nad kamerou (%.1f > %.1f)" % [float(pc.call("strecha_y", cam0.x, cam0.z)), cam0.y])
 	await main.fast_travel(Vector3(-63.0, 0.0, 930.0), Vector3(-66.0, 1.6, 932.0), 0.0, "test")
 	for i in 90:
 		await get_tree().process_frame
-	var vidno := 0
-	for c: Node in pc.get_children():
-		if c is MeshInstance3D and (c as MeshInstance3D).visible:
-			vidno += 1
-	if vidno > 0:
-		chyby.append("v hostinci viditelne vrstvy kapek %d" % vidno)
+	var cam1 := get_viewport().get_camera_3d().global_position
+	if float(pc.call("strecha_y", cam1.x, cam1.z)) < cam1.y:
+		chyby.append("v hostinci mapa strech pod kamerou (%.1f < %.1f) - prselo by dovnitr" % [float(pc.call("strecha_y", cam1.x, cam1.z)), cam1.y])
 	pc.vynuceno = -1.0
 	_vysledek("pocasi", chyby.is_empty(), "%d chyb %s; destu za 60 dni %d, nejdelsi %.1f h, mokrych materialu %d" % [chyby.size(), str(chyby), dni, nejdelsi, (pc.get("_mat_mokro") as Array).size()])
 
@@ -9060,6 +9062,19 @@ func _krcma_dvur() -> void:
 	var patro := (xf * Vector3(0.0, 2.85, 0.0)).y
 	if not bool(r[0]) or player.global_position.y < patro - 0.3:
 		chyby.append("na schody: %s, y %.2f / patro %.2f" % [r[1], player.global_position.y, patro])
+	# 4) dest na dvore (mapa strech jako Puchart): stoji-li hrac na dvore za deste, mapa pod nim je pod hlavou
+	var pc: Node = main.get("pocasi")
+	if pc and pc.has_method("strecha_y"):
+		pc.vynuceno = 1.0
+		await main.fast_travel(Vector3(b0.x, 0.0, b0.y), Vector3(b0.x - 3.0, 1.6, b0.y), 0.0, "test")
+		for i in 60:
+			await get_tree().process_frame
+		var hy := player.global_position.y + 1.6
+		for pr: Array in [["dvur stred", 4.0, -8.0], ["dvur u staje", 7.5, -10.0]]:
+			var w := xf * Vector3(float(pr[1]), 0.0, float(pr[2]))
+			if float(pc.call("strecha_y", w.x, w.z)) > hy:
+				chyby.append("mapa strech %s nad hlavou - neprsi" % pr[0])
+		pc.vynuceno = -1.0
 	_vysledek("krcma_dvur", chyby.is_empty(), "OK" if chyby.is_empty() else "; ".join(chyby))
 
 
