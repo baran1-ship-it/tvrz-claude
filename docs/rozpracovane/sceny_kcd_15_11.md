@@ -426,3 +426,18 @@ Míša: „posílám inspiraci, jak bych to chtěl, vem si z toho maximum“. Co
 „Úprava polí ve vsi, které máme zbytečně po kraji – stačilo by něco za vesnicí a zbytek louky a lesy.“ → pole jen za
 vsí (pruhy s mezemi a keři jako bejcek_16/18), ostatní plochy louky a les; záznam v `lokace.json`/`pole` (ne v kódu).
 Pořadí po vydání: 1) pole, 2) scény (clona vjezdu, houština, hmota lesa). Míša pošle ještě sadu fotek z Havrana podél mapy.
+
+## Sada 2 od Míši 15. 11. noc (`docs/reference/sceny_15_11/kcd_sada2_01–20`) – „podle kterých se dá pracovat, myslím, že hodně“
+| co | snímky | pravidlo pro nás (data, ne kód) |
+|---|---|---|
+| **Les = kmeny + podrost do výšky pasu, žádná louka** | 12–15, 17, 19 | v zapojeném lese tráva jen řídce (už `les_trava`), místo ní nízký podrost (břečťan/brslen/kopřiva/kapradí/mladé buky) + suché větve a hromádky klestu; řídký les → hustší zápoj (víc kmenů, menší rozestup) |
+| **Houština na kraji lesa a u cest** | 04, 16, 18, 19 | lískový/olšový pás 2–4 m vysoký mezi lesem a cestou/loukou; v lese jednotlivé keře, které zakryjí průhled |
+| **Pěšina v lese** | 13, 16, 20 | úzká hlína s listím, podrost až k okraji, koruny nad cestou se skoro zavírají (tunel) |
+| **Potok v lese** | 18, 20 | kamenité koryto, keře a vysoká tráva přes okraj, skoro neviditelný z dálky |
+| **Louka zblízka** | 09 | nízký drn s kvítím (modré čekanky, žluté, bílé), vysoká tráva jen v pruzích/na okraji – ne všude vysoká |
+| **Svah se skalními výchozy** | 07, 08 | ploché výchozy skály v trávě, keře mezi nimi, bříza; terén světlejší/sušší |
+| **Ves** | 02, 03, 05 | plot z plaňek + kamenná podezdívka, hlína ulice s kolejemi, tráva jen podél zdí a v pásech, stromy mezi staveními; vjezd po cestě s vysokou trávou po stranách |
+| **Mlýn** | 01 | kameny a padlý kmen u vody, vrba/keře u náhonu, ohrada |
+| **Rybníček/strouha** | 10 | lekníny + okřehek, vysoký rákos na březích, voda tmavá ale průhledná u kraje |
+| **Most z kuláčů** | 06 | povalový most bez zábradlí z jedné strany, listí na cestě |
+Výkonově (rozbor_gpu_15_11.md): les s podrostem místo trávy = méně průhledné trávy přes celou obrazovku + clona dálky.
