@@ -41,7 +41,11 @@ if co == "import":
 if co == "reka":
     sj = json.load(open("modely/svet.json")).get("reka_otisk")
     rj = json.load(open("modely/reka/reka.json")).get("reka_otisk") if os.path.exists("modely/reka/reka.json") else None
-    sys.exit(0 if sj == rj else 1)
+    # 15. 11.: v nove session byl reka.json se shodnym otiskem, ale bez reka_flow/reka_dist.png (gitignore) -> pect znovu
+    chybi = [f for f in ("reka.res", "reka_flow.png", "reka_dist.png") if not os.path.exists("modely/reka/" + f)]
+    if chybi:
+        print("POTOK: chybi %s" % chybi)
+    sys.exit(0 if sj == rj and not chybi else 1)
 if co == "drevo":
     # Misa 13. 11. (drevo cerne): materialy dreva v svet.json - jas textury x tint >= pravidla/svet/modely.json drevo_jas.min
     from PIL import Image
