@@ -45,7 +45,7 @@ S Míšou česky.
   „můžeš snížit rozlišení“): tablet pevně 75 % (`pravidla/svet/kvalita.json` `meritko_3d`), výkon se dál hledá u příčiny
   (záseky skriptů, světla, LOD, rozpočty); automatická kvalita jen v extrému (teplo, dlouhý pokles pod 33,3 ms) a ubírá
   detail, rozlišení za běhu **nemění** (zásek 1,36 s).
-- Podpisový klíč nikdy do repa.
+- Podpisový klíč nikdy do repa (záloha na Disku – oddíl „Záloha hry na Disk“).
 - **Čas u zpráv a vydání** (Míša 6. 11.: „nevšiml jsem si, že jsi vydal další verzi, nemáš časy v chatu“): zprávu o vydání
   začínat „**Vydáno 0.NN – <den. měsíc> <hh:mm>**“ (český čas, `TZ=Europe/Prague date`), i v dalších zprávách uvádět,
   o jakou verzi jde.
@@ -53,3 +53,21 @@ S Míšou česky.
   ```
   https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.NN.apk
   ```
+
+## Záloha hry na Disk (Míša 15. 11., stejně jako Puchart)
+- Po každém velkém updatu se Míši **zeptat**, jestli udělat zálohu. Plný instalátor vytvořit až po souhlasu (nebo když o něj řekne).
+- Plný instalátor = APK se VŠEMI herními daty uvnitř (preset Android bez vyloučení dat, exclude jen co hra nepotřebuje);
+  ověřit, že hra data najde v sobě a stahování přeskočí; podepsat stejným klíčem jako normální APK.
+- Konektor Disku nahraje jen soubory do 10 MB (ověřeno 15. 11.: 3 MB ano, 120 MB ne), SendUserFile do 400 MB → plnou APK zabalit
+  do 7z po 350 MB (py7zr + multivolumefile, bez komprese, `.7z.001`, `.002`…), ověřit (testzip) a poslat části do chatu;
+  Míša je uloží sám do `Havran – zálohy/<RRRR-MM-DD>`.
+- Místo v kontejneru: data ~2,8 GB, plná APK + podpis + části ~3× → uklízet průběžně (nepodepsanou APK po podpisu,
+  APK po zabalení, části po odeslání); před začátkem ověřit volné místo.
+- Disk: složka `Havran – zálohy` id `1vD7RqXebuH6M0iGGRf0slPcMkdjvt078`, `Klíč podpisu (nemazat)` id
+  `19UqHChWeoeAoSUaXjJykZVmTSrEevzR3`, keystore `tvrz_release.keystore` id `1VAHCni81ekYxURpF9KYElBfnG5LcLDSF`,
+  návod `CTI_ME – jak obnovit hru.txt` id `1c47D3aNa3VlKRCp47kvUqpvaolIkznCw`.
+- **Klíč podpisu:** `/root/keys/tvrz_release.keystore`, alias `havran`, otisk certifikátu SHA-256
+  `C6:1B:DC:1E:35:2B:3A:DC:58:63:4A:B1:E4:C2:5C:FB:B5:FE:91:B3:BA:3D:C5:AE:18:24:06:13:3B:EC:6C:59`, sha256sum souboru
+  `df68e8c320a8400576d37ba94229ed22cbb95db6785fca9e6721240872546065` (heslo v tools/vydani.py a v návodu na Disku).
+  **Před každým exportem/vydáním v nové session** ověřit `keytool -list -v` otisk; chybí-li soubor, stáhnout ho z Disku (id výše)
+  do `/root/keys/` a ověřit sha256sum. Klíč nikdy do repa.
