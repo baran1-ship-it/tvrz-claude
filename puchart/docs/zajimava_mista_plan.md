@@ -20,3 +20,5 @@ podlahu a postele, vykopat 2 schody do země a udělat zemljanku jako v KCD.“
   (~0,6–0,8 m, 2 hliněné/kamenné schody u vchodu dolů), stěny jámy hliněné, obložené kůly/proutím (KCD zemnice),
   ohniště uvnitř, terén proříznutý (díra v terénu + kolize), test průchodu dovnitř a ven.
 - Předloha: KCD zemnice (uhlíři, lapkové) – najít fotky; dobová reference: zahloubené stavby (polozemnice) 13.–14. st.
+- Vybavení (Míša 15. 11.): žádné postele – spalo se na zemi vlevo a vpravo na rohožích a houních (rohož z rákosí/slámy +
+  vlněná houně, pevný díl modelu); proti dveřím na konci bedna (truhla z katalogu Havrana), pokud se vejde.
