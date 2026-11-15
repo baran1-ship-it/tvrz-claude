@@ -225,7 +225,7 @@ def render_patch(kind="sindel", res=1024):
         out[res_k]["rough"] = os.path.basename(path)
     for res_k in ("1k", "2k"):
         mp = os.path.join(TEX_ROOT, "meta_%s.json" % res_k)
-        meta = json.load(open(mp))
+        meta = json.load(open(mp)) if os.path.exists(mp) else {}      # 15. 11.: nova session bez meta_1k.json
         meta[kind] = {"id": "vlastni", "size_m": [SIZE, SIZE], "maps": out[res_k]}
         json.dump(meta, open(mp, "w"), indent=1)
     print("hotovo", out)
