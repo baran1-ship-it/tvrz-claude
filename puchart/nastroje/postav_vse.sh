@@ -58,3 +58,4 @@ python3 $K/nastroje/import_stromy.py $K && (cd $K/hra && $G --headless --import 
 # stodoly a kůlna usedlostí (Míša 14. 11.: funkční vrata, prkna bez čtverečků): přepíše modely Havrana v predmety_h,
 # pak znovu vrata do hra/data/pohyb_mista.json (uzly *_Dvere_* stodol) a import
 [ -x /opt/bl/bin/python ] && /opt/bl/bin/python $K/blender/stodoly.py $K && python3 $K/nastroje/pohyb_mista.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)
+[ -x /opt/bl/bin/python ] && [ ! -f $K/hra/modely/predmety_h/kovadlina_1393.glb ] && /opt/bl/bin/python $K/blender/kovadlina.py $K --prac $B/kovadlina && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)   # kovadlina 1393 (Míša 15. 11., KCD2) – jen když chybí, ~50 min Cycles

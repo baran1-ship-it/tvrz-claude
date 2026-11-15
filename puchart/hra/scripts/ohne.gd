@@ -89,6 +89,33 @@ func _sit_disku(r: float) -> ArrayMesh:
 	return st.commit()
 
 
+## Svislá karta v rovině XY (normála +Z), základna na y = 0, UV.y 0 dole → 1 nahoře; rezim 1 (uhlíky): UV pro disk.
+func _karta(sirka: float, vyska: float, rezim: int) -> ArrayMesh:
+	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var h := sirka * 0.5
+	var v := [Vector3(-h, 0, 0), Vector3(h, 0, 0), Vector3(h, vyska, 0), Vector3(-h, vyska, 0)]
+	var uv := [Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1)]
+	if rezim == 1: uv = [Vector2(0.05, 0.4), Vector2(0.95, 0.4), Vector2(0.95, 0.6), Vector2(0.05, 0.6)]   # pruh: okraj disku jen na koncích
+	for k in [0, 1, 2, 0, 2, 3]:
+		st.set_color(Color(0.31, 0, 0)); st.set_normal(Vector3.BACK); st.set_uv(uv[k]); st.add_vertex(v[k])
+	return st.commit()
+
+
+## Ústí pece: značka modelu (m.usti_uzel pod domem – počátek = střed spodní hrany otvoru, osa +Z do místnosti, rozměr z dat)
+## nebo data m.usti (bod, smer, sirka, vyska v souřadnicích domu). Dům = rodič kolize pece. {} = ústí neznámé.
+func _usti(m: Dictionary, tel: Node3D) -> Dictionary:
+	if not m.has("usti"): return {}
+	var dum := tel.get_parent() as Node3D
+	if dum == null: return {}
+	var u: Dictionary = m["usti"]
+	var zn := dum.find_child(String(m.get("usti_uzel", "-")), true, false) as Node3D
+	if zn:
+		return {"bod": zn.global_position, "smer": (zn.global_basis.z * Vector3(1, 0, 1)).normalized(), "sirka": float(u["sirka"]), "vyska": float(u["vyska"])}
+	var b: Array = u["bod"]; var sm: Array = u["smer"]
+	return {"bod": dum.global_transform * Vector3(b[0], b[1], b[2]), "smer": (dum.global_basis * Vector3(sm[0], sm[1], sm[2])).normalized(),
+		"sirka": float(u["sirka"]), "vyska": float(u["vyska"])}
+
+
 ## Směr (vodorovně) s nejdelším volným paprskem z bodu – do místnosti; vyjma = RID vlastní kolize (pec).
 func _do_mistnosti(p: Vector3, vyjma: Array) -> Vector3:
 	var ss := get_world_3d().direct_space_state; var nej := Vector3.FORWARD; var nd := -1.0
@@ -107,6 +134,7 @@ func _pridej(m: Dictionary, n: Node3D) -> void:
 	var vlastni: Array = []
 	var zaklad: Vector3; var ven: Vector3
 	var zhar: MeshInstance3D = null
+	var usti := {}
 	if m.has("pec_kolize"):   # pec: ústí na straně do místnosti, výška usti_v nad spodkem pece
 		var tel := n if m.has("uzel") == false else n.get_parent().get_parent().find_child(String(m["pec_kolize"]), true, false) as Node3D
 		if not tel is CollisionObject3D: return
@@ -117,10 +145,14 @@ func _pridej(m: Dictionary, n: Node3D) -> void:
 			ab = b if prvni else ab.merge(b); prvni = false
 		if prvni: return
 		var c := ab.get_center()
-		ven = _do_mistnosti(c, vlastni)
-		# ústí: na líci klenby pece (kolize je jeden kvádr pece i s podstavcem – klenba končí na usti_od_stredu půlrozměru)
-		var lic := c + ven * minf(ab.size.x, ab.size.z) * 0.5 * float(dr["usti_od_stredu"])
-		zaklad = Vector3(lic.x, ab.position.y + ab.size.y * float(dr["usti_v"]), lic.z)
+		usti = _usti(m, tel)
+		if not usti.is_empty():   # ústí ze značky modelu (<Dům>_Pec_Usti) nebo z dat (mista[].usti): oheň vidět v otvoru
+			zaklad = usti["bod"]; ven = usti["smer"]
+		else:
+			ven = _do_mistnosti(c, vlastni)
+			# ústí: na líci klenby pece (kolize je jeden kvádr pece i s podstavcem – klenba končí na usti_od_stredu půlrozměru)
+			var lic := c + ven * minf(ab.size.x, ab.size.z) * 0.5 * float(dr["usti_od_stredu"])
+			zaklad = Vector3(lic.x, ab.position.y + ab.size.y * float(dr["usti_v"]), lic.z)
 	else:
 		var p := n.global_position
 		if m.has("zhar"):
@@ -150,6 +182,14 @@ func _pridej(m: Dictionary, n: Node3D) -> void:
 		if not _disk.has(r_): _disk[r_] = _sit_disku(r_)
 		var uh := MeshInstance3D.new(); uh.name = "Uhliky"; uh.mesh = _disk[r_]; uh.material_override = _mat_uhliky
 		_geom(uh); uh.position.y = 0.015; uz.add_child(uh); o["uhliky"] = uh
+	if not usti.is_empty():   # pec s ústím: plamen jako jedna karta v rovině otvoru, pod ním pruh žhavých uhlíků (KCD chalupy)
+		var up: Array = dr["usti_plamen"]; var od := float(dr["usti_odsazeni"])
+		var bz := Basis.looking_at(-ven, Vector3.UP)   # lokální +Z = ven (do místnosti), karta v rovině XY
+		var sw := float(usti["sirka"]); var sv_ := float(usti["vyska"])
+		var pl := MeshInstance3D.new(); pl.name = "Plamen"; pl.mesh = _karta(sw * float(up[0]), sv_ * float(up[1]), 0); pl.material_override = _mat_plamen
+		_geom(pl); uz.add_child(pl); pl.basis = bz; pl.position = ven * (od * 1.5) + Vector3.UP * 0.02; o["plamen"] = pl
+		var uh := MeshInstance3D.new(); uh.name = "Uhliky"; uh.mesh = _karta(sw * 0.92, float(dr["usti_uhliky_v"]), 1); uh.material_override = _mat_uhliky
+		_geom(uh); uz.add_child(uh); uh.basis = bz; uh.position = ven * od; o["uhliky"] = uh
 	if zhar:   # žár výhně: překryv sítě modelu (druhý průchod se stejným shaderem)
 		zhar.material_overlay = _mat_uhliky; o["zhar"] = zhar
 	var l := OmniLight3D.new(); l.name = "Svetlo"

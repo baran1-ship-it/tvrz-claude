@@ -3,8 +3,8 @@
 // - plamen (rezim 0): 3 křížené svislé karty (ohne.gd _sit_plamene), tvar kapky a barva bílá–žlutá–oranžová–červená
 //   počítané zde, jedna dlaždicová šumová textura (textury/ohen_sum.png, R = jazyky, G = chvění) čtená 2× s posunem
 //   nahoru, vlnění vrcholů; karta natočená hranou ke kameře se ztlumí (nevidět „čáru“).
-// - uhlíky (rezim 1): plochý disk nebo překryv sítě žáru (Kovarna_Zhar, material_overlay), žhnutí ze šumu ve světových
-//   souřadnicích a pomalé pulzování.
+// - uhlíky (rezim 1): plochý disk, svislý pruh v ústí pece (ohne.gd _karta) nebo překryv sítě žáru (Kovarna_Zhar,
+//   material_overlay), žhnutí ze šumu ve světových souřadnicích a pomalé pulzování.
 // Aditivní, neosvětlené, bez zápisu hloubky, bez stínu a mlhy; čísla vzhledu z dat (ohne.json plamen / uhliky).
 shader_type spatial;
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled, fog_disabled, specular_disabled;
@@ -66,7 +66,7 @@ void fragment() {
 		ALBEDO = c * (0.6 + 1.2 * h) * sila;
 		ALPHA = clamp(f * 1.3, 0.0, 1.0) * smoothstep(0.08, 0.45, v_celem);
 	} else {
-		vec2 p = v_wp.xz * uhliky_meritko;
+		vec2 p = vec2(v_wp.x + v_wp.z * 0.7, v_wp.z * 0.7 + v_wp.y) * uhliky_meritko;   // i svislý pruh v ústí pece (ne jen vodorovný disk)
 		float a = texture(sum_tex, p * 0.25).g;
 		float b = texture(sum_tex, p * 0.11 + vec2(TIME * 0.01, 0.0)).r;
 		float r = length(UV - 0.5) * 2.0;   // disk: k okraji slábne (překryv žáru má vlastní UV – ořez měkký)

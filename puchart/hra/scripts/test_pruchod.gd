@@ -277,11 +277,11 @@ func _test_povrch() -> void:
 												var _rid: RID = (_c as CollisionObject3D).get_rid()
 												_dbg.append("  B:%s srv=%s shapes=%d space=%s my=%s layer=%d dis=%s ch=%d" % [_c.name, PhysicsServer3D.body_get_state(_rid, PhysicsServer3D.BODY_STATE_TRANSFORM), PhysicsServer3D.body_get_shape_count(_rid), PhysicsServer3D.body_get_space(_rid), hrac.get_world_3d().space, (_c as CollisionObject3D).collision_layer, (_c as CollisionObject3D).process_mode, _c.get_child_count()])
 												for _cs in _c.get_children(): _dbg.append("    S:%s %s dis=%s" % [(_cs as CollisionShape3D).shape, (_cs as Node3D).global_transform, (_cs as CollisionShape3D).disabled])
-							sten += 1; vse.append({"druh": "zed", "chyba": chyba, "trasa": jm, "p": [p.x, p.z, hy], "smer": u * 45, "zed": dv_min, "kolize": dk_min, "mat": dmat, "dbg": _dbg, "lok": _lokalne(_dnode, _dwp)})
+							sten += 1; vse.append({"druh": "zed", "chyba": chyba, "trasa": jm, "p": [p.x, p.z, hy], "smer": u * 45, "zed": dv_min, "kolize": dk_min, "mat": dmat, "dbg": _dbg, "lok": _lokalne(_dnode, _dwp), "kolize_obj": dk_obj})
 							if spatne.size() < 24: spatne.append("%s [%.1f, %.1f] směr %d° %s (vidět %s m, kolize %s m %s, %s)" % [jm, p.x, p.z, u * 45, chyba, "–" if dv_min == INF else "%.2f" % dv_min, "–" if dk_min == INF else "%.2f" % dk_min, dk_obj, dmat])
 				var d: float = (h["position"] as Vector3).y - vis
 				if absf(d) > tol:
-					horsi = maxf(horsi, absf(d)); vse.append({"druh": "povrch", "trasa": jm, "p": [p.x, p.z, p.y], "d": d, "kolize_y": h["position"].y, "vid_y": vis, "objekt": (h["collider"] as Node).get_parent().name})
+					horsi = maxf(horsi, absf(d)); vse.append({"druh": "povrch", "trasa": jm, "p": [p.x, p.z, p.y], "d": d, "kolize_y": h["position"].y, "vid_y": vis, "objekt": (h["collider"] as Node).get_parent().name, "kolize_obj": String((h["collider"] as Node).name), "lok": _lokalne(h["collider"] as Node3D, h["position"])})
 					if spatne.size() < 12: spatne.append("%s [%.1f, %.1f] %s %.2f m" % [jm, p.x, p.z, "stojí nad viditelným" if d > 0 else "boří se", absf(d)])
 	var fo := FileAccess.open(OS.get_environment("PUCHART_POVRCH") if OS.has_environment("PUCHART_POVRCH") else "user://povrch.json", FileAccess.WRITE); fo.store_string(JSON.stringify(vse, " "))
 	vysledek["povrch_kolize"] = "OK" if spatne.is_empty() and n > 100 else "CHYBA: %d bodů, %s" % [n, "; ".join(spatne) if not spatne.is_empty() else "málo bodů"]

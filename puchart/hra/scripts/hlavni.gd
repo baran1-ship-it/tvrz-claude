@@ -689,6 +689,7 @@ func _mista() -> void:
 		_lavice_rucni(dum, String(s["model"]))
 		if _lavice_vzor != "": lavice.append_array(load("res://scripts/lavice.gd").mista(dum, _lavice_vzor))   # lavice z modelu (Míša 15. 11.)
 		_rampy_dveri(dum)
+		_krb(dum, String(s["model"]), float(lod["vnitrek_do_m"]), blizko if ssc else (75.0 if OS.has_feature("mobile") else 130.0))   # krb Rychty (krby.json; glb až od modeláře)
 		_ztlum(dum, float(md.get("jas_podrobny", 1.0)), jas_cache)   # Míša 14. 11.: „domy… až moc vypadají bílé“
 		var zbd: Array = (md.get("zebriky", {}) as Dictionary).get(String(s["model"]), [])
 		if zbd.size() == 4:   # žebřík na půdu v síni (Havran DUM_ZEBRIK; Míša 15. 11.: „chci všechny žebříky ve hře funkční“)
@@ -733,6 +734,26 @@ func _mista() -> void:
 	sc.queue_free()
 	if ssc: ssc.queue_free()
 	print("MISTA staveb %d" % uzel.get_child_count())
+
+
+## Krb vložený do domu (data/krby.json vlozit[]: model, soubor glb, poloha a yaw v souřadnicích modelu domu; Míša 15. 11.: krby
+## „hezké dobové dle KCD“ vymodeluje modelář). Glb chybí → nic. Kolize z glb (-col/-colonly), značka ohně <Model>_Krb_Ohen najde
+## ohne.gd (ohne.json rychta_krb). Vnitřní díl (jméno s Vnitrek) jen do vnitrek_do_m, ostatní (plášť, komín nad střechou) do vnejsi_do_m.
+var _krby: Array = []
+var _krby_nacteno := false
+func _krb(dum: Node3D, model: String, vnitrek_do: float, vnejsi_do: float) -> void:
+	if not _krby_nacteno:
+		_krby_nacteno = true
+		if FileAccess.file_exists("res://data/krby.json"): _krby = (JSON.parse_string(FileAccess.get_file_as_string("res://data/krby.json")) as Dictionary).get("vlozit", [])
+	for k: Dictionary in _krby:
+		if String(k["model"]) != model or not ResourceLoader.exists(String(k["soubor"])): continue
+		var kr := (load(String(k["soubor"])) as PackedScene).instantiate() as Node3D
+		var po: Array = k["poloha"]
+		kr.name = model + "_Krb"; kr.transform = Transform3D(Basis(Vector3.UP, deg_to_rad(float(k["yaw_deg"]))), Vector3(po[0], po[1], po[2]))
+		dum.add_child(kr)
+		for mi in kr.find_children("*", "MeshInstance3D", true, false):
+			(mi as MeshInstance3D).visibility_range_end = vnitrek_do if String(mi.name).contains("Vnitrek") else vnejsi_do
+			(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 ## Viditelné lavice bez kolizního uzlu (mista.json modely.lavice.rucni; Míša 15. 11.: každá lavice v modelu funkční): kvádr
