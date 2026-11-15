@@ -1257,6 +1257,30 @@
   "mezera_vyklenku_m": 0.08,
   "pozn_13_11": "Míša 13. 11. (foto z průjezdu branky: „most není dobrý pro zvednutí“ – užší a nižší než oblouk, kolem nebe): zvednutý most zakryje otvor portálu s přesahem vyklenek_okraj_m po stranách i nahoře; výklenek = most + mezera_vyklenku_m (puchart_hrad.most_kryti, všechny tři mosty). vyklenek_nad_m nahrazeno přesahem."
  },
+ "pohyb_okenice": {
+  "popis": "Okenice oken paláců jako pohyblivé díly (Míša 15. 11.: „co může mít funkci, tak ji mít bude“; okenice: „otvírat“). hrady.okno_palace: každé křídlo = uzel Pohyb_okeniceN_l / _p s pivotem v pantu, pohyb.json druh dvere (dvere.gd je otvírá jako dveře, ve glb otevřené). Okenice vnitřní (zavřené kryjí světlík z vnitřní strany slupky / vnitřního líce zdi), pant na hraně světlíku na straně do místnosti, křídlo = prkna na svlacích (Havran kit.window shutters: 3 prkna materiálu okenice). Úhel otevření: v nice nejvýš uhel_nika_max, ale jen dokud konec křídla nedojde k boku niky (minus mezera_m – ostění niky); bez niky (přízemí, okénka v hradbě) o uhel_lic k vnitřnímu líci zdi (křídlo je od líce odsazené o tloušťku, nekoliduje). Kolize bez (křídlo v nice nad podlahou, plochá k líci).",
+  "tloustka_m": 0.04,
+  "svlak_m": [0.07, 0.025],
+  "prken": 3,
+  "presah_m": 0.02,
+  "odstup_m": 0.01,
+  "mezera_m": 0.03,
+  "uhel_nika_max": 120.0,
+  "uhel_lic": 176.0,
+  "doba_s": 0.8,
+  "ovladani_do_mistnosti_m": 0.45,
+  "zdroj": "docs/reference/okna_palace.md (castlewales.com/life.html: okenice uvnitř se závorou; castles-of-britain.com/windows.htm: nezasklená okna s okenicemi; buildingconservation.com shutters: vnitřní okenice se skládají do ostění); Havran blender/kit.py window(shutters) – prkna okenice; doba jako lehké dveře Havrana (kit.doorway vnitrni 0,9 s)",
+  "jistota": "REKONSTRUKCE"
+ },
+ "pohyb_studna": {
+  "popis": "Rumpál a vědro studny nádvoří A jako pohyblivé díly (hrady.studna): Pohyb_studna_rumpal (druh navijak, otáčky turns kolem osy bubnu = místní X, místo ovládání u kliky), Pohyb_studna_vedro (druh vedro, posun lift po místní Y dolů k hladině, dur s, lano ropes = [kotva pod bubnem (svět), ucho vědra (místní)]). Skupina studna. Ve glb vědro nahoře pod bubnem (init 0). Navinuté lano je součást sítě bubnu (točí se s ním); Havran navin (navíjení lana multimeshí) dvere.gd nemá.",
+  "turns": 9.0,
+  "doba_s": 6.0,
+  "ponor_m": 0.17,
+  "ovladani": [1.3, -0.4, 0.0],
+  "zdroj": "Havran (větev claude/new-session-0dtk58) blender/studna.py: kit.movable studna_rumpal navijak turns 9, use c + (1,3; −0,4; 0), studna_vedro vedro lift −(hy + 2,55) (vědro pod hladinu), init 0, dur 6, ropes; scripts/pohyb.gd (vedro: posun lift·k po místní Y, nápis Spustit / Vytáhnout vědro, dopad_drevo / zapadka)",
+  "jistota": "REKONSTRUKCE"
+ },
  "vybaveni": {
   "stavet": false,
   "svetla_louci": false,

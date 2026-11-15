@@ -1,0 +1,3 @@
+Zvuky předmětů převzaté z Odkazu Havrana (větev claude/new-session-0dtk58, zvuky/predmety2, zvuky/seznam.txt):
+
+mech.ogg | kovářský měch (výdech vzduchu do výhně) | https://opengameart.org/content/50-rpg-sound-effects ; vlastní tvorba (syntéza) | kenney ; Claude pro Odkaz Havrana | CC0 | syntéza vzduchu + vrstvení kůže a dřeva, normalizace
