@@ -441,3 +441,10 @@ Pořadí po vydání: 1) pole, 2) scény (clona vjezdu, houština, hmota lesa). 
 | **Rybníček/strouha** | 10 | lekníny + okřehek, vysoký rákos na březích, voda tmavá ale průhledná u kraje |
 | **Most z kuláčů** | 06 | povalový most bez zábradlí z jedné strany, listí na cestě |
 Výkonově (rozbor_gpu_15_11.md): les s podrostem místo trávy = méně průhledné trávy přes celou obrazovku + clona dálky.
+
+## Řeka a zakrývání (Míša 15. 11. noc: „u té řeky opatrně se zakrýváním, máme širokou řeku“)
+- Předlohy (sada2 18, 20) jsou úzký lesní potok – u něj keře přes okraj a skoro neviditelný z dálky. **Naše Bystřice je
+  široká řeka** → nezakrývat celou: houština jen v pásech podél břehu s přerušením (pohled na vodu, brody, mosty,
+  mlýn, louky u vody), na vnější straně břehového pásu, ne na hraně vody. Hladina zůstane vidět z cest a mostů.
+- Platí `pasma.voda.holy_breh_m` (nic živého ve vodě, test smyslu) – houština až za ním; okluzor nikdy přes řeku.
+- Stromy u řeky: olše, vrby (hlavaté) v řadách s mezerami, ne souvislá stěna.
