@@ -2667,6 +2667,7 @@ func _usad_skaly(site: Dictionary) -> Dictionary:
 	var n := 0
 	var hloubky: Array[float] = []
 	var plosiny: Array = []              # [stred xz, polomer, vyska nad patou, dy] - co stoji na skale, jde s ni dolu
+	var nsk: Dictionary = pasma()["dosednuti"]["na_skale"]
 	for key: String in site:
 		var me: Mesh = site[key]
 		var fa := me.get_faces()
@@ -2713,7 +2714,7 @@ func _usad_skaly(site: Dictionary) -> Dictionary:
 			# cela skala (vrchol byva sirsi nez pata): co stoji nad ni, jde dolu s ni
 			var ab := me.get_aabb()
 			var rmax := maxf(maxf(absf(ab.position.x), absf(ab.end.x)), maxf(absf(ab.position.z), absf(ab.end.z)))
-			plosiny.append([Vector2(o.x, o.z), rmax * bs.x.length() + 0.5, o.y + 1.0, dy, key, i])
+			plosiny.append([Vector2(o.x, o.z), rmax * bs.x.length() + float(nsk["okraj_m"]), o.y + float(nsk["nad_patou_m"]), dy, key, i])
 	# rostliny na vrcholu a rimsach skal (borovice na vezi) posunout se skalou, jinak visi ve vzduchu
 	var mriz := {}
 	for pl: Array in plosiny:
@@ -2732,7 +2733,7 @@ func _usad_skaly(site: Dictionary) -> Dictionary:
 				for dz in range(-1, 2):
 					for pl: Array in mriz.get(cc + Vector2i(dx, dz), []):
 						# na skale = nad patou skaly i nad terenem (ve svahu u paty roste na zemi)
-						if float(t[7]) > float(pl[2]) and q.distance_to(pl[0]) < float(pl[1]) and float(t[7]) > _vyska(q.x, q.y) + 0.5:
+						if float(t[7]) > float(pl[2]) and q.distance_to(pl[0]) < float(pl[1]) and float(t[7]) > _vyska(q.x, q.y) + float(nsk["nad_terenem_m"]):
 							t[7] = float(t[7]) + float(pl[3])
 							nahore += 1
 	print("usazeni skal: s nimi posunuto %d rostlin a kamenu" % nahore)
@@ -3213,6 +3214,7 @@ func _pesiny_volne() -> void:
 	# co stoji na smazane skale (borovice na vrcholu veze), jde pryc s ni - jinak visi ve vzduchu (test visici 15. 11.:
 	# borovice 15 m nad zemi u (-144, 711)); na skale = nad patou, v pudorysu a nad terenem jako _usad_skaly plosiny
 	var na_smazane: Array = []                      # [stred xz, polomer, pata y]
+	var nsk: Dictionary = pasma()["dosednuti"]["na_skale"]
 	for key: String in r.keys():
 		if not key.begins_with("skala_"):
 			continue
@@ -3224,7 +3226,7 @@ func _pesiny_volne() -> void:
 				if me2 != null:
 					var ab2 := me2.get_aabb()
 					var rmax := maxf(maxf(absf(ab2.position.x), absf(ab2.end.x)), maxf(absf(ab2.position.z), absf(ab2.end.z)))
-					na_smazane.append([Vector2(float(t[3]), float(t[11])), rmax * Vector3(t[0], t[4], t[8]).length() + 0.5, float(t[7]) + 1.0])
+					na_smazane.append([Vector2(float(t[3]), float(t[11])), rmax * Vector3(t[0], t[4], t[8]).length() + float(nsk["okraj_m"]), float(t[7]) + float(nsk["nad_patou_m"])])
 			else:
 				zs.append(t)
 		r[key] = zs
@@ -3238,7 +3240,7 @@ func _pesiny_volne() -> void:
 				var q := Vector2(float(t[3]), float(t[11]))
 				var pryc2 := false
 				for sm: Array in na_smazane:
-					if q.distance_to(sm[0]) < float(sm[1]) and float(t[7]) > float(sm[2]) and float(t[7]) > _vyska(q.x, q.y) + 0.5:
+					if q.distance_to(sm[0]) < float(sm[1]) and float(t[7]) > float(sm[2]) and float(t[7]) > _vyska(q.x, q.y) + float(nsk["nad_terenem_m"]):
 						pryc2 = true
 						break
 				if pryc2:

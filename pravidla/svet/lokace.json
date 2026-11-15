@@ -2656,10 +2656,7 @@
     "tloustka_m": 0.11
    }
   ],
-  "_kolize_rampy": "Misa 14. 11. „zamer se na schody, na puvodnim modelu nefungovaly“ (test krcma_schody: hrac uvazl na schodech 0,66 m pod pavlaci): v modelu schodnice (KrcmaL_Kol_Schody) konci nahore v z -7,24, ale podesta (KrcmaL_Kol_Podesta, y 2,77-2,85) zacina uz v z -8,15 - na konci schodu 0,5 m vysoky schod do desky. Kolize schodu = rampa [od, do v ramci modelu] koncici na hrane podesty (sklon 37 st. < floor_max_angle 52). Pro modelare: schodnice ma koncit v z -8,15 (nebo podesta zacinat v -7,24)."
- },
- "kovarna_tvrz": {
-  "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",
+  "_kolize_rampy": "Misa 14. 11. „zamer se na schody, na puvodnim modelu nefungovaly“: v modelu z Disku konci schodnice v z -7,24 a podesta zacina v z -8,15 (schod 0,5 m). 15. 11. oprava ve zdroji (blender/krcma_L, schody konci na hrane podesty z -8,15, zabradli na volne strane) - rampa uz jen hladsi chuze po schodech (stejny sklon jako schodnice), test krcma_schody",
   "pocatek": [
    -19.75,
    0.0,
