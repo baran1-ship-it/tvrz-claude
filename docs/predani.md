@@ -1456,3 +1456,8 @@ Hotovo v kódu a datech (testy u každého):
   (4 sady), nová kontrola „spodní oděv nesmí prolézt kusem přes hlavu“ – chůze čistá, klek/sed 4–25 vrcholů do 3 cm u ramene a týla
   (3 pokusy o vrstvení → podle CLAUDE.md nový rozbor příčiny, ne další oprava; hypotéza: paže pod okrajem límce). Snímek
   `build/svy/kape_straz_chuze_zada.png`: bez děr, ale ostrý přehyb kápě v týle; vlasy prolézají vrškem kápě stráže (staré).
+- **Export světa v nové session – příprava (15. 11., 5 pádů za sebou):** `textures.fetch_models()`, `textures.fetch()`, `fetch_acg()`;
+  `cd blender && /opt/bl/bin/python bake_tex.py sindel` (meta se teď založí sama); `trees.py` + `listnace.py` (karty, segfault na konci
+  normální); borovice z Disku (`pine_tree.glb` id 15CZ-2994EOUWPM-1BNIuBCyJ-CUbED76 → `blender/tex_cache/nove/borovice.glb`); textury dveří:
+  `git clone --depth 1 --filter=blob:none --sparse …/tvrz-modely /home/user/tvrz-modely-git && git sparse-checkout set textury/medieval_door_pack`;
+  `git fetch --depth 1 origin main` (nove.py čte `origin/main:modely/nove/*.glb`); `tools/krok_b/vysky.json` (viz výše); `python3 tools/gen_tex.py`.
