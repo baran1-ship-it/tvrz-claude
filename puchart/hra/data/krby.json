@@ -203,7 +203,7 @@
    "snimek": "docs/screens/hradB_sin.png (pohled na východ, krb mezi dvěma okny)"
   }
  ],
- "navrhy_hrad": "hrad A: Krb_Hradni (Krb_Sinovy_Vysoky 3,0 m se mezi příčku a schody nevejde), hrad B: Krb_Sinovy_Vysoky – topeni.json hradA_krb, hradB_krb (značky HradA_Krb_Ohen / HradB_Krb_Ohen, ohne.json krb_obecny, koren Topeni)",
+ "navrhy_hrad": "hrad B: Krb_Sinovy_Vysoky (topeni.json hradB_krb, značka HradB_Krb_Ohen, ohne.json krb_obecny, koren Topeni); hrad A: NEVLOŽENO – místo hradA_krb_navrh blokuje nástup na schody do podkroví a síňový krb (3,0 m) ani hradní (2,67 m) se jinam nevejde (topeni.json neumisteno) – čeká na rozhodnutí",
  "reference": [
   "docs/reference/reserse_dispozice_palacu.md (Valdek: síň s krbem; Žebrák, Radyně: kamna přikládaná ze síně; Žebrák: dýmník černé kuchyně)",
   "Přimda – římsa krbu v 1. patře věže (12. st.), is.slu.cz Kultura bydlení hradů a tvrzí: https://is.slu.cz/el/fpf/zima2024/ARCHSTN041/6_Kultura_bydleni__vybaveni_hradu__tvrzi.pdf",

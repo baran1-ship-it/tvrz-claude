@@ -55,6 +55,8 @@ echo "postav_vse OK"
 python3 $K/nastroje/import_velikost.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)
 python3 $K/nastroje/import_stromy.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)
 [ -d $K/hra/modely/predmety_h ] || bash $K/nastroje/predmety_z_havrana.sh   # předměty, menu hráče a pískoviště z Havrana (Míša 10. 11.)
+[ -d $B/zdroj_modelar/Seno_1400 ] || (mkdir -p $B/zdroj_modelar && curl -sSL -m 600 -o $B/seno.zip "https://drive.usercontent.google.com/download?id=16P8JpAyu4200ZMkoitR8AaLjzCAYeu8B&export=download&confirm=t" && unzip -oq $B/seno.zip -x "*.blend" -d $B/zdroj_modelar && rm -f $B/seno.zip)   # seno od modeláře (Míšin Disk, Seno_1400.zip)
+[ -d $K/hra/modely/seno ] || (python3 $K/nastroje/seno_modely.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true))   # seno do jeslí + katalog pískoviště (Míša 15. 11.)
 # topení od Míšina modeláře (pravidla/svet/topeni.json; zdroj build/zdroj_modelar – stáhne nastroje/stavby_z_havrana.sh): přebalené
 # modely do hra/modely/topeni, nádobí do katalogu pískoviště (po predmety_z_havrana – doplní predmety_h.json), trasy průchodu
 python3 $K/nastroje/topeni_modely.py $K && python3 $K/nastroje/topeni_trasy.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)

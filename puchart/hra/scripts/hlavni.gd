@@ -763,6 +763,13 @@ func _topeni(koren: Node3D, kam: String, model: String, vnejsi_do: float) -> voi
 			t.set_meta("topeni", String(k["id"]))
 			koren.add_child(t)
 			var l0: Node3D = (load(c0) as PackedScene).instantiate(); l0.name = "LOD0"; t.add_child(l0)
+			var mz := String(k["topeni"]); var vr: Dictionary = (_top.get("varianty", {}) as Dictionary).get(mz, {})
+			if vr.has("z"): mz = String(vr["z"])
+			for q: Array in ((_top.get("modely", {}) as Dictionary).get(mz, {}) as Dictionary).get("kolize_doplnit", []):   # kvádry k proxy modeláře (podezdívka pece)
+				var sb := StaticBody3D.new(); sb.name = "KolizeDoplnena"; var cs := CollisionShape3D.new(); var bx := BoxShape3D.new()
+				bx.size = Vector3(float(q[1]) - float(q[0]), float(q[3]) - float(q[2]), float(q[5]) - float(q[4])); cs.shape = bx
+				cs.position = Vector3((float(q[0]) + float(q[1])) * 0.5, (float(q[2]) + float(q[3])) * 0.5, (float(q[4]) + float(q[5])) * 0.5)
+				sb.add_child(cs); t.add_child(sb)
 			for g in l0.find_children("*", "GeometryInstance3D", true, false):
 				(g as GeometryInstance3D).visibility_range_end = d0; (g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			for z in l0.find_children("*", "Node3D", true, false):

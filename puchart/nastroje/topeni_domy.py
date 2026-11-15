@@ -34,6 +34,7 @@ celkem = 0
 for dum, q in U["pec_pryc"].items():
     x0, x1, y0, y1, z0, z1 = q; n_ = 0
     for p in site_uzlu(dum + "_Interier"):   # síť bez transformace uzlu (domy.glb: sítě v souřadnicích modelu domu)
+        if not any(MAT[p["material"]].startswith(m) for m in U.get("pec_materialy", [""])): continue
         P = cti(j, b, p["attributes"]["POSITION"]); I = cti(j, b, p["indices"]).reshape(-1, 3).astype(np.int64)
         T = P[I]; lo = T.min(1); hi = T.max(1)
         uvnitr = (lo[:, 0] >= x0) & (hi[:, 0] <= x1) & (lo[:, 1] >= y0) & (hi[:, 1] <= y1) & (lo[:, 2] >= z0) & (hi[:, 2] <= z1)

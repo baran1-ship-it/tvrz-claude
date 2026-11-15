@@ -30,6 +30,16 @@
    "usti": [
     0.58,
     0.48
+   ],
+   "kolize_doplnit": [
+    [
+     -1.06,
+     1.06,
+     0.0,
+     0.5,
+     -1.6,
+     0.15
+    ]
    ]
   },
   "Pec_Krcma": {
@@ -38,6 +48,16 @@
    "usti": [
     0.72,
     0.57
+   ],
+   "kolize_doplnit": [
+    [
+     -1.33,
+     1.33,
+     0.0,
+     0.56,
+     -2.1,
+     0.15
+    ]
    ]
   },
   "Kamna_Hradni_Nadobkova": {
@@ -67,7 +87,8 @@
   "Topeniste_Kuchynske_Siroke": {
    "sada": "Topeni_1400_Doplnek",
    "druh": "kuchyne"
-  }
+  },
+  "_kolize_pozn": "kolize_doplnit = kvádry [x0, x1, y0, y1, z0, z1] v souřadnicích modelu přidané ke konvexním proxy modeláře (hlavni.gd _topeni, StaticBody3D): kamenná podezdívka pece je vidět do ±1,06 m a z 0,15 (Kamenna_podezdivka_celni_kamen), proxy jádra jen ±0,95 a z −0,05 – postava vešla 0,2 m do kamene (povrch_kolize 15. 11.: topeni_predhradi_Dum2_2 „projde viditelným … Kamenna_podezdivka_celni_kamen_Herni“); varianty (BezLavice) dědí z modelu"
  },
  "varianty": {
   "_popis": "model bez některých dílů (uzly začínající na vynechat, LOD0 i LOD1) – úprava u zdroje, ne skrývání ve hře",
@@ -314,21 +335,6 @@
    "zdroj": "krby.json hradA_kamna (Žebrák, Radyně – kamna přikládaná ze síně); NAVOD_PEC.md hradní kamna"
   },
   {
-   "id": "hradA_krb",
-   "kam": "hrad",
-   "topeni": "Krb_Hradni",
-   "prefix": "HradA",
-   "poloha": [
-    -8.333,
-    42.6,
-    -1.084
-   ],
-   "yaw_deg": 98.05,
-   "proc": "síň 1. patra paláce A: Krb_Sinovy_Vysoky (šířka 3,00 m) se mezi příčku světnice (líc u 5,06) a schody do podkroví (od u 7,75) nevejde – volno 2,7 m (paprsky KOLIZE 15. 11.); Krb_Hradni (2,67 m) u 5,05…7,71, záda na líci hradby (v −2,99); výška 3,42 m vs. strop 3,26 m – vrchol dýmníku 0,16 m v tloušťce stropu (strop 45,86, podlaha podkroví nad ním)",
-   "jistota": "NAVRH",
-   "zdroj": "krby.json hradA_krb_navrh (síň s krbem – Valdek)"
-  },
-  {
    "id": "hradB_krb",
    "kam": "hrad",
    "topeni": "Krb_Sinovy_Vysoky",
@@ -345,13 +351,13 @@
   }
  ],
  "upravy_domy": {
-  "_popis": "nastroje/topeni_domy.py přímo v glb (zachová kolize OMI_physics): po blender/okap_vstupu.py, před blender/stredni_lod.py (nastroje/stavby_z_havrana.sh). pec_pryc = smazat trojúhelníky sítě <Dům>_Interier celé uvnitř kvádru [x0, x1, y0, y1, z0, z1] (stará pec Havrana: M_Kamen podstavec + kamínkové ohniště, M_PecHlina, M_PecZacouzena, M_Tma, M_Zhar) a uzel kolize <Dům>_Kol_Pec; prostupy = otvor [x0, x1, y0, y1, z0, z1] v sítích s materiály (trojúhelníky rozříznuté rovinami x0, x1, z0, z1, smazané uvnitř). Opakované spuštění nic nezdvojí.",
+  "_popis": "nastroje/topeni_domy.py přímo v glb (zachová kolize OMI_physics): po blender/okap_vstupu.py, před blender/stredni_lod.py (nastroje/stavby_z_havrana.sh). pec_pryc = smazat trojúhelníky sítě <Dům>_Interier celé uvnitř kvádru [x0, x1, y0, y1, z0, z1] s materiálem z pec_materialy (y0 pod podlahou – spodní plochy podstavce leží na podlaze; povrch_kolize 15. 11.: 20 trojúhelníků M_Kamen v úrovni podlahy zůstalo bez kolize) (stará pec Havrana: M_Kamen podstavec + kamínkové ohniště, M_PecHlina, M_PecZacouzena, M_Tma, M_Zhar) a uzel kolize <Dům>_Kol_Pec; prostupy = otvor [x0, x1, y0, y1, z0, z1] v sítích s materiály (trojúhelníky rozříznuté rovinami x0, x1, z0, z1, smazané uvnitř). Opakované spuštění nic nezdvojí.",
   "soubor": "hra/modely/stavby_h/domy.glb",
   "pec_pryc": {
    "Dum1": [
     -3.38,
     -1.8,
-    0.305,
+    0.25,
     1.9,
     0.81,
     2.85
@@ -359,7 +365,7 @@
    "Dum2": [
     -2.88,
     -1.6,
-    0.255,
+    0.2,
     1.9,
     1.02,
     3.0
@@ -367,7 +373,7 @@
    "Rychta": [
     -3.68,
     -2.3,
-    0.305,
+    0.25,
     1.9,
     -0.43,
     1.55
@@ -412,10 +418,17 @@
     }
    ]
   },
-  "zdroj": "rozbor domy.glb 15. 11. (paprsky/obaly kusů): staré pece celé uvnitř kvádrů (Dum1 128+168+138+8+4 trojúhelníků, Dum2 a Rychta obdobně), jinak v kvádrech nic; nad krbem Rychty záklop ze 3 prken (x 1,15…2,02), stropní trám z 0…0,17 (komín ho mine), krokve ani latě v otvoru střechy nejsou (jen podbití a šindel)"
+  "zdroj": "rozbor domy.glb 15. 11. (paprsky/obaly kusů): staré pece celé uvnitř kvádrů (Dum1 128+168+138+8+4 trojúhelníků, Dum2 a Rychta obdobně), jinak v kvádrech nic; nad krbem Rychty záklop ze 3 prken (x 1,15…2,02), stropní trám z 0…0,17 (komín ho mine), krokve ani latě v otvoru střechy nejsou (jen podbití a šindel)",
+  "pec_materialy": [
+   "M_Kamen",
+   "M_PecHlina",
+   "M_PecZacouzena",
+   "M_Tma",
+   "M_Zhar"
+  ]
  },
  "trasy": {
-  "_popis": "trasy testu průchodu kolem nového topení (nastroje/topeni_trasy.py → hra/data/pruchody_topeni.json, test_pruchod.gd je načte s ostatními pruchody_*.json): pro každou instanci modelu (hra/data/mista_stavby.json) navazují na trasu vstupu do domu (pruchody_mista.json dum_<místo>_<model>[_<i>]) a pokračují body [x, z] v souřadnicích modelu – dveře jizby, kolem pece / topeniště, ke krbu; nové topení nesmí zablokovat průchod (zadání 15. 11.)",
+  "_popis": "trasy testu průchodu kolem nového topení (nastroje/topeni_trasy.py → hra/data/pruchody_topeni.json, test_pruchod.gd je načte s ostatními pruchody_*.json): pro každou instanci modelu (hra/data/mista_stavby.json) navazují na trasu vstupu do domu (pruchody_mista.json dum_<místo>_<model>[_<i>]) a pokračují body [x, z] v souřadnicích modelu – dveře jizby, kolem pece / topeniště, ke krbu; nové topení nesmí zablokovat průchod (zadání 15. 11.); bod [x, z, tolerance] = přesný bod (před dveřmi jizby 0,25 m – s výchozí tolerancí 0,6 m postava bod „splnila“ u zárubně a do dveří šla šikmo, Dum2_0 uvízla na zárubni 15. 11.)",
   "Dum1": [
    [
     2.5,
@@ -423,7 +436,8 @@
    ],
    [
     -1.27,
-    0.0
+    0.0,
+    0.25
    ],
    [
     -1.27,
@@ -449,7 +463,8 @@
    ],
    [
     -1.07,
-    0.3
+    0.3,
+    0.25
    ],
    [
     -1.07,
@@ -475,7 +490,8 @@
    ],
    [
     -1.37,
-    -1.2
+    -1.2,
+    0.25
    ],
    [
     -1.37,
@@ -640,5 +656,23 @@
     1.0
    ]
   }
- }
+ },
+ "neumisteno": [
+  {
+   "id": "hradA_krb",
+   "kam": "hrad",
+   "topeni": "Krb_Hradni",
+   "prefix": "HradA",
+   "poloha": [
+    -8.333,
+    42.6,
+    -1.084
+   ],
+   "yaw_deg": 98.05,
+   "proc": "síň 1. patra paláce A: Krb_Sinovy_Vysoky (šířka 3,00 m) se mezi příčku světnice (líc u 5,06) a schody do podkroví (od u 7,75) nevejde – volno 2,7 m (paprsky KOLIZE 15. 11.); Krb_Hradni (2,67 m) u 5,05…7,71, záda na líci hradby (v −2,99); výška 3,42 m vs. strop 3,26 m – vrchol dýmníku 0,16 m v tloušťce stropu (strop 45,86, podlaha podkroví nad ním)",
+   "jistota": "NAVRH",
+   "zdroj": "krby.json hradA_krb_navrh (síň s krbem – Valdek)",
+   "proc_neumisteno": "NEVLOŽENO (čeká na rozhodnutí Míši): v síni 1. patra paláce A je na zdi hradby mezi příčkou světnice (líc u 5,06) a schody do podkroví (od u 7,75) jen 2,7 m; Krb_Sinovy_Vysoky má 3,00 m, Krb_Hradni 2,67 m – ten se vejde, ale zakryje nástup na schody do podkroví (trasa A_palac bod u 6,83 v −2,49 před prvním stupněm – test průchodu 15. 11.: „uvízla … narazila na Krb_Hradni“). Nádvorní zeď síně má dveře na pavlač (u 6,0–6,6), příčky jsou dřevěné. Možnosti: přesunout schody do podkroví (hrad_puchart.json A dispozice podkrovi_schody) nebo krb do jiné místnosti – návrh ke schválení"
+  }
+ ]
 }

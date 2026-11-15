@@ -18,9 +18,9 @@ for i, s in enumerate(S):
     if not zaklad: print("TOPENI_TRASA_CHYBI vstup", s["misto"], m, i); continue
     c, sn = math.cos(float(s["yaw"])), math.sin(float(s["yaw"])); px = float(s.get("posun_x", 0.0))
     body = [list(b) for b in zaklad]
-    for x, z in T[m]:
-        x += px
-        body.append([round(float(s["x"]) + x * c + z * sn, 2), round(float(s["z"]) - x * sn + z * c, 2), None])
+    for q in T[m]:   # [x, z] nebo [x, z, tolerance] (přesný bod – test_pruchod [x, z, y, tolerance])
+        x, z = q[0] + px, q[1]
+        body.append([round(float(s["x"]) + x * c + z * sn, 2), round(float(s["z"]) - x * sn + z * c, 2), None] + ([q[2]] if len(q) > 2 else []))
     out["topeni_%s_%s_%d" % (s["misto"], m, i)] = body
 json.dump({"popis": "trasy průchodu kolem topení (nastroje/topeni_trasy.py z pravidla/svet/topeni.json trasy) – test_pruchod.gd", "trasy": out},
           open(os.path.join(K, "hra/data/pruchody_topeni.json"), "w"), ensure_ascii=False, indent=1)

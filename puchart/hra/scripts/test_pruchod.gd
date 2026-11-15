@@ -611,7 +611,8 @@ func _test_zlab() -> void:
 
 ## jesle_seno (Míša 15. 11.: jesle „nasypat seno“, „seno ale fotorealistické“): u jeslí nad žlabem nabídka „Nasypat seno“, po stisku
 ## model sena Míšina modeláře (funkce.json jesle.model, Seno_Jesle_420) v jeslích: obal LOD0 v souřadnicích domu v délce jeslí,
-## vrch nad horním koncem příček, nejníž u dolního konce příček, za roubením nic; LOD0 a LOD1 kreslí jen v dosahu (Visibility Range);
+## vrch nad horním koncem příček, nejníž u dolního konce příček, za roubení (2 cm) nejvýš 1 % vrcholů, přes horní břevno do chléva
+## nejvýš 25 cm (stébla přesahují); LOD0 a LOD1 kreslí jen v dosahu (Visibility Range);
 ## troj. LOD0 ≤ troj_max; nabídka pak zmizí, seno zůstane.
 func _test_jesle() -> void:
 	var fu := _funkce(); var spatne: Array = []; var n := 0
@@ -627,26 +628,31 @@ func _test_jesle() -> void:
 		await get_tree().process_frame
 		var uz: Node3D = p["seno"]
 		var ok := uz != null and String(uz.scene_file_path) == String(je["model"])
-		var ab := AABB(); var troj := 0; var vid_ok := true; var lod0 := 0
+		var ab := AABB(); var troj := 0; var vid_ok := true; var lod0 := 0; var zad := 0; var vse := 0
 		if ok:
 			var inv := dum.global_transform.affine_inverse()
 			for mi: MeshInstance3D in uz.find_children("*", "MeshInstance3D", true, false):
 				vid_ok = vid_ok and (mi.visibility_range_end > 0.0 or mi.visibility_range_begin > 0.0)
 				if mi.visibility_range_begin > 0.0: continue   # LOD1
 				lod0 += 1
-				var b: AABB = (inv * mi.global_transform) * mi.get_aabb()
-				ab = b if lod0 == 1 else ab.merge(b)
+				var xf: Transform3D = inv * mi.global_transform   # vrcholy v souřadnicích domu (obal otočené sítě by byl větší než seno)
+				for v in mi.mesh.get_faces():
+					var q: Vector3 = xf * v
+					if vse == 0: ab = AABB(q, Vector3.ZERO)
+					else: ab = ab.expand(q)
+					vse += 1
+					if q.z < float(tv["stena_z"]) - 0.02: zad += 1
 				for si in mi.mesh.get_surface_count():
 					var ar: Array = mi.mesh.surface_get_arrays(si)
 					troj += ((ar[Mesh.ARRAY_INDEX] as PackedInt32Array).size() if ar[Mesh.ARRAY_INDEX] != null else (ar[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()) / 3
 		var nah: Array = tv["pricky_nahore"]; var dol: Array = tv["pricky_dole"]
 		var tvar_ok := ok and lod0 > 0 and ab.position.x >= float(tv["x"][0]) - 0.06 and ab.end.x <= float(tv["x"][1]) + 0.06 \
-			and ab.end.y > float(nah[0]) and ab.position.y >= float(dol[0]) - 0.05 and ab.position.z >= float(tv["stena_z"]) - 0.08 \
-			and ab.end.z <= float(nah[1]) + 0.15
+			and ab.end.y > float(nah[0]) and ab.position.y >= float(dol[0]) - 0.05 and float(zad) <= 0.01 * vse \
+			and ab.end.z <= float(nah[1]) + 0.25
 		var znovu: Dictionary = fu.nejblizsi(fu.polozky_, hrac.cam)
 		ok = ok and vid_ok and tvar_ok and troj > 0 and troj <= int(je["troj_max"]) and (znovu.is_empty() or znovu["p"] != p)
-		print("PRUCHOD jesle %s: seno %s, LOD0 x %.2f..%.2f y %.2f..%.2f z %.2f..%.2f, troj. LOD0 %d, viditelnost %s -> %s" % [dum.name, uz != null,
-			ab.position.x, ab.end.x, ab.position.y, ab.end.y, ab.position.z, ab.end.z, troj, vid_ok, "OK" if ok else "CHYBA"])
+		print("PRUCHOD jesle %s: seno %s, LOD0 x %.2f..%.2f y %.2f..%.2f z %.2f..%.2f, za roubením %.1f %%, troj. LOD0 %d, viditelnost %s -> %s" % [dum.name, uz != null,
+			ab.position.x, ab.end.x, ab.position.y, ab.end.y, ab.position.z, ab.end.z, 100.0 * zad / maxi(vse, 1), troj, vid_ok, "OK" if ok else "CHYBA"])
 		if not ok: spatne.append("%s: seno %s, tvar %s, troj. %d, viditelnost %s" % [dum.name, uz != null, tvar_ok, troj, vid_ok])
 	vysledek["jesle_seno"] = "OK" if spatne.is_empty() and n > 0 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádné jesle ve světě")
 	print("PRUCHOD jesle_seno ", vysledek["jesle_seno"], " (jeslí %d)" % n)
