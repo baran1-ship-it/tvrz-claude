@@ -81,12 +81,12 @@ func _pridej(u: Node3D, e: Dictionary, g: String) -> void:
 		var sh := CollisionShape3D.new(); var bx := BoxShape3D.new(); bx.size = Vector3(c[3], c[4], c[5])
 		sh.shape = bx; sh.position = Vector3(c[0], c[1], c[2]); tel.add_child(sh)
 		if c.size() > 6: sh.rotation.x = deg_to_rad(float(c[6]))   # deska padacího mostu ve sklonu
-	u.add_child(tel)
 	if not u.has_meta("pohyb_use"):   # zacni běží i víckrát (snímek, test průchodu) – díl se otevře a místo spočte jen poprvé
 		var uw: Vector3 = Vector3(e["use"][0], e["use"][1], e["use"][2]) if e.has("use") else (u.global_transform * Vector3(e["use_mistni"][0], e["use_mistni"][1], e["use_mistni"][2]) if e.has("use_mistni") else Vector3.INF)
 		u.set_meta("pohyb_use", uw)
 		if bool(e.get("glb_zavreno", false)): u.transform = u.transform * Transform3D(Basis(Vector3.UP, deg_to_rad(float(e.get("open", 0.0)))), Vector3.ZERO)
 		u.set_meta("pohyb_zaklad", u.transform)
+	u.add_child(tel)   # až po otevření (glb_zavreno): přidaná dřív si fyzika nechala zavřenou polohu – kolize otevřeného křídla stála ve dveřích jako zavřená a u křídla žádná (15. 11., povrch_kolize „projde viditelným“ u 27 dveří vsi, č. 310)
 	if (u.get_meta("pohyb_use") as Vector3) != Vector3.INF: mista[g] = u.get_meta("pohyb_use")
 	if not dily.has(g): dily[g] = []; t[g] = 0.0; cil[g] = 0.0; stav[g] = true
 	dily[g].append({"uzel": u, "zaklad": u.get_meta("pohyb_zaklad"), "e": e})

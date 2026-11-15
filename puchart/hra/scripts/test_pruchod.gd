@@ -110,25 +110,25 @@ func _test_povrch() -> void:
 	_dvere(); await get_tree().physics_frame
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/kontroly_hra.json"))["povrch"]
 	if OS.has_environment("DBG_DV"):   # DBG
-	for _k in 3:
-		for _g in _dv.dily:
-			if not String(_g).ends_with("@predhradi_Dum2_0"): continue
-			for _d in _dv.dily[_g]:
-				var _u: Node3D = _d["uzel"]; var _e: Dictionary = _d["e"]; var _c: Array = _e["cols"][0]
-				var _tel: CollisionObject3D = null
-				for _ch in _u.get_children():
-					if _ch is CollisionObject3D: _tel = _ch
-				var _lc := Vector3(_c[0], _c[1], _c[2]); var _w_open := _u.global_transform * _lc
-				var _srv: Transform3D = PhysicsServer3D.body_get_state(_tel.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM)
-				var _w_srv := _srv * _lc
-				var _sp := hrac.get_world_3d().direct_space_state
-				var _q1 := PhysicsPointQueryParameters3D.new(); _q1.position = _w_open
-				var _q2 := PhysicsPointQueryParameters3D.new(); _q2.position = _w_srv
-				print("DBG_DV k=%d %s stav=%s uzel=%s srv=%s bodUzel=%s bodSrv=%s" % [_k, _g, _dv.stav[_g], _w_open, _w_srv, _sp.intersect_point(_q1, 3).map(func(r): return r["collider"].name), _sp.intersect_point(_q2, 3).map(func(r): return r["collider"].name)])
-		if _k < 2:
+		for _k in 3:
 			for _g in _dv.dily:
-				if String(_g).ends_with("@predhradi_Dum2_0"): _dv.prepni(_g)
-			await get_tree().create_timer(2.0).timeout
+				if not String(_g).ends_with("@predhradi_Dum2_0"): continue
+				for _d in _dv.dily[_g]:
+					var _u: Node3D = _d["uzel"]; var _e: Dictionary = _d["e"]; var _c: Array = _e["cols"][0]
+					var _tel: CollisionObject3D = null
+					for _ch in _u.get_children():
+						if _ch is CollisionObject3D: _tel = _ch
+					var _lc := Vector3(_c[0], _c[1], _c[2]); var _w_open := _u.global_transform * _lc
+					var _srv: Transform3D = PhysicsServer3D.body_get_state(_tel.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM)
+					var _w_srv := _srv * _lc
+					var _sp := hrac.get_world_3d().direct_space_state
+					var _q1 := PhysicsPointQueryParameters3D.new(); _q1.position = _w_open
+					var _q2 := PhysicsPointQueryParameters3D.new(); _q2.position = _w_srv
+					print("DBG_DV k=%d %s stav=%s uzel=%s srv=%s bodUzel=%s bodSrv=%s" % [_k, _g, _dv.stav[_g], _w_open, _w_srv, _sp.intersect_point(_q1, 3).map(func(r): return r["collider"].name), _sp.intersect_point(_q2, 3).map(func(r): return r["collider"].name)])
+			if _k < 2:
+				for _g in _dv.dily:
+					if String(_g).ends_with("@predhradi_Dum2_0"): _dv.prepni(_g)
+				await get_tree().create_timer(2.0).timeout
 	if OS.has_environment("DBG_CHUZE"):   # DBG
 		for _zav in 2:
 			if _zav == 1:
