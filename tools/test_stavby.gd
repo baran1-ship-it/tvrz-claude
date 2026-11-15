@@ -314,7 +314,7 @@ func _schody() -> void:
 			if c.disabled or not (c.shape is BoxShape3D):
 				continue
 			boxy.append([(c.shape as BoxShape3D).size.y, c.global_transform])
-		if boxy.size() == 1:
+		if boxy.size() == 1 and float(boxy[0][0]) > 0.5:      # rampa krcmy (kolize_rampy, tenky sikmy kvadr) neni zebrikove schody
 			# Misa 15. 11.: zebrikove schody (stupen uzsi nez schody_zebrik_stupen_pod_m) = jeden plny blok + zaznam zebrik.
 			# Nahoru i dolu lezenim; chuze proti bloku od nastupu 2 s nesmi hrace vysunout nahoru (samo „vybehne“).
 			var bt: Transform3D = boxy[0][1]

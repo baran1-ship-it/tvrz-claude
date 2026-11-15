@@ -10038,7 +10038,7 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 			vn.free()
 	_lednice_blok(sc, d)
 	_mlyn_dvere(sc, root, xf, d)
-	_schody_kolize(sc)
+	_schody_kolize(sc, d.get("schody_nastup", []))
 	_mlyn_pytle(sc)
 	_mlyn_zebrik(sc, xf, d)
 	var interier := sc.find_child("Mlyn_Interier_skupina", true, false)
@@ -10373,7 +10373,7 @@ func _mlyn_zebrik(sc: Node3D, xf: Transform3D, d: Dictionary) -> void:
 ## Kolize schodu dilu (*Kol_Schody*: konvexni obal z modelu = klin, u vetrneho mlyna 56 st. nad floor_max_angle hrace -
 ## Misa 0.99 „do mlyna nemuzu vejit“) -> schody z kvadru vysky hrac.json schod_kolize_m. Horni konec klinu = strana
 ## bliz stredu modelu (schody vedou ke dverim), klin podel delsi vodorovne osy.
-func _schody_kolize(sc: Node3D) -> void:
+func _schody_kolize(sc: Node3D, nastup_lok: Array = []) -> void:
 	var vyska_schodu := float(Pravidla.cti("hrac", "schod_kolize_m"))
 	for sb in sc.find_children("*Kol_Schody*", "CollisionObject3D", true, false):
 		for cs in (sb as Node3D).find_children("*", "CollisionShape3D", true, false):
@@ -10430,7 +10430,13 @@ func _schody_kolize(sc: Node3D) -> void:
 				var vr := csx * nahore
 				var ven := Vector3(pa.x - vr.x, 0.0, pa.z - vr.z).normalized()
 				var zs: Dictionary = Pravidla.cti("hrac", "schody_zebrik")
-				zebrik_use({"pata": pa, "vrchol": vr, "nastup": pa + ven * float(zs["nastup_m"]), "sestup": vr - ven * float(zs["sestup_m"])})
+				var nast := pa + ven * float(zs["nastup_m"])
+				# Misa 15. 11. (mlynice „dole me to uveznilo“): pata 0,46 m od steny - bod za patou je v kapse u zdi; dil muze
+				# dat nastup sam (schody_nastup [x, z] v ramci modelu, na volne podlaze vedle paty)
+				if nastup_lok.size() == 2:
+					nast = sc.global_transform * Vector3(float(nastup_lok[0]), 0.0, float(nastup_lok[1]))
+					nast.y = pa.y
+				zebrik_use({"pata": pa, "vrchol": vr, "nastup": nast, "sestup": vr - ven * float(zs["sestup_m"])})
 
 
 ## Dvere mlyna (Misa 28. 10. „do mlyna se neda dostat, zadne dvere nefunguji“): kridla Mlyn_Dvere_* maji pant v pocatku
