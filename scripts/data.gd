@@ -9,6 +9,9 @@ signal status(text: String)
 const MANIFEST := "res://data_manifest.json"
 const BASE := "https://raw.githubusercontent.com/baran1-ship-it/tvrz-claude/claude/new-session-0dtk58/data/"
 const DIR := "user://data"
+## plny instalator (Misa 15. 11., zaloha na Disk): baliky primo v APK (tools/plny_instalator.py) - pri prvnim spusteni
+## se zkopiruji do user://data (stejne jmeno jako po stazeni), stahovani se preskoci
+const VLOZENA := "res://data_vlozena"
 
 
 func ensure() -> bool:
@@ -29,6 +32,17 @@ func ensure() -> bool:
 		if not (FileAccess.file_exists(_path(name, pk)) and _size(_path(name, pk)) == int(pk["size"])):
 			need.append(name)
 			total += float(pk["size"])
+	# baliky vlozene v APK (plny instalator): zkopirovat, stahovat jen co v APK neni
+	var vlozeno: Array = need.filter(func(n: String) -> bool: return FileAccess.file_exists("%s/%s" % [VLOZENA, _path(n, packs[n]).get_file()]))
+	if not vlozeno.is_empty():
+		var hot := [0.0]
+		var vsech := 0.0
+		for name: String in vlozeno:
+			vsech += float(packs[name]["size"])
+		for name: String in vlozeno:
+			if await _z_apk(name, packs[name], hot, vsech):
+				need.erase(name)
+				total -= float(packs[name]["size"])
 	if not need.is_empty():
 		status.emit("Stahuji herní data… (%.0f MB)" % (total / 1048576.0))
 		var done := [0.0]
@@ -51,6 +65,27 @@ func ensure() -> bool:
 			DirAccess.remove_absolute(_path(name, packs[name]))
 			return false
 	return FileAccess.file_exists("res://modely/svet.json")
+
+
+## Balik z APK (plny instalator) do user://data po 8 MB (neblokovat hlavni vlakno); plati jen se spravnou velikosti.
+func _z_apk(name: String, pk: Dictionary, hot: Array, vsech: float) -> bool:
+	var dst := _path(name, pk)
+	var f := FileAccess.open("%s/%s" % [VLOZENA, dst.get_file()], FileAccess.READ)
+	var out := FileAccess.open(dst, FileAccess.WRITE)
+	if f == null or out == null:
+		return false
+	while f.get_position() < f.get_length():
+		var b := f.get_buffer(8 << 20)
+		out.store_buffer(b)
+		hot[0] += float(b.size())
+		status.emit("Rozbaluji herní data z instalátoru… %d %%" % int(100.0 * hot[0] / maxf(vsech, 1.0)))
+		await get_tree().process_frame
+	f = null
+	out = null
+	if _size(dst) != int(pk["size"]):
+		DirAccess.remove_absolute(dst)
+		return false
+	return true
 
 
 func _path(name: String, pk: Dictionary) -> String:
