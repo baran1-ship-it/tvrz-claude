@@ -394,3 +394,10 @@ remízky (5 stromů a 14 keřů na r 9). Bezpečné je to jen při **všech** po
 
 Rozlišení jistoty: v celém dokumentu je **NAMĚŘENO** jen to, co je v `mereni_verze.md` nebo v logu `build/beh`.
 Ostatní je podezření nebo návrh. Po dvou neúspěšných pokusech o tutéž věc nový rozbor, ne třetí oprava.
+
+## Rozhodnutí Míši 15. 11. večer
+- „Máš volnou ruku.“ Výhled u vjezdu do vsi a clony navrhuju sám (výhled na hranu svahu, cesta do vsi za sadem a houštinou).
+- **Houština = křoví**, myslela je stejně: jako v KCD je houština skoro všude a schovává všechno, co jde – v lese
+  (podrost, okraje, průseky) i na loukách (meze, remízky, kolem cest), **ne na všech** loukách (otevřené louky a výhledy
+  zůstanou). Houština tedy není jen clona u vsi, ale stálá vrstva krajiny podle stanoviště (`druhy.json`) s jádrem
+  okluzoru tam, kde je opravdu hustá (pravidla bodu b).
