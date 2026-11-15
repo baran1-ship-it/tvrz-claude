@@ -6862,7 +6862,5 @@
   ],
   "truhla_podil_max": 0.2,
   "_pozn": "Míša 14. 11.: obsluha hostince obchází ≥ 5 různých míst včetně kuchyně, Truhla_Otevri nejvýš 20 % klipů obchůzky (test lide_chovani)"
- },
- "odev_lod_bias": 50.0,
- "_odev_lod_bias": "Míša 15. 11. „postavy mají pořád trochu potrhané oblečení“ (rozbor: oděv 23–31 nesvařených kusů, rukáv zasunut pod trup jen 3–6 mm, váhy přes švy různé). Druhé podezření: automatické LOD importu Godotu (tablet mesh_lod_threshold 10 px × PC 4) rozevře nesvařené švy. lod_bias 50 = postavy bez automatického LOD (jako domy vsi a plůtky). Izolovaný test podezření – NEOVĚŘENO; hlavní oprava = svařit oděvy v přípravě postav."
+ }
 }
