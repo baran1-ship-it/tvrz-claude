@@ -565,6 +565,11 @@
     "zdroj": "Havran lokace.json ves.dvorec.zelen u_vjezdu / lipa na návsi (lípa střední 10–12 m)"
    }
   },
+  "lavice": {
+   "popis": "Lavice, které jsou součástí modelu stavby (Míša 15. 11.: „u modelů domů jsou někdy součástí modelu lavičky, tak ať jsou taky funkční“). hlavni.gd _mista/_celek najde v každé vložené stavbě kolizní uzly podle vzoru uzel_vzor (StaticBody3D, jméno po importu Godotu bez -convcolonly) a lavice.gd z jejich kvádru (BoxShape3D / ConvexPolygonShape3D) za běhu spočte místa k sezení (pravidla hrac.json sezeni) do hlavni.lavice. Jiná stavba s lavicí = jen kolizní uzel s tímto jménem v modelu.",
+   "uzel_vzor": "*_Kol_Lavice*",
+   "zdroj": "domy.glb (Havran blender/ves_domy.py): Dum1_Kol_Lavice, Dum2_Kol_Lavice, Rychta_Kol_Lavice (kolizní kvádry lavic, viditelná lavice v síti *_Interier); hajovna.glb Hajovna_Kol_Lavice-convcolonly (lavice u stěny jizby, docs/reference/hajovna/NAVOD_HAJOVNA.md)"
+  },
   "celky": {
    "popis": "Celé stavby z Disku Míši (model Odkazu Havrana se vším: dům, dvůr, plot, vrata, stáj) – místo se staví jako jeden díl bez usedlosti (Míša 14. 11.: „krčma a hájovna – nahraď novými modely naše původní“). aabb = [x0, x1, z0, z1] modelu (počátek na terénu, ulice/vchod +z); prichod = místo před vchodem v souřadnicích modelu (mapa – rychlé cestování, trasa testu); vnitrek = uzly kreslené jen zblízka; lod1 od lod1_od_m (návod modelu).",
    "KrcmaL": {

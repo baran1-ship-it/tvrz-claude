@@ -233,5 +233,19 @@
   "bez_miru_m": 0.7,
   "tolerance_m": 0.45,
   "vaha_vzdalenosti": 0.15
+ },
+ "sezeni": {
+  "popis": "Sezení na lavici z modelu stavby (lavice.gd, hrac.gd sit/stand_up; Havran player.gd sit/stand_up, predmety.gd: oči seat_h + 0,78 m). Podél lavice 1 až mist_max míst po rozestup_m (počet podle délky kvádru bez okraj_m na koncích), sed na horní ploše kolize; postava sedí zády ke stěně – čelem po normále delší strany kvádru směrem ke středu stavby. Kamera vsedě oci_nad_sedu_m nad horní plochou lavice (plynule rychlost_kamery za s). Vstát: pohyb páčkou / WASD / dotykem nad pohyb_vstat, tlačítko „Vstát“ nebo A; postava se postaví vstat_m před lavici na podlahu (postav_na_volne, volne_misto). Nabídka „Sednout si“ do dosah_m od očí, jen na místo, na které hráč míří a které vidí (zamer.gd).",
+  "rozestup_m": 0.6,
+  "okraj_m": 0.3,
+  "mist_max": 3,
+  "oci_nad_sedu_m": 0.78,
+  "rychlost_kamery": 6.0,
+  "pohyb_vstat": 0.5,
+  "vstat_m": 0.6,
+  "dosah_m": 2.2,
+  "nabidka": "Sednout si",
+  "vstat": "Vstát",
+  "zdroj": "Míša 15. 11. („ať jsou lavičky funkční“); Havran větev claude/new-session-0dtk58 scripts/player.gd sit/stand_up (vstání pohybem > 0,5, kamera lerp × 6), scripts/predmety.gd (oči 0,78 m nad sedákem); rozestup 0,6 m = šíře sedícího (lavice 3,4–3,9 m → 3 místa); dosah jako žebřík (lezeni.dosah_m 2,2)"
  }
 }
