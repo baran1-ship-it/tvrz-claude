@@ -9006,7 +9006,22 @@ func _krcma_schody() -> void:
 			var on := co.shape_owner_get_owner(co.shape_find_owner(int(hh["shape"]))) as Node3D if co else null
 			print("KRCMA_SCHODY dotyk %s / %s @ %s" % [co.name if co else "?", on.name if on else "?", str(on.global_position) if on else ""])
 		print("KRCMA_SCHODY hrac %s, mistne %s" % [str(player.global_position), str(xf.affine_inverse() * player.global_position)])
-	_vysledek("krcma_schody", ok, "%s; konec y %.2f, patro %.2f" % [r[1], y_kon, patro])
+	# Misa 15. 11. („spatne zabradli nahoru, na koncich ochozu chybi zabradli“): paprsek v pasu (0,7 m nad podlahou)
+	# z ochozu / podesty / schodu ven musi narazit na kolizi zabradli - konce pavlace, vnejsi kraj a jizni konec podesty,
+	# volna strana schodu (mistne souradnice dilu, Godot z = -Blender y; lokace.json krcma_l, zdroj krcma_L.py ZAB)
+	var sp := player.get_world_3d().direct_space_state
+	var zab_chybi: Array = []
+	for pr: Array in [["konec pavlace jih", Vector3(10.9, 3.55, 0.4), Vector3(10.9, 3.55, 1.7)],
+			["konec pavlace sever", Vector3(10.9, 3.55, -10.4), Vector3(10.9, 3.55, -11.7)],
+			["podesta vnejsi kraj", Vector3(9.3, 3.55, -7.65), Vector3(8.5, 3.55, -7.65)],
+			["podesta jizni konec", Vector3(9.3, 3.55, -7.65), Vector3(9.3, 3.55, -6.8)],
+			["schody volna strana", Vector3(9.3, 2.2, -10.0), Vector3(8.5, 2.2, -10.0)]]:
+		var q := PhysicsRayQueryParameters3D.create(xf * (pr[1] as Vector3), xf * (pr[2] as Vector3))
+		q.exclude = [player.get_rid()]
+		if sp.intersect_ray(q).is_empty():
+			zab_chybi.append(pr[0])
+	ok = ok and zab_chybi.is_empty()
+	_vysledek("krcma_schody", ok, "%s; konec y %.2f, patro %.2f; bez zabradli %s" % [r[1], y_kon, patro, str(zab_chybi)])
 
 
 ## 14. 11. (docs/rozpracovane/zaseky_rozbor_system.md F4): louka nesmi nahrat do GPU v jednom snimku vic, nez dovoli
