@@ -10481,6 +10481,7 @@ func _postele_domu() -> void:
 			continue
 		n += 1
 		var p: Vector3 = r["p"]
+		print("POSTELE_DOMU %s %s %s yaw %.2f" % [b, id, p.snapped(Vector3.ONE * 0.01), float(r["yaw"])])
 		if not cekam.has(id):
 			chyby.append("POSTEL %s (%.1f, %.1f) v %s, ma byt %s" % [id, p.x, p.z, b, str(cekam)])
 	for c: String in chyby:
@@ -10563,6 +10564,7 @@ func _ohen_u_pece() -> void:
 			var dz := maxf(absf(q.z) - float(r[2]) * 0.5, 0.0)
 			var dy := maxf(-q.y, maxf(q.y - float(r[1]), 0.0))
 			nej = minf(nej, Vector3(dx, dy, dz).length())
+		print("OHEN_U_PECE %s %s %s" % [o["name"], o["predmet"], op.snapped(Vector3.ONE * 0.01)])
 		if nej > float(t["ohen_od_predmetu_m"]):
 			chyby.append("OHEN %s (%.1f, %.1f) %.2f m od kusu %s" % [o["name"], op.x, op.z, nej, o["predmet"]])
 	var poc := {}

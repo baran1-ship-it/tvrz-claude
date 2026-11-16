@@ -10975,6 +10975,14 @@ func _ruiny_ves_dil(parent: Node3D) -> void:
 		sc.transform = xf
 		parent.add_child(sc)
 		_barva_vrcholu(sc, rv.get("barva_vrcholu_materialy", []))
+		# Misa 16. 11. r. 2 a 3 (lokace zanikla_ves kolize_ze_site, povrch_jako_teren): kolize valu sklepa z viditelne site
+		# (s otvorem vchodu), drn valu jako louka sveta, sut ve stejne plose pryc
+		for kz: Array in rv.get("kolize_ze_site", []):
+			if String(kz[0]) == sb:
+				_kolize_ze_site(sc, String(kz[1]), String(kz[2]))
+		var pj: Dictionary = (rv.get("povrch_jako_teren", {}) as Dictionary).get(sb, {})
+		if not pj.is_empty():
+			_povrch_jako_teren(sc, pj)
 		# dil pod klenbou (sklep): strecha i bez travy v pudorysu zdi (jako kryti_lok kostela)
 		if (rv.get("kryti_dily", []) as Array).has(sb):
 			for zr: Array in (rv["pudorysy"] as Dictionary).get(sb, {}).get("zdi", []):
@@ -10995,8 +11003,82 @@ func _ruiny_ves_dil(parent: Node3D) -> void:
 				(nd as GeometryInstance3D).visibility_range_begin = l1_od
 			for cn in l1.find_children("*", "CollisionObject3D", true, false):
 				(cn as Node).queue_free()
+			if not pj.is_empty():
+				_povrch_jako_teren(l1, pj)
 		n += 1
 	print("ruiny_ves: %d dilu zanikle vsi u (%.0f, %.0f)" % [n, cx, cz])
+
+
+## Kolize z viditelne site (Misa 16. 11. r. 2, lokace ruiny zanikla_ves kolize_ze_site [dil, kolize, sit]): kolize valu
+## sklepa z modelu (-colonly) je uzavreny kopec bez otvoru vchodu - stena 0,5 m v usti chodby (snimek 01, (322, 307)).
+## Tvar kolize = trojuhelniky viditelne site (ta otvor ma), v souradnicich telesa kolize.
+func _kolize_ze_site(sc: Node3D, kol_jm: String, sit_jm: String) -> void:
+	var mi := sc.find_child(sit_jm, true, false) as MeshInstance3D
+	var sb := sc.find_child(kol_jm, true, false) as StaticBody3D
+	if mi == null or mi.mesh == null or sb == null:
+		print("kolize_ze_site: %s nebo %s chybi" % [kol_jm, sit_jm])
+		return
+	var m := _rel_xf(sb, sc).affine_inverse() * _rel_xf(mi, sc)
+	var f := mi.mesh.get_faces()
+	for i in f.size():
+		f[i] = m * f[i]
+	var sh := ConcavePolygonShape3D.new()
+	sh.set_faces(f)
+	sh.backface_collision = true
+	for cs0 in sb.find_children("*", "CollisionShape3D", true, false):
+		(cs0 as CollisionShape3D).shape = sh
+	print("kolize_ze_site %s: %d trojuhelniku z %s" % [kol_jm, f.size() / 3, sit_jm])
+
+
+## Povrch dilu jako teren sveta (Misa 16. 11. r. 3, snimek 02: kopec sklepa zlutozeleny s ostrymi hnedymi trojuhelniky):
+## drn valu z modelu (olivova fotka, sRGB ~82/81/25) -> material zem (louka sveta, barva vrcholu jako teren: louka),
+## UV = svetove x, z jako zaplata terenu; povrchy `hlina` (sut ve stejne plose jako drn - z-fighting = ostre hnede
+## trojuhelniky) jako hlina sveta (barva vrcholu g hlina_g) vystrcene o hlina_nad_m po normale.
+func _povrch_jako_teren(sc: Node3D, pj: Dictionary) -> void:
+	var teren: Array = pj["teren"]
+	var hlina: Array = pj["hlina"]
+	var n := 0
+	for mi0 in sc.find_children("*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		var am := mi.mesh as ArrayMesh
+		if am == null:
+			continue
+		var jm: Array = []
+		for si in am.get_surface_count():
+			var mt := am.surface_get_material(si)
+			jm.append(String(mt.resource_name) if mt else "")
+		if not jm.any(func(j: String) -> bool: return teren.has(j) or hlina.has(j)):
+			continue
+		var gx := mi.global_transform if mi.is_inside_tree() else sc.transform * _rel_xf(mi, sc)
+		var nove := ArrayMesh.new()
+		for si in am.get_surface_count():
+			var arr := am.surface_get_arrays(si)
+			var je_h := hlina.has(jm[si])
+			if teren.has(jm[si]) or je_h:
+				var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+				var nr: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+				var col := PackedColorArray()
+				var uv := PackedVector2Array()
+				for i in v.size():
+					if je_h:
+						v[i] += nr[i] * float(pj["hlina_nad_m"])
+					var w := gx * v[i]
+					col.append(Color(0, float(pj["hlina_g"]) if je_h else float(pj["louka_g"]), 0, 1))
+					uv.append(Vector2(w.x, w.z))
+				arr[Mesh.ARRAY_VERTEX] = v
+				arr[Mesh.ARRAY_COLOR] = col
+				arr[Mesh.ARRAY_TEX_UV] = uv
+				arr[Mesh.ARRAY_TEX_UV2] = null
+				arr[Mesh.ARRAY_TANGENT] = null
+				var st := SurfaceTool.new()
+				st.create_from_arrays(arr)
+				st.generate_tangents()
+				arr = st.commit_to_arrays()
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			nove.surface_set_material(nove.get_surface_count() - 1, material("zem") if teren.has(jm[si]) or je_h else am.surface_get_material(si))
+			n += 1
+		mi.mesh = nove
+	print("povrch_jako_teren %s: %d povrchu" % [sc.name, n])
 
 ## Pytle ve mlyne (Misa 0.99 „pytle ve mlyne jsou na hovno“ - sit modelu Mlyn_PytleMouka s nataženou texturou): kazdy
 ## souvisly kus site (pytel) nahradi predmet katalogu pytel_mouky (stejny jako v komorach domu) na jeho miste a ve smeru
