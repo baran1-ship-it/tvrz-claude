@@ -3095,30 +3095,42 @@ func _clona_vsi() -> void:
 	var cv: Dictionary = sv.pasma()["test"]["clona_vsi"]
 	var koruny := {}                                 # bunka 8 m -> [stred xz, polomer, y od, y do]
 	var nkor := 0
+	# obal site podle klice z uzlu bunek (jmeno = klic_bx_bz_dil); polohy z dat (get_instance_transform u MultiMeshe
+	# s bufferem cte GPU - v testu bez kresleni vraci nuly, 16. 11. clona_vsi 0 zasahu z 62 tis. korun)
+	var obal := {}
 	for b: Vector2i in sv._rost_uzly:
 		for m: Node in sv._rost_uzly[b]:
 			var mmi := m as MultiMeshInstance3D
-			if mmi == null or mmi.multimesh == null or mmi.multimesh.mesh == null or String(mmi.name).contains("daleko"):
+			if mmi == null or mmi.multimesh == null or mmi.multimesh.mesh == null:
 				continue
-			var ab: AABB = mmi.multimesh.mesh.get_aabb()
-			for i in mmi.multimesh.instance_count:
-				var xf: Transform3D = mmi.global_transform * mmi.multimesh.get_instance_transform(i)
-				var sc := xf.basis.get_scale()
-				var hgt := ab.size.y * sc.y
-				if hgt < 1.2:
-					continue                                 # trava, byliny, kameni
-				var y0 := xf.origin.y + ab.position.y * sc.y
-				var r := minf(ab.size.x * sc.x, ab.size.z * sc.z) * 0.5 * 0.8
-				if hgt > 7.0:
-					y0 += hgt * float(cv["koruna_stromu_podil"])
-				else:
-					r = minf(r, hgt * float(cv["polomer_podil_vysky"]) * 1.4)
-				var c := Vector2(xf.origin.x, xf.origin.z)
-				var k := Vector2i(floori(c.x / 8.0), floori(c.y / 8.0))
-				if not koruny.has(k):
-					koruny[k] = []
-				(koruny[k] as Array).append([c, r, y0, xf.origin.y + ab.end.y * sc.y])
-				nkor += 1
+			var cs := String(mmi.name).split("_")
+			if cs.size() < 4:
+				continue
+			var key := "_".join(cs.slice(0, cs.size() - 3))
+			if not obal.has(key):
+				obal[key] = mmi.multimesh.mesh.get_aabb()
+	for key: String in sv.data["rostliny"]:
+		if not obal.has(key) or key.contains("daleko"):
+			continue
+		var ab: AABB = obal[key]
+		for t: Array in sv.data["rostliny"][key]:
+			var sc := Vector3(Vector3(t[0], t[4], t[8]).length(), Vector3(t[1], t[5], t[9]).length(), Vector3(t[2], t[6], t[10]).length())
+			var hgt := ab.size.y * sc.y
+			if hgt < 1.2:
+				continue                                 # trava, byliny, kameni
+			var oy := float(t[7])
+			var y0 := oy + ab.position.y * sc.y
+			var r := minf(ab.size.x * sc.x, ab.size.z * sc.z) * 0.5 * 0.8
+			if hgt > 7.0:
+				y0 += hgt * float(cv["koruna_stromu_podil"])
+			else:
+				r = minf(r, hgt * float(cv["polomer_podil_vysky"]) * 1.4)
+			var c := Vector2(float(t[3]), float(t[11]))
+			var k := Vector2i(floori(c.x / 8.0), floori(c.y / 8.0))
+			if not koruny.has(k):
+				koruny[k] = []
+			(koruny[k] as Array).append([c, r, y0, oy + ab.end.y * sc.y])
+			nkor += 1
 	var cile: Array = []
 	for cid: String in cv["cile"]:
 		if cid.begins_with("dum_"):
@@ -3187,7 +3199,7 @@ func _houstina_volno() -> void:
 				var ck: Vector2 = sv.cesta_kraj_osa(x, z)
 				if ck.y >= 0.0 and ck.x < sv.odstup_cesty(key, int(ck.y)):
 					duvod = "cesta"
-				elif sv.pes_d(x, z) < 1.5:
+				elif sv.pes_d(x, z) < sv.pesina_ker_m():
 					duvod = "pesina"
 			if duvod != "":
 				spatne.append("HOUSTINA %s %s (%.1f, %.1f)" % [duvod, key, x, z])

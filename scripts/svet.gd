@@ -12162,6 +12162,17 @@ func pes_d(x: float, z: float) -> float:
 	return lerpf(a, b, fz) * PES_DMAX
 
 
+## Ker nejbliz k ose pesiny (vlnena osa hry, pes_d): pul sirky pesiny (cesty.json pesina_zaklad_m) + pasma.cesta.pesina
+## ker_od_m od kraje. Jedno pravidlo pro vstup druhu (Blender), rozsevy hry (druh_smi_hra) i test houstina_volno.
+func pesina_ker_m() -> float:
+	if _pes_ker_m < 0.0:
+		_pes_ker_m = float(Pravidla.cti("cesty", "pesina_zaklad_m")) + float(pasma()["cesta"]["pesina"]["ker_od_m"])
+	return _pes_ker_m
+
+
+var _pes_ker_m := -1.0
+
+
 ## Useky pesin (a.x, a.z, b.x, b.z) za sebou pres vsechny pesiny (vstup pro _pes_postav).
 func pes_useky() -> PackedVector4Array:
 	var out := PackedVector4Array()
@@ -13492,6 +13503,8 @@ func druh_smi_hra(key: String, x: float, z: float, y := INF, sc := 1.0) -> bool:
 	if not (key.contains("trava") or key.contains("grass")) and v_pruchodu_ruiny(x, z):
 		return false                                  # pruchod zriceniny: jen trava (i pro _lesni_patro, _skalni_mesto)
 	var d: Dictionary = _druhy_hra.get(druh_klice(key), {})
+	if (key.begins_with("ker_") or String(d.get("skupina", "")) == "ker") and pes_d(x, z) < pesina_ker_m():
+		return false                                  # ker ne na pesine (16. 11. test houstina_volno: shrub_02 na ose)
 	if d.is_empty():
 		return true
 	if d.get("pouzit", true) == false:
