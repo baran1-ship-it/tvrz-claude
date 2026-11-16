@@ -3380,13 +3380,13 @@
    ],
    [
     "vidle_drevene",
-    12.9,
-    -5.8,
+    13.15,
+    -6.8,
     20.0,
-    0.4
+    0.05
    ]
   ],
-  "_nabytek": "Míša 14. 11.: model bez vybavení – vše z katalogu: [id, x, z, natočení_st v rámci modelu, (výška podlahy; jinak podlaha_m), (budova pro spánek u lůžek)]. Šenkovna stoly s lavicemi (x −7…−4), komora sudy (x 4,4…7, z −0,5…−4), jizba hospodského lůžko a truhla, komůrka šenkýřky úzké lůžko, stáj koryta u východní zdi (podlaha stáje 0,05), patro křídla (2,85): pokoj 1 lůžko hráče u značky KrcmaL_Spani_Hrac, pokoj 2 lůžko, nocležna 5 slamníků pro formany. Polohy = odhad z dispozice NAVOD, ověřit snímkem. 16. 11. (Misa: „hospoda dostane chude postele“): lozko a lozko_uzke -> postel_chudy (Luzka_1400, 1,23 x 2,15 m; pokoj 1 z -0,1 -> -0,2 a pokoj 2 z -4,2 -> -4,3, at delsi postel nesaha do pricky); noclezna zustava se slamniky (spolecne nocoviste formanu na slame). 16. 11.: pec_krcma v šenkovně (pec_senkovna_katalog); seno ve stáji (Seno_1400, NAVOD_SENO: kupa na zemi 2,5 × 1,8 m v jihozápadním rohu stáje u vrat, dva rozhozené chomáče u koryt, dřevěné vidle zapíchnuté do kupy 0,35 m nad podlahou).",
+  "_nabytek": "Míša 14. 11.: model bez vybavení – vše z katalogu: [id, x, z, natočení_st v rámci modelu, (výška podlahy; jinak podlaha_m), (budova pro spánek u lůžek)]. Šenkovna stoly s lavicemi (x −7…−4), komora sudy (x 4,4…7, z −0,5…−4), jizba hospodského lůžko a truhla, komůrka šenkýřky úzké lůžko, stáj koryta u východní zdi (podlaha stáje 0,05), patro křídla (2,85): pokoj 1 lůžko hráče u značky KrcmaL_Spani_Hrac, pokoj 2 lůžko, nocležna 5 slamníků pro formany. Polohy = odhad z dispozice NAVOD, ověřit snímkem. 16. 11. (Misa: „hospoda dostane chude postele“): lozko a lozko_uzke -> postel_chudy (Luzka_1400, 1,23 x 2,15 m; pokoj 1 z -0,1 -> -0,2 a pokoj 2 z -4,2 -> -4,3, at delsi postel nesaha do pricky); noclezna zustava se slamniky (spolecne nocoviste formanu na slame). 16. 11.: pec_krcma v šenkovně (pec_senkovna_katalog); seno ve stáji (Seno_1400, NAVOD_SENO: kupa na zemi 2,5 × 1,8 m v jihozápadním rohu stáje u vrat, dva rozhozené chomáče u koryt, dřevěné vidle zapíchnuté do kupy 0,35 m nad podlahou). 16. 11. (test visici): vidle stojí na podlaze stáje u boku kupy (dřív 0,4 m nad podlahou mimo kupu).",
   "mistnosti": [
    [
     "krcma_l_senkovna",

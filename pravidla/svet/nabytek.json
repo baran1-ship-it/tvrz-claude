@@ -738,13 +738,13 @@
   {
    "id": "vidle_drevene",
    "p": [
-    -21.7,
-    0.35,
+    -21.25,
+    0.0,
     -0.2
    ],
    "natoceni_st": 15.0,
    "budova": "tvrz_staj",
-   "popis": "dřevěné vidle zapíchnuté do kupy"
+   "popis": "dřevěné vidle stojí na podlaze opřené o bok kupy (test visici 16. 11.)"
   },
   {
    "id": "seno_chomac",
