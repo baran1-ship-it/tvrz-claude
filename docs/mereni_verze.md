@@ -504,3 +504,19 @@ k sezení (sedáky modelů), schody mlýnice jako žebřík, oděvy svařené, t
 rostliny, louka, kupy), lehký monitor měření, strop 8 kroků animace postav, odpojené modifikátory koster.
 Měřicí trasa: vše, bez_postav, dohled_kratsi, les_bez_korun, rostliny, stavby, vše znovu (≈25 min).
 Míša: měřit po instalaci 2× (1. trasa = keš shaderů), bez aplikací na pozadí a bez wifi, tablet vychladlý.
+
+### 0.999999 – Měřicí trasa 16. 11. 08:03 (sestavení 17091cc, manifest ec5dab68) – NEDOKONČENA (45 ze 105 úseků, pak zamrzl obraz)
+p50 vše / bez_postav / dohled x0.6 (v závorce 0.999998 vše 15. 11. 17:28): tvrz-cesta 19/24/40 (25), louka 19/29/24 (24),
+les 29/26/29 (28), skály 24/27/42 (32), ves 23/21/27 (31), mlýn 17/23/32 (18), ves-vjezd 30/32/32 (36), ves-dvory 31/29/31 (32),
+krcma-kovarna 24/21/21 (28), hostinec 19/23/30 (26), věž 28/24/22 (24). Koňské úseky 23–29.
+Paměť: **VRAM 1145 MB (textury 822, buffery 322)**, halda 1645 MB (max 1738), uzlů 17 486 (0.999998: VRAM 887, textury 600, uzlů 28 693).
+- **NAMĚŘENO – zlepšení „vše“:** ves 31 → 23, ves-vjezd 36 → 30, hostinec 26 → 19, tvrz-cesta 25 → 19, louka 24 → 19, skály 32 → 24;
+  uzlů −11 tis. (plánovač, LOD dílů, odpojené modifikátory, strop animací – který podíl, NEOVĚŘENO).
+- **NAMĚŘENO – postavy už nestojí:** bez_postav ≈ vše (ves 21 × 23, ves-vjezd 32 × 30, hostinec 23 × 19). Podezření
+  Míši „ve vsi se seká kvůli postavám“ pro 0.999999 VYVRÁCENO (pro 0.999998 bylo +9–12 ms dřív).
+- **NAMĚŘENO – dohled x0.6 nepomáhá** (tvrz-cesta 40, skály 42, mlýn 32 – horší; 3. varianta = teplo, ale ani lépe) → „dálky“
+  nejsou příčina; cena je blízko (terén celý, tráva, kreslení – rozbor_gpu_15_11.md).
+- **REGRESE paměti:** textury +222 MB proti 0.999998 → VAROVÁNÍ RAM 1650–1682 MB (práh 1200) a po 2. kole zamrznutí.
+  PODEZŘENÍ: nové díly z Disku (kostel 30 MB glb, Doubrava, krčma L, domy vsi) s texturami mimo tabletové zmenšení.
+- Špičky 1. průjezdu (vše): skály 2 374 ms, louka 1 453, tvrz-cesta 493 (halda 1734 MB) – skripty 4–6, kreslení jako okolí.
+  PODEZŘENÍ: první vykreslení + tlak paměti (halda u stropu). misa_16_11_chyby.md ř. 7.
