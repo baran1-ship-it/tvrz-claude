@@ -5292,8 +5292,9 @@ func _lesni_plast() -> void:
 				mx = maxf(mx, _les(p.x + o.x * dl, p.y + o.y * dl))
 			if mx < lk1:
 				continue
-			if absf(p.x + 4.0) < 80.0 and absf(p.y) < 75.0 or Vector2(p.x - 470.0, p.y - 830.0).length() < 140.0:
-				continue
+			if absf(p.x + 4.0) < 80.0 and absf(p.y) < 75.0:
+				continue                                    # tvrz ma vlastni (_tvrz_zvenci); ves: 16. 11. kruh 140 m kolem
+				# stare navsi pryc (les vychodne od vsi byl bez plaste) - dvory, zahrady a vstupy hlida uzivani_smi
 			if pes_d(p.x, p.y) < 1.8 or _u_mostu(p.x, p.y) or not smi_tu_byt(p.x, p.y, "ker") or sklon_bunky(p.x, p.y) > 0.9:
 				continue
 			var hy := _vyska(p.x, p.y)
