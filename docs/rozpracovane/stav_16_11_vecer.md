@@ -10,3 +10,13 @@ Po exportu:
    řady trsů louky ve vsi (podezření louka.gd). Rychta: pec uprostřed jizby, ne v rohu.
 3. nezávislá kontrola subagentem, celá sada, otisk_exportu.py over, vydani.py 0.9999991 --testovaci --jen z_svet,z_krcma,
    z_kostel,z_ruiny_ves,z_ves,z_rostliny,z_katalog,z_reka,tex_predmety2,z_dlazdice + 41 p_* (bez z_postavy).
+
+## 22:45
+- Pec: světlo ohně přesunuto před ústí (modely.json ohen_znacky.svetlo_pred_ustim_m) – podlaha před pecí svítí,
+  kopule v Dum1 ze strany kamery dál tmavá (snímek dum1_svetlo.png). PODEZŘENÍ: jen málo světla v jizbě (ambient),
+  ne chyba modelu (v krčmě a rychtě kopule osvětlená). 1. pokus hotov, další až po rozboru.
+- Lůžko: nejbližší volný kout, Dum2 a Rychta jen u zdi (pece_domu.typy luzko_u_zdi_staci, kontrola v pece_domu.py).
+- Nezávislá kontrola: nic blokujícího; otevřené: seno v jeslích šedé (staj4 se fotí), modrá deka zemljanky, zelené
+  čáry na návsi, tmavý dům na návsi zdálky, okluzor remízku čtverec (svet.gd:9183), čísla v kódu (_lesni_plast,
+  _okluzory_houstiny, _lesni_patro, _tvrz_zvenci), _zemljanky_k volané pro každou kolizi při načtení.
+- clona_vsi 48 % (min 50 %) – otevřené, po vydání.
