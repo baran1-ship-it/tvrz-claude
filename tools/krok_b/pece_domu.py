@@ -45,9 +45,12 @@ def glb_kolize(cesta):
     return out
 
 
+MER = {}                     # meritko kusu (pec zmensena na velikost pece modelu, pece_domu.meritko)
+
+
 def obd(id_, x, z, yaw_st):
     """Pudorys kusu (osove zarovnany obdelnik pro natoceni po 90 st.): (x0, x1, z0, z1)."""
-    r = KAT[id_]["rozmer"]
+    r = [v * MER.get(id_, 1.0) for v in KAT[id_]["rozmer"]]
     a = round(yaw_st / 90.0) % 2
     hx, hz = (r[0] / 2, r[2] / 2) if a == 0 else (r[2] / 2, r[0] / 2)
     return (x - hx, x + hx, z - hz, z + hz)
@@ -87,7 +90,14 @@ def pro_typ(typ, kol):
     stara = m["Kol_Pec"]
     sc = ((stara[0][0] + stara[1][0]) / 2, (stara[0][2] + stara[1][2]) / 2)
     pec = PR["pec"]
-    us = KAT[pec]["znacky"]["Pec_Usti"]
+    # Misa 16. 11. („kdyz je pec moc velka, zmensi ji na puvodni velikost“): meritko pece = nejvetsi rozmer pudorysu
+    # pece modelu (Kol_Pec) / nejvetsi rozmer pudorysu nove pece (katalog), jen zmenseni (pece_domu.meritko)
+    sp = stara[1] - stara[0]
+    MER.clear()
+    if PR.get("meritko") == "podle_pece_modelu":
+        MER[pec] = round(float(min(1.0, max(sp[0], sp[2]) / max(KAT[pec]["rozmer"][0], KAT[pec]["rozmer"][2]))), 3)
+    msc = MER.get(pec, 1.0)
+    us = [v * msc for v in KAT[pec]["znacky"]["Pec_Usti"]]
     kand = []
     for yaw in (0.0, 90.0, 180.0, 270.0):
         for x in np.arange(jizba[0], jizba[1], 0.05):
@@ -99,14 +109,18 @@ def pro_typ(typ, kol):
                 if not (jizba[0] < ux < jizba[1] and jizba[2] < uz < jizba[3]) or any(p[0] < ux < p[1] and p[2] < uz < p[3] for p in prekazky):
                     continue
                 # zapeci (mistni -z) a lavice (mistni -x) ke zdi: vzdalenost jejich strany obdelniku od lice jizby
-                zx, zz = lok(pec, x, z, yaw, (0.0, -KAT[pec]["rozmer"][2] / 2))
-                lx_, lz_ = lok(pec, x, z, yaw, (-KAT[pec]["rozmer"][0] / 2, 0.0))
+                zx, zz = lok(pec, x, z, yaw, (0.0, -KAT[pec]["rozmer"][2] * msc / 2))
+                lx_, lz_ = lok(pec, x, z, yaw, (-KAT[pec]["rozmer"][0] * msc / 2, 0.0))
                 dzed = lambda px, pz: min(px - jizba[0], jizba[1] - px, pz - jizba[2], jizba[3] - pz)
                 sk = 4.0 * dzed(zx, zz) + 2.0 * dzed(lx_, lz_) + 0.3 * math.hypot(x - sc[0], z - sc[1])
+                # Misa 16. 11.: pec v koute u vstupni steny (pricka sine) - co nejbliz, kam to pruchod dveri dovoli
+                sk += float(PR.get("k_vstupni_stene", 0.0)) * (o[2] - jizba[2])
                 kand.append((sk, round(float(x), 3), round(float(z), 3), yaw))
     kand.sort()
     for best in kand[:400]:
         r = _luzko(typ, kusy, jizba, prekazky, pec, us, best, pr_t)
+        if r:
+            print("PECE %s meritko %.3f" % (typ, MER.get(pec, 1.0)))
         if r:
             return r
     return None
@@ -162,7 +176,7 @@ def _luzko(typ, kusy, jizba, prekazky, pec, us, best, pr_t):
         if kb:
             out[i] = [k[0], kb[1], kb[2]] + k[3:]
             obsaz.append(obd(k[0], kb[1], kb[2], k[3]))
-    out.append([pec, px, pz, pyaw, 0.0])
+    out.append([pec, px, pz, pyaw, 0.0] + ([{"sc": MER[pec]}] if MER.get(pec, 1.0) != 1.0 else []))
     return out, best, lb, jizba
 
 

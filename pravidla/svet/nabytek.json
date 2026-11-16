@@ -48,8 +48,8 @@
     ],
     [
      "vedro",
-     -1.465,
-     2.085,
+     -2.065,
+     1.635,
      0.0,
      0.0
     ],
@@ -112,10 +112,13 @@
     ],
     [
      "pec_chalupni",
-     -2.065,
-     3.585,
+     -2.415,
+     2.835,
      90.0,
-     0.0
+     0.0,
+     {
+      "sc": 0.759
+     }
     ]
    ]
   },
@@ -173,13 +176,6 @@
      0.0
     ],
     [
-     "pec_chalupni",
-     -1.57,
-     3.08,
-     180.0,
-     0.0
-    ],
-    [
      "seno_jesle",
      -0.52,
      -4.32,
@@ -188,6 +184,16 @@
      {
       "naklon_x_st": 35.0,
       "sc": 0.8
+     }
+    ],
+    [
+     "pec_chalupni",
+     -1.92,
+     2.63,
+     90.0,
+     0.0,
+     {
+      "sc": 0.759
      }
     ]
    ]
@@ -246,7 +252,7 @@
     ],
     [
      "kolebka",
-     -0.615,
+     -1.265,
      1.135,
      0.0,
      0.0
@@ -303,17 +309,20 @@
     ],
     [
      "postel_rychtar",
-     0.585,
+     -2.915,
      0.735,
      180.0,
      0.0
     ],
     [
      "pec_chalupni",
-     -2.365,
-     2.485,
-     90.0,
-     0.0
+     0.185,
+     0.535,
+     0.0,
+     0.0,
+     {
+      "sc": 0.759
+     }
     ]
    ]
   },
@@ -1037,6 +1046,10 @@
     "_p": "Dum2 (chalupa) má jizbu 5,8 × 3,4 m – pec 2,5 × 2,5 m, stůl a lůžko se vejdou jen bez volné lavice (sedí se na rohové lavici modelu, nabytek.json sedaky_modelu Dum2) a s průchodem dveří 0,6 m (pec od dveří 0,8 m)"
    }
   },
-  "luzko_kout": "vstupni_stena_naproti_peci"
+  "luzko_kout": "vstupni_stena_naproti_peci",
+  "meritko": "podle_pece_modelu",
+  "_meritko": "Míša 16. 11. („když je pec moc velká, zmenši ji na původní velikost“): pec_chalupni v domech se zmenší tak, aby její největší rozměr půdorysu (s lavicí, zápecím a předpecím) byl jako největší rozměr pece modelu (Kol_Pec, domy.glb) – kus nese {sc}, hra zmenší model, kolizi i značky ohně a ústí (svet.ohen_predmetu sc).",
+  "k_vstupni_stene": 3.0,
+  "_k_vstupni_stene": "váha vzdálenosti pece od vstupní stěny jizby (příčka síně) ve skóre pece_domu.py – pec v koutě u vstupu (Míša 16. 11.), jak to průchod dveří (pruchod_m) dovolí"
  }
 }

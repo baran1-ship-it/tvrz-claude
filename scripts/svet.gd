@@ -6045,7 +6045,7 @@ func _nabytek_budov() -> void:
 ## Ohen a kour kusu katalogu ze znacek modelu (Misa 16. 11.: Topeni_1400 a les_dily „plameny a kour dela hra“;
 ## modely.json ohen_znacky): kus s ohen v katalogu -> data ohne (kind hearth na znackach ohne: jm, jm_2...) a data kour
 ## (znacky kour - kominy). zap = hori od zacatku. Vrati pocet ohnu.
-func ohen_predmetu(id: String, p: Vector3, yaw: float, jm: String, zap: bool) -> int:
+func ohen_predmetu(id: String, p: Vector3, yaw: float, jm: String, zap: bool, sc := 1.0) -> int:
 	if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
 		_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
 	var kt: Dictionary = _kat_p.get(id, {})
@@ -6053,7 +6053,7 @@ func ohen_predmetu(id: String, p: Vector3, yaw: float, jm: String, zap: bool) ->
 		return 0
 	var zn: Dictionary = kt.get("znacky", {})
 	var oz: Dictionary = Pravidla.cti("modely", "ohen_znacky")
-	var xf := Transform3D(Basis(Vector3.UP, yaw), p)
+	var xf := Transform3D(Basis(Vector3.UP, yaw).scaled(Vector3.ONE * sc), p)      # zmensena pec (nabytek sc)
 	var n := 0
 	for z: String in oz["ohen"]:
 		if zn.has(z):
@@ -6062,7 +6062,7 @@ func ohen_predmetu(id: String, p: Vector3, yaw: float, jm: String, zap: bool) ->
 				lq = lq.lerp(_v3(zn["Pec_Usti"]), float(oz.get("k_usti", 0.0)))   # zare videt z mistnosti (modely.json k_usti)
 			var q := xf * lq
 			data["ohne"].append({"kind": "hearth", "pos": [q.x, q.y, q.z], "name": jm if n == 0 else "%s_%d" % [jm, n + 1],
-					"size": float(oz["velikost_m"]), "zap": zap, "svetlo": oz["svetlo"], "predmet": id})
+					"size": float(oz["velikost_m"]) * sc, "zap": zap, "svetlo": oz["svetlo"], "predmet": id})
 			n += 1
 	for z: String in oz["kour"]:
 		if zn.has(z):
@@ -7277,7 +7277,8 @@ func _ves_domy(root: Node3D) -> void:
 					vr2["sc"] = float(ex["sc"])
 			data["vybaveni"].append(vr2)
 			_postel_zapis(String(v[0]), String(nb["budova"]) % int(d["k"]), wp, yv, 0)
-			ohen_predmetu(String(v[0]), wp, yv, "ohen_dum_%d" % int(d["k"]), int(d["k"]) % 2 == 1 or typ == "Rychta")
+			ohen_predmetu(String(v[0]), wp, yv, "ohen_dum_%d" % int(d["k"]), int(d["k"]) % 2 == 1 or typ == "Rychta",
+					float(vr2.get("sc", 1.0)))
 		# drevo u domu (Misa 27. 10.: nove hranice podle KCD1, kazdy dum jinak): [id, strana (-1 dvur / +1 vstup / 0 zadni
 		# stit), poloha podel steny (0..1 od stitu do navsi k zadu), odstup od zdi m, pootoceni]
 		if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
