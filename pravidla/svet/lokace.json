@@ -2855,6 +2855,28 @@
     "duvod": "křoví mezi usedlostí 0 a 2 na vnitřní straně ulice – ulice u vjezdu jako zelený tunel (bejcek_03/05)"
    },
    {
+    "id": "vjezd_houstina_jz2",
+    "typ": "houstina",
+    "skladba": "houstina",
+    "osa": [
+     [
+      364.0,
+      777.0
+     ],
+     [
+      374.0,
+      786.0
+     ],
+     [
+      384.0,
+      795.0
+     ]
+    ],
+    "sirka_m": 8.0,
+    "rozestup_m": 2.4,
+    "duvod": "16. 11. test clona_vsi 25 % (min 50 %): z vjezdu otevřený pohled na jih k usedlostem 6, 7 a kovárně mezi usedlostí 0 a sadem usedlosti 2 – pás křovin a stromů za humny usedlosti 0"
+   },
+   {
     "id": "vjezd_houstina_odbocka",
     "typ": "houstina",
     "skladba": "houstina",

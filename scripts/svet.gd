@@ -11835,6 +11835,8 @@ func _tvrz_zvencí() -> void:
 			var shluk := 1 if kk.begins_with("sipek") or kk.begins_with("bez") else rng.randi_range(2, 5)
 			for _j in shluk:
 				var q := p + Vector2(rng.randf_range(-0.7, 0.7), rng.randf_range(-0.7, 0.7))
+				if not druh_smi_hra(kk, q.x, q.y):
+					continue                            # 16. 11. houstina_volno: bez v pruchodu u hradeb (-27.6, -7.9)
 				(r[kk] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.04, q.y, rng.randf() * TAU, sc0 * rng.randf_range(0.7, 1.15)))
 				n += 1
 	# vrby hlavate na brehu prikopu: misto tesne nad hladinou na obvodu 4-12 m za hradbou
