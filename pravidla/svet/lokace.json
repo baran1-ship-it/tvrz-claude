@@ -301,9 +301,9 @@
     ],
     [
      "ves_sklep",
-     -47.0,
-     -2.0,
-     90.0
+     -52.0,
+     -12.0,
+     0.0
     ],
     [
      "ves_dum2",
@@ -565,7 +565,20 @@
    "kryti_dily": [
     "ves_sklep"
    ],
-   "_kryti_dily": "díly s klenbou (sklep v mezi): v půdorysu zdí střecha pro déšť a bez trávy (svet._ruiny_ves_dil → _plants)"
+   "_sklep_16_11": "Míša 16. 11. r. 2 a tabulka 15. 11. ř. 23 (test prochod tvrz–ves uvízl u (323, 299) o Ves_Kol_Sklep_Valy): sklep stál na ose návsi (díl −47; −2, 90°, val přes v −9…5 – pěšina tvrz_doubrava končí v −60; 0 a vede osou), na svahu 0,17 (vysky.json). Posunut na −52; −12, 0° (val u −59…−45, v −20…−10; svah 0,004, rozdíl výšek 0,07 m), vchod (+z dílu) k ose návsi 10 m od ní; žádný jiný díl v ploše.",
+   "_kryti_dily": "díly s klenbou (sklep v mezi): v půdorysu zdí střecha pro déšť a bez trávy (svet._ruiny_ves_dil → _plants)",
+   "porost": {
+    "kopriva": 700,
+    "kapradi": 160,
+    "bez": 90,
+    "nalet": 140,
+    "u_zdi_rozestup_m": 0.9,
+    "u_zdi_pas_m": [0.4, 2.6],
+    "u_zdi_podil": {"kopriva": 0.38, "kapradi": 0.12, "divoka_trava": 0.12, "bez": 0.2, "nalet": 0.18},
+    "nalet_vyska_m": [2.0, 6.5],
+    "nalet_druhy": ["briza", "briza", "briza", "shrub_02"]
+   },
+   "_porost": "Míša 16. 11. r. 1 (snímek 03 z 22 m nad vsí: holá louka, pár bříz – „víc zarůst“): porost Blenderu ruiny.zanikla_ves – po celé mýtině (_kraj_ruiny: kopřiva, kapradí, bez černý, nálet bříz a keřů) a u zdí každého dílu pás u_zdi_pas_m od líce po u_zdi_rozestup_m obvodu (podíly druhů). Mimo půdorys zdí, průchody dílů a osu návsi (pruchody_lok) – cesty zůstanou travou. Dříve v kódu 260/90/26/30 a u zdí po 2,5 m (stav 0.999999). Zaniklá ves po 600 letech: zdi zarostlé bezem a kopřivou (dusík), nálet bříz a keřů (Pfaffenschlag, Konůvky – fotky lokalit; počty odhad, NEOVĚŘENO zdrojem)."
   },
   {
    "id": "hradek",

@@ -215,7 +215,7 @@ def _plant(F, u, v, pid, h):
     ROSTLINY.append((pid, x, z, h))
 
 
-def _kraj_ruiny(F, r, n_nettle, n_fern, n_bez, n_nalet, keep_out):
+def _kraj_ruiny(F, r, n_nettle, n_fern, n_bez, n_nalet, keep_out, nalet_druhy=("briza", "briza", "shrub_02"), nalet_vyska=(2.5, 6.0)):
     """Zarust na okraji mytiny a u zdi; keep_out(u, v) = True tam, kde ma zustat pruchod.
     Na okraji ruiny par vzrostlych buku a dubu (stromy v2), na suti mech."""
     import nove
@@ -234,7 +234,7 @@ def _kraj_ruiny(F, r, n_nettle, n_fern, n_bez, n_nalet, keep_out):
         nove.misto(R.choice(["mech_1", "mech_2", "mech_3"]), x, _land(x, z), z, R.uniform(1.0, 2.5), R.uniform(0, 2 * math.pi), None, sink=0.0)
     k = 0
     tries = 0
-    while k < n_nettle + n_fern + n_bez + n_nalet and tries < 4000:
+    while k < n_nettle + n_fern + n_bez + n_nalet and tries < 4000 + 8 * (n_nettle + n_fern + n_bez + n_nalet):
         tries += 1
         a = R.uniform(0, 2 * math.pi)
         d = r * math.sqrt(R.uniform(0.05, 1.0))
@@ -259,7 +259,7 @@ def _kraj_ruiny(F, r, n_nettle, n_fern, n_bez, n_nalet, keep_out):
             pid = R.choice(["bez_cerny_1", "bez_cerny_2", "bez_cerny_3"])  # bez cerny - typicky ker zricenin
             nove.misto(pid, x, _land(x, z), z, R.uniform(0.7, 1.0), R.uniform(0, 2 * math.pi), None, sink=0.0)
         else:
-            _plant(F, u, v, R.choice(["briza", "briza", "shrub_02"]), R.uniform(2.5, 6.0))   # nalet briz
+            _plant(F, u, v, R.choice(list(nalet_druhy)), R.uniform(*nalet_vyska))   # nalet briz
         k += 1
 
 
@@ -339,14 +339,23 @@ def zanikla_ves(P):
 
     def keep_out(u, v):
         return v_zdi(u, v, 0.4) or v_pruchodu(u, v)
-    # porost hlavne u zdi: _kraj_ruiny sazi po cele mytine, u kazdeho dilu navic kopriva a bez kolem obvodu
-    _kraj_ruiny(F, r, 260, 90, 26, 30, keep_out)
+    # porost hlavne u zdi: _kraj_ruiny sazi po cele mytine, u kazdeho dilu navic kopriva a bez kolem obvodu - pocty
+    # ze zaznamu (lokace.json zanikla_ves porost, Misa 16. 11. r. 1 „vic zarust“)
+    po = rec["porost"]
+    _kraj_ruiny(F, r, int(po["kopriva"]), int(po["kapradi"]), int(po["bez"]), int(po["nalet"]), keep_out,
+                po["nalet_druhy"], tuple(po["nalet_vyska_m"]))
     import nove
+    pod = po["u_zdi_podil"]
+    meze = []
+    acc = 0.0
+    for druh in ("kopriva", "kapradi", "divoka_trava", "bez", "nalet"):
+        acc += float(pod[druh])
+        meze.append((acc, druh))
     for du, dv, c, s, x0, z0, x1, z1 in stavba:
         obvod = 2 * ((x1 - x0) + (z1 - z0))
-        for _ in range(int(obvod / 2.5)):
+        for _ in range(int(obvod / float(po["u_zdi_rozestup_m"]))):
             k = R.uniform(0, obvod)
-            d = R.uniform(0.5, 1.6)
+            d = R.uniform(*po["u_zdi_pas_m"])
             if k < x1 - x0:
                 lx, lz = x0 + k, z0 - d
             elif k < (x1 - x0) * 2:
@@ -358,19 +367,20 @@ def zanikla_ves(P):
             u, v = du + lx * c + lz * s, dv - lx * s + lz * c
             if keep_out(u, v):
                 continue
-            q = R.random()
-            if q < 0.45:
+            q = R.random() * acc
+            druh = next(dr for m, dr in meze if q <= m)
+            if druh == "kopriva":
                 _plant(F, u, v, "nettle_plant", R.uniform(0.5, 1.0))
-            elif q < 0.65:
+            elif druh == "kapradi":
                 _plant(F, u, v, "fern_02", R.uniform(0.6, 1.0))
-            elif q < 0.8:
+            elif druh == "divoka_trava":
                 _plant(F, u, v, "divoka_trava", R.uniform(0.6, 1.1))
-            elif q < 0.93:
+            elif druh == "bez":
                 x, z = F.p(u, v)
-                nove.misto(R.choice(["bez_cerny_1", "bez_cerny_2", "bez_cerny_3"]), x, _land(x, z), z, R.uniform(0.6, 0.9),
+                nove.misto(R.choice(["bez_cerny_1", "bez_cerny_2", "bez_cerny_3"]), x, _land(x, z), z, R.uniform(0.6, 1.0),
                            R.uniform(0, 2 * math.pi), None, sink=0.0)
             else:
-                _plant(F, u, v, "briza", R.uniform(2.5, 5.5))   # mlady nalet briz u zdi
+                _plant(F, u, v, R.choice(po["nalet_druhy"]), R.uniform(*po["nalet_vyska_m"]))   # mlady nalet u zdi
     NAZVY.append({"name": kraj.RUINY_NAZVY[id_], "x": cx, "z": cz, "r": r + 14})
 
 

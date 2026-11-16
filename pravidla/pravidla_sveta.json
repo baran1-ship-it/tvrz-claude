@@ -1691,7 +1691,9 @@
    "popis": "breh = vlhka zem bez trsu; rakos jen ve skupinach; dno_toku_m: od kraje vody maleho toku oblazky dna a holy breh (Misa 28. 10.: jako Bystrice); breh_m 0,3 (Misa 0.99: lemy svetle zelene holiny 1,5 m podel kazdeho potoka) - reserse_potok_1osoba_kun.md: na loukach trava az k vode, mokry tmavy okraj 0,2-0,5 m, ostrice a devetsil do 2 m; holy breh jen dno_toku_m | 3. 11. (soupis rozporu #19, jeden zdroj): holy_breh_m = jedina sirka holeho brehu od kraje vody maleho toku a rybniku - barva hliny a sterku (Blender kraj.ground_attrs), oblazky dna a brehu (hra _dno_toku), bez travy a rostlin (louka, svet, kraj). Drive tri cisla: breh_m 0,3 / dno_toku_m 0,6 / toky_tvar.breh_hlina_m 0,9.",
    "holy_breh_m": 0.6,
    "holy_breh_padu_m": 1.2,
-   "_holy_breh_padu_m": "Misa 15. 11. r. 4 (trava roste pres pad kaskady): od stopy padu stupne kaskady (koryto.od_padu: okap + zaclona, plna sirka pasu reky) bez travy (louka._zakaz_travy) - pas vody siaha pul sirky + 0,35 m, holy_breh_m 0,6 od pul sirky nestacil; tristi a mokra skala u padu"
+   "_holy_breh_padu_m": "Misa 15. 11. r. 4 (trava roste pres pad kaskady): od stopy padu stupne kaskady (koryto.od_padu: okap + zaclona, plna sirka pasu reky) bez travy (louka._zakaz_travy) - pas vody siaha pul sirky + 0,35 m, holy_breh_m 0,6 od pul sirky nestacil; tristi a mokra skala u padu",
+   "ryb_kraj_tolerance_m": 0.05,
+   "_ryb_kraj_tolerance_m": "Misa 16. 11. r. 6 (rybnik a lavka se vznasi): o kolik smi viditelny teren hry lezet pod terenem Blenderu ve vrcholu hladiny rybnika v2 (kraj vody = vrstevnice, hloubka v barve vrcholu) - test ryb_vznaseni; vic = hrana hladiny ve vzduchu, kuly lavky visi"
   },
   "skala": {
    "popis": "trava ne na strmejsi plose; mech jen ve sparach kamen_lod_bias: maly kamen (kamen_*) drzi podrobny tvar dele (MultiMesh lod_bias) - s mesh_lod_threshold tabletu spadly kaminky v korytu na 4-6 trojuhelniku = jehlany (Misa 0.98).",
