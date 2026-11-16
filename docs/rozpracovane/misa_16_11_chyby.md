@@ -1,0 +1,12 @@
+# Míša 16. 11. – tablet 0.999999 (snímky `docs/screens/misa_16_11/`)
+
+| # | Co Míša viděla | Rozbor | Oprava (záznam/pravidlo) | Kontrola | Stav |
+|---|---|---|---|---|---|
+| 1 | Doubrava víc zarůst (03, z 22 m nad vsí: holá louka, pár bříz) | porost `ruiny.zanikla_ves` (Blender) + `_kraj_ruiny` počty; průchody teď jen tráva | zvýšit počty náletu, bezu, kopřiv, keřů u zdí a mezi díly (lokace zanikla_ves – počty do záznamu, ne kód) | snímek z výšky + `ruiny_ves` (průchody volné) | OTEVŘENÉ |
+| 2 | Do sklepa Doubravy nejde vejít až dozadu (01, x 322 z 307: tma, kolize `Ves_Kol_Sklep_Valy` 0,5 m v ústí) | kolize valů sklepa (konkávní) zasahuje do chodby; souvisí s ř. 23 tabulky 15. 11. (pěšina tvrz–ves přes sklep) | kolize chodby podle viditelné sítě (jako kostel `kolize_podle_site`) nebo vynechat `Ves_Kol_Sklep_Valy` v chodbě; pěšina mimo sklep | test průchodu do sklepa (cíl vzadu) + `prochod` | OTEVŘENÉ |
+| 3 | Nad sklepem tráva a hlína (02: kopec sklepa žlutozelený, ostré hnědé trojúhelníky – textura/díra v drnu) | povrch kopce z modelu (materiál drnu), hra nepokryje trávou; trojúhelníky = jiný materiál/normály | kopec sklepa: louka/tráva na povrch (louka zná díl?) + hlína místo žluté; tvar z modelu | snímek | OTEVŘENÉ |
+| 4 | Dům s ubytovnou zarovnat s průchodem napojeným na hospodu (04, 05: krčma do L – patrový dům a stáj/průchod nesedí) | `krcma_L` díl: dvě křídla, mezera/přesah u průchodu | posun/natočení křídla v `lokace krcma_l` (nebo model krcma_L.py PLOT/S1) – ověřit půdorys | snímek shora + `krcma_dvur` | OTEVŘENÉ |
+| 5 | Kamenný můstek u rybníka vypadá hrozně (06: dlažba přelivu jako rozsypané kvádry, lávka na jednom sloupku) | `kraj.ryb2_predmety` přeliv/čelo – kvádry s mezerami, lávka nad vodou krátká | přeliv: souvislé koryto z plochých kamenů (Poly Haven / model), lávka s nohami do dna; nebo model z Disku | snímek | OTEVŘENÉ |
+| 6 | Rybník i s lávkou se vznáší (07: hladina nad břehem, nohy lávky visí, pás bahna pod) | hladina v2 nad terénem břehu (Blender ryb2_hladina vs. hra?), lávka podle hladiny | ověřit výšku hladiny proti terénu ve hře (možná hra mění terén po exportu – dlaždice/koryto) | test `voda_bez_hrany`/`ryb_napojeni` + snímek u břehu | OTEVŘENÉ – priorita |
+
+Pozn. panel (01, 04): „před kreslením 70 ms z toho diag 69“ = řádek „pod křížem“ (diag._pod_krizem) – měří jen při stání; neplatí pro hru, kontrola 15. 11. to označila „opravit brzy“.
