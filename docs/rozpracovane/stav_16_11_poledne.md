@@ -24,3 +24,11 @@ upéct dlaždice → testy po skupinách → snímky (prohlédnout!) → nezávi
 (`TVRZ_TEST_LIMIT=6600`) → `vydani.py 0.9999991 --testovaci --jen z_svet,z_krcma,z_kostel,z_ruiny_ves,z_ves,z_rostliny,
 z_katalog,z_reka,tex_predmety2,z_dlazdice,… + p_* nových předmětů` (seznam z hlášení pomocníka lůžek) → zpráva Vydáno.
 Postavy (z_postavy) stále rozbité (15 sad, ř. 22 tabulky 15. 11.) – nevydávat.
+
+## Doplněno před pauzou (hlášení pomocníků)
+- **Textury dílů HOTOVO:** ETC2 211 → 87 MB (Doubrava 117 → 25), PC grafika 1322 → 1208 MB, testy OK; prohlédnout
+  `build/dily_tex/po2_doubrava.png`, `po2_krcma.png` (fronta za exportem scén). Kovárna/mlýn v kontejneru bez glb (vynecháno).
+- **Míša ř. 1–6 HOTOVO** (testy OK: ruiny_ves, sklep_vstup, prochod, krcma_l/dvur/schody, ryb_napojeni); otevřené:
+  `ryb_vznaseni` 6 vrcholů 0,06–0,13 m (úhlopříčky čtverců); prohlédnout `build/m16/*.png` (sklep, vrata krčmy, lávka, přeliv).
+- Focení: NIKDY dvě focení najednou (2× Killed – paměť kontejneru).
+- Budík přesunut na 17:25 (reset limitu 17:20).
