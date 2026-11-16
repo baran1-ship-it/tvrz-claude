@@ -2,8 +2,8 @@
 
 > **Stav a další krok (16. 11. odpoledne, před limitem):**
 > - HOTOVO (neověřeno snímkem): barvy vrcholů sad lineární → sRGB (`pravidla/svet/barvy_vrcholu.json`, `tools/barvy_vrcholu.py`, převedeno 69 GLB
->   katalogu; seno albedo modulace [1; 0,9; 0,76] jako Puchart; volá ho i `blender/predmety.py build`) – **chybí `godot --import`**
->   (`tools/beh.sh imp cmd godot --headless --path . --import`) a snímky za dne: seno, chudá postel, zemljanka, rychtářova postel vs. nahledy sad.
+>   katalogu; seno albedo modulace [1; 0,9; 0,76] jako Puchart; volá ho i `blender/predmety.py build`) – import Godotu hotov (13:16)
+> ; chybí snímky za dne: seno, chudá postel, zemljanka, rychtářova postel vs. nahledy sad.
 > - HOTOVO (neověřeno): seno ve stáji tvrze z podlahy do žebřinových jeslí (3× `seno_jesle`, sklon 35°, měřítko 0,6, katalog `upevneno`);
 >   `nabytek.json svet` předává `up`/`sc`; test `nevisi_1400` přeskočí `upevneno`.
 > - ZBÝVÁ: krčma – chomáče sena do koryt (kupa jen v senném koutě), záře pece krčmy viditelná (ohen u ústí – značka Pec_Ohen je uvnitř klenby),
