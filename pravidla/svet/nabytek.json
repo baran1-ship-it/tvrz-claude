@@ -41,8 +41,8 @@
     ],
     [
      "truhla_vyrezavana",
-     -0.315,
-     2.385,
+     0.385,
+     1.685,
      0.0,
      0.0
     ],
@@ -128,35 +128,35 @@
     [
      "stul_selsky",
      1.65,
-     3.2,
+     3.32,
      90.0,
      0.0
     ],
     [
      "miska",
      1.6,
-     2.8,
+     2.92,
      17.19,
      0.776
     ],
     [
      "hrnec",
      1.7,
-     3.6,
+     3.72,
      0.0,
      0.776
     ],
     [
      "bedna",
-     1.68,
-     1.93,
+     0.73,
+     3.28,
      0.0,
      0.0
     ],
     [
      "vedro",
-     1.43,
-     1.48,
+     0.98,
+     2.53,
      0.0,
      0.0
     ],
@@ -170,9 +170,9 @@
     ],
     [
      "postel_chudy",
-     0.58,
-     2.13,
-     0.0,
+     1.48,
+     1.68,
+     90.0,
      0.0
     ],
     [
@@ -245,15 +245,15 @@
     ],
     [
      "truhla_vyrezavana",
-     1.185,
+     1.785,
      3.335,
      0.0,
      0.0
     ],
     [
      "kolebka",
-     -1.265,
-     1.135,
+     -1.365,
+     1.335,
      0.0,
      0.0
     ],
@@ -309,9 +309,9 @@
     ],
     [
      "postel_rychtar",
-     0.585,
-     0.735,
-     180.0,
+     0.185,
+     3.035,
+     90.0,
      0.0
     ],
     [
@@ -1056,6 +1056,8 @@
   "meritko": "podle_pece_modelu",
   "_meritko": "Míša 16. 11. („když je pec moc velká, zmenši ji na původní velikost“): pec_chalupni v domech se zmenší tak, aby její největší rozměr půdorysu (s lavicí, zápecím a předpecím) byl jako největší rozměr pece modelu (Kol_Pec, domy.glb) – kus nese {sc}, hra zmenší model, kolizi i značky ohně a ústí (svet.ohen_predmetu sc).",
   "k_vstupni_stene": -3.0,
-  "_k_vstupni_stene": "váha vzdálenosti pece od vstupní stěny jizby ve skóre pece_domu.py. Míša 16. 11. večer: „pece v rohu, ne u dveří“ → záporná: pec v rohu u protější (zadní) stěny, zápecí a lavice ke zdem; stůl (svatý kout) zůstává pevný."
+  "_k_vstupni_stene": "váha vzdálenosti pece od vstupní stěny jizby ve skóre pece_domu.py. Míša 16. 11. večer: „pece v rohu, ne u dveří“ → záporná: pec v rohu u protější (zadní) stěny, zápecí a lavice ke zdem; stůl (svatý kout) zůstává pevný.",
+  "pruchod_k_stredu_m": 0.32,
+  "_pruchod_k_stredu_m": "17. 11. (test dvere_domu: pec a kolebka v cestě ode dveří jizby do jejího středu): cesta dveře → střed jizby volná na tolik m od osy (postava hráče má poloměr 0,28 m)"
  }
 }

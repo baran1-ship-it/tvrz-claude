@@ -45,6 +45,7 @@ def glb_kolize(cesta):
     return out
 
 
+CHODBA = {}
 MER = {}                     # meritko kusu (pec zmensena na velikost pece modelu, pece_domu.meritko)
 
 
@@ -81,7 +82,18 @@ def pro_typ(typ, kol):
     dv = m["Dvere_Jizba"]
     dvere = (dv[0][0] - 0.1, dv[1][0] + 0.1, zp - 0.2, zp + float(PR.get("typy", {}).get(typ, {}).get("pruchod_m", PR["pruchod_m"])))
     lav = m["Kol_Lavice"]
-    prekazky = [dvere, (lav[0][0], lav[1][0], lav[0][2], lav[1][2])]
+    # 17. 11. (test dvere_domu: Dum2 82 %, Rychta 71 % - pec / kolebka v ceste ode dveri do stredu jizby): chodba ode
+    # dveri ke stredu jizby volna (sire pruchod_k_stredu_m na kazdou stranu osy)
+    dx = (dv[0][0] + dv[1][0]) / 2
+    cx, cz = (x0 + x1) / 2, (zp + zf) / 2
+    ps = float(PR["pruchod_k_stredu_m"])
+    chodba = []                                     # usecka dvere -> stred jizby jako rada ctvercu +- ps (cesta testu)
+    for i in range(13):
+        t_ = i / 12.0
+        qx, qz = dx + (cx - dx) * t_, zp + (cz - zp) * t_
+        chodba.append((qx - ps, qx + ps, qz - ps, qz + ps))
+    prekazky = [dvere, (lav[0][0], lav[1][0], lav[0][2], lav[1][2])] + chodba
+    CHODBA[typ] = chodba
     pr_t = dict(PR, **PR.get("typy", {}).get(typ, {}))
     kusy = [list(k) for k in NAB["domy"][typ]["kusy"] if k[0] not in pr_t.get("vynechat_kusy", []) and k[0] != PR["pec"]]
     pevne = [k for k in kusy if k[0] in PR["pevne_kusy"]]
@@ -169,7 +181,7 @@ def _luzko(typ, kusy, jizba, prekazky, pec, us, best, pr_t):
         if not (jizba[2] - 0.2 <= k[2] <= jizba[3] + 0.2):
             continue                                  # jen jizba
         o = obd(k[0], k[1], k[2], k[3])
-        if not any(prekryv(o, p) for p in [po, lo_]):
+        if not any(prekryv(o, p) for p in [po, lo_] + CHODBA[typ]):
             obsaz.append(o)
             continue
         kb = None
