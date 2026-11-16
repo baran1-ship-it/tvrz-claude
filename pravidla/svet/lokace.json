@@ -2455,14 +2455,14 @@
   "zelen_ulice": {
    "skladba": "ulice",
    "krok_m": [
-    7.0,
-    12.0
+    6.0,
+    10.0
    ],
    "od_kraje_m": [
     0.5,
     4.0
    ],
-   "podil": 0.75,
+   "podil": 0.9,
    "zacatek_m": 0.0,
    "u_plotu": {
     "skladba": "u_plotu",
@@ -2875,6 +2875,46 @@
     "sirka_m": 3.0,
     "rozestup_m": 2.6,
     "duvod": "pás křovin na jižní straně odbočky pod hřbetem (kcd1_ves_cesta_svah: cesta mezi plotem a pásem keřů, ves odkrytá jen v ose cesty)"
+   },
+   {
+    "id": "sad_za_krcmou",
+    "typ": "sad",
+    "skladba": "sad",
+    "osa": [
+     [
+      497.0,
+      798.0
+     ],
+     [
+      505.0,
+      824.0
+     ],
+     [
+      509.0,
+      850.0
+     ]
+    ],
+    "sirka_m": 16.0,
+    "rozestup_m": 7.0,
+    "duvod": "Míša 16. 11. „ves je moc otevřená“: sad za krčmou do L na otevřené louce východně od návsi (bejcek_02: statky v zeleni, ves z dálky schovaná za stromy) – zavře průhled z návsi na východní les a z louky na ves"
+   },
+   {
+    "id": "sad_mezi_dvory_v",
+    "typ": "sad",
+    "skladba": "sad",
+    "osa": [
+     [
+      468.0,
+      846.0
+     ],
+     [
+      490.0,
+      858.0
+     ]
+    ],
+    "sirka_m": 10.0,
+    "rozestup_m": 7.0,
+    "duvod": "sad mezi krčmou a usedlostí 3 (dvory oddělené zelení, kcd_sada2_05)"
    }
   ],
   "_clony": "Clony (sceny_kcd_15_11.md krok 2a, Míša 15. 11. „volná ruka“): pás vegetace podél osy (osa = lomená čára [x, z], sirka_m napříč, rozestup_m podél i napříč), skladba = les_podrost.json houstina.skladby. Staví Blender kraj.clony v kroku vegetace (po cestách a budovách, nehýbe jimi): kus se nesází na cestu (pasma.cesta ker_od_m/kmen_m od kraje), do vody (holy_breh_m), do budov a průchodů (pasma.budova kmen_od_zdi_m, pruchod_m), na vyšlapanou hlínu dvorů (ves.vyslapano), do výhledů (kompozice.vyhledy). Test smyslu clona_*; ve hře test clona_vsi (podíl zakrytí vsi z vjezdu, pasma.test.clona_vsi_*). Návrat: záznam smazat.",
