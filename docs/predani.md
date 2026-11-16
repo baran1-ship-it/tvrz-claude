@@ -1562,3 +1562,8 @@ Hotovo v kódu a datech (testy u každého):
 - Testy hry: `clona_vsi` (z vjezdu podíl paprsků k domům zakrytý vegetací, `pasma.test.clona_vsi`), `houstina_volno`.
 - Mapa návrhu bez Godotu: Blender python s `import bpy` + `kraj.clony / houstiny_meze / houstiny_breh`, `vesnice.zelen_ulice`
   (rychlé, meze ~13 s) – kontrolovat polohy dřív, než se pustí export.
+- **Kontrola práce pomocníků (Míša 16. 11.: „kontroluj si práce agentů, nemají takový přehled“):** po každém hlášení se
+  podívat na snímky pomocníka sám a porovnat s náhledy sady/předlohou. 16. 11. pomocník hlásil „hotovo, testy OK“, ale snímky:
+  seno modrošedé, lůžkoviny černé, houně tmavě modré – testy barvy neměří. U sad od modeláře vždy nejdřív Puchart
+  (`origin/ccr-f2d32673-9fi7m5`: nativní .tscn + sdílený materiál, barvy vrcholů lineární → sRGB `barvy_vrcholu.json`,
+  albedo modulace podle předlohy).
