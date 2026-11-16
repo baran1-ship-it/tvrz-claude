@@ -468,3 +468,14 @@ Výkonově (rozbor_gpu_15_11.md): les s podrostem místo trávy = méně průhle
 4. Log hry: „okluzor houstiny …“ (kolik jader prošlo kryti_min), „lesni plast“, „lesni patro (houstina)“.
 5. Balíky k vydání (až na VYDEJ): `z_svet`, `z_rostliny` (pokud export změnil modely/rostliny), `z_dlazdice`; tablet: Měřicí trasa s `bez_houstin`, zapsat do `mereni_verze.md`.
 **Otevřené:** jabloně v clonách (jablon_1–3 24–28 tis. troj.) zvýší cenu ves-vjezd – měří `les_bez_korun`; okluzor houštiny pravděpodobně nevznikne nikde (pásy 3–4 m, krytí ~0,6–0,7) – NEOVĚŘENO; podmínka 4 (snímek okluzor zap/vyp) bez testu; líska bez modelu (shrub_02 za ni).
+
+### 16. 11. večer (po exportu export_vse koordinátora, commit 94af585)
+- Testy (hou3): zasazeni OK; clona_vsi 34 % (min 50 %) → `vjezd_houstina_sv` rozšířena na 7 m (commit 5e8e43c, ČEKÁ NA EXPORT);
+  houstina_volno 104 → 2 (keře u vlněné osy pěšin: pravidlo `svet.pesina_ker_m` v `druh_smi_hra`; zbylé 2 mladé olše z pláště → plášť
+  teď používá totéž pravidlo); clona_vsi dřív 0 zásahů = chyba testu (MultiMesh s bufferem bez GPU vrací nulové transformace).
+- Snímky `build/sceny/po_*.png` (vjezd, ulice, náves, dvůr, dvur2, okraj, okraj2, les, mez, břeh, doubrava): ulice = zelený tunel
+  (jako bejcek_03/08), mez a břeh odpovídají předlohám (pás keřů, řeka vidět v mezerách). Otevřené: řady tmavých trsů na louce
+  ve vsi a u vjezdu = rozsev trsů louky (ne houština, ne pole; viděno i na tabletu misa_15_11/18) – PODEZŘENÍ louka.gd/maska trava_ves;
+  okraj lesa východně od vsi má plášť řídký (kruh 140 m kolem staré návsi v `_lesni_plast` odstraněn – po něm jen pár keřů:
+  řada stromů tam je nejspíš stromořadí, ne okraj masky `_les`); světle zelené čáry na hlíně dvorů a návsi (hrana masky).
+- Focení: dvě foto Godot najednou = OOM; fotit přes `beh.sh <jm> cmd` s výhradním zámkem.
