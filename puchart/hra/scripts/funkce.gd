@@ -89,9 +89,9 @@ static func polozky(h: Node) -> Array:
 	for k: Node in _koreny(h):
 		for zn in k.find_children(String(zs["uzel"]), "Node3D", true, false):
 			var hl := (zn as Node3D).global_position
-			var voda := zn.get_parent().find_child("Les_Studanka_Voda", true, false) as Node3D
+			var voda := zn.get_parent().find_child(String(zs.get("nabrat_uzel", "Les_Studanka_Voda")), true, false) as Node3D
 			out.append({"druh": "studanka_napit", "nazev": String(zs["napit"]), "pos": hl + Vector3.UP * 0.25, "vlastni": []})
-			out.append({"druh": "studanka_nabrat", "nazev": String(zs["nabrat"]), "pos": (voda.global_position if voda else hl) + Vector3.UP * 0.1, "vlastni": []})
+			out.append({"druh": "studanka_nabrat", "nazev": String(zs["nabrat"]), "pos": (voda.global_position if voda else hl) + Vector3.UP * 0.15, "vlastni": []})
 	var zl: Dictionary = cfg("zlab")
 	for jm in zl["kolize"]:
 		for k: Node in _koreny(h):

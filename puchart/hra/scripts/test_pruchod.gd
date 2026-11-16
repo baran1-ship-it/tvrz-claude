@@ -821,6 +821,7 @@ func _test_zajimava() -> void:
 			n += 1
 			if di.get("predmet", "") == "truhla": continue   # truhla v zemljance stojí na podlaze jámy (kolize terénu tam snížená)
 			var dy := float(di["y"]) - t
+			if di.get("u_steny", false): dy = maxf(dy, 0.0)   # kámen u stěny lomu: na dně, hrana stěny nad ním – jen nevisí
 			if dy > 0.6 or dy < -0.6: spatne.append("%s %s: y %.2f, terén %.2f" % [m["id"], di.get("model", di.get("predmet", di.get("balvan", "?"))), float(di["y"]), t])
 	# studánka: nabídky a použití
 	var fu := _funkce(); var ns := 0

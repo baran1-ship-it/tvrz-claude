@@ -342,7 +342,16 @@ for m in Z["mista"]:
         if d.get("k_bodu"):
             tx, tz = svet(o, *d["k_bodu"]); yaw = math.atan2(tx - wx, tz - wz)
         if d.get("zemljanka"):
-            zj = ZM[d["model"]]; x0, x1, z0, z1 = zj["jama"]; oz = {"x": wx, "z": wz, "yaw": yaw}
+            zj = ZM[d["model"]]; x0, x1, z0, z1 = zj["jama"]
+            # otvor jámy musí ležet celý v jedné dlaždici terénu (teren_dlazdice.py dira: přes hranici dlaždic se otvor nevyřízne –
+            # snímek 16. 11. zemljanka u lomu: v jámě tráva) → posunout po místní ose x o nejméně
+            DL = float(json.load(open(K + "/pravidla/svet/teren.json"))["dlazdice_m"])
+            def _u_hranice(px, pz):
+                return any(min((v - o_) % DL, DL - (v - o_) % DL) < 9.0 for v, o_ in ((px, xh0), (pz, zh0)))
+            for sx, sz in sorted(((a_, b_) for a_ in range(-12, 13) for b_ in range(-12, 13)), key=lambda q: q[0] ** 2 + q[1] ** 2):
+                px, pz = svet(o, lx + sx, lz + sz)
+                if not _u_hranice(px, pz): wx, wz = px, pz; break
+            oz = {"x": wx, "z": wz, "yaw": yaw}
             yz = plosina(oz, -2.4, 2.4, -3.0, 3.1, Z["teren"]["prechod_m"])
             if d.get("mimo_zarez"): pass
             ZE = Z["modely"]["zemljanky"]; rz = ZE["jama_kolize_rozsir_m"]
@@ -367,7 +376,8 @@ for m in Z["mista"]:
             q["brt"] = dict(d["brt"]); kr = ZM.get("strom_" + d["strom"], {}).get("kmen_r", {})
             hb = d["brt"]["vyska_m"]; kk = min(kr, key=lambda s: abs(float(s) - hb)) if kr else None
             q["brt"]["kmen_r"] = kr[kk] if kk else 0.5
-        if d.get("model") == "mlyn" or d.get("model") == "stola": q["y"] = o["y"]
+        if d.get("u_steny"): q["y"] = o["y"] - 0.15; q["u_steny"] = True   # kámen opřený o stěnu lomu: na dno, ne na hranu stěny
+        elif d.get("model") == "mlyn" or d.get("model") == "stola": q["y"] = o["y"]
         else: q["y"] = vys(wx, wz) + ly; q["_ly"] = ly
         zaz["dily"].append(q)
     # půdorys bez porostu (stavby_vegetace.py) a trasa od cesty k místu
@@ -418,4 +428,9 @@ json.dump({"popis": "zajímavá místa pro hru (nastroje/zajimava_mista.py z pra
           open(K + "/hra/data/zajimava_mista.json", "w"), ensure_ascii=False, indent=1)
 json.dump({"popis": "trasy průchodu zajímavých míst (nastroje/zajimava_mista.py) – test_pruchod.gd", "trasy": TRASY},
           open(K + "/hra/data/pruchody_zajimava.json", "w"), ensure_ascii=False, indent=1)
+_DL = float(json.load(open(K + "/pravidla/svet/teren.json"))["dlazdice_m"]); _spatne = []
+for q in DIRY:   # otvor musí ležet v jedné dlaždici (teren_dlazdice.py dira – jinak se nevyřízne a jámu zakryje tráva)
+    xs = [p[0] - xh0 for p in q["poly"]]; zs = [p[1] - zh0 for p in q["poly"]]
+    if int((min(xs) - 5) // _DL) != int((max(xs) + 5) // _DL) or int((min(zs) - 5) // _DL) != int((max(zs) + 5) // _DL): _spatne.append(q["misto"])
+if _spatne: print("ZAJIMAVA_CHYBA otvor přes hranici dlaždic:", _spatne); sys.exit(1)
 print("ZAJIMAVA míst %d, upravených buněk %d, děr %d, snížených kolizí %d, tras %d" % (len(VYSL), len(UPR), len(DIRY), len(KOL), len(TRASY)))
