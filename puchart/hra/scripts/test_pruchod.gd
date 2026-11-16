@@ -746,6 +746,44 @@ func _test_studna() -> void:
 	vysledek["studna_vedro"] = "OK" if spatne.is_empty() and n > 0 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádná studna s vědrem")
 	print("PRUCHOD studna_vedro ", vysledek["studna_vedro"], " (studní %d)" % n)
 
+## zajimava_mista (Míša 15. 11., docs/zajimava_mista_plan.md): každé místo z hra/data/zajimava_mista.json je ve hře (uzel Z_<id>
+## s díly), díly stojí na terénu (počátek dílu do tolerance nad/pod viditelnou výškou – nevisí, nejsou pod zemí; zemljanky,
+## štola a mlýn mají vlastní jámy/zářezy a hlídají je trasy průchodu), studánka nabízí „Napít se“ a „Nabrat vodu“ a obojí jde použít.
+func _test_zajimava() -> void:
+	var spatne: Array = []; var zj: Node = hlavni.get_node_or_null("Zajimava")
+	if zj == null or not FileAccess.file_exists("res://data/zajimava_mista.json"):
+		vysledek["zajimava_mista"] = "CHYBA: zajímavá místa nejsou ve hře"; print("PRUCHOD zajimava_mista ", vysledek["zajimava_mista"]); return
+	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/zajimava_mista.json"))
+	var n := 0
+	for m: Dictionary in d["mista"]:
+		var u := zj.get_node_or_null("Z_" + String(m["id"])) as Node3D
+		if u == null or u.get_child_count() == 0: spatne.append("%s: chybí ve hře" % m["id"]); continue
+		for di: Dictionary in m["dily"]:
+			if di.get("zemljanka", false) or String(di.get("model", "")) in ["stola", "mlyn"] or di.has("strom"): continue
+			var t := hlavni.svet.vyska(float(di["x"]), float(di["z"])) as float
+			n += 1
+			if di.get("predmet", "") == "truhla": continue   # truhla v zemljance stojí na podlaze jámy (kolize terénu tam snížená)
+			var dy := float(di["y"]) - t
+			if dy > 0.6 or dy < -0.6: spatne.append("%s %s: y %.2f, terén %.2f" % [m["id"], di.get("model", di.get("predmet", di.get("balvan", "?"))), float(di["y"]), t])
+	# studánka: nabídky a použití
+	var fu := _funkce(); var ns := 0
+	for p: Dictionary in fu.polozky_:
+		if not String(p["druh"]).begins_with("studanka"): continue
+		ns += 1
+		var u2: Dictionary = await _k_veci(p["pos"], p["pos"] + Vector3(0, 0, 1.4), p["vlastni"])
+		if u2.is_empty() or u2["p"]["druh"] != p["druh"]:
+			for sm in [Vector3(1.3, 0, 0), Vector3(-1.3, 0, 0), Vector3(0, 0, -1.3), Vector3(0.9, 0, 0.9), Vector3(-0.9, 0, 0.9)]:
+				u2 = await _k_veci(p["pos"], p["pos"] + sm, p["vlastni"])
+				if not u2.is_empty() and u2["p"]["druh"] == p["druh"]: break
+		if u2.is_empty() or u2["p"]["druh"] != p["druh"]: spatne.append("studánka: není nabídka %s" % p["nazev"]); continue
+		fu.pouzij_polozku(p)
+		var ok := int(p.get("napito", 0)) + int(p.get("nabrano", 0)) > 0
+		print("PRUCHOD studanka %s: nabídka %s -> %s" % [p["druh"], p["nazev"], "OK" if ok else "CHYBA"])
+		if not ok: spatne.append("studánka %s nejde použít" % p["nazev"])
+	if ns < 2: spatne.append("studánka: nabídek %d (čeká se Napít se + Nabrat vodu)" % ns)
+	vysledek["zajimava_mista"] = "OK" if spatne.is_empty() else "CHYBA: %s" % "; ".join(spatne)
+	print("PRUCHOD zajimava_mista ", vysledek["zajimava_mista"], " (míst %d, dílů na terénu %d, nabídek studánky %d)" % [d["mista"].size(), n, ns])
+
 func _chyba(t: String) -> void:
 	for i in hrac.get_slide_collision_count():
 		var c := hrac.get_slide_collision(i)
@@ -768,6 +806,7 @@ func _konec() -> void:
 	if jen == "" or "jesle" in jen: await _test_jesle()
 	if jen == "" or "studna" in jen: await _test_studna()
 	if jen == "" or "kovadlina" in jen: await _test_kovadlina()
+	if jen == "" or "zajimava" in jen: await _test_zajimava()
 	hrac.autopilot = Vector3.INF
 	var f := FileAccess.open(OS.get_environment("PUCHART_VYSTUP") if OS.has_environment("PUCHART_VYSTUP") else "user://pruchod.json", FileAccess.WRITE); f.store_string(JSON.stringify(vysledek, " "))
 	var ok := vysledek.values().all(func(v): return v == "OK")

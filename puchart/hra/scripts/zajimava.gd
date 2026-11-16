@@ -127,6 +127,9 @@ func _zemljanka(u: Node3D, di: Dictionary, mo: String) -> Node3D:
 			var c_: Array = zl["obal_barva"]   # hrubý obal bez textury (Míša 14. 11.: z dálky ne světlé kostky – barva ztmavlé kůry)
 			var mo_ := StandardMaterial3D.new(); mo_.albedo_color = Color(float(c_[0]), float(c_[1]), float(c_[2])); mo_.roughness = 1.0
 			gi.material_override = mo_
+		else:
+			gi.visibility_range_end = float(zl["podrobny_do_m"])
+			if String(gi.name).begins_with("Zemljanka_"): gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ho: Dictionary = Pravidla.cti("zajimava_mista", "modely", "zemljanky").get("houne", {})   # vlněná houně od modeláře na rohožích (Míša 16. 11.)
 	if ResourceLoader.exists(String(ho.get("model", ""))):
 		for jm in ["Zemljanka_Spani_L", "Zemljanka_Spani_P"]:
@@ -149,9 +152,6 @@ func _zemljanka(u: Node3D, di: Dictionary, mo: String) -> Node3D:
 			if not cache.has(mt):
 				var m2 := mt.duplicate() as BaseMaterial3D; m2.albedo_color = mt.albedo_color * Color(jas, jas, jas); cache[mt] = m2
 			(mi as MeshInstance3D).set_surface_override_material(i, cache[mt])
-		else:
-			gi.visibility_range_end = float(zl["podrobny_do_m"])
-			if String(gi.name).begins_with("Zemljanka_"): gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return z
 
 
