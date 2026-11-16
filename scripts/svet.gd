@@ -7260,7 +7260,7 @@ func _ves_domy(root: Node3D) -> void:
 			elif kusy_y.has(iv):
 				wp.y = float(kusy_y[iv]) + float(v[4])
 			var yv := yaw + deg_to_rad(float(v[3]))
-			if v.size() > 5 and String(v[5]) == "o_zed":
+			if v.size() > 5 and v[5] is String and String(v[5]) == "o_zed":
 				# Misa 0.99994 r. 68 „metla v kazde chalupe lezi na zemi“: kus 6. pole "o_zed" = opreny o nejblizsi zed
 				# mistnosti (pasma.predmet o_zed_uhel_st), pata od zdi tak, aby se horni konec zdi dotykal
 				data["vybaveni"].append(_opreny_o_zed(String(v[0]), Vector2(float(v[1]), float(v[2])), float(m["pod"]) + float(v[4]), m, xf))
