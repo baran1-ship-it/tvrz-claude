@@ -113,7 +113,7 @@
     [
      "pec_chalupni",
      -2.415,
-     2.835,
+     3.885,
      90.0,
      0.0,
      {
@@ -189,7 +189,7 @@
     [
      "pec_chalupni",
      -1.92,
-     2.63,
+     3.38,
      90.0,
      0.0,
      {
@@ -309,16 +309,16 @@
     ],
     [
      "postel_rychtar",
-     -2.915,
+     0.585,
      0.735,
      180.0,
      0.0
     ],
     [
      "pec_chalupni",
-     0.185,
-     0.535,
-     0.0,
+     -2.715,
+     2.785,
+     90.0,
      0.0,
      {
       "sc": 0.759
@@ -1049,7 +1049,7 @@
   "luzko_kout": "vstupni_stena_naproti_peci",
   "meritko": "podle_pece_modelu",
   "_meritko": "Míša 16. 11. („když je pec moc velká, zmenši ji na původní velikost“): pec_chalupni v domech se zmenší tak, aby její největší rozměr půdorysu (s lavicí, zápecím a předpecím) byl jako největší rozměr pece modelu (Kol_Pec, domy.glb) – kus nese {sc}, hra zmenší model, kolizi i značky ohně a ústí (svet.ohen_predmetu sc).",
-  "k_vstupni_stene": 3.0,
-  "_k_vstupni_stene": "váha vzdálenosti pece od vstupní stěny jizby (příčka síně) ve skóre pece_domu.py – pec v koutě u vstupu (Míša 16. 11.), jak to průchod dveří (pruchod_m) dovolí"
+  "k_vstupni_stene": -3.0,
+  "_k_vstupni_stene": "váha vzdálenosti pece od vstupní stěny jizby ve skóre pece_domu.py. Míša 16. 11. večer: „pece v rohu, ne u dveří“ → záporná: pec v rohu u protější (zadní) stěny, zápecí a lavice ke zdem; stůl (svatý kout) zůstává pevný."
  }
 }
