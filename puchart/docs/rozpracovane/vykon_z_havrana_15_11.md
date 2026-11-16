@@ -15,3 +15,12 @@ možná se ti bude něco hodit“. Porovnání s Puchartem (kód 15. 11.):
 | Stínová tělesa (`SHADOWS_ONLY`) panel počítá jako viditelná | Puchart má `_Daleko_Stin` u domů | panel: oddělit viditelné/stín (`get_render_info TYPE_VISIBLE/TYPE_SHADOW`) |
 
 Pořadí: po dokončení funkcí a hlídačů, před vydáním APK měřit P1 a P3 (rychlé), P2 a P4 podle výsledku.
+
+## Video Míši 16. 11. (LOD stromů a trávy) – co z toho pro Puchart
+| Technika z videa | Puchart dnes | Akce po APK |
+|---|---|---|
+| Časované prolnutí LOD (timed fade 0,25 s místo pásma podle vzdálenosti – strom kreslen dvakrát jen chvíli) | stromy: doplňkový dithering v pásmu `prolinani_m` (10 m) – v pásmu běží oba stupně (discard), les.gd _fade | P2: časované prolnutí v shaderu (čas spuštění v INSTANCE_CUSTOM), změřit dvojí kreslení v pásmu, Havran to plánuje také |
+| LOD0–LOD3 + impostor (2 troj.) | plný strom → jednoduchý tvar → impostor (atlas 8×8, Havran) | jen ověřit počty troj. stupňů |
+| Tráva: dither maska do dálky | byliny i louka – rozpouštění ditheringem / zmenšení trsu podle hustoty(vzdálenost) | nic |
+| Tráva z dálky: impostorové buňky (2 troj./buňka místo karet) | louka jen v okruhu buněk, dál barva terénu | P3: zvážit „travní impostor“ pásmo, pokud dálka louky vypadá holá |
+| Záseky Havrana (bohatší příroda) | Puchart P2 výše: zásoba MultiMeshů, plánovač | měřit trasou na tabletu |
