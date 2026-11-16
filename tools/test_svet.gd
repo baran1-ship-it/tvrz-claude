@@ -8862,7 +8862,7 @@ func _krcma_l() -> void:
 	if kd == null:
 		_vysledek("krcma_l", false, "Krcma_dil chybi")
 		return
-	for o: Vector2 in [Vector2(-8.0, -3.5), Vector2(7.0, -3.5), Vector2(-8.0, 4.0), Vector2(7.0, 4.0), Vector2(15.0, -10.0)]:
+	for o: Vector2 in [Vector2(-8.0, -3.5), Vector2(7.0, -3.5), Vector2(-8.0, 4.0), Vector2(7.0, 4.0), Vector2(15.0, -7.2)]:
 		var w := kd.global_transform * Vector3(o.x, 0.0, o.y)
 		var y_t: float = sv.call("_vyska", w.x, w.z)
 		if absf(kd.global_position.y - y_t) > 0.35:
@@ -9168,13 +9168,13 @@ func _krcma_schody() -> void:
 	var bod := func(x: float, z: float) -> Vector2:
 		var w := xf * Vector3(x, 0.0, z)
 		return Vector2(w.x, w.z)
-	var b0: Vector2 = bod.call(9.3, -12.6)
+	var b0: Vector2 = bod.call(9.3, -9.8)
 	await main.fast_travel(Vector3(b0.x, 0.0, b0.y), Vector3(b0.x, 1.6, b0.y + 2.0), 0.0, "test")
 	for i in 60:
 		await get_tree().physics_frame
 	player.set_flying(false)
 	var y0 := float(sv._teren_y(b0.x, b0.y))
-	var cesta: Array = [b0, bod.call(9.3, -11.6), bod.call(9.3, -7.6), bod.call(10.6, -7.65), bod.call(10.8, -4.0), bod.call(10.8, 0.5)]
+	var cesta: Array = [b0, bod.call(9.3, -8.8), bod.call(9.3, -4.8), bod.call(10.6, -4.85), bod.call(10.8, -1.2), bod.call(10.8, 3.3)]
 	var r: Array = await _jdi_poschodi(cesta, y0, 0.3)
 	var y_kon := player.global_position.y
 	var patro := (xf * Vector3(0.0, 2.85, 0.0)).y
@@ -9263,7 +9263,7 @@ func _krcma_dvur() -> void:
 	var chyby: Array = []
 	# 1) strecha: dvur a SZ roh ne, dum a stáj ano
 	for pr: Array in [["dvur stred", 4.0, -8.0, false], ["dvur u plotu", -6.0, -6.0, false], ["dvur u staje", 7.5, -10.0, false],
-			["SZ roh pozemku", -9.5, -13.5, false], ["senkovna", -4.0, 0.0, true], ["staj", 14.0, -5.0, true], ["kulna", -5.4, -11.5, true]]:
+			["SZ roh pozemku", -9.5, -13.5, false], ["senkovna", -4.0, 0.0, true], ["staj", 14.0, -2.2, true], ["kulna", -5.4, -11.5, true]]:
 		var w := xf * Vector3(float(pr[1]), 0.0, float(pr[2]))
 		if bool(sv.pod_strechou(w)) != bool(pr[3]):
 			chyby.append("strecha %s: %s" % [pr[0], str(not bool(pr[3]))])
@@ -9278,8 +9278,8 @@ func _krcma_dvur() -> void:
 	if not bool(r[0]):
 		chyby.append("ven ze dvora: %s" % r[1])
 	# 3) ze dvora na schody a na patro
-	r = await _jdi_poschodi([b0, bod.call(8.15, -11.0), bod.call(8.15, -13.4), bod.call(9.3, -13.4), bod.call(9.3, -11.6),
-			bod.call(9.3, -7.6), bod.call(10.6, -7.65)], y0, 0.3)
+	r = await _jdi_poschodi([b0, bod.call(8.15, -11.0), bod.call(8.15, -13.4), bod.call(9.3, -13.4), bod.call(9.3, -8.8),
+			bod.call(9.3, -4.8), bod.call(10.6, -4.85)], y0, 0.3)
 	var patro := (xf * Vector3(0.0, 2.85, 0.0)).y
 	if not bool(r[0]) or player.global_position.y < patro - 0.3:
 		chyby.append("na schody: %s, y %.2f / patro %.2f" % [r[1], player.global_position.y, patro])
@@ -10694,7 +10694,10 @@ func _ryb_vznaseni() -> void:
 				if best.is_empty() or Vector2(e[0], e[1]).distance_to(q) < Vector2(best[0], best[1]).distance_to(q):
 					best = e
 			var yb := hl - float(best[2]) if not best.is_empty() and Vector2(best[0], best[1]).distance_to(q) < 0.6 else INF
-			nohy.append("s%.1f teren hry %.2f Blender %.2f" % [s, yg, yb])
+			# rozbor (ktery krok hry teren snizil): koryto maleho toku a nadrz nad terenem Blenderu
+			var yk: float = sv.koryto_toku_y(q.x, q.y, yb) if yb != INF else INF
+			var yn: float = sv.nadrz.strop(q.x, q.y) if sv.nadrz else INF
+			nohy.append("s%.1f teren hry %.2f Blender %.2f (koryto_toku %.2f, nadrz strop %.2f)" % [s, yg, yb, yk, yn])
 			if yb != INF and yg != INF and yg < yb - 0.4 - 0.02:
 				chyby.append("noha lavky s %.1f visi %.2f m (teren hry %.2f, spodek %.2f)" % [s, yb - 0.4 - yg, yg, yb - 0.4])
 		s += 1.2

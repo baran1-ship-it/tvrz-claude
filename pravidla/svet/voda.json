@@ -1593,6 +1593,9 @@
    ]
   },
   "pozerak": {
+   "lavka_kuly_po_m": 1.0,
+   "kul_zapust_m": 0.5,
+   "_lavka_kuly": "Míša 16. 11. r. 5 (snímek 06: lávka na korunu „na jednom sloupku“): pod prkny lávky z koruny na požerák páry kůlů (dub, 0,12 m) do svahu hráze po lavka_kuly_po_m, zapuštěné kul_zapust_m, s příčkou; odhad podle dřevěných lávek k požerákům (NEOVĚŘENO zdrojem).",
    "od_vodni_cary_m": 0.6,
    "sirka_m": 0.7,
    "nad_korunou_m": 0.3,
@@ -1626,6 +1629,8 @@
    ]
   },
   "preliv": {
+   "dlazba": {"rada_m": 0.5, "kamen_sirka_m": 0.45, "spara_m": 0.02, "tloustka_m": 0.18, "nad_dnem_m": 0.03, "presah_m": 0.6, "obruba_sirka_m": 0.3, "obruba_vyska_m": 0.45, "obruba_nad_m": 0.15},
+   "_dlazba": "Míša 16. 11. r. 5 (snímek 06: dlažba přelivu jako rozsypané kvádry – kameny s náhodným natočením ±8° a délkou, vodorovné na svahu = schody): souvislé koryto – řady napříč po rada_m (vazba na přeskáčku), kámen nakloněný podle spádu dna (kraj.ryb2_preliv_dno), horní plocha nad_dnem_m nad dnem, spára spara_m; obruba z kvádrů podél osy po obou stranách, obruba_nad_m nad terénem. Rozměry podle kamenných skluzů rybníků (lomový kámen 0,4–0,5 m; NEOVĚŘENO zdrojem). Hledáno hotové: Poly Haven (modular_wooden_pier – mořské molo, ne skluz), Kenney/Quaternius (bez kamenného skluzu) – stavba z kvádrů kit.stone.",
    "posun_m": 2.8,
    "sirka_m": 1.6,
    "nabeh_m": 1.2,
@@ -6159,7 +6164,7 @@
   "mlyn/dil/s_toku",
   "mlyn/dil/zdroj",
   "prikop/hladina_y",
-  "mlyn/dil/odpad_za_dilem_m"
+  "mlyn/dil/odpad_za_dilem_m", "rybnik_lhota/pozerak/lavka_kuly_po_m", "rybnik_lhota/pozerak/kul_zapust_m", "rybnik_lhota/preliv/dlazba"
  ],
  "prikop": {
   "hladina_y": -2.0,

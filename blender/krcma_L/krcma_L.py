@@ -22,7 +22,12 @@ RENDER = "--norender" not in sys.argv
 # hlinena pec senkovny a jeji kolize se nestavi (nahodna cisla se spotrebuji stejne - ostatni model beze zmeny)
 import json as _json
 with open(os.path.join(OUT, "..", "..", "pravidla", "svet", "lokace.json"), encoding="utf-8") as _f:
-    PEC_KATALOG = bool(_json.load(_f)["krcma_l"].get("pec_senkovna_katalog", False))
+    _KL = _json.load(_f)["krcma_l"]
+    PEC_KATALOG = bool(_KL.get("pec_senkovna_katalog", False))
+# Misa 16. 11. r. 4 tabulky misa_16_11 (snimky 04, 05: „dum s ubytovnou zarovnat s pruchodem napojenym na hospodu“): kridlo
+# (stáj, pavlac, pokoje) posunuto o kridlo_posun_y_m podel Y tak, aby jeho ulicni lic lezel v care vrat pruchodu (Y0) -
+# drive kamenne lice SY0 -1,2 o 2,8 m za vraty a domem (lokace.json krcma_l kridlo_posun_y_m)
+KDY = float(_KL.get("kridlo_posun_y_m", 0.0))
 random.seed(SEED)
 W, L, ZE, P_MAIN = 8.0, 15.0, 3.15, math.radians(45)
 PFX = "KrcmaL"
@@ -42,10 +47,10 @@ def snap_dn(z, ph, z0=ZP): return max(b for b in bnd(ph, z0) if b <= z + 1e-6)
 DT0, DT1 = snap_up(ZF + 1.90, 0), snap_up(ZF + 1.90, 1)          # vršky dveří ve stěnách fáze 0 / 1
 WB0, WB1 = snap_dn(ZF + 0.95, 0), snap_dn(ZF + 0.95, 1)
 # křídlo
-KX0, KX1, KY0, KY1 = 11.95, 18.0, -1.0, 11.0     # osy roubeného patra (západní stěna ustoupená: pavlač 1,9 m na kameni pod střechou)
+KX0, KX1, KY0, KY1 = 11.95, 18.0, -1.0 + KDY, 11.0 + KDY     # osy roubeného patra (západní stěna ustoupená: pavlač 1,9 m na kameni pod střechou)
 KZ = 2.80; KZF = 2.85; KZW = 5.65                # patro: světlá výška pokojů ~2,5 m                # vršek kamene, podlaha patra, vršek stěn patra
 KDT = snap_up(KZF + 1.90, 0, KZF)
-SX0, SX1, SY0, SY1, ST = 9.80, 18.20, -1.20, 11.20, 0.60          # kamenné přízemí (vnější líc, tloušťka)
+SX0, SX1, SY0, SY1, ST = 9.80, 18.20, -1.20 + KDY, 11.20 + KDY, 0.60          # kamenné přízemí (vnější líc, tloušťka)
 
 def inside_house(c): return X0 + 0.1 < c.x < X1 - 0.1 and Y0 + 0.1 < c.y < Y1 - 0.1 and c.z < ZW + 4
 def WK_INSIDE(c):
@@ -158,11 +163,11 @@ podezdivka = masonry(pz, "KrcmaL_Podezdivka", 2.5, 0.07, lambda p, n: False, soo
 # ================================================================= KŘÍDLO: KAMENNÉ PŘÍZEMÍ (STÁJ)
 print("křídlo – kámen…")
 kz = solid_box((SX0, SY0, 0.0), (SX1, SY1, KZ))
-STAJ_D = [(1.6, 4.0)]                            # dvoukřídlá vrata stáje na západ do dvora (y), 2,4 × 2,5 m
+STAJ_D = [(1.6 + KDY, 4.0 + KDY)]                            # dvoukřídlá vrata stáje na západ do dvora (y), 2,4 × 2,5 m
 VZ_T = 2.50
 csg(kz, [solid_box((SX0 + ST, SY0 + ST, -0.1), (SX1 - ST, SY1 - ST, KZ + 0.1))] +
     [solid_box((SX0 - 0.2, y0, -0.1), (SX0 + ST + 0.2, y1, VZ_T)) for (y0, y1) in STAJ_D] +
-    [solid_box((SX1 - ST - 0.2, y - 0.13, 1.35), (SX1 + 0.2, y + 0.13, 1.85)) for y in (0.5, 3.5, 6.5, 9.5)] +
+    [solid_box((SX1 - ST - 0.2, y - 0.13, 1.35), (SX1 + 0.2, y + 0.13, 1.85)) for y in (0.5 + KDY, 3.5 + KDY, 6.5 + KDY, 9.5 + KDY)] +
     [solid_box((x - 0.13, SY1 - ST - 0.2, 1.35), (x + 0.13, SY1 + 0.2, 1.85)) for x in (12.5, 15.0, 17.0)], 'DIFFERENCE')
 def soot_kridlo(p, n, h, bed=False):
     inside = SX0 + ST - 0.05 < p.x < SX1 - ST + 0.05 and SY0 + ST - 0.05 < p.y < SY1 - ST + 0.05
@@ -180,12 +185,12 @@ kridlo_kamen = masonry(kz, "KrcmaL_Kridlo_Kamen", 2.5, 0.08, lambda p, n: False,
 print("křídlo – patro…")
 KR = Mesh("KrcmaL_Roubeni_Kridlo")
 KW = ((KX0, KY0), (KX0, KY1)); KE = ((KX1, KY0), (KX1, KY1)); KSo = ((KX0, KY0), (KX1, KY0)); KN = ((KX0, KY1), (KX1, KY1))
-ROOMS_Y = [KY0, 3.0, 7.0, KY1]                    # pokoj 1, pokoj 2, nocležna – každá 4 × 6 m
+ROOMS_Y = [KY0, 3.0 + KDY, 7.0 + KDY, KY1]                    # pokoj 1, pokoj 2, nocležna – každá 4 × 6 m
 KD = [(ROOMS_Y[0] + 0.5 - KY0, ROOMS_Y[0] + 1.4 - KY0, KZF - 0.03, KDT), (ROOMS_Y[1] + 0.5 - KY0, ROOMS_Y[1] + 1.4 - KY0, KZF - 0.03, KDT),
       (ROOMS_Y[2] + 0.4 - KY0, ROOMS_Y[2] + 1.3 - KY0, KZF - 0.03, KDT)]
 KWB = snap_dn(KZF + 1.0, 1, KZF)
-KWI = [(a - KY0, a + 0.5 - KY0, KWB, KWB + 0.5) for a in (1.9, 5.9, 9.9)]          # okénka na pavlač
-KEW = [(a - KY0, a + 0.55 - KY0, KWB, KWB + 0.5) for a in (0.7, 4.7, 8.7)]    # okna na východ
+KWI = [(a + KDY - KY0, a + KDY + 0.5 - KY0, KWB, KWB + 0.5) for a in (1.9, 5.9, 9.9)]          # okénka na pavlač
+KEW = [(a + KDY - KY0, a + KDY + 0.55 - KY0, KWB, KWB + 0.5) for a in (0.7, 4.7, 8.7)]    # okna na východ
 KNW = [(14.7 - KX0, 15.25 - KX0, snap_dn(KZF + 1.0, 0, KZF), snap_dn(KZF + 1.0, 0, KZF) + 0.5)]
 log_wall(KR, *KW, KZF - 0.04, KZW, 1, holes=KD + KWI, ext=(EXT, EXT), inward=(1, 0, 0))
 log_wall(KR, *KE, KZF - 0.04, KZW, 1, holes=KEW, ext=(EXT, EXT), inward=(-1, 0, 0))
@@ -205,8 +210,8 @@ ceiling(KR, KX0, KX1, KY0, KY1, KZW - 0.05, "x", key_beam="tram_in", top_board=T
 # pavlač: na kamenné zdi stáje pod přetaženou střechou; sloupy, pásky, vaznice, zábradlí s mezerou pro schody
 PX_ = SX0 + 0.14                                   # osa sloupů pavlače (na kameni)
 PVX0, PVX1, PVY0, PVY1 = SX0 - 1.2, KX0 - 0.12, SY0, SY1          # PVX0 zůstává kvůli plotu (mezera za křídlem)
-ST_Y0, ST_Y1 = 7.15, 8.15                          # průchod v zábradlí na schody
-POST_Y = [SY0 + 0.12, 2.0, 4.4, 6.9, 8.4, SY1 - 0.12]
+ST_Y0, ST_Y1 = 7.15 + KDY, 8.15 + KDY                          # průchod v zábradlí na schody
+POST_Y = [SY0 + 0.12, 2.0 + KDY, 4.4 + KDY, 6.9 + KDY, 8.4 + KDY, SY1 - 0.12]
 for y in POST_Y:
     T(KR, (PX_, y, KZF), (PX_, y, KZW + 0.02), 0.18, 0.18, up=(1, 0, 0), wane=0.5)
     T(KR, (PX_, y, KZW + 0.11), (KX0 + 0.2, y, KZW + 0.11), 0.16, 0.18, key="tram", wane=0.4)              # trámek k roubení
@@ -223,7 +228,7 @@ for (ya, yb) in splitr(SY0 + 0.05, SY1 - 0.05, [(ST_Y0, ST_Y1)]):
 STX = SX0 - 0.50
 # schody konci na severnim kraji podesty (Misa 15. 11. „spatne zabradli nahoru“: drive vybihaly az na jizni kraj podesty,
 # posledni metr schodu pod podestou = schod 0,5 m) a zabradli maji na volne strane, ne u zdi stane
-STA, STB = Vector((STX, 12.05, 0.0)), Vector((STX, ST_Y1, KZF))
+STA, STB = Vector((STX, 12.05 + KDY, 0.0)), Vector((STX, ST_Y1, KZF))
 stairs(KR, STA, STB, 0.85, rail=True, key="tram", rail_side=-1)
 def zabradli(Ms, p0, p1, z0):
     """rovne zabradli jako pavlac: madlo 1,0 m, prostredni zerd 0,5 m, svislice po 0,45 m, sloupky na koncich"""

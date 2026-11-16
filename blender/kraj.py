@@ -1864,22 +1864,68 @@ def ryb2_predmety(coll, ryb, land_fn, vs, tris, hl):
         kit.plank(P, a, b, 0.3, 0.05, "prkna_ven", wear=0.6, seg_len=0.4)
     P.cols.append((M(((px + kx) / 2, (y1 + kor) / 2 + 0.04, (pz_ + kz) / 2), yaw_n), (math.hypot(kx - px, kz - pz_) + 0.4, 0.08, 0.7)))
 
-    # preliv: plochy kamen v korytu prelivu (ryb2_preliv_dno) od navodni hrany koruny po konec u cela vypusti
+    # podpery lavky na korunu (Misa 16. 11. r. 5, snimek 06: „lavka na jednom sloupku“ - prkna lezela jen na pozeraku
+    # a korune): pary kulu do svahu hraze po pozerak.lavka_kuly_po_m s prickou pod prkny
+    kpo = pz["lavka_kuly_po_m"]
+    Lk = math.hypot(kx + nx * 0.4 - px, kz + nz * 0.4 - pz_)
+    nk = max(1, int(Lk / kpo))
+    for i_k in range(1, nk + 1):
+        f = i_k / (nk + 1.0)
+        mx_, mz_ = px + (kx + nx * 0.4 - px) * f, pz_ + (kz + nz * 0.4 - pz_) * f
+        my_ = y1 + 0.02 + (kor + 0.06 - y1 - 0.02) * f
+        for sg in (-0.3, 0.3):
+            qx, qz = mx_ + ux * sg, mz_ + uz * sg
+            P.rod(Vector((qx, land_fn(qx, qz) - pz["kul_zapust_m"], qz)), Vector((qx, my_ - 0.01, qz)), 0.06, 7, "dub_ven")
+        kit.plank(P, Vector((mx_ - ux * 0.38, my_ - 0.09, mz_ - uz * 0.38)), Vector((mx_ + ux * 0.38, my_ - 0.09, mz_ + uz * 0.38)),
+                  0.1, 0.08, "dub_ven", wear=0.2, seg_len=0.4)
+
+    # preliv (Misa 16. 11. r. 5, snimek 06: „dlazba jako rozsypane kvadry“): souvisle koryto - dlazba v radach napric
+    # (vazba na preskacku, spara preliv.dlazba.spara_m), kazdy kamen nakloneny podle spadu dna ryb2_preliv_dno (horni
+    # plocha v dne, ne schody na svahu), po stranach souvisla obruba z kvadru podel osy. Rozmery ze zaznamu preliv.dlazba.
+    dl = pr["dlazba"]
     ap, t, t_kon, _y0, _y1 = ryb2_preliv(ryb)
-    t -= 0.6
-    while t <= t_kon + 0.3:
-        bx, bz = hz["stred"][0] + ux * ap + nx * t, hz["stred"][1] + uz * ap + nz * t
-        o = -pr["sirka_m"] / 2.0
-        while o < pr["sirka_m"] / 2.0:
-            dl = R.uniform(0.35, 0.55)
-            sx, sz = bx + ux * (o + dl / 2), bz + uz * (o + dl / 2)
-            kit.stone(P, M((sx, land_fn(sx, sz) - 0.02, sz), yaw_n + R.uniform(-8, 8)), (R.uniform(0.38, 0.52), 0.12, dl - 0.03),
-                      "kvadr_sedy", cham=0.03, rough=0.02)
-            o += dl
-        for sg in (-1, 1):                               # obrubnik
-            sx, sz = bx + ux * sg * (pr["sirka_m"] / 2 + 0.15), bz + uz * sg * (pr["sirka_m"] / 2 + 0.15)
-            kit.stone(P, M((sx, land_fn(sx, sz) + 0.04, sz), yaw_n + R.uniform(-5, 5)), (0.45, 0.25, 0.28), "kvadr_sedy", cham=0.04, rough=0.02)
-        t += 0.45
+    t -= dl["presah_m"]
+    t_kon += dl["presah_m"]
+    hw = pr["sirka_m"] / 2.0
+    rd = dl["rada_m"]
+    sp = dl["spara_m"]
+    tl = dl["tloustka_m"]
+
+    def dno_v(tt, oo):
+        qx = hz["stred"][0] + ux * (ap + oo) + nx * tt
+        qz = hz["stred"][1] + uz * (ap + oo) + nz * tt
+        return qx, min(ryb2_preliv_dno(qx, qz, ryb), land_fn(qx, qz)), qz
+
+    def baze(tt0, tt1, oo):
+        # osa x po proudu (n) se sklonem dna, z napric (u), y kolmo nahoru
+        xa, ya, za = dno_v(tt0, oo)
+        xb, yb, zb = dno_v(tt1, oo)
+        X = Vector((xb - xa, yb - ya, zb - za)).normalized()
+        Z = Vector((ux, 0.0, uz))
+        Y = Z.cross(X).normalized()
+        if Y.y < 0.0:
+            Y = -Y
+        Z = X.cross(Y).normalized()
+        from mathutils import Matrix
+        return Matrix((X, Y, Z)).transposed(), ((xa + xb) / 2, (ya + yb) / 2, (za + zb) / 2)
+    rada = 0
+    while t < t_kon - 0.05:
+        t1 = min(t + rd, t_kon)
+        o = -hw - (dl["kamen_sirka_m"] / 2.0 if rada % 2 else 0.0)
+        while o < hw - 0.05:
+            o1 = min(o + dl["kamen_sirka_m"] * R.uniform(0.85, 1.15), hw)
+            o0 = max(o, -hw)
+            B, c = baze(t, t1, (o0 + o1) / 2)
+            cen = Vector(c) - B.col[1] * (tl / 2.0 - dl["nad_dnem_m"])
+            kit.stone(P, M(cen, basis=B), (t1 - t - sp, tl, o1 - o0 - sp), "kvadr_sedy", cham=0.025, rough=0.01)
+            o = o1
+        for sg in (-1, 1):                               # obruba: kvadr podel osy na kraji koryta
+            oo = sg * (hw + dl["obruba_sirka_m"] / 2.0)
+            B, c = baze(t, t1, oo)
+            cen = Vector(c) + B.col[1] * (dl["obruba_nad_m"] - dl["obruba_vyska_m"] / 2.0)
+            kit.stone(P, M(cen, basis=B), (t1 - t - sp, dl["obruba_vyska_m"], dl["obruba_sirka_m"]), "kvadr_sedy", cham=0.035, rough=0.015)
+        t = t1
+        rada += 1
 
     # praci lavka: kuly a prkna kolmo do vody od kraje
     lx, lz = lv["bod"]
