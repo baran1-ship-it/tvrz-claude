@@ -88,9 +88,12 @@ def pro_typ(typ, kol):
     cx, cz = (x0 + x1) / 2, (zp + zf) / 2
     ps = float(PR["pruchod_k_stredu_m"])
     chodba = []                                     # usecka dvere -> stred jizby jako rada ctvercu +- ps (cesta testu)
-    for i in range(13):
-        t_ = i / 12.0
-        qx, qz = dx + (cx - dx) * t_, zp + (cz - zp) * t_
+    sz = zp - float(PR["sin_stred_od_pricky_m"])    # cesta jako test dvere_domu: od stredu sine ke stredu jizby
+    for i in range(25):
+        t_ = i / 24.0
+        qx, qz = dx + (cx - dx) * t_, sz + (cz - sz) * t_
+        if qz < zp - 0.2:
+            continue
         chodba.append((qx - ps, qx + ps, qz - ps, qz + ps))
     prekazky = [dvere, (lav[0][0], lav[1][0], lav[0][2], lav[1][2])] + chodba
     CHODBA[typ] = chodba

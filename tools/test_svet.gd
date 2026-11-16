@@ -1080,7 +1080,10 @@ func _dvere_domu() -> void:
 			var y1 := y0
 			if String(d["typ"]) == "Rychta" and cil == "komora":
 				cz = -5.3                          # dvermi a pod patrem k hornimu schodu (komora 0,75 m niz)
-			var body := [Vector3(dvere_x, y0, sz), Vector3(dvere_x, y1, cz)]
+			# 17. 11.: do jizby ode dveri ke STREDU jizby (x 0 - jizba je mezi bocnimi stenami domu souměrna), ne rovne
+			# za dvermi - v jizbe po staru stoji pec v koute za dvermi (nabytek.json pece_domu pruchod_k_stredu_m hlida
+			# stejnou cestu pri rozmistovani)
+			var body := [Vector3(dvere_x, y0, sz), Vector3(0.0 if cil == "jizba" else dvere_x, y1, cz)]
 			var q := PhysicsShapeQueryParameters3D.new()
 			q.shape = cap
 			q.exclude = [player.get_rid()]
