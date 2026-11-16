@@ -148,10 +148,40 @@ static func osad_kovadliny(h: Node) -> Array:
 	return out
 
 
+## Pevná lůžka ve stavbách (luzka.json osazeni; Míša 16. 11.: „jestli máš někde postele, tak tam použij ty pro chudé“): model
+## lůžka modeláře jako dítě rodiče značky (stavba), poloha a natočení v souřadnicích stavby; jeho kolize (StaticBody3D „Kolize“)
+## se přejmenuje na kolize_jmeno (místo spánku funkce.json ji vynechá ze zaměření), LOD1 modelu dostane konec dosahu.
+## Staré lůžko ze sítě stavby smaže nastroje/luzka_modely.py. Vrací vložené uzly (už osazené se přeskočí).
+static func osad_luzka(h: Node) -> Array:
+	var out: Array = []
+	for o: Dictionary in Pravidla.cti("luzka", "osazeni"):
+		var cesta := "res://modely/luzka/%s%s.tscn" % [o["model"], Pravidla.cti("luzka", "varianta")]
+		if not ResourceLoader.exists(cesta): push_warning("FUNKCE lůžko: model %s chybí (nastroje/luzka_modely.py)" % cesta); continue
+		for k: Node in _koreny(h):
+			for zn in k.find_children(String(o["znacka"]), "Node3D", true, false):
+				var rod := zn.get_parent() as Node3D
+				var jm := "Luzko_" + String(o["jmeno"])
+				if rod.get_node_or_null(jm) != null: continue
+				var uz := (load(cesta) as PackedScene).instantiate() as Node3D
+				uz.name = jm
+				var po: Array = o["poloha"]
+				uz.transform = Transform3D(Basis(Vector3.UP, deg_to_rad(float(o["yaw_st"]))), Vector3(float(po[0]), float(po[1]), float(po[2])))
+				rod.add_child(uz)
+				var kol := uz.get_node_or_null("Kolize")
+				if kol: kol.name = String(o["kolize_jmeno"])
+				for g in uz.find_children("*", "GeometryInstance3D", true, false):
+					var gi := g as GeometryInstance3D
+					if gi.visibility_range_end <= 0.0: gi.visibility_range_end = float(o["dosah_m"])
+				out.append(uz)
+	return out
+
+
 func zacni(h: Node, vrstva: CanvasLayer) -> void:
 	hlavni = h; _vrstva = vrstva
 	var kov := osad_kovadliny(h)
 	if not kov.is_empty(): print("FUNKCE kovadlina osazena %d×" % kov.size())
+	var lu := osad_luzka(h)
+	if not lu.is_empty(): print("FUNKCE lůžka osazena %d×" % lu.size())
 	polozky_ = polozky(h)
 	var me: Dictionary = cfg("mech")
 	if ResourceLoader.exists(String(me["zvuk"])): _zvuk_mech = load(String(me["zvuk"]))

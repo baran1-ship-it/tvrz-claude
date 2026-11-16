@@ -1,12 +1,37 @@
 {
  "popis": "Lůžka od Míšina modeláře (sada Luzka_1400, 16. 11.): vlněná houně, deka na zemi, postel v chudém domě, rychtářova, panská a s nebesy. nastroje/luzka_modely.py zkopíruje z dodané sady jen tabletové nativní scény Godotu (*_Tablet_1K.tscn: LOD0 do 8 m / LOD1 přes Visibility Range, konvexní kolize StaticBody3D Kolize, značky Marker3D Luzko_Lezeni / Luzko_Hlava / Luzko_Vstup), sítě *_mesh.res, 1K materiály (ORMMaterial3D, vertex_color_use_as_albedo – COLOR_0 × albedo) a jejich 1K textury (albedo, normal GL, ORM) do vystup; struktura sady zůstane (scény odkazují relativně). GLB se nepoužívají (chybí jim textures/gltf), 2K materiály a mapy drsnosti také ne. Do katalogu pískoviště (hra/modely/predmety_h.json) zapíše záznamy luzko_<Model> (obalová scéna predmety_h/luzko_<Model>.tscn) s lehat: true – hráč si lehne podle značek modelu (predmety.gd use: Luzko_Lezeni, Luzko_Vstup) a vybere, do kdy spát. Výchozí postel nabídky (vychozi_postel) = Postel_Chudy_Dum (Míša 16. 11.: „jestli máš někde postele, tak tam použij ty pro chudé“).",
  "zdroj": "build/zdroj_modelar/Luzka_1400 (Míšin Disk 16. 11.; NAVOD_LUZKA.md, PREHLED_MODELU.md, ASSETY.json; PODKLADY_A_LICENCE.md: textury Poly Haven CC0 – rough_linen, poly_wool_herringbone, oak_veneer_01, rough_wood; modely Míšin modelář, výtvarný návrh kolem 1400 – NAVRH)",
+ "jen_blender": [
+  "slozka",
+  "vystup",
+  "sceny",
+  "materialy",
+  "textury_pripony",
+  "katalog",
+  "max_troj_pozn"
+ ],
  "slozka": "build/zdroj_modelar/Luzka_1400",
  "vystup": "hra/modely/luzka",
- "sceny": ["Houne_Vlnena", "Deka_Na_Zemi", "Postel_Chudy_Dum", "Postel_Rychtarova", "Postel_Panska", "Postel_S_Nebesy"],
+ "sceny": [
+  "Houne_Vlnena",
+  "Deka_Na_Zemi",
+  "Postel_Chudy_Dum",
+  "Postel_Rychtarova",
+  "Postel_Panska",
+  "Postel_S_Nebesy"
+ ],
  "varianta": "_Tablet_1K",
- "materialy": ["Dub_1K.tres", "Hrube_Drevo_1K.tres", "Len_1K.tres", "Vlna_1K.tres"],
- "textury_pripony": ["_Albedo_1K.jpg", "_NormalGL_1K.jpg", "_ORM_1K.png"],
+ "materialy": [
+  "Dub_1K.tres",
+  "Hrube_Drevo_1K.tres",
+  "Len_1K.tres",
+  "Vlna_1K.tres"
+ ],
+ "textury_pripony": [
+  "_Albedo_1K.jpg",
+  "_NormalGL_1K.jpg",
+  "_ORM_1K.png"
+ ],
  "vychozi_postel": "luzko_Postel_Chudy_Dum",
  "max_materialu": 3,
  "max_troj_lod0": 64000,
@@ -18,11 +43,94 @@
  },
  "katalog": {
   "_popis": "záznam katalogu pískoviště (id luzko_<Model>); nazev, stav, vaha, cena jako lůžka Havrana (postel 60 kg / 400, lozko 35 kg / 60, slamnik 8 kg / 15); rozmer z ASSETY.json bounds v osách Godotu [x šířka, y výška, z délka]; pruchozi = bez kolize pro hráče (houně a deka na podlaze, NAVOD_LUZKA.md: „bez kolize, aby neblokovaly chůzi“); mist = kolik lidí se vejde (postavy později)",
-  "Houne_Vlnena": {"nazev": "Vlněná houně", "stav": "uvnitr", "vaha": 3.0, "cena": 12, "pruchozi": true, "mist": 1},
-  "Deka_Na_Zemi": {"nazev": "Deka na zemi", "stav": "uvnitr", "vaha": 4.0, "cena": 14, "pruchozi": true, "mist": 1},
-  "Postel_Chudy_Dum": {"nazev": "Postel (chudý dům)", "stav": "uvnitr", "vaha": 30.0, "cena": 50, "mist": 2},
-  "Postel_Rychtarova": {"nazev": "Rychtářova postel", "stav": "uvnitr", "vaha": 45.0, "cena": 150, "mist": 2},
-  "Postel_Panska": {"nazev": "Panská postel", "stav": "uvnitr", "vaha": 60.0, "cena": 400, "mist": 2},
-  "Postel_S_Nebesy": {"nazev": "Postel s nebesy", "stav": "uvnitr", "vaha": 90.0, "cena": 900, "mist": 2}
- }
+  "Houne_Vlnena": {
+   "nazev": "Vlněná houně",
+   "stav": "uvnitr",
+   "vaha": 3.0,
+   "cena": 12,
+   "pruchozi": true,
+   "mist": 1
+  },
+  "Deka_Na_Zemi": {
+   "nazev": "Deka na zemi",
+   "stav": "uvnitr",
+   "vaha": 4.0,
+   "cena": 14,
+   "pruchozi": true,
+   "mist": 1
+  },
+  "Postel_Chudy_Dum": {
+   "nazev": "Postel (chudý dům)",
+   "stav": "uvnitr",
+   "vaha": 30.0,
+   "cena": 50,
+   "mist": 2
+  },
+  "Postel_Rychtarova": {
+   "nazev": "Rychtářova postel",
+   "stav": "uvnitr",
+   "vaha": 45.0,
+   "cena": 150,
+   "mist": 2
+  },
+  "Postel_Panska": {
+   "nazev": "Panská postel",
+   "stav": "uvnitr",
+   "vaha": 60.0,
+   "cena": 400,
+   "mist": 2
+  },
+  "Postel_S_Nebesy": {
+   "nazev": "Postel s nebesy",
+   "stav": "uvnitr",
+   "vaha": 90.0,
+   "cena": 900,
+   "mist": 2
+  }
+ },
+ "osazeni": [
+  {
+   "jmeno": "hajovna",
+   "popis": "Postel v jizbě hájovny (chudá roubená chalupa hajného): lůžko zapečené v síti Hajovna_Interier (rám, slamník, plachta – 2,0 × 1,0 m, ložná plocha ~1,0 m nad podlahou 0,45) nahrazeno modelem Postel_Chudy_Dum. Poloha v souřadnicích modelu hájovny: hlava k západní stěně (yaw_st 90: místní −Z modelu → −x hájovny), čelo 3 cm od vnitřní líce západní stěny (x −4,39), bok 3 cm od zadní stěny (z −2,89); lavice u západní stěny začíná až z −1,0 (postel končí z −1,63). Kolize: konvexní tvary modelu (StaticBody3D přejmenované na kolize_jmeno – funkce.json spanek místo hájovny ji vynechá ze zaměření); značka spánku Hajovna_Spani_Hrac (−3,30; 1,05; −2,25) zůstává – nad středem nové ložné plochy (1,02).",
+   "zdroj": "docs/reference/hajovna/NAVOD_HAJOVNA.md (jizba: hliněná pec, postel, lavice); rozbor hajovna.glb 16. 11. (Hajovna_Kol_Postel x −4,3…−2,3, y 0,45…1,05, z −2,75…−1,75; stěny Zapad4 x −4,39, Zad3 z −2,89; Lavice z −1,0…2,9); Míša 16. 11.: „jestli máš někde postele, tak tam použij ty pro chudé“",
+   "stavba_glb": "hra/modely/stavby_h/hajovna.glb",
+   "sit": "Hajovna_Interier",
+   "smazat_kvadr": [
+    -4.35,
+    -2.25,
+    0.44,
+    1.3,
+    -2.8,
+    -1.7
+   ],
+   "smazat_materialy": [
+    "M_RoubeniVnitrni",
+    "M_Zhlavi",
+    "M_Kura",
+    "M_Slama",
+    "M_Platno"
+   ],
+   "smazat_pozn": "kvádr = kolize starého lůžka + 5 cm, těžiště trojúhelníku; materiály rámu (M_RoubeniVnitrni, M_Zhlavi, M_Kura – kůra nohy), slamníku (M_Slama) a plachty (M_Platno); stěny (x −4,39, z −2,89) i podlaha (jiný materiál) zůstanou – rozbor: 384 troj., žádný větší než 0,3 m²",
+   "smazat_uzly": [
+    "Hajovna_Kol_Postel-convcolonly"
+   ],
+   "znacka": "Hajovna_Spani_Hrac",
+   "model": "Postel_Chudy_Dum",
+   "poloha": [
+    -3.283,
+    0.45,
+    -2.233
+   ],
+   "yaw_st": 90.0,
+   "kolize_jmeno": "Hajovna_Kol_Postel",
+   "dosah_m": 40.0,
+   "dosah_pozn": "LOD1 modelu nemá konec dosahu – jako drobnější předměty pískoviště (predmety.gd 40 m pro věci do 1,5 m výšky)"
+  }
+ ],
+ "nahrazuje": {
+  "postel": "luzko_Postel_Chudy_Dum",
+  "lozko": "luzko_Postel_Chudy_Dum",
+  "lozko_uzke": "luzko_Postel_Chudy_Dum"
+ },
+ "nahrazuje_pozn": "lůžka Havrana v katalogu pískoviště (gotická postel, lůžko se slamníkem, úzké lůžko) se v nabídce Stavění už nenabízejí – výchozí postel je chudá postel modeláře; uložené pozice s nimi se načtou s ní (stejná poloha a natočení). Slamník Havrana zůstává (jiný typ – na zemi, poustevna). Výchozí postel stojí v nabídce Uvnitř jako první."
 }

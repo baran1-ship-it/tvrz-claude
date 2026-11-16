@@ -558,7 +558,7 @@ func _test_spanek() -> void:
 		var hh := hrac.get_world_3d().direct_space_state.intersect_ray(q)
 		var podlaha: float = (hh["position"] as Vector3).y if not hh.is_empty() else zn.global_position.y - 0.6
 		var inst: Node3D = zn
-		while not (inst.get_parent() is Node3D) or not String(inst.get_parent().name) in ["Mista", "Ves"]: inst = inst.get_parent()
+		while not (inst.get_parent() is Node3D) or not String(inst.get_parent().name) in ["Mista", "Ves", "Zajimava"]: inst = inst.get_parent()   # i zemljanky (zajimava.gd)
 		var u: Dictionary = await _k_veci(p["pos"], _pred(zn.global_position, inst, podlaha, 1.4) if not (p["vlastni"] as Array).is_empty() else Vector3(zn.global_position.x, podlaha, zn.global_position.z), p["vlastni"])   # lůžko s kolizí: stát vedle něj směrem do stavby
 		if u.is_empty() or u["p"] != p:
 			spatne.append("%s: není nabídka %s (hráč [%.2f, %.2f, %.2f])" % [jm, sp["nabidka"], hrac.position.x, hrac.position.z, hrac.position.y]); continue
@@ -580,6 +580,63 @@ func _test_spanek() -> void:
 		if den: den.set_time("odpoledne", 0.01)
 	vysledek["spanek"] = "OK" if spatne.is_empty() and n >= 2 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "málo míst spánku (%d)" % n)
 	print("PRUCHOD spanek ", vysledek["spanek"], " (míst %d)" % n)
+
+## luzka (Míša 16. 11.: lůžka modeláře do nabídky, postele „tam použij ty pro chudé“): všech 6 scén se načte (LOD0 ≤ max_troj_lod0
+## troj., ≤ max_materialu materiálů, materiál násobí COLOR_0 s albedem, značky Luzko_Lezeni/Hlava/Vstup, postele s vlastní kolizí);
+## katalog pískoviště má luzko_* s lehat a výchozí postel; pevná lůžka (luzka.json osazeni) stojí ve stavbě, jejich kolize
+## nezasahuje do jiné kolize stavby (zdi, lavice, pec) a staré lůžko ani jeho kolize ve stavbě nezůstaly.
+func _test_luzka() -> void:
+	var lz: Dictionary = Pravidla.soubor("luzka"); var spatne: Array = []
+	var kat: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety_h.json")) if FileAccess.file_exists("res://modely/predmety_h.json") else {}
+	for sc: String in lz["sceny"]:
+		var c := "res://modely/luzka/%s%s.tscn" % [sc, Pravidla.cti("luzka", "varianta")]
+		var ps := load(c) as PackedScene
+		if ps == null: spatne.append("%s: scéna se nenačte" % sc); continue
+		var n := ps.instantiate() as Node3D
+		var troj := 0; var mats := {}; var vc := true
+		for g in n.find_children("*", "MeshInstance3D", true, false):
+			var mi := g as MeshInstance3D
+			if mi.get_parent().name != "LOD0": continue
+			for s in mi.mesh.get_surface_count():
+				troj += mi.mesh.surface_get_array_index_len(s) / 3 if mi.mesh.surface_get_array_index_len(s) > 0 else mi.mesh.surface_get_array_len(s) / 3
+				var m: Material = mi.material_override if mi.material_override else mi.mesh.surface_get_material(s)
+				mats[m] = true
+				if not (m is BaseMaterial3D and (m as BaseMaterial3D).vertex_color_use_as_albedo and (m as BaseMaterial3D).albedo_texture != null): vc = false
+		var zn := ["Luzko_Lezeni", "Luzko_Hlava", "Luzko_Vstup"].all(func(z: String) -> bool: return n.get_node_or_null(z) is Marker3D)
+		var kol := n.get_node_or_null("Kolize") is StaticBody3D
+		var postel := not bool(lz["katalog"][sc].get("pruchozi", false))
+		var kz: Dictionary = kat.get("luzko_" + sc, {})
+		var ok: bool = troj > 0 and troj <= int(Pravidla.cti("luzka", "max_troj_lod0")) and mats.size() <= int(Pravidla.cti("luzka", "max_materialu")) and vc and zn and (kol or not postel) and bool(kz.get("lehat", false)) and ResourceLoader.exists("res://modely/predmety_h/luzko_%s.png" % sc)
+		print("PRUCHOD luzka %s: troj. LOD0 %d, materiálů %d, COLOR_0×albedo %s, značky %s, kolize %s, katalog lehat %s -> %s" % [sc, troj, mats.size(), vc, zn, kol, kz.get("lehat", false), "OK" if ok else "CHYBA"])
+		if not ok: spatne.append("%s: troj. %d, mat. %d, vc %s, značky %s, kolize %s, katalog %s" % [sc, troj, mats.size(), vc, zn, kol, not kz.is_empty()])
+		n.free()
+	if not kat.has(String(Pravidla.cti("luzka", "vychozi_postel"))): spatne.append("výchozí postel není v katalogu")
+	_funkce()   # funkce.gd zacni osadí pevná lůžka (osad_luzka)
+	for o: Dictionary in Pravidla.cti("luzka", "osazeni"):
+		var uzly: Array = []
+		for k in ["Mista", "Ves", "Zajimava"]:
+			var kk := hlavni.get_node_or_null(k)
+			if kk: uzly.append_array(kk.find_children("Luzko_" + String(o["jmeno"]), "Node3D", true, false))
+		if uzly.is_empty(): spatne.append("%s: lůžko není ve stavbě" % o["jmeno"]); continue
+		for u: Node3D in uzly:
+			var rod := u.get_parent()
+			var kb := u.get_node_or_null(String(o["kolize_jmeno"])) as StaticBody3D
+			var stare := rod.find_children(String(o["smazat_uzly"][0]).get_slice("-", 0) + "*", "", true, false).filter(func(x: Node) -> bool: return not u.is_ancestor_of(x) and x != u)
+			var prekryv: Array = []
+			if kb:
+				hlavni.svet.kolize_ihned(u.global_position)
+				await get_tree().physics_frame
+				for cs in kb.find_children("*", "CollisionShape3D", true, false):
+					var q := PhysicsShapeQueryParameters3D.new(); q.shape = (cs as CollisionShape3D).shape
+					q.transform = (cs as CollisionShape3D).global_transform; q.exclude = [kb.get_rid(), hrac.get_rid()]
+					for h in hrac.get_world_3d().direct_space_state.intersect_shape(q, 8):
+						var nm := String((h["collider"] as Node).name)
+						if not nm in prekryv: prekryv.append(nm)
+			var ok2: bool = kb != null and prekryv.is_empty() and stare.is_empty()
+			print("PRUCHOD luzka osazení %s %s: kolize %s, zasahuje do %s, staré lůžko %s -> %s" % [o["jmeno"], rod.name, kb != null, prekryv, stare.map(func(x: Node) -> String: return String(x.name)), "OK" if ok2 else "CHYBA"])
+			if not ok2: spatne.append("%s: kolize %s, zasahuje do %s, staré %d" % [o["jmeno"], kb != null, prekryv, stare.size()])
+	vysledek["luzka"] = "OK" if spatne.is_empty() else "CHYBA: %s" % "; ".join(spatne)
+	print("PRUCHOD luzka ", vysledek["luzka"])
 
 ## zlab_voda (Míša 15. 11.: žlab „nalít vodu“): u žlabu nabídka „Nalít vodu“, po stisku hladina (shader vody) uvnitř půdorysu kolize
 ## žlabu pod jeho horní hranou; nabídka pak zmizí, voda zůstane.
@@ -801,6 +858,7 @@ func _konec() -> void:
 	if jen == "" or "zebrik" in jen: await _test_zebriky()
 	if jen == "" or "lavice" in jen: await _test_lavice()
 	if jen == "" or "mech" in jen: await _test_mech()
+	if jen == "" or "spanek" in jen or "luzka" in jen: await _test_luzka()
 	if jen == "" or "spanek" in jen: await _test_spanek()
 	if jen == "" or "zlab" in jen: await _test_zlab()
 	if jen == "" or "jesle" in jen: await _test_jesle()

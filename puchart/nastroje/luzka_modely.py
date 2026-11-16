@@ -7,6 +7,9 @@ Pro katalog pískoviště zapíše hra/modely/predmety_h/luzko_<Model>.tscn (ins
 hra/modely/predmety_h.json (rozměr z ASSETY.json v osách Godotu, lehat: true). Pravidla zkopíruje do hra/pravidla/svet.
   python3 nastroje/luzka_modely.py <K> [--ikony]"""
 import sys, os, json, re, shutil, subprocess
+import numpy as np
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from glb_sit import nacti, uloz, cti, pridej, smaz_uzly
 
 K = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else ".")
 C = json.load(open(os.path.join(K, "pravidla/svet/luzka.json")))
@@ -50,6 +53,57 @@ for d, _, fs in os.walk(OUT):
         zaklad = r[:-7] if r.endswith(".import") else r
         if zaklad not in chci:
             os.remove(os.path.join(d, f)); smaz += 1
+
+# pevná lůžka ve stavbách (osazeni): staré lůžko zapečené v síti interiéru stavby pryč (trojúhelníky s těžištěm v kvádru
+# a s materiálem ze seznamu), stará kolize pryč; nový model vloží hra (funkce.gd osad_luzka) na polohu z dat. Opakovaně nic nezmění.
+for o in C["osazeni"]:
+    if o["jmeno"].startswith("_"): continue
+    gp = os.path.join(K, o["stavba_glb"])
+    if not os.path.exists(gp): print("LUZKA_OSAZENI chybí", gp); continue
+    j, b, zb = nacti(gp); x0, x1, y0, y1, z0, z1 = o["smazat_kvadr"]; pryc = 0; prazdne = []
+    for n in j["nodes"]:
+        if n.get("name") != o["sit"] or "mesh" not in n: continue
+        me = j["meshes"][n["mesh"]]
+        for pr in me["primitives"]:
+            if j["materials"][pr["material"]]["name"] not in o["smazat_materialy"]: continue
+            P = cti(j, b, pr["attributes"]["POSITION"]); I = cti(j, b, pr["indices"]).reshape(-1, 3); c = P[I].mean(1)
+            sel = (c[:, 0] > x0) & (c[:, 0] < x1) & (c[:, 1] > y0) & (c[:, 1] < y1) & (c[:, 2] > z0) & (c[:, 2] < z1)
+            if sel.any():
+                pr["indices"] = pridej(j, b, I[~sel], "i") if (~sel).any() else None; pryc += int(sel.sum())
+        prazdne = [pr for pr in me["primitives"] if pr.get("indices", 0) is None or j["accessors"][pr["indices"]]["count"] == 0]
+        if prazdne:   # celý materiál byl jen v lůžku (slamník, plachta) – část sítě pryč (glTF nedovolí prázdný accessor)
+            me["primitives"] = [pr for pr in me["primitives"] if pr not in prazdne]
+    uzly = [u for u in o["smazat_uzly"] if any(n.get("name") == u for n in j["nodes"])]
+    if uzly: smaz_uzly(j, uzly)
+    # accessory bez odkazu s count 0 (glTF je nedovolí – Godot import selže) pryč, odkazy přečíslovat
+    pouz = set()
+    for me in j["meshes"]:
+        for pr in me["primitives"]:
+            pouz.update(pr["attributes"].values()); pouz.update(v for tg in pr.get("targets", []) for v in tg.values())
+            if pr.get("indices") is not None: pouz.add(pr["indices"])
+    for sk in j.get("skins", []):
+        if "inverseBindMatrices" in sk: pouz.add(sk["inverseBindMatrices"])
+    for an in j.get("animations", []):
+        for s in an["samplers"]: pouz.update((s["input"], s["output"]))
+    nul = [i for i, a in enumerate(j["accessors"]) if a["count"] == 0 and i not in pouz]
+    if nul:
+        mapa = {}; nove = []
+        for i, a in enumerate(j["accessors"]):
+            if i in nul: continue
+            mapa[i] = len(nove); nove.append(a)
+        j["accessors"] = nove
+        for me in j["meshes"]:
+            for pr in me["primitives"]:
+                pr["attributes"] = {k: mapa[v] for k, v in pr["attributes"].items()}
+                if pr.get("indices") is not None: pr["indices"] = mapa[pr["indices"]]
+                if "targets" in pr: pr["targets"] = [{k: mapa[v] for k, v in tg.items()} for tg in pr["targets"]]
+        for sk in j.get("skins", []):
+            if "inverseBindMatrices" in sk: sk["inverseBindMatrices"] = mapa[sk["inverseBindMatrices"]]
+        for an in j.get("animations", []):
+            for s in an["samplers"]: s["input"] = mapa[s["input"]]; s["output"] = mapa[s["output"]]
+    if pryc or uzly or prazdne or nul:
+        uloz(gp, j, b, zb)
+    print("LUZKA_OSAZENI %s: smazáno %d troj. starého lůžka, uzly %s" % (o["jmeno"], pryc, uzly))
 
 # katalog pískoviště: obalová scéna + záznam (rozměr z ASSETY.json: Blender X šířka, Y délka, Z výška → Godot [x, y, z])
 PRED = os.path.join(K, "hra/modely/predmety_h"); KATP = os.path.join(K, "hra/modely/predmety_h.json")

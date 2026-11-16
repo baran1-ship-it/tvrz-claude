@@ -107,6 +107,9 @@ func spawn_on_wall(id: String, from: Vector3, dir: Vector3, extra := {}) -> void
 
 
 func spawn(rec: Dictionary) -> void:
+	var nahr: Dictionary = Pravidla.cti("luzka", "nahrazuje")      # luzka Havrana -> luzka modelare (stara ulozeni)
+	if nahr.has(String(rec["id"])) and kat.has(String(nahr[rec["id"]])):
+		rec["id"] = String(nahr[rec["id"]])
 	var id: String = rec["id"]
 	if not kat.has(id) or scene(id) == null:
 		return                              # predmet ze starsiho ulozeni, ktery uz neexistuje
@@ -244,6 +247,8 @@ func spawn(rec: Dictionary) -> void:
 	# (vrstva 2: na talir jde polozit jablko, na polici svicen, hrac o ne nezakopne)
 	if m is RigidBody3D:   # vlastní fyzika scény (zamražená konvexní kolize, NAVOD_NADOBI.md) – bez náhradního kvádru; vrstva 1 + 2 (hráč i pokládání)
 		(m as RigidBody3D).collision_layer = 3
+	elif m.get_node_or_null("Kolize") is StaticBody3D:   # vlastní konvexní kolize scény (lůžka modeláře, luzka.json) – bez kvádru
+		(m.get_node("Kolize") as StaticBody3D).collision_layer = 3
 	elif not dily.has("kolize"):
 		var b := StaticBody3D.new()
 		# stany a pristresky (Misa 0.73 "do stanu nevejdu"): hrac projde pod platnem, kolize jen pro pokladani
@@ -476,8 +481,18 @@ func use(u: Dictionary) -> void:
 		var pl: CharacterBody3D = main.player
 		var back := pl.global_position
 		if info.get("lehat", false):
-			# lehnout na postel a nabidnout spanek
-			pl.sit((rec["p"] as Vector3) + Vector3(0, 0.15, 0), 0.62, back, pl.yaw, deg_to_rad(55))
+			# lehnout na postel a nabidnout spanek; luzka modelare (luzka.json): bod lehu ze znacky Luzko_Lezeni, hlavou
+			# k Luzko_Hlava (pohled k nohum), vstat na Luzko_Vstup (Misa 16. 11.)
+			var zl: Node3D = (rec["node"] as Node3D).find_child("Luzko_Lezeni", true, false) as Node3D if rec.has("node") and is_instance_valid(rec["node"]) else null
+			if zl:
+				var lz: Dictionary = Pravidla.cti("luzka", "lezeni")
+				var sp: Dictionary = Pravidla.cti("funkce", "spanek")
+				var nohy: Vector3 = zl.global_basis.z
+				var zv := zl.get_parent().get_node_or_null("Luzko_Vstup") as Node3D
+				pl.sit(zl.global_position - Vector3.UP * float(lz["leh_pod_znackou_m"]), float(sp["oci_m"]), zv.global_position if zv else back,
+						atan2(-nohy.x, -nohy.z), deg_to_rad(float(sp["pohled_nahoru_st"])))
+			else:
+				pl.sit((rec["p"] as Vector3) + Vector3(0, 0.15, 0), 0.62, back, pl.yaw, deg_to_rad(55))
 			main.offer_sleep()
 		else:
 			var seat_h := minf(float(r[1]), 0.5) if float(r[1]) > 0.3 else float(r[1])

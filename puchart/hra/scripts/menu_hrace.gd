@@ -219,9 +219,12 @@ func _items(s: int) -> Array:
 			for rec: Dictionary in _prec:
 				out.append(String(rec["id"]))
 			return out
+		var nahr: Dictionary = Pravidla.cti("luzka", "nahrazuje")    # luzka Havrana nahrazena luzky modelare (Misa 16. 11.)
+		var vych := String(Pravidla.cti("luzka", "vychozi_postel"))
 		for id: String in P.kat:
-			if str(P.kat[id].get("stav", "")) == k:
-				out.append(id)
+			if str(P.kat[id].get("stav", "")) == k and not nahr.has(id):
+				if id == vych: out.push_front(id)
+				else: out.append(id)
 		return out
 	var src: Dictionary = P.inv if s == 0 else box.get("obsah", {})
 	var k2: String = KAT_B[tab][0]
