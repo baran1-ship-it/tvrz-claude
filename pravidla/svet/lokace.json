@@ -15,7 +15,10 @@
   "vetrak/chalupa/od_mlyna_m",
   "vetrak/chalupa/rovina_r_m",
   "vetrak/rovina_r_m",
-  "kuchyne_tvrz"
+  "kuchyne_tvrz",
+  "kompozice/remizek_skladba",
+  "ves/zelen_ulice",
+  "ves/ploty_ulice"
  ],
  "stavby": [
   {

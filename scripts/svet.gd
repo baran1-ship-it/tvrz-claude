@@ -3652,6 +3652,17 @@ func rostliny_rozdel(root: Node3D) -> void:
 
 ## Radce 20:15 (overeno v kodu): cela bunka (vsechny MultiMeshe a buffery) najednou = spicka; limit se kontroloval
 ## az po ni. Ted po jednom MultiMeshi (davka do 512 instanci, rostliny_rozdel), rozpocet se kontroluje pred kazdym.
+var trasa_skryt: Array = []               # merici trasa (bez_houstin): predpony jmen bunek rostlin, ktere se nezobrazi
+
+
+## Odkryti bunky rostlin: skryte zustanou jen bunky s predponou z trasa_skryt (merici trasa bez_houstin).
+func _rost_smi(m: Node) -> bool:
+	for q: String in trasa_skryt:
+		if String(m.name).begins_with(q):
+			return false
+	return true
+
+
 ## Bunka je videt az cela (uzly skryte, pak naraz zobrazit - zadne prazdne mezery).
 func _rost_dil(b: Vector2i, i: int) -> void:
 	var e: Dictionary = (_rost_data[b] as Array)[i]
@@ -3680,7 +3691,7 @@ func _rost_postav(b: Vector2i) -> void:
 	for i in (_rost_data[b] as Array).size():
 		_rost_dil(b, i)
 	for m: Node3D in _rost_uzly[b]:
-		m.visible = true
+		m.visible = _rost_smi(m)
 
 
 var _rost_rozest: Array = []              # [bunka, dalsi index] rozestavena bunka
@@ -3739,7 +3750,7 @@ func rostliny_okoli(p: Vector3, vse := false, rozpocet_us := 1500) -> void:
 			if not Planovac.tezka("rostliny"):
 				break
 			for m: Node3D in _rost_uzly[bb]:
-				m.visible = true
+				m.visible = _rost_smi(m)
 			# radek zaseku (diag.udalost, zaseky_rozbor_system.md): odkryta bunka rostlin = nahrani jejich MultiMeshu
 			var dg_r: Object = Engine.get_meta("diag", null)
 			if dg_r:
@@ -5036,21 +5047,20 @@ func _skalni_mesto() -> void:
 ## Les neni park (radce 09:05 C): u stromu parezy, spadle vetve, keriky (lesni patro). Kazdy 5. strom pare nebo
 ## vetve, kazdy 3. kerik (sipek, ker) v okoli; meritka podle prvni instance druhu (tak jak je model navrzeny).
 func _lesni_patro() -> void:
+	# podrost pod zapojem (les_podrost.json houstina.patro, Misa 15. 11. kcd_sada2_12-19: kmeny + podrost do pasu,
+	# drevo a klesti; drive cisla v kodu): u kazdeho n-teho lesniho stromu ker / mlady buk a parez / hromada klesti
 	var r: Dictionary = data["rostliny"]
-	var drevo := ["tree_stump_01_0", "tree_stump_02_0", "dry_branches_medium_01_0", "dry_branches_medium_01_1", "dry_branches_medium_01_2"]
-	var kere: Array = ["shrub_02_0", "sipek_0"].filter(func(k: String) -> bool: return r.has(k) and not (r[k] as Array).is_empty())
-	for k: String in drevo:
-		if not r.has(k) or (r[k] as Array).is_empty():
-			return
-	if kere.is_empty():
+	var hp: Dictionary = Pravidla.cti("les_podrost", "houstina", "patro")
+	var drevo: Array = _hou_druhy(hp["drevo"])
+	var kere: Array = _hou_druhy(hp["kere"])
+	if drevo.is_empty() or kere.is_empty():
 		return
-	var mer := {}
-	for k: String in drevo + kere:
-		var t: Array = r[k][0]
-		mer[k] = Vector3(t[0], t[4], t[8]).length()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 404
 	var n := 0
+	var kd := int(hp["kazdy_strom_drevo"])
+	var kk := int(hp["kazdy_strom_ker"])
+	var les_od := float(hp["les_od"])
 	for key: String in r.keys():
 		var lesni := false
 		for d: String in ["dub_", "buk_", "lipa_", "smrk_", "borovice_", "olse_", "briza_"]:
@@ -5062,23 +5072,60 @@ func _lesni_patro() -> void:
 		# jen stromy z dat a skalniho mesta (nove lesy a doplneni lesa pridavaji na konec seznamu - patro by houstlo s nimi)
 		for t: Array in (r[key] as Array).slice(0, int(_stromy_6a.get(key, (r[key] as Array).size()))):
 			i += 1
-			if i % 5 == 0:
-				var k: String = drevo[rng.randi() % drevo.size()]
+			if _les(float(t[3]), float(t[11])) < les_od:
+				continue                                    # houstina patra jen pod lesem (louka pod solitery zustava)
+			if i % kd == 0:
 				var a := rng.randf() * TAU
-				var p := Vector2(t[3], t[11]) + Vector2(cos(a), sin(a)) * rng.randf_range(2.0, 6.0)
-				if not druh_smi_hra(k, p.x, p.y):
-					continue                                # parez ani vetev ne na ceste, ve vstupu, ve vode
-				(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.05, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.8, 1.3)))
-				n += 1
-			if i % 2 == 0:
-				var k: String = kere[rng.randi() % kere.size()]
-				var a := rng.randf() * TAU
-				var p := Vector2(t[3], t[11]) + Vector2(cos(a), sin(a)) * rng.randf_range(3.0, 7.0)
-				if not druh_smi_hra(k, p.x, p.y):
+				var c := Vector2(t[3], t[11]) + Vector2(cos(a), sin(a)) * rng.randf_range(float(hp["drevo_od_m"][0]), float(hp["drevo_od_m"][1]))
+				var vk: Array = _hou_vyber(drevo, rng)
+				var kus := 1
+				if String(vk[0]).begins_with("dry_branches"):
+					kus = rng.randi_range(int(hp["hromada_klesti"][0]), int(hp["hromada_klesti"][1]))
+				for _j in kus:
+					var p := c + Vector2(rng.randf_range(-0.7, 0.7), rng.randf_range(-0.7, 0.7)) * float(kus - 1)
+					if not druh_smi_hra(vk[0], p.x, p.y):
+						continue                                # parez ani vetev ne na ceste, ve vstupu, ve vode
+					(r[vk[0]] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.05, p.y, rng.randf() * TAU, _hou_meritko(vk[0], vk[1])))
+					n += 1
+			if i % kk == 0:
+				var vk2: Array = _hou_vyber(kere, rng)
+				var a2 := rng.randf() * TAU
+				var p2 := Vector2(t[3], t[11]) + Vector2(cos(a2), sin(a2)) * rng.randf_range(float(hp["ker_od_m"][0]), float(hp["ker_od_m"][1]))
+				if not druh_smi_hra(vk2[0], p2.x, p2.y):
 					continue                                # druhy.json vyjma (ker ne uprostred louky)
-				(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.05, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.7, 1.3)))
+				(r[vk2[0]] as Array).append(_xf(p2.x, _vyska(p2.x, p2.y) - 0.05, p2.y, rng.randf() * TAU, _hou_meritko(vk2[0], vk2[1])))
 				n += 1
-	print("lesni patro: pridano ", n, " parezu, vetvi a keru")
+	print("lesni patro (houstina): pridano ", n, " parezu, vetvi, keru a mladych buku")
+
+
+## Houstina (les_podrost.json houstina): seznam [klic, vaha, [vyska od, do]] -> jen klice, ktere data maji (pouzit, katalog).
+func _hou_druhy(sez: Array) -> Array:
+	var out: Array = []
+	for q: Array in sez:
+		var k: String = q[0]
+		if data["rostliny"].has(k) and not (data["rostliny"][k] as Array).is_empty():
+			out.append(q)
+	return out
+
+
+## [klic, vyska m] podle vah.
+func _hou_vyber(sez: Array, rng: RandomNumberGenerator) -> Array:
+	var tot := 0.0
+	for q: Array in sez:
+		tot += float(q[1])
+	var t := rng.randf() * tot
+	for q: Array in sez:
+		t -= float(q[1])
+		if t <= 0.0:
+			return [q[0], rng.randf_range(float(q[2][0]), float(q[2][1]))]
+	var l: Array = sez[-1]
+	return [l[0], float(l[2][1])]
+
+
+## Meritko instance pro cilovou vysku (houstina.plast.vyska_modelu_m = vyska modelu pri meritku 1, AABB glb).
+func _hou_meritko(key: String, vyska: float) -> float:
+	var vm: Dictionary = Pravidla.cti("les_podrost", "houstina", "plast")["vyska_modelu_m"]
+	return vyska / float(vm.get(key, 1.0))
 
 
 ## Huste lesy misto neudrzovanych luk (Misa 0.64: "mame strasne luk, spis huste... fakt huste lesy lemovane keri,
@@ -5192,24 +5239,23 @@ func _nove_lesy() -> void:
 ## mlade stromy. Pro VSECHNY okraje lesa (i z Blenderu): kraj = misto bez zapoje (< 0,35), ale do 8 m zapoj > 0,6.
 ## Mrizka 2,5 m; plast ~ 75 % bodu, lem 30 %. Mimo pesiny, vodu, most, tvrz a ves.
 func _lesni_plast() -> void:
+	# skladba a vysky z les_podrost.json houstina.plast (Misa 15. 11.: liskovy/olsovy pas 2-4 m mezi lesem a
+	# cestou/loukou; drive ker_husty a sipek 1,2-2,3 m natvrdo). Tezke kere (bez, shrub_02 2-3 tis. troj.) jen podilem.
 	var r: Dictionary = data["rostliny"]
-	var kere: Array = []
-	# jen lehke kere (ker_husty 382, sipek 650 troj.; bez a shrub_02 maji i po zjednoduseni 2-3 tisice)
-	for k: String in ["ker_husty_0", "ker_husty_0", "ker_husty_0", "sipek_0", "sipek_1", "sipek_2"]:
-		if r.has(k) and not (r[k] as Array).is_empty():
-			kere.append(k)
+	var hp: Dictionary = Pravidla.cti("les_podrost", "houstina", "plast")
+	var kere: Array = _hou_druhy(hp["druhy"])
 	if kere.is_empty() or _st_ch.is_empty():
 		return
-	var mlade: Array = []
-	for k: String in ["buk_stredni_0", "lipa_stredni_0", "briza_0", "briza_1", "olse_mlada_0"]:
-		if r.has(k) and not (r[k] as Array).is_empty():
-			mlade.append(k)
+	var mlade: Array = _hou_druhy(hp["mlade"])
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 6414
 	var nk := 0
 	var nl := 0
 	var nm := 0
-	var K := 2.5
+	var K := float(hp["krok_m"])
+	var lk0 := float(hp["les_kraj"][0])
+	var lk1 := float(hp["les_kraj"][1])
+	var dl := float(hp["dosah_lesa_m"])
 	# hruba mrizka 10 m: jen bunky, kde se les a bezlesi potkavaji (jinak 9 cteni masky na kazdy bod 2,5 m)
 	var t0 := Time.get_ticks_msec()
 	var kraj := {}
@@ -5223,7 +5269,7 @@ func _lesni_plast() -> void:
 				var lv := _les(gx + o.x, gy + o.y)
 				lo = minf(lo, lv)
 				hi = maxf(hi, lv)
-			if hi > 0.5 and lo < 0.45:
+			if hi > lk1 - 0.1 and lo < lk1 - 0.15:
 				for dx in range(-1, 2):
 					for dz in range(-1, 2):
 						kraj[Vector2i(floori(gx / 10.0) + dx, floori(gy / 10.0) + dz)] = true
@@ -5239,12 +5285,12 @@ func _lesni_plast() -> void:
 			var p := Vector2(x, y) + Vector2(rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0)) * K * 0.45
 			x += K
 			var l := _les(p.x, p.y)
-			if l > 0.6:
+			if l > lk1:
 				continue
 			var mx := 0.0
-			for o: Vector2 in [Vector2(6, 0), Vector2(-6, 0), Vector2(0, 6), Vector2(0, -6), Vector2(4.2, 4.2), Vector2(-4.2, 4.2), Vector2(4.2, -4.2), Vector2(-4.2, -4.2)]:
-				mx = maxf(mx, _les(p.x + o.x, p.y + o.y))
-			if mx < 0.6:
+			for o: Vector2 in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1), Vector2(0.7, 0.7), Vector2(-0.7, 0.7), Vector2(0.7, -0.7), Vector2(-0.7, -0.7)]:
+				mx = maxf(mx, _les(p.x + o.x * dl, p.y + o.y * dl))
+			if mx < lk1:
 				continue
 			if absf(p.x + 4.0) < 80.0 and absf(p.y) < 75.0 or Vector2(p.x - 470.0, p.y - 830.0).length() < 140.0:
 				continue
@@ -5254,31 +5300,32 @@ func _lesni_plast() -> void:
 			if hy < float(data.get("voda_y", -2.75)) + 0.4:
 				continue
 			var u := rng.randf()
-			if l > 0.35:
-				# vnitrni okraj: mlady strom (podrost) nebo ker
-				if u < 0.3 and not mlade.is_empty():
-					var km: String = mlade[rng.randi() % mlade.size()]
-					var sm := Vector3(r[km][0][0], r[km][0][4], r[km][0][8]).length()
-					(r[km] as Array).append(_xf(p.x, hy - 0.08, p.y, rng.randf() * TAU, sm * rng.randf_range(0.25, 0.5)))
-					nm += 1
+			if l > lk0:
+				# vnitrni okraj: mlady strom (olse, buk, lipa, briza 3-6 m) nebo ker
+				if u < float(hp["podil_mladych"]) and not mlade.is_empty():
+					var vm: Array = _hou_vyber(mlade, rng)
+					if druh_smi_hra(vm[0], p.x, p.y):
+						(r[vm[0]] as Array).append(_xf(p.x, hy - 0.08, p.y, rng.randf() * TAU, _hou_meritko(vm[0], vm[1])))
+						nm += 1
 					continue
-				if u > 0.6:
+				if u > float(hp["podil_keru"]):
 					continue
-			elif l < 0.12:
+			elif l < float(hp["lem_les"]):
 				# zevni lem: kopriva / vysoka bylina, obcas ker
 				# (kopriva ma i po zjednoduseni 1-1,5 tisice troj. - 25 000 kusu bylo moc; lem = kapradi a ker)
-				if u < 0.3 and r.has("kapradi_les_0"):
+				if u < float(hp["podil_lemu"]) and r.has("kapradi_les_0"):
 					for _j in rng.randi_range(1, 3):
 						var q := p + Vector2(rng.randf_range(-0.8, 0.8), rng.randf_range(-0.8, 0.8))
 						(r["kapradi_les_0"] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.03, q.y, rng.randf() * TAU, 1.0))
 						nl += 1
-				if u > 0.45:
+				if u > float(hp["lem_ker"]):
 					continue
-			elif u > 0.8:
+			elif u > float(hp["podil_keru"]):
 				continue
-			var k: String = kere[rng.randi() % kere.size()]
-			var s0 := 1.0 if k.begins_with("ker_husty") else Vector3(r[k][0][0], r[k][0][4], r[k][0][8]).length()
-			(r[k] as Array).append(_xf(p.x, hy - 0.06, p.y, rng.randf() * TAU, s0 * rng.randf_range(0.7, 1.35)))
+			var vk: Array = _hou_vyber(kere, rng)
+			if not druh_smi_hra(vk[0], p.x, p.y):
+				continue
+			(r[vk[0]] as Array).append(_xf(p.x, hy - 0.06, p.y, rng.randf() * TAU, _hou_meritko(vk[0], vk[1])))
 			nk += 1
 		y += K
 	print("lesni plast: keru %d, mladych stromu %d, kapradi v lemu %d (%d ms)" % [nk, nm, nl, Time.get_ticks_msec() - t0])
@@ -8966,31 +9013,17 @@ func _okluzory(parent: Node3D) -> void:
 		parent.add_child(dom)
 		_okl_prep.append([dom, Vector2(wc.x, wc.z), Vector2(bo3.size.x, bo3.size.z).length() * 0.5 + float(pasma()["test"]["okluzor_vypnout_m"])])
 		nd += 1
-	# remizky (lokace.json kompozice, Misa 28. 10. „pro krasu i pro zobrazovani, at se to neseka“): krabice v hustem
-	# jadru (stromy do 0,6 r, kere na kraji) od zeme do zapoje - co je cele za remizkem, se nekresli. U hrace
-	# (pasma test okluzor_vypnout_m za okrajem) se vypne, at kamera v krabici nezakryje vse (okluzory_u_hrace).
-	var nr := 0
-	var pk: Dictionary = Pravidla.cti("lokace", "kompozice")
-	var listi := bool(pasma()["test"]["okluzor_listi"])
-	for r: Dictionary in (pk.get("remizky", []) as Array if listi else []):
-		var c := Vector2(float(r["stred"][0]), float(r["stred"][1]))
-		var rad := float(r["polomer_m"])
-		var bo := BoxOccluder3D.new()
-		bo.size = Vector3(rad, 6.0, rad)
-		var ro := OccluderInstance3D.new()
-		ro.name = "Okluzor_remizek_%d" % nr
-		ro.occluder = bo
-		ro.position = Vector3(c.x, _vyska(c.x, c.y) + 4.0, c.y)
-		parent.add_child(ro)
-		_okl_prep.append([ro, c, rad * 0.5 + float(pasma()["test"]["okluzor_vypnout_m"])])
-		nr += 1
+	# houstina (pasma.test.okluzor_houstina, nahrazuje okluzor_listi false): kandidati clony (lokace kompozice.clony)
+	# a remizky; krabice jen v jadru, ktere je z oka hrace opravdu neprustrelne (podil vzorku kryty korunou kere / mladeho
+	# stromu z hotovych instanci >= kryti_min). U hrace se vypina (okluzory_u_hrace).
+	var nr := _okluzory_houstiny(parent)
 	# nitro lesa (pasma test okluzor_les_*): bunka, kde je les vsude do okraj_m kolem (okraj lesa a plast zustanou
 	# videt), dostane krabici od zeme+1 m do zapoje - co je cele za lesem, se nekresli
 	var pt: Dictionary = pasma()["test"]
 	var kb := float(pt["okluzor_les_bunka_m"])
 	var okr := float(pt["okluzor_les_okraj_m"])
 	var nl := 0
-	var lz := x0 if listi else 900.0
+	var lz := x0 if bool((pasma()["test"]["okluzor_houstina"] as Dictionary)["les_nitro"]) else 900.0
 	while lz < 900.0:
 		var lzz := z0
 		while lzz < 1350.0:
@@ -9012,7 +9045,101 @@ func _okluzory(parent: Node3D) -> void:
 				nl += 1
 			lzz += kb
 		lz += kb
-	print("okluzory: teren %d troj., krabic %d, remizku %d, nitro lesa %d, %d ms" % [idx.size() / 3, nd, nr, nl, Time.get_ticks_msec() - t0])
+	print("okluzory: teren %d troj., krabic %d, houstina %d, nitro lesa %d, %d ms" % [idx.size() / 3, nd, nr, nl, Time.get_ticks_msec() - t0])
+
+
+## Okluzory jader houstiny (pasma.test.okluzor_houstina, sceny_kcd_15_11.md krok 3): pro kazdy kandidat (clona = pas podel
+## osy, remizek = kruh) vzorky jadra po vzorek_m; vzorek je kryty, kdyz ho ve vysce oci prekryje koruna keře nebo mladeho
+## stromu (koule: polomer = vyska x polomer_podil_vysky). Krabice jen pri podilu >= kryti_min, vyska = nejnizsi ker jadra.
+func _okluzory_houstiny(parent: Node3D) -> int:
+	var oh: Dictionary = pasma()["test"]["okluzor_houstina"]
+	var vm: Dictionary = Pravidla.cti("les_podrost", "houstina", "plast")["vyska_modelu_m"]
+	var pk: Dictionary = Pravidla.cti("lokace", "kompozice")
+	var oci := float(oh["vyska_oci_m"])
+	var pp := float(oh["polomer_podil_vysky"])
+	var okr := float(oh["okraj_m"])
+	var vz := float(oh["vzorek_m"])
+	# keře a mlade stromy (do 7 m) z hotovych instanci do mrizky 8 m: [x, z, vyska]
+	var mriz := {}
+	for key: String in data["rostliny"]:
+		var base := key.rstrip("0123456789").trim_suffix("_")
+		var vh := -1.0
+		for mk: String in vm:
+			if key == mk or (mk.begins_with(base) and base.length() > 3):
+				vh = float(vm[mk])
+				break
+		if vh < 0.0:
+			continue
+		for t: Array in data["rostliny"][key]:
+			var h := Vector3(t[0], t[4], t[8]).length() * vh
+			if h < oci or h > 7.0:
+				continue                              # pod vyskou oci nekryje, vysoky strom kryje jen korunou nad oci
+			var c := Vector2i(floori(float(t[3]) / 8.0), floori(float(t[11]) / 8.0))
+			if not mriz.has(c):
+				mriz[c] = []
+			(mriz[c] as Array).append(Vector3(float(t[3]), float(t[11]), h))
+	var kandidati: Array = []                         # [id, [[a, b, polosirka jadra]]]
+	for c: Dictionary in pk.get("clony", []):
+		var segs: Array = []
+		var osa: Array = c["osa"]
+		for i in osa.size() - 1:
+			segs.append([Vector2(osa[i][0], osa[i][1]), Vector2(osa[i + 1][0], osa[i + 1][1]), float(c["sirka_m"]) * 0.5 - okr])
+		kandidati.append([String(c["id"]), segs])
+	for i in (pk.get("remizky", []) as Array).size():
+		var rz: Dictionary = pk["remizky"][i]
+		var cc := Vector2(rz["stred"][0], rz["stred"][1])
+		kandidati.append(["remizek_%d" % i, [[cc - Vector2(rz["polomer_m"], 0), cc + Vector2(rz["polomer_m"], 0), float(rz["polomer_m"]) - okr]]])
+	var n := 0
+	for kd: Array in kandidati:
+		for sg: Array in kd[1]:
+			var a: Vector2 = sg[0]
+			var b: Vector2 = sg[1]
+			var hw: float = sg[2]
+			if hw * 2.0 < float(oh["sirka_jadra_min_m"]):
+				continue
+			var dr := (b - a).normalized()
+			var nn := dr.orthogonal()
+			var L := a.distance_to(b)
+			var celkem := 0
+			var kryto := 0
+			var hmin := INF
+			var u := 0.0
+			while u <= L:
+				var v := -hw
+				while v <= hw:
+					var q := a + dr * u + nn * v
+					celkem += 1
+					var c0 := Vector2i(floori(q.x / 8.0), floori(q.y / 8.0))
+					var ok := false
+					for dx in range(-1, 2):
+						for dz in range(-1, 2):
+							for e: Vector3 in mriz.get(c0 + Vector2i(dx, dz), []):
+								var rr := e.z * pp
+								var dy := oci - e.z * 0.5
+								if not ok and Vector2(e.x, e.y).distance_squared_to(q) + dy * dy < rr * rr:
+									ok = true
+									hmin = minf(hmin, e.z)
+					if ok:
+						kryto += 1
+					v += vz
+				u += vz
+			var kryti := float(kryto) / maxf(celkem, 1)
+			if kryti < float(oh["kryti_min"]) or hmin == INF:
+				print("okluzor houstiny %s: kryti %.2f < %.2f - bez krabice" % [kd[0], kryti, float(oh["kryti_min"])])
+				continue
+			var vy := minf(hmin, float(oh["vyska_max_m"]))
+			var bo := BoxOccluder3D.new()
+			bo.size = Vector3(hw * 2.0, vy, L)
+			var oi := OccluderInstance3D.new()
+			oi.name = "Okluzor_houstina_%s" % kd[0]
+			oi.occluder = bo
+			var st := (a + b) * 0.5
+			oi.transform = Transform3D(Basis(Vector3.UP, atan2(dr.x, dr.y)), Vector3(st.x, _vyska_min(st.x, st.y, L * 0.5) + vy * 0.5, st.y))
+			parent.add_child(oi)
+			_okl_prep.append([oi, st, L * 0.5 + float(pasma()["test"]["okluzor_vypnout_m"])])
+			print("okluzor houstiny %s: kryti %.2f, krabice %.1f x %.1f x %.1f m" % [kd[0], kryti, hw * 2.0, vy, L])
+			n += 1
+	return n
 
 
 var _okl_prep: Array = []                 # [OccluderInstance3D, stred xz, vzdalenost vypnuti]

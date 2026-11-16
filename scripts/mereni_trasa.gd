@@ -7,6 +7,7 @@ const Pravidla := preload("res://scripts/pravidla.gd")
 ## je videt, co sekani zpusobuje, na kazdem useku. Na konci tabulka na obrazovce (vyfotit) + user://mereni_trasa.txt.
 
 var _vnitrek: Array = []            # bez_vnitrku_vsi: skryte site vnitrku domu vsi
+var _houstiny: Array = []           # bez_houstin: skryte MultiMeshe keru houstiny (varianty_parametry.bez_houstin.predpony)
 var main: Node
 var cfg: Dictionary
 var useky: Array = []
@@ -134,6 +135,28 @@ func _varianta(zap: bool) -> void:
 			main.kvalita.nastav(zap)
 	elif v.begins_with("3d_"):                 # rozliseni 3D v % soucasneho: roste-li FPS, brzdi vyplnovani pixelu (GPU)
 		get_viewport().scaling_3d_scale = _sc0 * float(v.substr(3)) / 100.0 if zap else _sc0
+	elif v == "bez_houstin":                   # 16. 11. (Misa: sceny, houstina jako vrstva krajiny): kere a mlade stromy
+		# houstiny skryte (rostliny s predponou z varianty_parametry.bez_houstin.predpony, i bunky vznikle behem varianty
+		# se pri dalsim zapnuti skryji) - cena houstiny na tabletu proti vse ve stejnem behu
+		var sv_: Object = main.get("svet")
+		if sv_ and "trasa_skryt" in sv_:
+			sv_.trasa_skryt = (_par(v).get("predpony", []) as Array).duplicate() if zap else []
+		if zap:
+			_houstiny = []
+			var pr: Array = _par(v).get("predpony", [])
+			for n in main.world.find_children("*", "GeometryInstance3D", true, false):
+				var gi := n as GeometryInstance3D
+				for q: String in pr:
+					if gi.visible and String(gi.name).begins_with(q):
+						gi.visible = false
+						_houstiny.append(gi)
+						break
+			print("TRASA bez_houstin: skryto %d uzlu" % _houstiny.size())
+		else:
+			for gi: GeometryInstance3D in _houstiny:
+				if is_instance_valid(gi):
+					gi.visible = true
+			_houstiny = []
 	elif v == "bez_vnitrku_vsi":               # 14. 11. (0.999996: zasek 2,4 s ve dvorech u usedlosti 6): vnitrek domu vsi
 		# (site *Interier* domu a predmety s dosahem ves_vnitrek) skryte - prvni vykresleni vnitrku = podezreni
 		if zap:
@@ -355,6 +378,8 @@ func _jm(v: String) -> String:
 		return "les-tráva"
 	if v == "les_bez_korun":
 		return "les-koruny"
+	if v == "bez_houstin":
+		return "bez houštin"
 	if v == "bez_svetel":
 		return "bez světel"
 	if v == "svetla_bez_stinu":

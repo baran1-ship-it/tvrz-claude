@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "sklep_vstup", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400", "houby_na_zemi"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "sklep_vstup", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400", "houby_na_zemi", "clona_vsi", "houstina_volno"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -3088,6 +3088,114 @@ func _sonda() -> void:
 
 ## Misa 15./16. 11. (hrib vysoko ve vzduchu u lomu (158, 956); na PC drive nereprodukovano): kazda houba (sber.spots)
 ## musi stat na kolizi pod sebou - paprsek z 30 m nad houbou dolu, nejvyssi zasah pod houbou do 0,15 m; vypis nejhorsich.
+## Clona vsi (Misa 16. 11. „krajina je otevrena, hlavne ve vsi“; pasma.test.clona_vsi): z bodu vjezdu paprsky k domum
+## a dilum vsi; podil paprsku, ktere projdou korunou kere nebo stromu (hotove instance bunek rostlin, AABB site), >= kryti_min.
+## Meri jen vegetaci (domy a teren se nepocitaji) - vjezd jako v KCD, ves za sadem a krovim.
+func _clona_vsi() -> void:
+	var cv: Dictionary = sv.pasma()["test"]["clona_vsi"]
+	var koruny := {}                                 # bunka 8 m -> [stred xz, polomer, y od, y do]
+	var nkor := 0
+	for b: Vector2i in sv._rost_uzly:
+		for m: Node in sv._rost_uzly[b]:
+			var mmi := m as MultiMeshInstance3D
+			if mmi == null or mmi.multimesh == null or mmi.multimesh.mesh == null or String(mmi.name).contains("daleko"):
+				continue
+			var ab: AABB = mmi.multimesh.mesh.get_aabb()
+			for i in mmi.multimesh.instance_count:
+				var xf: Transform3D = mmi.global_transform * mmi.multimesh.get_instance_transform(i)
+				var sc := xf.basis.get_scale()
+				var hgt := ab.size.y * sc.y
+				if hgt < 1.2:
+					continue                                 # trava, byliny, kameni
+				var y0 := xf.origin.y + ab.position.y * sc.y
+				var r := minf(ab.size.x * sc.x, ab.size.z * sc.z) * 0.5 * 0.8
+				if hgt > 7.0:
+					y0 += hgt * float(cv["koruna_stromu_podil"])
+				else:
+					r = minf(r, hgt * float(cv["polomer_podil_vysky"]) * 1.4)
+				var c := Vector2(xf.origin.x, xf.origin.z)
+				var k := Vector2i(floori(c.x / 8.0), floori(c.y / 8.0))
+				if not koruny.has(k):
+					koruny[k] = []
+				(koruny[k] as Array).append([c, r, y0, xf.origin.y + ab.end.y * sc.y])
+				nkor += 1
+	var cile: Array = []
+	for cid: String in cv["cile"]:
+		if cid.begins_with("dum_"):
+			for d: Dictionary in sv._domy:
+				if int(d["k"]) == int(cid.substr(4)):
+					cile.append([cid, Vector2((d["xf"] as Transform3D).origin.x, (d["xf"] as Transform3D).origin.z)])
+		else:
+			var st: Array = Pravidla.cti("lokace", cid, "stred")
+			cile.append([cid, Vector2(float(st[0]), float(st[1]))])
+	var celkem := 0
+	var kryto := 0
+	var po_cilech := {}
+	for od: Array in cv["odkud"]:
+		var o2 := Vector2(float(od[0]), float(od[1]))
+		for oci in cv["oci_m"]:
+			var a := Vector3(o2.x, sv._teren_y(o2.x, o2.y) + float(oci), o2.y)
+			for ci: Array in cile:
+				var c2: Vector2 = ci[1]
+				for vc in cv["vyska_cile_m"]:
+					var bq := Vector3(c2.x, sv._teren_y(c2.x, c2.y) + float(vc), c2.y)
+					var L := a.distance_to(bq)
+					var zakryt := false
+					var tt := 3.0
+					while tt < L - 3.0 and not zakryt:
+						var p := a.lerp(bq, tt / L)
+						var k0 := Vector2i(floori(p.x / 8.0), floori(p.z / 8.0))
+						for dx in range(-1, 2):
+							for dz in range(-1, 2):
+								for e: Array in koruny.get(k0 + Vector2i(dx, dz), []):
+									if not zakryt and p.y >= float(e[2]) and p.y <= float(e[3]) and Vector2(p.x, p.z).distance_to(e[0]) < float(e[1]):
+										zakryt = true
+						tt += 0.5
+					celkem += 1
+					if zakryt:
+						kryto += 1
+						po_cilech[ci[0]] = int(po_cilech.get(ci[0], 0)) + 1
+	var podil := float(kryto) / maxf(celkem, 1)
+	_vysledek("clona_vsi", podil >= float(cv["kryti_min"]), "z vjezdu zakryto vegetaci %d / %d paprsku (%.0f %%, min %.0f %%), korun %d, po cilech %s" % [kryto, celkem, podil * 100.0, float(cv["kryti_min"]) * 100.0, nkor, str(po_cilech)])
+
+
+## Houstina ve hre (16. 11.): ker nebo mlady strom houstiny (predpony z merici trasy bez_houstin) ne na ceste a pesine,
+## ve vode a na holem brehu, ve vstupu a pruchodu, ve zdi - totez pravidlo hry jako rozsev (sv.druh_smi_hra) nad hotovymi
+## instancemi; vypis <DRUH> druh (x, z) pro mapu stavby. Volnost cesty: osa pesiny a cesty bez keru do pasma ker_od_m.
+func _houstina_volno() -> void:
+	var pr: Array = (Pravidla.cti("mereni_trasa", "varianty_parametry") as Dictionary)["bez_houstin"]["predpony"]
+	var n := 0
+	var spatne: Array = []
+	for key: String in sv.data["rostliny"]:
+		var hou := false
+		for q: String in pr:
+			hou = hou or key.begins_with(q)
+		if not hou or key.contains("daleko"):
+			continue
+		for t: Array in sv.data["rostliny"][key]:
+			n += 1
+			var x := float(t[3])
+			var z := float(t[11])
+			var duvod := ""
+			if sv.od_vody(x, z, float(t[7])) < float(sv.pasma()["voda"]["holy_breh_m"]):
+				duvod = "voda"
+			elif sv.v_pruchodu(x, z, key):
+				duvod = "pruchod"
+			elif sv.v_pruchodu_ruiny(x, z):
+				duvod = "pruchod_ruiny"
+			else:
+				var ck: Vector2 = sv.cesta_kraj_osa(x, z)
+				if ck.y >= 0.0 and ck.x < sv.odstup_cesty(key, int(ck.y)):
+					duvod = "cesta"
+				elif sv.pes_d(x, z) < 1.5:
+					duvod = "pesina"
+			if duvod != "":
+				spatne.append("HOUSTINA %s %s (%.1f, %.1f)" % [duvod, key, x, z])
+	for e: String in spatne.slice(0, 40):
+		print(e)
+	_vysledek("houstina_volno", spatne.is_empty(), "keru houstiny %d, mimo pravidla %d %s" % [n, spatne.size(), str(spatne.slice(0, 5))])
+
+
 func _houby_na_zemi() -> void:
 	var sb: Node = main.sber
 	if sb == null:

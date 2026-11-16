@@ -1,5 +1,10 @@
 {
  "popis": "Trava v lese podle svetla (Misa 9. 11., docs/screens/misa_9_11/18_kcd_les.png, tabulka misa_28_chyby r. 88 a 86): v lese roste trava jen tam, kam dopadne svetlo - mytiny, okraje lesa, pruh podel pesin; pod zapojenymi korunami jehlici, hrabanka, kapradi, mech a hola zem (inspirace KCD, ne kopie). Zapoj = koruny VSECH stromu po vsech krocich sazeni (svet._koruny_stin, polomer koruny z modelu modely.json trava_unshaded.koruny) x zapoj okoli (samotny strom v louce zapoj nema) - svet.zapoj_v. Maska stanoviste R+G (krok 5+7) zna jen stromy kroku 6a a pravidlo zapoje ji v ridkem lese nuluje: test les_trava 9. 11. pred zmenou - 83 % bodu pod korunou melo R+G < 0,6, v lesich merici trasy R+G = 0, proto tam rostla trava vsude (potvrzena pricina r. 88). Lesni pudu (hrabanka, listi, jehlici, mech) kresli zem.gdshader podle R+G textury stanoviste, do ktere svet._puda_zapoj doplni zapoj (puda), + ridky podrost z atlasu travy (podrost). Cte louka.gd _vzorek (trsy, drn, vejir i kupy v dalce), test les_trava. Levna pokryvka misto travy: textura lesni pudy terenu (zem.gdshader pudy_a) + podrost (kapradi, byliny, trsy z atlasu travy) + kapradi a kere svet.gd _lesni_puda (modely z Disku/Poly Haven).",
+ "jen_blender": [
+  "houstina/skladby",
+  "houstina/meze",
+  "houstina/breh"
+ ],
  "trava": {
   "okoli_m": 8.0,
   "okoli_od": 0.55,
@@ -355,6 +360,8 @@
    "podil_keru": 0.78,
    "podil_mladych": 0.22,
    "podil_lemu": 0.35,
+   "lem_les": 0.12,
+   "lem_ker": 0.45,
    "druhy": [
     [
      "ker_husty_0",
@@ -449,7 +456,7 @@
     "kapradi_les_0": 0.6,
     "kapradi_les_1": 0.5
    },
-   "_p": "plášť lesa (svet.gd _lesni_plast, Míša 0.64 „kraje lesů všude plné keřů“ + 15. 11. lískový/olšový pás 2–4 m mezi lesem a cestou/loukou, kcd_sada2_04/16/18/19): body mřížky krok_m tam, kde les (svet._les) je mezi les_kraj a do dosah_lesa_m je zapojený les (> les_kraj[1]); vnější lem (les < 0,12) kapradí podle podil_lemu, vnitřní okraj (les > les_kraj[0]) mladé stromy podle podil_mladych, jinak keř s pravděpodobností podil_keru. Výška v m = měřítko × vyska_modelu_m (AABB glb, 16. 11.; shrub_02 a varianty: AABB celého souboru, NEOVĚŘENO po variantách). Dříve čísla v kódu: keře 0,7–1,35 × (ker_husty 1,7 m = 1,2–2,3 m), mladé stromy 0,25–0,5 ×."
+   "_p": "plášť lesa (svet.gd _lesni_plast, Míša 0.64 „kraje lesů všude plné keřů“ + 15. 11. lískový/olšový pás 2–4 m mezi lesem a cestou/loukou, kcd_sada2_04/16/18/19): body mřížky krok_m tam, kde les (svet._les) je mezi les_kraj a do dosah_lesa_m je zapojený les (> les_kraj[1]); vnější lem (les < 0,12) kapradí podle podil_lemu, vnitřní okraj (les > les_kraj[0]) mladé stromy podle podil_mladych, jinak keř s pravděpodobností podil_keru. Výška v m = měřítko × vyska_modelu_m (AABB glb, 16. 11.; shrub_02 a varianty: AABB celého souboru, NEOVĚŘENO po variantách). Dříve čísla v kódu: keře 0,7–1,35 × (ker_husty 1,7 m = 1,2–2,3 m), mladé stromy 0,25–0,5 ×. Vnější lem = les pod lem_les: kapradí (podil_lemu) a keř do lem_ker (dříve 0,12 a 0,45 v kódu)."
   },
   "patro": {
    "les_od": 0.6,

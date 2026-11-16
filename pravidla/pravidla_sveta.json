@@ -1746,8 +1746,17 @@
    "_hloubka_dno_min_m": "koryto maleho toku ve vysledne siti: teren pod osou aspon tolik pod hladinou (Misa 28. 10. voda v trave)",
    "okluzor_vypnout_m": 6.0,
    "_okluzor_vypnout_m": "okluzor remizku (a pozdeji domu) se vypne, kdyz je hrac bliz nez tolik za jeho okrajem - kamera v okluzoru by zakryla vse",
-   "okluzor_listi": false,
-   "_okluzor_listi": "Astra 29. 10.: plny zakryvac jen pres pevny tvar (teren, zdi domu a stodol); pres remizek a nitro lesa ne - listim je videt a da se jim projit, objekty by za nim mizely a naskakovaly. true = stare krabice remizku a lesa (jen pro A/B mereni)",
+   "okluzor_houstina": {
+    "kryti_min": 0.95,
+    "okraj_m": 0.8,
+    "vyska_oci_m": 1.7,
+    "polomer_podil_vysky": 0.35,
+    "vzorek_m": 0.5,
+    "sirka_jadra_min_m": 1.5,
+    "vyska_max_m": 2.5,
+    "les_nitro": false
+   },
+   "_okluzor_houstina": "Míša 15. 11. + plán sceny_kcd_15_11.md krok 3 (nahrazuje paušální okluzor_listi false, Astra 29. 10.: přes listí je vidět a dá se jím projít): okluzor (krabice) jen v jádru houštiny, která je z oka hráče opravdu neprůhledná – kandidáti jsou clony (lokace kompozice.clony) a remízky; svet._okluzory spočte z hotových instancí v jádru (pás osy zmenšený o okraj_m z každé strany) podíl vzorků po vzorek_m, které ve výšce vyska_oci_m kryje koruna keře nebo mladého stromu (poloměr = výška × polomer_podil_vysky, výška z měřítka × houstina.plast.vyska_modelu_m) – jen při podílu ≥ kryti_min (podmínka 1 a 2: spodní patro do výšky očí) a šířce jádra ≥ sirka_jadra_min_m dostane jádro krabici vysokou min(nejnižší keř jádra, vyska_max_m). U hráče se vypíná (okluzor_vypnout_m, podmínka 3); přes řeku nikdy (test smyslu houstina_reka). Výsledek se vypíše (okluzory: … houstina) – NEOVĚŘENO přínos (podle plánu desítky volání nejvýš). les_nitro: staré krabice nitra lesa (okluzor_les_*) jen pro A/B měření, listím je vidět → false. Podmínka 4 (snímek okluzor zap/vyp beze změny mimo masku) zatím ruční snímek, test chybí. Návrat: kryti_min > 1 vypne všechny.",
    "okluzor_les_bunka_m": 20.0,
    "okluzor_les_okraj_m": 20.0,
    "okluzor_les_min": 0.7,
@@ -1895,7 +1904,41 @@
     "zemljanka_dno_m": 0.2,
     "zemljanka_chuze_s": 8.0,
     "popis": "Míša 16. 11. (sady z Disku Luzka_1400, Topeni_1400 + Doplněk, les_dily, Seno_1400): testy katalog_1400 (každé id v katalogu se stavem pro stavitelské menu, model a LOD1), postele_domu (lůžko podle typu domu: Dum1/Dum2/mlýn/krčma postel_chudy, Rychta postel_rychtar, zemljanky houně a deka), zemljanka_schody (hráč sejde po dvou stupních na dno jámy do zemljanka_dno_m a vyjde ven za zemljanka_chuze_s), ohen_u_pece (oheň kusu s ohen do ohen_od_predmetu_m od půdorysu kusu, dům s pec_chalupni bez ohně modelu), nevisi_1400 (pata kusu sad do pata_m nad podlahou/terénem, ne pod ní)."
-   }
+   },
+   "clona_vsi": {
+    "odkud": [
+     [
+      352.0,
+      746.0
+     ],
+     [
+      364.0,
+      745.0
+     ]
+    ],
+    "oci_m": [
+     1.7,
+     2.5
+    ],
+    "cile": [
+     "dum_2",
+     "dum_3",
+     "dum_4",
+     "dum_5",
+     "dum_6",
+     "dum_7",
+     "krcma_l",
+     "kovarna_ves"
+    ],
+    "vyska_cile_m": [
+     1.5,
+     4.0
+    ],
+    "kryti_min": 0.5,
+    "polomer_podil_vysky": 0.35,
+    "koruna_stromu_podil": 0.3
+   },
+   "_clona_vsi": "Míša 16. 11. „nelíbí se mi, jak je krajina otevřená, hlavně ve vsi“ (test tools/test_svet.gd clona_vsi): z bodů vjezdu odkud ve výškách oci_m paprsky k cílům (dum_k = dům usedlosti k ze svet._domy, ostatní = lokace.json <id>.stred: krčma do L, kovárna) ve výškách vyska_cile_m; paprsek je zakrytý, když projde korunou keře (koule poloměru výška × polomer_podil_vysky ve středu výšky) nebo korunou stromu (od koruna_stromu_podil výšky po vrchol, poloměr = menší polovina vodorovného obalu AABB sítě × 0,8) z hotových instancí data rostliny; podíl zakrytých paprsků ≥ kryti_min (vjezd: ves se otevírá až po ohybu). Pevné zakrytí (domy, terén) se nepočítá – měří jen vegetaci."
   },
   "skupiny": {
    "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",

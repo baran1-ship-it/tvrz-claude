@@ -259,6 +259,7 @@
   "les_bez_korun",
   "rostliny",
   "stavby",
+  "bez_houstin",
   ""
  ],
  "samo_na_tabletu": false,
@@ -300,7 +301,17 @@
    "faktor": 0.6,
    "od_m": 40.0
   },
-  "_pozn": "15. 11. parametry variant: louka_puchart = louka jako Puchart (trs 0,5 m, plna do 14 m, ridne do 60 m; louka.nastav_puchart), stin_filtr_1 = RenderingServer.directional_soft_shadow_filter_set_quality (Compatibility: >= 2 PCF 5 vzorku, 1 = jeden vzorek; rasterizer_scene_gles3.cpp:3331); dohled_kratsi = far kamery (player.gd 2200 m) a visibility_range begin/end vsech uzlu s koncem nad od_m (dalkove dily, LOD prechody, rostliny, louka - i nove vznikle behem varianty) x faktor"
+  "_pozn": "15. 11. parametry variant: louka_puchart = louka jako Puchart (trs 0,5 m, plna do 14 m, ridne do 60 m; louka.nastav_puchart), stin_filtr_1 = RenderingServer.directional_soft_shadow_filter_set_quality (Compatibility: >= 2 PCF 5 vzorku, 1 = jeden vzorek; rasterizer_scene_gles3.cpp:3331); dohled_kratsi = far kamery (player.gd 2200 m) a visibility_range begin/end vsech uzlu s koncem nad od_m (dalkove dily, LOD prechody, rostliny, louka - i nove vznikle behem varianty) x faktor | 16. 11. bez_houstin = skryte kere houstiny (predpony klicu rostlin: ker_husty, ker_kulaty, shrub_02, bez cerny, olse mlada) - cena houstiny (plast lesa, meze, breh, clony vsi) proti vse; skryje i kere, ktere byly drive (krom houstiny), takze je to horni mez ceny.",
+  "bez_houstin": {
+   "predpony": [
+    "ker_husty",
+    "ker_kulaty",
+    "shrub_02",
+    "bez_cerny",
+    "olse_mlada",
+    "sipek"
+   ]
+  }
  },
  "_varianty_15_11": "15. 11. (docs/rozpracovane/vykon_postavy_puchart_15_11.md, body 1, 2, 4, 5, 6, 8): vse = nove vychozi (lehky monitor, strop kroku animace postavy.json anim_strop_snimek 8, modifikatory odpojene od kostry u postav bez zapnuteho modifikatoru - modif_odpojit); bez_postav (Misa 15. 11.: ves se seka kvuli postavam, pred nimi byla skoro v poradku) = Lide skryti a bez zpracovani, primo proti vse ve stejnem behu; diag_plny = drivejsi plny monitor; bez_stropu_koster = bez stropu (drive); modif_pripojene = modifikatory stale na kostre (drive); postavy_daleko = za 45 m bez animace, dohled 50 m (jen varianta); louka_bez_stinu = trava bez stinoveho pruchodu slunce (bunky stin nevrhaji uz drive); louka_puchart = trs 0,5 m, plna do 14 m, do 60 m; stin_filtr_1 = filtr stinu slunce 2 -> 1; dohled_kratsi (Misa 15. 11.: „dělají sekání dálky?“) = far kamery a dosahy viditelnosti nad 40 m na 60 % - izolace vlivu dalky na spicky (louka pri otoceni na koni, prvni pruchod krcmy); planovac rostlin (rozpocty.planovac.rostliny_dosah_m) nacita dal beze zmeny, jen se nekresli; vse znovu = teplo. bez_vnitrku_vsi a dest z kodu nezmizely (vratit do seznamu podle potreby). Vse NEOVERENO NA ZARIZENI. | 15. 11. vecer (koordinator: trasa ~20 min, 15 useku x 14 s = 3,5 min na variantu): v seznamu vse, bez_postav, dohled_kratsi, les_bez_korun (koruny a sady), rostliny, stavby (main._ab_skupiny), vse znovu = 7 variant ~25 min - rozdeleni ceny ves-vjezd (810 kresleni, 2,28 M troj.) podle skupin a dalky; ostatni nove varianty v _varianty_pristi (kod je umi, pristi trasa).",
  "_varianty_16_11": "16. 11. K4 (docs/rozpracovane/teren_dlazdice_navrh.md): teren_dlazdice = teren na dlazdice 128 m s LOD (pravidla/svet/teren_dlazdice.json) misto celych siti Teren* - primo proti vse ve stejnem behu. Kdyz v datech neni pecena sada nebo nesedi otisk, varianta dlazdice upece za behu (prvni usek varianty muze mit zasek - porovnavat od 2. useku). NEOVERENO NA ZARIZENI.",
@@ -312,5 +323,6 @@
   "stin_filtr_1",
   "bez_stropu_koster",
   "modif_pripojene"
- ]
+ ],
+ "_varianty_16_11b": "16. 11. sceny (houstina, clony vsi, pole za vsi): bez_houstin pridana pred posledni vse - cena houstiny na useku ves-vjezd, les, kun-les-mimo proti vse ve stejnem behu. NEOVERENO NA ZARIZENI."
 }
