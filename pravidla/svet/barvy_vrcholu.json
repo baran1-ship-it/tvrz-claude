@@ -1,0 +1,78 @@
+{
+ "popis": "Barvy vrcholů (COLOR_0) modelů od modeláře převedené z lineárních (glTF) na sRGB pro renderer Compatibility (převzato z Puchartu, větev ccr-f2d32673-9fi7m5 pravidla/svet/barvy_vrcholu.json, chyby.md 356): Compatibility násobí albedo (textura × albedo_color × COLOR) v sRGB a teprve výsledek převede do lineárního prostoru – lineární barva vrcholu se vezme jako sRGB a ztmavne (béžová 0,34 → 0,095: houně a přikrývka chudé postele téměř černé, Míša/koordinátor 16. 11. snímky chalupa2, zemljanka). tools/barvy_vrcholu.py převede COLOR_0 v GLB katalogu (modely/predmety/<id>.glb a <id>_lod1.glb) jednou – značka v asset.extras (opakované spuštění nic nezmění) – a u materiálů sady albedo_modulace nastaví baseColorFactor; pak godot --import. Test smyslu? ne – kontrola tools/barvy_vrcholu.py kontrola (rc 1 = GLB sady s COLOR_0 bez značky).",
+ "jen_blender": [
+  "znacka",
+  "sady"
+ ],
+ "znacka": "barvy_vrcholu_srgb",
+ "sady": {
+  "luzka": {
+   "ids": [
+    "postel_chudy",
+    "postel_rychtar",
+    "postel_panska",
+    "postel_nebesa",
+    "houne",
+    "deka_zem"
+   ],
+   "pozn": "Luzka_1400: Vlna, Len, Dub, Hrubé dřevo – COLOR_0 × albedo (NAVOD_LUZKA)"
+  },
+  "topeni": {
+   "ids": [
+    "pec_chalupni",
+    "pec_krcma",
+    "krb_rychta",
+    "krb_hradni",
+    "kamna_nadobkova",
+    "ohniste_cerna",
+    "krb_sinovy",
+    "topeniste_siroke",
+    "kotel_zavesny",
+    "hrnec_trinohy",
+    "panev_kovana",
+    "naberacka_kovana",
+    "sberacka_derovana",
+    "miska_hlinena",
+    "dzban_keramicky",
+    "poharek_keramicky",
+    "trojnozka_kovana"
+   ],
+   "pozn": "Topeni_1400 + Doplněk: začouzení v COLOR_0 (NAVOD_PEC: Vertex Color → Use As Albedo)"
+  },
+  "les": {
+   "ids": [
+    "milir_postaveny",
+    "milir_horici",
+    "milir_rozebrany",
+    "uhlir_chyse",
+    "uhlir_drevo",
+    "uhlir_naradi",
+    "uhlir_vozik",
+    "uhlir_mytina",
+    "smolarna",
+    "studanka",
+    "kriz_smirci",
+    "kriz_rozcesti",
+    "bozi_muka_drevene"
+   ],
+   "pozn": "les_dily: mech, saze, vlhko v COLOR_0 (NAVOD_LES)"
+  },
+  "seno": {
+   "ids": [
+    "seno_kupa",
+    "seno_puda",
+    "seno_jesle",
+    "seno_chomac",
+    "vidle_drevene"
+   ],
+   "albedo_modulace": {
+    "Seno": [
+     1.0,
+     0.9,
+     0.76
+    ]
+   },
+   "pozn": "Seno_1400: atlas sena s šedým COLOR_0 (průměr 0,79); albedo_modulace = baseColorFactor materiálu, jehož jméno začíná klíčem – Puchart seno.json (KCD1 bledě slámově béžová, poměr G/R 0,92, B/R 0,76; bez ní zelenošedé)"
+  }
+ }
+}

@@ -1018,6 +1018,8 @@ if __name__ == "__main__" and "build" in sys.argv:
     # sdilene textury (Misa 10. 11.: zasek pri prvnim zobrazeni predmetu): vlozene obrazky ven, jedna kopie podle md5
     import subprocess
     subprocess.run([sys.executable, os.path.join(HERE, "..", "tools", "textury_predmetu.py")], check=True)
+    # barvy vrcholu sad od modelare linearni -> sRGB (pravidla/svet/barvy_vrcholu.json; jinak v Compatibility tmave)
+    subprocess.run([sys.executable, os.path.join(HERE, "..", "tools", "barvy_vrcholu.py")], check=True)
 
 
 def meta():
