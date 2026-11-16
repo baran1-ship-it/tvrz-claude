@@ -22,3 +22,26 @@ podlahu a postele, vykopat 2 schody do země a udělat zemljanku jako v KCD.“
 - Předloha: KCD zemnice (uhlíři, lapkové) – najít fotky; dobová reference: zahloubené stavby (polozemnice) 13.–14. st.
 - Vybavení (Míša 15. 11.): žádné postele – spalo se na zemi vlevo a vpravo na rohožích a houních (rohož z rákosí/slámy +
   vlněná houně, pevný díl modelu); proti dveřím na konci bedna (truhla z katalogu Havrana), pokud se vejde.
+
+## Stav 16. 11. (postaveno)
+Data `pravidla/svet/zajimava_mista.json` (hledání polohy, díly, terén, funkce; zdroj a značka u každého místa) →
+`nastroje/zajimava_modely.py` (lesní díly modeláře do `hra/modely/les`, zemljanky `hra/modely/stavby_h/zemljanka_kura|prkna.glb`,
+zkrácená štola `hra/modely/les/stola.glb`, brť) → `nastroje/zajimava_mista.py` (poloha z terénu, plošiny, zářezy, jámy, trasy
+`hra/data/pruchody_zajimava.json`) → `teren_dlazdice.py` (otvory a snížená kolize z `build/zajimava_teren.json`) →
+`hra/scripts/zajimava.gd` (LOD, kolize, kouř milíře a smolárny, ohně, kolo mlýna, kahany ve štole, víko kolize nad štolou).
+Vše v `nastroje/postav_vse.sh`. Snímky `docs/screens/mista_*.png`, test `pruchod:zajimava_*` + `pruchod:zajimava_mista`.
+
+| Místo | Kde (hra x, z) | Značka |
+|---|---|---|
+| Kříž na rozcestí | rozcestí S od Předhradí | NAVRH |
+| Smírčí kříž | u vozové cesty z Kyžlířova | REKONSTRUKCE |
+| Boží muka | u cesty k mlýnu | NAVRH |
+| Uhlíř (milíř hořící + postavený, dřevo, nářadí, kára, zemljanka, ohniště) | les na plošině SZ | NAVRH |
+| Smolárna | les ~100 m od uhlíře | NAVRH |
+| Studánka | pramen přítoku Veličky na S | NAVRH |
+| Brtě (borovice a dub) | kraj lesu u pěšiny | REKONSTRUKCE |
+| Poustevna | pod skalami hřebene J od hradu | NAVRH |
+| Lom (dno, stěna, kameny, kvádry, zemljanka) | svah nad vozovou cestou J od hradu | NAVRH |
+| Průzkumná štola | strmá stráň V od vsi | NAVRH |
+| Mlýn | břeh Veličky u soutoku | REKONSTRUKCE |
+Přesné souřadnice: `hra/data/zajimava_mista.json`.

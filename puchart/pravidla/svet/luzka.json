@@ -132,5 +132,7 @@
   "lozko": "luzko_Postel_Chudy_Dum",
   "lozko_uzke": "luzko_Postel_Chudy_Dum"
  },
- "nahrazuje_pozn": "lůžka Havrana v katalogu pískoviště (gotická postel, lůžko se slamníkem, úzké lůžko) se v nabídce Stavění už nenabízejí – výchozí postel je chudá postel modeláře; uložené pozice s nimi se načtou s ní (stejná poloha a natočení). Slamník Havrana zůstává (jiný typ – na zemi, poustevna). Výchozí postel stojí v nabídce Uvnitř jako první."
+ "nahrazuje_pozn": "lůžka Havrana v katalogu pískoviště (gotická postel, lůžko se slamníkem, úzké lůžko) se v nabídce Stavění už nenabízejí – výchozí postel je chudá postel modeláře; uložené pozice s nimi se načtou s ní (stejná poloha a natočení). Slamník Havrana zůstává (jiný typ – na zemi, poustevna). Výchozí postel stojí v nabídce Uvnitř jako první.",
+ "lod_okraj_m": 0.0,
+ "lod_okraj_m_popis": "okraj přepnutí LOD0/LOD1 lůžek; modelář dal 0,75 m bez prolínání → po načtení v pásmu 7,25–8,75 m nebyl vidět ani jeden stupeň (zdroj: snímek agenta 16. 11., chyby.md 355)"
 }

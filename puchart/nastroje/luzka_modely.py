@@ -29,7 +29,11 @@ chci = set()
 for sc in C["sceny"]:
     tscn = sc + C["varianta"] + ".tscn"
     t = open(os.path.join(ZD, tscn)).read()
-    kopie(os.path.join(ZD, tscn), os.path.join(OUT, tscn)); chci.add(tscn)
+    # okraje LOD (margin 0,75 m bez prolínání) nechají v pásmu 7,25–8,75 m po načtení skrytý LOD0 i LOD1 (chyby.md 355)
+    t_hra = re.sub(r"visibility_range_(begin|end)_margin = [0-9.]+", lambda m: "visibility_range_%s_margin = %s" % (m.group(1), C.get("lod_okraj_m", 0.0)), t)
+    cil = os.path.join(OUT, tscn)
+    if not os.path.exists(cil) or open(cil).read() != t_hra: open(cil, "w").write(t_hra)
+    chci.add(tscn)
     for p in re.findall(r'\[ext_resource [^\]]*path="([^"]+)"', t):
         if p.startswith("res://") or not os.path.exists(os.path.join(ZD, p)):
             print("LUZKA_CHYBA cesta %s v %s" % (p, tscn)); sys.exit(1)

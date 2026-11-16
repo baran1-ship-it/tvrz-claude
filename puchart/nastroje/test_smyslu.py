@@ -406,7 +406,7 @@ TEST("nabeh_vyska", not _zle_r, "nájezdů %d, podstavec pod rampou vyšší ne�
 # textury 3D bez mipmap a komprese (Míša 9. 11.: „mipmapy jsme měli v plánu, proč je nemáme“): textury načítané skriptem
 # Godot nepozná jako 3D → import 2D bez mipmap a bez VRAM komprese (blikání v dálce, paměť a šířka pásma na Adreno).
 # Hlídá složky 3D textur; datové masky (data/, maska_*) jsou vyhledávací tabulky a mipmapy mít nesmí.
-import glob as _gl
+import glob as _gl, re
 _bez_mm = []
 for _f in _gl.glob(K + "/hra/textury/**/*.import", recursive=True):
     _jm = os.path.basename(_f)
@@ -879,6 +879,14 @@ for _dum in _SO["koreny"]:
     _h = _paprsky_troj(_O, _D, _T).mean(); _r21.append("%s %.1f %%" % (_dum, 100 * _h))
     if _h > _so["test_max"]: _c21.append("%s: %.1f %% líce na slunci ve stínu vlastní stínové kopie obalu (max %.1f %%)" % (_dum, 100 * _h, 100 * _so["test_max"]))
 TEST("stin_domu", not _c21, "; ".join(_c21) if _c21 else "líc domů na slunci mimo stín vlastního obalu (zásahy: %s)" % ", ".join(_r21))
+
+# lůžka: okraj LOD bez prolínání nechá po načtení v pásmu okraje skrytý LOD0 i LOD1 (chyby.md 355)
+import glob as _gl, re
+_c22 = []
+for _f in sorted(_gl.glob(K + "/hra/modely/luzka/*.tscn")):
+    for _m in re.findall(r"visibility_range_(?:begin|end)_margin = ([0-9.]+)", open(_f).read()):
+        if float(_m) > 0.0: _c22.append("%s margin %s" % (os.path.basename(_f), _m)); break
+TEST("luzka_lod_okraj", not _c22, "; ".join(_c22) if _c22 else "lůžka: LOD bez okraje (žádná mezera ve viditelnosti)")
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
