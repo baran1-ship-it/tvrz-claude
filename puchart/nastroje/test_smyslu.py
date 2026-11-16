@@ -638,6 +638,20 @@ for _m in json.load(open(D + "zajimava_mista.json"))["mista"]:
         _rost = sum(1 for x_, z_ in _body if _roste(TR[int(trida(x_, z_))]))
         if _mimo or _rost: _c32.append("%s %s: bodů pod střechou mimo otvor terénu %d, s porostem %d z %d" % (_m["id"], _q["model"], _mimo, _rost, len(_body)))
 TEST("zemljanka_bez_travy", _nz > 0 and not _c32, "; ".join(_c32) if _c32 else "%d zemljanek: půdorys pod střechou v otvoru terénu, bez porostu" % _nz)
+# mlýn: koryto Veličky u mlýna zůstane korytem (voda, ne porost) a pod kolem nic neroste (Míša 16. 11.: „kolo stojí v trávě“)
+_c33 = []; _zmj = json.load(open(K + "/pravidla/svet/zajimava_mista.json"))
+for _m in json.load(open(D + "zajimava_mista.json"))["mista"]:
+    if _m["id"] != "mlyn": continue
+    _ml = [q for q in _zmj["mista"] if q["id"] == "mlyn"][0]["mlyn"]; _cs, _sn = math.cos(_m["yaw"]), math.sin(_m["yaw"])
+    _sv = lambda a, b: (_m["x"] + a * _cs + b * _sn, _m["z"] - a * _sn + b * _cs)
+    _r = _ml["bez_porostu_kolo"]; _rost = [p_ for p_ in (_sv(a, b) for a in np.linspace(_r[0] + .2, _r[1] - .2, 6) for b in np.linspace(_r[2] + .2, _r[3] - .2, 8)) if _roste(TR[int(trida(*p_))])]
+    if _rost: _c33.append("pod kolem roste porost v %d bodech, např. [%.1f, %.1f] %s" % (len(_rost), _rost[0][0], _rost[0][1], TR[int(trida(*_rost[0]))]))
+    _vel = [t for t in json.load(open(D + "toky_hladina.json"))["toky"].values() if t.get("jmeno") == "Velička"][0]; _o = np.array(_vel["osa"])
+    _bl = _o[np.hypot(_o[:, 0] - _m["x"], _o[:, 1] - _m["z"]) < 12]
+    _jine = [(round(float(p_[0]), 1), round(float(p_[1]), 1), TR[int(trida(p_[0], p_[1]))]) for p_ in _bl if TR[int(trida(p_[0], p_[1]))] != "koryto_kamenite"]
+    if not len(_bl): _c33.append("Velička není do 12 m od mlýna")
+    if _jine: _c33.append("osa Veličky u mlýna mimo třídu koryta: %s" % _jine[:3])
+TEST("mlyn_koryto", not _c33, "; ".join(_c33) if _c33 else "koryto Veličky u mlýna je koryto, pod kolem bez porostu")
 _ROSTE = np.array([_roste(t) for t in TR])
 _CP = json.load(open(K + "/pravidla/svet/cesty_puchart.json")); _MO = np.array([m_["u_bodu"][:2] for m_ in json.load(open(K + "/pravidla/svet/voda_hra.json")).get("mosty", [])] or [[1e9, 1e9]])
 def _chaikin(p_, n=3):

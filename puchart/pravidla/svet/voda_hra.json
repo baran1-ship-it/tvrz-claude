@@ -11,7 +11,12 @@
  "vyhlazeni_m": 12.0,
  "presah_m": 0.35,
  "min_nad_dnem_m": 0.03,
- "lavky": [],
+ "lavky": [
+  {"id": "mlyn", "tok": "Velička", "u_bodu": [-334.12, -203.75], "k_bodu": [-332.62, -203.87], "sirka": 1.1, "delka_nad_m": 0.0, "zabradli_strany": [1], "trasa_u_cile_m": 0.3,
+   "zdroj": "Míša 16. 11. ke snímku mista_mlyn_kolo_16_11.png (nakreslila lávku z protějšího břehu ke dveřím mlýna): „dodělej tam lávku, když už jsme u vody“; stejná lávka jako ostatní (blender/voda.py: nástupní kameny, dva trámy, prkna napříč, zábradlí, kolize), jen jednostranné zábradlí po proudu (proti proudu je kolo) – Havran kraj.py lávka přes potok",
+   "pozn": "u_bodu = osa Veličky před dveřmi Mlyn_Dvere_Dvur (místně x −5,1, z 0,27; mlýn zajimava_mista.json), délka = šířka toku → konec u stěny mlýna (x −3,6), druhý konec na louce protějšího břehu (cesta tam žádná není – nejbližší cesty jsou na straně mlýna); k_bodu = konec u dveří (trasa lavka_mlyn končí 0,3 m za ním, u dveří)",
+   "jistota": "NAVRH"}
+ ],
  "koryto": {
   "popis": "Zářez koryta do terénu (nastroje/koryta.py, Míša 2. 11.: „koryto není dle reality“; Havran koryto.gd): pod hladinou dno (parabola), u vody práh břehu, pak svah až k původnímu terénu – terén se jen snižuje. Podhorský potok na drobě: kamenité dno, břehy 0,3–0,8 m, nárazové břehy strmější.",
   "hloubka_vody_m": {

@@ -346,6 +346,7 @@ for m in Z["mista"]:
             zaz["mlyn"] = {k_: ml[k_] for k_ in ("vynechat", "kolo_rad_s", "cevnik_nasobek", "lod1_od_m", "dil_do_m", "interier_do_m", "zastavit", "ovladani")}
             zaz["mlyn"]["smer"] = o["smer"]
             for (x0, x1, z0, z1) in ml["zabor"]: PUD.append(poly_svet(o, x0 - 1, x1 + 1, z0 - 1, z1 + 1))
+            if ml.get("bez_porostu_kolo"): PUD.append(poly_svet(o, *ml["bez_porostu_kolo"]))
             bx_, bz_ = m["pristup"]["bod"]
             tr += [[*svet(o, bx_, bz_), None], [*svet(o, 6.8, -9.0), None], [*svet(o, 6.0, -4.0), None], [*svet(o, 4.3, 0.2), None]]
     # ---- díly

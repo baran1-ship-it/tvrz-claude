@@ -43,6 +43,8 @@ nadvori = np.array(mn).astype(bool) & ~stavba_jadro
 predhradi = np.array(mp).astype(bool) & ~stavba_jadro & ~nadvori
 if "predhradi" not in SJ["tridy"]: SJ["tridy"].append("predhradi")
 st[predhradi] = SJ["tridy"].index("predhradi")
+_koryto0 = np.isin(st, [SJ["tridy"].index(t) for t in ("koryto_kamenite",) if t in SJ["tridy"]])   # Míša 16. 11. (mlýn: „kolo stojí v trávě“): koryto toku zůstane korytem i pod půdorysem míst – stavba ho nepřepíše, pata zdí do něj nesahá (chran)
+stavba &= ~_koryto0; stavba_jadro &= ~_koryto0
 st[stavba] = SJ["tridy"].index("stavba"); st[nadvori] = SJ["tridy"].index("nadvori")
 st[okraj_ := (stavba & ~stavba_jadro & ~nadvori & ~predhradi)] = SJ["tridy"].index("stavba")   # vnější prstenec určí pata zdí níž
 

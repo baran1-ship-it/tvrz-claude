@@ -214,12 +214,15 @@ for lv in VH["lavky"]:
         P.box(M(Vector((e.x, (ye + y) / 2 - 0.2, e.z)), basis=H.frame(nn)), (lv["sirka"] + 0.4, y - ye + 0.4, 0.8), "kvadr")
     kit.deck(P, a + UP * y, b + UP * y, lv["sirka"] / 2, "prkna_ven", beams=(-lv["sirka"] / 2 + 0.15, lv["sirka"] / 2 - 0.15))
     P.cols.append((M((a + b) / 2 + UP * (y - 0.1), basis=H.frame(nn)), (lv["sirka"], 0.2, (b - a).length + 1.0)))
-    for sg in (-1, 1):
+    for sg in lv.get("zabradli_strany", (-1, 1)):   # strana zábradlí: +1 = po proudu (dd), −1 = proti proudu (lávka u mlýna jen po proudu – kolo proti proudu)
         o = dd * sg * (lv["sirka"] / 2 + 0.05)
         P.beam(a + o + UP * (y + 1.0), b + o + UP * (y + 1.0), 0.08, 0.1, "dub", j=0.4)
         for f in np.linspace(0, 1, 4):
             q2 = a.lerp(b, f) + o; P.beam(q2 + UP * (ter(q2.x, q2.z) - 0.3 if 0 < f < 1 else y - 0.05), q2 + UP * (y + 1.05), 0.1, 0.1, "dub", j=0.5)
         P.cols.append((M((a + b) / 2 + o + UP * (y + 0.55), basis=H.frame(nn)), (0.1, 1.1, (b - a).length)))
+    if lv.get("k_bodu"):   # konec u cíle (dveře mlýna) jako druhý – trasa za ním jen trasa_u_cile_m (dál je stěna)
+        kb_ = Vector((lv["k_bodu"][0], 0, lv["k_bodu"][1]))
+        if (a - kb_).length < (b - kb_).length: a, b = b, a
     lv["_konce"] = [[a.x, a.z, y], [b.x, b.z, y]]
     print("lávka", lv["id"], "délka %.1f m, výška %.2f" % ((b - a).length, y))
 # mosty údolní cesty (Míša 5. 11.: dřevěné, hezké): kamenné opěry na březích, pilotová jařma po jarmo_po_m (rešerše: Lednica,
@@ -405,7 +408,8 @@ json.dump({lv["id"]: lv["_konce"] for lv in VH["lavky"]}, open(os.path.join(K, "
 TRp = {}
 for lv in VH["lavky"] + [m_ for m_ in VH.get("mosty", []) if "_konce" in m_]:
     (ax, az, y), (bx, bz, y2_) = lv["_konce"]; y = (y + y2_) / 2; d = np.array([bx - ax, bz - az]); d /= np.linalg.norm(d)   # střed mostovky (sklon)
-    TRp["lavka_" + lv["id"]] = [[ax - d[0] * 2.5, az - d[1] * 2.5, None], [(ax + bx) / 2, (az + bz) / 2, y + 0.05], [bx + d[0] * 2.5, bz + d[1] * 2.5, None]]
+    zb_ = float(lv.get("trasa_u_cile_m", 2.5))
+    TRp["lavka_" + lv["id"]] = [[ax - d[0] * 2.5, az - d[1] * 2.5, None], [(ax + bx) / 2, (az + bz) / 2, y + 0.05], [bx + d[0] * zb_, bz + d[1] * zb_, None]]
 json.dump({"popis": "trasy průchodu lávkami (blender/voda.py)", "trasy": TRp}, open(os.path.join(K, "hra/data/pruchody_voda.json"), "w"), ensure_ascii=False)
 
 # Blender (bpy) občas spadne při úklidu po uložení – návratový kód přerušil řetězec postav_vse.sh (12. 11.); vše je uložené
