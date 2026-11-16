@@ -1,0 +1,28 @@
+{
+ "popis": "Lůžka od Míšina modeláře (sada Luzka_1400, 16. 11.): vlněná houně, deka na zemi, postel v chudém domě, rychtářova, panská a s nebesy. nastroje/luzka_modely.py zkopíruje z dodané sady jen tabletové nativní scény Godotu (*_Tablet_1K.tscn: LOD0 do 8 m / LOD1 přes Visibility Range, konvexní kolize StaticBody3D Kolize, značky Marker3D Luzko_Lezeni / Luzko_Hlava / Luzko_Vstup), sítě *_mesh.res, 1K materiály (ORMMaterial3D, vertex_color_use_as_albedo – COLOR_0 × albedo) a jejich 1K textury (albedo, normal GL, ORM) do vystup; struktura sady zůstane (scény odkazují relativně). GLB se nepoužívají (chybí jim textures/gltf), 2K materiály a mapy drsnosti také ne. Do katalogu pískoviště (hra/modely/predmety_h.json) zapíše záznamy luzko_<Model> (obalová scéna predmety_h/luzko_<Model>.tscn) s lehat: true – hráč si lehne podle značek modelu (predmety.gd use: Luzko_Lezeni, Luzko_Vstup) a vybere, do kdy spát. Výchozí postel nabídky (vychozi_postel) = Postel_Chudy_Dum (Míša 16. 11.: „jestli máš někde postele, tak tam použij ty pro chudé“).",
+ "zdroj": "build/zdroj_modelar/Luzka_1400 (Míšin Disk 16. 11.; NAVOD_LUZKA.md, PREHLED_MODELU.md, ASSETY.json; PODKLADY_A_LICENCE.md: textury Poly Haven CC0 – rough_linen, poly_wool_herringbone, oak_veneer_01, rough_wood; modely Míšin modelář, výtvarný návrh kolem 1400 – NAVRH)",
+ "slozka": "build/zdroj_modelar/Luzka_1400",
+ "vystup": "hra/modely/luzka",
+ "sceny": ["Houne_Vlnena", "Deka_Na_Zemi", "Postel_Chudy_Dum", "Postel_Rychtarova", "Postel_Panska", "Postel_S_Nebesy"],
+ "varianta": "_Tablet_1K",
+ "materialy": ["Dub_1K.tres", "Hrube_Drevo_1K.tres", "Len_1K.tres", "Vlna_1K.tres"],
+ "textury_pripony": ["_Albedo_1K.jpg", "_NormalGL_1K.jpg", "_ORM_1K.png"],
+ "vychozi_postel": "luzko_Postel_Chudy_Dum",
+ "max_materialu": 3,
+ "max_troj_lod0": 64000,
+ "max_troj_pozn": "PREHLED_MODELU.md: LOD0 12 026 (houně) … 63 176 (nebesa); LOD1 4 574 … 22 643, přepnutí v 8 m. Nebesa jsou nejdražší (NAVOD_LUZKA.md: „v interiéru rozumný počet“). Test pruchod:luzka hlídá, že se sada nezmění bez vědomí (≤ max_troj_lod0, ≤ max_materialu materiálů v LOD0). Výkon na tabletu NEOVERENO.",
+ "lezeni": {
+  "leh_pod_znackou_m": 0.25,
+  "pozn": "bod lehu = značka Luzko_Lezeni (střed těla nad ložnou plochou) − leh_pod_znackou_m; oči funkce.json spanek oci_m nad bodem lehu, pohled spanek pohled_nahoru_st; hráč leží hlavou k Luzko_Hlava (pohled k nohám, místní +Z modelu). Vstávání na Luzko_Vstup (vedle pravého boku). Stejný vztah jako funkce.json spanek (značka + nad_znackou_m − leh_pod_m = značka − 0,25 m).",
+  "zdroj": "NAVOD_LUZKA.md (značky); Havran main.gd _on_use bed (player.sit pos − 0,5 m, oči 0,62, pohled 55°)"
+ },
+ "katalog": {
+  "_popis": "záznam katalogu pískoviště (id luzko_<Model>); nazev, stav, vaha, cena jako lůžka Havrana (postel 60 kg / 400, lozko 35 kg / 60, slamnik 8 kg / 15); rozmer z ASSETY.json bounds v osách Godotu [x šířka, y výška, z délka]; pruchozi = bez kolize pro hráče (houně a deka na podlaze, NAVOD_LUZKA.md: „bez kolize, aby neblokovaly chůzi“); mist = kolik lidí se vejde (postavy později)",
+  "Houne_Vlnena": {"nazev": "Vlněná houně", "stav": "uvnitr", "vaha": 3.0, "cena": 12, "pruchozi": true, "mist": 1},
+  "Deka_Na_Zemi": {"nazev": "Deka na zemi", "stav": "uvnitr", "vaha": 4.0, "cena": 14, "pruchozi": true, "mist": 1},
+  "Postel_Chudy_Dum": {"nazev": "Postel (chudý dům)", "stav": "uvnitr", "vaha": 30.0, "cena": 50, "mist": 2},
+  "Postel_Rychtarova": {"nazev": "Rychtářova postel", "stav": "uvnitr", "vaha": 45.0, "cena": 150, "mist": 2},
+  "Postel_Panska": {"nazev": "Panská postel", "stav": "uvnitr", "vaha": 60.0, "cena": 400, "mist": 2},
+  "Postel_S_Nebesy": {"nazev": "Postel s nebesy", "stav": "uvnitr", "vaha": 90.0, "cena": 900, "mist": 2}
+ }
+}
