@@ -1,5 +1,5 @@
 {
- "verze": "0.999998",
+ "verze": "0.999999",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -4210,55 +4210,96 @@
    ]
   },
   "z_rostliny": {
-   "src": "dd9b14a62d81763d6514d74e24d03edb",
-   "md5": "18c586eb512321f67b1ba4a75e056094",
-   "size": 156463104,
+   "src": "c21d87d9945b030661878657bb74e0a9",
+   "md5": "0f74b72a3d283bdd9a13c33835780255",
+   "size": 156431872,
    "parts": [
     {
-     "file": "z_rostliny-18c586eb51.pck.000",
+     "file": "z_rostliny-0f74b72a3d.pck.000",
      "size": 94371840,
-     "md5": "e8a6658253e639e93e1d335be39afacd"
+     "md5": "23156711f1422b76a1b5e81772cf61dc"
     },
     {
-     "file": "z_rostliny-18c586eb51.pck.001",
-     "size": 62091264,
-     "md5": "db63658a23e6b113f33878594f15b8aa"
+     "file": "z_rostliny-0f74b72a3d.pck.001",
+     "size": 62060032,
+     "md5": "c632409e217e949584ca7083450cd321"
     }
    ]
   },
   "z_krcma": {
-   "src": "c9e81e4882393cb4f937d1dd421010ee",
-   "md5": "91e18bff830c6eec7187d4e557addc1f",
-   "size": 66807392,
+   "src": "c35d22d79d1dbfa1a672a8bf27497495",
+   "md5": "3ec0e4316479fcd273fea633c65d4640",
+   "size": 64002080,
    "parts": [
     {
-     "file": "z_krcma-91e18bff83.pck.000",
-     "size": 66807392,
-     "md5": "91e18bff830c6eec7187d4e557addc1f"
+     "file": "z_krcma-3ec0e43164.pck.000",
+     "size": 64002080,
+     "md5": "3ec0e4316479fcd273fea633c65d4640"
+    }
+   ]
+  },
+  "z_kostel": {
+   "src": "72cbd015438e5ffe7976494727c39514",
+   "md5": "9ef2fd80828df52524fe6a0d75b88c11",
+   "size": 42282144,
+   "parts": [
+    {
+     "file": "z_kostel-9ef2fd8082.pck.000",
+     "size": 42282144,
+     "md5": "9ef2fd80828df52524fe6a0d75b88c11"
+    }
+   ]
+  },
+  "z_ruiny_ves": {
+   "src": "10d99a44ecacf39ae0bb77a5c68f41ab",
+   "md5": "bdf30d5c41da712b3bd01c5922e64369",
+   "size": 123590272,
+   "parts": [
+    {
+     "file": "z_ruiny_ves-bdf30d5c41.pck.000",
+     "size": 94371840,
+     "md5": "f99052c7f31a23eec2c2400700bc1f5c"
+    },
+    {
+     "file": "z_ruiny_ves-bdf30d5c41.pck.001",
+     "size": 29218432,
+     "md5": "385a6514881504b4f07cfb807fff50d4"
+    }
+   ]
+  },
+  "z_ves": {
+   "src": "010cf065836aac0b9a5f872837cc5e86",
+   "md5": "73ba1284d1b11b809cdd31feafb491fc",
+   "size": 65073216,
+   "parts": [
+    {
+     "file": "z_ves-73ba1284d1.pck.000",
+     "size": 65073216,
+     "md5": "73ba1284d1b11b809cdd31feafb491fc"
     }
    ]
   },
   "z_svet": {
-   "src": "f423d44be1fa06dbdb6030fdebc4b9cb",
-   "md5": "246abb60798d25bad1d610dcc1f40ff7",
-   "size": 60772352,
+   "src": "a71dae765be1ed077f045d155b5a2c49",
+   "md5": "fd15cef578073c3c27912d9fb30d7472",
+   "size": 60958176,
    "parts": [
     {
-     "file": "z_svet-246abb6079.pck.000",
-     "size": 60772352,
-     "md5": "246abb60798d25bad1d610dcc1f40ff7"
+     "file": "z_svet-fd15cef578.pck.000",
+     "size": 60958176,
+     "md5": "fd15cef578073c3c27912d9fb30d7472"
     }
    ]
   },
   "z_reka": {
-   "src": "efc31d887a827f78a178d60e7b777942",
-   "md5": "54f3a70786494860bbaef98819dac327",
-   "size": 1559872,
+   "src": "efa47dab720d3e2ed7c9ea082db2c37b",
+   "md5": "2052c761e98b42e63cf97bbbaeb988f8",
+   "size": 1568224,
    "parts": [
     {
-     "file": "z_reka-54f3a70786.pck.000",
-     "size": 1559872,
-     "md5": "54f3a70786494860bbaef98819dac327"
+     "file": "z_reka-2052c761e9.pck.000",
+     "size": 1568224,
+     "md5": "2052c761e98b42e63cf97bbbaeb988f8"
     }
    ]
   },
@@ -4271,18 +4312,6 @@
      "file": "z_kovarna-96210fd5b5.pck.000",
      "size": 50538880,
      "md5": "96210fd5b590df1872ce92dee3d60018"
-    }
-   ]
-  },
-  "z_ves": {
-   "src": "8708acd66def353c2958ae771b79089f",
-   "md5": "360b978dab4b5e23a27e8a2af022290f",
-   "size": 42635584,
-   "parts": [
-    {
-     "file": "z_ves-360b978dab.pck.000",
-     "size": 42635584,
-     "md5": "360b978dab4b5e23a27e8a2af022290f"
     }
    ]
   },
@@ -4393,11 +4422,14 @@
    ]
   }
  },
- "otisk_exportu": "568ae58bcc6d1b0d0153748dca494996",
- "otisk_vstupu": "2e7aca08bf1111f4f1ac2943dd113252",
- "otisk_sady": "b72754d9cf13e6200c8e9bf7b8da1229",
+ "otisk_exportu": "136c6e52836e996d2c09a010be22ef9e",
+ "otisk_vstupu": "859f3e1b4ba4a24804a4c0cb144274cb",
+ "otisk_sady": "696d1ece91218bd6da666bdd252ae33b",
  "testovaci": [
-  "POKRYTI_MATICE 0/114 (0 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, teren|predmet, voda|voda, voda|cesta",
-  "USPESNOST_MATICE 0/0 (0 %)"
+  "POKRYTI_MATICE 44/114 (39 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, voda|voda, voda|cesta, voda|strom",
+  "USPESNOST_MATICE 30/44 (68 %); s chybou: teren|predmet, budova|predmet, plot|predmet, predmet|predmet, voda|kun, cesta|kun, cesta|postava, budova|posun, budova|postava, kamen|lod, predmet|postava, predmet|lod",
+  "TEST stanoviste     CHYBA  v kosene louce: { \"kameni\": 557 }, priklad { \"kameni\": (3.154292, 70.96895) }",
+  "TEST ruiny_ves      CHYBA  dilu 15, roh max 0.30 m, v pruchodech 3, 3 chyb [\"shrub_02_0 v pruchodu (271.4, 369.1)\", \"shrub_02_1 v pruchodu (312.7, 378.4)\", \"mec",
+  "TEST stanoviste     CHYBA  v kosene louce: { \"kameni\": 557 }, priklad { \"kameni\": (3.154292, 70.96895) }"
  ]
 }
