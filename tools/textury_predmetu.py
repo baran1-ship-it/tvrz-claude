@@ -4,9 +4,14 @@ zvlast (<id>_Image_N.*) -> stejna textura je v graficke pameti 12-21x a kazdy no
 Reseni: obrazky se z glb vyjmou, ulozi JEDNOU podle md5 do slozky z pravidla/svet/kvalita.json textury_predmetu.slozka
 a v glb zustane jen uri (stejna cesta res:// = jeden zdroj, jedna textura v pameti). Normalova mapa je zvlast soubor
 (<md5>_n.*, import compress/normal_map=1), protoze Godot ji u externiho obrazku sam nepozna.
-  python3 tools/textury_predmetu.py            prevede vsechna glb (idempotentni; vola ho blender/predmety.py build)
-  python3 tools/textury_predmetu.py kontrola   rc 1 = vlozeny obrazek v glb, duplicitni md5 nebo textura nad mez
-Po prevodu: godot --import (a smazat osirele <id>_Image_N.* tools/textury_predmetu.py uklid)."""
+Dily (Misa 16. 11., mereni 0.999999: zamrznuti po 2. kole trasy, textury +220 MB): stejny postup pro slozky modelu dilu
+z Disku (kvalita.json textury_dilu.slozky_dilu: ruiny_ves 168 textur / 28 ruznych, krcma, kostel) do jedne spolecne
+slozky textury_dilu.slozka; uklid smaze rozbalene kopie <model>_<obrazek>.* (+ .import a cache v .godot/imported).
+  python3 tools/textury_predmetu.py            prevede vsechna glb predmetu (idempotentni; vola ho blender/predmety.py build)
+  python3 tools/textury_predmetu.py dily       prevede glb dilu a uklidi rozbalene kopie (krok exportu tools/export.sh)
+  python3 tools/textury_predmetu.py kontrola   rc 1 = vlozeny obrazek v glb, duplicitni md5, textura nad mez nebo
+                                               rozbalena kopie v slozce dilu (predmety i dily)
+Po prevodu: godot --import."""
 import glob
 import hashlib
 import io
@@ -19,10 +24,13 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
-CFG = json.load(open("pravidla/svet/kvalita.json", encoding="utf-8"))["textury_predmetu"]
+_KV = json.load(open("pravidla/svet/kvalita.json", encoding="utf-8"))
+CFG = _KV["textury_predmetu"]
 SLOZKA = CFG["slozka"]
 MEZ = int(CFG["mez_px"])
 LIMIT_IMPORTU = int(CFG["size_limit_importu"])
+DILY = _KV["textury_dilu"]
+OBRAZKY = (".png", ".jpg", ".jpeg", ".webp")
 PRIPONA = {"image/png": ".png", "image/jpeg": ".jpg"}
 
 IMPORT = """[remap]
@@ -90,33 +98,33 @@ def role_normal(j):
     return {i: (i in nm and i not in jine) for i in nm | jine}
 
 
-def preved(cesta):
+def preved(cesta, slozka=SLOZKA, mez=MEZ, lim=LIMIT_IMPORTU):
     j, b = nacti(cesta)
     imgs = [(i, im) for i, im in enumerate(j.get("images", [])) if "bufferView" in im]
     if not imgs:
         return 0, 0
     roly = role_normal(j)
     pryc, ulozeno = set(), 0
-    os.makedirs(SLOZKA, exist_ok=True)
+    os.makedirs(slozka, exist_ok=True)
     for i, im in imgs:
         bv = j["bufferViews"][im["bufferView"]]
         raw = b[bv.get("byteOffset", 0):bv.get("byteOffset", 0) + bv["byteLength"]]
         pr = PRIPONA.get(im.get("mimeType"), ".png")
         pil = Image.open(io.BytesIO(raw))
-        if max(pil.size) > MEZ:                       # mez z dat: zmensit na nejvetsi stranu MEZ
-            f = MEZ / max(pil.size)
+        if max(pil.size) > mez:                       # mez z dat: zmensit na nejvetsi stranu mez
+            f = mez / max(pil.size)
             pil = pil.resize((max(1, round(pil.size[0] * f)), max(1, round(pil.size[1] * f))), Image.LANCZOS)
             buf = io.BytesIO()
             pil.save(buf, format="PNG" if pr == ".png" else "JPEG", **({} if pr == ".png" else {"quality": 92}))
             raw = buf.getvalue()
         nm = roly.get(i, False)
         jm = hashlib.md5(raw).hexdigest()[:16] + ("_n" if nm else "") + pr
-        rel = SLOZKA + "/" + jm
+        rel = slozka + "/" + jm
         if not os.path.exists(rel):
             open(rel, "wb").write(raw)
             ulozeno += 1
         if not os.path.exists(rel + ".import"):
-            open(rel + ".import", "w").write(IMPORT % {"rel": rel, "nm": 1 if nm else 0, "lim": LIMIT_IMPORTU})
+            open(rel + ".import", "w").write(IMPORT % {"rel": rel, "nm": 1 if nm else 0, "lim": lim})
         pryc.add(im["bufferView"])
         del im["bufferView"]
         im.pop("mimeType", None)
@@ -146,23 +154,72 @@ def preved(cesta):
     return len(imgs), ulozeno
 
 
-def kontrola():
+def rozbalene(slozka):
+    """Kopie, ktere Godot rozbalil z vlozenych obrazku glb dilu (<model>_<jmeno obrazku>.*, i _N pri shode jmen)
+    a .import bez zdroje (po smazani kopie) - po prevodu na uri uz nic nepouziva."""
+    glb = {g[:-4]: [im.get("name", "") for im in nacti(g)[0].get("images", [])] for g in glob.glob(slozka + "/*.glb")}
+    out = []
+    for f in sorted(glob.glob(slozka + "/*")):
+        zdroj = f[:-7] if f.endswith(".import") else f
+        if not zdroj.lower().endswith(OBRAZKY):
+            continue
+        st = zdroj.rsplit(".", 1)[0]
+        if any(st == g + "_" + n or (st.startswith(g + "_" + n + "_") and st[len(g + n) + 2:].isdigit())
+               for g, jm in glb.items() for n in jm if n) or (f.endswith(".import") and not os.path.exists(zdroj)):
+            out.append(f)
+    return out
+
+
+def uklid(slozka):
+    n = 0
+    for f in rozbalene(slozka):
+        zdroj = f[:-7] if f.endswith(".import") else f
+        for x in (zdroj, zdroj + ".import"):
+            if os.path.exists(x):
+                os.remove(x)
+                n += 1
+        for c in glob.glob(".godot/imported/%s-*" % glob.escape(os.path.basename(zdroj))):
+            os.remove(c)
+    return n
+
+
+def zavislosti(cesta):
+    """Textury ze spolecne slozky, na ktere glb odkazuje (uri) - tools/vydani.py je da do baliku dilu."""
+    d = os.path.dirname(cesta)
+    return sorted({os.path.normpath(os.path.join(d, im["uri"])) for im in nacti(cesta)[0].get("images", []) if "uri" in im})
+
+
+def _kontrola_slozky(glby, slozka, mez, jak):
     chyby = []
-    for g in sorted(glob.glob("modely/predmety/*.glb")):
+    for g in glby:
         j, _ = nacti(g)
         n = sum(1 for im in j.get("images", []) if "bufferView" in im)
         if n:
-            chyby.append("%s: %d vlozenych obrazku (spustit tools/textury_predmetu.py)" % (g, n))
+            chyby.append("%s: %d vlozenych obrazku (spustit tools/textury_predmetu.py%s)" % (g, n, jak))
+        for z in zavislosti(g):
+            if not os.path.exists(z) and not os.path.exists(z + ".import"):
+                chyby.append("%s: chybi textura %s" % (g, z))
     md5 = {}
-    for f in sorted(glob.glob(SLOZKA + "/*")):
+    for f in sorted(glob.glob(slozka + "/*")):
         if f.endswith(".import"):
             continue
         h = hashlib.md5(open(f, "rb").read()).hexdigest()
         if h in md5:
             chyby.append("%s a %s: stejny obsah (md5 %s)" % (md5[h], f, h))
         md5[h] = f
-        if max(Image.open(f).size) > MEZ:
-            chyby.append("%s: nad mez %d px" % (f, MEZ))
+        if max(Image.open(f).size) > mez:
+            chyby.append("%s: nad mez %d px" % (f, mez))
+    return chyby
+
+
+def kontrola():
+    chyby = _kontrola_slozky(sorted(glob.glob("modely/predmety/*.glb")), SLOZKA, MEZ, "")
+    glby = sorted(g for s in DILY["slozky_dilu"] for g in glob.glob(s + "/*.glb"))
+    chyby += _kontrola_slozky(glby, DILY["slozka"], int(DILY["mez_px"]), " dily")
+    for s in DILY["slozky_dilu"]:
+        r = rozbalene(s)
+        if r:
+            chyby.append("%s: %d rozbalenych kopii obrazku (napr. %s; tools/textury_predmetu.py dily)" % (s, len(r), r[0]))
     return chyby
 
 
@@ -171,6 +228,17 @@ if __name__ == "__main__":
         ch = kontrola()
         print("TEXTURY_PREDMETU %s %s" % ("OK" if not ch else "CHYBA", ch[:20]))
         sys.exit(1 if ch else 0)
+    if "dily" in sys.argv:
+        n_img = n_nove = n_pryc = 0
+        for sl in DILY["slozky_dilu"]:
+            for g in sorted(glob.glob(sl + "/*.glb")):
+                a, b_ = preved(g, DILY["slozka"], int(DILY["mez_px"]), int(DILY["size_limit_importu"]))
+                n_img += a
+                n_nove += b_
+            n_pryc += uklid(sl)
+        print("textury dilu: %d vlozenych obrazku prevedeno, %d novych souboru v %s, %d rozbalenych kopii smazano"
+              % (n_img, n_nove, DILY["slozka"], n_pryc))
+        sys.exit(0)
     n_img = n_nove = 0
     for g in sorted(glob.glob("modely/predmety/*.glb")):
         a, b_ = preved(g)

@@ -195,11 +195,25 @@
  "_dolu_oken": "0.99993: se 3 okny (7,5 s) na krok trvalo 200 s, nez se ubraly 4 kroky - prvni 3 useky trasy zustaly sekane (p95 98-123). 2 okna = 5 s na krok.",
  "textury_predmetu": {
   "slozka": "modely/predmety/tex2",
-  "slozky_starsi": ["modely/predmety/tex"],
+  "slozky_starsi": [
+   "modely/predmety/tex"
+  ],
   "_slozka": "16. 11. (sady z Disku Luzka/Topeni/les/Seno): nove textury do tex2 - stara slozka tex ma v kontejneru jen .import (zdroje v baliku tex_predmety z minula); vydani.py dela balik pro kazdou slozku (tex_predmety, tex_predmety2), p_<id> vylucuje vsechny. Stejna textura muze byt v obou slozkach jednou (dve kopie v pameti jen pri souhre starych a novych predmetu).",
   "mez_px": 2048,
   "size_limit_importu": 1024,
   "popis": "Sdilene textury predmetu (tools/textury_predmetu.py, Misa 10. 11. zasek 0,5-1,9 s pri prvnim zobrazeni noveho predmetu): obrazky vlozene v modely/predmety/*.glb se vyjmou, ulozi JEDNOU podle md5 (a role: normalova mapa zvlast) do slozky a v glb zustane jen uri. Stejna cesta res:// = jeden zdroj, jeden import, jedna textura v graficke pameti pro vsechny modely (drive 268 MB vlozenych obrazku, z toho jen 139 MB unikatnich; Godot rozbalil kazdou kopii zvlast jako <id>_Image_N). mez_px = nejvetsi strana ulozene textury (vetsi se zmensi); size_limit_importu = strop textury v graficke pameti (shodne s tools/limity_textur.py). Balik: vydani.py skupina tex_predmety, v p_<id> baliku vyloucena."
+ },
+ "textury_dilu": {
+  "slozka": "modely/dily_tex",
+  "slozky_dilu": [
+   "modely/ruiny_ves",
+   "modely/krcma",
+   "modely/kostel"
+  ],
+  "mez_px": 2048,
+  "size_limit_importu": 1024,
+  "_vynechane": "16. 11.: modely/ves vynechana - tools/zesvetli_ves.py upravuje rozbalene textury domy_*_diff.jpg a domy.glb ma 72 obrazku, vsechny ruzne (nic k usetreni). modely/kovarna a modely/mlyn: v kontejneru jen .import (glb chybi) - kovarna 69 textur, jen 45 ruznych .ctex (ETC2 48 -> ~31 MB), mlyn 97 -> 62 (17 -> ~11 MB); pridat do slozky_dilu, az budou zdroje (export z Disku).",
+  "popis": "Sdilene textury dilu (Misa 16. 11. mereni 0.999999: zamrznuti po 2. kole trasy, VRAM 1145 MB, textury 822 MB; tools/textury_predmetu.py dily, krok exportu). Modely dilu z Disku (ruiny_ves 18 glb, krcma, kostel) nesly vlozene obrazky a Godot kazdou kopii rozbalil zvlast (<model>_<obrazek>.*): ruiny_ves 168 textur jen 28 ruznych, krcma 83/56, kostel 46/38. Obrazky se vyjmou do JEDNE spolecne slozky podle md5 (normalova mapa zvlast <md5>_n, import normal_map=1), v glb zustane uri; stejna textura v krcme, kostele i Doubrave je jeden zdroj = jedna textura v pameti. Balik: kazdy z_<dil> (tools/vydani.py) nese i textury ze spolecne slozky, na ktere jeho glb odkazuji (stejne jmeno = stejny obsah, prekryti baliku nevadi) - tablet se starymi baliky dostane s novym z_<dil> vzdy uplnou sadu. mez_px a size_limit_importu jako u predmetu (strop tabletu 1024, tools/textury_tablet.py)."
  },
  "snimky_vychozi_mobil": 1,
  "_snimky_13_11": "Misa 13. 11. (Puchart: pevnych 30 FPS, p95 36 ms, jede plynule; Havran volne 20-45 FPS = nerovnomerne snimky): na tabletu vychozi volba Snimky = pevnych 30 (main.snimky_i 1); hrac ji muze v Nastaveni zmenit, ulozena volba ma prednost",

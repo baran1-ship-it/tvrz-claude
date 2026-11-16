@@ -282,6 +282,15 @@ if JEN and "z_reka" in JEN:
     # i .import: nastaveni importu je zdroj (4. 11.: mapy potoka bezztratove - zmena jen v .import, balik se neprestavil)
     groups["z_reka"] = sorted(glob.glob("modely/reka/*"))
 
+# sdilene textury dilu (Misa 16. 11., tools/textury_predmetu.py dily; kvalita.json textury_dilu): glb dilu odkazuji (uri)
+# do jedne spolecne slozky - kazdy z_<dil> nese i textury, na ktere jeho glb odkazuji (jmeno = md5 obsahu, takze
+# prekryti stejneho souboru ve dvou balicich nevadi a tablet se starymi baliky dostane s novym z_<dil> uplnou sadu)
+sys.path.insert(0, "tools")
+import textury_predmetu as _tp  # noqa: E402
+for _n, _fs in groups.items():
+    if _n.startswith("z_") and _fs and os.path.dirname(_fs[0]) in _tp.DILY["slozky_dilu"]:
+        _fs += sorted({z for g in _fs if g.endswith(".glb") for z in _tp.zavislosti(g) if os.path.exists(z)} - set(_fs))
+
 old = {}
 if os.path.exists("data_manifest.json"):
     om = json.load(open("data_manifest.json"))

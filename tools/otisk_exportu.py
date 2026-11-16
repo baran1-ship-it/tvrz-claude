@@ -17,6 +17,9 @@ os.chdir(ROOT)
 VYSTUPY = ["modely/svet.json", "modely/tvrz.glb", "modely/predmety.json", "modely/reka/*", "modely/rostliny/*",
            "modely/ves/*", "modely/textury/*", "modely/mlyn/*", "modely/vetrak/*", "modely/rybnik/*", "modely/postavy/**",
            "modely/kone/*", "zvuky/kopyta/*"]
+# 16. 11.: dily z Disku (krcma, kostel, Doubrava) a jejich sdilene textury (tools/textury_predmetu.py dily = krok 17 exportu)
+_TD = json.load(open("pravidla/svet/kvalita.json", encoding="utf-8"))["textury_dilu"]
+VYSTUPY += [s + "/*" for s in _TD["slozky_dilu"]] + [_TD["slozka"] + "/*"]
 # vstupy = co stavba (blender/*.py) opravdu cte (28. 10.: hrac, jizda, prostredi, rozpocty, modely, vztahy cte jen hra -
 # jejich zmena nevyzaduje novy export; ctene soubory: grep _svet(" a pravidla_sveta v blender/)
 VSTUPY = ["pravidla/svet/" + f for f in ("cesty.json", "voda.json", "lokace.json", "generovani.json", "plochy.json", "druhy.json",

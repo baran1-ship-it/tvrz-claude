@@ -5,6 +5,7 @@
 #   rc 2 test smyslu pred exportem | 3 Blender (rc nebo chybi build/export_hotov.json z tohoto svet.json)
 #   rc 4 test smyslu po exportu   | 5 malo mista | 6 poskozeny obrazek | 7 pyflakes | 8 import Godotu
 #   rc 9 krok stavby nad mez       | 10 limity textur | 11 textury pro tablet | 12 predpeceni potoka | 13 zapis otisku
+#   rc 17 sdilene textury dilu (tools/textury_predmetu.py dily)
 # --jen-po: jen brany po exportu a dokonceni nad hotovym exportem (Blender se nespousti).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -43,6 +44,7 @@ if [ "$REZIM" != "--jen-po" ]; then
     krok 6 "obrazky po exportu (build/beh/obrazky_po.log)" bash -c "python3 tools/over_obrazky.py modely > build/beh/obrazky_po.log 2>&1"
     krok 10 "limity textur" python3 tools/limity_textur.py
     krok 16 "zesvetleni a hnede drevo vsi (Misa 14. 11., ves_jas; opakovani nic nemeni)" python3 tools/zesvetli_ves.py
+    krok 17 "sdilene textury dilu pred importem (Misa 16. 11., kvalita.json textury_dilu)" python3 tools/textury_predmetu.py dily
     krok 15 "jas dreva (Misa 13. 11. cerne drevo)" python3 tools/export_kontroly.py drevo
     krok 14 "UV modelu s texturou (hlidac 0.996 strechy stodol)" python3 tools/test_uv.py
     krok 11 "datove textury bezztratove pred importem" python3 tools/datove_textury_import.py
@@ -51,6 +53,9 @@ if [ "$REZIM" != "--jen-po" ]; then
     krok 11 "textury pro tablet" python3 tools/textury_tablet.py
     krok 11 "datove textury bezztratove (potok - schody vody na tabletu 0.9997)" python3 tools/kontrola_datovych_textur.py
 fi
+# 16. 11. (zamrznuti 0.999999, textury +220 MB): obrazky dilu z Disku jednou podle md5 do spolecne slozky, rozbalene kopie
+# pryc; i v --jen-po (prevod hotovych dilu), v plnem exportu uz nic nemeni. Import je az po predpeceni potoka (krok 8 nize).
+krok 17 "sdilene textury dilu (Misa 16. 11., kvalita.json textury_dilu)" python3 tools/textury_predmetu.py dily
 krok 4 "test smyslu po exportu (build/beh/smysl_po.log)" bash -c "/opt/bl/bin/python tools/test_smyslu.py --po > build/beh/smysl_po.log 2>&1"
 krok 9 "protokol stavby terenu (build/beh/protokol_blender.log)" bash -c "/opt/bl/bin/python tools/protokol_blender.py > build/beh/protokol_blender.log 2>&1"
 if ! python3 tools/export_kontroly.py reka; then
