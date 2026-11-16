@@ -213,7 +213,7 @@ for lv in VH["lavky"]:
     for e, ye in ((a, ya), (b, yb)):   # nástupní kameny a náběh
         P.box(M(Vector((e.x, (ye + y) / 2 - 0.2, e.z)), basis=H.frame(nn)), (lv["sirka"] + 0.4, y - ye + 0.4, 0.8), "kvadr")
     kit.deck(P, a + UP * y, b + UP * y, lv["sirka"] / 2, "prkna_ven", beams=(-lv["sirka"] / 2 + 0.15, lv["sirka"] / 2 - 0.15))
-    P.cols.append((M((a + b) / 2 + UP * (y - 0.1), basis=H.frame(nn)), (lv["sirka"], 0.2, (b - a).length + 1.0)))
+    P.cols.append((M((a + b) / 2 + UP * (y - 0.1), basis=H.frame(nn)), (lv["sirka"], 0.2, (b - a).length + 0.8)))   # jen po kraj nástupních kamenů (±0,4 m; dřív ±0,5 – kolize nad terénem za kamenem, chyby.md 361)
     for sg in lv.get("zabradli_strany", (-1, 1)):   # strana zábradlí: +1 = po proudu (dd), −1 = proti proudu (lávka u mlýna jen po proudu – kolo proti proudu)
         o = dd * sg * (lv["sirka"] / 2 + 0.05)
         P.beam(a + o + UP * (y + 1.0), b + o + UP * (y + 1.0), 0.08, 0.1, "dub", j=0.4)
