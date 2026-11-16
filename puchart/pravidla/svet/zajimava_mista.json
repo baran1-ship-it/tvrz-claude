@@ -10,12 +10,11 @@
    "pozn": "les_uhlir_chyse a les_uhlir_celek se nepoužijí – chýše u uhlíře je zemljanka (Míša 15. 11.), mýtina se skládá z dílů v datech níž"
   },
   "zemljanky": {
-   "popis": "Chýše do tvaru A z Havrana předělané na zemljanku (Míša 15. 11.: „zevnitř umazat podlahu a postele, vykopat 2 schody do země a udělat zemljanku jako v KCD“; „spalo se na zemi vlevo a vpravo na rohožích a houních; proti dveřím na konci bedna, pokud se vejde“). Ze vzoru se vypustí podlaha a pryčny (vynechat), dveře zůstanou otevřené ven (dvere_otevrit_st, pant u levé zárubně), uvnitř jáma s hliněnými stěnami obloženými kůly, dva stupně dolů ode dveří, rohože s houněmi po stranách (pevný díl modelu), truhla z katalogu Havrana na konci (díl místa). Terén: otvor ve viditelné síti po obrys jámy, kolize terénu pod jámou snížená (jama_kolize_rozsir_m do stran a dozadu – svah sítě 1 m by jinak vystupoval nad podlahu u stěn).",
+   "popis": "Chýše do tvaru A z Havrana předělané na zemljanku (Míša 15. 11.: „zevnitř umazat podlahu a postele, vykopat 2 schody do země a udělat zemljanku jako v KCD“; „spalo se na zemi vlevo a vpravo na rohožích a houních; proti dveřím na konci bedna, pokud se vejde“). Ze vzoru se vypustí podlaha a pryčny (vynechat), dveře zůstanou otevřené ven (dvere_otevrit_st, pant u levé zárubně), uvnitř jáma s hliněnými stěnami obloženými kůly, dva stupně dolů ode dveří, rohože po stranách (pevný díl modelu), na nich vlněné houně od modeláře (Luzka_1400, osazuje hra), truhla z katalogu Havrana na konci (díl místa). Terén: otvor ve viditelné síti po obrys jámy, kolize terénu pod jámou snížená (jama_kolize_rozsir_m do stran a dozadu – svah sítě 1 m by jinak vystupoval nad podlahu u stěn).",
    "zdroj": "Míša 15. 11. (popis zemljanky KCD u uhlíře a v lomu); doklad zahloubených staveb: polozemnice 13.–14. st. (rešerše 15 km kap. 9, NAVRH); Havran domy.glb ChyseKura/ChysePrkna, NAVOD_CHYSE.md; schody: pravidla/svet/hrac.json schod_m (stupeň do 0,45 m), Warhorse KM-A-52 stupeň ~0,20–0,25 m",
    "vzor": "build/zdroj_celky/domy.glb", "vzor_pozn": "originál z Disku (nastroje/stavby_z_havrana.sh) – chýše v něm stejné jako ve hře (úpravy domů – okap, pece – se chýší netýkají); hra/modely/stavby_h/domy.glb přestavují jiné kroky",
    "vystup": "hra/modely/stavby_h",
-   "houne_obraz": "hra/modely/predmety_h/lozko_houne_lozko_albedo.jpg",
-   "typy": {
+      "typy": {
     "zemljanka_kura": {"koren": "ChyseKura", "prah_y": 0.04, "podlaha_y": -0.7, "jama": [-1.5, 1.5, -2.05, 2.2], "rohoz_mat": "M_Slama_001", "hlina_mat": "M_Hlina_003", "drevo_mat": "M_Zhlavi_003", "dvere_x": [-0.48, 0.4], "dvere_z": 2.3},
     "zemljanka_prkna": {"koren": "ChysePrkna", "prah_y": 0.5, "podlaha_y": -0.45, "jama": [-1.6, 1.6, -2.05, 2.2], "rohoz_mat": "M_Slama_002", "hlina_mat": "M_Hlina_004", "drevo_mat": "M_Zhlavi_004", "dvere_x": [-0.48, 0.4], "dvere_z": 2.3}
    },
@@ -23,8 +22,8 @@
    "dvere_otevrit_st": -100,
    "schody": {"pocet": 2, "hloubka_m": 0.38, "sirka_m": 1.1, "zdroj": "Míša 15. 11.: „2 schody do země“; výška stupně = (práh − podlaha) / 3 (≤ hrac.json schod_m 0,45)"},
    "kuly": {"rozestup_m": 0.32, "prumer_m": 0.09, "nad_teren_m": 0.06, "zdroj": "KCD zemnice (popis Míši 15. 11.: stěny jámy hliněné, obložené kůly) – NAVRH"},
-   "rohoz": {"sirka_m": 0.72, "delka_m": 1.95, "tl_m": 0.035, "od_steny_m": 0.06, "z_konec": -1.95},
-   "houne": {"sirka_m": 0.62, "delka_m": 1.25, "tl_m": 0.05, "jas": 1.7, "zdroj": "vlněná houně – textura lůžka Havrana (lozko_houne), zesvětlená jas× (přírodní nebarvená vlna; snímek 16. 11. zi_uhlir: ve stínu černá)"},
+   "rohoz": {"sirka_m": 1.16, "delka_m": 2.0, "tl_m": 0.035, "od_steny_m": 0.05, "z_konec": -1.45, "zdroj": "rohož z rákosí/slámy pod houní (Míša 15. 11.); šíře a délka podle houně modeláře 1,08 × 1,93 m, za hlavou místo pro truhlu"},
+   "houne": {"model": "res://modely/luzka/Houne_Vlnena_Tablet_1K.tscn", "zdroj": "Míša 16. 11.: vlněná houně od modeláře build/zdroj_modelar/Luzka_1400 (NAVOD_LUZKA.md: 1,08 × 1,93 × 0,09 m, hlava k −Z, bez kolize, LOD0 do 8 m); kopie do hra/modely/luzka (nastroje/postav_vse.sh), osazení na značky spánku v zemljance (hra/scripts/zajimava.gd)", "lod0_do_m": 8.0, "do_m": 40.0},
    "jama_kolize_rozsir_m": 0.9,
    "lod": {"podrobny_do_m": 50.0, "obal_do_m": 400.0, "obal_barva": [0.29, 0.23, 0.17], "zdroj": "jako domy vsi (mista.json modely.domy.lod), zemljanka je malá (12 tis. troj.) → podrobně do 50 m, dál hrubý obal _Daleko v barvě ztmavlé kůry (mista.json daleko_textury jas Sindel × kůra; snímek 16. 11. f_uhlir: obal bez textury byl oranžový)"}
   },

@@ -106,26 +106,21 @@ for jm_t, t in ZE["typy"].items():
         dv["rotation"] = [0, math.sin(a / 2), 0, math.cos(a / 2)]; dv["translation"] = [tx, 0, tz]
     hl, dr, kol, zs = jama_steny(t, ZE["kuly"])
     mh = pb.material(t["hlina_mat"]); md = pb.material(t["drevo_mat"]); mr = pb.material(t["rohoz_mat"])
-    _ho = K + "/build/houne_svetla.jpg"   # houně zesvětlená (zemljanky.houne_jas – snímek 16. 11.: ve stínu střechy skoro černá)
-    from PIL import Image, ImageEnhance
-    ImageEnhance.Brightness(Image.open(K + "/" + ZE["houne_obraz"]).convert("RGB")).enhance(ZE["houne"]["jas"]).save(_ho, quality=90)
-    mho = pb.novy_material("M_Houne", _ho, drsnost=1.0)
     pb.pridej_sit("Zemljanka_Jama", [(mh,) + hl, (md,) + dr], kolize=kol)
     # rohože a houně vlevo a vpravo (pevný díl), značky spánku
-    R = ZE["rohoz"]; H_ = ZE["houne"]; x0, x1 = t["jama"][0], t["jama"][1]; yf = t["podlaha_y"]
-    ro = []; ho = []; zn = {}
+    R = ZE["rohoz"]; x0, x1 = t["jama"][0], t["jama"][1]; yf = t["podlaha_y"]
+    ro = []; zn = {}
     for strana, xs in (("L", x0 + R["od_steny_m"] + R["sirka_m"] / 2), ("P", x1 - R["od_steny_m"] - R["sirka_m"] / 2)):
         za = R["z_konec"]; zb = za + R["delka_m"]
         ro.append(kvadr(xs - R["sirka_m"] / 2, xs + R["sirka_m"] / 2, yf, yf + R["tl_m"], za, zb, uv_m=0.7))
-        ho.append(kvadr(xs - H_["sirka_m"] / 2, xs + H_["sirka_m"] / 2, yf + R["tl_m"], yf + R["tl_m"] + H_["tl_m"], za + 0.05, za + 0.05 + H_["delka_m"], uv_m=1.3))
         zn["Zemljanka_Spani_" + strana] = [xs, yf + R["tl_m"], (za + zb) / 2]
-    pb.pridej_sit("Zemljanka_Rohoze", [(mr,) + spoj(*ro), (mho,) + spoj(*ho)])
+    pb.pridej_sit("Zemljanka_Rohoze", [(mr,) + spoj(*ro)])   # houně od modeláře (Luzka_1400) osazuje hra na značky spánku
     for k_, p_ in zn.items():   # prázdné uzly = značky (funkce.gd spánek)
         pb.uzly.append({"name": k_, "translation": p_}); kor.setdefault("children", []).append(len(pb.uzly) - 1)
     dst = "%s/%s/%s.glb" % (K, ZE["vystup"], jm_t)
     n, vel, tri = pb.uloz(dst, "%s/%s/textury_zemljanka" % (K, ZE["vystup"]))
     INFO["modely"][jm_t] = {"aabb": bbox(dst), "jama": t["jama"], "podlaha_y": yf, "prah_y": t["prah_y"], "schody_od_z": zs,
-                            "spani": zn, "bedna": [0.0, yf, t["jama"][2] + 0.42], "dvere_z": t["dvere_z"], "troj": tri}
+                            "spani": zn, "bedna": [0.0, yf, t["jama"][2] + 0.31], "dvere_z": t["dvere_z"], "troj": tri}
     print("ZAJIMAVA %s uzlů %d, %.2f MB, troj %d" % (jm_t, n, vel / 1e6, tri))
 
 # ------------------------------------------------------------------ 3) štola

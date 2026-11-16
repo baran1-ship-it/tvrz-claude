@@ -127,6 +127,17 @@ func _zemljanka(u: Node3D, di: Dictionary, mo: String) -> Node3D:
 			var c_: Array = zl["obal_barva"]   # hrubý obal bez textury (Míša 14. 11.: z dálky ne světlé kostky – barva ztmavlé kůry)
 			var mo_ := StandardMaterial3D.new(); mo_.albedo_color = Color(float(c_[0]), float(c_[1]), float(c_[2])); mo_.roughness = 1.0
 			gi.material_override = mo_
+	var ho: Dictionary = Pravidla.cti("zajimava_mista", "modely", "zemljanky").get("houne", {})   # vlněná houně od modeláře na rohožích (Míša 16. 11.)
+	if ResourceLoader.exists(String(ho.get("model", ""))):
+		for jm in ["Zemljanka_Spani_L", "Zemljanka_Spani_P"]:
+			var zn := z.find_child(jm, true, false) as Node3D
+			if zn == null: continue
+			var h := (load(String(ho["model"])) as PackedScene).instantiate() as Node3D; h.name = "Houne_" + jm.right(1)
+			zn.add_child(h)
+			for g in h.find_children("*", "GeometryInstance3D", true, false):
+				var gi := g as GeometryInstance3D
+				if gi.visibility_range_begin > 0.0: gi.visibility_range_end = float(ho["do_m"])
+				gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# textury chýší Havrana jsou zesvětlené (domy: mista.json modely.domy.jas_podrobny, hlavni.gd _ztlum) – stejný násobek
 	var jas := float(Pravidla.cti("mista", "modely", "domy").get("jas_podrobny", 1.0)); var cache := {}
 	for mi in z.find_children("*", "MeshInstance3D", true, false):
