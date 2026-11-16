@@ -172,6 +172,8 @@
     "vynechat": ["Mlyn_Teren", "Mlyn_Nahon", "Mlyn_Vantrok", "Mlyn_Lednice", "Mlyn_Lavka", "Mlyn_Kol_KoryKoz"],
     "vynechat_pozn": "Míša 16. 11.: bez náhonu, žlabu na kozách (Mlyn_Nahon, kolize Mlyn_Kol_KoryKoz), vantroku, odtoku (Mlyn_Lednice) a lávky přes náhon (Mlyn_Lavka); dílový terén Havrana (Mlyn_Teren) se nepoužije",
     "zabor": [[-3.6, 11.0, -7.5, 7.5], [3.0, 10.6, -16.4, -7.5]],
+    "bez_porostu_kolo": [-6.2, -3.4, -5.8, -1.0],
+    "bez_porostu_pozn": "Míša 16. 11. (snímek mista_mlyn_kolo_16_11: „kolo stojí v trávě“): pod kolem a kolem něj bez porostu (pudorysy → stavby_vegetace.py; koryto toku zůstane korytem)",
     "zabor_pozn": "budova (Mlyn_Roubeni x −3,6…3,5), dvůr (Mlyn_Dvur x 4,2…10,9, z −7,3…6,9), cesta modelu (Mlyn_Cesta) – obdélníky [x0, x1, z0, z1] místně; plošina dvora se srovná do výšky podlahy, koryto toku zůstane",
     "kolo": [-4.65, 1.15, -3.4],
     "kolo_r_m": 1.84,
