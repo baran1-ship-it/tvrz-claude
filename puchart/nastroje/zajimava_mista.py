@@ -195,6 +195,9 @@ def hledej(m, hotova):
             if not (om[1] <= d_ <= om[2]): continue
         g = spad(x, z); sl = float(np.linalg.norm(g))
         if sl < h.get("sklon_min", -1): continue
+        if h.get("stena_min_m"):   # lom: terén do svahu stoupne o stěnu (jinak není co lámat)
+            gu = g / max(sl, 1e-6); hl_ = m["teren"][0]["hloubka_m"]
+            if min(vys(x + gu[0] * hl_ + gu[1] * s_, z + gu[1] * hl_ - gu[0] * s_) for s_ in (-4, 0, 4)) - vys(x, z) < h["stena_min_m"]: continue
         pv = prevyseni(x, z, h.get("polomer_m", 1.0))
         if pv > h.get("max_prevyseni_m", 99): continue
         if h.get("kryt_m"):   # štola: portál, nad chodbou kryt
@@ -284,10 +287,9 @@ for m in Z["mista"]:
             kruh(o, t["stred"][0], t["stred"][1], t["r_m"], Z["teren"]["prechod_m"])
         elif t["typ"] == "zarez":   # lom: dno ve výšce počátku, zadní stěna hloubka_m do svahu (−z)
             y0 = o["y"]; w = t["sirka_m"] / 2
-            for r, c, lx, lz, d in bunky_obdelnik(o, -w, w, -t["hloubka_m"], 3.0, Z["teren"]["prechod_m"]):
-                if d == 0: nastav(r, c, min(Y[r, c], y0) if lz > 0 else y0)
+            for r, c, lx, lz, d in bunky_obdelnik(o, -w, w, -t["hloubka_m"], 0.0, Z["teren"]["prechod_m"]):
+                if d == 0: nastav(r, c, min(Y[r, c], y0))   # dno lomu (jen snížení – před lomem terén klesá po spádu)
                 elif lz > -t["hloubka_m"] and abs(lx) > w: nastav(r, c, max(y0, min(Y[r, c], y0 + (abs(lx) - w) * 2.5)))
-                elif lz > 3.0: tt = min(d / Z["teren"]["prechod_m"], 1); nastav(r, c, y0 * (1 - tt) + Y[r, c] * tt)
             zaz["zarez"] = {"stena_y": round(vys(*svet(o, 0, -t["hloubka_m"] - 1.5), Y0) - y0, 2)}
             PUD.append(poly_svet(o, -w - 1, w + 1, -t["hloubka_m"] - 1, 4))
         elif t["typ"] == "stola":
@@ -300,6 +302,8 @@ for m in Z["mista"]:
             DIRY.append({"misto": m["id"], "poly": poly_svet(o, -1.75, 1.75, -3.6, -0.3)})
             KOL.append({"misto": m["id"], "poly": poly_svet(o, -cw, cw, -dl, -0.3), "y": round(y0 - 1.5, 3)})
             VIKA.append({"misto": m["id"], "poly": poly_svet(o, -cw - 0.6, cw + 0.6, -dl, -3.6), "od_z": -3.6})
+            # viditelná záplata nad otvorem: síť terénu, ale ne níž než strop chodby (snímek 16. 11. f_stola: otvorem nad tlamou bylo vidět nebe)
+            VIKA.append({"misto": m["id"] + "_otvor", "poly": poly_svet(o, -1.8, 1.8, -3.7, -0.25), "y_min": round(y0 + t["strop_m"], 3), "viditelne": True})
             zaz["stola"] = {"zarez_m": round(L, 2), "kryt_m": m["hledat"]["kryt_m"], "y0": round(y0, 3)}
             PUD.append(poly_svet(o, -w - 2, w + 2, -1, L + 3))
             c0 = svet(o, 0, L + 6); tr += [[*c0, None], [*svet(o, 0, 2.5), None], [*svet(o, 0, -6.0), y0, 0.6], [*svet(o, 0, -15.5), y0, 0.6], [*svet(o, 0, -6.0), y0, 0.6], [*svet(o, 0, 2.5), None]]

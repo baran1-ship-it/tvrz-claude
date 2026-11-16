@@ -131,7 +131,7 @@
    "id": "lom", "nazev": "Malý lom na kámen hradu", "znacka": "NAVRH",
    "zdroj": "plán bod 5; rešerše 15 km kap. 10 (malý dobový kamenolom na stavební kámen hradu – rekonstrukční hypotéza, droba); docs/historie_pravidla.md (Olšovecké břidlicové lomy 19. st. = X, jen obecný malý lom)",
    "proc": "ve svahu u vozové cesty blízko hradu (kámen se vozil na stavbu), lámavá stěna, odval, opracované kvádry",
-   "hledat": {"u": [150, 450], "r_m": 300, "cesty": ["vozova"], "od_osy_m": [12, 40], "od_cest_min_m": 12, "od_staveb_m": 60, "od_toku_m": 15, "sklon_min": 0.42, "polomer_m": 7.0, "do_svahu": true, "pozn": "ve svahu nad cestou (stěna lomu), ne na cestě – snímek 16. 11. f_lom: lom vyšel na rovinu u cesty"},
+   "hledat": {"u": [150, 450], "r_m": 300, "cesty": ["vozova"], "od_osy_m": [12, 40], "od_cest_min_m": 12, "od_staveb_m": 60, "od_toku_m": 15, "sklon_min": 0.3, "stena_min_m": 3.5, "polomer_m": 4.0, "max_prevyseni_m": 3.5, "do_svahu": true, "pozn": "ve svahu nad cestou (stěna lomu), ne na cestě – snímek 16. 11. f_lom: lom vyšel na rovinu u cesty"},
    "teren": [{"typ": "zarez", "sirka_m": 12.0, "hloubka_m": 9.0, "stena_m": 4.0}],
    "dily": [
     {"balvan": "balvan_droba_1", "poloha": [-3.8, 0, -8.6], "meritko": 2.4, "yaw_st": 10},
@@ -153,7 +153,7 @@
    "zdroj": "plán bod 1 (Míša 15. 11.); model štoly z Disku zkrácený na průzkumnou štolu (nastroje/zajimava_modely.py)",
    "proc": "ve strmé stráni v lese u pěšiny, vstup zářezem do svahu (portál až tam, kde je nad chodbou dost skály)",
    "hledat": {"u": [200, -330], "r_m": 400, "les": true, "cesty": ["pesina", "vozova"], "od_osy_m": [8, 70], "od_staveb_m": 120, "od_toku_m": 15, "sklon_min": 0.45, "polomer_m": 4.0, "do_svahu": true, "kryt_m": 3.8},
-   "teren": [{"typ": "stola", "sirka_m": 4.4, "zarez_max_m": 12.0, "chodba_sirka_m": 3.2, "podlaha_pod_m": 0.05}],
+   "teren": [{"typ": "stola", "sirka_m": 4.4, "zarez_max_m": 12.0, "chodba_sirka_m": 3.2, "podlaha_pod_m": 0.05, "strop_m": 2.85, "strop_pozn": "nad nejvyšším stropem výdřevy ústí (Cast_02 do 2,5 m, hornina do 2,6 m) – záplata otvoru terénu nad ústím nesmí do chodby"}],
    "dily": [{"model": "stola", "poloha": [0, 0, 0]}]
   },
   {
