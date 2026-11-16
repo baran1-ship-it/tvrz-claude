@@ -859,6 +859,8 @@ _MATd = [m_.get("name", "") for m_ in _jd["materials"]]
 for _dum in _SO["koreny"]:
     _ns = _Nd.get(_dum + _so.get("obal", "_Daleko") + _so.get("pripona", "_Stin")); _nv = _Nd.get(_dum + "_Vnejsek")
     if _nv is None: continue
+    _no = _Nd.get(_dum + _so.get("obal", "_Daleko"))   # obal bez stěn (chýše s kůrou: stěny = střecha) – nástroj kopii nedělá
+    if _no is None or "mesh" not in _no or not any(_MATd[p_["material"]].endswith(_so["steny"]) for p_ in _jd["meshes"][_no["mesh"]]["primitives"]): continue
     if _ns is None: _c21.append("%s bez stínové kopie obalu" % _dum); continue
     _T = np.concatenate([_gs.cti(_jd, _bd, p_["attributes"]["POSITION"])[_gs.cti(_jd, _bd, p_["indices"]).reshape(-1, 3)] for p_ in _jd["meshes"][_ns["mesh"]]["primitives"] if _MATd[p_["material"]].endswith(_so["steny"])] or [np.zeros((0, 3, 3))]).astype(np.float64)
     if not len(_T): continue
