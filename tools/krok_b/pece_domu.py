@@ -145,9 +145,16 @@ def _luzko(typ, kusy, jizba, prekazky, pec, us, best, pr_t):
                 if uvnitr(o, jizba) and not any(prekryv(o, p) for p in prek2):
                     # jizba po staru (Misa 16. 11., pece_domu.luzko_kout): luzko v koute vstupni steny (pricka sine) na druhe
                     # strane nez pec - blizko rohu: roh obdelniku luzka nejblize k rohu jizby
-                    rx = jizba[1] if px < (jizba[0] + jizba[1]) / 2 else jizba[0]
-                    rz = jizba[2]
-                    sk = math.hypot(min(abs(o[0] - rx), abs(o[1] - rx)), min(abs(o[2] - rz), abs(o[3] - rz))) + (0.0 if yaw == lk[3] else 0.05)
+                    # 16. 11. vecer (snimek rychty: luzko uprostred jizby, kout vstupni steny zabral stul) - luzko v nejblizsim
+                    # volnem koute: vstupni stena naproti peci ma prednost (+0), ostatni kouty mimo kout pece (+luzko_kout_jinde_m)
+                    sk = None
+                    for (rx, rz, pl) in ((jizba[1] if px < (jizba[0] + jizba[1]) / 2 else jizba[0], jizba[2], 0.0),
+                                         (jizba[0], jizba[2], 1.0), (jizba[1], jizba[2], 1.0), (jizba[0], jizba[3], 1.0), (jizba[1], jizba[3], 1.0)):
+                        if prekryv(po, (rx - 0.3, rx + 0.3, rz - 0.3, rz + 0.3)):
+                            continue                          # kout pece
+                        d_ = math.hypot(min(abs(o[0] - rx), abs(o[1] - rx)), min(abs(o[2] - rz), abs(o[3] - rz))) + pl * float(PR.get("luzko_kout_jinde_m", 0.5))
+                        sk = d_ if sk is None else min(sk, d_)
+                    sk += (0.0 if yaw == lk[3] else 0.05)
                     if lb is None or sk < lb[0]:
                         lb = (sk, round(float(x), 3), round(float(z), 3), yaw)
     if lb is None:
@@ -194,6 +201,10 @@ if __name__ == "__main__":
         if u_zdi < 2:
             # Misa 16. 11.: „nechci, aby pec nekde zavazela uprostred mistnosti“ - pec musi byt v rohu (u dvou zdi)
             print("PECE %s: pec neni v rohu (u zdi %d)" % (t, u_zdi))
+            sys.exit(1)
+        lo_ = obd([k for k in out if KAT[k[0]].get("lehat")][0][0], lb[1], lb[2], lb[3])
+        if sum(1 for v in (lo_[0] - jz[0], jz[1] - lo_[1], lo_[2] - jz[2], jz[3] - lo_[3]) if v < 0.4) < (1 if PR.get("typy", {}).get(t, {}).get("luzko_u_zdi_staci") else 2):      # 0,4: lavice modelu podel zdi
+            print("PECE %s: luzko neni v koute %s jizba %s" % (t, [round(v, 2) for v in lo_], [round(float(v), 2) for v in jz]))
             sys.exit(1)
         print("PECE %s: jizba %s, pec %s, luzko %s" % (t, [round(v, 2) for v in jz], b[1:], lb[1:]))
         for k in out:

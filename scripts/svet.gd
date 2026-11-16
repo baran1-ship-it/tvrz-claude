@@ -6062,8 +6062,13 @@ func ohen_predmetu(id: String, p: Vector3, yaw: float, jm: String, zap: bool, sc
 			if z == "Pec_Ohen" and zn.has("Pec_Usti") and (oz.get("k_usti_predmety", []) as Array).has(id):
 				lq = lq.lerp(_v3(zn["Pec_Usti"]), float(oz.get("k_usti", 0.0)))   # zare videt z mistnosti (modely.json k_usti)
 			var q := xf * lq
+			var sv_o: Array = oz["svetlo"]
+			if z == "Pec_Ohen" and zn.has("Pec_Usti") and (oz.get("k_usti_predmety", []) as Array).has(id):
+				# svetlo pred usti, ne v kopuli (modely.json ohen_znacky svetlo_pred_ustim_m): posun od plamene ve svete
+				var lsv := xf * (_v3(zn["Pec_Usti"]) + Vector3(0.0, 0.0, float(oz.get("svetlo_pred_ustim_m", 0.0))))
+				sv_o = [lsv.x - q.x, lsv.y - q.y, lsv.z - q.z]
 			data["ohne"].append({"kind": "hearth", "pos": [q.x, q.y, q.z], "name": jm if n == 0 else "%s_%d" % [jm, n + 1],
-					"size": float(oz["velikost_m"]) * sc, "zap": zap, "svetlo": oz["svetlo"], "predmet": id})
+					"size": float(oz["velikost_m"]) * sc, "zap": zap, "svetlo": sv_o, "predmet": id})
 			n += 1
 	for z: String in oz["kour"]:
 		if zn.has(z):

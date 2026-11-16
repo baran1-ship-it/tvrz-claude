@@ -1043,7 +1043,13 @@
      "lavice_selska"
     ],
     "pruchod_m": 0.6,
-    "_p": "Dum2 (chalupa) má jizbu 5,8 × 3,4 m – pec 2,5 × 2,5 m, stůl a lůžko se vejdou jen bez volné lavice (sedí se na rohové lavici modelu, nabytek.json sedaky_modelu Dum2) a s průchodem dveří 0,6 m (pec od dveří 0,8 m)"
+    "_p": "Dum2 (chalupa) má jizbu 5,8 × 3,4 m – pec 2,5 × 2,5 m, stůl a lůžko se vejdou jen bez volné lavice (sedí se na rohové lavici modelu, nabytek.json sedaky_modelu Dum2) a s průchodem dveří 0,6 m (pec od dveří 0,8 m)",
+    "luzko_u_zdi_staci": true,
+    "_luzko_u_zdi_staci": "16. 11. večer: v jizbě Dum2 (5,8 × 3,4 m) zaberou oba zbylé kouty pec a stůl s rohovou lavicí modelu – lůžko stojí u vstupní stěny mezi nimi (ne uprostřed místnosti)"
+   },
+   "Rychta": {
+    "luzko_u_zdi_staci": true,
+    "_luzko_u_zdi_staci": "16. 11. večer: v rychtě zabírá kout u dveří průchod, zadní kouty pec a stůl ve svatém koutě s lavicemi – rychtářovo lůžko stojí u vstupní stěny vedle dveří"
    }
   },
   "luzko_kout": "vstupni_stena_naproti_peci",
