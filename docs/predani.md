@@ -1508,3 +1508,14 @@ Hotovo v kódu a datech (testy u každého):
 - **Zemljanky:** polohy jen v `lokace.json zemljanky` (konstanta VES_CHYSE zrušena), jáma a otvor v terénu = export světa.
 - **Krčma:** `krcma_L.py` čte `lokace.json krcma_l pec_senkovna_katalog`; po změně znovu `cd blender/krcma_L && /opt/bl/bin/python krcma_L.py --norender`
   a přesunout `krcma_L*.glb` do `modely/krcma/` (balík `z_krcma`).
+
+### 16. 11. – tabulka `misa_16_11_chyby.md` ř. 1–6 (Doubrava, sklep, krčma L, rybník)
+- **Rybník v2 se „vznášel“ (ř. 6):** příčina = `nadrz.gd` bral hladinu `Rybnik_lhota_voda` (materiál voda_prikop) jako starou
+  nádrž a `vyhloub` prohloubil dno až o 1,1 m pod Blender (kraj hladiny ve vzduchu, kůly lávky visely). Hladina v2 se do nádrží
+  nebere (svet.gd sběr hladin). Hlídá test `ryb_vznaseni` (hloubka Blenderu je v barvě vrcholu hladiny – porovnává ji s viditelným
+  terénem hry, pásmo `voda.ryb_kraj_tolerance_m`). Pravidlo: co staví Blender celé (rybník v2), hra nesmí přetvářet – nová úprava
+  terénu ve hře musí rybník v2 vynechat.
+- **Díly z Disku s kolizí -colonly:** kolize může být uzavřená tam, kde viditelná síť má otvor (sklep Doubravy) → záznam
+  `kolize_ze_site` (lokace zanikla_ves). Povrch dílu jako terén světa: `povrch_jako_teren`.
+- **Krčma L:** křídlo posouvá `lokace krcma_l kridlo_posun_y_m` – při změně posunout i záznamy křídla v `krcma_l` a body testů
+  `krcma_l`, `krcma_dvur`, `krcma_schody`, model přestavět (`krcma_L.py --norender`, kopie do `modely/krcma`, `--import`).

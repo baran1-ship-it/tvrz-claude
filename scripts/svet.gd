@@ -1687,6 +1687,13 @@ func _koryto_terenu(root: Node3D) -> void:
 			var mt := me.surface_get_material(i)
 			var mn := String(mt.resource_name).split(".")[0] if mt else ""
 			if mn == "voda_prikop" or mn == "voda":
+				# rybnik v2 (voda.json rybnik_lhota obrys, Misa 16. 11. r. 6 „rybnik i s lavkou se vznasi“): dno, breh a hladinu
+				# stavi Blender (hladina = vrstevnice jeho terenu, hloubka v barve vrcholu) - nadrz.vyhloub ho prohloubila po
+				# svem (svah 1:4 do 1,8 m od rozmazaneho brehu): teren hry az 1,1 m pod Blenderem, kraj hladiny ve vzduchu,
+				# kuly lavky visely 0,6 m (test ryb_vznaseni). Hladina v2 do nadrzi nepatri, jen vlastni vzhled.
+				if String(mi.name).begins_with("Rybnik_lhota_voda") and (Pravidla.cti("voda", "rybnik_lhota") as Dictionary).has("obrys"):
+					_ryb_vzhled(mi as MeshInstance3D, i)
+					continue
 				var bb := AABB()
 				var vv: PackedVector3Array = me.surface_get_arrays(i)[Mesh.ARRAY_VERTEX]
 				for q in vv:
