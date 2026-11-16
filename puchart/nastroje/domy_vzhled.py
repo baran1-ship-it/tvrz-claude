@@ -25,6 +25,7 @@ j, b, zbytek = nacti(P_)
 ex = j.setdefault("asset", {}).setdefault("extras", {})
 hotovo = ex.get("domy_vzhled", {})
 MAT = [m.get("name", "") for m in j["materials"]]
+N_SITI0 = len(j["meshes"])   # sítě se jen přidávají (kolize OMI_physics_shape na ně odkazují indexem)
 
 
 def pudorys(dum, so):
@@ -78,23 +79,18 @@ def stin_obal(so):
                 P2[ven, 0] = lo[0] + (cx[ven] + 0.5) * kr; P2[ven, 2] = lo[1] + (cz[ven] + 0.5) * kr
                 q["attributes"]["POSITION"] = pridej(j, b, P2.astype(np.float32), "f")
             prims.append(q)
-        j["meshes"].append({"name": dum + so["obal"] + so["pripona"], "primitives": prims})
-        uz = {"name": dum + so["obal"] + so["pripona"], "mesh": len(j["meshes"]) - 1}
-        if ist is not None: j["nodes"][ist] = uz   # znovu: nahradit (stará síť zůstane bez odkazu – níž pryč)
+        sit_ = {"name": dum + so["obal"] + so["pripona"], "primitives": prims}
+        if ist is not None and "mesh" in j["nodes"][ist]: j["meshes"][j["nodes"][ist]["mesh"]] = sit_   # znovu: přepsat tutéž síť
         else:
+            j["meshes"].append(sit_)
+            uz = {"name": dum + so["obal"] + so["pripona"], "mesh": len(j["meshes"]) - 1}
             j["nodes"].append(uz); ni = len(j["nodes"]) - 1
             rod = next((i for i, n in enumerate(j["nodes"]) if io_ in n.get("children", [])), None)
             if rod is not None: j["nodes"][rod]["children"].append(ni)
             else: j["scenes"][j.get("scene", 0)]["nodes"].append(ni)
         n_ += 1
-    pouz = {n["mesh"] for n in j["nodes"] if "mesh" in n}
-    if len(pouz) < len(j["meshes"]):
-        mapa = {}; nove = []
-        for i, m in enumerate(j["meshes"]):
-            if i in pouz: mapa[i] = len(nove); nove.append(m)
-        j["meshes"] = nove
-        for n in j["nodes"]:
-            if "mesh" in n: n["mesh"] = mapa[n["mesh"]]
+    # sítě se nikdy nemažou ani nepřečíslují: kolize OMI_physics_shape (convex.mesh) odkazují na sítě bez uzlu (16. 11.: úklid
+    # „neodkazovaných“ sítí rozbil kolize domů – trasy vsi uvízly)
     print("DOMY_VZHLED stin_obal %d domů, stěny %.2f m za vnějším lícem" % (n_, so["odsazeni_m"]))
 
 
@@ -125,4 +121,6 @@ if "stin_obal" in MD and hotovo.get("stin_obal") != MD["stin_obal"]["odsazeni_m"
 if "omitka_diry" in MD and not hotovo.get("omitka_diry"):   # zesvětlení jen jednou (znovu by násobilo)
     omitka_diry(MD["omitka_diry"]); hotovo["omitka_diry"] = MD["omitka_diry"]["cil_jas"]
 ex["domy_vzhled"] = hotovo
+_sh = j.get("extensions", {}).get("OMI_physics_shape", {}).get("shapes", [])
+assert len(j["meshes"]) >= N_SITI0 and all(s_.get(s_["type"], {}).get("mesh", 0) < len(j["meshes"]) for s_ in _sh), "kolize OMI odkazují mimo sítě"
 uloz(P_, j, zhutni(j, b), zbytek)
