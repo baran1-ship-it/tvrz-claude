@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "9a77312",
+ "commit": "24f5ac0",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -95,7 +95,7 @@
    "zabradli_spojite": true,
    "portaly": true,
    "zemljanka_bez_travy": true,
-   "mlyn_koryto": false,
+   "mlyn_koryto": true,
    "cesta_bez_porostu": true,
    "strom_mimo_pas_cesty": true,
    "ves_vyslapano": true,
@@ -174,6 +174,7 @@
    "kovadlina_osazena": true,
    "kovarna_mech": true,
    "lavice_sezeni": true,
+   "lavka_mlyn": true,
    "lavka_most_440_1": true,
    "lavka_most_440_2": true,
    "lavka_most_440_3": true,
@@ -247,26 +248,26 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1052555,
-    "troj_max": 1075706,
-    "kresleni_p95": 368,
-    "kresleni_m_median": 477.0
+    "troj_p95": 1056828,
+    "troj_max": 1079994,
+    "kresleni_p95": 374,
+    "kresleni_m_median": 478.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1609796,
-    "troj_max": 1837856,
-    "kresleni_p95": 868,
-    "kresleni_m_median": 714.0
+    "troj_p95": 1621529,
+    "troj_max": 1842140,
+    "kresleni_p95": 874,
+    "kresleni_m_median": 714.5
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1563797,
-    "troj_max": 1745058,
-    "kresleni_p95": 1055,
-    "kresleni_m_median": 1762.0
+    "troj_p95": 1568085,
+    "troj_max": 1749354,
+    "kresleni_p95": 1061,
+    "kresleni_m_median": 1755.5
    },
-   "zmena_median": 34.08,
+   "zmena_median": 33.68,
    "doskoky": [],
    "ve_zdi": 2
   },
