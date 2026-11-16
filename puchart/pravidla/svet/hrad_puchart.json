@@ -1272,6 +1272,12 @@
   "zdroj": "docs/reference/okna_palace.md (castlewales.com/life.html: okenice uvnitř se závorou; castles-of-britain.com/windows.htm: nezasklená okna s okenicemi; buildingconservation.com shutters: vnitřní okenice se skládají do ostění); Havran blender/kit.py window(shutters) – prkna okenice; doba jako lehké dveře Havrana (kit.doorway vnitrni 0,9 s)",
   "jistota": "REKONSTRUKCE"
  },
+ "sedatko_niky": {
+  "popis": "Sedátko na dně niky okna paláce (hrady.okno_palace, lavice.gd) jen tam, kde je pod místem vstání podlaha: hráč vstává hrac.json sezeni.vstat_m před sedátko do místnosti; leží-li tento bod (rozšířený o okraj_otvoru_m = poloměr kapsle hráče, hlavni.gd 0,3 m) v otvoru podlahy nad ramenem vnitřního schodiště (puchart_hrad.otvory_ramen → hrady.OTVORY_PODLAH), sedátko (značka *_Sedatka a kolize *_Kol_Lavice) se nestaví – kamenné dno niky zůstává. Hlídá pruchod:lavice_sezeni (chyby.md #351).",
+  "okraj_otvoru_m": 0.3,
+  "zdroj": "test 16. 11.: Okno17 paláce B nad otvorem schodiště (trasa budova_palac_54_147) – po vstání hráč spadl do přízemí (y 15,73); nika nad schodištěm se sedátkem nepoužívá (sedátka v nikách: docs/reference/okna_palace.md)",
+  "jistota": "REKONSTRUKCE"
+ },
  "pohyb_studna": {
   "popis": "Rumpál a vědro studny nádvoří A jako pohyblivé díly (hrady.studna): Pohyb_studna_rumpal (druh navijak, otáčky turns kolem osy bubnu = místní X, místo ovládání u kliky), Pohyb_studna_vedro (druh vedro, posun lift po místní Y dolů k hladině, dur s, lano ropes = [kotva pod bubnem (svět), ucho vědra (místní)]). Skupina studna. Ve glb vědro nahoře pod bubnem (init 0). Navinuté lano je součást sítě bubnu (točí se s ním); Havran navin (navíjení lana multimeshí) dvere.gd nemá.",
   "turns": 9.0,

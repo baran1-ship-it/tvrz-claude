@@ -102,8 +102,19 @@ DIRY = []    # díry v terénu (studna): shader terénu je nekreslí
 ZNACKY = []      # prázdné uzly [(jméno, Vector)] – ohně (ohne.gd: *_Ohen_*), skupiny sedátek (*_Sedatka, rodič kolizí lavic)
 LAVICE_KOL = []  # kolizní kvádry sedátek [(jméno, rodič, Matrix, (x, y, z))] → uzel <jméno>-convcolonly (lavice.gd: *_Kol_Lavice*)
 OKENICE_N = [0]  # číslo skupiny okenic (Pohyb_okeniceN_l/_p)
+OTVORY_PODLAH = []   # [(c, d, s, (u0, u1, v0, v1), y)] otvory podlah nad rameny schodišť stavěné budovy (puchart_hrad.budova_k plní před stavbou paláce)
 _HP = json.load(open(os.path.join(K, "pravidla/svet/hrad_puchart.json")))
-POHYB_OK = _HP.get("pohyb_okenice", {}); POHYB_ST = _HP.get("pohyb_studna", {})
+POHYB_OK = _HP.get("pohyb_okenice", {}); POHYB_ST = _HP.get("pohyb_studna", {}); SED_NIKY = _HP["sedatko_niky"]
+VSTAT_M = json.load(open(os.path.join(K, "pravidla/svet/hrac.json")))["sezeni"]["vstat_m"]   # lavice.gd: vstává se vstat_m před sedátko
+
+def nad_otvorem_podlahy(q, y_pod, y_nad):
+    """Bod q (svět) nad otvorem v podlaze (OTVORY_PODLAH) mezi y_pod a y_nad, rozšířeným o okraj_otvoru_m."""
+    r_ = SED_NIKY["okraj_otvoru_m"]
+    for c_, d_, s_, (u0, u1, v0, v1), y_ in OTVORY_PODLAH:
+        if not (y_pod <= y_ <= y_nad): continue
+        u_ = (q - c_).dot(d_); v_ = (q - c_).dot(s_)
+        if u0 - r_ <= u_ <= u1 + r_ and v0 - r_ <= v_ <= v1 + r_: return True
+    return False
 
 def _kridlo_okenice(Q, wl, h, sx):
     """Křídlo okenice v místních souřadnicích pantu: osa pantu = místní Y v počátku, křídlo k ose okna (−sx · x), tloušťka
@@ -592,6 +603,8 @@ def okno_palace(P, c, dd, nout, t, w, ya, yb, dvoj, ys, yn):
     P.box(m @ M((0, ys - 0.03, -sl - hn / 2)), (wn, 0.06, hn), "kvadr_okno")
     if DETAIL:
         okenice(P, m, w, ya, yb, -sl, uhel_okenice_nika(w, wn), use_)
+        vstat_ = m @ Vector((0.0, ys, -sl - hn / 2 - VSTAT_M))   # místo vstání ze sedátka (lavice.gd: vstat_m před lavici do místnosti)
+        if nad_otvorem_podlahy(vstat_, ys - 1.5, ys): return   # pod místem vstání otvor schodiště – sedátko ne (hrad_puchart.json sedatko_niky)
         # sedátko na dně niky: kolizní kvádr pro lavice.gd (mista.json modely.lavice.uzel_vzor *_Kol_Lavice*); rodič = značka
         # v místnosti před oknem (lavice.gd otočí sedícího ke svému rodiči – zády k oknu)
         jm_ = "Okno%d" % OKENICE_N[0]

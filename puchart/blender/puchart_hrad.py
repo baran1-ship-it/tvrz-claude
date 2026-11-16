@@ -764,6 +764,22 @@ def podlaha(P, c, d, iw, idp, y, otvory=(), tl=0.24, mat="prkna_ven"):
             P.box(M(q + UP * (y - 0.08 - (tl - 0.08) / 2), basis=frame(d)), (v1 - v0, tl - 0.08, u1 - u0), "dub")
             kol(P, q + UP * (y - tl / 2), d, (v1 - v0, tl, u1 - u0)); POCH.append((P.cols[-1], y, "podlaha", P))
 
+_STENY_RAMEN = lambda iw, idp: [((-iw / 2, -idp / 2), (1, 0), (0, 1)), ((iw / 2, -idp / 2), (0, 1), (-1, 0)),
+                                ((iw / 2, idp / 2), (-1, 0), (0, -1)), ((-iw / 2, idp / 2), (0, -1), (1, 0))]
+
+def otvory_ramen(iw, idp, patra, steny_ramen, sq=1.0, run=None, sirka=1.0, sq_konec=None):
+    """Otvory v podlahách nad rameny vnitrek_veze (lokálně u podél d, v podél s): {patro k: [(u0, u1, v0, v1)]}. Sdílí
+    vnitrek_veze (stavba podlah) a budova_k (předem pro hrady.okno_palace – sedátko v nice nad otvorem se nestaví)."""
+    steny = _STENY_RAMEN(iw, idp); otv = {k: [] for k in range(len(patra))}
+    for k in range(len(patra) - 1):
+        (cu, cv), (du, dv), (lu, lv) = steny[steny_ramen[k]]
+        delka = iw if du else idp
+        rn = run or (delka - sq - (sq if sq_konec is None else sq_konec))
+        pts = [(cu + du * (sq - 0.05) + lu * x, cv + dv * (sq - 0.05) + lv * x) for x in (0, sirka + 0.05)] + \
+              [(cu + du * (sq + rn) + lu * x, cv + dv * (sq + rn) + lv * x) for x in (0, sirka + 0.05)]
+        otv[k + 1].append((min(p[0] for p in pts), max(p[0] for p in pts), min(p[1] for p in pts), max(p[1] for p in pts)))
+    return otv
+
 def vnitrek_veze(P, c, d, iw, idp, patra, steny_ramen, sq=1.0, run=None, sirka=1.0, sq_konec=None):
     """Patra a schodiště věže: rameno k vede z patra k do k+1 podél stěny steny_ramen[k] (0 S, 1 V, 2 J, 3 Z v lokálních
     osách). Začíná sq od rohu a končí sq před dalším rohem – čtverec v rohu je pevná podesta, ze které vychází další
@@ -771,9 +787,8 @@ def vnitrek_veze(P, c, d, iw, idp, patra, steny_ramen, sq=1.0, run=None, sirka=1
     nahoře volný. Vrací ramena [(start, konec, směr, y0, y1)] pro test průchodu."""
     d = hz(d).normalized(); s = d.cross(UP).normalized()
     L = lambda u, v: c + d * u + s * v
-    steny = [((-iw / 2, -idp / 2), (1, 0), (0, 1)), ((iw / 2, -idp / 2), (0, 1), (-1, 0)),
-             ((iw / 2, idp / 2), (-1, 0), (0, -1)), ((-iw / 2, idp / 2), (0, -1), (1, 0))]
-    ramena = []; otv = {k: [] for k in range(len(patra))}; zabr = []
+    steny = _STENY_RAMEN(iw, idp)
+    ramena = []; otv = otvory_ramen(iw, idp, patra, steny_ramen, sq, run, sirka, sq_konec); zabr = []
     for k in range(len(patra) - 1):
         (cu, cv), (du, dv), (lu, lv) = steny[steny_ramen[k]]
         delka = iw if du else idp
@@ -783,9 +798,6 @@ def vnitrek_veze(P, c, d, iw, idp, patra, steny_ramen, sq=1.0, run=None, sirka=1
         a = L(su, sv); dirw = d * du + s * dv
         e, _ = schody2(P, a, dirw, y0, y1, sirka - 0.05, zabradli=(), podklad=y0, r=r, vyska_st=(y1 - y0) / n)
         ramena.append((a, e, dirw, y0, y1))
-        pts = [(cu + du * (sq - 0.05) + lu * x, cv + dv * (sq - 0.05) + lv * x) for x in (0, sirka + 0.05)] + \
-              [(cu + du * (sq + rn) + lu * x, cv + dv * (sq + rn) + lv * x) for x in (0, sirka + 0.05)]
-        otv[k + 1].append((min(p[0] for p in pts), max(p[0] for p in pts), min(p[1] for p in pts), max(p[1] for p in pts)))
         e0 = L(cu + du * sq + lu * (sirka + 0.05), cv + dv * sq + lv * (sirka + 0.05))
         e1 = L(cu + du * (sq + rn - (1.1 if run else 0)) + lu * (sirka + 0.05), cv + dv * (sq + rn - (1.1 if run else 0)) + lv * (sirka + 0.05))
         zabr += [(e0, e1, y1), (L(cu + du * sq, cv + dv * sq), e0, y1)]
@@ -845,7 +857,10 @@ def most2(P, a, ya, b, yb, w, Lp, na_terenu=True, vyk=None, navijak=None):
         for o in (-w / 2 + 0.25, w / 2 - 0.25):   # sloup přesně pod krajním podélným trámem (dřív o 10 cm vedle – pásky končily vedle trámu)
             q = p + s * o; g = ter(q.x, q.z); gs.append(g)
             P.box(M(q + UP * (g + 0.05), basis=frame(d)), (0.6, 0.5, 0.6), "kvadr_sedy")      # patka (do terénu 0,2 m)
-            P.beam(q + UP * (g + 0.28), q + UP * (yy - 0.49), 0.28, 0.28, "dub", up=d, j=0.4)   # čep do příčníku
+            # sloup končí čelem pod příčníkem, do příčníku jen čep (třetina tloušťky, dlab podél příčníku do půl výšky) – dřív sloup
+            # stejně široký jako příčník vnikal do jeho středu celým průřezem a s chvěním j vyčníval z boků (kontrola_spoju vrostlý, 16. 11.)
+            P.beam(q + UP * (g + 0.28), q + UP * (yy - 0.61), 0.28, 0.28, "dub", up=d, j=0.4)
+            P.beam(q + UP * (yy - 0.67), q + UP * (yy - 0.49), 0.2, 0.09, "dub", up=d)   # čep (šířka podél příčníku, tloušťka podél mostu)
             if yy - g > 1.6:   # pásky ze sloupu pod podélník (čep do sloupu, čep do podélníku), pod příčníkem volně (dřív končily v něm)
                 pd_ = yy - 1.16; dx = (yy - 0.22) - pd_
                 for sm in (-1, 1):
@@ -1104,6 +1119,7 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
     a vybavení podle vnitrek; jinak plná kolize půdorysu (starší chování). podl zadaná = pod budovou je sklep."""
     A_, B_ = V(a), V(b); d_ = (B_ - A_).normalized(); s_ = d_.cross(UP).normalized()
     BUDOVY.append([[round(q.x, 2), round(q.z, 2)] for q in (A_ - s_ * hloubka / 2, B_ - s_ * hloubka / 2, B_ + s_ * hloubka / 2, A_ + s_ * hloubka / 2)])
+    H.OTVORY_PODLAH[:] = []
     if k_bodu is not None:
         A_, B_ = V(a), V(b); d = (B_ - A_).normalized(); s = d.cross(UP).normalized(); L = (B_ - A_).length
         sg = 1 if (V(k_bodu) - (A_ + B_) / 2).dot(s) > 0 else -1
@@ -1115,6 +1131,10 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
             p0_ = podl if podl is not None else H.ter_rozsah([(q.x, q.z) for q in rh_])[1] + 0.3   # jako H.budova
             H.BEZ_OKEN[:] = [(cS - d * (L / 2) - s * sg * vS, cS + d * (L / 2) - s * sg * vS, p0_, p0_ + patro_y),        # rameno 1 u stěny −sg
                              (cS - d * (L / 2) + s * sg * vS, cS + d * (L / 2) + s * sg * vS, p0_ + patro_y, p0_ + (patro2_y or hk))]  # rameno 2 u stěny +sg
+            # otvory podlah nad rameny (stejná geometrie jako vnitrek_veze níž): sedátko v nice nad otvorem se nestaví (sedatko_niky)
+            t_ = 1.1; pat_ = [p0_, p0_ + patro_y] + ([p0_ + (patro2_y or hk)] if (podkrovi and patro2_y) else [])
+            for k_, ot_ in otvory_ramen(L - t_, hloubka - t_, pat_, [0 if sg > 0 else 2, 2 if sg > 0 else 0], sq=1.1, sirka=1.0).items():
+                H.OTVORY_PODLAH.extend((cS, d, s, o_, pat_[k_]) for o_ in ot_)
         podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ, podl=podl, otvory=otvory, vstup=vs, patra_rel=(([0.0, patro_y] + ([patro2_y] if patro2_y else [])) if patro_y else None))
         t = 1.1 if typ == "palac" else 0.5; hi_ = (hk + hd) if typ == "palac" else 0.6 + (hd if hd > 0 else hk)
         c = (A_ + B_) / 2; wi = hloubka - (t if typ == "palac" else 0.4); li = L - (t if typ == "palac" else 0.4)
@@ -2071,7 +2091,9 @@ def zabradli_stavba():
         e = d.normalized(); ka = 0.05; kb = 0.05   # čep 4 cm do sloupku 0,18 m
         a_m, b_m = a + e * ka, b - e * kb; ya_m = ya + (yb - ya) * ka / L; yb_m = yb - (yb - ya) * kb / L
         P.beam(a_m + UP * (ya_m + 1.0), b_m + UP * (yb_m + 1.0), 0.12, 0.1, "dub", j=0.2, ext=0.0, collide=None)              # madlo: čepy do sloupků zábradlí na koncích
-        P.beam(a_m + s_ * 0.06 + UP * (ya_m + 0.5), b_m + s_ * 0.06 + UP * (yb_m + 0.5), 0.05, 0.07, "dub", j=0.2, ext=0.0, collide=None)   # střední tyč z líce mezisloupků, čepy do sloupků zábradlí
+        # střední tyč zapuštěná do líce mezisloupků do půl své tloušťky (osa 0,05 m od osy zábradlí), čepy do sloupků zábradlí; dřív osa 0,06 m:
+        # vnější líc tyče 0,085 m lícoval s bokem sloupku 0,18 m a s chvěním j z něj vyčníval (kontrola_spoju vrostlý podle stavu náhody, 16. 11.)
+        P.beam(a_m + s_ * 0.05 + UP * (ya_m + 0.5), b_m + s_ * 0.05 + UP * (yb_m + 0.5), 0.05, 0.07, "dub", j=0.2, ext=0.0, collide=None)
         n = max(1, round(L / 1.2))
         for i in range(n + 1):
             q = a.lerp(b, i / n); yq = ya + (yb - ya) * i / n; kl = (round(q.x * 20), round(q.z * 20), round(yq * 10))

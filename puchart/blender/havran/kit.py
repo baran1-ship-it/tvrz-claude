@@ -601,10 +601,13 @@ def drawbridge(P: Part, m: Matrix, w=3.5, L=4.2, angle=0.0):
     mm = m @ Matrix.Rotation(math.radians(angle), 4, "X")
     for sx in (-1, 1):
         x = sx * (w / 2 - 0.15)
-        P.beam(mm @ Vector((x, -0.2, 0.0)), mm @ Vector((x, -0.2, L)), 0.24, 0.28, "dub_ven", j=1)
+        P.beam(mm @ Vector((x, -0.2, 0.0)), mm @ Vector((x, -0.2, L)), 0.24, 0.28, "dub_ven", j=0.4)
     for k in range(5):
         z = 0.2 + (L - 0.4) * k / 4
-        P.beam(mm @ Vector((-w / 2, -0.445, z)), mm @ Vector((w / 2, -0.445, z)), 0.16, 0.14, "dub_ven", j=1)   # 13. 11.: delší a širší most (most_kryti) – s chvěním j trámy příčníků sahaly do podélníků (kontrola_spoju vrostlý); mezera 3,5 cm
+        # 13. 11.: delší a širší most (most_kryti) – s chvěním j trámy příčníků sahaly do podélníků (kontrola_spoju vrostlý); mezera 3,5 cm.
+        # 16. 11.: chvění j=1 (náklon ±0,012 rad = ±2,7 cm na konci 4,5m podélníku, výška ±12 %) mezeru i tak přerostlo podle stavu
+        # náhody (vrostlý drawbridge po přidání okenic) – j 0,4 jako ostatní tesané trámy hradu: nejhůř 1,1 + 0,7 + 0,5 + 0,3 cm < 3,5 cm
+        P.beam(mm @ Vector((-w / 2, -0.445, z)), mm @ Vector((w / 2, -0.445, z)), 0.16, 0.14, "dub_ven", j=0.4)
     deck(P, mm @ Vector((0, -0.06, 0.02)), mm @ Vector((0, -0.06, L - 0.02)), w / 2 - 0.05, "prkna_ven", 0.9,
          beams=(-(w / 2 - 0.15), 0.0, w / 2 - 0.15))
     # kovane hrany a oka pro retezy

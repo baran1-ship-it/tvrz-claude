@@ -25,6 +25,7 @@ for l in open(K + "/docs/chyby.md"):
             if "--rychle" in sys.argv: continue
             _ht = open(K + "/build/hlidaci.txt").read() if os.path.exists(K + "/build/hlidaci.txt") else ""
             if t == "skripty_beh": ok = ("SKRIPTY OK" in _ht) and ("SKRIPTY ZA BEHU CHYBA" not in _ht)   # skripty se načtou a za běhu her bez SCRIPT ERROR
+            elif t == "spoje": ok = ("SPOJE trámů" in _ht) and ("SPOJE CHYBA" not in _ht)   # kontrola_spoju.py: vadných spojů nejvýš strop kontroly.json spoje
             else: ok = bool(re.search({"klik": r"KLIK_TEST dvere.*-> OK", "klik_ves": r"KLIK_VES_TEST dvere.*-> OK", "behlet": r"BEHLET_TEST OK", "louc": r"LOUC_TEST zapaleni.*-> OK", "ohne": r"OHNE_TEST.*OK"}.get(t, "^$NIKDY"), _ht))
             if not ok: chyby.append("#%s: hlidac:%s neprošel/neběžel" % (m.group(1), t))
             continue
