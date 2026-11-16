@@ -117,7 +117,16 @@ def src_hash(files):
     return h.hexdigest()
 
 
-TEX_PRED = json.load(open("pravidla/svet/kvalita.json", encoding="utf-8"))["textury_predmetu"]["slozka"]
+_TEXCFG = json.load(open("pravidla/svet/kvalita.json", encoding="utf-8"))["textury_predmetu"]
+TEX_PRED = _TEXCFG["slozka"]
+# 16. 11.: nove textury do nove slozky (kvalita.json slozka), starsi slozky maji v kontejneru jen .import (zdroje jsou
+# v baliku tex_predmety z minula) - kazda slozka vlastni balik tex_predmety<pripona>, aby novy balik nesmazal stare textury
+TEX_VSE = [TEX_PRED] + list(_TEXCFG.get("slozky_starsi", []))
+TEX_VYL = ", ".join(f + "/*" for f in TEX_VSE)
+
+
+def tex_skupina(f):
+    return "tex_predmety" + os.path.basename(f)[3:]
 
 
 def preset_with(data_filter, files=None, vyloucit=None):
@@ -204,7 +213,8 @@ groups = {"svet": [f for f in glob.glob("modely/**", recursive=True) if os.path.
 groups["louka"] = sorted(glob.glob("modely/louka/*.bin"))
 # sdilene textury predmetu (tools/textury_predmetu.py): jednou ve vlastnim baliku, v p_<id> vyloucene (export-pack bere
 # zavislosti glb sam); hra nacita vsechny baliky pred prvnim pouzitim, poradi nehraje roli
-groups["tex_predmety"] = sorted(f for f in glob.glob(TEX_PRED + "/*") if os.path.isfile(f) and not f.endswith(".import"))
+for _tf in TEX_VSE:
+    groups[tex_skupina(_tf)] = sorted(f for f in glob.glob(_tf + "/*") if os.path.isfile(f) and not f.endswith(".import"))
 for i in items:
     groups["p_" + i] = ["modely/predmety/" + f for f in files_all if owner(f) == i]
 # hudba (krome hudby menu, ta hraje pred stazenim dat) a ruchy prostredi: velke, meni se zridka
@@ -321,7 +331,7 @@ for name, files in groups.items():
         cfg = cfg.replace('\ninclude_filter=""', '\ninclude_filter="modely/louka/*.bin"', 1)
     else:
         cfg = preset_with(None, [f for f in files if f.endswith((".glb", ".png", ".jpg", ".ogg"))],
-                          None if name == "tex_predmety" else TEX_PRED + "/*")
+                          None if name.startswith("tex_predmety") else TEX_VYL)
     if name == "z_textury":
         pck = open("build/z_textury.pck", "rb").read()
     else:

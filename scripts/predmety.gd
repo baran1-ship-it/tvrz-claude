@@ -238,6 +238,27 @@ func spawn(rec: Dictionary) -> void:
 				st.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if k == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 				m.add_child(st)
 		si0.free()
+	# LOD1 od modelare (sady z Disku 16. 11., blender/predmety.py lod1 -> <id>_lod1.glb, katalog lod1): podrobny model do
+	# modely.json predmety_lod lod1_od_m, dal LOD1 se stejnou transformaci az do dosahu (bez prolinani, jako .tscn modelare)
+	var l1_od := float(plod["lod1_od_m"])
+	for pr: String in (plod.get("lod1_od_m_predpony", {}) as Dictionary):
+		if id.begins_with(pr):
+			l1_od = float(plod["lod1_od_m_predpony"][pr])
+	if bool(info.get("lod1", false)) and l1_od < dosah and ResourceLoader.exists(DIR + id + "_lod1.glb"):
+		var l1 := (load(DIR + id + "_lod1.glb") as PackedScene).instantiate() as Node3D
+		for g in m.find_children("*", "GeometryInstance3D", true, false):
+			var g0 := g as GeometryInstance3D
+			g0.visibility_range_end = minf(g0.visibility_range_end, l1_od)
+		for g in l1.find_children("*", "GeometryInstance3D", true, false):
+			var g1 := g as GeometryInstance3D
+			g1.visibility_range_begin = l1_od
+			g1.visibility_range_end = dosah
+			g1.visibility_range_end_margin = 3.0
+			g1.visibility_range_fade_mode = Pravidla.fade_dosahu()
+			g1.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if vel < float(plod["stin_od_m"]) else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		l1.name = "LOD1"
+		l1.transform = m.transform
+		n.add_child(l1)
 	if (info.get("louc", false) or SVETLA.has(id)) and not rec.has("auto") and not NE_DO_RUKY.has(id):
 		rec["auto"] = true                 # sviti samo vecer a v noci, dokud ho hrac neovlada rucne
 	if info.get("louc", false):

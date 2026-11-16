@@ -426,6 +426,103 @@ KATALOG.update({
     "hostinec": ("ext:medieval_tavern_interior.glb", "Zájezdní hostinec", None, None, 0.0, 0, {"troj": 12000, "tex": 1024, "pevne_stavba": True, "zem0": True, "uprava": "hostinec", "sketchup": True}),
 })
 
+# ---- sady od modelare z Disku (Misa 16. 11.: Luzka_1400, Topeni_1400 + Doplnek, les_dily, Seno_1400; rozbalene v DISK,
+# NAVOD_*.md a PRAMENY_A_LICENCE.md v kazde sade, titulky docs/licence_modelu.md): "disk:<cesta k LOD0.glb>", vlastnost
+# lod1 = cesta k LOD1 (stejna transformace, <id>_lod1.glb, hra predmety.gd od modely.json predmety_lod lod1_od_m),
+# znacky = prazdne uzly modelu (Luzko_Lezeni, Pec_Ohen, Pec_Kour, Krb_Ohen, Les_Milir_Kour_* ...) v souradnicich
+# predmetu do katalogu; uzly -convcolonly/-colonly se do viditelne site neberou (kolize dela predmety.gd z rozmeru).
+# troj = strop nad dodanou siti (modelar uz LOD0 omezil, decimace by rozbila zapecene latky), textury 1K (tablet).
+DISK = os.environ.get("TVRZ_DISK", "/home/user/disk_16_11")
+_L = "Luzka_1400/Luzka_1400/"
+_T = "Topeni_1400/Topeni_1400/"
+_D = "Topeni_1400_Doplnek/Topeni_1400_Doplnek/"
+_S = "Seno_1400/Seno_1400/"
+_F = "les_dily/"
+
+
+def _uzly_sceny(cesta):
+    """Jmena uzlu vychozi sceny GLB (sady Topeni maji v jednom GLB i sceny ostatnich modelu - Blender importuje vse)."""
+    import struct
+    d = open(cesta, "rb").read()
+    j = json.loads(d[20:20 + struct.unpack_from("<I", d, 12)[0]])
+    out, zas = set(), list(j["scenes"][j.get("scene", 0)].get("nodes", []))
+    while zas:
+        n = j["nodes"][zas.pop()]
+        out.add(n.get("name", ""))
+        zas.extend(n.get("children", []))
+    return out
+
+
+def _dk(cesta, lod1, **kw):
+    pr = {"tex": 1024, "troj": 70000, "lod1": "disk:" + lod1}
+    pr.update(kw)
+    return pr
+
+
+KATALOG.update({
+    # luzka (NAVOD_LUZKA.md: hlava k -Z, vstup +X, lozna plocha 0,57 / 0,70 / 0,82 / 0,82 m)
+    "postel_chudy": ("disk:" + _L + "Postel_Chudy_Dum_LOD0.glb", "Postel v chudém domě", None, "uvnitr", 40.0, 50,
+                     _dk(_L, _L + "Postel_Chudy_Dum_LOD1.glb", lehat=True, mist=2)),
+    "postel_rychtar": ("disk:" + _L + "Postel_Rychtarova_LOD0.glb", "Rychtářova postel", None, "uvnitr", 55.0, 120,
+                       _dk(_L, _L + "Postel_Rychtarova_LOD1.glb", lehat=True, mist=2)),
+    "postel_panska": ("disk:" + _L + "Postel_Panska_LOD0.glb", "Panská postel", None, "uvnitr", 70.0, 260,
+                      _dk(_L, _L + "Postel_Panska_LOD1.glb", lehat=True, mist=2)),
+    "postel_nebesa": ("disk:" + _L + "Postel_S_Nebesy_LOD0.glb", "Postel s nebesy", None, "uvnitr", 110.0, 600,
+                      _dk(_L, _L + "Postel_S_Nebesy_LOD1.glb", lehat=True, mist=2)),
+    "houne": ("disk:" + _L + "Houne_Vlnena_LOD0.glb", "Vlněná houně na zemi", None, "uvnitr", 4.0, 12,
+              _dk(_L, _L + "Houne_Vlnena_LOD1.glb", lehat=True, mist=1, pruchozi=True)),
+    "deka_zem": ("disk:" + _L + "Deka_Na_Zemi_LOD0.glb", "Deka na zemi", None, "uvnitr", 3.0, 10,
+                 _dk(_L, _L + "Deka_Na_Zemi_LOD1.glb", lehat=True, mist=1, pruchozi=True)),
+    # topeni (NAVOD_PEC.md, NAVOD_KRB.md: celo +Z, Pec_Usti -Z ven, Pec_Ohen/Krb_Ohen = herni ohen, Pec_Kour/Krb_Kour = kour)
+    "pec_chalupni": ("disk:" + _T + "Pec_Chalupni_LOD0.glb", "Chalupní pec", None, "uvnitr", 3000.0, 0,
+                     _dk(_T, _T + "Pec_Chalupni_LOD1.glb", ohen=True)),
+    "pec_krcma": ("disk:" + _T + "Pec_Krcma_LOD0.glb", "Chlebová pec krčmy", None, "uvnitr", 4000.0, 0,
+                  _dk(_T, _T + "Pec_Krcma_LOD1.glb", ohen=True)),
+    "krb_rychta": ("disk:" + _T + "Krb_Rychta_LOD0.glb", "Krb rychty", None, "uvnitr", 2500.0, 0,
+                   _dk(_T, _T + "Krb_Rychta_LOD1.glb", ohen=True)),
+    "krb_hradni": ("disk:" + _T + "Krb_Hradni_LOD0.glb", "Hradní krb", None, "uvnitr", 4000.0, 0,
+                   _dk(_T, _T + "Krb_Hradni_LOD1.glb", ohen=True)),
+    "kamna_nadobkova": ("disk:" + _T + "Kamna_Hradni_Nadobkova_LOD0.glb", "Nádobková kamna", None, "uvnitr", 1500.0, 0,
+                        _dk(_T, _T + "Kamna_Hradni_Nadobkova_LOD1.glb", ohen=True)),
+    "ohniste_cerna": ("disk:" + _T + "Ohniste_Cerna_Kuchyne_LOD0.glb", "Ohniště černé kuchyně", None, "uvnitr", 2500.0, 0,
+                      _dk(_T, _T + "Ohniste_Cerna_Kuchyne_LOD1.glb", ohen=True)),
+    "krb_sinovy": ("disk:" + _D + "Krb_Sinovy_Vysoky_LOD0.glb", "Vysoký síňový krb", None, "uvnitr", 5000.0, 0,
+                   _dk(_D, _D + "Krb_Sinovy_Vysoky_LOD1.glb", ohen=True)),
+    "topeniste_siroke": ("disk:" + _D + "Topeniste_Kuchynske_Siroke_LOD0.glb", "Široké kuchyňské topeniště", None, "uvnitr", 4000.0, 0,
+                         _dk(_D, _D + "Topeniste_Kuchynske_Siroke_LOD1.glb", ohen=True)),
+    # nadobi k topenistim (NAVOD_NADOBI.md)
+    "kotel_zavesny": ("disk:" + _D + "Kotel_Zavesny_LOD0.glb", "Závěsný kotel", "nadoby", "dekorace", 6.0, 40, _dk(_D, _D + "Kotel_Zavesny_LOD1.glb")),
+    "hrnec_trinohy": ("disk:" + _D + "Hrnec_Trinohy_LOD0.glb", "Trojnohý hrnec", "nadoby", "dekorace", 2.0, 8, _dk(_D, _D + "Hrnec_Trinohy_LOD1.glb")),
+    "panev_kovana": ("disk:" + _D + "Panev_Kovana_LOD0.glb", "Kovaná pánev", "nadoby", "dekorace", 1.5, 15, _dk(_D, _D + "Panev_Kovana_LOD1.glb")),
+    "naberacka_kovana": ("disk:" + _D + "Naberacka_Kovana_LOD0.glb", "Kovaná naběračka", "naradi", "dekorace", 0.4, 5, _dk(_D, _D + "Naberacka_Kovana_LOD1.glb")),
+    "sberacka_derovana": ("disk:" + _D + "Sberacka_Derovana_LOD0.glb", "Děrovaná sběračka", "naradi", "dekorace", 0.4, 5, _dk(_D, _D + "Sberacka_Derovana_LOD1.glb")),
+    "miska_hlinena": ("disk:" + _D + "Miska_Hlinena_LOD0.glb", "Hliněná miska", "nadoby", "dekorace", 0.4, 2, _dk(_D, _D + "Miska_Hlinena_LOD1.glb")),
+    "dzban_keramicky": ("disk:" + _D + "Dzban_Keramicky_LOD0.glb", "Keramický džbán", "nadoby", "dekorace", 1.2, 4, _dk(_D, _D + "Dzban_Keramicky_LOD1.glb")),
+    "poharek_keramicky": ("disk:" + _D + "Poharek_Keramicky_LOD0.glb", "Keramický pohárek", "nadoby", "dekorace", 0.2, 2, _dk(_D, _D + "Poharek_Keramicky_LOD1.glb")),
+    "trojnozka_kovana": ("disk:" + _D + "Trojnozka_Kovana_LOD0.glb", "Kovaná trojnožka", "naradi", "dekorace", 3.0, 12, _dk(_D, _D + "Trojnozka_Kovana_LOD1.glb")),
+    # lesni dily uhliru a smolare (NAVOD_LES.md: pocatek na terenu uprostred dilu, okraj 5-8 cm pod nulou -> zem0)
+    "milir_postaveny": ("disk:" + _F + "les_milir_a.glb", "Milíř postavený", None, "venku", 20000.0, 0, _dk(_F, _F + "les_milir_a_lod1.glb", zem0=True)),
+    "milir_horici": ("disk:" + _F + "les_milir_b.glb", "Milíř hořící", None, "venku", 20000.0, 0, _dk(_F, _F + "les_milir_b_lod1.glb", zem0=True, ohen=True)),
+    "milir_rozebrany": ("disk:" + _F + "les_milir_c.glb", "Milíř rozebraný", None, "venku", 5000.0, 0, _dk(_F, _F + "les_milir_c_lod1.glb", zem0=True, pruchozi=True)),
+    "uhlir_chyse": ("disk:" + _F + "les_uhlir_chyse.glb", "Uhlířská chýše", None, "venku", 800.0, 0, _dk(_F, _F + "les_uhlir_chyse_lod1.glb", zem0=True, pruchozi=True)),
+    "uhlir_drevo": ("disk:" + _F + "les_uhlir_drevo.glb", "Rovnaná polena uhlíře", None, "venku", 1500.0, 30, _dk(_F, _F + "les_uhlir_drevo_lod1.glb", zem0=True)),
+    "uhlir_naradi": ("disk:" + _F + "les_uhlir_naradi.glb", "Uhlířské hrábě a lopata", "naradi", "venku", 4.0, 6, _dk(_F, _F + "les_uhlir_naradi_lod1.glb", zem0=True)),
+    "uhlir_vozik": ("disk:" + _F + "les_uhlir_vozik.glb", "Kára na uhlí", None, "venku", 120.0, 60, _dk(_F, _F + "les_uhlir_vozik_lod1.glb", zem0=True)),
+    "uhlir_mytina": ("disk:" + _F + "les_uhlir_celek.glb", "Uhlířská mýtina (celek)", None, "venku", 30000.0, 0,
+                     _dk(_F, _F + "les_uhlir_celek_lod1.glb", zem0=True, pruchozi=True, ohen=True)),
+    "smolarna": ("disk:" + _F + "les_smolarna.glb", "Smolárna", None, "venku", 3000.0, 0, _dk(_F, _F + "les_smolarna_lod1.glb", zem0=True, pruchozi=True, ohen=True)),
+    "studanka": ("disk:" + _F + "les_studanka.glb", "Studánka pod skálou", None, "venku", 5000.0, 0, _dk(_F, _F + "les_studanka_lod1.glb", zem0=True)),
+    "kriz_smirci": ("disk:" + _F + "les_kriz_smirci.glb", "Smírčí kříž", None, "venku", 400.0, 0, _dk(_F, _F + "les_kriz_smirci_lod1.glb", zem0=True)),
+    "kriz_rozcesti": ("disk:" + _F + "les_kriz_rozcesti.glb", "Kříž na rozcestí", None, "venku", 120.0, 0, _dk(_F, _F + "les_kriz_rozcesti_lod1.glb", zem0=True)),
+    "bozi_muka_drevene": ("disk:" + _F + "les_bozi_muka.glb", "Dřevěná boží muka", None, "venku", 150.0, 0, _dk(_F, _F + "les_bozi_muka_lod1.glb", zem0=True)),
+    # seno (NAVOD_SENO.md: pocatek uprostred spodku, bez kolize; seno do jesli Y = 1,30 m)
+    "seno_kupa": ("disk:" + _S + "Seno_Kupa_Zem_LOD0.glb", "Kupa sena", None, "venku", 120.0, 8, _dk(_S, _S + "Seno_Kupa_Zem_LOD1.glb")),
+    "seno_puda": ("disk:" + _S + "Seno_Puda_Vrstva_LOD0.glb", "Vrstva sena na půdě", None, "uvnitr", 150.0, 8, _dk(_S, _S + "Seno_Puda_Vrstva_LOD1.glb")),
+    "seno_jesle": ("disk:" + _S + "Seno_Jesle_420_LOD0.glb", "Seno do jeslí", None, "uvnitr", 60.0, 4, _dk(_S, _S + "Seno_Jesle_420_LOD1.glb", pruchozi=True)),
+    "seno_chomac": ("disk:" + _S + "Seno_Rozhazeny_Chomac_LOD0.glb", "Chomáč sena", None, "dekorace", 0.5, 0, _dk(_S, _S + "Seno_Rozhazeny_Chomac_LOD1.glb")),
+    "vidle_drevene": ("disk:" + _S + "Vidle_Drevene_LOD0.glb", "Dřevěné vidle", "naradi", "remeslo", 1.5, 6, _dk(_S, _S + "Vidle_Drevene_LOD1.glb")),
+})
+
 
 
 
@@ -557,6 +654,8 @@ def build():
         elif pid.startswith("ph:"):
             # rostliny z Poly Haven (1k, uz stazene pro krajinu): tex_cache/models/<id>/<id>.gltf
             bpy.ops.import_scene.gltf(filepath=os.path.join(HERE, "tex_cache", "models", pid[3:], pid[3:] + ".gltf"))
+        elif pid.startswith("disk:"):
+            bpy.ops.import_scene.gltf(filepath=os.path.join(DISK, pid[5:]))
         elif pid.startswith("ext:"):
             try:
                 bpy.ops.import_scene.gltf(filepath=os.path.join(EXT, pid[4:]))
@@ -570,6 +669,13 @@ def build():
                 print("PRESKOCENO", key, e)
                 continue
         meshes = [o for o in bpy.context.scene.objects if o.type == "MESH"]
+        znacky = {}
+        if pid.startswith("disk:"):
+            # sady z Disku: kolizni proxy pryc z viditelne site, prazdne uzly = znacky (ohen, kour, luzko)
+            sc_uzly = _uzly_sceny(os.path.join(DISK, pid[5:]))
+            meshes = [o for o in meshes if "colonly" not in o.name and o.name in sc_uzly]
+            znacky = {o.name: o.matrix_world.translation.copy() for o in bpy.context.scene.objects
+                      if o.type == "EMPTY" and not o.children and o.name in sc_uzly}
         # pohyblive dily vlastnich modelu (jerab: kolo, kladnice, lano) zvlast: <id>_<dil>.glb s pocatkem v pivotu
         dily = {}
         if pid == "@":
@@ -726,6 +832,7 @@ def build():
         mn = Vector((min(v.x for v in vs), min(v.y for v in vs), min(v.z for v in vs)))
         mx = Vector((max(v.x for v in vs), max(v.y for v in vs), max(v.z for v in vs)))
         c = (mn + mx) / 2
+        posun = Vector((c.x, c.y, 0.0 if props.get("zem0") else mn.z))       # znacky a LOD1 stejne jako model
         # stavby: zem v z = 0 (koliky stanu pod zemi model nezvedaji)
         for o_ in [ob] + ([kol] if kol else []):
             o_.data.transform(__import__("mathutils").Matrix.Translation(Vector((-c.x, -c.y, 0.0 if props.get("zem0") else -mn.z))))
@@ -819,8 +926,48 @@ def build():
                              for d_, (ds, piv, udaje) in dily.items()}
         cat[key] = {"nazev": name, "kat": kat, "stav": stav, "vaha": wt, "cena": price,
                     "rozmer": [round(size.x, 3), round(size.z, 3), round(size.y, 3)],
-                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex", "zem0", "uprava", "vyprazdnit", "bez_barvy_vrcholu", "oboustranne", "barva", "res")}}
+                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex", "zem0", "uprava", "vyprazdnit", "bez_barvy_vrcholu", "oboustranne", "barva", "res", "lod1")}}
+        if znacky:
+            # znacky v souradnicich predmetu ve hre (Y nahoru, z = -y Blenderu), posun a meritko jako model
+            cat[key]["znacky"] = {n_: [round((v_.x - posun.x) * k, 3), round((v_.z - posun.z) * k, 3), round(-(v_.y - posun.y) * k, 3)]
+                                  for n_, v_ in sorted(znacky.items())}
         print("predmet", key, "%d troj." % tris, [round(v, 2) for v in size])
+        if props.get("lod1"):
+            # LOD1 od modelare: stejna transformace jako LOD0 (posun, meritko), bez kolizi, textury jako LOD0
+            bpy.ops.wm.read_factory_settings(use_empty=True)
+            bpy.ops.import_scene.gltf(filepath=os.path.join(DISK, props["lod1"][5:]))
+            sc1 = _uzly_sceny(os.path.join(DISK, props["lod1"][5:]))
+            ms1 = [o for o in bpy.context.scene.objects if o.type == "MESH" and "colonly" not in o.name and o.name in sc1]
+            for o in ms1:
+                mw = o.matrix_world.copy()
+                o.parent = None
+                o.matrix_world = mw
+            for o in list(bpy.context.scene.objects):
+                if o not in ms1:
+                    bpy.data.objects.remove(o)
+            bpy.ops.object.select_all(action="DESELECT")
+            for o in ms1:
+                o.select_set(True)
+            bpy.context.view_layer.objects.active = ms1[0]
+            if len(ms1) > 1:
+                _uv_jednotne(ms1)
+                bpy.ops.object.join()
+            o1 = bpy.context.view_layer.objects.active
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+            o1.data.transform(__import__("mathutils").Matrix.Translation(-posun))
+            if k != 1.0:
+                o1.data.transform(__import__("mathutils").Matrix.Scale(k, 4))
+            o1.name = key + "_lod1"
+            o1.data.name = key + "_lod1"
+            tmax = int(props.get("tex", 1024))
+            for img in bpy.data.images:
+                if img.size[0] > tmax or img.size[1] > tmax:
+                    f_ = tmax / max(img.size[0], img.size[1])
+                    img.scale(max(1, int(img.size[0] * f_)), max(1, int(img.size[1] * f_)))
+            bpy.ops.export_scene.gltf(filepath=os.path.join(OUT, key + "_lod1.glb"), export_format="GLB", use_selection=False,
+                                      export_apply=True, export_yup=True, export_image_format="AUTO")
+            cat[key]["lod1"] = True
+            print("lod1", key, sum(len(p_.vertices) - 2 for p_ in o1.data.polygons), "troj.")
     p = os.path.join(OUT, "..", "predmety.json")
     old = json.load(open(p)) if os.path.exists(p) and only else {}
     old.update(cat)

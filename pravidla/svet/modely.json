@@ -5715,9 +5715,11 @@
   "stredni_od_m": 30.0,
   "min_velikost_m": 3.0,
   "stin_od_m": 2.5,
-  "lod_bias": 50.0
+  "lod_bias": 50.0,
+  "lod1_od_m": 8.0,
+  "lod1_od_m_predpony": {"milir_": 40.0, "uhlir_": 40.0, "smolarna": 40.0, "studanka": 40.0, "kriz_": 40.0, "bozi_muka_drevene": 40.0}
  },
- "_predmety_lod": "Misa 2. 11. (sekani): velky predmet katalogu (nejvetsi rozmer >= min_velikost_m) s modelem <id>_stredni.glb (blender/lod_barvy.py: jedna sit, barva ve vrcholech, 1 material) - podrobny model jen do stredni_od_m, dal stredni do dosahu predmetu. Stin vrha jen stredni (kopie jen pro stin po cely dosah) - stodola 5 materialu = 5 kresleni ve stinu. Cisla odhad, NEOVERENO na tabletu. Navrat: stredni_od_m >= dosah (80) vypne bez nove verze kodu. stin_od_m: predmet vrha stin jen od teto nejvetsi velikosti (rešerse: stin jen z velkych jednoduchych tvaru; mereni 2. 11. ves_cesta: stiny predmetu 100 z 338 kresleni stinu; drive natvrdo 1 m). Navrat: 1.0.",
+ "_predmety_lod": "Misa 2. 11. (sekani): velky predmet katalogu (nejvetsi rozmer >= min_velikost_m) s modelem <id>_stredni.glb (blender/lod_barvy.py: jedna sit, barva ve vrcholech, 1 material) - podrobny model jen do stredni_od_m, dal stredni do dosahu predmetu. Stin vrha jen stredni (kopie jen pro stin po cely dosah) - stodola 5 materialu = 5 kresleni ve stinu. Cisla odhad, NEOVERENO na tabletu. Navrat: stredni_od_m >= dosah (80) vypne bez nove verze kodu. stin_od_m: predmet vrha stin jen od teto nejvetsi velikosti (rešerse: stin jen z velkych jednoduchych tvaru; mereni 2. 11. ves_cesta: stiny predmetu 100 z 338 kresleni stinu; drive natvrdo 1 m). Navrat: 1.0. lod1_od_m (16. 11., sady z Disku Luzka/Topeni/les/Seno): predmet s LOD1 od modelare (katalog lod1, <id>_lod1.glb z blender/predmety.py) - podrobny LOD0 do lod1_od_m, dal LOD1 do dosahu; 8 m = hodnota z .tscn modelare (NAVOD_LUZKA, NAVOD_PEC: LOD0 do 8 m, bez prolinani). Seno ma v .tscn 6 m (chomac 2,8 m) - jedna hodnota pro vsechny je zjednoduseni, NEOVERENO na tabletu. Navrat: lod1_od_m >= 80 vypne LOD1. lod1_od_m_predpony: lesni dily (les_dily, NAVOD_LES.md) maji LOD1 jako hruby obal (12-48 troj.) - podrobne do 40 m jako Puchart (zajimava_mista.json modely.lod_les lod0_do_m 40), predpona id -> vzdalenost.",
  "trava_dosah_m": {
   "plna": [
    110.0,
