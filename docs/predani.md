@@ -1534,7 +1534,12 @@ Hotovo v kódu a datech (testy u každého):
   tablet se starými balíky dostane s novým `z_<díl>` úplnou sadu). Vydat: `--jen …,z_kostel,z_krcma,z_ruiny_ves`.
 - **Číslo (PC, součet ETC2 z .import):** 211,2 → 86,7 MB (106 souborů; podle odkazů ruiny_ves 117,5 → 25,2, krčma
   60,8 → 45,4, kostel 32,9 → 33,6). 459 materiálových slotů glb před/po se stejným obsahem obrázku (názvy materiálů beze
-  změny → `barva_vrcholu_materialy`, `_tex_prumer` i brečťan s alfou fungují dál). Na tabletu NEOVĚŘENO.
+  změny → `barva_vrcholu_materialy`, `_tex_prumer` i brečťan s alfou fungují dál). Grafická paměť PC xvfb (MERENI,
+  textury nezávisí na místě – celý svět nahraný): `dl_pred` 07:54 před převodem textury 992 MB / gpu 1322 MB →
+  `dtex_pred` 08:33 po převodu 880 / 1208 MB (−112 MB textur; mezi nimi jen oprava krtinců zemljanek). Testy
+  `lod_urovne`, `kostel_zed`, `ruiny_ves`, `krcma_dvur`, `krcma_l` OK. Na tabletu NEOVĚŘENO.
+- **Pád snímku `dtex_po2` (16. 11. 11:4x, „Killed“ = OOM):** běžel vedle dalšího fota a testů jiných pomocníků (16 GB
+  sdílené) – 4 snímky z jednoho běhu při plném stroji nepouštět; opakováno se 3 snímky.
 - **Nevyřešeno:** `ves` (domy.glb 72 obrázků, všechny různé; `zesvetli_ves.py` upravuje rozbalené `domy_*_diff.jpg` –
   nepřevádět bez úpravy zesvětlení), `kovarna` a `mlyn` (v kontejneru jen `.import`, glb chybí; kovárna 69 → 45 různých
   `.ctex`, ~48 → 31 MB) – přidat do `slozky_dilu`, až budou zdroje. 512 px pro zdi ruin nezkoušeno.
