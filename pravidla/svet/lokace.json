@@ -2828,9 +2828,10 @@
       789.0
      ]
     ],
-    "sirka_m": 4.0,
-    "rozestup_m": 2.2,
-    "duvod": "hustý pás křovin podél ulice na vnější straně ohybu (sad za ním) – z vjezdu zavře pohled na náves a krčmu"
+    "sirka_m": 7.0,
+    "rozestup_m": 2.0,
+    "duvod": "hustý pás křovin podél ulice na vnější straně ohybu (sad za ním) – z vjezdu zavře pohled na náves a krčmu",
+    "_sirka": "16. 11. test clona_vsi 34 % (min 50 %): pás 4 m měl mezery, paprsky k návsi a krčmě prošly – 7 m, rozestup 2 m"
    },
    {
     "id": "vjezd_houstina_jz",

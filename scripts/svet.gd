@@ -5295,7 +5295,7 @@ func _lesni_plast() -> void:
 			if absf(p.x + 4.0) < 80.0 and absf(p.y) < 75.0:
 				continue                                    # tvrz ma vlastni (_tvrz_zvenci); ves: 16. 11. kruh 140 m kolem
 				# stare navsi pryc (les vychodne od vsi byl bez plaste) - dvory, zahrady a vstupy hlida uzivani_smi
-			if pes_d(p.x, p.y) < 1.8 or _u_mostu(p.x, p.y) or not smi_tu_byt(p.x, p.y, "ker") or sklon_bunky(p.x, p.y) > 0.9:
+			if pes_d(p.x, p.y) < pesina_ker_m() or _u_mostu(p.x, p.y) or not smi_tu_byt(p.x, p.y, "ker") or sklon_bunky(p.x, p.y) > 0.9:
 				continue
 			var hy := _vyska(p.x, p.y)
 			if hy < float(data.get("voda_y", -2.75)) + 0.4:
