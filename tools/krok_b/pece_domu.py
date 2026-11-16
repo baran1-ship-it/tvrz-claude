@@ -189,6 +189,12 @@ if __name__ == "__main__":
             print("PECE %s: pec se do jizby nevejde" % t)
             sys.exit(1)
         out, b, lb, jz = r
+        po = obd(PR["pec"], b[1], b[2], b[3])
+        u_zdi = sum(1 for v in (po[0] - jz[0], jz[1] - po[1], po[2] - jz[2], jz[3] - po[3]) if v < 0.15)
+        if u_zdi < 2:
+            # Misa 16. 11.: „nechci, aby pec nekde zavazela uprostred mistnosti“ - pec musi byt v rohu (u dvou zdi)
+            print("PECE %s: pec neni v rohu (u zdi %d)" % (t, u_zdi))
+            sys.exit(1)
         print("PECE %s: jizba %s, pec %s, luzko %s" % (t, [round(v, 2) for v in jz], b[1:], lb[1:]))
         for k in out:
             print("   ", k)
