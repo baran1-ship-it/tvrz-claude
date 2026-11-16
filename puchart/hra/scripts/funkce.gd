@@ -106,7 +106,12 @@ static func polozky(h: Node) -> Array:
 			if c.has("bod_kmen_m") and zn:   # brť vysoko na kmeni: nabídka u kmene pod ní
 				var kp := (n as Node3D).global_position; var sm := zn.global_position - kp; sm.y = 0.0
 				pos = kp + sm + Vector3.UP * float(c["bod_kmen_m"])
-			out.append({"druh": "sber", "sber": dr, "nazev": String(c["nabidka"]), "pos": pos, "vlastni": [], "uzel": n})
+			var vl: Array = []
+			if c.has("k_mistu_m"):   # velký kámen u stěny lomu: bod na líci kamene směrem do lomu (počátek je uvnitř), vlastní kolize se nepočítá
+				var st: Vector3 = (n.get_parent().get_meta("stred", Vector3.ZERO) as Vector3) - (n as Node3D).global_position; st.y = 0.0
+				pos += st.normalized() * float(c["k_mistu_m"]) * (n as Node3D).scale.x
+				for co in n.find_children("*", "CollisionObject3D", true, false): vl.append((co as CollisionObject3D).get_rid())
+			out.append({"druh": "sber", "sber": dr, "nazev": String(c["nabidka"]), "pos": pos, "vlastni": vl, "uzel": n})
 		var mf: Dictionary = Pravidla.cti("zajimava_mista", "funkce", "mlyn")
 		for zn in zj.find_children(String(mf["kolo_uzel"]), "Node3D", true, false):
 			var kolo := zn.get_parent().find_child("Mlyn_Kolo", true, false)

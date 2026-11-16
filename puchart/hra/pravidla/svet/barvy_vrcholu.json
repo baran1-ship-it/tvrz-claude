@@ -17,6 +17,10 @@
    "site": "hra/modely/luzka/*_mesh.res",
    "pozn": "Luzka_1400: houně, deka, 4 postele (Vlna, Len, Dub, Hrube_Drevo – všechny s COLOR_0 × albedo); chyby.md 356"
   },
+  "les": {
+   "site": "hra/modely/les/les_*.glb",
+   "pozn": "lesní díly zajímavých míst od modeláře (milíře, kříže, boží muka, smolárna, studánka, uhlíř – NAVOD_LES.md: „barva vrcholů nese stárnutí – mech, saze, vlhko, uhelný prach; zapni Vertex Color → Use as Albedo“): zajimava.gd _barva_vrcholu zapne barvu vrcholu jako albedo, převod v glb (COLOR_0 float, značka v asset.extras) po nastroje/zajimava_modely.py; _lod1 barvy nemají (koordinátor 16. 11.)"
+  },
   "seno": {
    "site": "hra/modely/seno/*_mesh.res",
    "pozn": "Seno_1400: atlas sena (COLOR_0 šedé 0,26–1, průměr 0,79 – stínění chomáčů) a vidle (0,75–1); ztmavení bylo dřív vyrovnané albedo_modulace (seno.json) – po převodu přeladěno, viz seno.json albedo_modulace_pozn"
@@ -25,7 +29,6 @@
  "nepreveden": {
   "_popis": "modely od modeláře s COLOR_0, které se nepřevádějí (rozbor agenta 16. 11.: import Godotu + hra)",
   "topeni": "hra/modely/topeni/*.glb (Topeni_1400): import glb nechává vertex_color_use_as_albedo vypnuté u všech materiálů a hra ho nezapíná → barva vrcholů se nekreslí, tmavnutí nehrozí",
-  "les": "hra/modely/les/*.glb (milíře, kříže, boží muka, smolárna, uhlíř): vertex_color_use_as_albedo vypnuté (zajimava.gd _barva_vrcholu podle NAVOD_LES.md se nikde nevolá); jen studánka má po importu zapnuté M_LesDrevo (průměr 0,96) a M_LesVoda (1,0) – rozdíl pod 5 %. Kdyby se _barva_vrcholu zapojila, patří lesní glb sem do sad (převod v glb).",
   "zemljanky": "hra/modely/stavby_h/zemljanka_*.glb: bez COLOR_0",
   "kovadlina": "hra/modely/predmety_h/kovadlina_1393*.glb: detail bez COLOR_0; střední a daleký stupeň nesou zapečenou barvu (železo 0,08; dřevo 0,02 – tmavé i lineárně) a predmety.gd střední stupeň kreslí s barvou vrcholu jako albedo → v Compatibility tmavší; Míša 16. 11.: kovadlinu „nechat“ – nepřevádí se"
  }

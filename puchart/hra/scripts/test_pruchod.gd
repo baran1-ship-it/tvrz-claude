@@ -879,8 +879,13 @@ func _test_zajimava() -> void:
 	if pk.is_empty() or pm.is_empty(): spatne.append("mlýn: chybí nabídka kola nebo mletí")
 	else:
 		var kolo: Node3D = pk["kolo"]; var y0 := kolo.position.y
-		var uk: Dictionary = await _k_veci(pk["pos"], pk["pos"] + Vector3(0, -0.8, 0) + (kolo.get_parent() as Node3D).global_transform.basis.x * 1.2, [])
+		var bm := (kolo.get_parent() as Node3D).global_transform.basis; var uk: Dictionary = {}; var dostal := []
+		for sm in [bm.x * 1.2, bm.x * 0.9 + bm.z * 0.9, bm.x * 0.9 - bm.z * 0.9, bm.z * 1.1, -bm.z * 1.1]:
+			uk = await _k_veci(pk["pos"], pk["pos"] + Vector3(0, -0.8, 0) + sm, [])
+			dostal.append("—" if uk.is_empty() else String(uk["p"]["druh"]))
+			if not uk.is_empty() and uk["p"]["druh"] == "mlyn_kolo": break
 		var vidi_k: bool = not uk.is_empty() and uk["p"]["druh"] == "mlyn_kolo"
+		print("PRUCHOD zajimava mlýn: u páky kola nabídky %s" % [dostal])
 		fu.pouzij_polozku(pk)   # zastavit
 		await get_tree().create_timer(5.0).timeout
 		var w_stop := absf(float(kolo.get("_w"))); var zdvih := kolo.position.y - y0

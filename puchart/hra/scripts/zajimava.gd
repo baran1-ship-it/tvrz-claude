@@ -22,7 +22,7 @@ func _ready() -> void:
 	var n := 0
 	for m: Dictionary in d["mista"]:
 		var u := Node3D.new(); u.name = "Z_" + String(m["id"]); add_child(u)
-		u.set_meta("nazev", m["nazev"]); u.set_meta("znacka", m["znacka"])
+		u.set_meta("nazev", m["nazev"]); u.set_meta("znacka", m["znacka"]); u.set_meta("stred", Vector3(float(m["x"]), float(m["y"]), float(m["z"])))
 		for di: Dictionary in m["dily"]:
 			var x := _dil(u, di, m)
 			if x:
@@ -85,6 +85,7 @@ func _les(u: Node3D, di: Dictionary, jm: String) -> Node3D:
 	if not ResourceLoader.exists(c0): push_warning("ZAJIMAVA model %s chybí (nastroje/zajimava_modely.py)" % c0); return null
 	var k := Node3D.new(); k.name = jm; k.transform = _xf(di); u.add_child(k)
 	var l0 := (load(c0) as PackedScene).instantiate() as Node3D; l0.name = "LOD0"; k.add_child(l0)
+	_barva_vrcholu(l0)   # NAVOD_LES.md: mech, saze, uhelný prach v barvě vrcholů (COLOR_0 převedené na sRGB – nastroje/barvy_vrcholu.py sada les)
 	var d0 := float(lod["lod0_do_m"])
 	var male := jm.begins_with("les_kriz") or jm.begins_with("les_bozi") or jm == "les_uhlir_naradi"
 	var d1 := float(di.get("lod1_do_m", lod["male_lod1_do_m"] if male else lod["lod1_do_m"]))
