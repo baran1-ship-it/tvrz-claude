@@ -87,7 +87,7 @@ func _test_kmene() -> void:
 	await get_tree().create_timer(0.5).timeout
 	hrac.autopilot = Vector3(k.x + smer.x * 3.0, 0, k.z)
 	var nejbliz := INF   # kmen smí postavu odklonit (obejde ho), ale nesmí jím projít: osa kmene ≥ poloměr + kapsle
-	for i in 80:
+	for i in 160:   # 80 snímků (1,3 s) do kopce nestačilo na 1,5 m (16. 11.: 1,46 m, kmen 1,56 m daleko)
 		await get_tree().physics_frame
 		nejbliz = minf(nejbliz, Vector2(hrac.position.x - k.x, hrac.position.z - k.z).length())
 	hrac.autopilot = Vector3.INF
