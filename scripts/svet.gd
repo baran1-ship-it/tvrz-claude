@@ -6475,8 +6475,10 @@ func _dum_mist(d: Dictionary, x: float, z: float) -> Vector2:
 
 
 ## Bod uvnitr stare chalupy (vcetne strechy a sudu u zdi) nebo noveho domu (+ okraj).
-func _dum_zabira(x: float, z: float, okraj_novy := 0.2, stara := true) -> bool:
+func _dum_zabira(x: float, z: float, okraj_novy := 0.2, stara := true, bez_zemljanek := false) -> bool:
 	for d: Dictionary in _domy:
+		if bez_zemljanek and _zemljanky_k().has(int(d["k"])):
+			continue                     # jama zemljanky (svet.json kolize z blender/zemljanka.py) patri chysi, neni stara chalupa
 		var p := Vector2(x, z) - (d["c"] as Vector2)
 		# stara chalupa: vpredu podsin 1,9 m + presah stitu (Misa 0.78 "zustaly stity starych"), vzadu hranice dreva
 		var u := p.dot(d["au"])
@@ -6490,6 +6492,14 @@ func _dum_zabira(x: float, z: float, okraj_novy := 0.2, stara := true) -> bool:
 	return false
 
 
+## Cisla domu zemljanek (lokace.json zemljanky mista k) - jejich jamu (kolize) stari chalup neodstranuje.
+func _zemljanky_k() -> Array:
+	var out: Array = []
+	for zm: Dictionary in (Pravidla.cti("lokace", "zemljanky") as Dictionary).get("mista", []):
+		out.append(int(zm["k"]))
+	return out
+
+
 ## Data sveta bez starych chalup (pred kolizemi, mistnostmi, vybavenim a pohybem).
 func _ves_stare_pryc() -> void:
 	_domy_ramce()
@@ -6501,7 +6511,7 @@ func _ves_stare_pryc() -> void:
 	var n := [0, 0, 0, 0, 0, 0]
 	var kol: Array = []
 	for c: Array in data["kolize"]:
-		if _dum_zabira(float(c[0]), float(c[2])):
+		if _dum_zabira(float(c[0]), float(c[2]), 0.2, true, true):
 			n[0] += 1
 		else:
 			kol.append(c)
