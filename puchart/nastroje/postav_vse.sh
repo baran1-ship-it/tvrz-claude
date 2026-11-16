@@ -29,7 +29,7 @@ python3 $K/nastroje/koryta.py vysek1m_upr vysek1m_kor $K   # koryta potoků zař
 python3 $K/nastroje/cesty.py vysek1m_kor vysek1m_cesty $K   # cesty (zářez, maska, stromy pryč)
 python3 $K/nastroje/mista_rozmisteni.py vysek1m_cesty vysek1m_mista $K   # stavby nových míst (pravidla/svet/mista.json): domy a plošiny pod nimi
 [ -d $K/hra/modely/luzka ] || { mkdir -p $K/hra/modely/luzka && (cd $B/zdroj_modelar/Luzka_1400 && cp -r $(ls | grep -vE "^(nahledy|zdroj)$|\.(blend|jpg)$") $K/hra/modely/luzka/); }   # lůžka od modeláře (houně do zemljanek, Míša 16. 11.)
-python3 $K/nastroje/zajimava_modely.py $K && python3 $K/nastroje/zajimava_mista.py vysek1m_mista vysek1m_zaj $K   # zajímavá místa (pravidla/svet/zajimava_mista.json, Míša 15. 11.): modely, poloha, terén, trasy
+cp $K/pravidla/svet/zajimava_mista.json $K/hra/pravidla/svet/ && python3 $K/nastroje/zajimava_modely.py $K && python3 $K/nastroje/zajimava_mista.py vysek1m_mista vysek1m_zaj $K   # zajímavá místa (pravidla/svet/zajimava_mista.json, Míša 15. 11.): modely, poloha, terén, trasy
 python3 $K/nastroje/pohyb_mista.py $K   # dveře domů (domy.glb *_Dvere_*) → hra/data/pohyb_mista.json (Míša 13. 11.: funkční dveře ve vsi)
 python3 $K/nastroje/teren_dlazdice.py vysek1m_zaj obzor10m $K
 cp $K/pravidla/svet/pudy.json $K/pravidla/svet/rozpocty.json $K/pravidla/svet/kontroly_hra.json $K/pravidla/svet/hrad_vzhled.json $K/pravidla/svet/den.json $K/pravidla/svet/mapa_body.json $K/pravidla/svet/pocasi.json $K/pravidla/svet/vykreslovani.json $K/pravidla/svet/ohne.json $K/pravidla/svet/krby.json $K/pravidla/svet/topeni.json $K/hra/data/

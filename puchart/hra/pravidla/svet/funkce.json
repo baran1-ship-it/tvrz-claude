@@ -76,6 +76,18 @@
    {
     "kolize": "ChysePrkna_Kol_Prycna1",
     "nazev": "pryčna v chýši"
+   },
+   {
+    "uzel": "Zemljanka_Spani_L",
+    "kolize": "",
+    "nazev": "rohož v zemljance",
+    "zdroj": "Míša 15. 11.: spalo se na zemi vlevo a vpravo na rohožích a houních (zajimava_mista.json zemljanky)"
+   },
+   {
+    "uzel": "Zemljanka_Spani_P",
+    "kolize": "",
+    "nazev": "rohož v zemljance",
+    "zdroj": "Míša 15. 11.: spalo se na zemi vlevo a vpravo na rohožích a houních (zajimava_mista.json zemljanky)"
    }
   ],
   "nad_znackou_m": 0.25,

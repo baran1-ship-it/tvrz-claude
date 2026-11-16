@@ -1,0 +1,190 @@
+{
+ "popis": "Zajímavá místa ve výseku 2×2 km (docs/zajimava_mista_plan.md, Míša 15. 11.: „vše schváleno“). Každé místo = záznam: kde ho hledat (hledat: bod, poloměr a podmínky – u cesty, u vody, ve svahu, v lese, na rovině), z čeho je složené (dily: model a poloha v rámci místa, +z místa = k cestě / ke vstupu), úpravy terénu (teren: plošina, zářez, jáma), funkce. Stavba: nastroje/zajimava_modely.py (přebalení modelů od modeláře, zemljanky z chýší Havrana, zkrácená štola) → nastroje/zajimava_mista.py (poloha z terénu, úpravy terénu do mřížky před dlaždicemi, trasy průchodu) → hra/data/zajimava_mista.json → hra/scripts/zajimava.gd. Značky DOLOZENO / REKONSTRUKCE / NAVRH podle docs/historie_pravidla.md.",
+ "zdroj": "docs/zajimava_mista_plan.md (Míša 15. 11.); modely od Míšina modeláře build/zdroj_modelar/les (NAVOD_LES.md, fotoskeny Poly Haven CC0); chýše Havrana domy.glb ChyseKura/ChysePrkna (blender/ves_domy.py Havrana, modelář 25. 10.); štola z Disku Stara_stola_1393_REALISM (CC0, docs/reference/disk_15_11/STOLA_CTI_ME.txt); mlýn Havrana mlyn.glb (docs/krok_b/zadani_mlyn.md Havrana); rešerše okruhu 15 km kap. 9–10 (docs/reference/Puchart_okruh_15km_historicka_reserse.pdf)",
+ "modely": {
+  "les": {
+   "zdroj": "build/zdroj_modelar/les",
+   "vystup": "hra/modely/les",
+   "disk": "Míšin Disk 15. 11. (sada les – milíř, uhlíř, smolárna, studánka, kříže); stáhne se ručně do build/zdroj_modelar/les",
+   "soubory": ["les_milir_a", "les_milir_b", "les_milir_c", "les_smolarna", "les_studanka", "les_kriz_smirci", "les_kriz_rozcesti", "les_bozi_muka", "les_uhlir_drevo", "les_uhlir_naradi", "les_uhlir_vozik"],
+   "pozn": "les_uhlir_chyse a les_uhlir_celek se nepoužijí – chýše u uhlíře je zemljanka (Míša 15. 11.), mýtina se skládá z dílů v datech níž"
+  },
+  "zemljanky": {
+   "popis": "Chýše do tvaru A z Havrana předělané na zemljanku (Míša 15. 11.: „zevnitř umazat podlahu a postele, vykopat 2 schody do země a udělat zemljanku jako v KCD“; „spalo se na zemi vlevo a vpravo na rohožích a houních; proti dveřím na konci bedna, pokud se vejde“). Ze vzoru se vypustí podlaha a pryčny (vynechat), dveře zůstanou otevřené ven (dvere_otevrit_st, pant u levé zárubně), uvnitř jáma s hliněnými stěnami obloženými kůly, dva stupně dolů ode dveří, rohože po stranách (pevný díl modelu), na nich vlněné houně od modeláře (Luzka_1400, osazuje hra), truhla z katalogu Havrana na konci (díl místa). Terén: otvor ve viditelné síti po obrys jámy, kolize terénu pod jámou snížená (jama_kolize_rozsir_m do stran a dozadu – svah sítě 1 m by jinak vystupoval nad podlahu u stěn).",
+   "zdroj": "Míša 15. 11. (popis zemljanky KCD u uhlíře a v lomu); doklad zahloubených staveb: polozemnice 13.–14. st. (rešerše 15 km kap. 9, NAVRH); Havran domy.glb ChyseKura/ChysePrkna, NAVOD_CHYSE.md; schody: pravidla/svet/hrac.json schod_m (stupeň do 0,45 m), Warhorse KM-A-52 stupeň ~0,20–0,25 m",
+   "vzor": "build/zdroj_celky/domy.glb", "vzor_pozn": "originál z Disku (nastroje/stavby_z_havrana.sh) – chýše v něm stejné jako ve hře (úpravy domů – okap, pece – se chýší netýkají); hra/modely/stavby_h/domy.glb přestavují jiné kroky",
+   "vystup": "hra/modely/stavby_h",
+      "typy": {
+    "zemljanka_kura": {"koren": "ChyseKura", "prah_y": 0.04, "podlaha_y": -0.7, "jama": [-1.5, 1.5, -2.05, 2.2], "rohoz_mat": "M_Slama_001", "hlina_mat": "M_Hlina_003", "drevo_mat": "M_Zhlavi_003", "dvere_x": [-0.48, 0.4], "dvere_z": 2.3},
+    "zemljanka_prkna": {"koren": "ChysePrkna", "prah_y": 0.5, "podlaha_y": -0.45, "jama": [-1.6, 1.6, -2.05, 2.2], "rohoz_mat": "M_Slama_002", "hlina_mat": "M_Hlina_004", "drevo_mat": "M_Zhlavi_004", "dvere_x": [-0.48, 0.4], "dvere_z": 2.3}
+   },
+   "vynechat": ["_Interier", "_Kol_Prycna"],
+   "dvere_otevrit_st": -100,
+   "schody": {"pocet": 2, "hloubka_m": 0.38, "sirka_m": 1.1, "zdroj": "Míša 15. 11.: „2 schody do země“; výška stupně = (práh − podlaha) / 3 (≤ hrac.json schod_m 0,45)"},
+   "kuly": {"rozestup_m": 0.32, "prumer_m": 0.09, "nad_teren_m": 0.06, "zdroj": "KCD zemnice (popis Míši 15. 11.: stěny jámy hliněné, obložené kůly) – NAVRH"},
+   "rohoz": {"sirka_m": 1.16, "delka_m": 2.0, "tl_m": 0.035, "od_steny_m": 0.05, "z_konec": -1.45, "zdroj": "rohož z rákosí/slámy pod houní (Míša 15. 11.); šíře a délka podle houně modeláře 1,08 × 1,93 m, za hlavou místo pro truhlu"},
+   "houne": {"model": "res://modely/luzka/Houne_Vlnena_Tablet_1K.tscn", "zdroj": "Míša 16. 11.: vlněná houně od modeláře build/zdroj_modelar/Luzka_1400 (NAVOD_LUZKA.md: 1,08 × 1,93 × 0,09 m, hlava k −Z, bez kolize, LOD0 do 8 m); kopie do hra/modely/luzka (nastroje/postav_vse.sh), osazení na značky spánku v zemljance (hra/scripts/zajimava.gd)", "lod0_do_m": 8.0, "do_m": 40.0},
+   "jama_kolize_rozsir_m": 0.9,
+   "lod": {"podrobny_do_m": 50.0, "obal_do_m": 400.0, "obal_barva": [0.29, 0.23, 0.17], "zdroj": "jako domy vsi (mista.json modely.domy.lod), zemljanka je malá (12 tis. troj.) → podrobně do 50 m, dál hrubý obal _Daleko v barvě ztmavlé kůry (mista.json daleko_textury jas Sindel × kůra; snímek 16. 11. f_uhlir: obal bez textury byl oranžový)"}
+  },
+  "stola": {
+   "popis": "Průzkumná štola ve stráni (Míša 15. 11.: „průzkumná štola ve stráni (hypotéza H/NAVRH, ne na místě Soudkovy štoly 19. st.), zmenšit pro tablet, otevřít vstup v terénu“). Z dodaného dolu (~189 m chodeb, 446 tis. troj.) zůstane jen vstup se skalní tlamou a první úsek hlavní chodby do delka_m, zakončený čelbou (průzkumná štola končí čelbou); zbylé úseky (dělené po 9 m: jméno _i_j, j = úsek ve směru chodby) se vypustí. Hlinitá plocha před vstupem (Brown Mud) se vypustí – terén hry. Textury na max_px.",
+   "zdroj": "docs/reference/disk_15_11/STOLA_CTI_ME.txt (Disk id 14LCazQ15kZGet65mk2S6epyGP3b7lCjN, CC0, STOLA_ZDROJE.txt); docs/historie_pravidla.md (Soudkova štola 19. st. = X → jen obecná průzkumná štola NAVRH)",
+   "disk_id": "14LCazQ15kZGet65mk2S6epyGP3b7lCjN",
+   "glb": "Stara_stola_1393_REALISM/Stara_stola_1393.glb",
+   "usekovat_m": 9.0,
+   "useky_j": [-2, -1, 0, 1],
+   "delka_m": 18.0,
+   "vynechat_prim": {"Cast_03_0_-1": ["PH / Brown Mud"], "Cast_06_0_-1": ["PH / Brown Mud"]},
+   "celba": {"z": -17.9, "x": [-2.4, 2.4], "y": [-0.4, 3.4], "material": "PH / Rock Face 03", "zdroj": "čelba průzkumné štoly – skalní stěna konce chodby"},
+   "max_px": 1024,
+   "kahany": "Stara_stola_1393.tscn Kahan_* (světla kahanů ve štole, jen v dosahu)",
+   "lod": {"vstup_do_m": 150.0, "chodba_do_m": 45.0, "zdroj": "vstup (skalní tlama, výdřeva) z dálky, chodba jen zblízka (rozpocty.json kresleni)"}
+  },
+  "katalog": {
+   "zdroj": "hra/modely/predmety_h (předměty Havrana, nastroje/predmety_z_havrana.sh)",
+   "pozn": "díly typu predmet: model z katalogu pískoviště jako pevná součást místa (statická kolize z konvexního obalu)"
+  },
+  "lod_les": {"lod0_do_m": 40.0, "lod1_do_m": 220.0, "male_lod1_do_m": 120.0, "zdroj": "NAVOD_LES.md: ke každému dílu _lod1; podrobný stupeň jako topení/předměty zblízka, hrubý do střední vzdálenosti (rozpocty.json kresleni cil 700); malé díly (kříže, nářadí) jen do 120 m"}
+ },
+ "teren": {
+  "prechod_m": 3.0,
+  "pozn": "plošina = rovina ve výšce mediánu terénu pod ní s plynulým přechodem prechod_m (jako mista_rozmisteni.py), zářez = snížení do svahu; buňky úprav se připíší k _jamy.npz (ostrá hrana bez vyhlazení dlaždic)"
+ },
+ "mista": [
+  {
+   "id": "kriz_rozcesti", "nazev": "Kříž na rozcestí", "znacka": "NAVRH",
+   "zdroj": "plán bod 2 (Míša 15. 11.); dřevěné kříže na rozcestích – lidová tradice, podoba podle NAVOD_LES.md (dubový sloupek, příčka na plát s kolíkem, stříška)",
+   "proc": "rozcestí cest, kudy se chodí (KCD: kříže a boží muka u cest)",
+   "hledat": {"u": [-110, -420], "r_m": 260, "rozcesti": true, "od_osy_m": [2.6, 4.0], "od_staveb_m": 40, "max_prevyseni_m": 0.5, "polomer_m": 1.0},
+   "dily": [{"model": "les/les_kriz_rozcesti", "poloha": [0, 0, 0]}]
+  },
+  {
+   "id": "kriz_smirci", "nazev": "Smírčí kříž", "znacka": "REKONSTRUKCE",
+   "zdroj": "plán bod 2; smírčí kříže 13.–16. st., Morava a Slezsko (NAVOD_LES.md, smírčí smlouvy); kámen u cesty mimo ves",
+   "proc": "u vozové cesty z Kyžlířova, na místě dávného neštěstí (smírčí kříže stojí u cest, často osaměle)",
+   "hledat": {"u": [-80, -760], "r_m": 160, "cesty": ["vozova", "hrebenova"], "od_osy_m": [2.4, 3.2], "od_staveb_m": 120, "max_prevyseni_m": 0.4, "polomer_m": 0.8},
+   "dily": [{"model": "les/les_kriz_smirci", "poloha": [0, 0, 0]}]
+  },
+  {
+   "id": "bozi_muka", "nazev": "Boží muka", "znacka": "NAVRH",
+   "zdroj": "plán bod 2; dřevěná boží muka (sloupek se stříškou a výklenkem) – NAVOD_LES.md",
+   "proc": "u cesty k mlýnu na Veličce za vsí",
+   "hledat": {"u": [-320, -330], "r_m": 160, "cesty": ["vozova"], "od_osy_m": [2.6, 3.4], "od_staveb_m": 50, "max_prevyseni_m": 0.4, "polomer_m": 1.0},
+   "dily": [{"model": "les/les_bozi_muka", "poloha": [0, 0, 0]}]
+  },
+  {
+   "id": "uhlir", "nazev": "Uhlířské pracoviště", "znacka": "NAVRH",
+   "zdroj": "plán bod 3 (rešerše 15 km kap. 9 – milíře jako přiznaná rekonstrukce); NAVOD_LES.md (milíř a/b, dřevo, nářadí, vozík; rozmístění podle les_uhlir_celek); zemljanka místo kuželové chýše (Míša 15. 11.)",
+   "proc": "v lese u vozové cesty (dřevo na milíř a odvoz uhlí na káře), na rovině (milířiště)",
+   "hledat": {"u": [-330, -690], "r_m": 220, "les": true, "cesty": ["vozova", "pesina"], "od_osy_m": [14, 45], "od_staveb_m": 150, "od_toku_m": 25, "max_prevyseni_m": 1.6, "polomer_m": 11.0, "k_ceste": true},
+   "teren": [{"typ": "plosina", "stred": [0, 0], "r_m": 4.2}, {"typ": "plosina", "stred": [-10, 2.5], "r_m": 4.0}, {"typ": "plosina", "stred": [-5.5, -10.5], "obdelnik": [3.2, 3.8], "yaw_k": [0, 0]}],
+   "dily": [
+    {"model": "les/les_milir_b", "poloha": [0, 0, 0], "lod1_do_m": 300, "efekt": "milir"},
+    {"model": "les/les_milir_a", "poloha": [-10, 0, 2.5], "yaw_st": 40},
+    {"model": "les/les_uhlir_drevo", "poloha": [4.6, 0, -5.2], "yaw_st": 20},
+    {"model": "les/les_uhlir_naradi", "poloha": [-3.3, 0, -2.4], "yaw_st": 23},
+    {"model": "les/les_uhlir_vozik", "poloha": [4.8, 0, 4.2], "yaw_st": 131},
+    {"model": "zemljanka_kura", "poloha": [-5.5, 0, -10.5], "k_bodu": [0, 0], "zemljanka": true},
+    {"predmet": "truhla", "v_zemljance": true},
+    {"predmet": "ohniste_kamenne", "pred_dvermi_m": 3.2, "bokem_m": 2.4, "efekt": "ohen"}
+   ]
+  },
+  {
+   "id": "smolarna", "nazev": "Smolárna (dehtárna)", "znacka": "NAVRH",
+   "zdroj": "plán bod 3; NAVOD_LES.md (smolárna: hliněná kopule nad jámou, žlábek, dvojhrnec, smolné pařezy); rešerše 15 km kap. 9",
+   "proc": "v lese kus od uhlíře, u pěšiny (smolné dřevo z pařezů borovic)",
+   "hledat": {"u": [-260, -780], "r_m": 220, "les": true, "cesty": ["vozova", "pesina"], "od_osy_m": [8, 30], "od_staveb_m": 150, "od_mista": ["uhlir", 70, 200], "max_prevyseni_m": 0.9, "polomer_m": 5.0, "k_ceste": true},
+   "teren": [{"typ": "plosina", "stred": [0, 0], "r_m": 4.5}],
+   "dily": [{"model": "les/les_smolarna", "poloha": [0, 0, 0], "efekt": "smolarna"}]
+  },
+  {
+   "id": "studanka", "nazev": "Studánka pod skálou", "znacka": "NAVRH",
+   "zdroj": "plán bod 6; NAVOD_LES.md (studánka: skalní výchoz, obruba pramene, roubenka se stříškou, žlábek, potůček); pramen = horní konec potoka",
+   "proc": "u pramene potoka (horní konec toku) pod svahem, u pěšiny – sem se chodí pro vodu",
+   "hledat": {"pramen": true, "u": [-385, -840], "r_m": 400, "cesty": ["vozova", "pesina"], "od_osy_m": [4, 150], "od_toku_m": [0, 14], "max_prevyseni_m": 2.2, "polomer_m": 2.5, "zady_do_svahu": true},
+   "dily": [{"model": "les/les_studanka", "poloha": [0, 0, 0], "funkce": "studanka"}]
+  },
+  {
+   "id": "brte", "nazev": "Brtě", "znacka": "REKONSTRUKCE",
+   "zdroj": "plán bod 7; středověké brtnictví – brť = dutina vydlabaná ve živém stromě ve výšce 3–6 m, zakrytá prknem (dlužkou) s česnem; brtníci doloženi v listinách 13.–14. st. (lesní včelaření)",
+   "proc": "staré stromy na kraji lesa u pěšiny (brtník k nim chodí)",
+   "hledat": {"u": [-210, -830], "r_m": 260, "les": true, "cesty": ["pesina", "vozova"], "od_osy_m": [6, 25], "od_staveb_m": 150, "max_prevyseni_m": 2.0, "polomer_m": 4.0, "k_ceste": true},
+   "dily": [
+    {"strom": "borovice_stara", "poloha": [0, 0, 0], "brt": {"vyska_m": 3.6, "smer_st": 0}},
+    {"strom": "dub_stary", "poloha": [7.5, 0, -3.5], "brt": {"vyska_m": 3.2, "smer_st": 30}}
+   ]
+  },
+  {
+   "id": "poustevna", "nazev": "Poustevna pod skalním převisem", "znacka": "NAVRH",
+   "zdroj": "plán bod 8 (lidová tradice poustevníka – Kostelíček u Potštátu, rešerše H); lůžko z chvojí a ohniště jako uhlířská chýše (NAVOD_LES.md Chyse_Luzko/Ohniste) – zde z katalogu Havrana",
+   "proc": "pod skalní stěnou mimo cesty (samota), u skal hřebene",
+   "hledat": {"skala": true, "u": [60, 230], "r_m": 260, "od_staveb_m": 25, "od_cest_min_m": 20, "max_prevyseni_m": 0.8, "polomer_m": 2.0, "zady_ke_skale": true},
+   "dily": [
+    {"predmet": "slamnik", "poloha": [-0.8, 0, -0.6], "yaw_st": 90},
+    {"predmet": "ohniste_kamenne", "poloha": [1.4, 0, 1.0], "efekt": "ohen"},
+    {"predmet": "kotlik_trojnozka", "poloha": [1.4, 0, 1.0]},
+    {"model": "les/les_kriz_rozcesti", "poloha": [0.6, 0, -1.4], "meritko": 0.55}
+   ]
+  },
+  {
+   "id": "lom", "nazev": "Malý lom na kámen hradu", "znacka": "NAVRH",
+   "zdroj": "plán bod 5; rešerše 15 km kap. 10 (malý dobový kamenolom na stavební kámen hradu – rekonstrukční hypotéza, droba); docs/historie_pravidla.md (Olšovecké břidlicové lomy 19. st. = X, jen obecný malý lom)",
+   "proc": "ve svahu u vozové cesty blízko hradu (kámen se vozil na stavbu), lámavá stěna, odval, opracované kvádry",
+   "hledat": {"u": [150, 450], "r_m": 300, "cesty": ["vozova"], "od_osy_m": [12, 40], "od_cest_min_m": 12, "od_staveb_m": 60, "od_toku_m": 15, "sklon_min": 0.42, "polomer_m": 7.0, "do_svahu": true, "pozn": "ve svahu nad cestou (stěna lomu), ne na cestě – snímek 16. 11. f_lom: lom vyšel na rovinu u cesty"},
+   "teren": [{"typ": "zarez", "sirka_m": 12.0, "hloubka_m": 9.0, "stena_m": 4.0}],
+   "dily": [
+    {"balvan": "balvan_droba_1", "poloha": [-3.8, 0, -8.6], "meritko": 2.4, "yaw_st": 10},
+    {"balvan": "balvan_droba_1", "poloha": [0.2, 0, -9.0], "meritko": 2.8, "yaw_st": 95},
+    {"balvan": "balvan_droba_1", "poloha": [4.0, 0, -8.5], "meritko": 2.3, "yaw_st": 200},
+    {"balvan": "kamen_droba_1", "poloha": [5.2, 0, 1.5], "meritko": 1.5},
+    {"balvan": "kamen_droba_1", "poloha": [6.0, 0, 2.6], "meritko": 1.2, "yaw_st": 60},
+    {"balvan": "kamen_droba_1", "poloha": [4.6, 0, 3.0], "meritko": 1.3, "yaw_st": 140},
+    {"predmet": "kvadr_hruby_1", "poloha": [-1.5, 0, 0.5], "yaw_st": 10},
+    {"predmet": "kvadr_hruby_2", "poloha": [0.3, 0, 1.4], "yaw_st": -6},
+    {"predmet": "kvadr_hruby_1", "poloha": [-0.4, 0.53, 1.1], "yaw_st": 3},
+    {"predmet": "krumpac", "poloha": [-2.6, 0, -5.8], "yaw_st": 30},
+    {"model": "zemljanka_prkna", "poloha": [-8.5, 0, 4.5], "yaw_st": 90, "zemljanka": true, "mimo_zarez": true},
+    {"predmet": "truhla", "v_zemljance": true}
+   ]
+  },
+  {
+   "id": "stola", "nazev": "Průzkumná štola", "znacka": "NAVRH",
+   "zdroj": "plán bod 1 (Míša 15. 11.); model štoly z Disku zkrácený na průzkumnou štolu (nastroje/zajimava_modely.py)",
+   "proc": "ve strmé stráni v lese u pěšiny, vstup zářezem do svahu (portál až tam, kde je nad chodbou dost skály)",
+   "hledat": {"u": [200, -330], "r_m": 400, "les": true, "cesty": ["pesina", "vozova"], "od_osy_m": [8, 70], "od_staveb_m": 120, "od_toku_m": 15, "sklon_min": 0.45, "polomer_m": 4.0, "do_svahu": true, "kryt_m": 3.8},
+   "teren": [{"typ": "stola", "sirka_m": 4.4, "zarez_max_m": 12.0, "chodba_sirka_m": 3.2, "podlaha_pod_m": 0.05}],
+   "dily": [{"model": "stola", "poloha": [0, 0, 0]}]
+  },
+  {
+   "id": "mlyn", "nazev": "Mlýn na Veličce", "znacka": "REKONSTRUKCE",
+   "zdroj": "plán bod 4; docs/historie_pravidla.md: Potštátský mlýn (B 1408) → už 1393, poloha volná; mista.json mlyn_velicka (vojenská mapa: obrysy u Veličky ~500 m SZ od hradu); model Havrana mlyn.glb (docs/krok_b/zadani_mlyn.md, scripts/mlyn_kolo.gd)",
+   "proc": "na břehu Veličky u cesty, kolo k vodě, odpadní kanál (lednice) do Veličky",
+   "hledat": {"mlyn": true, "u": [-495, -400], "r_m": 170, "tok": "Velička"},
+   "teren": [{"typ": "mlyn"}],
+   "dily": [{"model": "mlyn", "poloha": [0, 0, 0]}],
+   "mlyn": {
+    "vynechat": ["Mlyn_Teren"],
+    "dvur_aabb": [-4.0, 11.0, -7.5, 7.5],
+    "kolo_misto": [-3.6, -3.4],
+    "lednice_konec": [-12.4, -1.6],
+    "lednice_y": -1.2,
+    "nahon_zacatek": [-17.8, -24.5],
+    "nahon_y": 3.0,
+    "jama_kola": [-6.0, -1.4, -5.6, -1.2],
+    "lednice_pas": [-12.6, -3.4, -5.2, 2.0],
+    "kolo_rad_s": 0.9,
+    "cevnik_nasobek": 6.0,
+    "lod1_od_m": 120.0,
+    "dil_do_m": 160.0,
+    "interier_do_m": 35.0,
+    "zdroj": "Havran voda.json mlyn.dil (kolo_rad_s, cevnik_nasobek, interier_do_m), mlyn_misto.py (náhon nad hladinou toku); rozměry z mlyn.glb (Mlyn_Kolo, Mlyn_Lednice, Mlyn_Nahon, Mlyn_Dvur)",
+    "pozn": "dílový terén Havrana (Mlyn_Teren se strmým vlastním potokem, spád 5 m na 42 m) se nepoužije – Velička u mlýna má malý spád; náhon na kozách začíná ve svahu (napájí ho příkop po vrstevnici z Veličky výš proti proudu – NAVRH)"
+   }
+  }
+ ],
+ "funkce": {
+  "studanka": {"uzel": "Les_Studanka_Napit", "napit": "Napít se", "nabrat": "Nabrat vodu", "predmet": "voda_mech", "dosah_m": 2.2, "zprava_napit": "Voda je studená a čistá.", "zdroj": "funkce.json studna (Havran); plán bod 6 – funkce napít / nabrat vodu (měch s vodou z katalogu)"},
+  "spani": {"uzly": ["Zemljanka_Spani_L", "Zemljanka_Spani_P"], "nazev": "rohož v zemljance", "zdroj": "funkce.json spanek (Havran main.gd bed) – spalo se na zemi na rohožích (Míša 15. 11.)"}
+ }
+}
