@@ -1539,7 +1539,9 @@ Hotovo v kódu a datech (testy u každého):
   `dtex_pred` 08:33 po převodu 880 / 1208 MB (−112 MB textur; mezi nimi jen oprava krtinců zemljanek). Testy
   `lod_urovne`, `kostel_zed`, `ruiny_ves`, `krcma_dvur`, `krcma_l` OK. Na tabletu NEOVĚŘENO.
 - **Pád snímku `dtex_po2` (16. 11. 11:4x, „Killed“ = OOM):** běžel vedle dalšího fota a testů jiných pomocníků (16 GB
-  sdílené) – 4 snímky z jednoho běhu při plném stroji nepouštět; opakováno se 3 snímky.
+  sdílené) – i `dtex_po3` se 3 snímky „Killed“ při přesunu na 2. místo (kostel → Doubrava, troj 4 M). Při plném stroji
+  vzdálená místa (> 200 m) fotit po jednom snímku na běh; rozbor paměti při přesunu NEOVĚŘEN (tablet padal po 2. kole trasy –
+  sledovat RAM při přesunech v trase).
 - **Nevyřešeno:** `ves` (domy.glb 72 obrázků, všechny různé; `zesvetli_ves.py` upravuje rozbalené `domy_*_diff.jpg` –
   nepřevádět bez úpravy zesvětlení), `kovarna` a `mlyn` (v kontejneru jen `.import`, glb chybí; kovárna 69 → 45 různých
   `.ctex`, ~48 → 31 MB) – přidat do `slozky_dilu`, až budou zdroje. 512 px pro zdi ruin nezkoušeno.
