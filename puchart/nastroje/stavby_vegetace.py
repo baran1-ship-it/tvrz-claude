@@ -27,6 +27,8 @@ if os.path.exists(D + "stavby_pudorysy.json"):   # celé půdorysy budov (tráva
     for q in json.load(open(D + "stavby_pudorysy.json"))["budovy"]: dr.polygon([pix(r) for r in q], fill=1)
 if os.path.exists(D + "mista_stavby.json"):   # domy nových míst (mista_rozmisteni.py: Předhradí, krčma, hájovna)
     for q in json.load(open(D + "mista_stavby.json"))["pudorysy"]: dr.polygon([pix(r) for r in q], fill=1)
+if os.path.exists(D + "zajimava_mista.json"):   # zajímavá místa (nastroje/zajimava_mista.py): milířiště, zemljanky, lom, štola, mlýn bez porostu
+    for q in json.load(open(D + "zajimava_mista.json"))["pudorysy"]: dr.polygon([pix(r) for r in q], fill=1)
 mn = Image.new("L", ms.size, 0); dn = ImageDraw.Draw(mn)
 HP = json.load(open(K + "/pravidla/svet/hrad_puchart.json"))
 for poly in (HP["A"]["jadro"], HP["B"]["hradba"]):

@@ -1,0 +1,1148 @@
+{
+ "popis": "zajímavá místa pro hru (nastroje/zajimava_mista.py z pravidla/svet/zajimava_mista.json) – hra/scripts/zajimava.gd; pudorysy pro stavby_vegetace.py (bez porostu)",
+ "lod_les": {
+  "lod0_do_m": 40.0,
+  "lod1_do_m": 220.0,
+  "male_lod1_do_m": 120.0,
+  "zdroj": "NAVOD_LES.md: ke každému dílu _lod1; podrobný stupeň jako topení/předměty zblízka, hrubý do střední vzdálenosti (rozpocty.json kresleni cil 700); malé díly (kříže, nářadí) jen do 120 m"
+ },
+ "zemljanky_lod": {
+  "podrobny_do_m": 30.0,
+  "obal_do_m": 400.0,
+  "zdroj": "jako domy vsi (mista.json modely.domy.lod: podrobný 25–30 m, dál hrubý obal _Daleko)"
+ },
+ "stola_lod": {
+  "vstup_do_m": 150.0,
+  "chodba_do_m": 45.0,
+  "zdroj": "vstup (skalní tlama, výdřeva) z dálky, chodba jen zblízka (rozpocty.json kresleni)"
+ },
+ "stola_kahany": [
+  [
+   0.74,
+   1.16,
+   0.7
+  ],
+  [
+   -4.96,
+   1.02,
+   4.9
+  ],
+  [
+   0.86,
+   1.2735713,
+   -3.4999495
+  ],
+  [
+   0.89691705,
+   1.3450856,
+   -14.593702
+  ]
+ ],
+ "funkce": {
+  "studanka": {
+   "uzel": "Les_Studanka_Napit",
+   "napit": "Napít se",
+   "nabrat": "Nabrat vodu",
+   "predmet": "voda_mech",
+   "dosah_m": 2.2,
+   "zprava_napit": "Voda je studená a čistá.",
+   "zdroj": "funkce.json studna (Havran); plán bod 6 – funkce napít / nabrat vodu (měch s vodou z katalogu)"
+  },
+  "spani": {
+   "uzly": [
+    "Zemljanka_Spani_L",
+    "Zemljanka_Spani_P"
+   ],
+   "nazev": "rohož v zemljance",
+   "zdroj": "funkce.json spanek (Havran main.gd bed) – spalo se na zemi na rohožích (Míša 15. 11.)"
+  }
+ },
+ "vika": [
+  {
+   "misto": "stola",
+   "poly": [
+    [
+     146.53747660369874,
+     -344.67618406828115
+    ],
+    [
+     146.6502933956723,
+     -340.2776306274953
+    ],
+    [
+     131.65522484753882,
+     -339.8930279275855
+    ],
+    [
+     131.54240805556526,
+     -344.2915813683713
+    ]
+   ],
+   "od_z": -3.6
+  }
+ ],
+ "mista": [
+  {
+   "id": "kriz_rozcesti",
+   "nazev": "Kříž na rozcestí",
+   "znacka": "NAVRH",
+   "zdroj": "plán bod 2 (Míša 15. 11.); dřevěné kříže na rozcestích – lidová tradice, podoba podle NAVOD_LES.md (dubový sloupek, příčka na plát s kolíkem, stříška)",
+   "x": -167.515,
+   "z": -351.141,
+   "yaw": -0.50478,
+   "dily": [
+    {
+     "x": -167.515,
+     "z": -351.141,
+     "yaw": -0.50478,
+     "model": "les/les_kriz_rozcesti",
+     "y": 51.466
+    }
+   ],
+   "y": 51.466
+  },
+  {
+   "id": "kriz_smirci",
+   "nazev": "Smírčí kříž",
+   "znacka": "REKONSTRUKCE",
+   "zdroj": "plán bod 2; smírčí kříže 13.–16. st., Morava a Slezsko (NAVOD_LES.md, smírčí smlouvy); kámen u cesty mimo ves",
+   "x": -90.0,
+   "z": -890.0,
+   "yaw": -1.13386,
+   "dily": [
+    {
+     "x": -90.0,
+     "z": -890.0,
+     "yaw": -1.13386,
+     "model": "les/les_kriz_smirci",
+     "y": 83.014
+    }
+   ],
+   "y": 83.014
+  },
+  {
+   "id": "bozi_muka",
+   "nazev": "Boží muka",
+   "znacka": "NAVRH",
+   "zdroj": "plán bod 2; dřevěná boží muka (sloupek se stříškou a výklenkem) – NAVOD_LES.md",
+   "x": -346.0,
+   "z": -300.0,
+   "yaw": -1.21523,
+   "dily": [
+    {
+     "x": -346.0,
+     "z": -300.0,
+     "yaw": -1.21523,
+     "model": "les/les_bozi_muka",
+     "y": -22.157
+    }
+   ],
+   "y": -22.157
+  },
+  {
+   "id": "uhlir",
+   "nazev": "Uhlířské pracoviště",
+   "znacka": "NAVRH",
+   "zdroj": "plán bod 3 (rešerše 15 km kap. 9 – milíře jako přiznaná rekonstrukce); NAVOD_LES.md (milíř a/b, dřevo, nářadí, vozík; rozmístění podle les_uhlir_celek); zemljanka místo kuželové chýše (Míša 15. 11.)",
+   "x": -280.0,
+   "z": -816.0,
+   "yaw": 1.40105,
+   "dily": [
+    {
+     "x": -280.0,
+     "z": -816.0,
+     "yaw": 1.40105,
+     "model": "les/les_milir_b",
+     "efekt": "milir",
+     "lod1_do_m": 300,
+     "y": 124.422
+    },
+    {
+     "x": -279.225,
+     "z": -805.721,
+     "yaw": 2.09918,
+     "model": "les/les_milir_a",
+     "y": 124.405
+    },
+    {
+     "x": -284.348,
+     "z": -821.412,
+     "yaw": 1.75012,
+     "model": "les/les_uhlir_drevo",
+     "y": 124.321
+    },
+    {
+     "x": -282.923,
+     "z": -813.153,
+     "yaw": 1.80248,
+     "model": "les/les_uhlir_naradi",
+     "y": 124.422
+    },
+    {
+     "x": -275.049,
+     "z": -820.022,
+     "yaw": 3.68743,
+     "model": "les/les_uhlir_vozik",
+     "y": 124.406
+    },
+    {
+     "model": "zemljanka_kura",
+     "x": -291.278,
+     "y": 124.172,
+     "z": -812.353,
+     "yaw": 1.88356,
+     "zemljanka": true
+    },
+    {
+     "predmet": "truhla",
+     "x": -292.829,
+     "y": 123.472,
+     "z": -811.851,
+     "yaw": 1.88356
+    },
+    {
+     "predmet": "ohniste_kamenne",
+     "x": -286.616,
+     "y": 124.284,
+     "z": -813.861,
+     "yaw": 1.88356,
+     "efekt": "ohen"
+    }
+   ],
+   "y": 124.487
+  },
+  {
+   "id": "smolarna",
+   "nazev": "Smolárna (dehtárna)",
+   "znacka": "NAVRH",
+   "zdroj": "plán bod 3; NAVOD_LES.md (smolárna: hliněná kopule nad jámou, žlábek, dvojhrnec, smolné pařezy); rešerše 15 km kap. 9",
+   "x": -244.0,
+   "z": -752.0,
+   "yaw": -1.39949,
+   "dily": [
+    {
+     "x": -244.0,
+     "z": -752.0,
+     "yaw": -1.39949,
+     "model": "les/les_smolarna",
+     "efekt": "smolarna",
+     "y": 122.868
+    }
+   ],
+   "y": 122.866
+  },
+  {
+   "id": "studanka",
+   "nazev": "Studánka pod skálou",
+   "znacka": "NAVRH",
+   "zdroj": "plán bod 6; NAVOD_LES.md (studánka: skalní výchoz, obruba pramene, roubenka se stříškou, žlábek, potůček); pramen = horní konec potoka",
+   "x": -482.761,
+   "z": -956.753,
+   "yaw": -0.11968,
+   "dily": [
+    {
+     "x": -482.761,
+     "z": -956.753,
+     "yaw": -0.11968,
+     "model": "les/les_studanka",
+     "funkce": "studanka",
+     "y": 79.913
+    }
+   ],
+   "y": 79.913
+  },
+  {
+   "id": "brte",
+   "nazev": "Brtě",
+   "znacka": "REKONSTRUKCE",
+   "zdroj": "plán bod 7; středověké brtnictví – brť = dutina vydlabaná ve živém stromě ve výšce 3–6 m, zakrytá prknem (dlužkou) s česnem; brtníci doloženi v listinách 13.–14. st. (lesní včelaření)",
+   "x": -244.0,
+   "z": -852.0,
+   "yaw": -1.25216,
+   "dily": [
+    {
+     "x": -244.0,
+     "z": -852.0,
+     "yaw": -1.25216,
+     "strom": "borovice_stara",
+     "brt": {
+      "vyska_m": 3.6,
+      "smer_st": 0,
+      "kmen_r": 0.473
+     },
+     "y": 121.177
+    },
+    {
+     "x": -238.327,
+     "z": -845.974,
+     "yaw": -1.25216,
+     "strom": "dub_stary",
+     "brt": {
+      "vyska_m": 3.2,
+      "smer_st": 30,
+      "kmen_r": 0.536
+     },
+     "y": 121.011
+    }
+   ],
+   "y": 121.177
+  },
+  {
+   "id": "poustevna",
+   "nazev": "Poustevna pod skalním převisem",
+   "znacka": "NAVRH",
+   "zdroj": "plán bod 8 (lidová tradice poustevníka – Kostelíček u Potštátu, rešerše H); lůžko z chvojí a ohniště jako uhlířská chýše (NAVOD_LES.md Chyse_Luzko/Ohniste) – zde z katalogu Havrana",
+   "x": -27.117,
+   "z": 129.246,
+   "yaw": -0.76522,
+   "dily": [
+    {
+     "x": -27.278,
+     "z": 128.259,
+     "yaw": 0.80558,
+     "predmet": "slamnik",
+     "y": -38.442
+    },
+    {
+     "x": -26.8,
+     "z": 130.937,
+     "yaw": -0.76522,
+     "predmet": "ohniste_kamenne",
+     "efekt": "ohen",
+     "y": -38.859
+    },
+    {
+     "x": -26.8,
+     "z": 130.937,
+     "yaw": -0.76522,
+     "predmet": "kotlik_trojnozka",
+     "y": -38.859
+    },
+    {
+     "x": -25.715,
+     "z": 128.651,
+     "yaw": -0.76522,
+     "model": "les/les_kriz_rozcesti",
+     "meritko": 0.55,
+     "y": -38.391
+    }
+   ],
+   "y": -38.419
+  },
+  {
+   "id": "lom",
+   "nazev": "Malý lom na kámen hradu",
+   "znacka": "NAVRH",
+   "zdroj": "plán bod 5; rešerše 15 km kap. 10 (malý dobový kamenolom na stavební kámen hradu – rekonstrukční hypotéza, droba); docs/historie_pravidla.md (Olšovecké břidlicové lomy 19. st. = X, jen obecný malý lom)",
+   "x": 124.0,
+   "z": 522.0,
+   "yaw": -1.35177,
+   "dily": [
+    {
+     "x": 131.569,
+     "z": 516.422,
+     "yaw": -1.17724,
+     "balvan": "balvan_droba_1",
+     "meritko": 2.4,
+     "y": -46.812
+    },
+    {
+     "x": 132.828,
+     "z": 520.24,
+     "yaw": 0.30629,
+     "balvan": "balvan_droba_1",
+     "meritko": 2.8,
+     "y": -46.237
+    },
+    {
+     "x": 133.166,
+     "z": 524.058,
+     "yaw": 2.13889,
+     "balvan": "balvan_droba_1",
+     "meritko": 2.3,
+     "y": -46.768
+    },
+    {
+     "x": 123.666,
+     "z": 527.402,
+     "yaw": -1.35177,
+     "balvan": "kamen_droba_1",
+     "meritko": 1.5,
+     "y": -47.925
+    },
+    {
+     "x": 122.766,
+     "z": 528.422,
+     "yaw": -0.30457,
+     "balvan": "kamen_droba_1",
+     "meritko": 1.2,
+     "y": -47.516
+    },
+    {
+     "x": 122.071,
+     "z": 527.142,
+     "yaw": 1.09169,
+     "balvan": "kamen_droba_1",
+     "meritko": 1.3,
+     "y": -47.176
+    },
+    {
+     "x": 123.186,
+     "z": 520.644,
+     "yaw": -1.17724,
+     "predmet": "kvadr_hruby_1",
+     "y": -47.344
+    },
+    {
+     "x": 122.699,
+     "z": 522.597,
+     "yaw": -1.45649,
+     "predmet": "kvadr_hruby_2",
+     "y": -47.553
+    },
+    {
+     "x": 122.839,
+     "z": 521.849,
+     "yaw": -1.29941,
+     "predmet": "kvadr_hruby_1",
+     "y": -46.881
+    },
+    {
+     "x": 129.097,
+     "z": 518.202,
+     "yaw": -0.82817,
+     "predmet": "krumpac",
+     "y": -47.083
+    },
+    {
+     "model": "zemljanka_prkna",
+     "x": 117.761,
+     "y": -47.689,
+     "z": 514.681,
+     "yaw": 0.21902,
+     "zemljanka": true
+    },
+    {
+     "predmet": "truhla",
+     "x": 117.406,
+     "y": -48.139,
+     "z": 513.09,
+     "yaw": 0.21902
+    }
+   ],
+   "zarez": {
+    "stena_y": 0.84
+   },
+   "y": -47.083
+  },
+  {
+   "id": "stola",
+   "nazev": "Průzkumná štola",
+   "znacka": "NAVRH",
+   "zdroj": "plán bod 1 (Míša 15. 11.); model štoly z Disku zkrácený na průzkumnou štolu (nastroje/zajimava_modely.py)",
+   "x": 128.0,
+   "z": -342.0,
+   "yaw": -1.54515,
+   "dily": [
+    {
+     "x": 128.0,
+     "z": -342.0,
+     "yaw": -1.54515,
+     "model": "stola",
+     "y": -5.831
+    }
+   ],
+   "stola": {
+    "zarez_m": 7.0,
+    "kryt_m": 3.8,
+    "y0": -5.831
+   },
+   "y": -5.831
+  },
+  {
+   "id": "mlyn",
+   "nazev": "Mlýn na Veličce",
+   "znacka": "REKONSTRUKCE",
+   "zdroj": "plán bod 4; docs/historie_pravidla.md: Potštátský mlýn (B 1408) → už 1393, poloha volná; mista.json mlyn_velicka (vojenská mapa: obrysy u Veličky ~500 m SZ od hradu); model Havrana mlyn.glb (docs/krok_b/zadani_mlyn.md, scripts/mlyn_kolo.gd)",
+   "x": -408.002,
+   "z": -343.179,
+   "yaw": 1.04117,
+   "dily": [
+    {
+     "x": -408.002,
+     "z": -343.179,
+     "yaw": 1.04117,
+     "model": "mlyn",
+     "y": -20.217
+    }
+   ],
+   "mlyn": {
+    "vynechat": [
+     "Mlyn_Teren"
+    ],
+    "kolo_rad_s": 0.9,
+    "cevnik_nasobek": 6.0,
+    "lod1_od_m": 120.0,
+    "dil_do_m": 160.0,
+    "interier_do_m": 35.0
+   },
+   "y": -20.217
+  }
+ ],
+ "pudorysy": [
+  [
+   [
+    -165.91,
+    -351.14
+   ],
+   [
+    -166.04,
+    -350.53
+   ],
+   [
+    -166.38,
+    -350.01
+   ],
+   [
+    -166.9,
+    -349.66
+   ],
+   [
+    -167.51,
+    -349.54
+   ],
+   [
+    -168.13,
+    -349.66
+   ],
+   [
+    -168.65,
+    -350.01
+   ],
+   [
+    -168.99,
+    -350.53
+   ],
+   [
+    -169.11,
+    -351.14
+   ],
+   [
+    -168.99,
+    -351.75
+   ],
+   [
+    -168.65,
+    -352.27
+   ],
+   [
+    -168.13,
+    -352.62
+   ],
+   [
+    -167.51,
+    -352.74
+   ],
+   [
+    -166.9,
+    -352.62
+   ],
+   [
+    -166.38,
+    -352.27
+   ],
+   [
+    -166.04,
+    -351.75
+   ]
+  ],
+  [
+   [
+    -88.4,
+    -890.0
+   ],
+   [
+    -88.52,
+    -889.39
+   ],
+   [
+    -88.87,
+    -888.87
+   ],
+   [
+    -89.39,
+    -888.52
+   ],
+   [
+    -90.0,
+    -888.4
+   ],
+   [
+    -90.61,
+    -888.52
+   ],
+   [
+    -91.13,
+    -888.87
+   ],
+   [
+    -91.48,
+    -889.39
+   ],
+   [
+    -91.6,
+    -890.0
+   ],
+   [
+    -91.48,
+    -890.61
+   ],
+   [
+    -91.13,
+    -891.13
+   ],
+   [
+    -90.61,
+    -891.48
+   ],
+   [
+    -90.0,
+    -891.6
+   ],
+   [
+    -89.39,
+    -891.48
+   ],
+   [
+    -88.87,
+    -891.13
+   ],
+   [
+    -88.52,
+    -890.61
+   ]
+  ],
+  [
+   [
+    -344.4,
+    -300.0
+   ],
+   [
+    -344.52,
+    -299.39
+   ],
+   [
+    -344.87,
+    -298.87
+   ],
+   [
+    -345.39,
+    -298.52
+   ],
+   [
+    -346.0,
+    -298.4
+   ],
+   [
+    -346.61,
+    -298.52
+   ],
+   [
+    -347.13,
+    -298.87
+   ],
+   [
+    -347.48,
+    -299.39
+   ],
+   [
+    -347.6,
+    -300.0
+   ],
+   [
+    -347.48,
+    -300.61
+   ],
+   [
+    -347.13,
+    -301.13
+   ],
+   [
+    -346.61,
+    -301.48
+   ],
+   [
+    -346.0,
+    -301.6
+   ],
+   [
+    -345.39,
+    -301.48
+   ],
+   [
+    -344.87,
+    -301.13
+   ],
+   [
+    -344.52,
+    -300.61
+   ]
+  ],
+  [
+   [
+    -293.52,
+    -808.89
+   ],
+   [
+    -295.12,
+    -813.84
+   ],
+   [
+    -288.08,
+    -816.12
+   ],
+   [
+    -286.48,
+    -811.17
+   ]
+  ],
+  [
+   [
+    -267.0,
+    -816.0
+   ],
+   [
+    -267.99,
+    -811.03
+   ],
+   [
+    -270.81,
+    -806.81
+   ],
+   [
+    -275.03,
+    -803.99
+   ],
+   [
+    -280.0,
+    -803.0
+   ],
+   [
+    -284.97,
+    -803.99
+   ],
+   [
+    -289.19,
+    -806.81
+   ],
+   [
+    -292.01,
+    -811.03
+   ],
+   [
+    -293.0,
+    -816.0
+   ],
+   [
+    -292.01,
+    -820.97
+   ],
+   [
+    -289.19,
+    -825.19
+   ],
+   [
+    -284.97,
+    -828.01
+   ],
+   [
+    -280.0,
+    -829.0
+   ],
+   [
+    -275.03,
+    -828.01
+   ],
+   [
+    -270.81,
+    -825.19
+   ],
+   [
+    -267.99,
+    -820.97
+   ]
+  ],
+  [
+   [
+    -239.0,
+    -752.0
+   ],
+   [
+    -239.38,
+    -750.09
+   ],
+   [
+    -240.46,
+    -748.46
+   ],
+   [
+    -242.09,
+    -747.38
+   ],
+   [
+    -244.0,
+    -747.0
+   ],
+   [
+    -245.91,
+    -747.38
+   ],
+   [
+    -247.54,
+    -748.46
+   ],
+   [
+    -248.62,
+    -750.09
+   ],
+   [
+    -249.0,
+    -752.0
+   ],
+   [
+    -248.62,
+    -753.91
+   ],
+   [
+    -247.54,
+    -755.54
+   ],
+   [
+    -245.91,
+    -756.62
+   ],
+   [
+    -244.0,
+    -757.0
+   ],
+   [
+    -242.09,
+    -756.62
+   ],
+   [
+    -240.46,
+    -755.54
+   ],
+   [
+    -239.38,
+    -753.91
+   ]
+  ],
+  [
+   [
+    -479.26,
+    -956.75
+   ],
+   [
+    -479.53,
+    -955.41
+   ],
+   [
+    -480.29,
+    -954.28
+   ],
+   [
+    -481.42,
+    -953.52
+   ],
+   [
+    -482.76,
+    -953.25
+   ],
+   [
+    -484.1,
+    -953.52
+   ],
+   [
+    -485.24,
+    -954.28
+   ],
+   [
+    -485.99,
+    -955.41
+   ],
+   [
+    -486.26,
+    -956.75
+   ],
+   [
+    -485.99,
+    -958.09
+   ],
+   [
+    -485.24,
+    -959.23
+   ],
+   [
+    -484.1,
+    -959.99
+   ],
+   [
+    -482.76,
+    -960.25
+   ],
+   [
+    -481.42,
+    -959.99
+   ],
+   [
+    -480.29,
+    -959.23
+   ],
+   [
+    -479.53,
+    -958.09
+   ]
+  ],
+  [
+   [
+    -242.0,
+    -852.0
+   ],
+   [
+    -242.38,
+    -850.82
+   ],
+   [
+    -243.38,
+    -850.1
+   ],
+   [
+    -244.62,
+    -850.1
+   ],
+   [
+    -245.62,
+    -850.82
+   ],
+   [
+    -246.0,
+    -852.0
+   ],
+   [
+    -245.62,
+    -853.18
+   ],
+   [
+    -244.62,
+    -853.9
+   ],
+   [
+    -243.38,
+    -853.9
+   ],
+   [
+    -242.38,
+    -853.18
+   ]
+  ],
+  [
+   [
+    -236.33,
+    -845.97
+   ],
+   [
+    -236.71,
+    -844.8
+   ],
+   [
+    -237.71,
+    -844.07
+   ],
+   [
+    -238.94,
+    -844.07
+   ],
+   [
+    -239.94,
+    -844.8
+   ],
+   [
+    -240.33,
+    -845.97
+   ],
+   [
+    -239.94,
+    -847.15
+   ],
+   [
+    -238.94,
+    -847.88
+   ],
+   [
+    -237.71,
+    -847.88
+   ],
+   [
+    -236.71,
+    -847.15
+   ]
+  ],
+  [
+   [
+    -23.62,
+    129.25
+   ],
+   [
+    -23.88,
+    130.58
+   ],
+   [
+    -24.64,
+    131.72
+   ],
+   [
+    -25.78,
+    132.48
+   ],
+   [
+    -27.12,
+    132.75
+   ],
+   [
+    -28.46,
+    132.48
+   ],
+   [
+    -29.59,
+    131.72
+   ],
+   [
+    -30.35,
+    130.58
+   ],
+   [
+    -30.62,
+    129.25
+   ],
+   [
+    -30.35,
+    127.91
+   ],
+   [
+    -29.59,
+    126.77
+   ],
+   [
+    -28.46,
+    126.01
+   ],
+   [
+    -27.12,
+    125.75
+   ],
+   [
+    -25.78,
+    126.01
+   ],
+   [
+    -24.64,
+    126.77
+   ],
+   [
+    -23.88,
+    127.91
+   ]
+  ],
+  [
+   [
+    132.24,
+    512.99
+   ],
+   [
+    135.28,
+    526.66
+   ],
+   [
+    121.62,
+    529.7
+   ],
+   [
+    118.57,
+    516.04
+   ]
+  ],
+  [
+   [
+    114.53,
+    512.12
+   ],
+   [
+    119.6,
+    510.99
+   ],
+   [
+    121.21,
+    518.22
+   ],
+   [
+    116.14,
+    519.35
+   ]
+  ],
+  [
+   [
+    128.89,
+    -346.22
+   ],
+   [
+    129.11,
+    -337.83
+   ],
+   [
+    118.11,
+    -337.54
+   ],
+   [
+    117.9,
+    -345.94
+   ]
+  ],
+  [
+   [
+    -417.86,
+    -343.16
+   ],
+   [
+    -409.28,
+    -357.83
+   ],
+   [
+    -394.6,
+    -349.24
+   ],
+   [
+    -403.19,
+    -334.57
+   ]
+  ],
+  [
+   [
+    -440.04,
+    -339.92
+   ],
+   [
+    -430.69,
+    -355.88
+   ],
+   [
+    -416.88,
+    -347.8
+   ],
+   [
+    -426.23,
+    -331.83
+   ]
+  ]
+ ]
+}

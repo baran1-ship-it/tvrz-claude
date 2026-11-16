@@ -21,10 +21,10 @@ class Prebal:
             if n.get("name") == jm: return i
         raise KeyError(jm)
 
-    def vyber(s, koreny=None, vynechat=(), vynechat_prim=(), vynechat_fn=None):
+    def vyber(s, koreny=None, vynechat=(), vynechat_prim=None, vynechat_fn=None):
         """koreny: jména uzlů (None = kořeny výchozí scény); vynechat: začátky jmen uzlů; vynechat_prim: {jméno uzlu:
         [začátky jmen materiálů]} nebo {"*": [...]} – primitivy těch materiálů se z uzlu vypustí; vynechat_fn(jméno) -> bool"""
-        j = s.j; s._vp = vynechat_prim
+        j = s.j; s._vp = vynechat_prim or {}
         sc = j["scenes"][j.get("scene", 0)]
         rr = sc["nodes"] if koreny is None else [s.najdi(k) for k in koreny]
         pryc = lambda n: any(n.get("name", "").startswith(v) for v in vynechat) or (vynechat_fn is not None and vynechat_fn(n.get("name", "")))
