@@ -6079,6 +6079,6 @@
   },
   "_pozn": "Míša 14. 11. („puchart udělal vesnici světlejší“): textury domů vsi (modely/ves/domy_*_diff/albedo) na průměrný jas cil (sRGB, nejvýš max_x), sytost × sytost; začouzené aspoň zacouzene.cil; vnitřek, pec, podlaha, omítka a kámen beze změny. Stejně barvy vrcholů středního stupně (domy_stredni.glb) a barva _Daleko (domy.glb). Podle Pucharta nastroje/havran/stavby_export.gd (a4239c63). Nástroj tools/zesvetli_ves.py (opakované spuštění nic nemění)."
  },
- "teren_lod_bias": 100.0,
- "_teren_lod_bias": "16. 11. Míša „létající hřiby“ (jeden model, jen tablet; dříve i trsy a mech, na PC nereprodukováno): sítě Teren* mají automatické LOD z importu tvrz.glb (generate_lods=true) a tablet kreslí s mesh_lod_threshold 10 px (PC 4) → zjednodušený terén leží až decimetry pod kolizí a _vyska(), na které sber._houby a louka sázejí. lod_bias 100 = automatické LOD terénu prakticky vypnuté (jako domy a plůtky lod_bias). Úsporu do dálky přebírají dlaždice terénu (teren_dlazdice.json, úroveň 0 přesná kopie). PODEZŘENÍ – ověřit na tabletu (houby u kmenů v lese ze 2–30 m)."
+ "teren_lod_bias": 4.0,
+ "_teren_lod_bias": "16. 11. Míša „létající hřiby“ (jeden model, jen tablet; dříve i trsy a mech, na PC nereprodukováno): sítě Teren* mají automatické LOD z importu tvrz.glb (generate_lods=true) a tablet kreslí s mesh_lod_threshold 10 px (PC 4) → zjednodušený terén leží až decimetry pod kolizí a _vyska(), na které sber._houby a louka sázejí. lod_bias 4 = práh tabletu efektivně 2,5 px (chyba ~6 cm ve 30 m místo ~25 cm), do dálky automatické LOD zůstává (100 by vypnulo úsporu terénu na tabletu, dokud nejsou zapnuté dlaždice – riziko výkonu). Po zapnutí dlaždic (úroveň 0 přesná) zvážit 100. PODEZŘENÍ – ověřit na tabletu (houby u kmenů v lese ze 2–30 m)."
 }
