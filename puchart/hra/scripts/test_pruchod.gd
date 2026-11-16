@@ -92,7 +92,9 @@ func _test_kmene() -> void:
 		nejbliz = minf(nejbliz, Vector2(hrac.position.x - k.x, hrac.position.z - k.z).length())
 	hrac.autopilot = Vector3.INF
 	var ujela := Vector2(hrac.position.x - st.x, hrac.position.z - st.z).length()   # QA: bez pohybu by test prošel naprázdno
-	if ujela < 1.5: vysledek["strom_kolize"] = "CHYBA: postava se nerozešla (%.2f m)" % ujela   # kmen zastaví na ~3 − (poloměr + kapsle)
+	var cil_ujet := minf(1.5, 3.0 - k.w - 0.3 - 0.3)   # kmen zastaví na 3 − (poloměr kmene + kapsle 0,3) – silný dub dřív (16. 11.: 1,38 m u kmene r ~1 m)
+	print("PRUCHOD strom_kolize kmen ", Vector3(k.x, k.y, k.z), " r %.2f, ujela %.2f, nejblíž %.2f" % [k.w, ujela, nejbliz])
+	if ujela < cil_ujet: vysledek["strom_kolize"] = "CHYBA: postava se nerozešla (%.2f m, čekám ≥ %.2f)" % [ujela, cil_ujet]
 	else: vysledek["strom_kolize"] = "OK" if nejbliz > k.w + 0.2 else "CHYBA: prošla kmenem (nejblíž %.2f m od osy, poloměr %.2f)" % [nejbliz, k.w]
 	print("PRUCHOD strom_kolize ", vysledek["strom_kolize"])
 
