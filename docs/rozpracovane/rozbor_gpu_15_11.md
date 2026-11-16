@@ -366,3 +366,9 @@ pak oprava. Hypotézu nevydávat za opravu.
   (automatické mezistupně Godotu uvnitř LOD0), ale ty listí karet nezjednoduší dobře (podezření, neměřeno, kolik se jich
   na tabletu reálně použije). Návrh: vlastní LOD1 ~3 tis. a LOD2 ~1 tis. (Blender decimace karet / méně karet, jako
   `trees.py` karty), impostor až dál, s časovaným prolínáním K13 → méně trojúhelníků ve 15–40 m i kratší 2× kreslení.
+- **K14 tráva podle videa (Míša 16. 11. 17:57–18:02: dither mask, card cells × impostor cells).** Prolínání ditherem už
+  máme (`trava_gpu.gdshader`: každý trs vlastní práh + Bayer 4×4, pásmo `fade_sirka` 14 m před `trava_dosah_m` 80 m).
+  Chybí jejich druhá vrstva: za hranicí trsů „impostor cells“ = nízká síť (~10 troj./buňka) s texturou vršků trávy,
+  aby za hranicí nebyl hladký terén → hranice zmizí a trsy mohou končit blíž (jejich 82,6k → 41k troj. při stejném
+  vzhledu). Pozor: u nás 0.9995 zkrácení dosahu výkon na tabletu NEZMĚNILO (naměřeno) → dřív ověřit, kolik tráva stojí
+  kresleníma pixely (překryv karet) a ne trojúhelníky: varianta trasy „trava_dosah 40 + vrstva vršků“ vs. 80.
