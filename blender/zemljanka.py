@@ -82,6 +82,35 @@ def kontrola():
     return h
 
 
+def _blok(P, H, xs, zs, vys, yb, mat):
+    """Souvisly blok hliny: bunka (ix, iz) ma horni plochu ve vysce vys[iz][ix], mezi bunkami svisle steny, po obvodu
+    steny dolu na yb, dno. Vrcholy sdilene podle polohy (jeden kus site)."""
+    idx, V, F = {}, [], []
+
+    def v(x, y, z):
+        k = (round(x, 4), round(y, 4), round(z, 4))
+        if k not in idx:
+            idx[k] = len(V)
+            V.append(k)
+        return idx[k]
+    nx, nz = len(xs) - 1, len(zs) - 1
+
+    def hh(ix, iz):
+        return vys[iz][ix] if 0 <= ix < nx and 0 <= iz < nz else yb
+    for iz in range(nz):
+        for ix in range(nx):
+            a, b, c, d = xs[ix], xs[ix + 1], zs[iz], zs[iz + 1]
+            y = vys[iz][ix]
+            F.append((v(a, y, c), v(a, y, d), v(b, y, d), v(b, y, c)))                 # horni plocha
+            F.append((v(a, yb, c), v(b, yb, c), v(b, yb, d), v(a, yb, d)))             # dno
+            # stena k sousedovi, je-li soused nizsi (u kraje soused = yb): +x, -x, +z, -z
+            for (ox, oz, p0, p1) in ((1, 0, (b, d), (b, c)), (-1, 0, (a, c), (a, d)), (0, 1, (a, d), (b, d)), (0, -1, (b, c), (a, c))):
+                y2 = hh(ix + ox, iz + oz)
+                if y2 < y - 1e-6:
+                    F.append((v(p0[0], y2, p0[1]), v(p1[0], y2, p1[1]), v(p1[0], y, p1[1]), v(p0[0], y, p0[1])))
+    P.mesh([H @ Vector(p) for p in V], F, mat)
+
+
 def build(coll, land_fn, teren_pod_prahem_m):
     """Jama kazde zemljanky (Part Zemljanka_<k>) a seznam poloh chysi pro svet.json: [{k, typ, p, smer}]."""
     if not Z:
@@ -109,16 +138,21 @@ def build(coll, land_fn, teren_pod_prahem_m):
             lo = Vector((min(a[0], b[0]), min(a[1], b[1]), min(a[2], b[2])))
             hi = Vector((max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2])))
             P.box(H @ Matrix.Translation((lo + hi) * 0.5), tuple(hi - lo), mat, collide=collide)
-        # dno a stupne (hlina), hrana stupne z kulatiny
-        kv((x0, yf - 0.25, z0), (x1, yf, zs), "hlina_hra")
+        # dno, stupne a hlina po stranach stupnu az k prahu = jeden souvisly kus hliny (vyskove pole po bunkach, svisle
+        # steny mezi nimi; test smyslu krtinec 16. 11.: samostatne kvadry stupnu a lavic byly „kupky hliny“), kolize po bunkach
+        xs = [x0, -sw, sw, x1]
+        zr = [z0, zs] + [z1 - (n - 1 - i) * dz for i in range(n)]
+        vys = [[yf, yf, yf]] + [[yt, prah - (n - i) * h, yt] for i in range(n)]
+        _blok(P, H, xs, zr, vys, yf - 0.25, "hlina_hra")
+        for iz in range(len(zr) - 1):
+            for ix in range(3):
+                lo = Vector((xs[ix], yf - 0.3, zr[iz]))
+                hi = Vector((xs[ix + 1], vys[iz][ix], zr[iz + 1]))
+                P.cols.append((H @ Matrix.Translation((lo + hi) * 0.5), tuple(hi - lo)))
         for i in range(n):
             ytop = prah - (i + 1) * h
-            za, zb = z1 - (i + 1) * dz, z1 - i * dz
-            kv((-sw, yf - 0.25, za), (sw, ytop, zb), "hlina_hra")
-            kv((-sw, ytop - 0.08, za), (sw, ytop + 0.01, za + 0.09), "dub", collide=False)
-        # hlina po stranach stupnu az k prahu (Puchart tu mel jen tenke steny a dole prazdno)
-        kv((x0, yf - 0.25, zs), (-sw, yt, z1), "hlina_hra")
-        kv((sw, yf - 0.25, zs), (x1, yt, z1), "hlina_hra")
+            za = z1 - (i + 1) * dz
+            kv((-sw, ytop - 0.08, za), (sw, ytop + 0.01, za + 0.09), "dub", collide=False)   # hrana stupne z kulatiny
         # steny jamy: lic na obrysu, tloustka T za licem (kryje zubaty okraj otvoru v terenu)
         kv((x0 - T, yf, z0 - T), (x0, yt, z1), "hlina_hra")
         kv((x1, yf, z0 - T), (x1 + T, yt, z1), "hlina_hra")
