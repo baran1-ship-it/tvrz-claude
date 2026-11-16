@@ -195,11 +195,16 @@ TK = KC["teren_shoda"]; nad = 0; pod = 0; vz = 0; pr = []
 for f in sorted(_gl.glob(K + "/hra/dlazdice/t_*.glb")):
     P_, I_ = _glb_lod0(f); T_ = P_[I_.reshape(-1, 3)]
     nn_ = np.cross(T_[:, 1] - T_[:, 0], T_[:, 2] - T_[:, 0]); T_ = T_[np.abs(nn_[:, 1]) > 0.05 * np.linalg.norm(nn_, axis=1)]   # bez svislé sukně
+    _fine = np.linalg.norm(T_[:, 1] - T_[:, 0], axis=1) < 0.5   # trojúhelníky jemné sítě otvoru (0,25 m)
     for w in ([1/3, 1/3, 1/3], [.5, .5, 0], [0, .5, .5], [.5, 0, .5]):
         q = np.einsum("j,ijk->ik", np.array(w, np.float32), T_); d = q[:, 1] - ter(q[:, 0], q[:, 2]); vz += len(q)
         jemne = _JM[np.clip(np.round(q[:, 2] - VY["z0_hra"]).astype(int), 0, _JM.shape[0] - 1), np.clip(np.round(q[:, 0] - VY["x0_hra"]).astype(int), 0, _JM.shape[1] - 1)]
         kryto = _KR[np.clip(np.round(q[:, 2] - VY["z0_hra"]).astype(int), 0, _KR.shape[0] - 1), np.clip(np.round(q[:, 0] - VY["x0_hra"]).astype(int), 0, _KR.shape[1] - 1)]
-        a = (d > TK["tolerance_m"]) & ~kryto; c = (d < -TK["tolerance_m"]) & ~jemne
+        # jemná síť 0,25 m kolem otvoru (zemljanka, štola – teren_dlazdice.py dira) leží v rovinách sítě 2 m; kolize (r16, 1 m) se mezi
+        # uzly interpoluje bilineárně a na úhlopříčce sítě 2 m se od roviny odchýlí – vzorky jemných trojúhelníků to zachytí ve strmém
+        # svahu (16. 11.: otvor zemljanky u lomu přes celý půdorys pod střechou sahá k hraně zářezu, −0,12 m); tolerance jemne_m
+        tol_ = np.where(_fine, max(TK["tolerance_m"], TK.get("jemna_sit_tolerance_m", 0.15)), TK["tolerance_m"])
+        a = (d > tol_) & ~kryto; c = (d < -tol_) & ~jemne
         nad += int(a.sum()); pod += int(c.sum())
         if (a | c).any() and len(pr) < 3: i = int(np.argmax(np.abs(d) * (a | c))); pr.append("[%.0f, %.0f] %.2f m" % (q[i, 0], q[i, 2], d[i]))
 # hra kreslí terén za běhu z vysek_sit.r16 (svet.gd _sit, LOD0 krok k0, úhlopříčka (r, c+k)–(r+k, c)) – ne z .glb (Míša 4. 11.:
