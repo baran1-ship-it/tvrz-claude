@@ -377,10 +377,11 @@ for m in Z["mista"]:
             yz = plosina(oz, -2.4, 2.4, -3.0, 3.1, Z["teren"]["prechod_m"])
             if d.get("mimo_zarez"): pass
             ZE = Z["modely"]["zemljanky"]; rz = ZE["jama_kolize_rozsir_m"]
-            DIRY.append({"misto": m["id"], "poly": poly_svet(oz, x0, x1, z0, z1)})
+            ZZ = Z["modely"]["zemljanky"]["zem"]; ps_ = zj.get("pod_strechou") or [x0, x1, z0, z1]; od_ = ZZ["otvor_dovnitr_m"]
+            DIRY.append({"misto": m["id"], "poly": poly_svet(oz, ps_[0] + od_, ps_[1] - od_, ps_[2] + od_, ps_[3] - od_), "zemljanka": True})   # celý půdorys pod střechou (Míša 16. 11.: tráva v zemljance)
             KOL.append({"misto": m["id"], "poly": poly_svet(oz, x0 - rz, x1 + rz, z0 - rz, z1 - 0.05), "y": round(yz + zj["podlaha_y"] - 0.6, 3)})
             q = {"model": d["model"], "x": wx, "y": yz, "z": wz, "yaw": yaw, "zemljanka": True}
-            zaz["dily"].append(q); PUD.append(poly_svet(oz, -2.6, 2.6, -3.2, 4.2))
+            po_ = ZZ["porost_okraj_m"]; zaz["dily"].append(q); PUD.append(poly_svet(oz, min(-2.6, ps_[0] - po_), max(2.6, ps_[1] + po_), min(-3.2, ps_[2] - po_), max(4.2, ps_[3] + po_)))
             # trasa: před dveřmi → stupně → podlaha → zpět ven
             n_ = ZE["schody"]["pocet"]; hst = (zj["prah_y"] - zj["podlaha_y"]) / (n_ + 1); dz_ = ZE["schody"]["hloubka_m"]; zd = zj["dvere_z"]
             ven = [*svet(oz, 0, zd + 2.2), None]

@@ -15,8 +15,8 @@
    "vzor": "build/zdroj_celky/domy.glb", "vzor_pozn": "originál z Disku (nastroje/stavby_z_havrana.sh) – chýše v něm stejné jako ve hře (úpravy domů – okap, pece – se chýší netýkají); hra/modely/stavby_h/domy.glb přestavují jiné kroky",
    "vystup": "hra/modely/stavby_h",
       "typy": {
-    "zemljanka_kura": {"koren": "ChyseKura", "prah_y": 0.04, "podlaha_y": -0.7, "jama": [-1.5, 1.5, -2.05, 2.2], "rohoz_mat": "M_Slama_001", "hlina_mat": "M_Hlina_003", "drevo_mat": "M_Zhlavi_003", "dvere_x": [-0.48, 0.4], "dvere_z": 2.3},
-    "zemljanka_prkna": {"koren": "ChysePrkna", "prah_y": 0.5, "podlaha_y": -0.45, "jama": [-1.6, 1.6, -2.05, 2.2], "rohoz_mat": "M_Slama_002", "hlina_mat": "M_Hlina_004", "drevo_mat": "M_Zhlavi_004", "dvere_x": [-0.48, 0.4], "dvere_z": 2.3}
+    "zemljanka_kura": {"koren": "ChyseKura", "prah_y": 0.04, "podlaha_y": -0.7, "jama": [-1.5, 1.5, -2.05, 2.2], "rohoz_mat": "M_Slama_001", "hlina_mat": "M_Hlina_003", "drevo_mat": "M_Zhlavi_003", "dvere_x": [-0.48, 0.4], "dvere_z": 2.3, "pod_strechou": [-2.25, 2.24, -2.94, 3.12]},
+    "zemljanka_prkna": {"koren": "ChysePrkna", "prah_y": 0.5, "podlaha_y": -0.45, "jama": [-1.6, 1.6, -2.05, 2.2], "rohoz_mat": "M_Slama_002", "hlina_mat": "M_Hlina_004", "drevo_mat": "M_Zhlavi_004", "dvere_x": [-0.48, 0.4], "dvere_z": 2.3, "pod_strechou": [-2.22, 2.22, -2.85, 2.85]}
    },
    "vynechat": ["_Interier", "_Kol_Prycna"],
    "dvere_otevrit_st": -100,
@@ -25,6 +25,7 @@
    "rohoz": {"sirka_m": 1.16, "delka_m": 2.0, "tl_m": 0.035, "od_steny_m": 0.05, "z_konec": -1.45, "zdroj": "rohož z rákosí/slámy pod houní (Míša 15. 11.); šíře a délka podle houně modeláře 1,08 × 1,93 m, za hlavou místo pro truhlu"},
    "houne": {"model": "res://modely/luzka/Houne_Vlnena_Tablet_1K.tscn", "zdroj": "Míša 16. 11.: vlněná houně od modeláře build/zdroj_modelar/Luzka_1400 (NAVOD_LUZKA.md: 1,08 × 1,93 × 0,09 m, hlava k −Z, bez kolize, LOD0 do 8 m); kopie do hra/modely/luzka (nastroje/postav_vse.sh), osazení na značky spánku v zemljance (hra/scripts/zajimava.gd)", "lod0_do_m": 8.0, "do_m": 40.0},
    "jama_kolize_rozsir_m": 0.9,
+   "zem": {"popis": "Míša 16. 11. (snímek luzka_barvy_zemljanka_svetlo.jpg: „neleze ti tráva do té zemljanky?“): pod střechou mezi hranou jámy a patou krokví hliněná zem chýše (síť Zemljanka_Zem s kolizí, výška horní hrany stěn), otvor v terénu přes celý půdorys pod střechou (typy.pod_strechou – obal Vnejsek z modelu) zmenšený o otvor_dovnitr_m, aby okraj otvoru (jemná síť 0,25 m) ležel pod krokvemi; maska porostu (pudorysy → stavby_vegetace.py) pokrývá půdorys + porost_okraj_m", "otvor_dovnitr_m": 0.12, "tl_m": 0.12, "porost_okraj_m": 0.5, "test": "smysl:zemljanka_bez_travy"},
    "lod": {"podrobny_do_m": 50.0, "obal_do_m": 400.0, "obal_barva": [0.29, 0.23, 0.17], "jas_podrobny": 0.8, "jas_pozn": "jako domy vsi (mista.json modely.domy.jas_podrobny 0,8 – textury chýší Havrana jsou zesvětlené)", "zdroj": "jako domy vsi (mista.json modely.domy.lod), zemljanka je malá (12 tis. troj.) → podrobně do 50 m, dál hrubý obal _Daleko v barvě ztmavlé kůry (mista.json daleko_textury jas Sindel × kůra; snímek 16. 11. f_uhlir: obal bez textury byl oranžový)"}
   },
   "stola": {

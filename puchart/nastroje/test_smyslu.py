@@ -612,6 +612,27 @@ TEST("portaly", len(POR_) >= KC.get("portaly_min", 8), "portálů z portaly.py: 
 # Mimo: obrys stavby (brána) a 28 m od konce mostu (cesty.py tam osu stáčí rovně do osy mostu – ROVNE_M/OBLOUK_M).
 LO_ = json.load(open(D + "louka.json"))["tridy"]
 def _roste(t): return float(LO_.get(t, 0.0)) > 0 or any(float(v) > 0 for v in BY["tridy"].get(t, {}).values() if not isinstance(v, str)) or bool(KE["tridy"].get(t))
+# zemljanky bez trávy (Míša 16. 11. ke snímku luzka_barvy_zemljanka_svetlo.jpg: „neleze ti tráva do té zemljanky?“): půdorys pod
+# střechou (zajimava_modely.json pod_strechou) celý v otvoru terénu (build/zajimava_teren.json diry) a bez porostu (stanoviště)
+_zmo = json.load(open(D + "zajimava_modely.json"))["modely"]; _zt = json.load(open(K + "/build/zajimava_teren.json")) if os.path.exists(K + "/build/zajimava_teren.json") else {"diry": []}
+def _v_poly(x, z, P):
+    c = False
+    for i_ in range(len(P)):
+        (x1, z1), (x2, z2) = P[i_], P[(i_ + 1) % len(P)]
+        if (z1 > z) != (z2 > z) and x < (x2 - x1) * (z - z1) / (z2 - z1) + x1: c = not c
+    return c
+_c32 = []; _nz = 0
+for _m in json.load(open(D + "zajimava_mista.json"))["mista"]:
+    for _q in _m["dily"]:
+        if not _q.get("zemljanka"): continue
+        _nz += 1; _ps = _zmo[_q["model"]].get("pod_strechou")
+        if not _ps: _c32.append("%s: model bez pod_strechou" % _q["model"]); continue
+        _cs, _sn = math.cos(_q["yaw"]), math.sin(_q["yaw"]); _od = 0.2
+        _body = [(_q["x"] + a * _cs + b * _sn, _q["z"] - a * _sn + b * _cs) for a in np.linspace(_ps[0] + _od, _ps[1] - _od, 9) for b in np.linspace(_ps[2] + _od, _ps[3] - _od, 11)]
+        _mimo = sum(1 for x_, z_ in _body if not any(_v_poly(x_, z_, d_["poly"]) for d_ in _zt["diry"]))
+        _rost = sum(1 for x_, z_ in _body if _roste(TR[int(trida(x_, z_))]))
+        if _mimo or _rost: _c32.append("%s %s: bodů pod střechou mimo otvor terénu %d, s porostem %d z %d" % (_m["id"], _q["model"], _mimo, _rost, len(_body)))
+TEST("zemljanka_bez_travy", _nz > 0 and not _c32, "; ".join(_c32) if _c32 else "%d zemljanek: půdorys pod střechou v otvoru terénu, bez porostu" % _nz)
 _ROSTE = np.array([_roste(t) for t in TR])
 _CP = json.load(open(K + "/pravidla/svet/cesty_puchart.json")); _MO = np.array([m_["u_bodu"][:2] for m_ in json.load(open(K + "/pravidla/svet/voda_hra.json")).get("mosty", [])] or [[1e9, 1e9]])
 def _chaikin(p_, n=3):

@@ -89,6 +89,12 @@ def jama_steny(t, kp):
     for z in np.arange(z0 + 0.15, zs + 0.01, kp["rozestup_m"]):
         dr.append(kul(x0, z)); dr.append(kul(x1, z))
     for x in np.arange(x0 + 0.16, x1, kp["rozestup_m"]): dr.append(kul(x, z0))
+    # zem chýše pod střechou kolem jámy (Míša 16. 11.: tráva v zemljance) – horní plocha ve výšce hrany stěn, s kolizí
+    if t.get("pod_strechou"):
+        a0, a1, b0, b1 = t["pod_strechou"]; tz_ = ZE["zem"]["tl_m"]
+        for q in ((a0, x0 - T, b0, b1), (x1 + T, a1, b0, b1), (x0 - T, x1 + T, b0, z0 - T), (x0 - T, -sw, z1 + T, b1), (sw, x1 + T, z1 + T, b1), (-sw, sw, z1, b1)):
+            if q[1] - q[0] < 0.01 or q[3] - q[2] < 0.01: continue
+            hl.append(kvadr(q[0], q[1], yt - tz_, yt, q[2], q[3], uv_m=1.0)); kol.append(kvadr(q[0], q[1], yt - tz_ - 0.2, yt, q[2], q[3])[0])
     return spoj(*hl), spoj(*dr), kol, zs
 
 
@@ -119,7 +125,7 @@ for jm_t, t in ZE["typy"].items():
         pb.uzly.append({"name": k_, "translation": p_}); kor.setdefault("children", []).append(len(pb.uzly) - 1)
     dst = "%s/%s/%s.glb" % (K, ZE["vystup"], jm_t)
     n, vel, tri = pb.uloz(dst, "%s/%s/textury_zemljanka" % (K, ZE["vystup"]))
-    INFO["modely"][jm_t] = {"aabb": bbox(dst), "jama": t["jama"], "podlaha_y": yf, "prah_y": t["prah_y"], "schody_od_z": zs,
+    INFO["modely"][jm_t] = {"aabb": bbox(dst), "jama": t["jama"], "pod_strechou": t.get("pod_strechou"), "podlaha_y": yf, "prah_y": t["prah_y"], "schody_od_z": zs,
                             "spani": zn, "bedna": [0.0, yf, t["jama"][2] + 0.31], "dvere_z": t["dvere_z"], "troj": tri}
     print("ZAJIMAVA %s uzlů %d, %.2f MB, troj %d" % (jm_t, n, vel / 1e6, tri))
 
