@@ -32,3 +32,9 @@ Postavy (z_postavy) stále rozbité (15 sad, ř. 22 tabulky 15. 11.) – nevydá
   `ryb_vznaseni` 6 vrcholů 0,06–0,13 m (úhlopříčky čtverců); prohlédnout `build/m16/*.png` (sklep, vrata krčmy, lávka, přeliv).
 - Focení: NIKDY dvě focení najednou (2× Killed – paměť kontejneru).
 - Budík přesunut na 17:25 (reset limitu 17:20).
+- **Scény HOTOVO v datech, export `export_sceny` běžel ve 14:15 (výsledek v build/beh/export_sceny.log)**: pole jen za vsí
+  (plochy.json pole.za_vsi), houština (les_podrost.json houstina: meze, břeh s mezerami, plášť lesa, podrost), clony vsi
+  (kompozice.clony, ves.zelen_ulice, ves.ploty_ulice), výhled prijezd_ves na hraně svahu, okluzor_houstina, varianta
+  bez_houstin. Test smyslu OK (982 kusů houštiny). Další krok: oddíl „Stav a další krok“ v sceny_kcd_15_11.md
+  (výsledek exportu → dlaždice → testy clona_vsi, houstina_volno… → snímky po dvou bězích, PROHLÉDNOUT).
+  Riziko: jabloně u vjezdu 24–28 tis. troj. (výkon ves-vjezd).
