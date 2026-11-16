@@ -6,7 +6,9 @@ a na jeji misto u dveri jizby se nevejde - hleda se misto v jizbe podle pravidel
     x hloubka pruchod_m), mimo lavici modelu (Kol_Lavice) a stul s lavici (kusy nabytku);
   - pred ustim (znacka Pec_Usti) volne misto pred_ustim_m (prikladani, pekarska lopata);
   - zapeci (mistni -z) a lavice pece (mistni -x) ke zdi (KCD, chalupy 14. st.: pec v koute, zapeci u zdi);
-  - pak luzko: cele v jizbe, mimo pec, dvere, lavice, stul; nejblize puvodnimu mistu;
+  - pak luzko: cele v jizbe, mimo pec, dvere, lavice, stul; v koute vstupni steny na druhe strane nez pec (Misa 16. 11.:
+    jizba po staru - pec v koute u vstupu, stul ve svatem koute, luzko v protejsim koute; dvere jizby jsou v modelech u rohu,
+    pec 2,5 x 2,5 m se do rohu u dveri nevejde -> pec v rohu -x hned za pruchodem dveri);
   - drobne kusy (vedro, spalek, truhla, kolebka), ktere zasahuji do pece nebo luzka, se presunou na nejblizsi volne misto.
 Vystup: nabytek.json domy[typ] kusy (pec_chalupni + posunute kusy) a pec_modelu (materialy a uzly puvodni pece pryc).
   python3 tools/krok_b/pece_domu.py [--zapis]"""
@@ -127,13 +129,18 @@ def _luzko(typ, kusy, jizba, prekazky, pec, us, best, pr_t):
             for z in np.arange(jizba[2], jizba[3], 0.05):
                 o = obd(lk[0], x, z, yaw)
                 if uvnitr(o, jizba) and not any(prekryv(o, p) for p in prek2):
-                    sk = math.hypot(x - lk[1], z - lk[2]) + (0.0 if yaw == lk[3] else 0.4)
+                    # jizba po staru (Misa 16. 11., pece_domu.luzko_kout): luzko v koute vstupni steny (pricka sine) na druhe
+                    # strane nez pec - blizko rohu: roh obdelniku luzka nejblize k rohu jizby
+                    rx = jizba[1] if px < (jizba[0] + jizba[1]) / 2 else jizba[0]
+                    rz = jizba[2]
+                    sk = math.hypot(min(abs(o[0] - rx), abs(o[1] - rx)), min(abs(o[2] - rz), abs(o[3] - rz))) + (0.0 if yaw == lk[3] else 0.05)
                     if lb is None or sk < lb[0]:
                         lb = (sk, round(float(x), 3), round(float(z), 3), yaw)
     if lb is None:
         return None
     out[li] = [lk[0], lb[1], lb[2], lb[3], lk[4]]
-    obsaz = prek2 + [obd(lk[0], lb[1], lb[2], lb[3])]
+    lo_ = obd(lk[0], lb[1], lb[2], lb[3])
+    obsaz = prek2 + [lo_]
     # drobne kusy na podlaze jizby, ktere zasahuji do pece nebo luzka: nejblizsi volne misto
     for i, k in enumerate(out):
         if i == li or k[0] in PR["pevne_kusy"] or len(k) > 5 or float(k[4]) != 0.0:
@@ -141,7 +148,7 @@ def _luzko(typ, kusy, jizba, prekazky, pec, us, best, pr_t):
         if not (jizba[2] - 0.2 <= k[2] <= jizba[3] + 0.2):
             continue                                  # jen jizba
         o = obd(k[0], k[1], k[2], k[3])
-        if not any(prekryv(o, p) for p in [po, obsaz[-1]]):
+        if not any(prekryv(o, p) for p in [po, lo_]):
             obsaz.append(o)
             continue
         kb = None

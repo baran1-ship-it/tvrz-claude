@@ -6057,7 +6057,10 @@ func ohen_predmetu(id: String, p: Vector3, yaw: float, jm: String, zap: bool) ->
 	var n := 0
 	for z: String in oz["ohen"]:
 		if zn.has(z):
-			var q := xf * _v3(zn[z])
+			var lq := _v3(zn[z])
+			if z == "Pec_Ohen" and zn.has("Pec_Usti") and (oz.get("k_usti_predmety", []) as Array).has(id):
+				lq = lq.lerp(_v3(zn["Pec_Usti"]), float(oz.get("k_usti", 0.0)))   # zare videt z mistnosti (modely.json k_usti)
+			var q := xf * lq
 			data["ohne"].append({"kind": "hearth", "pos": [q.x, q.y, q.z], "name": jm if n == 0 else "%s_%d" % [jm, n + 1],
 					"size": float(oz["velikost_m"]), "zap": zap, "svetlo": oz["svetlo"], "predmet": id})
 			n += 1
@@ -7262,7 +7265,17 @@ func _ves_domy(root: Node3D) -> void:
 				# mistnosti (pasma.predmet o_zed_uhel_st), pata od zdi tak, aby se horni konec zdi dotykal
 				data["vybaveni"].append(_opreny_o_zed(String(v[0]), Vector2(float(v[1]), float(v[2])), float(m["pod"]) + float(v[4]), m, xf))
 				continue
-			data["vybaveni"].append({"id": v[0], "p": [wp.x, wp.y, wp.z], "yaw": yv})
+			var vr2 := {"id": v[0], "p": [wp.x, wp.y, wp.z], "yaw": yv}
+			if v.size() > 5 and v[v.size() - 1] is Dictionary:
+				# seno v jeslich chleva (nabytek.json domy: posledni pole {naklon_x_st, sc} - sklon kolem osy x modelu, meritko)
+				var ex: Dictionary = v[v.size() - 1]
+				if ex.has("naklon_x_st"):
+					var na := deg_to_rad(float(ex["naklon_x_st"]))
+					var upw: Vector3 = (xf.basis * Vector3(0.0, cos(na), sin(na))).normalized()
+					vr2["up"] = [upw.x, upw.y, upw.z]
+				if ex.has("sc"):
+					vr2["sc"] = float(ex["sc"])
+			data["vybaveni"].append(vr2)
 			_postel_zapis(String(v[0]), String(nb["budova"]) % int(d["k"]), wp, yv, 0)
 			ohen_predmetu(String(v[0]), wp, yv, "ohen_dum_%d" % int(d["k"]), int(d["k"]) % 2 == 1 or typ == "Rychta")
 		# drevo u domu (Misa 27. 10.: nove hranice podle KCD1, kazdy dum jinak): [id, strana (-1 dvur / +1 vstup / 0 zadni
