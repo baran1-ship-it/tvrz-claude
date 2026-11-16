@@ -94,7 +94,7 @@ func _les(u: Node3D, di: Dictionary, jm: String) -> Node3D:
 		for g in l1.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_begin = d0; (g as GeometryInstance3D).visibility_range_end = d1
 		for c in l1.find_children("*", "CollisionObject3D", true, false): c.queue_free()
-	if String(di.get("funkce", "")) == "studanka": _voda_studanky(k)
+	if String(di.get("funkce", "")) == "studanka": call_deferred("_voda_studanky", k)   # hlavni.mat_voda vzniká až po zajímavých místech
 	match String(di.get("efekt", "")):
 		"milir": _milir(k)
 		"smolarna": _smolarna(k)
@@ -119,7 +119,9 @@ func _voda_studanky(k: Node3D) -> void:
 			var arr := am.surface_get_arrays(i)
 			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 			var uv := PackedVector2Array(); var co := PackedColorArray()
-			for p in v: uv.append(Vector2(p.z, 1.0 - float(vo["hloubka_m"]))); co.append(Color(1, 1, 1, 1))
+			for p in v:   # šachta hluboká, potůček (vrcholy pod potucek_pod_y) mělký
+				var hl := float(vo["potucek_hloubka_m"]) if p.y < float(vo["potucek_pod_y"]) else float(vo["hloubka_m"])
+				uv.append(Vector2(p.z, 1.0 - hl)); co.append(Color(1, 1, 1, 1))
 			arr[Mesh.ARRAY_TEX_UV] = uv; arr[Mesh.ARRAY_COLOR] = co
 			var nova := ArrayMesh.new()
 			for j in am.get_surface_count():
