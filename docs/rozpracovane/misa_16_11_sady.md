@@ -1,5 +1,19 @@
 # Míša 16. 11. – sady z Disku (lůžka, topení, lesní díly, seno) a zemljanky
 
+> **Stav a další krok (16. 11. odpoledne, před limitem):**
+> - HOTOVO (neověřeno snímkem): barvy vrcholů sad lineární → sRGB (`pravidla/svet/barvy_vrcholu.json`, `tools/barvy_vrcholu.py`, převedeno 69 GLB
+>   katalogu; seno albedo modulace [1; 0,9; 0,76] jako Puchart; volá ho i `blender/predmety.py build`) – **chybí `godot --import`**
+>   (`tools/beh.sh imp cmd godot --headless --path . --import`) a snímky za dne: seno, chudá postel, zemljanka, rychtářova postel vs. nahledy sad.
+> - HOTOVO (neověřeno): seno ve stáji tvrze z podlahy do žebřinových jeslí (3× `seno_jesle`, sklon 35°, měřítko 0,6, katalog `upevneno`);
+>   `nabytek.json svet` předává `up`/`sc`; test `nevisi_1400` přeskočí `upevneno`.
+> - ZBÝVÁ: krčma – chomáče sena do koryt (kupa jen v senném koutě), záře pece krčmy viditelná (ohen u ústí – značka Pec_Ohen je uvnitř klenby),
+>   jizba po staru (Míša: pec v koutě u vstupní stěny, stůl s postelí v protějším/svatém koutě) jako pravidlo v `tools/krok_b/pece_domu.py`:
+>   dveře jizby jsou v modelech u rohu (Dum1 x −1,7…−0,8) – pec 2,5 × 2,5 m se do rohu u dveří nevejde; návrh: pec v rohu −x u vstupní
+>   stěny za průchodem dveří (jako teď), postel do rohu (+x, vstupní stěna), stůl zůstává ve svatém koutě; seno do jeslí chléva Dum2
+>   (Puchart funkce.json jesle osazeni: poloha (−0,52; 1,5; −4,32), sklon 35°, měřítko [0,99; 1; 0,7] – kus domu potřebuje up/sc);
+>   pak testy `katalog_1400,postele_domu,ohen_u_pece,nevisi_1400,visici,lide_chovani` a snímky všech typů domů. Export světa nedělat (agent scén).
+
+
 Zdroj: zipy na Disku `Luzka_1400`, `Topeni_1400`, `Topeni_1400_Doplnek`, `les_dily`, `Seno_1400` (NAVOD_*.md, PRAMENY/PODKLADY_A_LICENCE.md);
 zemljanka podle Puchartu (větev ccr-f2d32673-9fi7m5: `docs/zajimava_mista_plan.md`, `nastroje/zajimava_modely.py`, `zajimava_mista.py`).
 Meze testů: `pravidla/pravidla_sveta.json pasma.test.sady_1400`.
