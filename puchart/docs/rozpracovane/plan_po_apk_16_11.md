@@ -5,6 +5,9 @@ i možnost hry, ne jen pískoviště, ale i příběh – ten by ze začátku by
 a pití vody nebo vína či piva, aby postava přežila.“
 
 1. Míša projde APK → opravy chyb (chyby.md + testy).
+1b. **PRVNÍ po APK (Míša 16. 11.): plnější příroda a scény s houštinami jako teď dělá Havran** – nejdřív zásoba MultiMeshů
+   (bez záseků), časované prolnutí stromů, pak hustší podrost/houštiny/keře podle Havrana (zjistit jeho aktuální práci na
+   větvi claude/new-session-0dtk58), měřit trasou na tabletu. Život (zvěř) až potom.
 2. Život ve světě: zvuky prostředí (Havran ruchy.gd), zvěř – realistické CC0/CC-BY modely s kostrou, náhledy Míše na výběr,
    modelář dodělá (docs/rozpracovane/havran_prevzeti_16_11.md); chování z Havrana zvirata.gd (stanoviště v lese, útěk, spánek).
 3. Lov a trofeje: luk/toulec (katalog Havrana), zásah, smrt zvěře (klip Death), vyvržení → maso, kůže, trofej (jelení trofej,
