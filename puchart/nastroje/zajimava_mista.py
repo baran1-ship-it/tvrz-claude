@@ -43,11 +43,13 @@ def hust(o, k=1.0):
 
 
 OSY = {}
-for c in C["cesty"]:
-    if c.get("osa") and not c.get("jen_maska"): OSY.setdefault(c["typ"], []).append(hust(np.array(c["osa"])[:, :2]))
+for c in C["cesty"]:   # pěšiny k místům (k_mistu, nastroje/pesiny_k_mistum.py) se při hledání polohy nepočítají – vedou k místu, které se teprve hledá
+    if c.get("osa") and not c.get("jen_maska") and not c.get("k_mistu"): OSY.setdefault(c["typ"], []).append(hust(np.array(c["osa"])[:, :2]))
+SIRKA = {t: float(v["sirka_m"]) for t, v in C["typy"].items()}   # pás cesty = sirka_m / 2 od osy (test smysl:zajimava_mimo_cest)
+K_MISTU = {c["k_mistu"]: c for c in C["cesty"] if c.get("k_mistu") and c.get("osa")}
 KD = {t: cKDTree(np.vstack(v)) for t, v in OSY.items()}
 VSE = cKDTree(np.vstack([np.vstack(v) for v in OSY.values()]))
-SEG = [(c["id"], hust(np.array(c["osa"])[:, :2])) for c in C["cesty"] if c.get("osa") and not c.get("jen_maska")]
+SEG = [(c["id"], hust(np.array(c["osa"])[:, :2])) for c in C["cesty"] if c.get("osa") and not c.get("jen_maska") and not c.get("k_mistu")]
 TOKY = [np.array(t["osa"]) for t in TH.values()]
 KT = cKDTree(np.vstack([hust(t[:, :2]) for t in TOKY]))
 MS = json.load(open(K + "/hra/data/mista_stavby.json"))
@@ -234,45 +236,62 @@ def stola_ok(x, z, g, m):
 
 
 # ------------------------------------------------------------------ mlýn na Veličce
+def _zabor_body(o, obdelniky, n=8):
+    return [svet(o, a, b) for (x0, x1, z0, z1) in obdelniky for a in np.linspace(x0, x1, n) for b in np.linspace(z0, z1, n)]
+
+
+def od_pasu_cest(body):
+    """nejmenší vzdálenost bodů od kraje pásu kterékoli cesty (osa − sirka_m / 2); záporná = v cestě"""
+    return min(float(KD[t].query(body)[0].min()) - SIRKA.get(t, 2.0) / 2 for t in KD)
+
+
 def hledej_mlyn(m):
+    """Míša 16. 11.: mlýn přímo na břehu Veličky, kolo na spodní vodu v proudu (bez náhonu a odtoku), mimo cestu.
+    Osa kola (mlyn.kolo) kolo_od_osy_m od osy toku k vlastnímu břehu, podlaha z hladiny (ponor lopatek), +z místa po proudu
+    nebo proti proudu (mlýn na jednom či druhém břehu – směr otáčení kola podle toho). Zábor (budova, dvůr, cesta modelu)
+    mimo pás cest (od_cest_m), mimo koryto Veličky i jiné toky, do max_vyrovnani_m od podlahy, přístup do cesta_max_m od cesty."""
     h = m["hledat"]; ml = m["mlyn"]; best = None
-    vel = [t for t in TH.values() if t.get("jmeno") == h["tok"]][0]; osa = np.array(vel["osa"])
+    vel = [t for t in TH.values() if t.get("jmeno") == h["tok"]][0]; osa = np.array(vel["osa"]); sir_t = float(vel["sirka"])
     kv = cKDTree(hust(osa[:, :2], 0.5))
-    for i in range(2, len(osa) - 2, 2):
+    jine = [np.array(t["osa"]) for t in TH.values() if t is not vel]
+    kj = cKDTree(np.vstack([hust(t[:, :2]) for t in jine])) if jine else None
+    kx, ky, kz = ml["kolo"]; R = ml["kolo_r_m"]; posun = ml["kolo_od_osy_m"]
+    for i in range(2, len(osa) - 2):
         p = osa[i]
         if np.hypot(p[0] - h["u"][0], p[1] - h["u"][1]) > h["r_m"]: continue
         f = osa[i + 2, :2] - osa[i - 2, :2]; f /= np.linalg.norm(f)
-        yaw = math.atan2(f[0], f[1])   # +z místa = po proudu (náhon začíná proti proudu)
-        for posun_ in np.arange(-6, 6.1, 2.0):
-            for odsaz in np.arange(9.0, 15.1, 1.0):
-                lx_e, lz_e = ml["lednice_konec"]
-                # o + rot(lednice_konec) = bod osy (o posun_ po proudu)
-                tx, tz = p[0] + f[0] * posun_, p[1] + f[1] * posun_
-                o = {"yaw": yaw}
-                ex, ez = rot(yaw, lx_e, lz_e); o["x"] = tx - ex * (odsaz / abs(lx_e)); o["z"] = tz - ez * (odsaz / abs(lx_e))
-                xa, xb, za, zb = ml["dvur_aabb"]
-                body = [svet(o, a, b) for a in np.linspace(xa, xb, 6) for b in np.linspace(za, zb, 6)]
-                hy = [vys(*q) for q in body]; y0 = float(np.median(hy)); pv = max(hy) - min(hy)
-                dmin = min(kv.query(q)[0] for q in body)
-                if dmin < 5.0: continue
-                led = svet(o, *ml["lednice_konec"]); d_led = kv.query(led)[0]
-                wl = float(osa[min(range(len(osa)), key=lambda k: (osa[k, 0] - led[0]) ** 2 + (osa[k, 1] - led[1]) ** 2), 2])
-                ns = svet(o, *ml["nahon_zacatek"]); hn = vys(*ns)
-                dc = d_cesty(o["x"], o["z"], ["vozova"])[0]
-                if KS.query([o["x"], o["z"]])[0] < 25: continue
-                cena = pv * 0.6 + abs(wl - (y0 + ml["lednice_y"])) * 1.5 + max(0, (y0 + ml["nahon_y"]) - hn) * 0.4 + d_led * 0.3 + max(0, dc - 25) * 0.05
-                if best is None or cena < best[0]: best = (cena, o["x"], o["z"], yaw, y0, pv, wl, hn, dc)
+        for smer in (1, -1):
+            yaw = math.atan2(f[0] * smer, f[1] * smer)
+            o = {"yaw": yaw, "x": 0.0, "z": 0.0}
+            bx, bz = svet(o, kx - posun, kz)   # osa toku = kolo posunuté o kolo_od_osy_m dál od budovy (−x)
+            o["x"] = p[0] - bx; o["z"] = p[1] - bz
+            if not (xh0 + 40 < o["x"] < xh0 + nx - 40 and zh0 + 40 < o["z"] < zh0 + ny - 40): continue
+            wl = float(p[2]); y0 = wl - ml["ponor_m"] - ky + R
+            body = _zabor_body(o, ml["zabor"])
+            if od_pasu_cest(body) < h["od_cest_m"]: continue
+            if float(kv.query(body)[0].min()) < sir_t / 2 - 0.05: continue
+            if kj is not None and float(kj.query(body)[0].min()) < h["od_jinych_toku_m"]: continue
+            if float(KS.query(body)[0].min()) < h["od_staveb_m"]: continue
+            dy = np.array([vys(*q) for q in body]) - y0
+            if np.abs(dy).max() > h["max_vyrovnani_m"]: continue
+            pr = svet(o, *m["pristup"]["bod"]); dc = d_cesty(pr[0], pr[1], m["pristup"]["cesty"])[0]
+            if dc > h["cesta_max_m"]: continue
+            cena = float(np.abs(dy).mean()) + 0.5 * float(np.abs(dy).max()) + dc * 0.02 + np.hypot(p[0] - h["u"][0], p[1] - h["u"][1]) * 0.002
+            if best is None or cena < best[0]: best = (cena, o["x"], o["z"], yaw, y0, float(np.abs(dy).max()), wl, smer, dc, od_pasu_cest(body))
     return best
 
 
 # ------------------------------------------------------------------ místa
 hotova = {}
+ODLOZENA = []
 for m in Z["mista"]:
+    if m.get("odlozeno"):   # Míša 16. 11.: poustevna odložená (záznam zůstává, ve světě není – test pruchod:zajimava_mista)
+        ODLOZENA.append(m["id"]); print("ZAJIMAVA_MISTO %s ODLOŽENO (%s)" % (m["id"], m.get("odlozeno_pozn", "")[:60])); continue
     if m["hledat"].get("mlyn"):
         b = hledej_mlyn(m)
         if b is None: print("ZAJIMAVA_MISTO %s NENALEZENO" % m["id"]); continue
-        o = {"x": b[1], "z": b[2], "yaw": b[3]}
-        print("ZAJIMAVA_MISTO mlyn [%.1f, %.1f] yaw %.0f°, dvůr y %.2f (převýšení %.2f), hladina u lednice %.2f, terén u náhonu %.2f, cesta %.0f m, cena %.2f" % (b[1], b[2], math.degrees(b[3]), b[4], b[5], b[6], b[7], b[8], b[0]))
+        o = {"x": b[1], "z": b[2], "yaw": b[3], "y0": b[4], "smer": b[7]}
+        print("ZAJIMAVA_MISTO mlyn [%.1f, %.1f] yaw %.0f°, podlaha y %.2f (vyrovnání do %.2f m), hladina %.2f, %s, přístup %.0f m od cesty, od pásu cest %.1f m, cena %.2f" % (b[1], b[2], math.degrees(b[3]), b[4], b[5], b[6], "po proudu" if b[7] > 0 else "proti proudu", b[8], b[9], b[0]))
     else:
         b = hledej(m, hotova)
         if b is None: print("ZAJIMAVA_MISTO %s NENALEZENO" % m["id"]); continue
@@ -310,22 +329,25 @@ for m in Z["mista"]:
             zaz["stola"] = {"zarez_m": round(L, 2), "kryt_m": m["hledat"]["kryt_m"], "y0": round(y0, 3)}
             PUD.append(poly_svet(o, -w - 2, w + 2, -1, L + 3))
             c0 = svet(o, 0, L + 6); tr += [[*c0, None], [*svet(o, 0, 2.5), None], [*svet(o, 0, -6.0), y0, 0.6], [*svet(o, 0, -15.5), y0, 0.6], [*svet(o, 0, -6.0), y0, 0.6], [*svet(o, 0, 2.5), None]]
-        elif t["typ"] == "mlyn":
-            ml = m["mlyn"]; xa, xb, za, zb = ml["dvur_aabb"]
-            y0 = float(np.median([vys(*svet(o, a, b_)) for a in np.linspace(xa, xb, 6) for b_ in np.linspace(za, zb, 6)]))
-            plosina(o, xa, xb, za, zb, 4.0, y0)
-            # násyp náhonu na kozách (Mlyn_Nahon: od začátku ke kolu) – kozy stojí na zemi
-            n0 = np.array(ml["nahon_zacatek"]); n1 = np.array([-1.5, -11.0])
-            for s in np.linspace(0, 1, 30):
-                q = n0 + (n1 - n0) * s
-                for r, c, lx, lz, d in bunky_obdelnik({"x": svet(o, *q)[0], "z": svet(o, *q)[1], "yaw": o["yaw"]}, -1.2, 1.2, -1.2, 1.2, 3.0):
-                    cil = y0 + 2.2 - max(d - 0.0, 0) * 0.66
-                    if Y[r, c] < cil: nastav(r, c, cil)
-            for a in (ml["jama_kola"], ml["lednice_pas"]):   # kanál kola a lednice
-                for r, c, lx, lz, d in bunky_obdelnik(o, a[0], a[1], a[2], a[3], 0.0): nastav(r, c, y0 + ml["lednice_y"] - 0.3)
-            o["y"] = y0; zaz["mlyn"] = {k_: ml[k_] for k_ in ("vynechat", "kolo_rad_s", "cevnik_nasobek", "lod1_od_m", "dil_do_m", "interier_do_m")}
-            PUD.append(poly_svet(o, xa - 1, xb + 1, za - 1, zb + 1)); PUD.append(poly_svet(o, -19, -0.5, -26, -10))
-            tr += [[*svet(o, xb + 8, 0), None], [*svet(o, xb - 1, 0), None], [*svet(o, 6.0, -6.0), None]]
+        elif t["typ"] == "mlyn":   # plošina záboru ve výšce podlahy (koryto toku a pás cest zůstanou), kolo stojí v proudu
+            ml = m["mlyn"]; y0 = o["y0"]; KO_ = json.load(open(K + "/pravidla/svet/voda_hra.json"))["koryto"]
+            vel = [t_ for t_ in TH.values() if t_.get("jmeno") == m["hledat"]["tok"]][0]; kv = cKDTree(hust(np.array(vel["osa"])[:, :2], 0.5))
+            breh = float(vel["sirka"]) / 2 + float(KO_["prah_m"]); pr_ = Z["teren"]["prechod_m"] + 1.0
+            bun = {}
+            for (x0, x1, z0, z1) in ml["zabor"]:
+                for r, c, lx, lz, d in bunky_obdelnik(o, x0, x1, z0, z1, pr_):
+                    if (r, c) not in bun or d < bun[(r, c)]: bun[(r, c)] = d
+            for (r, c), d in bun.items():
+                wx, wz = xh0 + c, zh0 + r
+                if od_pasu_cest([[wx, wz]]) < 1.0: continue   # cesta (dřívější krok) zůstane
+                t_ = min(d / pr_, 1.0); t_ = t_ * t_ * (3 - 2 * t_); cil = y0 * (1 - t_) + Y[r, c] * t_
+                nastav(r, c, min(Y[r, c], cil) if kv.query([wx, wz])[0] < breh else cil)
+            o["y"] = y0
+            zaz["mlyn"] = {k_: ml[k_] for k_ in ("vynechat", "kolo_rad_s", "cevnik_nasobek", "lod1_od_m", "dil_do_m", "interier_do_m", "zastavit", "ovladani")}
+            zaz["mlyn"]["smer"] = o["smer"]
+            for (x0, x1, z0, z1) in ml["zabor"]: PUD.append(poly_svet(o, x0 - 1, x1 + 1, z0 - 1, z1 + 1))
+            bx_, bz_ = m["pristup"]["bod"]
+            tr += [[*svet(o, bx_, bz_), None], [*svet(o, 6.8, -9.0), None], [*svet(o, 6.0, -4.0), None], [*svet(o, 4.3, 0.2), None]]
     # ---- díly
     for di in m["dily"]:
         d = dict(di); lx, ly, lz = d.get("poloha", [0, 0, 0]); yaw = o["yaw"] + math.radians(d.get("yaw_st", 0))
@@ -394,6 +416,16 @@ for m in Z["mista"]:
             tr = [[float(cp[0]), float(cp[1]), None], [float(cil[0]), float(cil[1]), None]]
     if m["id"] == "lom":
         tr = [[float(cp[0]), float(cp[1]), None], [*svet(o, 0, 4), None], [*svet(o, 0, -4.0), None]]
+    if m.get("pristup"):   # přístup od cesty (Míša 16. 11.): bod, ke kterému vede pěšina k_<id> (nastroje/pesiny_k_mistum.py → cesty_puchart.json)
+        pb = svet(o, *m["pristup"]["bod"]); zaz["pristup"] = {"bod": [round(pb[0], 2), round(pb[1], 2)], "cesty": m["pristup"]["cesty"]}
+        kc = K_MISTU.get(m["id"])
+        if kc is None: print("ZAJIMAVA_POZOR %s: pěšina k místu chybí v cesty_puchart.json (python3 nastroje/pesiny_k_mistum.py)" % m["id"])
+        else:
+            ko = np.array(kc["osa"], float)[:, :2]; dk = float(np.hypot(*(ko[-1] - np.array(pb))))
+            if dk > 3.0: print("ZAJIMAVA_POZOR %s: pěšina k místu končí %.1f m od přístupu (místo se posunulo – python3 nastroje/pesiny_k_mistum.py)" % (m["id"], dk))
+            hk = hust(ko, 6.0)   # trasa průchodu po pěšině od cesty k místu (test pruchod:zajimava_<id>_pesina)
+            TRASY["zajimava_%s_pesina" % m["id"]] = [[float(a_), float(b_), None] for a_, b_ in hk[1:]] + [[float(ko[-1][0]), float(ko[-1][1]), None]]
+            TRASY["zajimava_%s_pesina" % m["id"]].insert(0, [float(ko[0][0]), float(ko[0][1]), None])
     if tr: TRASY["zajimava_%s" % m["id"]] = [[round(p[0], 2), round(p[1], 2)] + p[2:] for p in tr]
     zaz["y"] = round(o["y"], 3)
     VYSL.append(zaz)
@@ -403,6 +435,25 @@ for k, v in TRASY.items(): TRASY[k] = [[round(float(p[0]), 2), round(float(p[1])
 for zaz in VYSL:
     for q in zaz["dily"]:
         if "_ly" in q: q["y"] = vys(q["x"], q["z"]) + q.pop("_ly")
+# ---- zábor dílů na zemi (obdélníky v půdorysu) – test smysl:zajimava_mimo_cest: nic z místa nezasahuje do pásu cesty
+_KATP = K + "/hra/modely/predmety_h.json"; KAT_ = json.load(open(_KATP)) if os.path.exists(_KATP) else {}
+def zabor_dilu(q, m_):
+    s_ = float(q.get("meritko", 1.0)); ob = []
+    if q.get("model") == "mlyn": ob = m_["mlyn"]["zabor"]; s_ = 1.0
+    elif q.get("model") == "stola":
+        (a0, _, b0), (a1, _, b1) = ZM["stola"]["aabb"]; ob = [[a0, a1, -1.0, b1]]   # jen ústí nad zemí (chodba je pod terénem)
+    elif q.get("model") in ZM: (a0, _, b0), (a1, _, b1) = ZM[q["model"]]["aabb"]; ob = [[a0, a1, b0, b1]]
+    elif "balvan" in q and q["balvan"] in ZM: (a0, _, b0), (a1, _, b1) = ZM[q["balvan"]]["aabb"]; ob = [[a0, a1, b0, b1]]
+    elif "predmet" in q and q["predmet"] in KAT_:
+        rx, _, rz = KAT_[q["predmet"]].get("rozmer", [0.4, 0.4, 0.4]); ob = [[-rx / 2, rx / 2, -rz / 2, rz / 2]]
+    elif "strom" in q: kr = 0.5; ob = [[-kr, kr, -kr, kr]]
+    o_ = {"x": q["x"], "z": q["z"], "yaw": q["yaw"]}
+    return [[[round(v, 2) for v in svet(o_, a * s_, b * s_)] for a, b in ((x0, z0), (x1, z0), (x1, z1), (x0, z1))] for x0, x1, z0, z1 in ob]
+_MZ = {m_["id"]: m_ for m_ in Z["mista"]}
+for zaz in VYSL:
+    for q in zaz["dily"]:
+        zb = zabor_dilu(q, _MZ[zaz["id"]])
+        if zb: q["zabor"] = zb
 for zaz in VYSL:
     for q in zaz["dily"]:
         for k_ in ("x", "y", "z", "yaw"):
@@ -424,7 +475,7 @@ json.dump({"popis": "úpravy terénu zajímavých míst (nastroje/zajimava_mista
 json.dump({"popis": "zajímavá místa pro hru (nastroje/zajimava_mista.py z pravidla/svet/zajimava_mista.json) – hra/scripts/zajimava.gd; pudorysy pro stavby_vegetace.py (bez porostu)",
            "lod_les": Z["modely"]["lod_les"], "zemljanky_lod": Z["modely"]["zemljanky"]["lod"], "stola_lod": Z["modely"]["stola"]["lod"],
            "stola_kahany": ZM.get("stola", {}).get("kahany", []), "funkce": Z["funkce"], "vika": VIKA,
-           "mista": VYSL, "pudorysy": [[[round(a, 2), round(b, 2)] for a, b in p] for p in PUD]},
+           "mista": VYSL, "odlozena": ODLOZENA, "pudorysy": [[[round(a, 2), round(b, 2)] for a, b in p] for p in PUD]},
           open(K + "/hra/data/zajimava_mista.json", "w"), ensure_ascii=False, indent=1)
 json.dump({"popis": "trasy průchodu zajímavých míst (nastroje/zajimava_mista.py) – test_pruchod.gd", "trasy": TRASY},
           open(K + "/hra/data/pruchody_zajimava.json", "w"), ensure_ascii=False, indent=1)

@@ -8,7 +8,9 @@
   "materialy",
   "textury_pripony",
   "katalog",
-  "max_troj_pozn"
+  "max_troj_pozn",
+  "barvy_vrcholu",
+  "normal_import"
  ],
  "slozka": "build/zdroj_modelar/Luzka_1400",
  "vystup": "hra/modely/luzka",
@@ -133,6 +135,19 @@
   "lozko_uzke": "luzko_Postel_Chudy_Dum"
  },
  "nahrazuje_pozn": "lůžka Havrana v katalogu pískoviště (gotická postel, lůžko se slamníkem, úzké lůžko) se v nabídce Stavění už nenabízejí – výchozí postel je chudá postel modeláře; uložené pozice s nimi se načtou s ní (stejná poloha a natočení). Slamník Havrana zůstává (jiný typ – na zemi, poustevna). Výchozí postel stojí v nabídce Uvnitř jako první.",
+ "barvy_vrcholu": {
+  "prevest_na_srgb": true,
+  "znacka": "barvy_vrcholu_srgb",
+  "zprava": "build/luzka_barvy.json",
+  "popis": "barvy vrcholů sítí lůžek (COLOR_0 × albedo, NAVOD_LUZKA.md) převést z lineárních na sRGB (nastroje/godot/luzka_barvy.gd volaný z luzka_modely.py; převedená síť nese metadata znacka). glTF ukládá COLOR_0 lineárně (houně průměr 0,34; 0,25; 0,15 = béžová 0,62; 0,54; 0,42 v sRGB), renderer Compatibility ale násobí albedo (textura × albedo_color × COLOR) v sRGB a teprve výsledek převede do lineárního prostoru (scene.glsl albedo = srgb_to_linear(albedo); vertex_color_is_srgb v Compatibility nic nedělá) → barva vrcholu se vzala jako sRGB a ztmavla na 0,095; 0,051; 0,019: vlněná houně a přikrývka chudé postele téměř černé (pod ACES jen modrý odlesk oblohy), modrá a červená přikrývka, len i dřevo tmavší než předloha. Modelářova kontrola QA_REPORT běžela v Godotu 4.6.3 (jiný renderer), proto vadu neukázala.",
+  "zdroj": "předloha build/zdroj_modelar/Luzka_1400/LUZKA_1400_PREHLED.jpg a nahledy/*.jpg (houně béžová, chudá přikrývka olivová, rychtářova světle modrá); snímky ze hry docs/screens/mista_zemljanka_uhlir_uvnitr.png (před) a luzka_barvy_*.png; měření agenta 16. 11. v zemljance u uhlíře: houně s barvou vrcholů = stejný pixel jako albedo_color 0,34; 0,25; 0,15 bez barev vrcholů (7; 5; 3), s albedo_color 0,62; 0,54; 0,42 (= převod) 50; 55; 48 (chyby.md 356)"
+ },
+ "normal_import": {
+  "pripona": "_NormalGL_1K.jpg",
+  "normal_map": 1,
+  "popis": "normálové mapy lůžek importovat jako normálové (compress/normal_map=1 v .import, zapíše luzka_modely.py): detekce (0) se při headless importu nespustí a mapa šla jako barevná RGB textura. Vzhled to neměnilo (houně bez normálové mapy zůstala černá), jde o správnou kompresi RG.",
+  "zdroj": "Godot 4.7 dokumentace ResourceImporterTexture compress/normal_map; NAVOD_LUZKA.md (normal mapy OpenGL)"
+ },
  "lod_okraj_m": 0.0,
  "lod_okraj_m_popis": "okraj přepnutí LOD0/LOD1 lůžek; modelář dal 0,75 m bez prolínání → po načtení v pásmu 7,25–8,75 m nebyl vidět ani jeden stupeň (zdroj: snímek agenta 16. 11., chyby.md 355)"
 }

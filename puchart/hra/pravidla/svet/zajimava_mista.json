@@ -78,10 +78,11 @@
    "zdroj": "plán bod 3 (rešerše 15 km kap. 9 – milíře jako přiznaná rekonstrukce); NAVOD_LES.md (milíř a/b, dřevo, nářadí, vozík; rozmístění podle les_uhlir_celek); zemljanka místo kuželové chýše (Míša 15. 11.)",
    "proc": "v lese u vozové cesty (dřevo na milíř a odvoz uhlí na káře), na rovině (milířiště)",
    "hledat": {"u": [-330, -690], "r_m": 220, "les": true, "cesty": ["vozova", "pesina"], "od_osy_m": [14, 45], "od_staveb_m": 150, "od_toku_m": 25, "max_prevyseni_m": 1.6, "polomer_m": 11.0, "k_ceste": true},
-   "teren": [{"typ": "plosina", "stred": [0, 0], "r_m": 4.2}, {"typ": "plosina", "stred": [-10, 2.5], "r_m": 4.0}, {"typ": "plosina", "stred": [-5.5, -10.5], "obdelnik": [3.2, 3.8], "yaw_k": [0, 0]}],
+   "teren": [{"typ": "plosina", "stred": [0, 0], "r_m": 4.2}, {"typ": "plosina", "stred": [-10, 2.5], "r_m": 4.0}, {"typ": "plosina", "stred": [10.5, -2.0], "r_m": 4.0}, {"typ": "plosina", "stred": [-5.5, -10.5], "obdelnik": [3.2, 3.8], "yaw_k": [0, 0]}],
    "dily": [
     {"model": "les/les_milir_b", "poloha": [0, 0, 0], "lod1_do_m": 300, "efekt": "milir"},
     {"model": "les/les_milir_a", "poloha": [-10, 0, 2.5], "yaw_st": 40},
+    {"model": "les/les_milir_c", "poloha": [10.5, 0, -2.0], "yaw_st": 15, "pozn": "Míša 16. 11. „Nabrat uhlí“ – rozebraný milíř s kupkou uhlí (NAVOD_LES.md stav C: po vychladnutí se milíř rozhrabal a uhlí odváželo)"},
     {"model": "les/les_uhlir_drevo", "poloha": [4.6, 0, -5.2], "yaw_st": 20},
     {"model": "les/les_uhlir_naradi", "poloha": [-3.3, 0, -2.4], "yaw_st": 23},
     {"model": "les/les_uhlir_vozik", "poloha": [4.8, 0, 4.2], "yaw_st": 131},
@@ -103,6 +104,7 @@
    "zdroj": "plán bod 6; NAVOD_LES.md (studánka: skalní výchoz, obruba pramene, roubenka se stříškou, žlábek, potůček); pramen = horní konec potoka",
    "proc": "u pramene potoka (horní konec toku) pod svahem, u pěšiny – sem se chodí pro vodu",
    "hledat": {"pramen": true, "u": [-385, -840], "r_m": 400, "cesty": ["vozova", "pesina"], "od_osy_m": [4, 150], "od_toku_m": [0, 14], "max_prevyseni_m": 2.2, "polomer_m": 2.5, "zady_do_svahu": true},
+   "pristup": {"bod": [-1.4, 2.4], "cesty": ["vozova", "pesina", "hrebenova"], "pozn": "Míša 16. 11.: vyšlapaná pěšina od nejbližší cesty ke studánce (stejně jako ostatní pěšiny – záznam k_studanka v cesty_puchart.json, tvar a hlína nastroje/cesty.py); konec vedle žlábku před roubenkou (Les_Studanka_Napit 0 / 0,95, potůček x ~0,3 po +z)"},
    "dily": [{"model": "les/les_studanka", "poloha": [0, 0, 0], "funkce": "studanka"}]
   },
   {
@@ -117,6 +119,7 @@
   },
   {
    "id": "poustevna", "nazev": "Poustevna pod skalním převisem", "znacka": "NAVRH",
+   "odlozeno": true, "odlozeno_pozn": "Míša 16. 11.: poustevnu teď odebrat – postaví se až při rozšíření světa ve skalním městě. Záznam zůstává, nástroje ho přeskočí (bez terénu, dílů, trasy), test pruchod:zajimava_mista hlídá, že ve hře není.",
    "zdroj": "plán bod 8 (lidová tradice poustevníka – Kostelíček u Potštátu, rešerše H); lůžko z chvojí a ohniště jako uhlířská chýše (NAVOD_LES.md Chyse_Luzko/Ohniste) – zde z katalogu Havrana",
    "proc": "pod skalní stěnou mimo cesty (samota), u skal hřebene",
    "hledat": {"skala": true, "u": [60, 230], "r_m": 260, "od_staveb_m": 25, "od_cest_min_m": 20, "max_prevyseni_m": 0.8, "polomer_m": 2.0, "zady_ke_skale": true},
@@ -158,31 +161,37 @@
   },
   {
    "id": "mlyn", "nazev": "Mlýn na Veličce", "znacka": "REKONSTRUKCE",
-   "zdroj": "plán bod 4; docs/historie_pravidla.md: Potštátský mlýn (B 1408) → už 1393, poloha volná; mista.json mlyn_velicka (vojenská mapa: obrysy u Veličky ~500 m SZ od hradu); model Havrana mlyn.glb (docs/krok_b/zadani_mlyn.md, scripts/mlyn_kolo.gd)",
-   "proc": "na břehu Veličky u cesty, kolo k vodě, odpadní kanál (lednice) do Veličky",
-   "hledat": {"mlyn": true, "u": [-495, -400], "r_m": 170, "tok": "Velička"},
+   "zdroj": "plán bod 4; docs/historie_pravidla.md: Potštátský mlýn (B 1408) → už 1393, poloha volná; mista.json mlyn_velicka (vojenská mapa: obrysy u Veličky ~500 m SZ od hradu); model Havrana mlyn.glb (docs/krok_b/zadani_mlyn.md, scripts/mlyn_kolo.gd); Míša 16. 11.: „když bychom umazali náhon a odtok, nemůžeme ho dát přímo k vodě?“ – mlýn přímo na břehu, kolo na spodní vodu v toku (bez náhonu, žlabu, příkopu a odtoku)",
+   "proc": "na břehu Veličky mimo cestu (Míša 16. 11.: „není v cestě?“ – mlýn stál na údolní cestě), kolo přímo v proudu toku, k vratům dvora odbočka z cesty",
+   "hledat": {"mlyn": true, "u": [-470, -380], "r_m": 260, "tok": "Velička", "od_staveb_m": 25, "od_cest_m": 3.0, "od_cest_pozn": "pás cesty (cesty_puchart.json typy.sirka_m / 2) + od_cest_m od každého bodu záboru mlýna (budova, dvůr, cesta modelu) – test smysl:zajimava_mimo_cest", "od_jinych_toku_m": 4.0, "max_vyrovnani_m": 1.6, "cesta_max_m": 60.0},
+   "pristup": {"bod": [6.8, -17.2], "cesty": ["vozova", "pesina", "hrebenova"], "pozn": "konec cesty modelu (Mlyn_Cesta x 3,2–10,5, z −16,1…−8,1) před vraty dvora – odbočka k ní (nastroje/pesiny_k_mistum.py → cesty_puchart.json k_mlyn)"},
    "teren": [{"typ": "mlyn"}],
    "dily": [{"model": "mlyn", "poloha": [0, 0, 0]}],
    "mlyn": {
-    "vynechat": ["Mlyn_Teren"],
-    "dvur_aabb": [-4.0, 11.0, -7.5, 7.5],
-    "kolo_misto": [-3.6, -3.4],
-    "lednice_konec": [-12.4, -1.6],
-    "lednice_y": -1.2,
-    "nahon_zacatek": [-17.8, -24.5],
-    "nahon_y": 3.0,
-    "jama_kola": [-6.0, -1.4, -5.6, -1.2],
-    "lednice_pas": [-12.6, -3.4, -5.2, 2.0],
+    "vynechat": ["Mlyn_Teren", "Mlyn_Nahon", "Mlyn_Vantrok", "Mlyn_Lednice", "Mlyn_Lavka", "Mlyn_Kol_KoryKoz"],
+    "vynechat_pozn": "Míša 16. 11.: bez náhonu, žlabu na kozách (Mlyn_Nahon, kolize Mlyn_Kol_KoryKoz), vantroku, odtoku (Mlyn_Lednice) a lávky přes náhon (Mlyn_Lavka); dílový terén Havrana (Mlyn_Teren) se nepoužije",
+    "zabor": [[-3.6, 11.0, -7.5, 7.5], [3.0, 10.6, -16.4, -7.5]],
+    "zabor_pozn": "budova (Mlyn_Roubeni x −3,6…3,5), dvůr (Mlyn_Dvur x 4,2…10,9, z −7,3…6,9), cesta modelu (Mlyn_Cesta) – obdélníky [x0, x1, z0, z1] místně; plošina dvora se srovná do výšky podlahy, koryto toku zůstane",
+    "kolo": [-4.65, 1.15, -3.4],
+    "kolo_r_m": 1.84,
+    "kolo_od_osy_m": 0.45,
+    "kolo_od_osy_pozn": "střed lopatek 0,45 m od osy toku k protějšímu břehu: stěna budovy (x −3,6) stojí na kraji koryta (Velička půlšířka ~1,5 m), lopatky (x −5,56…−3,79) celé ve vodě",
+    "kolo_sirka_x": [-5.56, -3.79],
+    "kolo_pozn": "osa kola Mlyn_Kolo (mlyn.glb: střed −4,65 / 1,15 / −3,4, poloměr 1,84 m, lopatky x −5,56…−3,79) – střed lopatek nad osou toku",
+    "ponor_m": 0.25,
+    "ponor_pozn": "spodní (podsťité) kolo: lopatky 0,25 m pod hladinou; Velička u mlýna šířka ~3,0 m, hloubka ~0,39 m (hra/data/toky_hladina.json) – kolo 1,77 m široké se vejde, ode dna 0,14 m. Podlaha mlýna = hladina + poloměr − osa − ponor",
     "kolo_rad_s": 0.9,
     "cevnik_nasobek": 6.0,
+    "zastavit": {"zdvih_m": 0.45, "zdvih_s": 2.5, "rozjezd_s": 4.0, "nabidka_stoji": "Pustit kolo", "nabidka_bezi": "Zastavit kolo", "zdroj": "Havran main.gd mlyn_stavidlo (kola ve skupině mlyn_kolo: bezi true/false, mlyn_kolo.gd rozjezd); u spodního kola bez náhonu se kolo zastaví zdvižením z proudu (zdvihadlo kola – NAVRH, nejjednodušší dobové řešení u kol na spodní vodu bez stavidla)"},
+    "ovladani": {"paka": [-2.2, 1.2, -3.4], "mleti": [0.0, 1.3, -2.5], "dosah_m": 2.2, "mleti_s": 6.0, "zdroj": "Havran voda.json mlyn.dil.ovladani (stavidlo [-2,2; 1,2; −3,4] u hřídele kola ve mlýnici, mletí [0; 1,3; −2,5] u kamene, mleti_s 6) – stejný model mlyn.glb"},
     "lod1_od_m": 120.0,
     "dil_do_m": 160.0,
     "interier_do_m": 35.0,
-    "zdroj": "Havran voda.json mlyn.dil (kolo_rad_s, cevnik_nasobek, interier_do_m), mlyn_misto.py (náhon nad hladinou toku); rozměry z mlyn.glb (Mlyn_Kolo, Mlyn_Lednice, Mlyn_Nahon, Mlyn_Dvur)",
-    "pozn": "dílový terén Havrana (Mlyn_Teren se strmým vlastním potokem, spád 5 m na 42 m) se nepoužije – Velička u mlýna má malý spád; náhon na kozách začíná ve svahu (napájí ho příkop po vrstevnici z Veličky výš proti proudu – NAVRH)"
+    "zdroj": "Havran voda.json mlyn.dil (kolo_rad_s, cevnik_nasobek, interier_do_m, ovladani); rozměry z mlyn.glb (Mlyn_Kolo, Mlyn_Roubeni, Mlyn_Dvur, Mlyn_Cesta)"
    }
   }
  ],
+ "pesiny": {"popis": "pěšiny od nejbližší cesty k místům s pristup (nastroje/pesiny_k_mistum.py → cesty_puchart.json k_<id>, tvar nastroje/cesty.py): A* nad terénem 1 m", "okno_m": 40, "krok_m": 3.0, "k_sklon": 6.0, "sklon_volny": 0.12, "tok_m": 2.5, "tok_prirazka": 8.0, "stavba_m": 2.0, "stavba_prirazka": 50.0, "dil_m": 0.8, "dil_prirazka": 50.0, "zdroj": "nastroje/pristup.py (cena = délka × (1 + k·nadsklon)); pěšina pesina cesty_puchart.json typy (max_sklon 0,7) – chodí se podle terénu, potok se překročí, stavby a díly míst se obcházejí"},
  "funkce": {
   "studanka": {"uzel": "Les_Studanka_Napit", "nabrat_uzel": "Les_Studanka_Potucek_1", "nabrat_pozn": "nabírá se na konci žlábku (pod stříškou roubenky na hladinu nedosáhne – test pruchod:zajimava_mista)", "napit": "Napít se", "nabrat": "Nabrat vodu", "predmet": "voda_mech", "dosah_m": 2.2, "zprava_napit": "Voda je studená a čistá.", "zdroj": "funkce.json studna (Havran); plán bod 6 – funkce napít / nabrat vodu (měch s vodou z katalogu)"},
   "spani": {"uzly": ["Zemljanka_Spani_L", "Zemljanka_Spani_P"], "nazev": "rohož v zemljance", "zdroj": "funkce.json spanek (Havran main.gd bed) – spalo se na zemi na rohožích (Míša 15. 11.)"}

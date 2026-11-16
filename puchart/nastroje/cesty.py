@@ -91,6 +91,7 @@ for m_ in _VH.get("mosty", []):
 _D = [_husta(c["osa"]) for c in C["cesty"]]; SPOJKY = []
 for i, c in enumerate(C["cesty"]):
     for kon in (0, -1):
+        if c.get("k_mistu") and kon == -1: continue   # pěšina k zajímavému místu (nastroje/pesiny_k_mistum.py) končí u místa, ne spojkou na jinou cestu
         p_ = np.array(c["osa"][kon][:2], float); best = None
         for j, q in enumerate(_D):
             if j == i: continue
