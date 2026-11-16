@@ -40,8 +40,18 @@ Vše v `nastroje/postav_vse.sh`. Snímky `docs/screens/mista_*.png`, test `pruch
 | Smolárna | les ~100 m od uhlíře | NAVRH |
 | Studánka | pramen přítoku Veličky na S | NAVRH |
 | Brtě (borovice a dub) | kraj lesu u pěšiny | REKONSTRUKCE |
-| Poustevna | pod skalami hřebene J od hradu | NAVRH |
+| Poustevna | ODLOŽENO (Míša 16. 11.: až při rozšíření světa ve skalním městě) | NAVRH |
 | Lom (dno, stěna, kameny, kvádry, zemljanka) | svah nad vozovou cestou J od hradu | NAVRH |
 | Průzkumná štola | strmá stráň V od vsi | NAVRH |
-| Mlýn | břeh Veličky u soutoku | REKONSTRUKCE |
+| Mlýn | přímo na břehu Veličky mimo cestu, kolo na spodní vodu v proudu, bez náhonu (Míša 16. 11.), odbočka k_mlyn | REKONSTRUKCE |
 Přesné souřadnice: `hra/data/zajimava_mista.json`.
+
+## Změny 16. 11. (Míša)
+- Mlýn mimo cestu (chyby.md 357): přímo na břehu Veličky, kolo v korytě (spodní voda), náhon/žlab/odtok/lávka z modelu pryč;
+  „Zastavit kolo / Pustit kolo“ = zdvih kola z proudu, „Mlít obilí“ jako Havran (pytel obilí → pytel mouky jen s kolem v chodu).
+  Test smysl:zajimava_mimo_cest hlídá zábor všech dílů všech míst proti pásu cest.
+- Funkce míst (chyby.md 358): Nabrat uhlí (rozebraný milíř les_milir_c), Vybrat med (brtě), Nabrat smolu (smolárna), Lámat kámen
+  (lom, krumpáč) → předměty do brašny (uhlí, smola, lomový kámen doplňuje nastroje/predmety_mist.py).
+- Studánka: pěšina k_studanka od nejbližší cesty (nastroje/pesiny_k_mistum.py → cesty_puchart.json → cesty.py), hladina shaderem potoků,
+  „Napít se“ volá hrac.uhas_zizen – systém potřeb (žízeň) v Havranovi ani Puchartu není, napojení připravené.
+- Poustevna odložena (záznam odlozeno: true, nástroje ji přeskočí).
