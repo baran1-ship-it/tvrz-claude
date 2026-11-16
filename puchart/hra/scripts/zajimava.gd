@@ -66,6 +66,13 @@ func _dil(u: Node3D, di: Dictionary, m: Dictionary) -> Node3D:
 		return b
 	if di.has("strom"):
 		return _strom(u, di)
+	if di.has("scena"):   # hotová scéna Godotu (houně od modeláře – Luzka_1400, bez kolize)
+		if not ResourceLoader.exists(String(di["scena"])): return null
+		var sc := (load(String(di["scena"])) as PackedScene).instantiate() as Node3D
+		sc.transform = _xf(di); u.add_child(sc)
+		for g in sc.find_children("*", "GeometryInstance3D", true, false):
+			if (g as GeometryInstance3D).visibility_range_begin > 0.0: (g as GeometryInstance3D).visibility_range_end = float(lod["lod0_do_m"])
+		return sc
 	return null
 
 
@@ -142,7 +149,7 @@ func _zemljanka(u: Node3D, di: Dictionary, mo: String) -> Node3D:
 				if gi.visibility_range_begin > 0.0: gi.visibility_range_end = float(ho["do_m"])
 				gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# textury chýší Havrana jsou zesvětlené (domy: mista.json modely.domy.jas_podrobny, hlavni.gd _ztlum) – stejný násobek
-	var jas := float(Pravidla.cti("mista", "modely", "domy").get("jas_podrobny", 1.0)); var cache := {}
+	var jas := float(zl.get("jas_podrobny", 1.0)); var cache := {}
 	for mi in z.find_children("*", "MeshInstance3D", true, false):
 		var nm := String(mi.name)
 		if nm.ends_with("_Daleko") or nm.begins_with("Zemljanka_") or (mi as MeshInstance3D).mesh == null: continue

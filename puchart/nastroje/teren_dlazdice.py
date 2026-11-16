@@ -149,6 +149,24 @@ if ZAJ_T["kolize"]:   # zajímavá místa: kolize terénu snížená pod jámou 
         H[_r0:_r1, _c0:_c1] = np.where(_m, np.minimum(H[_r0:_r1, _c0:_c1], _k["y"] + P["H"]), H[_r0:_r1, _c0:_c1])
     np.clip(np.round((H - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek.r16"))
     print("zajímavá místa: snížená kolize terénu v %d mnohoúhelnících" % len(ZAJ_T["kolize"]))
+    # pro test smyslu: snížená kolize je krytá modelem (jáma zemljanky, chodba štoly) – teren_shoda ji nebere jako boření,
+    # teren_skoky ne jako skok terénu (maska zajimava v build/teren_jemne.npz)
+    _zm = np.zeros(H.shape, bool)
+    for _k in ZAJ_T["kolize"]:
+        _pg = np.array(_k["poly"], float); _c0 = max(int(_pg[:, 0].min() - x_hra0) - 1, 0); _c1 = int(_pg[:, 0].max() - x_hra0) + 2
+        _r0 = max(int(_pg[:, 1].min() - z_hra0) - 1, 0); _r1 = int(_pg[:, 1].max() - z_hra0) + 2
+        _cc, _rr = np.meshgrid(np.arange(_c0, _c1), np.arange(_r0, _r1))
+        _zm[_r0:_r1, _c0:_c1] |= _Pz(_pg).contains_points(np.c_[(_cc + x_hra0).ravel(), (_rr + z_hra0).ravel()]).reshape(_cc.shape)
+    _zk = np.zeros(H.shape, bool)   # krytá modelem (skalní tlama štoly) – jen pro teren_shoda
+    for _k in ZAJ_T.get("kryte", []):
+        _pg = np.array(_k["poly"], float); _c0 = max(int(_pg[:, 0].min() - x_hra0) - 1, 0); _c1 = int(_pg[:, 0].max() - x_hra0) + 2
+        _r0 = max(int(_pg[:, 1].min() - z_hra0) - 1, 0); _r1 = int(_pg[:, 1].max() - z_hra0) + 2
+        _cc, _rr = np.meshgrid(np.arange(_c0, _c1), np.arange(_r0, _r1))
+        _zk[_r0:_r1, _c0:_c1] |= _Pz(_pg).contains_points(np.c_[(_cc + x_hra0).ravel(), (_rr + z_hra0).ravel()]).reshape(_cc.shape)
+    _jz = dict(np.load(os.path.join(koren, "build/teren_jemne.npz"))); _jz["zajimava"] = np.packbits(_zm)
+    _kr = np.unpackbits(_jz["kryto"])[:_zm.size].reshape(_zm.shape).astype(bool) | _zm | _zk; _jz["kryto"] = np.packbits(_kr)
+    _jz["m"] = np.packbits(np.unpackbits(_jz["m"])[:_zk.size].reshape(_zk.shape).astype(bool) | _zk)   # tlama štoly = vlastní povrch (model)
+    np.savez_compressed(os.path.join(koren, "build/teren_jemne.npz"), **_jz)
 np.clip(np.round((Y.astype(np.float64) + P["H"] - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek_sit.r16"))
 # normály z plné mřížky (stejné pro všechny LOD -> LOD se liší jen tvarem, ne světlem)
 gz, gx = np.gradient(Y, 1.0)  # gz = dY/dřádek = dY/dz (řádek roste s z)

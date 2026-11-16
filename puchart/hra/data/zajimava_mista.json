@@ -14,6 +14,8 @@
    0.23,
    0.17
   ],
+  "jas_podrobny": 0.8,
+  "jas_pozn": "jako domy vsi (mista.json modely.domy.jas_podrobny 0,8 – textury chýší Havrana jsou zesvětlené)",
   "zdroj": "jako domy vsi (mista.json modely.domy.lod), zemljanka je malá (12 tis. troj.) → podrobně do 50 m, dál hrubý obal _Daleko v barvě ztmavlé kůry (mista.json daleko_textury jas Sindel × kůra; snímek 16. 11. f_uhlir: obal bez textury byl oranžový)"
  },
  "stola_lod": {
@@ -328,7 +330,7 @@
      "x": -27.278,
      "z": 128.259,
      "yaw": 0.80558,
-     "predmet": "slamnik",
+     "scena": "res://modely/luzka/Houne_Vlnena_Tablet_1K.tscn",
      "y": -38.442
     },
     {

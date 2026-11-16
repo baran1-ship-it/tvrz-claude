@@ -293,7 +293,10 @@ casti = [os.path.getsize(os.path.join(K, "data", f)) / 1048576 for f in os.listd
 TEST("data_casti", all(c < 95 for c in casti), "části balíku %s MiB" % [round(c, 1) for c in casti])
 
 # --- terén, cesty, hrad: navázání
-dz = max(float(np.abs(np.diff(Yt, axis=0)).max()), float(np.abs(np.diff(Yt, axis=1)).max()))
+_zjz = np.load(K + "/build/teren_jemne.npz")   # snížená kolize pod jámou zemljanky a chodbou štoly (nastroje/zajimava_mista.py) není skok terénu
+from scipy.ndimage import binary_dilation as _bdz
+_ZJ = _bdz(np.unpackbits(_zjz["zajimava"])[:Yt.size].reshape(Yt.shape).astype(bool), iterations=1) if "zajimava" in _zjz.files else np.zeros(Yt.shape, bool)
+dz = max(float(np.abs(np.diff(Yt, axis=0))[~(_ZJ[1:] | _ZJ[:-1])].max()), float(np.abs(np.diff(Yt, axis=1))[~(_ZJ[:, 1:] | _ZJ[:, :-1])].max()))
 TEST("teren_skoky", dz < KC["teren"]["skok_max_m"], "největší skok mezi sousedními metry %.1f m (skalní stěny ≤ %s)" % (dz, KC["teren"]["skok_max_m"]))
 DL = json.load(open(K + "/hra/dlazdice/dlazdice.json"))
 TEST("dlazdice", len(DL["dlazdice"]) == DL["pocet"][0] * DL["pocet"][1] and all(os.path.exists(K + "/hra/dlazdice/" + os.path.basename(str(d.get("soubor", d) if isinstance(d, dict) else d))) for d in DL["dlazdice"]),   # dřív „or True“ (audit 15. 11.)

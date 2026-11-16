@@ -128,6 +128,7 @@ def kruh(o, sx, sz, rr, prechod, y=None):
     return y
 
 
+KRYTE = []   # buňky, kde terén zakrývá model (skalní tlama štoly – schod zářez/svah), pro test smysl:teren_shoda
 DIRY = []; KOL = []; VIKA = []; TRASY = {}; PUD = []; VYSL = []
 
 
@@ -293,10 +294,11 @@ for m in Z["mista"]:
             zaz["zarez"] = {"stena_y": round(vys(*svet(o, 0, -t["hloubka_m"] - 1.5), Y0) - y0, 2)}
             PUD.append(poly_svet(o, -w - 1, w + 1, -t["hloubka_m"] - 1, 4))
         elif t["typ"] == "stola":
+            T_SV = t.get("svah_boku", 0.7)
             g = spad(o["x"], o["z"]); so = stola_ok(o["x"], o["z"], g, m); y0 = so["y0"]; L = so["L"]; w = t["sirka_m"] / 2
             for r, c, lx, lz, d in bunky_obdelnik(o, -w, w, -0.5, L + 1.5, 6.0):
                 if d == 0: nastav(r, c, min(Y[r, c], y0) if lz > L else y0)
-                elif lz > -0.5 and abs(lx) > w: nastav(r, c, min(Y[r, c], max(y0, y0 + (abs(lx) - w) * 1.2)))
+                elif lz > -0.5 and abs(lx) > w: nastav(r, c, min(Y[r, c], max(y0, y0 + (abs(lx) - w) * T_SV)))
             o["y"] = y0
             cw = t["chodba_sirka_m"] / 2; dl = Z["modely"]["stola"]["delka_m"] + 0.6
             DIRY.append({"misto": m["id"], "poly": poly_svet(o, -1.75, 1.75, -3.6, -0.3)})
@@ -304,6 +306,7 @@ for m in Z["mista"]:
             VIKA.append({"misto": m["id"], "poly": poly_svet(o, -cw - 0.6, cw + 0.6, -dl, -3.6), "od_z": -3.6})
             # viditelná záplata nad otvorem: síť terénu, ale ne níž než strop chodby (snímek 16. 11. f_stola: otvorem nad tlamou bylo vidět nebe)
             VIKA.append({"misto": m["id"] + "_otvor", "poly": poly_svet(o, -1.8, 1.8, -3.7, -0.25), "y_min": round(y0 + t["strop_m"], 3), "viditelne": True})
+            KRYTE.append({"misto": m["id"], "poly": poly_svet(o, -4.6, 4.5, -1.6, 0.6)})
             zaz["stola"] = {"zarez_m": round(L, 2), "kryt_m": m["hledat"]["kryt_m"], "y0": round(y0, 3)}
             PUD.append(poly_svet(o, -w - 2, w + 2, -1, L + 3))
             c0 = svet(o, 0, L + 6); tr += [[*c0, None], [*svet(o, 0, 2.5), None], [*svet(o, 0, -6.0), y0, 0.6], [*svet(o, 0, -15.5), y0, 0.6], [*svet(o, 0, -6.0), y0, 0.6], [*svet(o, 0, 2.5), None]]
@@ -358,7 +361,7 @@ for m in Z["mista"]:
             TRASY["zajimava_%s_zemljanka" % m["id"]] = tz
             continue
         q = {"x": wx, "z": wz, "yaw": yaw}
-        for k_ in ("model", "predmet", "strom", "balvan", "efekt", "funkce", "meritko", "lod1_do_m"):
+        for k_ in ("model", "predmet", "strom", "balvan", "scena", "efekt", "funkce", "meritko", "lod1_do_m"):
             if k_ in d: q[k_] = d[k_]
         if d.get("brt"):
             q["brt"] = dict(d["brt"]); kr = ZM.get("strom_" + d["strom"], {}).get("kmen_r", {})
@@ -397,21 +400,17 @@ for zaz in VYSL:
 
 # ------------------------------------------------------------------ výstupy
 np.save(out + ".npy", (Y + P["H"]).astype(np.float32)); json.dump(M, open(out + ".json", "w"), ensure_ascii=False, indent=1)
-for suf in ("_koryta.npz", "_plosiny_mista.npz"):
+for suf in ("_koryta.npz", "_jamy.npz"):
     if os.path.exists(pre + suf): shutil.copy(pre + suf, out + suf)
-if os.path.exists(pre + "_jamy.npz"):
-    J = dict(np.load(pre + "_jamy.npz"))
-    if UPR:
-        rc = np.array(list(UPR.keys())); yy = np.array(list(UPR.values())) + P["H"]
-        stare = {(int(r), int(c)) for r, c in zip(J["r"], J["c"])}
-        nove = [i for i, (r, c) in enumerate(rc) if (int(r), int(c)) not in stare]
-        J["r"] = np.r_[J["r"], rc[nove, 0]]; J["c"] = np.r_[J["c"], rc[nove, 1]]; J["y"] = np.r_[J["y"], yy[nove].astype(np.float32)]
-        # už v jamách (zářez koryt): přepsat výšku
-        idx = {(int(r), int(c)): i for i, (r, c) in enumerate(zip(J["r"], J["c"]))}
-        for (r, c), y in UPR.items(): J["y"][idx[(r, c)]] = y + P["H"]
-    np.savez(out + "_jamy.npz", **J)
+# upravené buňky jako plošiny míst (teren_dlazdice.py: bez vyhlazení, kolize = viditelná síť – test teren_shoda)
+_pm = dict(np.load(pre + "_plosiny_mista.npz")) if os.path.exists(pre + "_plosiny_mista.npz") else {"r": np.zeros(0, int), "c": np.zeros(0, int)}
+if UPR:
+    rc = np.array(list(UPR.keys())); stare = {(int(r), int(c)) for r, c in zip(_pm["r"], _pm["c"])}
+    nove = np.array([i for i, (r, c) in enumerate(rc) if (int(r), int(c)) not in stare], int)
+    if len(nove): _pm["r"] = np.r_[_pm["r"], rc[nove, 0]]; _pm["c"] = np.r_[_pm["c"], rc[nove, 1]]
+np.savez(out + "_plosiny_mista.npz", **_pm)
 json.dump({"popis": "úpravy terénu zajímavých míst (nastroje/zajimava_mista.py) pro teren_dlazdice.py: diry = otvory ve viditelné síti (jáma zemljanky, ústí štoly), kolize = snížená kolize terénu v mnohoúhelníku na y (jáma, chodba štoly)",
-           "diry": DIRY, "kolize": KOL}, open(K + "/build/zajimava_teren.json", "w"), ensure_ascii=False, indent=1)
+           "diry": DIRY, "kolize": KOL, "kryte": KRYTE}, open(K + "/build/zajimava_teren.json", "w"), ensure_ascii=False, indent=1)
 json.dump({"popis": "zajímavá místa pro hru (nastroje/zajimava_mista.py z pravidla/svet/zajimava_mista.json) – hra/scripts/zajimava.gd; pudorysy pro stavby_vegetace.py (bez porostu)",
            "lod_les": Z["modely"]["lod_les"], "zemljanky_lod": Z["modely"]["zemljanky"]["lod"], "stola_lod": Z["modely"]["stola"]["lod"],
            "stola_kahany": ZM.get("stola", {}).get("kahany", []), "funkce": Z["funkce"], "vika": VIKA,

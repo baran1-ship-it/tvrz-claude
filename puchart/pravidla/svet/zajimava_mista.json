@@ -25,7 +25,7 @@
    "rohoz": {"sirka_m": 1.16, "delka_m": 2.0, "tl_m": 0.035, "od_steny_m": 0.05, "z_konec": -1.45, "zdroj": "rohož z rákosí/slámy pod houní (Míša 15. 11.); šíře a délka podle houně modeláře 1,08 × 1,93 m, za hlavou místo pro truhlu"},
    "houne": {"model": "res://modely/luzka/Houne_Vlnena_Tablet_1K.tscn", "zdroj": "Míša 16. 11.: vlněná houně od modeláře build/zdroj_modelar/Luzka_1400 (NAVOD_LUZKA.md: 1,08 × 1,93 × 0,09 m, hlava k −Z, bez kolize, LOD0 do 8 m); kopie do hra/modely/luzka (nastroje/postav_vse.sh), osazení na značky spánku v zemljance (hra/scripts/zajimava.gd)", "lod0_do_m": 8.0, "do_m": 40.0},
    "jama_kolize_rozsir_m": 0.9,
-   "lod": {"podrobny_do_m": 50.0, "obal_do_m": 400.0, "obal_barva": [0.29, 0.23, 0.17], "zdroj": "jako domy vsi (mista.json modely.domy.lod), zemljanka je malá (12 tis. troj.) → podrobně do 50 m, dál hrubý obal _Daleko v barvě ztmavlé kůry (mista.json daleko_textury jas Sindel × kůra; snímek 16. 11. f_uhlir: obal bez textury byl oranžový)"}
+   "lod": {"podrobny_do_m": 50.0, "obal_do_m": 400.0, "obal_barva": [0.29, 0.23, 0.17], "jas_podrobny": 0.8, "jas_pozn": "jako domy vsi (mista.json modely.domy.jas_podrobny 0,8 – textury chýší Havrana jsou zesvětlené)", "zdroj": "jako domy vsi (mista.json modely.domy.lod), zemljanka je malá (12 tis. troj.) → podrobně do 50 m, dál hrubý obal _Daleko v barvě ztmavlé kůry (mista.json daleko_textury jas Sindel × kůra; snímek 16. 11. f_uhlir: obal bez textury byl oranžový)"}
   },
   "stola": {
    "popis": "Průzkumná štola ve stráni (Míša 15. 11.: „průzkumná štola ve stráni (hypotéza H/NAVRH, ne na místě Soudkovy štoly 19. st.), zmenšit pro tablet, otevřít vstup v terénu“). Z dodaného dolu (~189 m chodeb, 446 tis. troj.) zůstane jen vstup se skalní tlamou a první úsek hlavní chodby do delka_m, zakončený čelbou (průzkumná štola končí čelbou); zbylé úseky (dělené po 9 m: jméno _i_j, j = úsek ve směru chodby) se vypustí. Hlinitá plocha před vstupem (Brown Mud) se vypustí – terén hry. Textury na max_px.",
@@ -49,7 +49,7 @@
  },
  "teren": {
   "prechod_m": 3.0,
-  "pozn": "plošina = rovina ve výšce mediánu terénu pod ní s plynulým přechodem prechod_m (jako mista_rozmisteni.py), zářez = snížení do svahu; buňky úprav se připíší k _jamy.npz (ostrá hrana bez vyhlazení dlaždic)"
+  "pozn": "plošina = rovina ve výšce mediánu terénu pod ní s plynulým přechodem prechod_m (jako mista_rozmisteni.py), zářez = snížení do svahu; buňky úprav se připíší k _plosiny_mista.npz (bez vyhlazení dlaždic, kolize = viditelná síť – test teren_shoda)"
  },
  "mista": [
   {
@@ -121,7 +121,7 @@
    "proc": "pod skalní stěnou mimo cesty (samota), u skal hřebene",
    "hledat": {"skala": true, "u": [60, 230], "r_m": 260, "od_staveb_m": 25, "od_cest_min_m": 20, "max_prevyseni_m": 0.8, "polomer_m": 2.0, "zady_ke_skale": true},
    "dily": [
-    {"predmet": "slamnik", "poloha": [-0.8, 0, -0.6], "yaw_st": 90},
+    {"scena": "res://modely/luzka/Houne_Vlnena_Tablet_1K.tscn", "poloha": [-0.8, 0, -0.6], "yaw_st": 90, "pozn": "koordinátor 16. 11.: místo slamníku Havrana houně od modeláře (spí se na zemi)"},
     {"predmet": "ohniste_kamenne", "poloha": [1.4, 0, 1.0], "efekt": "ohen"},
     {"predmet": "kotlik_trojnozka", "poloha": [1.4, 0, 1.0]},
     {"model": "les/les_kriz_rozcesti", "poloha": [0.6, 0, -1.4], "meritko": 0.55}
@@ -153,7 +153,7 @@
    "zdroj": "plán bod 1 (Míša 15. 11.); model štoly z Disku zkrácený na průzkumnou štolu (nastroje/zajimava_modely.py)",
    "proc": "ve strmé stráni v lese u pěšiny, vstup zářezem do svahu (portál až tam, kde je nad chodbou dost skály)",
    "hledat": {"u": [200, -330], "r_m": 400, "les": true, "cesty": ["pesina", "vozova"], "od_osy_m": [8, 70], "od_staveb_m": 120, "od_toku_m": 15, "sklon_min": 0.45, "polomer_m": 4.0, "do_svahu": true, "kryt_m": 3.8},
-   "teren": [{"typ": "stola", "sirka_m": 4.4, "zarez_max_m": 12.0, "chodba_sirka_m": 3.2, "podlaha_pod_m": 0.05, "strop_m": 2.85, "strop_pozn": "nad nejvyšším stropem výdřevy ústí (Cast_02 do 2,5 m, hornina do 2,6 m) – záplata otvoru terénu nad ústím nesmí do chodby"}],
+   "teren": [{"typ": "stola", "sirka_m": 4.4, "zarez_max_m": 12.0, "chodba_sirka_m": 3.2, "podlaha_pod_m": 0.05, "strop_m": 2.85, "svah_boku": 0.7, "svah_boku_pozn": "sklon boků zářezu (výška/šířka); 1,2 dával na síti 2 m rozdíl síť–kolize přes 0,2 m (test smysl:teren_shoda)", "strop_pozn": "nad nejvyšším stropem výdřevy ústí (Cast_02 do 2,5 m, hornina do 2,6 m) – záplata otvoru terénu nad ústím nesmí do chodby"}],
    "dily": [{"model": "stola", "poloha": [0, 0, 0]}]
   },
   {
