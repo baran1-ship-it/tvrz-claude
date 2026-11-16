@@ -459,7 +459,7 @@ Výkonově (rozbor_gpu_15_11.md): les s podrostem místo trávy = méně průhle
 - testy: test smyslu `houstina_*` (16. 11.: 982 kusů, 0 chyb, souhrn OK), hra `clona_vsi`, `houstina_volno` (napsané, ZATÍM NESPUŠTĚNÉ);
 - tabulka `misa_16_11_chyby.md` ř. 9–11, `predani.md` oddíl „Scény 16. 11.“.
 
-**Běží / čeká:** export světa `build/beh/export_sceny.log` (start 12:57, Blender doběhl k rozmístění: houština clony 104, ulice 84, meze 284, břeh 510; pšenice 17 136 trsů místo ~43 tis.). Výsledek exportu ověřit v logu (`EXPORT OK` / `KROK SELHAL`) a `build/export_stav.json`.
+**Export HOTOV:** `build/beh/export_sceny.log` OK za 1320 s, `build/export_stav.json` stav OK rc 0 (16. 11. 14:19, svet.json md5 0004430071e2…; start 12:57, Blender doběhl k rozmístění: houština clony 104, ulice 84, meze 284, břeh 510; pšenice 17 136 trsů místo ~43 tis.). Dlaždice, testy a snímky po exportu ZATÍM NESPUŠTĚNÉ (konec session).
 
 **Další krok po exportu:**
 1. `tools/beh.sh dlazdice cmd bash tools/pregeneruj.sh dlazdice` (přepéct dlaždice terénu).
