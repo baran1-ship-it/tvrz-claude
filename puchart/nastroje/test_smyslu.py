@@ -927,22 +927,25 @@ for _f in sorted(_gl.glob(K + "/hra/modely/luzka/*.tscn")):
         if float(_m) > 0.0: _c22.append("%s margin %s" % (os.path.basename(_f), _m)); break
 TEST("luzka_lod_okraj", not _c22, "; ".join(_c22) if _c22 else "lůžka: LOD bez okraje (žádná mezera ve viditelnosti)")
 
-# lůžka: barvy vrcholů glTF (lineární) převedené na sRGB – Compatibility je násobí s albedem v sRGB (chyby.md 356: houně černá)
-_bv = json.load(open(K + "/pravidla/svet/luzka.json"))["barvy_vrcholu"]; _c23 = []
+# barvy vrcholů modelů od modeláře (glTF COLOR_0 lineární) převedené na sRGB – Compatibility je násobí s albedem v sRGB
+# (chyby.md 356: houně černá); sady pravidla/svet/barvy_vrcholu.json, zpráva nastroje/barvy_vrcholu.py
+_bv = json.load(open(K + "/pravidla/svet/barvy_vrcholu.json")); _c23 = []; _n23 = {}
 _zp = json.load(open(K + "/" + _bv["zprava"])) if os.path.exists(K + "/" + _bv["zprava"]) else {}
-_site = sorted(_gl.glob(K + "/hra/modely/luzka/*_mesh.res"))
-for _f in _site:
-    _r = "res://" + os.path.relpath(_f, K + "/hra")
-    _z = _zp.get(_r)
-    if _z is None: _c23.append("%s chybí ve zprávě %s (luzka_modely.py nepřevedl)" % (os.path.basename(_f), _bv["zprava"])); continue
-    if _z["velikost"] != os.path.getsize(_f): _c23.append("%s změněna po převodu (velikost %d ≠ %d)" % (os.path.basename(_f), os.path.getsize(_f), _z["velikost"])); continue
-    if _bv["prevest_na_srgb"] and _z["vrcholu_s_barvou"] > 0 and not _z["srgb"]: _c23.append("%s barvy vrcholů lineární (nepřevedené)" % os.path.basename(_f))
+for _sd, _sv in _bv["sady"].items():
+    _site = sorted(_gl.glob(K + "/" + _sv["site"])); _n23[_sd] = len(_site)
+    if not _site: _c23.append("sada %s: žádné sítě %s" % (_sd, _sv["site"]))
+    for _f in _site:
+        _z = _zp.get("res://" + os.path.relpath(_f, K + "/hra"))
+        if _z is None: _c23.append("%s chybí ve zprávě %s (barvy_vrcholu.py nepřevedl)" % (os.path.basename(_f), _bv["zprava"])); continue
+        if _z["velikost"] != os.path.getsize(_f): _c23.append("%s změněna po převodu (velikost %d ≠ %d)" % (os.path.basename(_f), os.path.getsize(_f), _z["velikost"])); continue
+        if _bv["prevest_na_srgb"] and _z["vrcholu_s_barvou"] > 0 and not _z["srgb"]: _c23.append("%s barvy vrcholů lineární (nepřevedené)" % os.path.basename(_f))
+TEST("barvy_vrcholu", not _c23, "; ".join(_c23) if _c23 else "barvy vrcholů v sRGB: " + ", ".join("%s %d sítí" % kv for kv in _n23.items()))
 # importy normálových map lůžek jako normálové (luzka.json normal_import)
-_ni = json.load(open(K + "/pravidla/svet/luzka.json"))["normal_import"]
+_ni = json.load(open(K + "/pravidla/svet/luzka.json"))["normal_import"]; _c24 = []
 for _f in sorted(_gl.glob(K + "/hra/modely/luzka/textures/*" + _ni["pripona"])):
     _t = open(_f + ".import").read() if os.path.exists(_f + ".import") else ""
-    if "compress/normal_map=%d" % _ni["normal_map"] not in _t: _c23.append("%s import bez compress/normal_map=%d" % (os.path.basename(_f), _ni["normal_map"]))
-TEST("luzka_barvy", bool(_site) and not _c23, "; ".join(_c23) if _c23 else ("lůžka: %d sítí s barvami vrcholů v sRGB, normálové mapy jako normálové" % len(_site) if _site else "lůžka: žádné sítě v hra/modely/luzka"))
+    if "compress/normal_map=%d" % _ni["normal_map"] not in _t: _c24.append("%s import bez compress/normal_map=%d" % (os.path.basename(_f), _ni["normal_map"]))
+TEST("luzka_normaly", not _c24, "; ".join(_c24) if _c24 else "lůžka: normálové mapy importované jako normálové")
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)

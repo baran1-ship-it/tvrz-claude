@@ -1,17 +1,18 @@
 extends SceneTree
-## Barvy vrcholů lůžek modeláře (COLOR_0 z glTF = lineární) → sRGB pro renderer Compatibility (chyby.md 356).
+## Barvy vrcholů modelů od modeláře (COLOR_0 z glTF = lineární) → sRGB pro renderer Compatibility (chyby.md 356,
+## pravidla/svet/barvy_vrcholu.json).
 ## Compatibility násobí albedo (textura × albedo_color × COLOR) v sRGB a teprve výsledek převede do lineárního prostoru
 ## (scene.glsl „albedo = srgb_to_linear(albedo)“; vertex_color_is_srgb tam nic nedělá) → lineární barva vrcholu se vzala
 ## jako sRGB a ztmavla (béžová 0,34 → 0,095: houně a přikrývka chudé postele téměř černé).
-## Volá nastroje/luzka_modely.py: -- <značka> <zpráva.json> <res://…_mesh.res>… ; převede jen sítě bez metadat <značka>
-## (opakovaně nic nezmění); do zprávy zapíše u každé sítě značku, velikost souboru a průměrnou barvu vrcholů (test smysl:luzka_barvy).
+## Volá nastroje/barvy_vrcholu.py: -- <značka> <zpráva.json> <res://…_mesh.res>… ; převede jen sítě bez metadat <značka>
+## (opakovaně nic nezmění); do zprávy zapíše u každé sítě značku, velikost souboru a průměrnou barvu vrcholů (test smysl:barvy_vrcholu).
 ## Mění jen proud atributů (barva RGBA8 + UV) – vrcholy, indexy, AABB a LOD zůstanou.
 func _initialize() -> void:
 	var a := OS.get_cmdline_user_args()
 	var znacka := StringName(a[0]); var prevedeno := 0; var zprava := {}
 	for c in a.slice(2):
 		var m := ResourceLoader.load(c, "", ResourceLoader.CACHE_MODE_IGNORE) as ArrayMesh
-		if m == null: print("LUZKA_BARVY_CHYBA nelze načíst ", c); quit(1); return
+		if m == null: print("BARVY_VRCHOLU_CHYBA nelze načíst ", c); quit(1); return
 		if m.has_meta(znacka):
 			zprava[c] = _zaznam(m, c, znacka); continue
 		var su: Array = m.get("_surfaces")
@@ -26,15 +27,15 @@ func _initialize() -> void:
 			t.add_surface_from_arrays(m.surface_get_primitive_type(i), ar, [], {}, fmt & Mesh.ARRAY_FLAG_COMPRESS_ATTRIBUTES)
 			var nove: PackedByteArray = (t.get("_surfaces") as Array)[0]["attribute_data"]
 			if nove.size() != (su[i]["attribute_data"] as PackedByteArray).size():
-				print("LUZKA_BARVY_CHYBA jiná délka atributů ", c, " ", i); quit(1); return
+				print("BARVY_VRCHOLU_CHYBA jiná délka atributů ", c, " ", i); quit(1); return
 			su[i]["attribute_data"] = nove
 		m.set("_surfaces", su)
 		m.set_meta(znacka, true)
 		var e := ResourceSaver.save(m, c, ResourceSaver.FLAG_COMPRESS)   # jako sítě modeláře (RSCC)
-		if e != OK: print("LUZKA_BARVY_CHYBA uložení ", c, " ", e); quit(1); return
+		if e != OK: print("BARVY_VRCHOLU_CHYBA uložení ", c, " ", e); quit(1); return
 		prevedeno += 1; zprava[c] = _zaznam(m, c, znacka)
 	var f := FileAccess.open(a[1], FileAccess.WRITE); f.store_string(JSON.stringify(zprava, " ")); f.close()
-	print("LUZKA_BARVY převedeno %d sítí z %d" % [prevedeno, a.size() - 2])
+	print("BARVY_VRCHOLU převedeno %d sítí z %d" % [prevedeno, a.size() - 2])
 	quit()
 
 

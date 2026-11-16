@@ -1,0 +1,32 @@
+{
+ "popis": "Barvy vrcholů (COLOR_0) modelů od modeláře, které hra bere jako albedo (vertex_color_use_as_albedo), převést z lineárních (glTF) na sRGB. Renderer Compatibility násobí albedo (textura × albedo_color × COLOR) v sRGB a teprve výsledek převede do lineárního prostoru (scene.glsl albedo = srgb_to_linear(albedo); vertex_color_is_srgb v Compatibility nic nedělá) → lineární barva vrcholu se vezme jako sRGB a ztmavne (0,34 → 0,095; 0,79 → 0,59). nastroje/barvy_vrcholu.py <K> [sada…] spustí nastroje/godot/barvy_vrcholu.gd na sítě sady (*_mesh.res): převede jen proud atributů (barva RGBA8 + UV), převedená síť nese metadata znacka (opakované spuštění nic nezmění), do zprava zapíše u každé sítě značku, velikost a průměrnou barvu (test smysl:barvy_vrcholu). Volají ho nástroje sad po kopii sítí (luzka_modely.py, seno_modely.py); kopie sítě se po převodu nepřepisuje kvůli jiné velikosti, jen novějším zdrojem.",
+ "jen_blender": [
+  "zdroj",
+  "zprava",
+  "test",
+  "sady",
+  "nepreveden"
+ ],
+ "zdroj": "předloha build/zdroj_modelar/Luzka_1400/LUZKA_1400_PREHLED.jpg a nahledy/*.jpg (houně béžová, chudá přikrývka olivová, rychtářova světle modrá); snímky ze hry docs/screens/mista_zemljanka_uhlir_uvnitr.png (před) a luzka_barvy_*.png; měření agenta 16. 11. v zemljance u uhlíře: houně s barvou vrcholů = stejný pixel jako albedo_color 0,34; 0,25; 0,15 bez barev vrcholů (7; 5; 3), s albedo_color 0,62; 0,54; 0,42 (= převod) 50; 55; 48 (chyby.md 356); rozbor ostatních modelů od modeláře 16. 11. – viz nepreveden",
+ "prevest_na_srgb": true,
+ "znacka": "barvy_vrcholu_srgb",
+ "zprava": "build/barvy_vrcholu.json",
+ "test": "smysl:barvy_vrcholu (každá síť sad převedená a od převodu nezměněná) + pruchod:luzka (síť s COLOR_0 nese metadata znacka)",
+ "sady": {
+  "luzka": {
+   "site": "hra/modely/luzka/*_mesh.res",
+   "pozn": "Luzka_1400: houně, deka, 4 postele (Vlna, Len, Dub, Hrube_Drevo – všechny s COLOR_0 × albedo); chyby.md 356"
+  },
+  "seno": {
+   "site": "hra/modely/seno/*_mesh.res",
+   "pozn": "Seno_1400: atlas sena (COLOR_0 šedé 0,26–1, průměr 0,79 – stínění chomáčů) a vidle (0,75–1); ztmavení bylo dřív vyrovnané albedo_modulace (seno.json) – po převodu přeladěno, viz seno.json albedo_modulace_pozn"
+  }
+ },
+ "nepreveden": {
+  "_popis": "modely od modeláře s COLOR_0, které se nepřevádějí (rozbor agenta 16. 11.: import Godotu + hra)",
+  "topeni": "hra/modely/topeni/*.glb (Topeni_1400): import glb nechává vertex_color_use_as_albedo vypnuté u všech materiálů a hra ho nezapíná → barva vrcholů se nekreslí, tmavnutí nehrozí",
+  "les": "hra/modely/les/*.glb (milíře, kříže, boží muka, smolárna, uhlíř): vertex_color_use_as_albedo vypnuté (zajimava.gd _barva_vrcholu podle NAVOD_LES.md se nikde nevolá); jen studánka má po importu zapnuté M_LesDrevo (průměr 0,96) a M_LesVoda (1,0) – rozdíl pod 5 %. Kdyby se _barva_vrcholu zapojila, patří lesní glb sem do sad (převod v glb).",
+  "zemljanky": "hra/modely/stavby_h/zemljanka_*.glb: bez COLOR_0",
+  "kovadlina": "hra/modely/predmety_h/kovadlina_1393*.glb: detail bez COLOR_0; střední a daleký stupeň nesou zapečenou barvu (železo 0,08; dřevo 0,02 – tmavé i lineárně) a predmety.gd střední stupeň kreslí s barvou vrcholu jako albedo → v Compatibility tmavší; Míša 16. 11.: kovadlinu „nechat“ – nepřevádí se"
+ }
+}

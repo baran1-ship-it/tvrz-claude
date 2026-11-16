@@ -5,7 +5,7 @@ Materiál sena dostane albedo modulaci z dat (albedo_color). Dodané .glb se nek
 Pro katalog pískoviště zapíše hra/modely/predmety_h/seno_<Model>.tscn (instance nativní scény) a záznamy do
 hra/modely/predmety_h.json (rozměr z LOD0 .glb sady, osy Godotu).
   python3 nastroje/seno_modely.py <K>"""
-import sys, os, json, re, shutil
+import sys, os, json, re, shutil, subprocess
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from glb_sit import nacti, cti
@@ -19,7 +19,8 @@ os.makedirs(os.path.join(OUT, "textures"), exist_ok=True)
 
 
 def kopie(src, dst):
-    if not os.path.exists(dst) or os.path.getmtime(src) > os.path.getmtime(dst) or os.path.getsize(src) != os.path.getsize(dst):
+    # sítě *_mesh.res se po kopii převádějí (barvy vrcholů → sRGB, barvy_vrcholu.py), velikost se smí lišit – kopie jen při novějším zdroji
+    if not os.path.exists(dst) or os.path.getmtime(src) > os.path.getmtime(dst) or (not dst.endswith("_mesh.res") and os.path.getsize(src) != os.path.getsize(dst)):
         shutil.copy2(src, dst)
 
 
@@ -36,6 +37,8 @@ for m in C["materialy"]:
         t = re.sub(r"\nalbedo_color = [^\n]*", "", t)
         t = t.replace("\nalbedo_texture", "\nalbedo_color = Color(%.3f, %.3f, %.3f, 1)\nalbedo_texture" % (r, g, b), 1)
     open(os.path.join(OUT, m), "w").write(t)
+# barvy vrcholů lineární → sRGB (pravidla/svet/barvy_vrcholu.json sada seno; Compatibility je násobí s albedem v sRGB – chyby.md 356)
+if subprocess.run([sys.executable, os.path.join(K, "nastroje/barvy_vrcholu.py"), K, C["barvy_vrcholu_sada"]]).returncode != 0: sys.exit(1)
 
 # katalog pískoviště: obalová scéna + záznam s rozměrem z LOD0 glb
 PRED = os.path.join(K, "hra/modely/predmety_h"); KATP = os.path.join(K, "hra/modely/predmety_h.json")

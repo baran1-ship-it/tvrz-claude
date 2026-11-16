@@ -59,19 +59,8 @@ for tp in sorted(chci):
     t = open(ip).read() if os.path.exists(ip) else '[remap]\n\nimporter="texture"\ntype="CompressedTexture2D"\n\n[params]\n\n'
     t2 = re.sub(r"compress/normal_map=\d+", "compress/normal_map=%d" % NI["normal_map"], t) if "compress/normal_map=" in t else t + "compress/normal_map=%d\n" % NI["normal_map"]
     if t2 != t: open(ip, "w").write(t2)
-# barvy vrcholů (luzka.json barvy_vrcholu): glTF COLOR_0 je lineární, Compatibility je násobí s albedem v sRGB → převod
-# lineární → sRGB v sítích hry (nastroje/godot/luzka_barvy.gd; síť se značkou v metadatech se znovu nepřevádí)
-BV = C["barvy_vrcholu"]
-if BV["prevest_na_srgb"]:
-    G = os.environ.get("G", "/opt/godot47/Godot_v4.7.2-stable_linux.x86_64")
-    site = ["res://" + os.path.relpath(os.path.join(OUT, p), os.path.join(K, "hra")).replace(os.sep, "/") for p in sorted(chci) if p.endswith("_mesh.res")]
-    shutil.copy2(os.path.join(K, "nastroje/godot/luzka_barvy.gd"), os.path.join(K, "hra/_luzka_barvy.gd"))
-    r = subprocess.run([G, "--headless", "--path", os.path.join(K, "hra"), "-s", "res://_luzka_barvy.gd", "--", BV["znacka"], os.path.join(K, BV["zprava"])] + site, capture_output=True, text=True)
-    for f in ("_luzka_barvy.gd", "_luzka_barvy.gd.uid"):
-        if os.path.exists(os.path.join(K, "hra", f)): os.remove(os.path.join(K, "hra", f))
-    vys = [l for l in r.stdout.splitlines() if l.startswith("LUZKA_BARVY")]
-    print("\n".join(vys) or "LUZKA_BARVY_CHYBA Godot nic nevypsal (%d)" % r.returncode)
-    if r.returncode != 0 or not vys or any("CHYBA" in l for l in vys): sys.exit(1)
+# barvy vrcholů lineární → sRGB (pravidla/svet/barvy_vrcholu.json sada luzka; Compatibility je násobí s albedem v sRGB – chyby.md 356)
+if subprocess.run([sys.executable, os.path.join(K, "nastroje/barvy_vrcholu.py"), K, C["barvy_vrcholu_sada"]]).returncode != 0: sys.exit(1)
 # úklid: co sada nepotřebuje (GLB, 2K, dokumentace z dřívější kopie celé složky) i s importem
 smaz = 0
 for d, _, fs in os.walk(OUT):

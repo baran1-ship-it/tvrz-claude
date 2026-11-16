@@ -14,12 +14,13 @@
   "Seno_Atlas_1K.tres",
   "Vidle_Drevo_1K.tres"
  ],
+ "barvy_vrcholu_sada": "seno",
  "albedo_modulace": [
   1.0,
   0.9,
   0.76
  ],
- "albedo_modulace_pozn": "násobí albedo atlasu sena (ORMMaterial3D albedo_color, sRGB): dodaný materiál je na rendru bílo-šedý, KCD1 bledě slámově béžová (Míša přes koordinátora 15. 11.: „laď barvu v materiálu, ne přepis textury“). Měřeno 15. 11. (medián světlejších 40 % pixelů kupy, poměr G/R, B/R): KCD1 0,92 / 0,76; bez modulace ve světle hry 1,04 / 0,80 (zelenošedé od modré oblohy), s [1; 0,9; 0,76] ve světle hry 1,00 / 0,78, s lampou 0,88 / 0,65 – kompromis mezi oběma světly. NEOVERENO na tabletu – snímek docs/screens/funkce_jesle_seno_srovnani.png",
+ "albedo_modulace_pozn": "násobí albedo atlasu sena (ORMMaterial3D albedo_color, sRGB): dodaný materiál je na rendru bílo-šedý, KCD1 bledě slámově béžová (Míša přes koordinátora 15. 11.: „laď barvu v materiálu, ne přepis textury“). Měřeno 15. 11. (medián světlejších 40 % pixelů kupy, poměr G/R, B/R): KCD1 0,92 / 0,76; bez modulace ve světle hry 1,04 / 0,80 (zelenošedé od modré oblohy), s [1; 0,9; 0,76] ve světle hry 1,00 / 0,78, s lampou 0,88 / 0,65 – kompromis mezi oběma světly. NEOVERENO na tabletu – snímek docs/screens/funkce_jesle_seno_srovnani.png Po převodu barev vrcholů lineární → sRGB (pravidla/svet/barvy_vrcholu.json sada seno, chyby.md 359 – Compatibility brala šedé COLOR_0 0,79 jako sRGB = 0,59) měřeno 16. 11. stejně (jesle Dum2, medián světlejších 40 %): světlo hry před 49; 49; 38 (1,00 / 0,78) → po 57; 56; 43 (0,98 / 0,75), lampa před 206; 185; 143 (0,90 / 0,69) → po 218; 197; 155 (0,90 / 0,71); KCD1 143; 130; 107 (0,92 / 0,76) – seno je o ~15 % světlejší a poměry blíž předloze v obou světlech, modulace zůstává [1; 0,9; 0,76] (snímek docs/screens/barvy_vrcholu_seno.jpg)",
  "katalog": {
   "_popis": "záznam katalogu pískoviště (hra/modely/predmety_h.json, id seno_<Model>, scéna predmety_h/seno_<Model>.tscn = instance nativní scény ze sady); nazev, kat, stav, vaha, cena jako podobné předměty Havrana (kupka_sena venku 120 kg / 10, vidle 1,5 kg / 6); rozmer = rozměry z ASSETY.json v osách Godotu [x délka, y výška, z hloubka]",
   "Seno_Kupa_Zem": {

@@ -603,7 +603,7 @@ func _test_luzka() -> void:
 				mats[m] = true
 				if not (m is BaseMaterial3D and (m as BaseMaterial3D).vertex_color_use_as_albedo and (m as BaseMaterial3D).albedo_texture != null): vc = false
 				# barvy vrcholů převedené z lineárních glTF na sRGB (Compatibility násobí albedo v sRGB – chyby.md 356, houně černá)
-				if (mi.mesh.surface_get_format(s) & Mesh.ARRAY_FORMAT_COLOR) and bool(Pravidla.cti("luzka", "barvy_vrcholu", "prevest_na_srgb")) and not mi.mesh.has_meta(StringName(Pravidla.cti("luzka", "barvy_vrcholu", "znacka"))): vc = false
+				if (mi.mesh.surface_get_format(s) & Mesh.ARRAY_FORMAT_COLOR) and bool(Pravidla.cti("barvy_vrcholu", "prevest_na_srgb")) and not mi.mesh.has_meta(StringName(Pravidla.cti("barvy_vrcholu", "znacka"))): vc = false
 		var zn := ["Luzko_Lezeni", "Luzko_Hlava", "Luzko_Vstup"].all(func(z: String) -> bool: return n.get_node_or_null(z) is Marker3D)
 		var kol := n.get_node_or_null("Kolize") is StaticBody3D
 		var postel := not bool(lz["katalog"][sc].get("pruchozi", false))
