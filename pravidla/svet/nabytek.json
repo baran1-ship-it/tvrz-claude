@@ -252,8 +252,8 @@
     ],
     [
      "kolebka",
-     -1.365,
-     1.335,
+     -1.665,
+     1.385,
      0.0,
      0.0
     ],
@@ -1059,7 +1059,7 @@
   "_k_vstupni_stene": "váha vzdálenosti pece od vstupní stěny jizby ve skóre pece_domu.py. Míša 16. 11. večer: „pece v rohu, ne u dveří“ → záporná: pec v rohu u protější (zadní) stěny, zápecí a lavice ke zdem; stůl (svatý kout) zůstává pevný.",
   "pruchod_k_stredu_m": 0.32,
   "_pruchod_k_stredu_m": "17. 11. (test dvere_domu: pec a kolebka v cestě ode dveří jizby do jejího středu): cesta dveře → střed jizby volná na tolik m od osy (postava hráče má poloměr 0,28 m)",
-  "sin_stred_od_pricky_m": 1.4,
-  "_sin_stred_od_pricky_m": "střed síně před příčkou jizby (svet.gd DUM sin [-1,69; 0,59] proti jizbě od 0,81 → 1,4 m) – začátek cesty do jizby jako v testu dvere_domu"
+  "za_dvermi_m": 0.6,
+  "_za_dvermi_m": "cesta do jizby (test dvere_domu i rozmístění pece a lůžka): rovně dveřmi tolik m za příčku síně, pak ke středu jizby"
  }
 }

@@ -1083,16 +1083,26 @@ func _dvere_domu() -> void:
 			# 17. 11.: do jizby ode dveri ke STREDU jizby (x 0 - jizba je mezi bocnimi stenami domu souměrna), ne rovne
 			# za dvermi - v jizbe po staru stoji pec v koute za dvermi (nabytek.json pece_domu pruchod_k_stredu_m hlida
 			# stejnou cestu pri rozmistovani)
-			var body := [Vector3(dvere_x, y0, sz), Vector3(0.0 if cil == "jizba" else dvere_x, y1, cz)]
+			var body := [Vector3(dvere_x, y0, sz), Vector3(dvere_x, y1, cz)]
+			if cil == "jizba":
+				# rovne dvermi za pricku (nabytek.json pece_domu za_dvermi_m), pak ke stredu jizby
+				var zd := float(m["jizba"][0]) + float((Pravidla.cti("nabytek", "pece_domu") as Dictionary)["za_dvermi_m"])
+				body = [Vector3(dvere_x, y0, sz), Vector3(dvere_x, y0, zd), Vector3(0.0, y1, cz)]
 			var q := PhysicsShapeQueryParameters3D.new()
 			q.shape = cap
 			q.exclude = [player.get_rid()]
-			var a: Vector3 = xf * body[0]
-			var b: Vector3 = xf * body[1]
-			q.transform = Transform3D(Basis.IDENTITY, a)
-			q.motion = b - a
-			var r := space.cast_motion(q)
 			n += 1
+			var r := [1.0, 1.0]
+			var a: Vector3
+			var b: Vector3
+			for si in body.size() - 1:
+				a = xf * (body[si] as Vector3)
+				b = xf * (body[si + 1] as Vector3)
+				q.transform = Transform3D(Basis.IDENTITY, a)
+				q.motion = b - a
+				r = space.cast_motion(q)
+				if r[0] < 0.9:
+					break
 			if r[0] < 0.9:
 				q.transform = Transform3D(Basis.IDENTITY, a + (b - a) * r[1])
 				q.motion = Vector3.ZERO
