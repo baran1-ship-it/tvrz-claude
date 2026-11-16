@@ -1495,3 +1495,16 @@ Hotovo v kódu a datech (testy u každého):
   změně herní úpravy terénu znovu upéct: `tools/beh.sh dlazdice cmd bash tools/pregeneruj.sh dlazdice` – jinak otisk nesedí
   a hra kreslí celé sítě (bezpečné). Zkoušky: `TVRZ_DLAZDICE=1` (peče za běhu), test `teren_dlazdice`, varianta trasy
   `teren_dlazdice`. Balík v kontejneru bez zdrojů: `vydani.py … --jen z_dlazdice`.
+
+### 16. 11. – sady z Disku (lůžka, topení, les, seno), zemljanky, pece (tabulka `docs/rozpracovane/misa_16_11_sady.md`)
+- **Katalog:** `blender/predmety.py` zdroj `disk:<sada>/<LOD0.glb>` (TVRZ_DISK, výchozí `/home/user/disk_16_11`). Past: GLB sady Topeni mají
+  v jednom souboru scény všech modelů – Blender je importuje všechny (pec měla nad sebou komíny jiných modelů) → bere se jen podstrom výchozí
+  scény (`_uzly_sceny`). Ikony potřebují `blender/tex_cache/studio_small_09_1k.hdr` (Poly Haven, není v gitu). `modely/` není v gitu –
+  nové předměty jsou jen v kontejneru, do tabletu jen balíky `p_<id>` + `tex_predmety2` + `z_katalog` z tohoto kontejneru.
+- **Sdílené textury:** nová složka `modely/predmety/tex2` (kvalita.json `slozka`); stará `tex` má v kontejneru jen `.import` – nový balík
+  ze staré složky by smazal staré textury. vydani.py: balík pro každou složku.
+- **Pece v domech:** pec modelu = povrchy materiálů (nabytek.json `pece_domu.pec_modelu`), hra je vynechá; místo nové pece a lůžka
+  počítá `tools/krok_b/pece_domu.py` (po změně domy.glb nebo nábytku spustit znovu s `--zapis`).
+- **Zemljanky:** polohy jen v `lokace.json zemljanky` (konstanta VES_CHYSE zrušena), jáma a otvor v terénu = export světa.
+- **Krčma:** `krcma_L.py` čte `lokace.json krcma_l pec_senkovna_katalog`; po změně znovu `cd blender/krcma_L && /opt/bl/bin/python krcma_L.py --norender`
+  a přesunout `krcma_L*.glb` do `modely/krcma/` (balík `z_krcma`).
