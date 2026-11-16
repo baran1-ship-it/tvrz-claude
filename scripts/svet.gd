@@ -6024,7 +6024,11 @@ func _nabytek_budov() -> void:
 		ohen_predmetu(String(v[0]), wp, yv, "ohen_mlyn", true)
 	for r: Dictionary in Pravidla.cti("nabytek", "svet"):
 		var p := Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))
-		data["vybaveni"].append({"id": r["id"], "p": [p.x, p.y, p.z], "yaw": deg_to_rad(float(r["natoceni_st"]))})
+		var vr := {"id": r["id"], "p": [p.x, p.y, p.z], "yaw": deg_to_rad(float(r["natoceni_st"]))}
+		for kk: String in ["up", "sc"]:                 # seno v jeslich: sklon a meritko (nabytek.json svet)
+			if r.has(kk):
+				vr[kk] = r[kk]
+		data["vybaveni"].append(vr)
 		_postel_zapis(String(r["id"]), String(r["budova"]), p, deg_to_rad(float(r["natoceni_st"])), int(r.get("mist", 0)))
 		ohen_predmetu(String(r["id"]), p, deg_to_rad(float(r["natoceni_st"])), String(r.get("ohen", "ohen_" + String(r["budova"]))), true)
 	for r: Dictionary in Pravidla.cti("nabytek", "zapecene"):

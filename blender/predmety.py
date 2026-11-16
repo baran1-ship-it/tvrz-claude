@@ -518,7 +518,7 @@ KATALOG.update({
     # seno (NAVOD_SENO.md: pocatek uprostred spodku, bez kolize; seno do jesli Y = 1,30 m)
     "seno_kupa": ("disk:" + _S + "Seno_Kupa_Zem_LOD0.glb", "Kupa sena", None, "venku", 120.0, 8, _dk(_S, _S + "Seno_Kupa_Zem_LOD1.glb")),
     "seno_puda": ("disk:" + _S + "Seno_Puda_Vrstva_LOD0.glb", "Vrstva sena na půdě", None, "uvnitr", 150.0, 8, _dk(_S, _S + "Seno_Puda_Vrstva_LOD1.glb")),
-    "seno_jesle": ("disk:" + _S + "Seno_Jesle_420_LOD0.glb", "Seno do jeslí", None, "uvnitr", 60.0, 4, _dk(_S, _S + "Seno_Jesle_420_LOD1.glb", pruchozi=True)),
+    "seno_jesle": ("disk:" + _S + "Seno_Jesle_420_LOD0.glb", "Seno do jeslí", None, "uvnitr", 60.0, 4, _dk(_S, _S + "Seno_Jesle_420_LOD1.glb", pruchozi=True, upevneno="v jeslích")),
     "seno_chomac": ("disk:" + _S + "Seno_Rozhazeny_Chomac_LOD0.glb", "Chomáč sena", None, "dekorace", 0.5, 0, _dk(_S, _S + "Seno_Rozhazeny_Chomac_LOD1.glb")),
     "vidle_drevene": ("disk:" + _S + "Vidle_Drevene_LOD0.glb", "Dřevěné vidle", "naradi", "remeslo", 1.5, 6, _dk(_S, _S + "Vidle_Drevene_LOD1.glb")),
 })

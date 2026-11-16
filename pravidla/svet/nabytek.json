@@ -725,26 +725,15 @@
    "popis": "Míša 16. 11. („nová kamna nebo krb na tvrz“): nádobková kamna (Topeni_1400 Kamna_Hradni_Nadobkova) v ložnici pána v patře paláce (svet.json mistnosti loznice x 7,2–17, z −14 až −7,6, podlaha 3,9) zády k příčce s komnatou (x 7,2), ústím do místnosti; jižně od postele (z −12,93). Síň má gotický krb stavby (palace.fireplace) – nádobková kamna patří do vytápěné obytné místnosti (NAVOD_PEC: kamna s přikládáním zvenku, kolem 1400 v obytných světnicích hradů a tvrzí). Oheň ze značky Pec_Ohen."
   },
   {
-   "id": "seno_kupa",
-   "p": [
-    -22.6,
-    0.0,
-    -0.55
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_staj",
-   "popis": "Míša 16. 11.: seno ve stáji tvrze – kupa v prázdném třetím boxu (blender/hospodar.py stable: boxy z −8,3 po 3,1 m, střed třetího −0,55; podlaha 0)"
-  },
-  {
    "id": "vidle_drevene",
    "p": [
-    -21.25,
+    -21.0,
     0.0,
     -0.2
    ],
    "natoceni_st": 15.0,
    "budova": "tvrz_staj",
-   "popis": "dřevěné vidle stojí na podlaze opřené o bok kupy (test visici 16. 11.)"
+   "popis": "dřevěné vidle v prázdném boxu u stěny (kupa na podlaze pryč – seno je v jeslích)"
   },
   {
    "id": "seno_chomac",
@@ -756,6 +745,57 @@
    "natoceni_st": 70.0,
    "budova": "tvrz_staj",
    "popis": "rozhozený chomáč u koně"
+  },
+  {
+   "id": "seno_jesle",
+   "p": [
+    -24.75,
+    1.35,
+    -6.75
+   ],
+   "natoceni_st": 90.0,
+   "up": [
+    0.574,
+    0.819,
+    0.0
+   ],
+   "sc": 0.6,
+   "budova": "tvrz_staj",
+   "popis": "Míša 16. 11. (staj2: „seno patří do jeslí, ne na zem“): seno v žebřinových jeslích boxu (blender/hospodar.py stable: příčky od (xb+0,12; y 1,0) k (xb+0,85; y 2,05), xb = −25, box dlouhý 2,5 m) – jako Puchart funkce.json jesle: sklon 35° vrchem do stáje (up), měřítko 0,6 (2,5 m box; model 4,2 m), počátek = střed spodku v koši. Katalog upevneno (v jeslích, nestojí na zemi)."
+  },
+  {
+   "id": "seno_jesle",
+   "p": [
+    -24.75,
+    1.35,
+    -3.65
+   ],
+   "natoceni_st": 90.0,
+   "up": [
+    0.574,
+    0.819,
+    0.0
+   ],
+   "sc": 0.6,
+   "budova": "tvrz_staj",
+   "popis": "Míša 16. 11. (staj2: „seno patří do jeslí, ne na zem“): seno v žebřinových jeslích boxu (blender/hospodar.py stable: příčky od (xb+0,12; y 1,0) k (xb+0,85; y 2,05), xb = −25, box dlouhý 2,5 m) – jako Puchart funkce.json jesle: sklon 35° vrchem do stáje (up), měřítko 0,6 (2,5 m box; model 4,2 m), počátek = střed spodku v koši. Katalog upevneno (v jeslích, nestojí na zemi)."
+  },
+  {
+   "id": "seno_jesle",
+   "p": [
+    -24.75,
+    1.35,
+    -0.55
+   ],
+   "natoceni_st": 90.0,
+   "up": [
+    0.574,
+    0.819,
+    0.0
+   ],
+   "sc": 0.6,
+   "budova": "tvrz_staj",
+   "popis": "Míša 16. 11. (staj2: „seno patří do jeslí, ne na zem“): seno v žebřinových jeslích boxu (blender/hospodar.py stable: příčky od (xb+0,12; y 1,0) k (xb+0,85; y 2,05), xb = −25, box dlouhý 2,5 m) – jako Puchart funkce.json jesle: sklon 35° vrchem do stáje (up), měřítko 0,6 (2,5 m box; model 4,2 m), počátek = střed spodku v koši. Katalog upevneno (v jeslích, nestojí na zemi)."
   }
  ],
  "_svet": "kusy ve svetovych souradnicich (tvrz: kolize modely/svet.json): p = pata predmetu na podlaze, natoceni_st, budova, mist (kolik lidi v luzku spi, jinak z katalogu); poradi kusu = poradi prideleni luzek obyvatelum stejne budovy (lide.gd _postel v poradi postavy.json obyvatele)",

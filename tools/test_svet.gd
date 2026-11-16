@@ -10743,8 +10743,8 @@ func _nevisi_1400() -> void:
 	var n := 0
 	for v: Dictionary in sv.data.get("vybaveni", []):
 		var id := String(v["id"])
-		if not ids.has(id):
-			continue
+		if not ids.has(id) or main.predmety.kat.get(id, {}).has("upevneno"):
+			continue                                  # seno v jeslich (katalog upevneno)
 		var p := Vector3(float(v["p"][0]), float(v["p"][1]), float(v["p"][2]))
 		if p.distance_to(player.global_position) > 150.0:
 			await main.fast_travel(p, p + Vector3(0, 0, 1), 0.0, "test")
