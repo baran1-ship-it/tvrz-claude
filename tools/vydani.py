@@ -275,6 +275,9 @@ if JEN and "z_svet" in JEN:
     # krok B 0.97 (cesty po terenu, hostinec u hlavni cesty): novy export sveta z Blenderu v kontejneru bez zdroju
     # baliku svet - jen co export zmenil (geometrie, svet.json, portaly hostince)
     groups["z_svet"] = ["modely/tvrz.glb", "modely/svet.json", "modely/portaly.json"]
+if JEN and "z_dlazdice" in JEN:
+    # teren na dlazdice s LOD (K4, scripts/teren_dlazdice.gd; tools/pregeneruj.sh dlazdice po exportu sveta)
+    groups["z_dlazdice"] = sorted(glob.glob("modely/teren_dlazdice/*"))
 if JEN and "z_reka" in JEN:
     # i .import: nastaveni importu je zdroj (4. 11.: mapy potoka bezztratove - zmena jen v .import, balik se neprestavil)
     groups["z_reka"] = sorted(glob.glob("modely/reka/*"))

@@ -177,6 +177,10 @@ func _varianta(zap: bool) -> void:
 		RenderingServer.directional_soft_shadow_filter_set_quality(q as RenderingServer.ShadowQuality)
 	elif v == "dohled_kratsi":                 # 15. 11. (Misa: zpusobuje sekani dalka?): far kamery a dosahy viditelnosti x faktor
 		_dohled(zap)
+	elif v == "teren_dlazdice":                # 16. 11. K4: teren na dlazdice s LOD (pravidla/svet/teren_dlazdice.json) proti celym sitim
+		var td: Node3D = main.svet.teren_dlazdice if main.svet else null
+		if td:
+			td.zapni(zap, true)
 	elif v == "diag_plny":                     # 15. 11. bod 1: plny monitor jako drive (prepina _monitor)
 		pass
 	elif v == "dest":                          # 13. 11.: cena deste (pocasi.gd z Pucharta) - plny dest po celou variantu
@@ -371,6 +375,8 @@ func _jm(v: String) -> String:
 		return "filtr st.1"
 	if v == "dohled_kratsi":
 		return "dohled x%.1f" % float(_par(v).get("faktor", 0.6))
+	if v == "teren_dlazdice":
+		return "terén dlažd."
 	if v.begins_with("trava_"):
 		return "tráva " + v.substr(6) + "m"
 	return String(main.AB_NAZVY.get(v, v)).substr(0, 10)

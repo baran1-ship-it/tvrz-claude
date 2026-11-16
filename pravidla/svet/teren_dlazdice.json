@@ -1,0 +1,47 @@
+{
+ "popis": "Teren na dlazdice s LOD (rozbor_gpu_15_11.md K4, postup prevzaty z Pucharta: puchart/nastroje/teren_dlazdice.py, puchart/pravidla/svet/teren.json). Dlazdice se peci z HOTOVE site terenu - az po vsech hernich upravach (koryto, nadrze, terasy, cesty, dily, zamek terenu), takze nic driv postaveneho nehybou. Pece: TVRZ_DLAZDICE_PEC=1 godot --headless --path . (scripts/teren_dlazdice.gd, vystup soubor + index). Hra: zapnuto true = nacte pecene dlazdice, puvodni site Teren* zustanou pro kolize a dotazy vysek (layers 0 = nekresli se). zapnuto false = dnesni cesta (cele site). Navrh: docs/rozpracovane/teren_dlazdice_navrh.md.",
+ "zapnuto": false,
+ "_zapnuto": "jediny prepinac navratu: false = cele site Teren* jako do 0.999999. Vychozi false, dokud trasa na tabletu (varianta teren_dlazdice) neukaze zlepseni.",
+ "dlazdice_m": 128.0,
+ "_dlazdice_m": "strana ctverce dlazdice (m), troj. podle teziste do ctverce floor(x / dlazdice_m) - hrany dlazdic vedou po hranach puvodnich trojuhelniku, LOD0 je presna kopie. Puchart 250 m (mrizka 2 m); u nas pasma 1 m, mensi dlazdice = lepsi orez pohledem (rozbor K4: 128).",
+ "lod": [
+  {"do_m": 180.0, "chyba_m": 0.0},
+  {"do_m": 450.0, "chyba_m": 0.3},
+  {"do_m": 100000.0, "chyba_m": 1.2}
+ ],
+ "_lod": "urovne: do_m = vzdalenost kamery ke stredu AABB kusu (tak meri Godot visibility_range), chyba_m = nejvetsi geometricka chyba zjednoduseni (ImporterMesh.generate_lods, meshoptimizer s LOCK_BORDER - okraj kusu zustava presny, mezi dlazdicemi ani pasmy nevznikne skvira). Uroven 0 = presna sit. Kdyz zjednoduseni s chybou do chyba_m nic neubere, uroven se slouci s predchozi.",
+ "hystereze_m": 20.0,
+ "_hystereze_m": "jako Puchart (teren.json hystereze_m, svet.gd _umisti): rozsahy sousednich urovni se o hysterezi prekryvaji a margin = hystereze s FADE_DISABLED - bez diry pri startu/teleportu (Godot zacina se stavem skryto), prepnuti az za hranici (ne blikani na hrane).",
+ "sukne_m": 1.0,
+ "_sukne_m": "sukne (svisly pas dolu po okraji kusu) jen u zjednodusenych urovni (>= 1): pojistka proti skvire, kdyby se okraj presto lisil (LOCK_BORDER ho drzi presne). Puchart: 3 m + 1,5 x krok - jeho urovne maji ruzne okraje, nase ne.",
+ "uhel_slouceni_normal_st": 60.0,
+ "_uhel_slouceni_normal_st": "ImporterMesh.generate_lods normal_merge_angle (vychozi importu Godotu 60)",
+ "site": {
+  "predpona": "Teren",
+  "vynechat": ["Teren_obzor", "Teren_cesta_kamen"],
+  "vynechat_konec": ["_sukne", "_kolize"],
+  "min_troj": 4000
+ },
+ "_site": "ktere site terenu se deli: MeshInstance3D pod modelem sveta se jmenem na predponu, viditelne, aspon min_troj troj. Teren_obzor (25 m, 40 k troj., cely svet) zustava jednim kusem - jeho dlazdice by byly stovky kresleni (jako Puchart obzor.glb); sukne pasem jsou levne.",
+ "soubor": "res://modely/teren_dlazdice/dlazdice.scn",
+ "index": "res://modely/teren_dlazdice/dlazdice.json",
+ "kdyz_neplatne": "stara_cesta",
+ "_kdyz_neplatne": "pecene dlazdice nesedi na dnesni sit (jiny export nebo jina herni uprava terenu - otisk): stara_cesta = cele site (bezpecne), pec_za_behu = dlazdice spocitat pri nacteni (sekundy na tabletu). Varianta trasy teren_dlazdice a test peci za behu vzdy.",
+ "test": {
+  "krok_vzorku_m": 8.0,
+  "bunka_indexu_m": 4.0,
+  "shoda_l0_m": 0.01,
+  "chyba_nasobek": 3.0,
+  "chyba_rezerva_m": 0.05,
+  "podil_v_toleranci": 0.99,
+  "kolize_tol_m": 0.05,
+  "hrana_krok_m": 1.0,
+  "hrana_odsazeni_m": [0.05, 0.3],
+  "oko_m": 1.7,
+  "body": [[0.0, 40.0, 0.0, 300.0], [73.0, 947.0, 470.0, 830.0], [822.0, 215.0, 600.0, 600.0], [440.0, 820.0, 650.0, 950.0], [-197.0, 988.0, 300.0, 900.0]]
+ },
+ "_test": "tools/test_svet.gd teren_dlazdice: (1) pokryti - mrizka krok_vzorku_m: kde ma vysku puvodni sit, LOD0 ji ma do shoda_l0_m a hrubsi urovne do chyba_nasobek x chyba_m + chyba_rezerva_m u podil_v_toleranci bodu, nikde dira; kolize (Teren*_kolize) se od dlazdic lisi nad kolize_tol_m ne casteji nez od puvodni site; (2) skviry - sachovnice urovni (sude dlazdice uroven a, liche b) po hranach dlazdic kazdy hrana_krok_m, hrana_odsazeni_m na obe strany: kde je puvodni sit, je i dlazdice; (3) trojuhelniky v zornem jehlanu z bodu [x, z, cil x, cil z] ve vysce oko_m: dlazdice < cele site.",
+ "otisk_vzorku": 2000,
+ "otisk_tolerance_m": 0.02,
+ "_otisk": "otisk hotove site: pocet vrcholu a indexu kazdeho povrchu + vyska kazdeho n-teho vrcholu (do otisk_vzorku na povrch) s toleranci - stejne cislo z PC i tabletu (presna shoda bitu by na ARM nemusela vyjit)."
+}

@@ -409,6 +409,8 @@ def main():
         # otisk hladiny Bystrice z tohoto exportu: predpeceny potok (modely/reka, tools/reka_bake.gd) hra pouzije jen se
         # stejnym otiskem - stary balik z_reka na tabletu ukazoval hladinu stare trasy (Misa 28. 10. „reka nema vodu“)
         "reka_otisk": _reka_otisk(),
+        # zemljanky (lokace.json zemljanky, blender/zemljanka.py): poloha a vyska chysi s jamou - hra je postavi sem
+        "zemljanky": __import__("zemljanka").VYSTUP,
         "trava_ves": trava_ves,
         "trava_kraj": trava_kraj,
         "start": SPAWN,

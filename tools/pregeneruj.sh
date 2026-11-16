@@ -6,6 +6,8 @@
 #   kryti   modely/louka/kryti.bin - paprsky shora pod stoly, strechy, skaly (zmena staveb, skal)
 #   reka    modely/reka/*          - potok z koryta (zmena scripts/koryto.gd nebo osy)
 #   portaly modely/portaly.json    - okna a dvere hostince z blender/hostinec.py (Blender)
+#   dlazdice modely/teren_dlazdice/* - teren na dlazdice s LOD z hotove site (scripts/teren_dlazdice.gd, K4); po kazdem
+#           exportu sveta nebo zmene herni upravy terenu (jinak otisk nesedi a hra kresli cele site); neni ve vychozim vyberu
 #   pudy    modely/textury/<puda>_{diff,nor}.jpg - fotky pud (svet.gd PUDY) z Poly Haven (blender/textures.py); jen kdyz
 #           se meni seznam pud - z baliku jsou importovane i bez zdroje (neni ve vychozim vyberu, stahuje ~200 MB)
 # Po zmene: vydani.py zabali jen baliky, ke kterym jsou zdroje (jinak opravny balik: vydani.py --jen z_<nazev>).
@@ -23,6 +25,8 @@ for c in $CO; do
 				-s res://tools/reka_bake.gd > build/pregeneruj_reka.log 2>&1
 			godot --headless --path . --import > build/pregeneruj_import.log 2>&1 ;;
 		portaly) /opt/bl/bin/python tools/portaly.py ;;
+		dlazdice) TVRZ_DLAZDICE_PEC=1 timeout 1800 godot --headless --path . > build/pregeneruj_dlazdice.log 2>&1
+			grep "TEREN_DLAZDICE PEC" build/pregeneruj_dlazdice.log ;;
 		pudy) python3 blender/textures.py 2k > build/pregeneruj_pudy.log
 			for n in $(grep -o 'const PUDY := \[[^]]*\]' scripts/svet.gd | grep -o '"[a-z_]*"' | tr -d '"'); do
 				for k in diff nor; do

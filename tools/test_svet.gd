@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -10165,3 +10165,272 @@ func _ruiny_ves() -> void:
 					break
 	print("RUINY_VES dilu %d, nejvetsi odchylka rohu %.2f m, rostlin v pruchodech %d" % [n, nejvic, v_pruchodu])
 	_vysledek("ruiny_ves", chyby.is_empty() and n == (rv["dily"] as Array).size(), "dilu %d, roh max %.2f m, v pruchodech %d, %d chyb %s" % [n, nejvic, v_pruchodu, chyby.size(), chyby.slice(0, 6)])
+
+
+
+## K4 teren na dlazdice s LOD (scripts/teren_dlazdice.gd, pravidla/svet/teren_dlazdice.json test): dlazdice se zapnou
+## (pec za behu, kdyz pecena sada chybi nebo nesedi) a porovnaji s puvodni siti Teren* a kolizi.
+##   pokryti  mrizka po krok_vzorku_m: kde ma puvodni sit vysku, LOD0 do shoda_l0_m, hrubsi urovne do
+##            chyba_nasobek x chyba_m + rezerva u podil_v_toleranci bodu, nikde dira; kolize (Teren*_kolize) se od LOD0
+##            lisi nad kolize_tol_m nejvys tak casto jako od puvodni site (dlazdice nepridaji nesoulad s fyzikou)
+##   skviry   sachovnice urovni (sude dlazdice a, liche b) po hranach dlazdic: kde je puvodni sit, je i dlazdice
+##   troj     troj. v zornem jehlanu z bodu (rozsahy viditelnosti jako Godot: vzdalenost ke stredu AABB): dlazdice < cele
+## Vypis TEREN_DLAZDICE ... (cisla do navrhu).
+func _teren_dlazdice() -> void:
+	var td: Node3D = sv.teren_dlazdice
+	if td == null:
+		_vysledek("teren_dlazdice", false, "chybi uzel TerenDlazdice (svet.build hook)")
+		return
+	var T := {}
+	for k: String in ["krok_vzorku_m", "bunka_indexu_m", "shoda_l0_m", "chyba_nasobek", "chyba_rezerva_m", "podil_v_toleranci",
+			"kolize_tol_m", "hrana_krok_m", "hrana_odsazeni_m", "oko_m", "body"]:
+		T[k] = Pravidla.cti("teren_dlazdice", "test", k)
+	var bylo: bool = td.zapnute
+	var t0 := Time.get_ticks_msec()
+	td.zapni(true, true)
+	print("TEREN_DLAZDICE zapnuti %d ms, stav %s" % [Time.get_ticks_msec() - t0, td.stav])
+	if not td.zapnute:
+		_vysledek("teren_dlazdice", false, "dlazdice se nezapnuly: " + String(td.stav))
+		return
+	var lod: Array = td.P["lod"]
+	var nu := lod.size()
+	var D := float(td.P["dlazdice_m"])
+	var bunka := float(T["bunka_indexu_m"])
+	# indexy vysek: puvodni sit, kazda uroven zvlast, sachovnice urovni (a, b)
+	var src_m: Array = []
+	var rect := Rect2()
+	for mi: MeshInstance3D in td.zdroje:
+		src_m.append([mi.mesh, mi.global_transform])
+		var bb: AABB = mi.global_transform * mi.get_aabb()
+		var r2 := Rect2(bb.position.x, bb.position.z, bb.size.x, bb.size.z)
+		rect = r2 if rect.size == Vector2.ZERO else rect.merge(r2)
+	var ix_src := _dl_index(src_m, bunka)
+	var ix_u: Array = []
+	for u in nu:
+		ix_u.append(_dl_index(_dl_kusy(td, func(_dl: Vector2i, od: int, do_: int) -> bool: return od <= u and u <= do_), bunka))
+	# (1) pokryti a shoda s kolizi
+	var sp: PhysicsDirectSpaceState3D = player.get_world_3d().direct_space_state
+	var krok := float(T["krok_vzorku_m"])
+	var bodu := 0
+	var diry: Array = []
+	var mimo: Array = []
+	var max_dy: Array = []
+	max_dy.resize(nu)
+	max_dy.fill(0.0)
+	mimo.resize(nu)
+	mimo.fill(0)
+	diry.resize(nu)
+	diry.fill(0)
+	var kol_src := 0
+	var kol_l0 := 0
+	var kol_bodu := 0
+	var x := rect.position.x + krok * 0.5
+	while x < rect.end.x:
+		var z := rect.position.y + krok * 0.5
+		while z < rect.end.y:
+			var hs := _dl_vyska(ix_src, x, z)
+			if hs > -INF:
+				bodu += 1
+				var h0 := -INF
+				for u in nu:
+					var hu := _dl_vyska(ix_u[u], x, z)
+					if u == 0:
+						h0 = hu
+					if hu == -INF:
+						diry[u] += 1
+						if int(diry[u]) <= 5:
+							print("TEREN_DLAZDICE dira uroven %d (%.1f, %.1f)" % [u, x, z])
+						continue
+					var dy := absf(hu - hs)
+					max_dy[u] = maxf(float(max_dy[u]), dy)
+					var tol := float(T["shoda_l0_m"]) if u == 0 else float(T["chyba_nasobek"]) * float(lod[u]["chyba_m"]) + float(T["chyba_rezerva_m"])
+					if dy > tol:
+						mimo[u] += 1
+				var hk := _dl_kolize(sp, x, z)
+				if hk > -INF:
+					kol_bodu += 1
+					if absf(hk - hs) > float(T["kolize_tol_m"]):
+						kol_src += 1
+					if h0 == -INF or absf(hk - h0) > float(T["kolize_tol_m"]):
+						kol_l0 += 1
+			z += krok
+		x += krok
+	var ok := bodu > 0
+	var txt := "bodu %d" % bodu
+	for u in nu:
+		var podil := 1.0 - float(mimo[u]) / maxf(1.0, bodu)
+		var u_ok: bool = int(diry[u]) == 0 and (int(mimo[u]) == 0 if u == 0 else podil >= float(T["podil_v_toleranci"]))
+		ok = ok and u_ok
+		txt += "; L%d diry %d, mimo tol. %d, max dy %.2f m" % [u, diry[u], mimo[u], max_dy[u]]
+	ok = ok and kol_l0 <= kol_src
+	txt += "; kolize (%d bodu) lisi se od puvodni %d, od LOD0 %d" % [kol_bodu, kol_src, kol_l0]
+	# (2) skviry: sachovnice urovni, vzorky tesne u hran dlazdic
+	var skviry := 0
+	var hran_bodu := 0
+	for par: Array in [[0, 1], [1, 0], [0, nu - 1], [1, nu - 1]]:
+		if int(par[0]) >= nu or int(par[1]) >= nu or int(par[0]) == int(par[1]):
+			continue
+		var ia := int(par[0])
+		var ib := int(par[1])
+		var ix_m := _dl_index(_dl_kusy(td, func(dl: Vector2i, od: int, do_: int) -> bool:
+			var u := ia if (dl.x + dl.y) % 2 == 0 else ib
+			return od <= u and u <= do_), bunka)
+		for osa in 2:
+			var k0 := ceili((rect.position.x if osa == 0 else rect.position.y) / D)
+			var k1 := floori((rect.end.x if osa == 0 else rect.end.y) / D)
+			for k in range(k0, k1 + 1):
+				var t := (rect.position.y if osa == 0 else rect.position.x)
+				var t_end := (rect.end.y if osa == 0 else rect.end.x)
+				while t < t_end:
+					for ods: float in T["hrana_odsazeni_m"]:
+						for zn: float in [-1.0, 1.0]:
+							var px := k * D + zn * ods if osa == 0 else t
+							var pz := t if osa == 0 else k * D + zn * ods
+							if _dl_vyska(ix_src, px, pz) == -INF:
+								continue
+							hran_bodu += 1
+							if _dl_vyska(ix_m, px, pz) == -INF:
+								skviry += 1
+								if skviry <= 5:
+									print("TEREN_DLAZDICE skvira L%d/L%d (%.2f, %.2f)" % [ia, ib, px, pz])
+					t += float(T["hrana_krok_m"])
+	ok = ok and skviry == 0 and hran_bodu > 0
+	txt += "; hrany %d bodu, skvir %d" % [hran_bodu, skviry]
+	# (3) trojuhelniky v zornem jehlanu
+	var cam := Camera3D.new()
+	var pc := get_viewport().get_camera_3d()
+	main.add_child(cam)
+	if pc:
+		cam.fov = pc.fov
+		cam.far = pc.far
+		cam.near = pc.near
+	var vse_mene := true
+	var lst: Array = []
+	for b: Array in T["body"]:
+		var p := Vector3(float(b[0]), 0.0, float(b[1]))
+		var hy := _dl_vyska(ix_src, p.x, p.z)
+		p.y = (hy if hy > -INF else 0.0) + float(T["oko_m"])
+		var cil := Vector3(float(b[2]), p.y, float(b[3]))
+		cam.global_position = p
+		cam.look_at(cil, Vector3.UP)
+		var fr := cam.get_frustum()
+		var stare := 0
+		for mi: MeshInstance3D in td.zdroje:
+			if _dl_v_jehlanu(fr, mi.global_transform * mi.get_aabb()):
+				stare += _dl_troj(mi.mesh)
+		var nove := 0
+		var kusu := 0
+		for n in td.get_children():
+			var m := n as MeshInstance3D
+			var bb: AABB = m.global_transform * m.get_aabb()
+			var d := p.distance_to(bb.get_center())
+			var od := int(m.get_meta("od"))
+			var do_ := int(m.get_meta("do"))
+			var zac := 0.0 if od == 0 else float(lod[od - 1]["do_m"])
+			var kon := INF if do_ == nu - 1 else float(lod[do_]["do_m"])
+			if d < zac or d >= kon or not _dl_v_jehlanu(fr, bb):
+				continue
+			nove += _dl_troj(m.mesh)
+			kusu += 1
+		lst.append("(%d,%d) %d -> %d troj (%d kusu)" % [b[0], b[1], stare, nove, kusu])
+		print("TEREN_DLAZDICE troj (%d, %d) -> (%d, %d): cele site %d, dlazdice %d (%d kusu, %.0f %%)" % [b[0], b[1], b[2], b[3],
+				stare, nove, kusu, 100.0 * nove / maxf(1.0, stare)])
+		vse_mene = vse_mene and nove < stare
+	cam.queue_free()
+	ok = ok and vse_mene
+	txt += "; troj " + ", ".join(lst)
+	print("TEREN_DLAZDICE " + txt)
+	_vysledek("teren_dlazdice", ok, txt)
+	if not bylo:
+		td.zapni(false)
+
+
+## Kusy dlazdic [mesh, transformace] podle filtru (dlazdice i j z jmena D_i_j_n_Lk, rozsah urovni od..do).
+func _dl_kusy(td: Node3D, filtr: Callable) -> Array:
+	var out: Array = []
+	for n in td.get_children():
+		var m := n as MeshInstance3D
+		var c := String(m.name).split("_")
+		if filtr.call(Vector2i(int(c[1]), int(c[2])), int(m.get_meta("od")), int(m.get_meta("do"))):
+			out.append([m.mesh, m.global_transform])
+	return out
+
+
+## Index trojuhelniku po bunkach (x, z) pro vysku shora; svisle (sukne) vynechany.
+func _dl_index(site: Array, bunka: float) -> Dictionary:
+	var f := PackedVector3Array()
+	for s: Array in site:
+		var g: PackedVector3Array = (s[0] as Mesh).get_faces()
+		var xf: Transform3D = s[1]
+		if not xf.is_equal_approx(Transform3D.IDENTITY):
+			for i in g.size():
+				g[i] = xf * g[i]
+		f.append_array(g)
+	var bunky := {}
+	for t in f.size() / 3:
+		var a := f[t * 3]
+		var b := f[t * 3 + 1]
+		var c := f[t * 3 + 2]
+		if absf((b.x - a.x) * (c.z - a.z) - (c.x - a.x) * (b.z - a.z)) < 1e-6:
+			continue
+		for i in range(floori(minf(a.x, minf(b.x, c.x)) / bunka), floori(maxf(a.x, maxf(b.x, c.x)) / bunka) + 1):
+			for j in range(floori(minf(a.z, minf(b.z, c.z)) / bunka), floori(maxf(a.z, maxf(b.z, c.z)) / bunka) + 1):
+				var k := Vector2i(i, j)
+				if not bunky.has(k):
+					bunky[k] = []
+				(bunky[k] as Array).append(t)
+	return {"f": f, "b": bunky, "s": bunka}
+
+
+## Nejvyssi vyska site v bode (-INF = nic).
+func _dl_vyska(ix: Dictionary, x: float, z: float) -> float:
+	var s := float(ix["s"])
+	var l: Variant = (ix["b"] as Dictionary).get(Vector2i(floori(x / s), floori(z / s)))
+	if l == null:
+		return -INF
+	var f: PackedVector3Array = ix["f"]
+	var best := -INF
+	for t: int in l:
+		var a := f[t * 3]
+		var b := f[t * 3 + 1]
+		var c := f[t * 3 + 2]
+		var det := (b.x - a.x) * (c.z - a.z) - (c.x - a.x) * (b.z - a.z)
+		var l1 := ((x - a.x) * (c.z - a.z) - (c.x - a.x) * (z - a.z)) / det
+		var l2 := ((b.x - a.x) * (z - a.z) - (x - a.x) * (b.z - a.z)) / det
+		if l1 < -1e-5 or l2 < -1e-5 or l1 + l2 > 1.0 + 1e-5:
+			continue
+		best = maxf(best, a.y + l1 * (b.y - a.y) + l2 * (c.y - a.y))
+	return best
+
+
+## Vyska kolize terenu (tela Teren*_kolize) shora; ostatni tela preskocit.
+func _dl_kolize(sp: PhysicsDirectSpaceState3D, x: float, z: float) -> float:
+	var vyl: Array[RID] = [player.get_rid()]
+	for _i in 8:
+		var q := PhysicsRayQueryParameters3D.create(Vector3(x, 600.0, z), Vector3(x, -200.0, z))
+		q.exclude = vyl
+		var h := sp.intersect_ray(q)
+		if h.is_empty():
+			return -INF
+		var nm := String((h["collider"] as Node).name)
+		if nm.begins_with("Teren") and nm.ends_with("_kolize"):
+			return (h["position"] as Vector3).y
+		vyl.append(h["rid"])
+	return -INF
+
+
+func _dl_v_jehlanu(fr: Array, bb: AABB) -> bool:
+	for pl: Plane in fr:
+		var q := Vector3(bb.position.x if pl.normal.x > 0.0 else bb.end.x, bb.position.y if pl.normal.y > 0.0 else bb.end.y,
+				bb.position.z if pl.normal.z > 0.0 else bb.end.z)
+		if pl.distance_to(q) > 0.0:
+			return false
+	return true
+
+
+func _dl_troj(m: Mesh) -> int:
+	var t := 0
+	for si in m.get_surface_count():
+		var ni := (m as ArrayMesh).surface_get_array_index_len(si)
+		t += (ni if ni > 0 else (m as ArrayMesh).surface_get_array_len(si)) / 3
+	return t

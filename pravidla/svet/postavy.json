@@ -5103,7 +5103,7 @@
    },
    "spanek": {
     "budova": "dum_5",
-    "postel": "lozko"
+    "postel": "postel_rychtar"
    },
    "pribeh": "Rychtář dohlíží na náves, vykládá se sousedy, občas zajde do hostince; poledne doma."
   },
@@ -5117,7 +5117,7 @@
    },
    "spanek": {
     "budova": "dum_2",
-    "postel": "lozko"
+    "postel": "postel_chudy"
    },
    "pribeh": "Sedlák ráno na pole a na dvůr štípat dříví, v poledne doma, odpoledne pole, štípání, krmení; večer krčma U Kohouta nebo hovor na návsi."
   },
@@ -5131,7 +5131,7 @@
    },
    "spanek": {
     "budova": "dum_2",
-    "postel": "lozko"
+    "postel": "postel_chudy"
    },
    "pribeh": "Selka ráno nakrmí drůbež na dvoře, pak záhon, sad, krmení a hovor se sousedkou; vaří doma oběd a večeři."
   },
@@ -5145,7 +5145,7 @@
    },
    "spanek": {
     "budova": "dum_4",
-    "postel": "lozko"
+    "postel": "postel_chudy"
    },
    "pribeh": "Jako ostatní sedláci – pole, dříví, krčma."
   },
@@ -5159,7 +5159,7 @@
    },
    "spanek": {
     "budova": "dum_3",
-    "postel": "lozko"
+    "postel": "postel_chudy"
    },
    "pribeh": "Jako ostatní selky – drůbež, záhon, sad, vaření doma."
   },
@@ -5173,7 +5173,7 @@
    },
    "spanek": {
     "budova": "dum_1",
-    "postel": "lozko"
+    "postel": "postel_chudy"
    },
    "pribeh": "Chalupník pracuje na zahrádce a štípe dříví, večer zajde do krčmy."
   },
@@ -5187,7 +5187,7 @@
    },
    "spanek": {
     "budova": "dum_6",
-    "postel": "lozko"
+    "postel": "postel_chudy"
    },
    "pribeh": "Jako ostatní selky."
   },
@@ -5203,7 +5203,7 @@
    "prace": "lom_stena_1",
    "spanek": {
     "budova": "chyse_22",
-    "postel": "lozko"
+    "postel": "houne"
    },
    "pribeh": "Lamač ráno přijde do lomu, kutá ve stěně s krátkými oddechy, v poledne si sedne s ostatními, jí, pije a vykládá, odpoledne zas kutá; večer jde domů a do hospody."
   },
@@ -5219,7 +5219,7 @@
    "prace": "lom_stena_2",
    "spanek": {
     "budova": "chyse_23",
-    "postel": "lozko"
+    "postel": "houne"
    },
    "pribeh": "Jako první lamač, u druhé stěny lomu."
   },
@@ -5235,7 +5235,7 @@
    "prace": "lom_spalek",
    "spanek": {
     "budova": "chyse_22",
-    "postel": "lozko"
+    "postel": "deka_zem"
    },
    "pribeh": "Kameník tesá u špalku v lomu, v poledne svačí s lamači, večer hostinec."
   },
@@ -5278,7 +5278,7 @@
    "prace": "mlyn",
    "spanek": {
     "budova": "mlyn",
-    "postel": "lozko"
+    "postel": "postel_chudy"
    },
    "pribeh": "Mlynář Kuneš ráno pustí vodu a mele ve mlýnici, mezi tím nosí pytle (obilí dovnitř, mouka ven), v poledne si sedne před mlýn nebo jde domů, večer posedí."
   },
@@ -5293,7 +5293,7 @@
    "prace": "vetrak_plac",
    "spanek": {
     "budova": "dum_30",
-    "postel": "lozko"
+    "postel": "postel_chudy"
    },
    "pribeh": "Mlynář u větrného mlýna – stejný den jako Kuneš u vodního."
   },
@@ -5465,7 +5465,7 @@
    },
    "spanek": {
     "budova": "dum_1",
-    "postel": "lozko"
+    "postel": "postel_chudy"
    },
    "pribeh": "Ponocný spí do odpoledne, pak náves, večer dohled a v noci obchůzka s lucernou."
   },
@@ -5481,7 +5481,7 @@
    "prace": "kosar_pastyr",
    "spanek": {
     "budova": "chyse_kura_21",
-    "postel": "slamnik"
+    "postel": "houne"
    },
    "pribeh": "Pastýř pase u košáru s oddechy, večer krčma."
   },
@@ -5496,7 +5496,7 @@
    "prace": "kosar_pasacka",
    "spanek": {
     "budova": "dum_3",
-    "postel": "lozko"
+    "postel": "postel_chudy"
    },
    "pribeh": "Pasačka pase, v poledne doma, odpoledne si hraje na návsi."
   },
@@ -5512,7 +5512,7 @@
    "prace": "uhlir_plac",
    "spanek": {
     "budova": "chyse_kura_20",
-    "postel": "slamnik"
+    "postel": "houne"
    },
    "pribeh": "Uhlíř štípe a skládá dříví u milíře, v poledne svačí, večer hovor u chýše."
   },
@@ -5526,7 +5526,7 @@
    },
    "spanek": {
     "budova": "krcma_jizba",
-    "postel": "lozko",
+    "postel": "postel_chudy",
     "_p": "Misa 14. 11.: nova krcma do L - krcmar spi v jizbe hospodskeho (lokace krcma_l nabytek), stara krcma U Kohouta je obycejna usedlost"
    },
    "pribeh": "Krčmář Kubát v krčmě U Kohouta: s hosty obsluhuje (opřený u trámu pozoruje, nese ke stolům, zpět k pultu), bez hostů uklízí a vaří; odpočine si jen bez hostů."
@@ -5541,7 +5541,7 @@
    },
    "spanek": {
     "budova": "dum_7",
-    "postel": "lozko"
+    "postel": "postel_chudy"
    },
    "pribeh": "Bylinkářka pečuje o záhon a sad, krmí drůbež, k polednímu a večer doma, odpoledne na návsi."
   },
@@ -5556,7 +5556,7 @@
    "prace": "mlyn_dvur",
    "spanek": {
     "budova": "mlyn",
-    "postel": "lozko"
+    "postel": "postel_chudy"
    },
    "pribeh": "Mlynářův syn si hraje u mlýna a na návsi."
   },
@@ -6337,7 +6337,13 @@
    "lozko_uzke": 0.64,
    "luzko_hostinec": 0.62,
    "slamnik": 0.2,
-   "*": 0.4
+   "*": 0.4,
+   "postel_chudy": 0.64,
+   "postel_rychtar": 0.77,
+   "postel_panska": 0.89,
+   "postel_nebesa": 0.89,
+   "houne": 0.06,
+   "deka_zem": 0.05
   },
   "otoceni_st": 0.0,
   "posun": [
@@ -6352,7 +6358,8 @@
   },
   "rozestup_m": 0.32,
   "tempo": 1.0,
-  "_mixamo": "Misa 10. 11.: spanek Mixamo Laying_Sleeping (dychani, tempo 1) - panev prvniho snimku srovnana na UAL LayToIdle v case 0 (anim_cmu.py LEH_VZOR), takze plati nad_postel_m; snimek fmix6 10. 11.: lezi na matraci jako LayToIdle. Sleeping_Idle / _2 (Spanek_Lezmo1/3) vyrazeny - nohy nahoru / zaboreny do luzka. Zivnuti (klip chybi) a probuzeni (Waking - z jine polohy) = dalsi krok"
+  "_mixamo": "Misa 10. 11.: spanek Mixamo Laying_Sleeping (dychani, tempo 1) - panev prvniho snimku srovnana na UAL LayToIdle v case 0 (anim_cmu.py LEH_VZOR), takze plati nad_postel_m; snimek fmix6 10. 11.: lezi na matraci jako LayToIdle. Sleeping_Idle / _2 (Spanek_Lezmo1/3) vyrazeny - nohy nahoru / zaboreny do luzka. Zivnuti (klip chybi) a probuzeni (Waking - z jine polohy) = dalsi krok",
+  "_nad_postel_luzka_1400": "16. 11. luzka z Disku (Luzka_1400 ASSETY.json, znacka Luzko_Lezeni = stred tela nad loznou plochou: chudy 0,623, rychtar 0,751, panska a nebesa 0,871, houne 0,037, deka 0,031 m): nad_postel = znacka + 0,02 (jako lozko: panev 0,04 nad povrchem matrace). NEOVERENO snimkem spanku."
  },
  "denni_rezim": {
   "_popis": "Misa 5. 11.: uplny denni rezim (vstavani = rano u dveri, jidlo, prace, hospoda, navrat, spanek) je v rozvrhu roli (role.*.rozvrh); v noci (noc_doma) vsichni doma v posteli, chodi jen straze: ponocny s lucernou po navsi, nocni straz tvrze po nadvori (role ponocny, straz_noc); buzeni hrdinou pozdeji.",

@@ -301,6 +301,11 @@ if _KOV.get("stred"):
 for _i, _m in enumerate(_LOKACE_J.get("lom_chyse", {}).get("mista", [])):
     MISTA.append(("lom_chyse_%d" % _i, _m[0], _m[1], 0.0, _LOKACE_J["lom_chyse"]["rovina_r_m"]))
     PLACKY.append((_m[0], _m[1], _LOKACE_J["lom_chyse"]["plac_r_m"]))
+# zemljanky uhliru v lese (Misa 16. 11., lokace.json zemljanky mista se stredem; chyse u lomu maji rovinu z lom_chyse):
+# rovina pod chysi (vyska prahu = srovnany teren, blender/zemljanka.py), jama v terenu - otvor v Teren_zemljanky
+for _m in _LOKACE_J.get("zemljanky", {}).get("mista", []):
+    if "stred" in _m:
+        MISTA.append(("zemljanka_%d" % _m["k"], _m["stred"][0], _m["stred"][1], 0.0, _LOKACE_J["zemljanky"]["rovina_r_m"]))
 # krcma do L u odbocky k rybniku (Misa 14. 11., lokace.json krcma_l): rovina a vegetace pryc, model stavi hra (svet._krcma_dil)
 _KRC = _LOKACE_J.get("krcma_l", {})
 if _KRC.get("stred"):
@@ -2500,6 +2505,7 @@ def tiles(coll, land_fn):
     BRECT = (bx5 - 40.0, bx5 + 40.0, bz5 - 40.0, bz5 + 40.0)          # jemny teren u mostu (nasep, brehy)
     _REKA_MIMO[:] = [VRECT, BRECT]
     jemne = {}
+    zemljanky_bunky = {}
     for name, rect, inner, step in (("Teren_ves", VRECT, [], 2.0), ("Teren_most", BRECT, [], 1.0),
                                     ("Teren_okoli", ACT, [NEAR, VRECT, BRECT], 5.0), ("Teren_obzor", FAR, ACT, 25.0)):
         _KROK_SITE[0] = step                                  # sum masky povrchu podle rozliseni pasma
@@ -2508,10 +2514,14 @@ def tiles(coll, land_fn):
         jem = _bunky_u_vody(rect, inner, step) if name in ("Teren_ves", "Teren_okoli") else set()
         jemne[name] = (rect, step, jem)
 
-        def vynech(cx, cz, rect=rect, step=step, jem=jem, name=name):
+        zem = _bunky_zemljanek(rect, inner, step, jem) if name in ("Teren_ves", "Teren_okoli") else set()
+        zemljanky_bunky[name] = (rect, step, zem)
+
+        def vynech(cx, cz, rect=rect, step=step, jem=jem, name=name, zem=zem):
             if name == "Teren_okoli" and _v_pasu_reky(cx, cz):
                 return True
-            return (int((cx - rect[0]) // step), int((cz - rect[2]) // step)) in jem
+            bk = (int((cx - rect[0]) // step), int((cz - rect[2]) // step))
+            return bk in jem or bk in zem
         verts, faces, attrs = _grid(xs, zs, inner, land_fn, name, None, coll,
                                     skip_fn=vynech if name in ("Teren_okoli", "Teren_ves") else None)
         # obzor: lesy jako tmava vyvysena koruna (z dalky vypada jako les, stromy by stály moc)
@@ -2529,7 +2539,84 @@ def tiles(coll, land_fn):
     _KROK_SITE[0] = 1.0                                       # pas reky po 1 m
     out.append(_teren_reka(coll, land_fn, [VRECT, BRECT]))
     out.append(_teren_u_vody(coll, land_fn, jemne))
+    out.append(_teren_zemljanek(coll, land_fn, zemljanky_bunky))
     return out
+
+
+def _bunky_zemljanek(rect, inner, step, jem):
+    """Bunky pasma pod jamou zemljanky (lokace.json zemljanky) a jeden pas bunek kolem: nahradi je jemny teren
+    s otvorem po obrys jamy (_teren_zemljanek). Bunky jemneho terenu u vody (jem) ne - ty ma Teren_toky."""
+    import zemljanka
+    out = set()
+    nx = int(round((rect[1] - rect[0]) / step))
+    nz = int(round((rect[3] - rect[2]) / step))
+    for m in zemljanka.mista():
+        poly = zemljanka.jama_poly(m)
+        xs = [p[0] for p in poly]
+        zs = [p[1] for p in poly]
+        for i in range(int((min(xs) - step - rect[0]) // step), int((max(xs) + step - rect[0]) // step) + 1):
+            for k in range(int((min(zs) - step - rect[2]) // step), int((max(zs) + step - rect[2]) // step) + 1):
+                if 0 <= i < nx and 0 <= k < nz and (i, k) not in jem:
+                    cx, cz = rect[0] + (i + 0.5) * step, rect[2] + (k + 0.5) * step
+                    if not any(x0 < cx < x1 and z0 < cz < z1 for x0, x1, z0, z1 in inner):
+                        out.add((i, k))
+    return out
+
+
+def _teren_zemljanek(coll, land_fn, bunky):
+    """Jemny teren (lokace.json zemljanky teren_krok_m) v bunkach _bunky_zemljanek s otvorem po obrys jamy: plocha,
+    jejiz stred lezi v jame, se vynecha (okraj otvoru do pul kroku od lice; kryje ho stena jamy zemljanky.stena_m).
+    Vrchol na hrane k hrube sousedni bunce ma vysku hrube hrany (jako _teren_u_vody) - bez skulin."""
+    import zemljanka
+    from lib import Part
+    if not zemljanka.Z:
+        return None
+    jamy = [zemljanka.jama_poly(m) for m in zemljanka.mista()]
+    krok = float(zemljanka.Z["teren_krok_m"])
+    verts, faces, attrs = [], [], []
+    idx = {}
+    for name, (rect, step, zem) in bunky.items():
+        n = int(round(step / krok))
+
+        def bod(i, k, a, b, rect=rect, step=step, zem=zem):
+            x, z = rect[0] + i * step + a, rect[2] + k * step + b
+            key = (round(x * 16), round(z * 16))
+            if key in idx:
+                return idx[key]
+            y = None
+            if 0 < b < step and a in (0.0, step):
+                ii = i - 1 if a == 0.0 else i + 1
+                if (ii, k) not in zem:
+                    z0, z1 = rect[2] + k * step, rect[2] + (k + 1) * step
+                    y = land_fn(x, z0) + (land_fn(x, z1) - land_fn(x, z0)) * b / step
+            if 0 < a < step and b in (0.0, step):
+                kk = k - 1 if b == 0.0 else k + 1
+                if (i, kk) not in zem:
+                    x0, x1 = rect[0] + i * step, rect[0] + (i + 1) * step
+                    y = land_fn(x0, z) + (land_fn(x1, z) - land_fn(x0, z)) * a / step
+            if y is None:
+                y = land_fn(x, z)
+            idx[key] = len(verts)
+            verts.append((x, y, z))
+            attrs.append(ground_attrs(x, z))
+            return idx[key]
+        d = step / n
+        for (i, k) in sorted(zem):
+            for u in range(n):
+                for v in range(n):
+                    a0, a1, b0, b1 = u * d, (u + 1) * d, v * d, (v + 1) * d
+                    cx, cz = rect[0] + i * step + (a0 + a1) / 2, rect[2] + k * step + (b0 + b1) / 2
+                    if any(zemljanka.v_jame(cx, cz, p) for p in jamy):
+                        continue
+                    faces.append((bod(i, k, a0, b0), bod(i, k, a0, b1), bod(i, k, a1, b1), bod(i, k, a1, b0)))
+    if not faces:
+        return None
+    P = Part("Teren_zemljanky", smooth=True)
+    P.mesh(verts, faces, "zem")
+    o = P.commit(coll)
+    _set_attrs(o, attrs)
+    print("teren zemljanek: %d bodu, %d bunek, %d jam" % (len(verts), sum(len(b[2]) for b in bunky.values()), len(jamy)))
+    return o
 
 
 def _mlyn_pad_vody(coll):

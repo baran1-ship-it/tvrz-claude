@@ -165,7 +165,7 @@ func _ready() -> void:
 	menu.music.volume_db = HUDBA_DB
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_MERENI") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA") or OS.has_environment("TVRZ_TEST") or OS.has_environment("TVRZ_ROZSEV") or OS.has_environment("TVRZ_JIZDA") or OS.has_environment("TVRZ_TRASA"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_MERENI") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA") or OS.has_environment("TVRZ_TEST") or OS.has_environment("TVRZ_ROZSEV") or OS.has_environment("TVRZ_DLAZDICE_PEC") or OS.has_environment("TVRZ_JIZDA") or OS.has_environment("TVRZ_TRASA"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()

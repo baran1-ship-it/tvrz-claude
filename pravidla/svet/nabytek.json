@@ -104,9 +104,9 @@
      0.0
     ],
     [
-     "lozko",
+     "postel_chudy",
      -2.705,
-     3.88,
+     3.82,
      180.0,
      0.0
     ]
@@ -166,8 +166,8 @@
      "o_zed"
     ],
     [
-     "lozko",
-     -1.885,
+     "postel_chudy",
+     -1.81,
      3.71,
      90.0,
      0.0
@@ -284,9 +284,9 @@
      -0.75
     ],
     [
-     "lozko",
-     -3.005,
-     2.78,
+     "postel_rychtar",
+     -2.98,
+     2.68,
      180.0,
      0.0
     ]
@@ -294,48 +294,70 @@
   },
   "ChysePrkna": {
    "budova": "chyse_%d",
-   "_p": "Misa 14. 11.: pryčny a podlaha modelu pryc (lokace lom_chyse vynechat_uzly), chyse na udusane hline - nase luzko (2 spaci) napric u zadni steny (natoceni 90 - podel steny bylo v ceste ode dveri, test lide_chovani), podlaha = teren (vyska 0)",
+   "_p": "16. 11. zemljanka (lokace.json zemljanky), jako ChyseKura; jáma o 0,1 m širší",
    "kusy": [
     [
-     "lozko",
+     "houne",
+     -1.01,
+     -0.48,
      0.0,
-     -1.25,
-     90.0,
+     0.0
+    ],
+    [
+     "deka_zem",
+     0.98,
+     -0.45,
+     0.0,
+     0.0
+    ],
+    [
+     "truhla",
+     0.0,
+     -1.74,
+     0.0,
      0.0
     ]
    ]
   },
   "ChyseKura": {
    "budova": "chyse_kura_%d",
+   "_p": "16. 11. zemljanka (lokace.json zemljanky): výška kusu nad dnem jámy (podlaha = prah_y − hloubka_m); houně vlevo, deka vpravo (hlavou k zadní stěně), truhla u zadní stěny mezi nimi (Puchart: bedna proti dveřím)",
    "kusy": [
     [
-     "slamnik",
-     -0.875,
-     -1.0,
+     "houne",
+     -0.91,
+     -0.48,
      0.0,
-     0.38
+     0.0
     ],
     [
-     "slamnik",
-     0.875,
-     -1.0,
+     "deka_zem",
+     0.88,
+     -0.45,
      0.0,
-     0.38
+     0.0
+    ],
+    [
+     "truhla",
+     0.0,
+     -1.74,
+     0.0,
+     0.0
     ]
    ]
   }
  },
- "_domy": "podle typu modelu domu (svet._domy typ: Dum1, Dum2, Rychta, ChysePrkna u lomu, ChyseKura uhliru): kus = [id z katalogu, x, z v ramci domu (+x vstup, +z stit do navsi), natoceni_st v ramci domu, vyska nad podlahou pod]; budova = jmeno pro spanek obyvatel (k = cislo domu). Luzko: delka podel osy z modelu, hlava na -z (natoceni 180 = hlava k +z). Dum1/Dum2/Rychta: luzko v koute jizby mezi peci a stitem (kde lezela ovci kuze - pryc, vedro v Dum2 posunuto), Rychta kolebka o 0,15 m k jizbe. Chyse: slamnik na kazde prycne (Kol_Prycna, 0,38 m nad podlahou), hlavou k zadni stene.",
+ "_domy": "podle typu modelu domu (svet._domy typ: Dum1, Dum2, Rychta, ChysePrkna u lomu, ChyseKura uhliru): kus = [id z katalogu, x, z v ramci domu (+x vstup, +z stit do navsi), natoceni_st v ramci domu, vyska nad podlahou pod]; budova = jmeno pro spanek obyvatel (k = cislo domu). Luzko: delka podel osy z modelu, hlava na -z (natoceni 180 = hlava k +z). Dum1/Dum2/Rychta: luzko v koute jizby mezi peci a stitem (kde lezela ovci kuze - pryc, vedro v Dum2 posunuto), Rychta kolebka o 0,15 m k jizbe. Chyse: slamnik na kazde prycne (Kol_Prycna, 0,38 m nad podlahou), hlavou k zadni stene. 16. 11. (Misa: „nase postele v domech nahradit chudymi, rychtar dostane rychtarovu“): lozko -> postel_chudy (Luzka_1400 Postel_Chudy_Dum 1,23 x 2,15 m, o 0,18 m delsi nez lozko - poloha posunuta tak, aby konec zustal od steny jizby: Dum1 z 3,88 -> 3,82, Dum2 x -1,885 -> -1,81), Rychta postel_rychtar (1,42 x 2,21 m: x -3,005 -> -2,98, z 2,78 -> 2,68); chyse u lomu a uhliru = zemljanka (lokace.json zemljanky): misto luzek a slamniku houne vlevo a vpravo na dne jamy (vyska nad podlahou = dno jamy pod prahem, zemljanka.podlaha_y).",
  "mlyn": [
   [
-   "lozko",
-   -2.08,
+   "postel_chudy",
+   -1.99,
    4.705,
    90.0,
    0.3
   ]
  ],
- "_mlyn": "vodni mlyn (ramec voda.json mlyn.dil: stred, natoceni, y_dvora): [id, x, z, natoceni_st, y nad pocatkem modelu (podlaha Kol_Podlaha 0,3)]; luzko v jizbe u stitu za peci; budova mlyn",
+ "_mlyn": "vodni mlyn (ramec voda.json mlyn.dil: stred, natoceni, y_dvora): [id, x, z, natoceni_st, y nad pocatkem modelu (podlaha Kol_Podlaha 0,3)]; luzko v jizbe u stitu za peci; budova mlyn 16. 11.: lozko -> postel_chudy (o 0,18 m delsi, x -2,08 -> -1,99: konec u stitu zustava).",
  "svet": [
   {
    "id": "postel",
@@ -350,7 +372,7 @@
    "popis": "loznice pana tvrze v patre palace (u severni zdi, mimo vyklenky oken) - luzko hrace (Jan z Havrani, pribeh/postavy.md), obyvatel v nem nespi"
   },
   {
-   "id": "lozko_uzke",
+   "id": "postel_chudy",
    "p": [
     363.68,
     4.83,
@@ -358,7 +380,7 @@
    ],
    "natoceni_st": 43.89,
    "budova": "krcma",
-   "popis": "krcma U Kohouta (stara usedlost 0), komora u zapadni zdi mezi pytli a bednou (krcmar Kubat); ves_0_komora lokalne (-0,77; -1,72), vnitrni lic zdi x -1,28..1,28, vstup ze sine x 1,28 z 1,6..2,5 (kolize svet.json); 10. 11. y 5,01 -> 4,83 = podlaha po exportu 10. 11. (test lide_chovani). NEOVERENO: zaznam je v absolutnich souradnicich - pri dalsim posunu usedlosti 0 se rozejde znovu, prevest na mistni (domy)"
+   "popis": "krcma U Kohouta (stara usedlost 0), komora u zapadni zdi mezi pytli a bednou (krcmar Kubat); ves_0_komora lokalne (-0,77; -1,72), vnitrni lic zdi x -1,28..1,28, vstup ze sine x 1,28 z 1,6..2,5 (kolize svet.json); 10. 11. y 5,01 -> 4,83 = podlaha po exportu 10. 11. (test lide_chovani). NEOVERENO: zaznam je v absolutnich souradnicich - pri dalsim posunu usedlosti 0 se rozejde znovu, prevest na mistni (domy) 16. 11.: lozko_uzke -> postel_chudy (Misa: v krcme chude postele)"
   },
   {
    "id": "stul_selsky",

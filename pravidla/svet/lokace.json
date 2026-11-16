@@ -2976,7 +2976,7 @@
     0.45
    ],
    [
-    "lozko",
+    "postel_chudy",
     6.0,
     2.7,
     0.0,
@@ -2991,7 +2991,7 @@
     0.45
    ],
    [
-    "lozko_uzke",
+    "postel_chudy",
     3.5,
     -2.6,
     0.0,
@@ -3013,16 +3013,16 @@
     0.05
    ],
    [
-    "lozko",
+    "postel_chudy",
     16.85,
-    -0.1,
+    -0.2,
     0.0,
     2.85
    ],
    [
-    "lozko",
+    "postel_chudy",
     16.85,
-    -4.2,
+    -4.3,
     0.0,
     2.85,
     "krcma_pokoj2"
@@ -3075,7 +3075,7 @@
     "krcma_noclezna"
    ]
   ],
-  "_nabytek": "Míša 14. 11.: model bez vybavení – vše z katalogu: [id, x, z, natočení_st v rámci modelu, (výška podlahy; jinak podlaha_m), (budova pro spánek u lůžek)]. Šenkovna stoly s lavicemi (x −7…−4), komora sudy (x 4,4…7, z −0,5…−4), jizba hospodského lůžko a truhla, komůrka šenkýřky úzké lůžko, stáj koryta u východní zdi (podlaha stáje 0,05), patro křídla (2,85): pokoj 1 lůžko hráče u značky KrcmaL_Spani_Hrac, pokoj 2 lůžko, nocležna 5 slamníků pro formany. Polohy = odhad z dispozice NAVOD, ověřit snímkem.",
+  "_nabytek": "Míša 14. 11.: model bez vybavení – vše z katalogu: [id, x, z, natočení_st v rámci modelu, (výška podlahy; jinak podlaha_m), (budova pro spánek u lůžek)]. Šenkovna stoly s lavicemi (x −7…−4), komora sudy (x 4,4…7, z −0,5…−4), jizba hospodského lůžko a truhla, komůrka šenkýřky úzké lůžko, stáj koryta u východní zdi (podlaha stáje 0,05), patro křídla (2,85): pokoj 1 lůžko hráče u značky KrcmaL_Spani_Hrac, pokoj 2 lůžko, nocležna 5 slamníků pro formany. Polohy = odhad z dispozice NAVOD, ověřit snímkem. 16. 11. (Misa: „hospoda dostane chude postele“): lozko a lozko_uzke -> postel_chudy (Luzka_1400, 1,23 x 2,15 m; pokoj 1 z -0,1 -> -0,2 a pokoj 2 z -4,2 -> -4,3, at delsi postel nesaha do pricky); noclezna zustava se slamniky (spolecne nocoviste formanu na slame).",
   "mistnosti": [
    [
     "krcma_l_senkovna",
@@ -3669,5 +3669,102 @@
   "rovina_r_m": 4.5,
   "plac_r_m": 4.0,
   "_mista": "15. 11.: stredy chysi u lomu jako zaznam (drive hledane za behu svet._chyse_k_lomu) - Blender pod nimi srovna jemny teren (kraj.MISTA, stavba_pad) a udusanou hlinu (PLACKY); bez toho hruba sit terenu (vrcholy po 5 m) nechala podlahu 12-16 cm pod luzkem (test lide_chovani). Hra bere polohy odtud."
+ },
+ "zemljanky": {
+  "popis": "Míša 16. 11.: chýše v lomu a u uhlíře v lese (domy.glb ChyseKura / ChysePrkna) jako zemljanky – „postele pryč, vykopat zemljanku se dvěma schody dolů, na zemi vlevo a vpravo houně; podívej se na Puchart“. Převzato z Puchartu (větev ccr-f2d32673-9fi7m5: docs/zajimava_mista_plan.md „Chýše do tvaru A jako zemljanky“, nastroje/zajimava_modely.py jama_steny, nastroje/zajimava_mista.py díry v terénu): z chýše se vypustí podlaha a pryčny (vynechat_uzly), uvnitř jáma s hliněnými stěnami obloženými kůly, dva hliněné stupně s dřevěnou hranou dolů ode dveří (hlína po stranách stupňů až k prahu), na dně houně vlevo a vpravo a truhla u zadní stěny (nabytek.json domy). Terén: Blender (kraj.py) vyřízne otvor přesně po obrys jámy v jemné síti Teren_zemljanky (krok teren_krok_m, okolní buňky hrubé sítě nahrazeny, okraj jako u Teren_toky), jámu, stupně, stěny a kolizi staví blender/zemljanka.py v pořadí terén → stavby (jáma je součást stavby, terén se po kroku 4 nemění). Polohy a natočení jsou záznam (dřív uhlířské chýše konstanta svet.gd VES_CHYSE a natočení chýší u lomu počítané za běhu ke vchodu lomu); výšku (práh = srovnaný terén + lom_chyse.teren_pod_prahem_m) spočítá Blender a zapíše do svet.json zemljanky, hra chýši staví na ni.",
+  "zdroj": "Puchart zajimava_mista.json modely.zemljanky (čísla jámy, stupňů, kůlů převzata; hloubka jednotně hloubka_m pod prahem); dobový doklad: polozemnice/zahloubené stavby 13.–14. st. (rešerše Puchartu kap. 9, NAVRH); KCD zemnice uhlířů; schody: hrac.json schod_m (stupeň do 0,45 m), Warhorse KM-A-52 stupeň 0,20–0,25 m",
+  "typy": {
+   "ChyseKura": {
+    "prah_y": 0.02,
+    "jama": [
+     -1.5,
+     1.5,
+     -2.05,
+     2.2
+    ]
+   },
+   "ChysePrkna": {
+    "prah_y": 0.5,
+    "jama": [
+     -1.6,
+     1.6,
+     -2.05,
+     2.2
+    ]
+   }
+  },
+  "_typy": "v souřadnicích modelu chýše (+z dveře, štít vpředu z 2,22): prah_y = výška prahu dveří modelu (ChysePrkna stojí na zídce 0,5 m – model se spouští, aby práh ležel na terénu), jama = [x0, x1, z0, z1] vnitřní líc jámy (Puchart: střecha dosedá na zem v x ±hw, štít vzadu z −2,22)",
+  "hloubka_m": 0.75,
+  "_hloubka_m": "dno jámy pod prahem; dva stupně + krok na dno = 3 × 0,25 m (≤ hrac.json schod_m 0,45, Warhorse 0,20–0,25)",
+  "schody": {
+   "pocet": 2,
+   "hloubka_m": 0.38,
+   "sirka_m": 1.1
+  },
+  "kuly": {
+   "rozestup_m": 0.32,
+   "prumer_m": 0.09,
+   "nad_prah_m": 0.06
+  },
+  "stena_m": 0.15,
+  "_stena_m": "tloušťka hliněné stěny za lícem jámy – kryje zubatý okraj otvoru v terénu (otvor po buňkách teren_krok_m: mezera do půl buňky < stena_m)",
+  "teren_krok_m": 0.25,
+  "vynechat_uzly": [
+   "_Interier",
+   "_Kol_Prycna0",
+   "_Kol_Prycna1"
+  ],
+  "mista": [
+   {
+    "k": 20,
+    "typ": "ChyseKura",
+    "stred": [
+     642.0,
+     818.0
+    ],
+    "smer": 0.785398,
+    "paseka_m": 12.0,
+    "k_cili": [
+     [
+      640.0,
+      825.0
+     ]
+    ],
+    "popis": "uhlířská chýše v lese nad vsí (dřív svet.gd VES_CHYSE)"
+   },
+   {
+    "k": 21,
+    "typ": "ChyseKura",
+    "stred": [
+     651.0,
+     821.0
+    ],
+    "smer": 2.941593,
+    "paseka_m": 12.0,
+    "k_cili": [
+     [
+      640.0,
+      825.0
+     ]
+    ],
+    "popis": "druhá uhlířská chýše"
+   },
+   {
+    "k": 22,
+    "typ": "ChysePrkna",
+    "lom_chyse": 0,
+    "smer": -2.182182,
+    "popis": "chýše u lomu (střed lom_chyse.mista[0]); smer = dřívější výpočet svet._chyse_k_lomu (osa obou chýší ke vchodu lomu 150, 935)"
+   },
+   {
+    "k": 23,
+    "typ": "ChysePrkna",
+    "lom_chyse": 1,
+    "smer": -2.182182,
+    "popis": "druhá chýše u lomu (lom_chyse.mista[1])"
+   }
+  ],
+  "_mista": "k = číslo domu (svet._domy, postavy.json spanek budova chyse_kura_<k> / chyse_<k>); smer = úhel osy +z chýše ve světě (rad, atan2(z, x) jako svet._domy au); rovina terénu pod chýší kraj.MISTA (rovina_r_m)",
+  "rovina_r_m": 4.5
  }
 }

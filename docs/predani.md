@@ -1489,3 +1489,9 @@ Hotovo v kódu a datech (testy u každého):
   0.999998). Oprava: znovu `tools/postavy_q/sestav.sh` (zdroje z větve assets) a ověřit, že .gltf i .bin mají stejný čas;
   pak `--import`, test_svy_odevu, z_postavy. `valid=false` v .import Godot při --import sám nezkusí znovu → smazat řádek
   `valid=false` a .md5 v .godot/imported, pak --import.
+- **Terén na dlaždice K4 (16. 11., `docs/rozpracovane/teren_dlazdice_navrh.md`):** `scripts/teren_dlazdice.gd`, pravidla
+  `pravidla/svet/teren_dlazdice.json` (`zapnuto: false` = celé sítě jako dosud). Dlaždice vznikají z HOTOVÉ sítě (poslední
+  krok `svet.build`), původní sítě `Teren*` zůstávají pro kolize a dotazy (jen `layers 0`). Po každém exportu světa nebo
+  změně herní úpravy terénu znovu upéct: `tools/beh.sh dlazdice cmd bash tools/pregeneruj.sh dlazdice` – jinak otisk nesedí
+  a hra kreslí celé sítě (bezpečné). Zkoušky: `TVRZ_DLAZDICE=1` (peče za běhu), test `teren_dlazdice`, varianta trasy
+  `teren_dlazdice`. Balík v kontejneru bez zdrojů: `vydani.py … --jen z_dlazdice`.

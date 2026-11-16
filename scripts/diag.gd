@@ -1095,6 +1095,8 @@ func _troj_skupiny() -> void:
 		if not is_instance_valid(g) or not (g as GeometryInstance3D).is_visible_in_tree():
 			continue
 		var gi := g as GeometryInstance3D
+		if gi.layers == 0:
+			continue                             # nekresli se (zdroje dlazdic terenu, teren_dlazdice.gd)
 		var bb := gi.global_transform * (gi.custom_aabb if gi.custom_aabb.size != Vector3.ZERO else gi.get_aabb())
 		var c := bb.get_center()
 		var rad := bb.size.length() * 0.5

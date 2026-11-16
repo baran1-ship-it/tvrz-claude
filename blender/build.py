@@ -75,6 +75,10 @@ def build(parts):
         import krajina
         krajina.build(c)
         cas("krajina")
+        # zemljanky (lokace.json zemljanky, Misa 16. 11.): jama chysi po terenu (otvor vyrizne kraj.tiles), pred stavbami
+        import zemljanka
+        zemljanka.build(scene.coll("Zemljanky"), fort.land, float(zemljanka._LOK["lom_chyse"]["teren_pod_prahem_m"]))
+        cas("zemljanky")
     if "fort" in parts:
         c = scene.coll("Opevneni")
         fort.walls(c)

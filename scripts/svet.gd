@@ -580,6 +580,7 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 ## Kroky stavby, ktere zmenily sit terenu (Teren*): kazda uprava terenu meni mi.mesh - stopa = instance siti po kroku.
 ## Test zamek_terenu porovna se zaznamem poradi v pasma.test.poradi_terenu (pipeline: pozdejsi krok nehybe drivejsim).
 var teren_kroky: Array = []
+var teren_dlazdice: Node3D                # K4 dlazdice terenu (scripts/teren_dlazdice.gd); zapni(bool) pro trasu
 var _teren_stopa := {}
 
 
@@ -801,6 +802,9 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_kolize_cisteni")
 	_okluzory(parent)
 	_krok_cas("_okluzory")
+	# K4 teren na dlazdice s LOD (scripts/teren_dlazdice.gd, pravidla/svet/teren_dlazdice.json): az z hotove site, nic nemeni
+	teren_dlazdice = load("res://scripts/teren_dlazdice.gd").pripoj(root, parent)
+	_krok_cas("teren_dlazdice")
 	protokol_zapis()
 
 
