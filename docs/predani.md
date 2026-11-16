@@ -1519,3 +1519,22 @@ Hotovo v kódu a datech (testy u každého):
   `kolize_ze_site` (lokace zanikla_ves). Povrch dílu jako terén světa: `povrch_jako_teren`.
 - **Krčma L:** křídlo posouvá `lokace krcma_l kridlo_posun_y_m` – při změně posunout i záznamy křídla v `krcma_l` a body testů
   `krcma_l`, `krcma_dvur`, `krcma_schody`, model přestavět (`krcma_L.py --norender`, kopie do `modely/krcma`, `--import`).
+
+### 16. 11. – sdílené textury dílů (ř. 7 `misa_16_11_chyby.md`, zamrznutí 0.999999, textury +220 MB)
+- **Příčina:** díly z Disku (`modely/ruiny_ves`, `krcma`, `kostel`) nesly obrázky vložené v každém glb a Godot rozbalil
+  každou kopii zvlášť (`<model>_<obrázek>.*`): Doubrava 168 textur / 28 různých, krčma 87/56, kostel 46/38 = 211 MB ETC2.
+- **Oprava (stejně jako předměty 10. 11.):** `python3 tools/textury_predmetu.py dily` – obrázky jednou podle md5 do
+  `modely/dily_tex` (`kvalita.json textury_dilu`: složka, `slozky_dilu`, mez 2048, strop importu 1024; normálové `_n` s
+  `normal_map=1`), v glb jen `uri`, rozbalené kopie + `.import` + cache v `.godot/imported` pryč. Je to **krok 17
+  `tools/export.sh`** (před importem a znovu před krokem 4, takže i `--jen-po`); `otisk_exportu.py` zahrnuje díly i `dily_tex`.
+  **Kdo přestaví díl ručně** (`krcma_L.py --norender`, kopie do `modely/krcma`) → `python3 tools/textury_predmetu.py dily`
+  a `--import`, jinak `kontrola` (krok 11 exportu, `kontrola_datovych_textur.py`) spadne na vložené obrázky.
+- **Balíky:** jedna společná složka (stejná textura v krčmě, kostele i Doubravě = jedna v paměti); `vydani.py` dá do
+  každého `z_<díl>` i soubory `dily_tex`, na které jeho glb odkazují (jméno = md5 obsahu → překrytí v balících nevadí,
+  tablet se starými balíky dostane s novým `z_<díl>` úplnou sadu). Vydat: `--jen …,z_kostel,z_krcma,z_ruiny_ves`.
+- **Číslo (PC, součet ETC2 z .import):** 211,2 → 86,7 MB (106 souborů; podle odkazů ruiny_ves 117,5 → 25,2, krčma
+  60,8 → 45,4, kostel 32,9 → 33,6). 459 materiálových slotů glb před/po se stejným obsahem obrázku (názvy materiálů beze
+  změny → `barva_vrcholu_materialy`, `_tex_prumer` i brečťan s alfou fungují dál). Na tabletu NEOVĚŘENO.
+- **Nevyřešeno:** `ves` (domy.glb 72 obrázků, všechny různé; `zesvetli_ves.py` upravuje rozbalené `domy_*_diff.jpg` –
+  nepřevádět bez úpravy zesvětlení), `kovarna` a `mlyn` (v kontejneru jen `.import`, glb chybí; kovárna 69 → 45 různých
+  `.ctex`, ~48 → 31 MB) – přidat do `slozky_dilu`, až budou zdroje. 512 px pro zdi ruin nezkoušeno.
