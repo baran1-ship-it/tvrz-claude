@@ -770,7 +770,7 @@
    "id": "seno_jesle",
    "p": [
     -24.75,
-    1.35,
+    1.5,
     -6.75
    ],
    "natoceni_st": 90.0,
@@ -779,15 +779,15 @@
     0.819,
     0.0
    ],
-   "sc": 0.6,
+   "sc": 0.75,
    "budova": "tvrz_staj",
-   "popis": "Míša 16. 11. (staj2: „seno patří do jeslí, ne na zem“): seno v žebřinových jeslích boxu (blender/hospodar.py stable: příčky od (xb+0,12; y 1,0) k (xb+0,85; y 2,05), xb = −25, box dlouhý 2,5 m) – jako Puchart funkce.json jesle: sklon 35° vrchem do stáje (up), měřítko 0,6 (2,5 m box; model 4,2 m), počátek = střed spodku v koši. Katalog upevneno (v jeslích, nestojí na zemi)."
+   "popis": "Míša 16. 11. (staj2: „seno patří do jeslí, ne na zem“): seno v žebřinových jeslích boxu (blender/hospodar.py stable: příčky od (xb+0,12; y 1,0) k (xb+0,85; y 2,05), xb = −25, box dlouhý 2,5 m) – jako Puchart funkce.json jesle: sklon 35° vrchem do stáje (up), měřítko 0,75 (snímek staj3: při 0,6 a y 1,35 jen proužek sena pod příčkami; seno má přečnívat ~0,3 m nad horní břevno 2,05 jako NAVOD_SENO) (2,5 m box; model 4,2 m), počátek = střed spodku v koši. Katalog upevneno (v jeslích, nestojí na zemi)."
   },
   {
    "id": "seno_jesle",
    "p": [
     -24.75,
-    1.35,
+    1.5,
     -3.65
    ],
    "natoceni_st": 90.0,
@@ -796,15 +796,15 @@
     0.819,
     0.0
    ],
-   "sc": 0.6,
+   "sc": 0.75,
    "budova": "tvrz_staj",
-   "popis": "Míša 16. 11. (staj2: „seno patří do jeslí, ne na zem“): seno v žebřinových jeslích boxu (blender/hospodar.py stable: příčky od (xb+0,12; y 1,0) k (xb+0,85; y 2,05), xb = −25, box dlouhý 2,5 m) – jako Puchart funkce.json jesle: sklon 35° vrchem do stáje (up), měřítko 0,6 (2,5 m box; model 4,2 m), počátek = střed spodku v koši. Katalog upevneno (v jeslích, nestojí na zemi)."
+   "popis": "Míša 16. 11. (staj2: „seno patří do jeslí, ne na zem“): seno v žebřinových jeslích boxu (blender/hospodar.py stable: příčky od (xb+0,12; y 1,0) k (xb+0,85; y 2,05), xb = −25, box dlouhý 2,5 m) – jako Puchart funkce.json jesle: sklon 35° vrchem do stáje (up), měřítko 0,75 (snímek staj3: při 0,6 a y 1,35 jen proužek sena pod příčkami; seno má přečnívat ~0,3 m nad horní břevno 2,05 jako NAVOD_SENO) (2,5 m box; model 4,2 m), počátek = střed spodku v koši. Katalog upevneno (v jeslích, nestojí na zemi)."
   },
   {
    "id": "seno_jesle",
    "p": [
     -24.75,
-    1.35,
+    1.5,
     -0.55
    ],
    "natoceni_st": 90.0,
@@ -813,9 +813,9 @@
     0.819,
     0.0
    ],
-   "sc": 0.6,
+   "sc": 0.75,
    "budova": "tvrz_staj",
-   "popis": "Míša 16. 11. (staj2: „seno patří do jeslí, ne na zem“): seno v žebřinových jeslích boxu (blender/hospodar.py stable: příčky od (xb+0,12; y 1,0) k (xb+0,85; y 2,05), xb = −25, box dlouhý 2,5 m) – jako Puchart funkce.json jesle: sklon 35° vrchem do stáje (up), měřítko 0,6 (2,5 m box; model 4,2 m), počátek = střed spodku v koši. Katalog upevneno (v jeslích, nestojí na zemi)."
+   "popis": "Míša 16. 11. (staj2: „seno patří do jeslí, ne na zem“): seno v žebřinových jeslích boxu (blender/hospodar.py stable: příčky od (xb+0,12; y 1,0) k (xb+0,85; y 2,05), xb = −25, box dlouhý 2,5 m) – jako Puchart funkce.json jesle: sklon 35° vrchem do stáje (up), měřítko 0,75 (snímek staj3: při 0,6 a y 1,35 jen proužek sena pod příčkami; seno má přečnívat ~0,3 m nad horní břevno 2,05 jako NAVOD_SENO) (2,5 m box; model 4,2 m), počátek = střed spodku v koši. Katalog upevneno (v jeslích, nestojí na zemi)."
   }
  ],
  "_svet": "kusy ve svetovych souradnicich (tvrz: kolize modely/svet.json): p = pata predmetu na podlaze, natoceni_st, budova, mist (kolik lidi v luzku spi, jinak z katalogu); poradi kusu = poradi prideleni luzek obyvatelum stejne budovy (lide.gd _postel v poradi postavy.json obyvatele)",
