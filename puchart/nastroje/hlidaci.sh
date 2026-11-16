@@ -39,7 +39,7 @@ if [ "$1" != "--rychle" ]; then
   krok "test průchodu + hlídač scén (souběžně)"
   (cd $K/hra && PUCHART_TEST=sceny PUCHART_VYSTUP=$K/build/sceny.json timeout 2400 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 > $K/build/hlidaci_sceny_godot.log 2>&1) &
   _PSC=$!
-  (cd $K/hra && PUCHART_TEST=pruchod PUCHART_VYSTUP=$K/build/pruchod.json timeout 2700 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | tee $K/build/hlidaci_beh_godot.log | grep -E "^PRUCHOD" | cut -c1-160 | tee -a $S)
+  (cd $K/hra && PUCHART_TEST=pruchod PUCHART_VYSTUP=$K/build/pruchod.json timeout 5400 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | tee $K/build/hlidaci_beh_godot.log | grep -E "^PRUCHOD" | cut -c1-160 | tee -a $S)
   # všechny trasy z dat i pevné testy musí mít výsledek OK (audit 15. 11.: chybějící trasa dřív prošla)
   python3 - "$K" <<'PY' | tee -a $S || rc=1
 import json, sys

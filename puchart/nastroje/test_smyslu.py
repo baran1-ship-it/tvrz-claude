@@ -451,6 +451,7 @@ def _zed_nad_strechou(f):
         if "mesh" not in nd or nd.get("name", "").startswith("KOLIZE"): continue
         t = np.array(nd.get("translation", [0, 0, 0]))
         for p in J["meshes"][nd["mesh"]]["primitives"]:
+            if "material" not in p: continue   # kolizní proxy bez materiálu (-convcolonly sedátek oken, 15. 11.) – není viditelná síť
             P = acc(p["attributes"]["POSITION"]).astype(float) + t; I = acc(p["indices"]).astype(int).reshape(-1, 3)
             T.setdefault(mats[p["material"]], []).append(P[I])
     T = {k: np.concatenate(v) for k, v in T.items()}

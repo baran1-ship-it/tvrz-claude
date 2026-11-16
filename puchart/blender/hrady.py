@@ -968,7 +968,7 @@ def studna(P, x, z):
     yr = yt + 0.12; hy = yr + 0.95   # osa rumpálu
     for sx in (-1, 1):   # sloupy s vidlicí a vzpěrami, zapuštěné do roubení
         xx = sx * 1.02
-        P.beam(p + Vector((xx, -0.2, 0)), p + Vector((xx, hy + 1.25, 0)), 0.17, 0.17, "dub_ven", j=1)
+        P.beam(p + Vector((xx, -0.2, 0)), p + Vector((xx, hy + 1.2 - 0.065, 0)), 0.17, 0.17, "dub_ven", j=1)   # sloup končí pod vaznicí (osedlání), ne v ní (hlídač spojů 16. 11.: vrostlý)
         P.beam(p + Vector((xx, yr + 0.35, -0.08)), p + Vector((xx - sx * 0.4, yr + 0.05, -0.08)), 0.08, 0.08, "dub_ven", j=0.6)
         P.rod(p + Vector((xx - sx * 0.1, hy - 0.08, 0)), p + Vector((xx - sx * 0.1, hy + 0.08, 0)), 0.035, 8, "zelezo")
     yb = hy + 1.2   # stříška: vaznice, krokve a šindel
@@ -976,7 +976,7 @@ def studna(P, x, z):
         P.beam(p + Vector((sx * 1.02, yb, -0.95)), p + Vector((sx * 1.02, yb, 0.95)), 0.12, 0.13, "dub_ven", j=0.5)
     P.beam(p + Vector((-1.35, yb + 0.85, 0)), p + Vector((1.35, yb + 0.85, 0)), 0.13, 0.13, "dub_ven", j=0.5)
     for sx in (-1, 1):
-        P.beam(p + Vector((sx * 1.02, yb, 0)), p + Vector((sx * 1.02, yb + 0.85, 0)), 0.1, 0.1, "dub_ven")
+        P.beam(p + Vector((sx * 1.02, yb + 0.065, 0)), p + Vector((sx * 1.02, yb + 0.85, 0)), 0.1, 0.1, "dub_ven")   # sloupek stojí na vaznici
         for sz in (-1, 1):
             P.beam(p + Vector((sx * 1.15, yb - 0.05, sz * 1.0)), p + Vector((sx * 1.15, yb + 0.88, 0)), 0.07, 0.09, "dub_ven")
     for sz in (-1, 1):
