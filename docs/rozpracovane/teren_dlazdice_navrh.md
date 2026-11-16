@@ -108,6 +108,19 @@ Test `teren_dlazdice` (`tools/beh.sh dl1 testy teren_dlazdice,zamek_terenu,pravi
 | ves (440, 820) → (650, 950) | 655 874 | 121 677 | 22 | 19 % |
 | les (−197, 988) → (300, 900) | 673 520 | 290 237 | 81 | 43 % |
 
+Snímky PC (`tools/beh.sh dl_pred|dl_po foto`, `TVRZ_DLAZDICE=0/1`, řádek MERENI = skutečně vykreslené za snímek,
+celá scéna): `docs/screens/teren_dlazdice_16_11/{pred,po}_{vyhled,potok,tvrz}.jpg` – terén na snímcích shodný,
+bez děr a pruhů (prohlédnuto).
+
+| místo | troj. před → po | kreslení před → po | buffery GPU před → po |
+|---|---|---|---|
+| výhled z kopce (73, 947) | 1,93 → **1,47 M** | 603 → 667 | 330 → 369 MB |
+| potok (822, 215) | 1,91 → **1,73 M** | 407 → 470 | 327 → 367 MB |
+| tvrz (0, 40) | 1,90 → **1,50 M** | 705 → 618 | 331 → 370 MB |
+
+(Kreslení kolísá i s rostlinami/loukou, které se mezi běhy liší; buffery +~40 MB = LOD0 kopie + úrovně, zdroje zůstávají.)
+Pečení v běhu s renderem dalo 272 kusů (test headless 273) – PODEZŘENÍ: pořadí/klíč materiálu; otisk to neovlivní.
+
 Výkon na tabletu: **NEOVĚŘENO NA ZAŘÍZENÍ** – varianta trasy `teren_dlazdice`.
 
 ## 4. Rizika a otevřené body
