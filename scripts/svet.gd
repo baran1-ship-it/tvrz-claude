@@ -7162,7 +7162,7 @@ func _ves_domy(root: Node3D) -> void:
 				if Vector2(p_minus.x, p_minus.z).distance_to(Vector2(cil.x, cil.z)) < Vector2(p_plus.x, p_plus.z).distance_to(Vector2(cil.x, cil.z)):
 					otev = -otev
 				var use := xf * (dv.position + cl + Vector3(0, 0.95 - cl.y, 0))
-				var vstup := cn.ends_with("Vstup")
+				var vstup := cn.ends_with("Vstup") or d.has("zemljanka")      # zemljanka: dvere otevrene (Puchart)
 				data["pohyb"].append({"name": jm, "kind": "dvere", "group": jm.trim_prefix("Pohyb_"),
 						"cols": [[cl.x, cl.y, cl.z, ab.size.x, ab.size.y, maxf(ab.size.z, 0.06)]],
 						"pos": [use.x, use.y, use.z], "use": [use.x, use.y, use.z], "open": otev, "init": otev if vstup else 0.0, "dur": 1.0})
