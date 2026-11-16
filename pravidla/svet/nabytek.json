@@ -388,13 +388,13 @@
   {
    "id": "postel_chudy",
    "p": [
-    363.68,
+    363.78,
     4.83,
-    764.053
+    763.95
    ],
    "natoceni_st": 43.89,
    "budova": "krcma",
-   "popis": "krcma U Kohouta (stara usedlost 0), komora u zapadni zdi mezi pytli a bednou (krcmar Kubat); ves_0_komora lokalne (-0,77; -1,72), vnitrni lic zdi x -1,28..1,28, vstup ze sine x 1,28 z 1,6..2,5 (kolize svet.json); 10. 11. y 5,01 -> 4,83 = podlaha po exportu 10. 11. (test lide_chovani). NEOVERENO: zaznam je v absolutnich souradnicich - pri dalsim posunu usedlosti 0 se rozejde znovu, prevest na mistni (domy) 16. 11.: lozko_uzke -> postel_chudy (Misa: v krcme chude postele)"
+   "popis": "krcma U Kohouta (stara usedlost 0), komora u zapadni zdi mezi pytli a bednou (krcmar Kubat); ves_0_komora lokalne (-0,77; -1,72), vnitrni lic zdi x -1,28..1,28, vstup ze sine x 1,28 z 1,6..2,5 (kolize svet.json); 10. 11. y 5,01 -> 4,83 = podlaha po exportu 10. 11. (test lide_chovani). NEOVERENO: zaznam je v absolutnich souradnicich - pri dalsim posunu usedlosti 0 se rozejde znovu, prevest na mistni (domy) 16. 11.: lozko_uzke -> postel_chudy (Misa: v krcme chude postele); postel_chudy je o 0,25 m sirsi nez lozko_uzke - posunuta o 0,14 m od zapadni zdi komory (kolize svet.json: lic 0,50 m od stredu, pul sire postele 0,61; test lide_chovani 16. 11.)"
   },
   {
    "id": "stul_selsky",
