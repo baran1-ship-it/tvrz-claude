@@ -32,3 +32,14 @@ materiály podle názvu i statickým stavbám.
 - **Ruce pro první osobu** (Disk/Modely, 19. 10.): `first_person_hands_rigged.glb` (0,4 MB), `first_person_arms.glb` (13 MB), `arm_piece_armor.glb` (23 MB náloketník). Viz radce.md 07:50 – hráč = celé tělo postavy (Quaternius), ruce z těla; tyto modely jako záloha / detail prstů.
 - **Kovárna na tvrzi (Míša 29. 10. „sada kovárna, nahradit tu naši nepěknou“):** `old_smithy.glb` (Disk Modely, Sketchfab „Old Smithy“, lucasprs51450, CC-BY 4.0, https://sketchfab.com/3d-models/old-smithy-6e8297ae714547448cc6f7da8acbb247) – 3 500 troj., 4 textury; rozdělená na 7 kusů katalogu `kovarna_*` (výheň s komínem, kovadlina na pařezu, brus, měch na stolici, ponk, vědro, polena; `blender/predmety.py` SMITHY, měřítko sady 4,8). Rozložení = záznam `pravidla/svet/lokace.json` `kovarna_tvrz`, staví `blender/hospodar.py forge_interior` (původní skládaná výheň, měch, kovadlina, brus, police a řetězy smazány). Soubor patří do `tvrz-modely/stazene`.
 - **Pšenice (Míša 28. 10.):** `wheat.glb` (Sketchfab „Wheat“, ljungman, CC-BY 4.0, https://sketchfab.com/3d-models/wheat-1e4643b88a1f4683a9765287ff2871cb) – dvě zkřížené karty (8 troj.), zralé klasy; v exportu `blender/tex_cache/nove/psenice.glb` (z nahrávky Míši), zelená varianta přebarvením. `yard_wheat_clump.glb` (ebmclachlan, CC-BY 4.0) je luční tráva s latami, ne pšenice – zatím nepoužito (případně do louky).
+
+## Sady z Disku 16. 11. (Míša: lůžka, topení, lesní díly, seno) – katalog předmětů
+Zdroj: zipy `Luzka_1400`, `Topeni_1400`, `Topeni_1400_Doplnek`, `les_dily`, `Seno_1400` (rozbalené v kontejneru `/home/user/disk_16_11`, v nové
+session znovu z Disku; `blender/predmety.py` DISK = `TVRZ_DISK`). Stavba: `cd blender && /opt/bl/bin/python predmety.py build <id>` (po jednom –
+segfault na konci normální), pak `python3 tools/textury_predmetu.py` (sdílené textury do `modely/predmety/tex2`) a `godot --import`.
+41 kusů katalogu (seznam `pravidla_sveta.json pasma.test.sady_1400.ids`), každý s `<id>_lod1.glb` od modeláře a značkami (lůžko, ústí,
+oheň, kouř) v katalogu. Licence (PODKLADY/PRAMENY_A_LICENCE.md v sadách): vlastní modely modeláře; fotografické textury Poly Haven CC0
+(rough_linen, poly_wool_herringbone, oak_veneer_01, rough_wood, rock_face_03, white_rough_plaster, clay_plaster – Amal Kumar,
+plaster_stone_wall_01 – Charlotte Baglioni, large_sandstone_blocks – Rob Tuytel, pine_bark, forest_ground_04, burned_ground_01,
+grass_ground, mossy_rock), seno: „Hay“ RedBirdTheCardinal (OpenGameArt) CC0. Inspirace KCD/KCD2 jen jako předloha, žádné herní podklady
+Warhorse. Titulky: `scripts/menu.gd`.

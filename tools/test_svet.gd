@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -10434,3 +10434,272 @@ func _dl_troj(m: Mesh) -> int:
 		var ni := (m as ArrayMesh).surface_get_array_index_len(si)
 		t += (ni if ni > 0 else (m as ArrayMesh).surface_get_array_len(si)) / 3
 	return t
+
+
+# ------------------------------------------------------------------ sady z Disku 16. 11. (pravidla_sveta pasma.test sady_1400)
+
+## Katalog (Misa 16. 11. „pridat do stavitelskeho menu“): kazde id sad je v katalogu se stavem (strana menu staveni), model
+## a ikona existuji, LOD1 kdyz ho katalog hlasi.
+func _katalog_1400() -> void:
+	var t: Dictionary = sv.pasma()["test"]["sady_1400"]
+	var P: Node = main.predmety
+	var chyby: Array = []
+	for id: String in t["ids"]:
+		var k: Dictionary = P.kat.get(id, {})
+		if k.is_empty():
+			chyby.append("KATALOG %s (0, 0) chybi v katalogu" % id)
+			continue
+		if str(k.get("stav", "")) == "" or str(k.get("stav")) == "<null>":
+			chyby.append("KATALOG %s (0, 0) bez stavu (neni v menu staveni)" % id)
+		if not ResourceLoader.exists("res://modely/predmety/%s.glb" % id) or not ResourceLoader.exists("res://modely/predmety/%s.png" % id):
+			chyby.append("KATALOG %s (0, 0) chybi model nebo ikona" % id)
+		if bool(k.get("lod1", false)) and not ResourceLoader.exists("res://modely/predmety/%s_lod1.glb" % id):
+			chyby.append("KATALOG %s (0, 0) chybi LOD1" % id)
+	for c: String in chyby:
+		print(c)
+	_vysledek("katalog_1400", chyby.is_empty(), "%d id, chyby %s" % [(t["ids"] as Array).size(), str(chyby.slice(0, 6))])
+
+
+## Luzka podle domu (Misa 16. 11.): domy vsi, mlyn a krcma chude postele, rychta rychtarova, zemljanky houne/deka na dne.
+func _postele_domu() -> void:
+	var chyby: Array = []
+	var n := 0
+	var typy: Dictionary = {}
+	for d: Dictionary in sv._domy:
+		typy["dum_%d" % int(d["k"])] = String(d["typ"])
+	for r: Dictionary in sv.data.get("postele", []):
+		var b := String(r["budova"])
+		var id := String(r["id"])
+		var cekam: Array = []
+		if b.begins_with("dum_"):
+			cekam = ["postel_rychtar"] if typy.get(b, "") == "Rychta" else ["postel_chudy"]
+		elif b == "mlyn" or b.begins_with("krcma"):
+			cekam = ["postel_chudy", "slamnik"] if b == "krcma_noclezna" else ["postel_chudy"]
+		elif b.begins_with("chyse"):
+			cekam = ["houne", "deka_zem"]
+		else:
+			continue
+		n += 1
+		var p: Vector3 = r["p"]
+		if not cekam.has(id):
+			chyby.append("POSTEL %s (%.1f, %.1f) v %s, ma byt %s" % [id, p.x, p.z, b, str(cekam)])
+	for c: String in chyby:
+		print(c)
+	_vysledek("postele_domu", chyby.is_empty() and n > 0, "%d luzek, chyby %s" % [n, str(chyby.slice(0, 6))])
+
+
+## Zemljanka (Misa 16. 11., Puchart test_pruchod): hrac od dveri sejde po stupnich na dno jamy a vyjde zpet ven.
+func _zemljanka_schody() -> void:
+	var t: Dictionary = sv.pasma()["test"]["sady_1400"]
+	var zl: Dictionary = Pravidla.cti("lokace", "zemljanky")
+	var chyby: Array = []
+	var n := 0
+	for z: Dictionary in sv.data.get("zemljanky", []):
+		var ty: Dictionary = zl["typy"][String(z["typ"])]
+		var smer := float(z["smer"])
+		var xf := Transform3D(Basis(Vector3.UP, PI / 2.0 - smer), Vector3(float(z["p"][0]), float(z["p"][1]), float(z["p"][2])))
+		var jm: Array = ty["jama"]
+		var ven := xf * Vector3(0.0, float(z["prah_y"]) + 0.9, float(jm[3]) + 1.6)
+		var dno := xf * Vector3(0.0, float(z["podlaha_y"]), float(jm[2]) + 1.2)
+		await main.fast_travel(ven, dno, 0.0, "test")
+		for _i in 60:
+			await get_tree().physics_frame
+		var r1: Array = await _chuze_k(ven, dno, float(t["zemljanka_chuze_s"]))
+		var y1 := player.global_position.y
+		var ok_dolu := bool(r1[0]) and absf(y1 - dno.y) < float(t["zemljanka_dno_m"])
+		var r2: Array = await _chuze_k(player.global_position + Vector3(0, 0.1, 0), ven - Vector3(0, 0.9, 0), float(t["zemljanka_chuze_s"]))
+		var ok_ven := bool(r2[0]) and player.global_position.y > ven.y - 0.9 - 0.25
+		n += 1
+		if not ok_dolu or not ok_ven:
+			chyby.append("ZEMLJANKA %d (%.1f, %.1f) dolu %s y %.2f dno %.2f, ven %s %s" % [int(z["k"]), xf.origin.x, xf.origin.z, ok_dolu, y1, dno.y, ok_ven, r2[1]])
+	for c: String in chyby:
+		print(c)
+	_vysledek("zemljanka_schody", chyby.is_empty() and n > 0, "%d zemljanek, chyby %s" % [n, str(chyby)])
+
+
+## Chuze packou k cili (vodorovne do 0,4 m) nejvys t s: [dosel, poloha].
+func _chuze_k(od: Vector3, cil: Vector3, t: float) -> Array:
+	player.flying = false
+	player.global_position = od
+	player.velocity = Vector3.ZERO
+	await get_tree().physics_frame
+	var k := 0
+	var ok := false
+	while k < int(t * 60.0):
+		var sm := Vector3(cil.x - player.global_position.x, 0.0, cil.z - player.global_position.z)
+		if sm.length() < 0.4:
+			ok = true
+			break
+		player.yaw = atan2(-sm.x, -sm.z)
+		player.move_input = Vector2(0, 1)
+		await get_tree().physics_frame
+		k += 1
+	player.move_input = Vector2.ZERO
+	for _i in 40:
+		await get_tree().physics_frame
+	return [ok, player.global_position.snapped(Vector3.ONE * 0.01)]
+
+
+## Ohen u pece (Misa 16. 11.: efekty ohne u novych topenist): kazdy ohen kusu katalogu lezi v pudorysu kusu (+ mez),
+## dum s pec_chalupni nema ohen modelu (puvodni pec pryc) a ma prave jeden ohen ohen_dum_<k>.
+func _ohen_u_pece() -> void:
+	var t: Dictionary = sv.pasma()["test"]["sady_1400"]
+	var kat: Dictionary = main.predmety.kat
+	var chyby: Array = []
+	var n := 0
+	for o: Dictionary in sv.data.get("ohne", []):
+		if not o.has("predmet"):
+			continue
+		n += 1
+		var op := Vector3(float(o["pos"][0]), float(o["pos"][1]), float(o["pos"][2]))
+		var nej := INF
+		for v: Dictionary in sv.data.get("vybaveni", []):
+			if String(v["id"]) != String(o["predmet"]):
+				continue
+			var vp := Vector3(float(v["p"][0]), float(v["p"][1]), float(v["p"][2]))
+			var q := Basis(Vector3.UP, float(v["yaw"])).inverse() * (op - vp)
+			var r: Array = kat[String(v["id"])]["rozmer"]
+			var dx := maxf(absf(q.x) - float(r[0]) * 0.5, 0.0)
+			var dz := maxf(absf(q.z) - float(r[2]) * 0.5, 0.0)
+			var dy := maxf(-q.y, maxf(q.y - float(r[1]), 0.0))
+			nej = minf(nej, Vector3(dx, dy, dz).length())
+		if nej > float(t["ohen_od_predmetu_m"]):
+			chyby.append("OHEN %s (%.1f, %.1f) %.2f m od kusu %s" % [o["name"], op.x, op.z, nej, o["predmet"]])
+	var poc := {}
+	for o: Dictionary in sv.data.get("ohne", []):
+		var jm := String(o.get("name", ""))
+		if jm.begins_with("ohen_dum_"):
+			poc[jm] = int(poc.get(jm, 0)) + 1
+	for jm: String in poc:
+		if int(poc[jm]) != 1:
+			chyby.append("OHEN %s (0, 0) %d ohnu (pec modelu nezmizela?)" % [jm, poc[jm]])
+	for c: String in chyby:
+		print(c)
+	_vysledek("ohen_u_pece", chyby.is_empty() and n > 0, "%d ohnu kusu, domy %d, chyby %s" % [n, poc.size(), str(chyby.slice(0, 6))])
+
+
+## Nic nevisi (Misa: „levitujici …“): pata kazdeho kusu sad 16. 11. lezi na podlaze / terenu / dne jamy do pata_m.
+func _nevisi_1400() -> void:
+	var t: Dictionary = sv.pasma()["test"]["sady_1400"]
+	var ids: Array = t["ids"]
+	var sp := player.get_world_3d().direct_space_state
+	var chyby: Array = []
+	var n := 0
+	for v: Dictionary in sv.data.get("vybaveni", []):
+		var id := String(v["id"])
+		if not ids.has(id) or id == "vidle_drevene":
+			continue                                  # vidle zapichnute do sena
+		var p := Vector3(float(v["p"][0]), float(v["p"][1]), float(v["p"][2]))
+		if p.distance_to(player.global_position) > 150.0:
+			await main.fast_travel(p, p + Vector3(0, 0, 1), 0.0, "test")
+			for _i in 30:
+				await get_tree().physics_frame
+		var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(p + Vector3(0, 0.05, 0), p - Vector3(0, 1.0, 0)))
+		n += 1
+		if h.is_empty():
+			chyby.append("VISI %s (%.1f, %.1f) pod patou nic do 1 m" % [id, p.x, p.z])
+		elif p.y - (h["position"] as Vector3).y > float(t["pata_m"]):
+			chyby.append("VISI %s (%.1f, %.1f) %.2f m nad %s" % [id, p.x, p.z, p.y - (h["position"] as Vector3).y, String((h["collider"] as Node).name)])
+	for c: String in chyby:
+		print(c)
+	_vysledek("nevisi_1400", chyby.is_empty() and n > 0, "%d kusu, chyby %s" % [n, str(chyby.slice(0, 8))])
+
+
+
+## Misa 16. 11. r. 6 (snimek 07 u (514, 871): „rybnik i s lavkou se vznasi“ - hladina nad brehem, nohy lavky visi): hladina
+## rybnika v2 je vrstevnice terenu z Blenderu a nese v barve vrcholu jeho hloubku (COLOR.r * 4 m = hladina - teren Blenderu).
+## Viditelny teren hry musi v kazdem vrcholu hladiny lezet tam, kde ho videl Blender (hra teren u rybnika nemeni):
+## na kraji (hloubka 0) ne pod hladinou o vic nez pasma.voda.ryb_kraj_tolerance_m (jinak hrana vody ve vzduchu), uvnitr ne
+## nize nez Blender o vic nez totez (kuly lavky jsou zapustene 0,4 m do terenu Blenderu). Nohy lavky (voda.json lavka) dosahnou
+## na viditelny teren hry.
+func _ryb_vznaseni() -> void:
+	var tol := float(sv.pasma()["voda"]["ryb_kraj_tolerance_m"])
+	var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
+	var hl := float(rl["hladina_y"])
+	var ter := PackedVector3Array()
+	for mi0 in main.find_children("Teren*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		if mi.mesh == null or not mi.is_visible_in_tree() or String(mi.name) == "Teren_obzor":
+			continue
+		var ab := mi.global_transform * mi.mesh.get_aabb()
+		if ab.position.x > sv.RYB_C.x + 40.0 or ab.end.x < sv.RYB_C.x - 40.0 or ab.position.z > sv.RYB_C.y + 40.0 or ab.end.z < sv.RYB_C.y - 40.0:
+			continue
+		var f := mi.mesh.get_faces()
+		var xf := mi.global_transform
+		for i in range(0, f.size(), 3):
+			var c := xf * f[i]
+			if Vector2(c.x, c.z).distance_to(sv.RYB_C) < 40.0:
+				ter.append(c)
+				ter.append(xf * f[i + 1])
+				ter.append(xf * f[i + 2])
+	var gt: Dictionary = sv._tri_mrizka(ter, Transform3D())
+	var chyby: Array = []
+	var n_kraj := 0
+	var n_vnitr := 0
+	var nej_kraj := 0.0
+	var kde_kraj := Vector2.ZERO
+	var nej_vn := 0.0
+	var kde_vn := Vector2.ZERO
+	var hist := {}
+	var dep: Array = []                     # [x, z, hloubka Blenderu] pro nohy lavky
+	for mi0 in main.find_children("Rybnik_lhota_voda*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		var xf := mi.global_transform
+		for si in mi.mesh.get_surface_count():
+			var arr := mi.mesh.surface_get_arrays(si)
+			if arr[Mesh.ARRAY_COLOR] == null:
+				chyby.append("hladina bez barvy hloubky")
+				continue
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var col: PackedColorArray = arr[Mesh.ARRAY_COLOR]
+			for i in v.size():
+				var w := xf * v[i]
+				var hb := col[i].r * 4.0            # hloubka Blenderu
+				var yb := w.y - hb                  # teren Blenderu
+				var yg: float = sv._tri_vyska(gt, w.x, w.z)
+				if yg == INF:
+					continue
+				var dd := yb - yg                   # o kolik je teren hry niz nez Blender
+				var b := clampi(roundi(dd * 10.0), -10, 10)
+				hist[b] = int(hist.get(b, 0)) + 1
+				dep.append([w.x, w.z, hb, yg])
+				if hb < 0.01:
+					n_kraj += 1
+					if dd > nej_kraj:
+						nej_kraj = dd
+						kde_kraj = Vector2(w.x, w.z)
+				elif hb < 3.9:
+					n_vnitr += 1
+					if dd > nej_vn:
+						nej_vn = dd
+						kde_vn = Vector2(w.x, w.z)
+	if nej_kraj > tol:
+		chyby.append("kraj vody %.2f m nad terenem hry u (%.1f, %.1f)" % [nej_kraj, kde_kraj.x, kde_kraj.y])
+	if nej_vn > tol:
+		chyby.append("dno hry %.2f m pod Blenderem u (%.1f, %.1f)" % [nej_vn, kde_vn.x, kde_vn.y])
+	# nohy lavky: spodek = teren Blenderu - 0,4 (kraj.ryb2_predmety), teren Blenderu z nejblizsiho vrcholu hladiny
+	var lv: Dictionary = rl["lavka"]
+	var lb := Vector2(float(lv["bod"][0]), float(lv["bod"][1]))
+	var ls := Vector2(float(lv["smer"][0]), float(lv["smer"][1]))
+	var nohy: Array = []
+	var s := 0.2
+	while s <= float(lv["delka_m"]) + 0.05:
+		for sg in [-1.0, 1.0]:
+			var q: Vector2 = lb + ls * s + Vector2(-ls.y, ls.x) * sg * (float(lv["sirka_m"]) / 2.0 - 0.08)
+			var yg: float = sv._tri_vyska(gt, q.x, q.y)
+			var best: Array = []
+			for e: Array in dep:
+				if best.is_empty() or Vector2(e[0], e[1]).distance_to(q) < Vector2(best[0], best[1]).distance_to(q):
+					best = e
+			var yb := hl - float(best[2]) if not best.is_empty() and Vector2(best[0], best[1]).distance_to(q) < 0.6 else INF
+			nohy.append("s%.1f teren hry %.2f Blender %.2f" % [s, yg, yb])
+			if yb != INF and yg != INF and yg < yb - 0.4 - 0.02:
+				chyby.append("noha lavky s %.1f visi %.2f m (teren hry %.2f, spodek %.2f)" % [s, yb - 0.4 - yg, yg, yb - 0.4])
+		s += 1.2
+	var hs: Array = []
+	for b: int in range(-10, 11):
+		if hist.has(b):
+			hs.append("%+.1f:%d" % [b / 10.0, hist[b]])
+	_vysledek("ryb_vznaseni", chyby.is_empty() and n_kraj > 0, "kraj %d vrch., nejvic %.2f m pod hladinou u %s; vnitrek %d, teren hry nejvic %.2f m pod Blenderem u %s; rozdil Blender-hra (m:pocet) %s; nohy %s; chyby %s" % [n_kraj, nej_kraj, str(kde_kraj), n_vnitr, nej_vn, str(kde_vn), " ".join(hs), "; ".join(nohy.slice(0, 6)), str(chyby.slice(0, 6))])
