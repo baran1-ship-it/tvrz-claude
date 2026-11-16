@@ -448,3 +448,23 @@ Výkonově (rozbor_gpu_15_11.md): les s podrostem místo trávy = méně průhle
   mlýn, louky u vody), na vnější straně břehového pásu, ne na hraně vody. Hladina zůstane vidět z cest a mostů.
 - Platí `pasma.voda.holy_breh_m` (nic živého ve vodě, test smyslu) – houština až za ním; okluzor nikdy přes řeku.
 - Stromy u řeky: olše, vrby (hlavaté) v řadách s mezerami, ne souvislá stěna.
+
+## Stav a další krok (16. 11. odpoledne, scény – houština, clony vsi, pole za vsí)
+**Hotovo v datech a kódu (commity 0eb807e, ec007bc, c6c8f9b, cf55d53):**
+- pole jen za vsí (`plochy.json pole.za_vsi`, `pole_dolina.zapnuto` false), bývalá pole = louka s mezemi s křovím (`pole.meze_po_polich`);
+- `les_podrost.json houstina` (skladby, breh, plast, patro) → Blender `kraj.houstiny_meze/_breh`, `kraj.clony`, `vesnice.zelen_ulice`; hra `svet._lesni_plast/_lesni_patro` z dat;
+- `lokace.json kompozice.clony` (vjezd: sad SV, houština SV/JZ/u odbočky; sad za krčmou, sad mezi dvory), výhled `prijezd_ves` na hranu svahu (336, 738) r 14;
+- ploty do ulice s kamennou podezdívkou, prkenné u 2, 5, 7 (`ves.ploty_ulice`, `vesnice.picket_fence`);
+- `pasma.test.okluzor_houstina` místo `okluzor_listi` (`svet._okluzory_houstiny`), varianta trasy `bez_houstin` (`svet.trasa_skryt`);
+- testy: test smyslu `houstina_*` (16. 11.: 982 kusů, 0 chyb, souhrn OK), hra `clona_vsi`, `houstina_volno` (napsané, ZATÍM NESPUŠTĚNÉ);
+- tabulka `misa_16_11_chyby.md` ř. 9–11, `predani.md` oddíl „Scény 16. 11.“.
+
+**Běží / čeká:** export světa `build/beh/export_sceny.log` (start 12:57, Blender doběhl k rozmístění: houština clony 104, ulice 84, meze 284, břeh 510; pšenice 17 136 trsů místo ~43 tis.). Výsledek exportu ověřit v logu (`EXPORT OK` / `KROK SELHAL`) a `build/export_stav.json`.
+
+**Další krok po exportu:**
+1. `tools/beh.sh dlazdice cmd bash tools/pregeneruj.sh dlazdice` (přepéct dlaždice terénu).
+2. Testy po skupinách: `TVRZ_TEST_LIMIT=1500 BEH_LIMIT=2400 tools/beh.sh hou1 testy "clona_vsi,houstina_volno,zasazeni"`, pak `"vstupy_bez_travy,stanoviste,pravidla_cteni"`, `"les_trava,ruiny_ves,vztahy_hra"`. Pokud `clona_vsi` < kryti_min: přidat/zahustit záznam clony, ne výjimku.
+3. Snímky (≤ 4 na běh): `vjezd;352,746,440,790|vyhled;336,738,430,800|ulice;405,775,448,812|dvur;418,790,398,805` a `okraj;530,830,580,830|les;208,270,220,340|mez;497,690,497,650|breh;205,705,170,725` → `build/sceny/`; porovnat s bejcek_02/08, kcd_sada2_03/05/16 a s „před“ = `docs/screens/misa_15_11/18.jpg`.
+4. Log hry: „okluzor houstiny …“ (kolik jader prošlo kryti_min), „lesni plast“, „lesni patro (houstina)“.
+5. Balíky k vydání (až na VYDEJ): `z_svet`, `z_rostliny` (pokud export změnil modely/rostliny), `z_dlazdice`; tablet: Měřicí trasa s `bez_houstin`, zapsat do `mereni_verze.md`.
+**Otevřené:** jabloně v clonách (jablon_1–3 24–28 tis. troj.) zvýší cenu ves-vjezd – měří `les_bez_korun`; okluzor houštiny pravděpodobně nevznikne nikde (pásy 3–4 m, krytí ~0,6–0,7) – NEOVĚŘENO; podmínka 4 (snímek okluzor zap/vyp) bez testu; líska bez modelu (shrub_02 za ni).
