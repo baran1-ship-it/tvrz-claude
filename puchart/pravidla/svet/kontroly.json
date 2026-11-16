@@ -477,6 +477,8 @@
  },
  "teren_shoda": {
   "tolerance_m": 0.1,
+  "jemna_sit_tolerance_m": 0.15,
+  "jemna_sit_pozn": "16. 11.: jemná síť 0,25 m otvorů (zemljanka, štola) leží v rovinách sítě 2 m, kolize r16 se mezi uzly 1 m interpoluje bilineárně – na úhlopříčce sítě ve strmém svahu odchylka do 0,12 m (otvor zemljanky u lomu u hrany zářezu, chyby.md 359)",
   "jemna_trida": [
    "koryto_kamenite",
    "breh"
