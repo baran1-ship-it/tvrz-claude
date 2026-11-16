@@ -8884,6 +8884,17 @@ func _krcma_l() -> void:
 		post = post or (String(u.get("kind", "")) == "bed" and Vector2(float(u["pos"][0]), float(u["pos"][2])).distance_to(Vector2(kd.global_position.x, kd.global_position.z)) < 20.0)
 	if not post:
 		chyby.append("postel hrace chybi")
+	# Misa 16. 11. r. 4 (kridlo posunute o lokace krcma_l kridlo_posun_y_m): zaznamy kridla (pudorys_lok[1]) musi sedet s modelem
+	# ve hre - kamenne prizemi KrcmaL_Kridlo_Kamen; nesoulad = stary import krcma_L.glb nebo zaznamy neposunute (16. 11.: slamniky
+	# v nocklezne narazely do pricky KPric starého modelu)
+	var km := kd.find_child("KrcmaL_Kridlo_Kamen*", true, false) as MeshInstance3D
+	var pl: Array = Pravidla.cti("lokace", "krcma_l", "pudorys_lok")[1]
+	if km == null or km.mesh == null:
+		chyby.append("KrcmaL_Kridlo_Kamen chybi")
+	else:
+		var ab: AABB = kd.global_transform.affine_inverse() * km.global_transform * km.get_aabb()
+		if absf(ab.position.z - float(pl[2])) > 0.15 or absf(ab.end.z - float(pl[3])) > 0.15:
+			chyby.append("kridlo modelu z %.2f..%.2f, zaznam pudorys_lok %.2f..%.2f (import krcma_L.glb?)" % [ab.position.z, ab.end.z, float(pl[2]), float(pl[3])])
 	_vysledek("krcma_l", chyby.is_empty(), "%d chyb %s; u %s, dveri %d" % [chyby.size(), str(chyby), kd.global_position.snapped(Vector3.ONE * 0.1), dv])
 
 
