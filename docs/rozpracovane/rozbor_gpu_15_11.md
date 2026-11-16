@@ -350,3 +350,12 @@ pak oprava. Hypotézu nevydávat za opravu.
 - Režim „uvnitř“ (pod střechou kratší dohled / zdi zakryjí): obě hry stejně → K8.
 - Pevná zásoba připravených kusů (louka, les, byliny) místo nové paměti na grafice → K5, Puchart to plánuje taky.
 - Panel sám 7–11 ms (u nás naměřeno 2,1–11,6 ms) → lehký monitor už je výchozí v měřicí trase.
+
+## K13 – časované prolínání LOD místo pásma (Míša 16. 11., předloha `docs/reference/lod_casovane_prolinani/`)
+- Princip: dnes (Godot visibility_range fade, stromy `_prolinani_stromu` = true, dlaždice terénu pás 40 m) se oba stupně
+  kreslí PO CELOU dobu, co je kamera v pásmu (stojí-li hráč v pásmu, navždy) – na předloze 58–63 stromů 2×. Časované
+  prolínání: při překročení hranice se zapíše čas, shader prolne dither za `fadeTime` (0,25 s) → 2× jen na okamžik (0–3 stromy).
+- U nás: overdraw listí v pásmu byl už 0.997 naměřen jako cena (modely.json `_prolinani_stromu`). Stromy jsou v buňkách
+  MultiMesh → čas přechodu po buňce (custom data/uniform instance), ne po stromu; hystereze proti kmitání na hraně.
+  Totéž pro dlaždice terénu (pás 40 m) a díly (_dil_lod).
+- Data: `modely.json lod_prolinani {"druh": "cas"|"pasmo", "cas_s": 0.25}`, varianta trasy pro A/B. NEOVĚŘENO – po vydání.
