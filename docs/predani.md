@@ -1543,3 +1543,20 @@ Hotovo v kódu a datech (testy u každého):
 - **Nevyřešeno:** `ves` (domy.glb 72 obrázků, všechny různé; `zesvetli_ves.py` upravuje rozbalené `domy_*_diff.jpg` –
   nepřevádět bez úpravy zesvětlení), `kovarna` a `mlyn` (v kontejneru jen `.import`, glb chybí; kovárna 69 → 45 různých
   `.ctex`, ~48 → 31 MB) – přidat do `slozky_dilu`, až budou zdroje. 512 px pro zdi ruin nezkoušeno.
+
+## Scény 16. 11.: houština, clony vsi, pole za vsí (kde co je)
+- **Houština** = jeden záznam `pravidla/svet/les_podrost.json houstina` pro všechny generátory: `skladby` (Blender: mez, breh,
+  sad, houstina, ulice, u_plotu), `breh` (přerušované pásy u Bystřice), `plast` a `patro` (hra `svet._lesni_plast`,
+  `_lesni_patro`; výška v m = měřítko × `plast.vyska_modelu_m`). Odstupy jen z pasem přes `kraj.houstina_volno` (cesty
+  i pěšiny z `cesty.json`, ulice `ves_ramec`, voda + holý břeh, průchody zřícenin, zdi a vstupy `vesnice.stavby_vsi`,
+  vyšlapaná hlína, výhledy). Test smyslu `houstina_*` přepočítává pravidla zvlášť (ne stejnou funkcí).
+- **Clony** = `lokace.json kompozice.clony` (pás podél osy, typ sad/houstina) → `kraj.clony`; **zeleň ulice** =
+  `ves.zelen_ulice` → `vesnice.zelen_ulice`; **ploty do ulice** s kamennou podezdívkou / prkenné = `ves.ploty_ulice`.
+- **Pole jen za vsí**: `plochy.json pole.za_vsi` (výseč), bývalá pole = louka s mezemi s křovím (`pole.meze_po_polich`,
+  `kraj.mez_krovi` → stanoviště „mez“; druhy bez, bříza, dub, lípa mají v `druhy.json` i „mez“).
+- **Okluzor houštiny** `pasma.test.okluzor_houstina` (místo `okluzor_listi`): krabice jen u jádra s krytím ≥ kryti_min
+  spočteným z hotových instancí (`svet._okluzory_houstiny`, výpis „okluzor houstiny …“ v logu).
+- Měření: varianta trasy `bez_houstin` (`svet.trasa_skryt` skryje i buňky rostlin odkryté během varianty).
+- Testy hry: `clona_vsi` (z vjezdu podíl paprsků k domům zakrytý vegetací, `pasma.test.clona_vsi`), `houstina_volno`.
+- Mapa návrhu bez Godotu: Blender python s `import bpy` + `kraj.clony / houstiny_meze / houstiny_breh`, `vesnice.zelen_ulice`
+  (rychlé, meze ~13 s) – kontrolovat polohy dřív, než se pustí export.
