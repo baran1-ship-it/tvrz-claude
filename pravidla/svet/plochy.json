@@ -38,9 +38,10 @@
   "meze_po_polich": {
    "podil_honu": 0.45,
    "sirka_m": 2.5,
-   "krok_m": 3.0,
-   "hustota": 0.7,
-   "duvod": "Misa 15. 11. „houstina … i na loukach (meze, remizky, kolem cest), ne na vsech loukach“: na byvalych polich mimo vysec za_vsi zustanou meze mezi hony jako pasy krovi (podil_honu = kolik hranic honu ma mez s krovim, ostatni louka otevrena), sirka_m od hranice honu, krok_m mrizka sazeni, hustota = podil bodu s kerem. Skladba les_podrost.json houstina.skladby.mez. Stanoviste bodu = mez (kraj.stanoviste)."
+   "krok_m": 2.5,
+   "hustota": 0.9,
+   "duvod": "Misa 15. 11. „houstina … i na loukach (meze, remizky, kolem cest), ne na vsech loukach“: na byvalych polich mimo vysec za_vsi zustanou meze mezi hony jako pasy krovi (podil_honu = kolik hranic honu ma mez s krovim, ostatni louka otevrena), sirka_m od hranice honu, krok_m mrizka sazeni, hustota = podil bodu s kerem. Skladba les_podrost.json houstina.skladby.mez. Stanoviste bodu = mez (kraj.stanoviste). podil_lanu: kolik hranic mezi lany uvnitr honu (pruhy jako bejcek_16/18) ma taky mez s krovim (16. 11.: jen hranice honu = 6 % byvalych poli, malo).",
+   "podil_lanu": 0.3
   }
  },
  "pastvina": {

@@ -687,15 +687,37 @@ def _pole(P: Part, base, h, r=0.065, mat="kura"):
     return top
 
 
-def picket_fence(P: Part, a, b, gap=None, h=1.15):
+def _podezdivka(P: Part, a, dn, nrm, L, gap, pod):
+    """Kamenna podezdivka plotu do ulice (lokace ves.ploty_ulice.podezdivka): lomovy kamen (zdivo_hole jako podezdivka
+    domu) po kusech ~2 m podle terenu, zapustena; v mezere vrat a branky nic."""
+    segs = [(0.0, L)] if not gap else [(0.0, gap[0]), (gap[1], L)]
+    for s0, s1 in segs:
+        n = max(1, int(math.ceil((s1 - s0) / 2.0)))
+        for i in range(n):
+            u0, u1 = s0 + (s1 - s0) * i / n, s0 + (s1 - s0) * (i + 1) / n
+            if u1 - u0 < 0.2:
+                continue
+            c = a + dn * ((u0 + u1) / 2)
+            y = min(_land(q.x, q.z) for q in (a + dn * u0, a + dn * u1, c))
+            hh = pod["vyska_m"] + pod["zapusteni_m"] + (_land(c.x, c.z) - y)
+            P.box(M(Vector((c.x, y - pod["zapusteni_m"] + hh / 2, c.z)) - nrm * 0.035, basis=frame(dn)),
+                  (pod["sirka_m"], hh, u1 - u0 + 0.02), "zdivo_hole", collide=False)
+
+
+def picket_fence(P: Part, a, b, gap=None, h=1.15, pod=None, prkna=None):
     """Latkovy plot: kulove sloupky po 2 m, dve zerdi s kurou, latky ruzne siroke a vysoke, zasedle,
-    nekde nakrivo nebo chybi. gap = (s0, s1) misto pro branu."""
+    nekde nakrivo nebo chybi. gap = (s0, s1) misto pro branu. pod = kamenna podezdivka (latky na ni), prkna = plot
+    z prken misto latek (lokace ves.ploty_ulice)."""
     from mathutils import Matrix
     a, b = Vector(a), Vector(b)
     d = b - a
     L = d.length
     dn = d.normalized()
     nrm = Vector((-dn.z, 0.0, dn.x))
+    zv = 0.0
+    if pod:
+        _podezdivka(P, a, dn, nrm, L, gap, pod)
+        zv = pod["vyska_m"]                        # latky a spodni zerd zacinaji na podezdivce
     nposts = max(1, int(L / 2.0))
     for i in range(nposts + 1):
         s = L * i / nposts
@@ -703,7 +725,7 @@ def picket_fence(P: Part, a, b, gap=None, h=1.15):
             continue
         p = a + dn * s
         _pole(P, Vector((p.x, _land(p.x, p.z) - 0.3, p.z)) - nrm * 0.12, h + 0.35, 0.06)
-    for yy in (0.3, h - 0.25):
+    for yy in (0.3 + zv, h - 0.25 + zv * 0.5):
         segs = [(0.0, L)] if not gap else [(0.0, gap[0]), (gap[1], L)]
         for s0, s1 in segs:
             if s1 - s0 < 0.3:
@@ -717,13 +739,13 @@ def picket_fence(P: Part, a, b, gap=None, h=1.15):
         if gap and gap[0] < s < gap[1]:
             s = gap[1] + 0.05
             continue
-        w = R.uniform(0.055, 0.1)
-        if R.random() < 0.04:                    # chybejici latka
+        w = R.uniform(*prkna["sirka_prkna_m"]) if prkna else R.uniform(0.055, 0.1)
+        if R.random() < 0.04 and not prkna:      # chybejici latka
             s += w + R.uniform(0.04, 0.07)
             continue
         p = a + dn * s
-        y = _land(p.x, p.z)
-        hh = h + R.uniform(-0.12, 0.08)
+        y = _land(p.x, p.z) + zv
+        hh = h + R.uniform(-0.12, 0.08) - zv * 0.5
         # latka: plocha podel plotu, prurez w x 2.2 cm, prisita na zerdi; spicka vyrezana (spicata,
         # sikmo uriznuta nebo jen zarovna), mirne nakrivo v rovine plotu i ven
         tilt = R.uniform(-0.04, 0.04) if R.random() < 0.85 else R.uniform(-0.12, 0.12)
@@ -743,7 +765,7 @@ def picket_fence(P: Part, a, b, gap=None, h=1.15):
         if (pts[1] - pts[0]).cross(pts[2] - pts[0]).dot(dd) < 0:
             pts.reverse()
         P.prism(pts, dd, "lata", rnd=R.random())
-        s += w + R.uniform(0.03, 0.07)
+        s += w + (R.uniform(*prkna["mezera_m"]) if prkna else R.uniform(0.03, 0.07))
     # kolize po usecich (v mezere pro vrata / branku nic, tam kolidují kridla)
     for s0, s1 in ([(0.0, L)] if not gap else [(0.0, gap[0]), (gap[1], L)]):
         if s1 - s0 < 0.05:
@@ -1167,10 +1189,14 @@ def build(coll):
         pl = ploty_usedlosti(h)
         pa, pb = pl["latkovy_vrata"]
         front = L / 2 + 0.05
-        picket_fence(Pf, pa, pb, gap=(1.0, 4.2))
+        pu_ = kraj._LOKACE_J["ves"].get("ploty_ulice", {})
+        ku_ = _usedlost_k(h)
+        pod_ = pu_.get("podezdivka") if ku_ in pu_.get("podezdivka", {}).get("usedlosti", []) else None
+        prk_ = pu_.get("prkenny") if ku_ in pu_.get("prkenny", {}).get("usedlosti", []) else None
+        picket_fence(Pf, pa, pb, gap=(1.0, 4.2), pod=pod_, prkna=prk_)
         roofed_gate(Pf, F, W / 2 + 0.12 + 2.6, front, 3.0)
         pg0, pg1 = pl["latkovy_branka"]
-        picket_fence(Pf, pg0, pg1, gap=(0.62, 1.68))
+        picket_fence(Pf, pg0, pg1, gap=(0.62, 1.68), pod=pod_, prkna=prk_)
         wicket(Pf, pg0 + (pg1 - pg0).normalized() * 0.7, (pg1 - pg0).normalized(), 0.9)
         # bocni a zadni ohrada dvora a zahrady
         rail_fence(Pf, pl["ohrada"])
@@ -1522,6 +1548,78 @@ def dvorec_stromy():
                 vv = vL + vR - vv
             q = F.c + F.au * uu + F.av * vv
             out.append((z_["strom"], q.x, q.z, z_["vyska_m"]))
+    return out
+
+
+def _od_plotu(x, z):
+    """Vzdalenost od nejblizsi cary plotu usedlosti (predni latkove, ohrada)."""
+    best = 1e9
+    for h in layout():
+        pl = ploty_usedlosti(h)
+        for key in ("latkovy_vrata", "latkovy_branka", "ohrada"):
+            pts = [(q.x, q.z) for q in pl[key]]
+            if abs(pts[0][0] - x) > 60.0 or abs(pts[0][1] - z) > 60.0:
+                continue
+            best = min(best, kraj.seg_info(x, z, pts)[0])
+    return best
+
+
+def zelen_ulice():
+    """Zelen mezi stavenimi (lokace.json ves.zelen_ulice, Misa 16. 11. „ves je moc otevrena“): podel osy ulice
+    stromy a kere (skladba ulice), u bocnich a zadnich ohrad kere zvenku (u_plotu). [(model, x, z, vyska)]."""
+    zu = _lokace_ves().get("zelen_ulice")
+    import ves_ramec as VR
+    if not zu or not VR.zapnuto():
+        return []
+    Rz = random.Random(1616)
+    pu = kraj._PASMA_CESTA["ulice_vsi"]
+    osa = VR.osa_ulice()
+    out = []
+    # podel ulice (body osy po 1 m)
+    for sd in (-1, 1):
+        f = zu["zacatek_m"] + Rz.uniform(*zu["krok_m"]) * 0.5
+        while f < len(osa) - 2:
+            i = int(f)
+            f += Rz.uniform(*zu["krok_m"])
+            if Rz.random() > zu["podil"]:
+                continue
+            a, b = osa[max(i - 1, 0)], osa[min(i + 1, len(osa) - 1)]
+            tx, tz = b[0] - a[0], b[1] - a[1]
+            ln = math.hypot(tx, tz) or 1.0
+            nx, nz = -tz / ln * sd, tx / ln * sd
+            pid, hgt = kraj.houstina_vyber(zu["skladba"], Rz)
+            o = VR.pulsirka(i / max(len(osa) - 1, 1)) + (pu["kmen_m"] if kraj.je_strom(pid) else pu["ker_od_m"]) + Rz.uniform(*zu["od_kraje_m"])
+            x, z = osa[i][0] + nx * o, osa[i][1] + nz * o
+            if _od_plotu(x, z) < 0.8 or kraj.houstina_volno(pid, x, z) is not None:
+                continue
+            out.append((pid, x, z, hgt))
+    # u ohrad usedlosti zvenku
+    up = zu["u_plotu"]
+    for h in layout():
+        pts = [(q.x, q.z) for q in ploty_usedlosti(h)["ohrada"]]
+        cx, cz = h["p"].x, h["p"].z
+        for (ax, az), (bx, bz) in zip(pts[:-1], pts[1:]):
+            L = math.hypot(bx - ax, bz - az)
+            if L < 1e-3:
+                continue
+            nx, nz = -(bz - az) / L, (bx - ax) / L
+            mx, mz = (ax + bx) / 2, (az + bz) / 2
+            if (mx - cx) * nx + (mz - cz) * nz < 0:
+                nx, nz = -nx, -nz                      # normala ven od domu
+            t = Rz.uniform(0.0, up["krok_m"][0])
+            while t < L:
+                s_ = t
+                t += Rz.uniform(*up["krok_m"])
+                if Rz.random() > up["podil"]:
+                    continue
+                o = Rz.uniform(*up["od_plotu_m"])
+                x, z = ax + (bx - ax) * s_ / L + nx * o, az + (bz - az) * s_ / L + nz * o
+                pid, hgt = kraj.houstina_vyber(up["skladba"], Rz)
+                if in_homestead(x, z) and yard_dirt(x, z) > 0.0:
+                    continue
+                if kraj.houstina_volno(pid, x, z) is not None:
+                    continue
+                out.append((pid, x, z, hgt))
     return out
 
 

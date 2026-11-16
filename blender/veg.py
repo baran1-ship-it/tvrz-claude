@@ -540,6 +540,36 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
         for pid, x, z, h in rem_kere:
             if pid.startswith("bez_cerny"):
                 nove.misto(pid, x, F.land(x, z), z, h / nove.DIM[pid][1], Rr.uniform(0, 2 * math.pi), None, sink=0.05)
+        # houstina (les_podrost.json houstina, Misa 15. 11.: kroví jako stala vrstva krajiny): clony vjezdu do vsi
+        # (lokace kompozice.clony), zelen ulice a kere u ohrad (ves.zelen_ulice), meze s krovim na byvalych polich
+        # (plochy pole.meze_po_polich), prerusovane pasy u Bystrice (houstina.breh). Stromy v2 a bez pred rozmistenim,
+        # kere z knihovny po nem (jako remizky).
+        import vesnice
+        sad_m = vesnice._lokace_ves().get("dvorec", {}).get("sad", {})
+        hou_pozde = []
+        hou_pocet = {}
+        Rh = random.Random(1515)
+        for zdroj, body in (("clony", [q[:4] for q in kraj.clony(Rh)]), ("ulice", vesnice.zelen_ulice()),
+                            ("meze", kraj.houstiny_meze(Rh)), ("breh", kraj.houstiny_breh(Rh))):
+            hou_pocet[zdroj] = len(body)
+            for pid, x, z, h in body:
+                if pid == "jablon" and sad_m.get("modely"):
+                    rr = random.Random(int(x * 1000) * 7919 + int(z * 1000))
+                    tah, acc_ = rr.random() * sum(w for _, w in sad_m["modely"]), 0.0
+                    for mid, w in sad_m["modely"]:
+                        acc_ += w
+                        if tah <= acc_:
+                            pid = mid
+                            break
+                    h = nove.DIM[pid][1] * rr.uniform(*sad_m["meritko"])
+                    nove.zaznam(pid, x, F.land(x, z), z, h, novy_ramec=True)
+                elif pid.startswith("bez_cerny"):
+                    nove.misto(pid, x, F.land(x, z), z, h / nove.DIM[pid][1], Rh.uniform(0, 2 * math.pi), None, sink=0.05)
+                elif pid in nove.DIM:
+                    nove.strom(pid, x, F.land(x, z), z, h)
+                else:
+                    hou_pozde.append((pid, x, z, h))
+        print("houstina:", hou_pocet)
         # ves B (lokace.json ves.dvorec): stromy u staveni ve starem ramci, zahumenky, zivy plot a lipa na navsi v novem
         import vesnice
         for pid, x, z, h in vesnice.dvorec_stromy():
@@ -565,6 +595,8 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
         for pid, x, z, h in rem_kere:
             if not pid.startswith("bez_cerny"):
                 put(pid, (x, F.land(x, z), z), h)
+        for pid, x, z, h in hou_pozde:
+            put(pid, (x, F.land(x, z), z), h)
         print("remizky kompozice: %d stromu, %d keru" % (len(rem_stromy), len(rem_kere)))
         import ruiny
         for pid, x, z, h in ruiny.ROSTLINY:

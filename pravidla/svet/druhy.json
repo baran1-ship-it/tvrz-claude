@@ -13,8 +13,10 @@
     "okraj",
     "louka",
     "ves",
-    "cesta"
-   ]
+    "cesta",
+    "mez"
+   ],
+   "_mez": "16. 11. houstina na mezích (plochy.json pole.meze_po_polich, Míša 15. 11.): bez, nálet břízy a solitérní dub/lípa na mezi s křovím (Chytrý – Vegetace ČR: křoviny mezí Prunetalia/Sambucus, solitéry na mezích)"
   },
   {
    "id": "dub_stredni",
@@ -27,8 +29,10 @@
     "okraj",
     "louka",
     "ves",
-    "cesta"
-   ]
+    "cesta",
+    "mez"
+   ],
+   "_mez": "16. 11. houstina na mezích (plochy.json pole.meze_po_polich, Míša 15. 11.): bez, nálet břízy a solitérní dub/lípa na mezi s křovím (Chytrý – Vegetace ČR: křoviny mezí Prunetalia/Sambucus, solitéry na mezích)"
   },
   {
    "id": "dub",
@@ -41,8 +45,10 @@
     "okraj",
     "louka",
     "ves",
-    "cesta"
-   ]
+    "cesta",
+    "mez"
+   ],
+   "_mez": "16. 11. houstina na mezích (plochy.json pole.meze_po_polich, Míša 15. 11.): bez, nálet břízy a solitérní dub/lípa na mezi s křovím (Chytrý – Vegetace ČR: křoviny mezí Prunetalia/Sambucus, solitéry na mezích)"
   },
   {
    "id": "lipa_stara",
@@ -55,8 +61,10 @@
     "okraj",
     "louka",
     "cesta",
-    "les"
-   ]
+    "les",
+    "mez"
+   ],
+   "_mez": "16. 11. houstina na mezích (plochy.json pole.meze_po_polich, Míša 15. 11.): bez, nálet břízy a solitérní dub/lípa na mezi s křovím (Chytrý – Vegetace ČR: křoviny mezí Prunetalia/Sambucus, solitéry na mezích)"
   },
   {
    "id": "lipa_stredni",
@@ -69,8 +77,10 @@
     "okraj",
     "louka",
     "cesta",
-    "les"
-   ]
+    "les",
+    "mez"
+   ],
+   "_mez": "16. 11. houstina na mezích (plochy.json pole.meze_po_polich, Míša 15. 11.): bez, nálet břízy a solitérní dub/lípa na mezi s křovím (Chytrý – Vegetace ČR: křoviny mezí Prunetalia/Sambucus, solitéry na mezích)"
   },
   {
    "id": "lipa",
@@ -83,8 +93,10 @@
     "okraj",
     "louka",
     "cesta",
-    "les"
-   ]
+    "les",
+    "mez"
+   ],
+   "_mez": "16. 11. houstina na mezích (plochy.json pole.meze_po_polich, Míša 15. 11.): bez, nálet břízy a solitérní dub/lípa na mezi s křovím (Chytrý – Vegetace ČR: křoviny mezí Prunetalia/Sambucus, solitéry na mezích)"
   },
   {
    "id": "buk_stredni",
@@ -109,8 +121,10 @@
     "louka",
     "skala",
     "cesta",
-    "ves"
-   ]
+    "ves",
+    "mez"
+   ],
+   "_mez": "16. 11. houstina na mezích (plochy.json pole.meze_po_polich, Míša 15. 11.): bez, nálet břízy a solitérní dub/lípa na mezi s křovím (Chytrý – Vegetace ČR: křoviny mezí Prunetalia/Sambucus, solitéry na mezích)"
   },
   {
    "id": "smrk",
@@ -233,11 +247,13 @@
     "okraj",
     "les",
     "breh",
-    "tvrz"
+    "tvrz",
+    "mez"
    ],
    "vyjma": [
     "volna_louka"
-   ]
+   ],
+   "_mez": "16. 11. houstina na mezích (plochy.json pole.meze_po_polich, Míša 15. 11.): bez, nálet břízy a solitérní dub/lípa na mezi s křovím (Chytrý – Vegetace ČR: křoviny mezí Prunetalia/Sambucus, solitéry na mezích)"
   },
   {
    "id": "sipek",

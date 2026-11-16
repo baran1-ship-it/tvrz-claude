@@ -1032,6 +1032,82 @@ for ryb in kraj.RYBNIKY:
     print("SMYSL rybnik v2: vtok %.0f st. od kolmice, skok %.3f m; hladina %d troj., okraj %d hran, tvrdych %d; nad brehem %d, bez vody %d; odtok %.2f m od cela" % (
         uhel(vt["smer"], nrm), skok, len(tr_), len(kr_), len(tvrde), len(nad_brehem), len(bez_vody), dv))
 
+# ------------------------------------------------------------------ houstina: clony, zelen ulice, meze, breh (16. 11.)
+# Misa 15./16. 11. (sceny_kcd_15_11.md, les_podrost.json houstina): kazdy kus houstiny z generatoru (pred exportem
+# z dat) zvlast prepocitanymi pravidly: ne na ceste ani pesine (pasma.cesta ker_od_m / kmen_m od kraje), ne na hline
+# ulice, ve vode ani na holem brehu (Bystrice i male toky), v pruchodu zriceniny, ve zdi, ve vstupu (pasma.budova
+# pruchod_m + dvur_m), na vysalpane hline dvoru, ve vyhledu; clona nikdy pres reku (okluzor pres vodu).
+try:
+    import random as _rnd
+    import vesnice as _ves
+    import ves_ramec as _vr
+    _pas = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]
+    _pc, _pb, _pv = _pas["cesta"], _pas["budova"], _pas["voda"]
+    _cj = J("cesty.json")
+    _osy = [([tuple(q) for q in e["osa"]], e.get("pulsirka_m", e.get("blender_sirka_m", 2 * _cj["pesina_zaklad_m"]) / 2.0),
+             e.get("typ", "vozova")) for e in _cj["vozove"] + _cj["pesiny"] if len(e.get("osa") or []) > 1]
+    _vyh = J("lokace.json").get("kompozice", {}).get("vyhledy", [])
+    _Rt = _rnd.Random(1515)
+    _kusy = [("clona:" + q[4], q[0], q[1], q[2]) for q in kraj.clony(_Rt)]
+    _kusy += [("ulice", q[0], q[1], q[2]) for q in _ves.zelen_ulice()]
+    _kusy += [("mez", q[0], q[1], q[2]) for q in kraj.houstiny_meze(_Rt)]
+    _kusy += [("breh", q[0], q[1], q[2]) for q in kraj.houstiny_breh(_Rt)]
+    _zle = {}
+
+    def _hz(druh, zd, pid, x, z, txt):
+        _zle.setdefault(druh, []).append("%s %s (%.1f, %.1f) %s" % (zd, pid, x, z, txt))
+    for zd, pid, x, z in _kusy:
+        strom = kraj.je_strom(pid)
+        for pts, pw, typ in _osy:
+            if abs(pts[0][0] - x) > 2500:
+                continue
+            pp = _pc.get(typ, _pc["vozova"])
+            d_ = d_osa(x, z, pts) - pw
+            if d_ < (pp["kmen_m"] if strom else pp["ker_od_m"]):
+                _hz("houstina_cesta", zd, pid, x, z, "%.1f m od kraje cesty (pasmo %s)" % (d_, typ))
+                break
+        if _vr.zapnuto() and _vr.od_kraje_hliny(x, z) < (_pc["ulice_vsi"]["kmen_m"] if strom else _pc["ulice_vsi"]["ker_od_m"]):
+            _hz("houstina_cesta", zd, pid, x, z, "%.1f m od hliny ulice" % _vr.od_kraje_hliny(x, z))
+        rv_ = kraj.river(x, z)
+        if (rv_ is not None and rv_[0] < kraj._PO["pulsirka_vody_m"] * (1.0 + 0.75 * rv_[2]) + _pv["holy_breh_m"]) \
+                or kraj.ve_vode(x, z, 1e9) < _pv["holy_breh_m"]:
+            _hz("houstina_voda", zd, pid, x, z, "ve vode nebo na holem brehu")
+        if kraj.v_pruchodu_ruiny(x, z):
+            _hz("houstina_pruchod", zd, pid, x, z, "v pruchodu zriceniny")
+        for e in _ves.stavby_vsi():
+            ox, oz = e["o"]
+            lx = (x - ox) * e["ex"][0] + (z - oz) * e["ex"][1]
+            lz = (x - ox) * e["ez"][0] + (z - oz) * e["ez"][1]
+            if abs(lx) > 60 or abs(lz) > 60:
+                continue
+            for x0, x1, z0, z1 in e["boxy"]:
+                dz_ = math.hypot(max(x0 - lx, lx - x1, 0.0), max(z0 - lz, lz - z1, 0.0))
+                if dz_ < (_pb["kmen_od_zdi_m"] if strom else _pb["plevel_u_zdi_m"]):
+                    _hz("houstina_budova", zd, pid, x, z, "%.1f m od zdi %s" % (dz_, e["id"]))
+            for vx, vz, nx_, nz_, w in e["vstupy"]:
+                if math.hypot(lx - vx, lz - vz) < _pb["pruchod_m"] + w * 0.5 + _pb["dvur_m"]:
+                    _hz("houstina_vstup", zd, pid, x, z, "ve vstupu %s" % e["id"])
+        if _ves.vyslapano(x, z) > 0.0:
+            _hz("houstina_dvur", zd, pid, x, z, "na vyslapane hline")
+        for v in _vyh:
+            if math.hypot(x - v["stred"][0], z - v["stred"][1]) < v["polomer_m"]:
+                _hz("houstina_vyhled", zd, pid, x, z, "ve vyhledu %s" % v["id"])
+    # clona (okluzor) nikdy pres reku: osa + pul sirky dal nez voda a holy breh
+    for c in J("lokace.json").get("kompozice", {}).get("clony", []):
+        for (ax, az), (bx, bz) in zip(c["osa"][:-1], c["osa"][1:]):
+            for k_ in range(11):
+                qx, qz = ax + (bx - ax) * k_ / 10, az + (bz - az) * k_ / 10
+                rv_ = kraj.river(qx, qz)
+                if rv_ is not None and rv_[0] < kraj._PO["pulsirka_vody_m"] * 1.75 + _pv["holy_breh_m"] + c["sirka_m"] / 2:
+                    _hz("houstina_reka", "clona:" + c["id"], "osa", qx, qz, "clona zasahuje k vode reky (%.1f m od osy)" % rv_[0])
+    for druh, lst in sorted(_zle.items()):
+        chyba(druh, "%d kusu" % len(lst), "; ".join(lst[:5]))
+    print("SMYSL houstina: %d kusu (clony %d, ulice %d, meze %d, breh %d), chyb %d" % (
+        len(_kusy), sum(1 for q in _kusy if q[0].startswith("clona")), sum(1 for q in _kusy if q[0] == "ulice"),
+        sum(1 for q in _kusy if q[0] == "mez"), sum(1 for q in _kusy if q[0] == "breh"), sum(len(v) for v in _zle.values())))
+except Exception as ex_:
+    chyba("podklad", "houstina", "generator houstiny selhal: %r" % ex_)
+
 souhrn = {}
 for c in CHYBY:
     souhrn[c] = souhrn.get(c, 0) + 1

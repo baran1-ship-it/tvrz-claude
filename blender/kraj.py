@@ -1026,6 +1026,8 @@ def stanoviste(x, z, y):
         out.add("okraj")
     if field_strip(x, z, mez=False) is not None:
         out.add("pole" if field_strip(x, z) is not None else "mez")
+    elif mez_krovi(x, z):
+        out.add("mez")                                # mez s krovim na byvalem poli (plochy.json pole.meze_po_polich)
     if math.hypot(x, z) < 70.0:
         out.add("tvrz")
     if ves_r(x, z) < VES_R + 30.0 or any(math.hypot(x - cx, z - cz) < 40.0 for _, cx, cz, _, _ in STAVBY):
@@ -1141,24 +1143,235 @@ def druh_smi(pid, x, z, y):
 def kompozice_remizky():
     """Remizky z lokace.json kompozice (krok C bod 7): kazdy zaviera prilis otevreny dohled (duvod v zaznamu).
     Uprostred stromy (dub, lipa, briza - stromy v2), na kraji kere (lieska/hloh = shrub_02, sipek, bez), vse podle
-    stanovist a vody (druh_smi). Vraci ([(model v2, x, z, vyska)], [(model, x, z, vyska)])."""
+    stanovist a vody (druh_smi). Skladba z kompozice.remizek_skladba (16. 11., drive cisla v kodu - stejny vysledek).
+    Vraci ([(model v2, x, z, vyska)], [(model, x, z, vyska)])."""
     R = random.Random(1979)
     stromy, kere = [], []
+    ks = _LOKACE_J.get("kompozice", {}).get("remizek_skladba", {})
     # kere okraje jen druhy s pouzit (druhy.json; sipek vyrazen - drive se tise vynechal a okraj remizku ridl)
-    kere_modely = [m for m in ("shrub_02", "sipek", "bez_cerny_1", "shrub_02")
-                   if DRUHY.get(druh_id(m) or "", {}).get("pouzit", True)]
+    kere_modely = [m for m in ks["kere"] if DRUHY.get(druh_id(m) or "", {}).get("pouzit", True)]
     for r in _LOKACE_J.get("kompozice", {}).get("remizky", []):
         cx, cz = r["stred"]
         rad = r["polomer_m"]
-        for _ in range(int(rad * 0.6)):
-            a, d = R.uniform(0, 2 * math.pi), rad * math.sqrt(R.random()) * 0.6
-            stromy.append((R.choice(["dub_stredni", "lipa_stredni", "dub_stredni", "lipa_stredni", "dub_stary"]),
-                           cx + math.cos(a) * d, cz + math.sin(a) * d, R.uniform(9.0, 15.0)))
-        for _ in range(int(rad * 1.6)):
-            a, d = R.uniform(0, 2 * math.pi), rad * R.uniform(0.55, 1.05)
+        for _ in range(int(rad * ks["stromy_na_m_polomeru"])):
+            a, d = R.uniform(0, 2 * math.pi), rad * math.sqrt(R.random()) * ks["stromy_do_podilu_r"]
+            stromy.append((R.choice(ks["stromy"]), cx + math.cos(a) * d, cz + math.sin(a) * d, R.uniform(*ks["vyska_stromu_m"])))
+        for _ in range(int(rad * ks["kere_na_m_polomeru"])):
+            a, d = R.uniform(0, 2 * math.pi), rad * R.uniform(*ks["kere_od_do_podilu_r"])
             kere.append((R.choice(kere_modely), cx + math.cos(a) * d, cz + math.sin(a) * d,
-                         R.uniform(1.2, 3.0)))
+                         R.uniform(*ks["vyska_keru_m"])))
     return stromy, kere
+
+
+# ---- houstina (les_podrost.json houstina, Misa 15. 11.: kroví jako stala vrstva krajiny podle stanoviste)
+_HOUSTINA = _svet("les_podrost.json")["houstina"]
+with open(os.path.join(os.path.dirname(_SVET), "pravidla_sveta.json"), encoding="utf-8") as _f:
+    _PASMA_CESTA = json.load(_f)["pasma"]["cesta"]
+_OSY_VSECH = None
+
+
+def _osy_vsech():
+    """Osy vsech cest a pesin z cesty.json (vozove i pesiny) s pulsirkou a typem pasma: [(_Line, pulsirka, typ)]."""
+    global _OSY_VSECH
+    if _OSY_VSECH is None:
+        cj = _svet("cesty.json")
+        _OSY_VSECH = []
+        for e in cj["vozove"] + cj["pesiny"]:
+            o = [tuple(q) for q in e.get("osa") or []]
+            if len(o) < 2:
+                continue
+            typ = e.get("typ", "vozova")
+            pw = e.get("pulsirka_m", e.get("blender_sirka_m", 2.0 * cj["pesina_zaklad_m"]) / 2.0)
+            _OSY_VSECH.append((_Line(o, 40.0), pw, typ if typ in _PASMA_CESTA else "vozova"))
+    return _OSY_VSECH
+
+
+def od_kraje_cesty(x, z):
+    """(vzdalenost od kraje nejblizsi cesty nebo pesiny z cesty.json, typ pasma) nebo (1e9, None)."""
+    best = (1e9, None)
+    for ln, pw, typ in _osy_vsech():
+        r = ln.near(x, z)
+        if r and r[0] - pw < best[0]:
+            best = (r[0] - pw, typ)
+    return best
+
+
+def je_strom(pid):
+    i = druh_id(pid)
+    return bool(i) and DRUHY[i]["skupina"] == "strom"
+
+
+def houstina_volno(pid, x, z, y=None):
+    """Smi kus houstiny (clona, mez, breh, zelen vsi) na (x, z)? Jedno pravidlo pro generatory i test smyslu clona_*:
+    ne na cestu (pasma.cesta ker_od_m / kmen_m od kraje, i pesiny), do vody a na holy breh (malé toky, rybniky,
+    Bystrice), do pruchodu zriceniny, do zdi a pruchodu staveb (pasma.budova), do vyhledu (kompozice.vyhledy).
+    Vraci None, nebo duvod (retezec)."""
+    d, typ = od_kraje_cesty(x, z)
+    pc = _PASMA_CESTA.get(typ or "vozova", _PASMA_CESTA["vozova"])
+    if d < (pc["kmen_m"] if je_strom(pid) else pc["ker_od_m"]):
+        return "cesta"
+    rn = road_near(x, z)
+    if rn and rn[0] - rn[3] < (_PASMA_CESTA["vozova"]["kmen_m"] if je_strom(pid) else _PASMA_CESTA["vozova"]["ker_od_m"]):
+        return "cesta"
+    rv = river(x, z)
+    if rv is not None and rv[0] < _PO["pulsirka_vody_m"] * (1.0 + 0.75 * rv[2]) + _PASMA_VODA["holy_breh_m"]:
+        return "voda"
+    if y is not None and rostlina_ve_vode(pid, x, z, y):
+        return "voda"
+    if v_pruchodu_ruiny(x, z):
+        return "pruchod"
+    if od_zdi(x, z) < (_PASMA_BUDOVA["kmen_od_zdi_m"] if je_strom(pid) else _PASMA_BUDOVA["plevel_u_zdi_m"]):
+        return "budova"
+    import vesnice
+    import ves_ramec
+    if ves_ramec.zapnuto():
+        pu = _PASMA_CESTA["ulice_vsi"]
+        if ves_ramec.od_kraje_hliny(x, z) < (pu["kmen_m"] if je_strom(pid) else pu["ker_od_m"]):
+            return "ulice"
+    if vesnice.path_dist(x, z) < (_PASMA_CESTA["pesina"]["kmen_m"] if je_strom(pid) else _PASMA_CESTA["pesina"]["ker_od_m"]):
+        return "cesta"
+    for e in vesnice.stavby_vsi():
+        ox, oz = e["o"]
+        ex_, ez_ = e["ex"], e["ez"]
+        lx, lz = (x - ox) * ex_[0] + (z - oz) * ex_[1], (x - ox) * ez_[0] + (z - oz) * ez_[1]
+        if abs(lx) > 60.0 or abs(lz) > 60.0:
+            continue
+        odst = _PASMA_BUDOVA["kmen_od_zdi_m"] if je_strom(pid) else _PASMA_BUDOVA["drn_m"]
+        for x0, x1, z0, z1 in e["boxy"]:
+            if math.hypot(max(x0 - lx, lx - x1, 0.0), max(z0 - lz, lz - z1, 0.0)) < odst:
+                return "budova"
+        for vx, vz, nx, nz, w in e["vstupy"]:
+            if math.hypot(lx - vx, lz - vz) < _PASMA_BUDOVA["pruchod_m"] + w * 0.5 + _PASMA_BUDOVA["dvur_m"] + _PASMA_BUDOVA["kmen_od_zdi_m"]:
+                return "vstup"
+    if vesnice.vyslapano(x, z) > 0.0:
+        return "vyslapano"
+    if vesnice.in_homestead(x, z) and vesnice.yard_dirt(x, z) > 0.0:
+        return "dvur"
+    for v in _LOKACE_J.get("kompozice", {}).get("vyhledy", []):
+        if math.hypot(x - v["stred"][0], z - v["stred"][1]) < v["polomer_m"]:
+            return "vyhled"
+    return None
+
+
+def houstina_vyber(skladba, R):
+    """(model, vyska m) podle vahy ze skladby les_podrost.json houstina.skladby.<skladba>."""
+    dr = [q for q in _HOUSTINA["skladby"][skladba]["druhy"] if DRUHY.get(druh_id(q[0]) or "", {}).get("pouzit", True)]
+    t, acc = R.random() * sum(q[1] for q in dr), 0.0
+    for pid, w, h in dr:
+        acc += w
+        if t <= acc:
+            return pid, R.uniform(*h)
+    return dr[-1][0], R.uniform(*dr[-1][2])
+
+
+def mez_krovi(x, z):
+    """Mez s krovim na byvalem poli mimo vysec za vsi (plochy.json pole.meze_po_polich): bod do sirka_m od hranice
+    honu, jen u vybranych honu (podil_honu podle hashe honu, stabilni)."""
+    mp = _PLOCHY_J["pole"].get("meze_po_polich")
+    if not mp or za_vsi(x, z):
+        return False
+    if field_strip(x, z, mez=False, vysec=False) is None:
+        return False
+    h, edge, t, w = hon(x, z)
+    if edge < mp["sirka_m"] and (_hash(h ^ 0x51ED27) & 0xFFFF) / 65535.0 < mp["podil_honu"]:
+        return True                                   # mez mezi hony
+    n = math.floor(t / w + 0.5)                       # nejblizsi hranice lanu
+    if abs(t - n * w) > mp["sirka_m"] * 0.5:
+        return False
+    return (_hash(h ^ ((n * 2246822519) & 0xFFFFFFFF)) & 0xFFFF) / 65535.0 < mp["podil_lanu"]
+
+
+def houstiny_meze(R):
+    """Kroviny na mezich byvalych poli: [(model, x, z, vyska)]. Mrizka krok_m s posunem, hustota = podil bodu."""
+    mp = _PLOCHY_J["pole"].get("meze_po_polich")
+    if not mp:
+        return []
+    out = []
+    xs = [u[0] for u in _HUMNA]
+    zs = [u[1] for u in _HUMNA]
+    dosah = _PLOCHY_J["pole"]["za_humny_m"] + 25.0
+    k = mp["krok_m"]
+    z = min(zs) - dosah
+    while z < max(zs) + dosah:
+        x = min(xs) - dosah
+        while x < max(xs) + dosah:
+            px, pz = x + R.uniform(-0.4, 0.4) * k, z + R.uniform(-0.4, 0.4) * k
+            x += k
+            if R.random() > mp["hustota"] or not mez_krovi(px, pz):
+                continue
+            pid, h = houstina_vyber("mez", R)
+            if houstina_volno(pid, px, pz) is None:
+                out.append((pid, px, pz, h))
+        z += k
+    return out
+
+
+def houstiny_breh(R):
+    """Prerusovane pasy houstiny podel Bystrice (les_podrost.json houstina.breh): na kazdem brehu zvlast usek s kerim,
+    mezera bez nich; za okrajem vody a holym brehem, ne u prechodu a mlyna. [(model, x, z, vyska)]."""
+    hb = _HOUSTINA["breh"]
+    prech = [(p["stred"][0], p["stred"][1], p.get("polomer_m", 0.0)) for p in _svet("cesty.json").get("prechody", [])]
+    mlyn = [(cx, cz, r) for _, cx, cz, _, r in MISTA]
+    out = []
+    for sd in (-1, 1):
+        stav, zbyva = R.random() < 0.5, R.uniform(*hb["usek_m"])
+        acc = 0.0
+        for (ax, az), (bx, bz) in zip(REKA[:-1], REKA[1:]):
+            L = math.hypot(bx - ax, bz - az)
+            if L < 1e-3:
+                continue
+            nx, nz = -(bz - az) / L, (bx - ax) / L
+            t = 0.0
+            while t < L:
+                krok = min(hb["krok_m"], L - t)
+                t += krok
+                zbyva -= krok
+                if zbyva <= 0.0:
+                    stav = not stav
+                    zbyva = R.uniform(*(hb["usek_m"] if stav else hb["mezera_m"]))
+                if not stav or R.random() > hb["hustota"]:
+                    continue
+                cx, cz = ax + (bx - ax) * t / L, az + (bz - az) * t / L
+                if not (ACT[0] + 5 < cx < ACT[1] - 5 and ACT[2] + 5 < cz < ACT[3] - 5):
+                    continue
+                if any(math.hypot(cx - px, cz - pz) < pr + hb["volno_u_prechodu_m"] for px, pz, pr in prech + mlyn):
+                    continue
+                rv = river(cx, cz)
+                pj = rv[2] if rv else 0.0
+                okraj = _PO["pulsirka_vody_m"] * (1.0 + 0.75 * pj) + _PASMA_VODA["holy_breh_m"]
+                o = okraj + R.uniform(*hb["od_vody_m"])
+                x, z = cx + nx * o * sd, cz + nz * o * sd
+                if od_kraje_cesty(x, z)[0] < hb["volno_u_cesty_m"]:
+                    continue
+                pid, h = houstina_vyber("breh", R)
+                if houstina_volno(pid, x, z) is None:
+                    out.append((pid, x, z, h))
+        acc += 1
+    return out
+
+
+def clony(R):
+    """Clony z lokace.json kompozice.clony (sad, houstina): pas podel osy, sirka_m napric, body po rozestup_m.
+    [(model, x, z, vyska, id clony)]."""
+    out = []
+    for c in _LOKACE_J.get("kompozice", {}).get("clony", []):
+        osa, w, krok = c["osa"], c["sirka_m"], c["rozestup_m"]
+        nr = max(1, int(w / krok) + 1)
+        for (ax, az), (bx, bz) in zip(osa[:-1], osa[1:]):
+            L = math.hypot(bx - ax, bz - az)
+            nx, nz = -(bz - az) / L, (bx - ax) / L
+            t = R.uniform(0.0, krok * 0.5)
+            while t < L:
+                for i in range(nr):
+                    o = (i - (nr - 1) / 2.0) * (w / max(nr - 1, 1) if nr > 1 else 0.0)
+                    jt = krok * (0.15 if c["typ"] == "sad" else 0.4)
+                    x = ax + (bx - ax) * t / L + nx * o + R.uniform(-jt, jt)
+                    z = az + (bz - az) * t / L + nz * o + R.uniform(-jt, jt)
+                    pid, h = houstina_vyber(c["skladba"], R)
+                    if houstina_volno(pid, x, z) is None:
+                        out.append((pid, x, z, h, c["id"]))
+                t += krok
+    return out
 
 
 def tok_near(x, z):
