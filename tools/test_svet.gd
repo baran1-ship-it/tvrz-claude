@@ -8895,6 +8895,10 @@ func _krcma_l() -> void:
 		var ab: AABB = kd.global_transform.affine_inverse() * km.global_transform * km.get_aabb()
 		if absf(ab.position.z - float(pl[2])) > 0.15 or absf(ab.end.z - float(pl[3])) > 0.15:
 			chyby.append("kridlo modelu z %.2f..%.2f, zaznam pudorys_lok %.2f..%.2f (import krcma_L.glb?)" % [ab.position.z, ab.end.z, float(pl[2]), float(pl[3])])
+	# nabytek kridla (x v pudorysu kridla) lezi v pudorysu kridla - posun kridla musi nest i nabytek (16. 11. slamniky)
+	for nb: Array in Pravidla.cti("lokace", "krcma_l", "nabytek"):
+		if float(nb[1]) > float(pl[0]) and (float(nb[2]) < float(pl[2]) or float(nb[2]) > float(pl[3])):
+			chyby.append("nabytek %s (%.1f, %.1f) mimo pudorys kridla z %.1f..%.1f" % [nb[0], float(nb[1]), float(nb[2]), float(pl[2]), float(pl[3])])
 	_vysledek("krcma_l", chyby.is_empty(), "%d chyb %s; u %s, dveri %d" % [chyby.size(), str(chyby), kd.global_position.snapped(Vector3.ONE * 0.1), dv])
 
 
@@ -9208,11 +9212,13 @@ func _krcma_schody() -> void:
 	# volna strana schodu (mistne souradnice dilu, Godot z = -Blender y; lokace.json krcma_l, zdroj krcma_L.py ZAB)
 	var sp := player.get_world_3d().direct_space_state
 	var zab_chybi: Array = []
-	for pr: Array in [["konec pavlace jih", Vector3(10.9, 3.55, 0.4), Vector3(10.9, 3.55, 1.7)],
-			["konec pavlace sever", Vector3(10.9, 3.55, -10.4), Vector3(10.9, 3.55, -11.7)],
-			["podesta vnejsi kraj", Vector3(9.3, 3.55, -7.65), Vector3(8.5, 3.55, -7.65)],
-			["podesta jizni konec", Vector3(9.3, 3.55, -7.65), Vector3(9.3, 3.55, -6.8)],
-			["schody volna strana", Vector3(9.3, 2.2, -10.0), Vector3(8.5, 2.2, -10.0)]]:
+	# 16. 11.: kridlo posunute o lokace krcma_l kridlo_posun_y_m (-2,8 Blender y = +2,8 z) - body s nim
+	var kdz := -float(Pravidla.cti("lokace", "krcma_l", "kridlo_posun_y_m"))
+	for pr: Array in [["konec pavlace jih", Vector3(10.9, 3.55, 0.4 + kdz), Vector3(10.9, 3.55, 1.7 + kdz)],
+			["konec pavlace sever", Vector3(10.9, 3.55, -10.4 + kdz), Vector3(10.9, 3.55, -11.7 + kdz)],
+			["podesta vnejsi kraj", Vector3(9.3, 3.55, -7.65 + kdz), Vector3(8.5, 3.55, -7.65 + kdz)],
+			["podesta jizni konec", Vector3(9.3, 3.55, -7.65 + kdz), Vector3(9.3, 3.55, -6.8 + kdz)],
+			["schody volna strana", Vector3(9.3, 2.2, -10.0 + kdz), Vector3(8.5, 2.2, -10.0 + kdz)]]:
 		var q := PhysicsRayQueryParameters3D.create(xf * (pr[1] as Vector3), xf * (pr[2] as Vector3))
 		q.exclude = [player.get_rid()]
 		if sp.intersect_ray(q).is_empty():
