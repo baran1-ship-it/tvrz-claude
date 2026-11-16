@@ -328,7 +328,7 @@ for m in Z["mista"]:
                 bx, by, bz = ZM[zm["model"]]["bedna"]; wx, wz = rot(zm["yaw"], bx, bz)
                 zaz["dily"].append({"predmet": d["predmet"], "x": zm["x"] + wx, "y": zm["y"] + by, "z": zm["z"] + wz, "yaw": zm["yaw"]})
             else:
-                wx, wz = rot(zm["yaw"], 0, ZM[zm["model"]]["dvere_z"] + d["pred_dvermi_m"]); px, pz = zm["x"] + wx, zm["z"] + wz
+                wx, wz = rot(zm["yaw"], d.get("bokem_m", 0.0), ZM[zm["model"]]["dvere_z"] + d["pred_dvermi_m"]); px, pz = zm["x"] + wx, zm["z"] + wz
                 zaz["dily"].append({"predmet": d["predmet"], "x": px, "y": vys(px, pz), "z": pz, "yaw": zm["yaw"], "efekt": d.get("efekt")})
             continue
         wx, wz = svet(o, lx, lz)

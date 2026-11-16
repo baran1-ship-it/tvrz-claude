@@ -106,7 +106,10 @@ for jm_t, t in ZE["typy"].items():
         dv["rotation"] = [0, math.sin(a / 2), 0, math.cos(a / 2)]; dv["translation"] = [tx, 0, tz]
     hl, dr, kol, zs = jama_steny(t, ZE["kuly"])
     mh = pb.material(t["hlina_mat"]); md = pb.material(t["drevo_mat"]); mr = pb.material(t["rohoz_mat"])
-    mho = pb.novy_material("M_Houne", K + "/" + ZE["houne_obraz"], drsnost=1.0)
+    _ho = K + "/build/houne_svetla.jpg"   # houně zesvětlená (zemljanky.houne_jas – snímek 16. 11.: ve stínu střechy skoro černá)
+    from PIL import Image, ImageEnhance
+    ImageEnhance.Brightness(Image.open(K + "/" + ZE["houne_obraz"]).convert("RGB")).enhance(ZE["houne"]["jas"]).save(_ho, quality=90)
+    mho = pb.novy_material("M_Houne", _ho, drsnost=1.0)
     pb.pridej_sit("Zemljanka_Jama", [(mh,) + hl, (md,) + dr], kolize=kol)
     # rohože a houně vlevo a vpravo (pevný díl), značky spánku
     R = ZE["rohoz"]; H_ = ZE["houne"]; x0, x1 = t["jama"][0], t["jama"][1]; yf = t["podlaha_y"]

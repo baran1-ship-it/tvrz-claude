@@ -837,6 +837,49 @@ for _v in _TP.get("vlozit", []):
     if _bl is not None: _min20.append("%s %.2f m" % (_v["id"], _bl))
 TEST("krb_okna", not _c20, "; ".join(_c20) if _c20 else "topení hradů mimo okenní niky (nejbližší zdivo: %s; min %.2f m)" % (", ".join(_min20) or "žádná nika ve výšce", _odst))
 
+# Míša 16. 11.: Dům 2 „černé fleky a světlé pruhy na omítce“ – stín vrhal hrubý obal, jehož stěny ležely před lícem domu;
+# stěna obrácená ke slunci nesmí ležet ve stínu vlastní stínové kopie (mista.json modely.domy.stin_obal). Paprsek z vrcholu
+# vnějšího líce (síť <Dům>_Vnejsek bez střechy, normála ven a vodorovně) šikmo vzhůru ke slunci (sklon stin_test_sklon) nesmí
+# narazit do stěn <Dům>_Daleko_Stin; povolený podíl zásahů stin_test_max (okraje otvorů, nároží).
+def _paprsky_troj(O, D, T):
+    e1 = T[:, 1] - T[:, 0]; e2 = T[:, 2] - T[:, 0]; hit = np.zeros(len(O), bool)
+    for k in range(0, len(O), 256):
+        o = O[k:k + 256, None, :]; dd = D[k:k + 256, None, :]
+        pv = np.cross(dd, e2[None]); det = np.einsum("ijk,jk->ij", pv, e1); inv = 1.0 / np.where(np.abs(det) < 1e-12, 1e-12, det)
+        tv = o - T[None, :, 0]; u = np.einsum("ijk,ijk->ij", tv, pv) * inv
+        qv = np.cross(tv, e1[None]); v = np.einsum("ijk,ijk->ij", dd, qv) * inv; t = np.einsum("ijk,jk->ij", qv, e2) * inv
+        hit[k:k + 256] = ((np.abs(det) > 1e-12) & (u >= 0) & (v >= 0) & (u + v <= 1) & (t > 1e-4)).any(1)
+    return hit
+_SO = json.load(open(K + "/pravidla/svet/mista.json"))["modely"]["domy"]; _so = _SO.get("stin_obal", {}); _c21 = []; _r21 = []
+_jd, _bd, _ = _gs.nacti(K + "/hra/" + _SO["soubor"][len("res://"):]); _Nd = {n_.get("name"): n_ for n_ in _jd["nodes"]}
+_MATd = [m_.get("name", "") for m_ in _jd["materials"]]
+for _dum in _SO["koreny"]:
+    _ns = _Nd.get(_dum + _so.get("obal", "_Daleko") + _so.get("pripona", "_Stin")); _nv = _Nd.get(_dum + "_Vnejsek")
+    if _nv is None: continue
+    if _ns is None: _c21.append("%s bez stínové kopie obalu" % _dum); continue
+    _T = np.concatenate([_gs.cti(_jd, _bd, p_["attributes"]["POSITION"])[_gs.cti(_jd, _bd, p_["indices"]).reshape(-1, 3)] for p_ in _jd["meshes"][_ns["mesh"]]["primitives"] if _MATd[p_["material"]].endswith(_so["steny"])] or [np.zeros((0, 3, 3))]).astype(np.float64)
+    if not len(_T): continue
+    _V = []   # vrcholy líců (poloha, normála) v pásu test_y
+    for p_ in _jd["meshes"][_nv["mesh"]]["primitives"]:
+        if any(x_ in _MATd[p_["material"]] for x_ in _so.get("test_bez", [])): continue
+        P_ = _gs.cti(_jd, _bd, p_["attributes"]["POSITION"]).astype(np.float64); N_ = _gs.cti(_jd, _bd, p_["attributes"]["NORMAL"]).astype(np.float64)
+        m_ = (np.abs(N_[:, 1]) < 0.3) & (P_[:, 1] > _so["test_y"][0]) & (P_[:, 1] < _so["test_y"][1])
+        _V.append(np.c_[P_[m_], N_[m_]])
+    _V = np.concatenate(_V); _O = []; _D = []
+    for _ax in (0, 2):   # jen vnější plášť: líc s normálou ven podél osy, nejvýš odsazeni_m za nejvzdálenějším lícem na té straně
+        for _sg in (1, -1):
+            _s = _V[:, 3 + _ax] * _sg > 0.9
+            if _s.sum() < 5: continue
+            _kr = _V[_s, _ax] * _sg; _s[_s] = _kr >= np.percentile(_kr, 95) - _so["odsazeni_m"]
+            d_ = np.zeros((_s.sum(), 3)); d_[:, _ax] = _sg; d_[:, 1] = _so["test_sklon"]; d_ /= np.linalg.norm(d_, axis=1)[:, None]
+            _O.append(_V[_s, :3] + d_ * 0.01); _D.append(d_)
+    if not _O: continue
+    _O = np.concatenate(_O); _D = np.concatenate(_D)
+    if len(_O) > 4000: _ix = np.linspace(0, len(_O) - 1, 4000).astype(int); _O = _O[_ix]; _D = _D[_ix]
+    _h = _paprsky_troj(_O, _D, _T).mean(); _r21.append("%s %.1f %%" % (_dum, 100 * _h))
+    if _h > _so["test_max"]: _c21.append("%s: %.1f %% líce na slunci ve stínu vlastní stínové kopie obalu (max %.1f %%)" % (_dum, 100 * _h, 100 * _so["test_max"]))
+TEST("stin_domu", not _c21, "; ".join(_c21) if _c21 else "líc domů na slunci mimo stín vlastního obalu (zásahy: %s)" % ", ".join(_r21))
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

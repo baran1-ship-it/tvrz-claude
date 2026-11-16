@@ -12,7 +12,7 @@
   "zemljanky": {
    "popis": "Chýše do tvaru A z Havrana předělané na zemljanku (Míša 15. 11.: „zevnitř umazat podlahu a postele, vykopat 2 schody do země a udělat zemljanku jako v KCD“; „spalo se na zemi vlevo a vpravo na rohožích a houních; proti dveřím na konci bedna, pokud se vejde“). Ze vzoru se vypustí podlaha a pryčny (vynechat), dveře zůstanou otevřené ven (dvere_otevrit_st, pant u levé zárubně), uvnitř jáma s hliněnými stěnami obloženými kůly, dva stupně dolů ode dveří, rohože s houněmi po stranách (pevný díl modelu), truhla z katalogu Havrana na konci (díl místa). Terén: otvor ve viditelné síti po obrys jámy, kolize terénu pod jámou snížená (jama_kolize_rozsir_m do stran a dozadu – svah sítě 1 m by jinak vystupoval nad podlahu u stěn).",
    "zdroj": "Míša 15. 11. (popis zemljanky KCD u uhlíře a v lomu); doklad zahloubených staveb: polozemnice 13.–14. st. (rešerše 15 km kap. 9, NAVRH); Havran domy.glb ChyseKura/ChysePrkna, NAVOD_CHYSE.md; schody: pravidla/svet/hrac.json schod_m (stupeň do 0,45 m), Warhorse KM-A-52 stupeň ~0,20–0,25 m",
-   "vzor": "hra/modely/stavby_h/domy.glb",
+   "vzor": "build/zdroj_celky/domy.glb", "vzor_pozn": "originál z Disku (nastroje/stavby_z_havrana.sh) – chýše v něm stejné jako ve hře (úpravy domů – okap, pece – se chýší netýkají); hra/modely/stavby_h/domy.glb přestavují jiné kroky",
    "vystup": "hra/modely/stavby_h",
    "houne_obraz": "hra/modely/predmety_h/lozko_houne_lozko_albedo.jpg",
    "typy": {
@@ -24,9 +24,9 @@
    "schody": {"pocet": 2, "hloubka_m": 0.38, "sirka_m": 1.1, "zdroj": "Míša 15. 11.: „2 schody do země“; výška stupně = (práh − podlaha) / 3 (≤ hrac.json schod_m 0,45)"},
    "kuly": {"rozestup_m": 0.32, "prumer_m": 0.09, "nad_teren_m": 0.06, "zdroj": "KCD zemnice (popis Míši 15. 11.: stěny jámy hliněné, obložené kůly) – NAVRH"},
    "rohoz": {"sirka_m": 0.72, "delka_m": 1.95, "tl_m": 0.035, "od_steny_m": 0.06, "z_konec": -1.95},
-   "houne": {"sirka_m": 0.62, "delka_m": 1.25, "tl_m": 0.05, "zdroj": "vlněná houně – textura lůžka Havrana (lozko_houne)"},
+   "houne": {"sirka_m": 0.62, "delka_m": 1.25, "tl_m": 0.05, "jas": 1.7, "zdroj": "vlněná houně – textura lůžka Havrana (lozko_houne), zesvětlená jas× (přírodní nebarvená vlna; snímek 16. 11. zi_uhlir: ve stínu černá)"},
    "jama_kolize_rozsir_m": 0.9,
-   "lod": {"podrobny_do_m": 30.0, "obal_do_m": 400.0, "zdroj": "jako domy vsi (mista.json modely.domy.lod: podrobný 25–30 m, dál hrubý obal _Daleko)"}
+   "lod": {"podrobny_do_m": 50.0, "obal_do_m": 400.0, "obal_barva": [0.29, 0.23, 0.17], "zdroj": "jako domy vsi (mista.json modely.domy.lod), zemljanka je malá (12 tis. troj.) → podrobně do 50 m, dál hrubý obal _Daleko v barvě ztmavlé kůry (mista.json daleko_textury jas Sindel × kůra; snímek 16. 11. f_uhlir: obal bez textury byl oranžový)"}
   },
   "stola": {
    "popis": "Průzkumná štola ve stráni (Míša 15. 11.: „průzkumná štola ve stráni (hypotéza H/NAVRH, ne na místě Soudkovy štoly 19. st.), zmenšit pro tablet, otevřít vstup v terénu“). Z dodaného dolu (~189 m chodeb, 446 tis. troj.) zůstane jen vstup se skalní tlamou a první úsek hlavní chodby do delka_m, zakončený čelbou (průzkumná štola končí čelbou); zbylé úseky (dělené po 9 m: jméno _i_j, j = úsek ve směru chodby) se vypustí. Hlinitá plocha před vstupem (Brown Mud) se vypustí – terén hry. Textury na max_px.",
@@ -88,7 +88,7 @@
     {"model": "les/les_uhlir_vozik", "poloha": [4.8, 0, 4.2], "yaw_st": 131},
     {"model": "zemljanka_kura", "poloha": [-5.5, 0, -10.5], "k_bodu": [0, 0], "zemljanka": true},
     {"predmet": "truhla", "v_zemljance": true},
-    {"predmet": "ohniste_kamenne", "pred_dvermi_m": 2.6, "efekt": "ohen"}
+    {"predmet": "ohniste_kamenne", "pred_dvermi_m": 3.2, "bokem_m": 2.4, "efekt": "ohen"}
    ]
   },
   {
@@ -132,7 +132,7 @@
    "id": "lom", "nazev": "Malý lom na kámen hradu", "znacka": "NAVRH",
    "zdroj": "plán bod 5; rešerše 15 km kap. 10 (malý dobový kamenolom na stavební kámen hradu – rekonstrukční hypotéza, droba); docs/historie_pravidla.md (Olšovecké břidlicové lomy 19. st. = X, jen obecný malý lom)",
    "proc": "ve svahu u vozové cesty blízko hradu (kámen se vozil na stavbu), lámavá stěna, odval, opracované kvádry",
-   "hledat": {"u": [150, 450], "r_m": 260, "cesty": ["vozova"], "od_osy_m": [10, 35], "od_staveb_m": 60, "od_toku_m": 12, "sklon_min": 0.28, "polomer_m": 7.0, "do_svahu": true},
+   "hledat": {"u": [150, 450], "r_m": 300, "cesty": ["vozova"], "od_osy_m": [12, 40], "od_cest_min_m": 12, "od_staveb_m": 60, "od_toku_m": 15, "sklon_min": 0.42, "polomer_m": 7.0, "do_svahu": true, "pozn": "ve svahu nad cestou (stěna lomu), ne na cestě – snímek 16. 11. f_lom: lom vyšel na rovinu u cesty"},
    "teren": [{"typ": "zarez", "sirka_m": 12.0, "hloubka_m": 9.0, "stena_m": 4.0}],
    "dily": [
     {"balvan": "balvan_droba_1", "poloha": [-3.8, 0, -8.6], "meritko": 2.4, "yaw_st": 10},

@@ -113,6 +113,8 @@ func _start() -> void:
 			var ms_: Array = load("res://scripts/lavice.gd").mista(s_, _lavice_vzor)
 			_sedatka_hradu.append_array(ms_); lavice.append_array(ms_)
 	if FileAccess.file_exists("res://data/mista_stavby.json"): add_child(preload("res://scripts/ves.gd").new())   # usedlosti: stodoly, kůlny, ploty, zahrady, studna, stromy (ves.gd)
+	Denik.zapis("zajímavá místa")
+	if FileAccess.file_exists("res://data/zajimava_mista.json"): add_child(preload("res://scripts/zajimava.gd").new())   # kříže, uhlíř, smolárna, studánka, brtě, poustevna, lom, štola, mlýn (Míša 15. 11.)
 	Denik.zapis("kameny v korytech")
 	if FileAccess.file_exists("res://data/koryto_kameny.json"): _kameny_koryta()   # valouny a balvany v korytech (Míša 10. 11.)   # kapradí, tráva, mech, semenáčky na římsách skal
 	var _jp_dosah := 220.0
@@ -664,7 +666,8 @@ func _vzory_bunek() -> Array:
 ## Stavby nových míst (hra/data/mista_stavby.json z nastroje/mista_rozmisteni.py, pravidla/svet/mista.json): domy vsi z Havrana
 ## (modely/stavby_h/domy.glb – nastroje/stavby_z_havrana.sh) osazené jako v Havranovi svet.gd _ves_domy: počátek modelu = terén
 ## plošiny (podezdívka jde pod zem), kolize z modelu (Kol_*), podrobný vnějšek do podrobny_do_m, střední stupeň (1 materiál,
-## barva vrcholu) do stredni_do_m (tablet stredni_do_m_mobil), dál hrubý obal _Daleko; vnitřek jen zblízka; stín jen z _Daleko.
+## barva vrcholu) do stredni_do_m (tablet stredni_do_m_mobil), dál hrubý obal _Daleko; vnitřek jen zblízka; stín jen ze stínové
+## kopie obalu _Daleko_Stin (stěny za lícem – mista.json stin_obal; obal sám stínil vlastní zeď, Míša 16. 11. Dum2 „černé fleky“).
 func _mista() -> void:
 	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mista_stavby.json"))
 	var md: Dictionary = d["modely"]["domy"]
@@ -706,7 +709,7 @@ func _mista() -> void:
 			# jednobarevný materiál z barvy vrcholů (kreslil se černě, Míša 15. 11.: „dodělej ty střední zobrazení domů“)
 			var mt_ := {}
 			for ch_ in dum.get_children():
-				if ch_ is MeshInstance3D and (ch_ as MeshInstance3D).mesh and not String(ch_.name).ends_with("_Daleko"):
+				if ch_ is MeshInstance3D and (ch_ as MeshInstance3D).mesh and not String(ch_.name).ends_with("_Daleko") and not String(ch_.name).ends_with("_Stin"):
 					for i_ in (ch_ as MeshInstance3D).mesh.get_surface_count():
 						var am_ := (ch_ as MeshInstance3D).get_active_material(i_)
 						if am_: mt_[String((ch_ as MeshInstance3D).mesh.surface_get_material(i_).resource_name if (ch_ as MeshInstance3D).mesh.surface_get_material(i_) else "")] = am_
@@ -720,12 +723,15 @@ func _mista() -> void:
 		for ch in dum.get_children():
 			if not ch is MeshInstance3D or String(ch.name).ends_with("_Stredni"): continue
 			var mi := ch as MeshInstance3D; var cn := String(ch.name)
-			if cn.ends_with("_Daleko"):
+			if cn.ends_with("_Stin"):   # stínová kopie obalu se stěnami za lícem (nastroje/domy_vzhled.py, mista.json stin_obal)
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY; mi.visibility_range_end = dal
+			elif cn.ends_with("_Daleko"):
 				mi.visibility_range_begin = dal; mi.visibility_range_end = obal_do
 				_daleko_textury(mi, vzor, String(s["model"]), dt, dt_cache)   # Míša 14. 11.: „z dálky jsou to bílé kostky“
-				var sd := MeshInstance3D.new(); sd.name = cn + "_Stin"; sd.mesh = mi.mesh; sd.transform = mi.transform
-				sd.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY; sd.visibility_range_end = dal
-				dum.add_child.call_deferred(sd)
+				if dum.get_node_or_null(NodePath(cn + "_Stin")) == null:   # model bez stínové kopie (starší domy.glb): stín z obalu
+					var sd := MeshInstance3D.new(); sd.name = cn + "_Stin"; sd.mesh = mi.mesh; sd.transform = mi.transform
+					sd.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY; sd.visibility_range_end = dal
+					dum.add_child.call_deferred(sd)
 			elif cn.ends_with("Interier") or cn.ends_with("Drobne"):
 				mi.visibility_range_end = float(lod["vnitrek_do_m"]) if cn.ends_with("Interier") else blizko
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -800,7 +806,7 @@ func _ztlum(dum: Node3D, jas: float, cache: Dictionary) -> void:
 	for ch in dum.get_children():
 		if not ch is MeshInstance3D: continue
 		var cn := String(ch.name)
-		if cn.ends_with("_Daleko") or cn.ends_with("Interier") or cn.ends_with("_Stredni"): continue
+		if cn.ends_with("_Daleko") or cn.ends_with("Interier") or cn.ends_with("_Stredni") or cn.ends_with("_Stin"): continue
 		var mi := ch as MeshInstance3D
 		for i in mi.mesh.get_surface_count():
 			var mt := mi.mesh.surface_get_material(i) as BaseMaterial3D

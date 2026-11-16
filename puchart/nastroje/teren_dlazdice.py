@@ -18,6 +18,8 @@ T = json.load(open(os.path.join(koren, "pravidla/svet/teren.json")))
 P = S["pocatek"]
 H = np.load(vys_pre + ".npy").astype(np.float64)
 M = json.load(open(vys_pre + ".json"))
+_ZT = os.path.join(koren, "build/zajimava_teren.json")   # zajímavá místa (nastroje/zajimava_mista.py): jáma zemljanky, ústí štoly
+ZAJ_T = json.load(open(_ZT)) if os.path.exists(_ZT) and "zaj" in os.path.basename(vys_pre) else {"diry": [], "kolize": []}
 H_SUROVY = H.copy()   # před vyhlazením: násypy u nástupů mostů (cesty.py) se nevyhlazují (vyhlazení je snížilo o 0,5 m, test 9. 11.)
 assert M["krok_m"] == T["mrizka_m"]
 if os.path.exists(vys_pre + "_jamy.npz"):   # sklep: vyhladit terén, jako by jáma nebyla, a jámu vrátit s ostrou hranou
@@ -227,8 +229,6 @@ if _A.get("sklep", {}).get("palac_dira"):   # půdorys paláce po líc obvodový
     _g = _hg.sklep(_A); _tl = _g["tl"]
     DIRY.append(("mnohouhelnik", [tuple(_g["svet"](u, v)) for u, v in ((-_tl + 0.08, -_tl + 0.08), (_g["Li"] + _tl - 0.08, -_tl + 0.08),
                                                                          (_g["Li"] + _tl - 0.08, _g["Wi"] + _tl - 0.08), (-_tl + 0.08, _g["Wi"] + _tl - 0.08))]))
-_ZT = os.path.join(koren, "build/zajimava_teren.json")   # zajímavá místa (nastroje/zajimava_mista.py): jáma zemljanky, ústí štoly
-ZAJ_T = json.load(open(_ZT)) if os.path.exists(_ZT) else {"diry": [], "kolize": []}
 for _d in ZAJ_T["diry"]: DIRY.append(("mnohouhelnik", [tuple(q) for q in _d["poly"]]))
 def _uvnitr(px, pz, poly):
     c = False; n = len(poly)

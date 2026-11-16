@@ -41,6 +41,9 @@ python3 -c "import json;Z=json.load(open('$K/pravidla/svet/topeni.json'))['zdroj
   mkdir -p $K/$ZD_ && curl -sSL -m 900 -o $T/$SADA_.zip "https://drive.usercontent.google.com/download?id=$ID_&export=download&confirm=t" && unzip -oq $T/$SADA_.zip '*.glb' '*.tscn' '*.json' '*.md' -d $K/$ZD_/ ; rm -f $T/$SADA_.zip
 done
 python3 $K/nastroje/topeni_domy.py $K
+# stínová kopie obalu domů (stěny za lícem) a zesvětlení děr opadané omítky Dum2 (mista.json modely.domy stin_obal, omitka_diry;
+# Míša 16. 11.: „černé fleky a světlé pruhy na omítce“) – po topení, před středním stupněm
+python3 $K/nastroje/domy_vzhled.py $K
 python3 $K/nastroje/topeni_modely.py $K
 /opt/bl/bin/python $K/blender/stredni_lod.py -- $K
 rm -rf $T; ls -la $K/hra/modely/stavby_h/

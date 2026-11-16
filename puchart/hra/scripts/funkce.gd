@@ -27,7 +27,7 @@ static func cfg(k: String) -> Dictionary:
 ## Kořeny vložených staveb (domy, krčma, hájovna pod Mista; kovárna, stodoly pod Ves).
 static func _koreny(h: Node) -> Array:
 	var out: Array = []
-	for jm in ["Mista", "Ves"]:
+	for jm in ["Mista", "Ves", "Zajimava"]:
 		var k := h.get_node_or_null(jm)
 		if k: out.append(k)
 	return out
@@ -85,6 +85,13 @@ static func polozky(h: Node) -> Array:
 				var p := zn.global_position + Vector3.UP * float(sp["nad_znackou_m"])
 				out.append({"druh": "spani", "nazev": String(sp["nabidka"]), "pos": p, "vlastni": vl, "misto": String(m["nazev"]),
 					"leh": p - Vector3.UP * float(sp["leh_pod_m"]), "znacka": zn})
+	var zs: Dictionary = Pravidla.cti("zajimava_mista", "funkce", "studanka")   # studánka (zajimava_mista.json funkce): napít se, nabrat vodu
+	for k: Node in _koreny(h):
+		for zn in k.find_children(String(zs["uzel"]), "Node3D", true, false):
+			var hl := (zn as Node3D).global_position
+			var voda := zn.get_parent().find_child("Les_Studanka_Voda", true, false) as Node3D
+			out.append({"druh": "studanka_napit", "nazev": String(zs["napit"]), "pos": hl + Vector3.UP * 0.25, "vlastni": []})
+			out.append({"druh": "studanka_nabrat", "nazev": String(zs["nabrat"]), "pos": (voda.global_position if voda else hl) + Vector3.UP * 0.1, "vlastni": []})
 	var zl: Dictionary = cfg("zlab")
 	for jm in zl["kolize"]:
 		for k: Node in _koreny(h):
@@ -186,6 +193,21 @@ func pouzij_polozku(p: Dictionary) -> void:
 		"spani": lehni(p)
 		"zlab": nalij(p)
 		"jesle": nasyp(p)
+		"studanka_napit", "studanka_nabrat": studanka(p)
+
+
+## ---------------------------------------------------------------- studánka (zajimava_mista.json funkce.studanka)
+func studanka(p: Dictionary) -> void:
+	var zs: Dictionary = Pravidla.cti("zajimava_mista", "funkce", "studanka")
+	var hv: Node = _vrstva.get("hv") if _vrstva else null
+	if String(p["druh"]) == "studanka_nabrat":
+		var pr: Node = hv.get("predmety") if hv else null
+		if pr and pr.has_method("add_inv"): pr.add_inv(String(zs["predmet"]))
+		p["nabrano"] = int(p.get("nabrano", 0)) + 1
+		if hv and hv.get("hud"): hv.hud.toast("Nabral jsi vodu do měchu.", 2.2)
+	else:
+		p["napito"] = int(p.get("napito", 0)) + 1
+		if hv and hv.get("hud"): hv.hud.toast(String(zs["zprava_napit"]), 2.2)
 
 
 ## ---------------------------------------------------------------- měch (Havran kovarna_mech.gd pumpuj + main.gd boost výhně)

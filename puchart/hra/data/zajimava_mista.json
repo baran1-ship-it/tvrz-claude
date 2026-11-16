@@ -7,9 +7,14 @@
   "zdroj": "NAVOD_LES.md: ke každému dílu _lod1; podrobný stupeň jako topení/předměty zblízka, hrubý do střední vzdálenosti (rozpocty.json kresleni cil 700); malé díly (kříže, nářadí) jen do 120 m"
  },
  "zemljanky_lod": {
-  "podrobny_do_m": 30.0,
+  "podrobny_do_m": 50.0,
   "obal_do_m": 400.0,
-  "zdroj": "jako domy vsi (mista.json modely.domy.lod: podrobný 25–30 m, dál hrubý obal _Daleko)"
+  "obal_barva": [
+   0.29,
+   0.23,
+   0.17
+  ],
+  "zdroj": "jako domy vsi (mista.json modely.domy.lod), zemljanka je malá (12 tis. troj.) → podrobně do 50 m, dál hrubý obal _Daleko v barvě ztmavlé kůry (mista.json daleko_textury jas Sindel × kůra; snímek 16. 11. f_uhlir: obal bez textury byl oranžový)"
  },
  "stola_lod": {
   "vstup_do_m": 150.0,
@@ -202,9 +207,9 @@
     },
     {
      "predmet": "ohniste_kamenne",
-     "x": -286.616,
-     "y": 124.284,
-     "z": -813.861,
+     "x": -286.784,
+     "y": 124.379,
+     "z": -816.329,
      "yaw": 1.88356,
      "efekt": "ohen"
     }
@@ -334,106 +339,106 @@
    "nazev": "Malý lom na kámen hradu",
    "znacka": "NAVRH",
    "zdroj": "plán bod 5; rešerše 15 km kap. 10 (malý dobový kamenolom na stavební kámen hradu – rekonstrukční hypotéza, droba); docs/historie_pravidla.md (Olšovecké břidlicové lomy 19. st. = X, jen obecný malý lom)",
-   "x": 124.0,
-   "z": 522.0,
-   "yaw": -1.35177,
+   "x": -42.0,
+   "z": 608.0,
+   "yaw": 2.33358,
    "dily": [
     {
-     "x": 131.569,
-     "z": 516.422,
-     "yaw": -1.17724,
+     "x": -45.592,
+     "z": 616.689,
+     "yaw": 2.50811,
      "balvan": "balvan_droba_1",
      "meritko": 2.4,
-     "y": -46.812
+     "y": 5.936
     },
     {
-     "x": 132.828,
-     "z": 520.24,
-     "yaw": 0.30629,
+     "x": -48.644,
+     "z": 614.074,
+     "yaw": 3.99164,
      "balvan": "balvan_droba_1",
      "meritko": 2.8,
-     "y": -46.237
+     "y": 6.257
     },
     {
-     "x": 133.166,
-     "z": 524.058,
-     "yaw": 2.13889,
+     "x": -50.909,
+     "z": 610.981,
+     "yaw": 5.82424,
      "balvan": "balvan_droba_1",
      "meritko": 2.3,
-     "y": -46.768
+     "y": 5.575
     },
     {
-     "x": 123.666,
-     "z": 527.402,
-     "yaw": -1.35177,
+     "x": -44.508,
+     "z": 603.204,
+     "yaw": 2.33358,
      "balvan": "kamen_droba_1",
      "meritko": 1.5,
-     "y": -47.925
+     "y": 5.324
     },
     {
-     "x": 122.766,
-     "z": 528.422,
-     "yaw": -0.30457,
+     "x": -44.266,
+     "z": 601.866,
+     "yaw": 3.38078,
      "balvan": "kamen_droba_1",
      "meritko": 1.2,
-     "y": -47.516
+     "y": 5.082
     },
     {
-     "x": 122.071,
-     "z": 527.142,
-     "yaw": 1.09169,
+     "x": -43.01,
+     "z": 602.602,
+     "yaw": 4.77704,
      "balvan": "kamen_droba_1",
      "meritko": 1.3,
-     "y": -47.176
+     "y": 4.861
     },
     {
-     "x": 123.186,
-     "z": 520.644,
-     "yaw": -1.17724,
+     "x": -40.602,
+     "z": 608.739,
+     "yaw": 2.50811,
      "predmet": "kvadr_hruby_1",
-     "y": -47.344
+     "y": 5.099
     },
     {
-     "x": 122.699,
-     "z": 522.597,
-     "yaw": -1.45649,
+     "x": -41.195,
+     "z": 606.816,
+     "yaw": 2.22886,
      "predmet": "kvadr_hruby_2",
-     "y": -47.553
+     "y": 4.781
     },
     {
-     "x": 122.839,
-     "z": 521.849,
-     "yaw": -1.29941,
+     "x": -40.928,
+     "z": 607.529,
+     "yaw": 2.38594,
      "predmet": "kvadr_hruby_1",
-     "y": -46.881
+     "y": 5.47
     },
     {
-     "x": 129.097,
-     "z": 518.202,
-     "yaw": -0.82817,
+     "x": -44.396,
+     "z": 613.887,
+     "yaw": 2.85718,
      "predmet": "krumpac",
-     "y": -47.083
+     "y": 5.575
     },
     {
      "model": "zemljanka_prkna",
-     "x": 117.761,
-     "y": -47.689,
-     "z": 514.681,
-     "yaw": 0.21902,
+     "x": -32.874,
+     "y": 3.798,
+     "z": 611.036,
+     "yaw": 3.90438,
      "zemljanka": true
     },
     {
      "predmet": "truhla",
-     "x": 117.406,
-     "y": -48.139,
-     "z": 513.09,
-     "yaw": 0.21902
+     "x": -31.748,
+     "y": 3.348,
+     "z": 612.214,
+     "yaw": 3.90438
     }
    ],
    "zarez": {
-    "stena_y": 0.84
+    "stena_y": 0.94
    },
-   "y": -47.083
+   "y": 5.575
   },
   {
    "id": "stola",
@@ -1056,38 +1061,38 @@
   ],
   [
    [
-    132.24,
-    512.99
+    -44.39,
+    619.97
    ],
    [
-    135.28,
-    526.66
+    -54.07,
+    609.85
    ],
    [
-    121.62,
-    529.7
+    -43.94,
+    600.18
    ],
    [
-    118.57,
-    516.04
+    -34.27,
+    610.3
    ]
   ],
   [
    [
-    114.53,
-    512.12
+    -28.78,
+    611.55
    ],
    [
-    119.6,
-    510.99
+    -32.54,
+    615.15
    ],
    [
-    121.21,
-    518.22
+    -37.66,
+    609.8
    ],
    [
-    116.14,
-    519.35
+    -33.9,
+    606.2
    ]
   ],
   [
