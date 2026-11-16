@@ -18,6 +18,11 @@ OUT = os.path.dirname(os.path.abspath(__file__))
 FOTO = os.path.join(OUT, "foto"); TEX = os.path.join(OUT, "textury"); os.makedirs(TEX, exist_ok=True)
 PRE = os.path.join(OUT, "nahledy_krcma_L"); os.makedirs(PRE, exist_ok=True)
 RENDER = "--norender" not in sys.argv
+# Misa 16. 11.: pec v senkovne z katalogu hry (Topeni_1400 Pec_Krcma, lokace.json krcma_l pec_senkovna_katalog) - vlastni
+# hlinena pec senkovny a jeji kolize se nestavi (nahodna cisla se spotrebuji stejne - ostatni model beze zmeny)
+import json as _json
+with open(os.path.join(OUT, "..", "..", "pravidla", "svet", "lokace.json"), encoding="utf-8") as _f:
+    PEC_KATALOG = bool(_json.load(_f)["krcma_l"].get("pec_senkovna_katalog", False))
 random.seed(SEED)
 W, L, ZE, P_MAIN = 8.0, 15.0, 3.15, math.radians(45)
 PFX = "KrcmaL"
@@ -114,7 +119,7 @@ RD.build(KS, SH, rx, collar_z=5.6, skip=skip_d, dymnik_a=DYM_A, key_r="tram_s", 
 # ================================================================= HLAVNÍ DŮM – VYBAVENÍ (pevné)
 print("vybavení domu…")
 IN = Mesh("KrcmaL_Interier_Dum")
-clay_oven(IN, -2.75, XS - 0.12, 1.25, Y1 - 0.12, ZF, base_h=0.55, top_h=1.65)              # pec v šenkovně (topí se z kuchyně)
+clay_oven(Mesh("KrcmaL_Pec_Zahozena") if PEC_KATALOG else IN, -2.75, XS - 0.12, 1.25, Y1 - 0.12, ZF, base_h=0.55, top_h=1.65)  # pec v šenkovně (topí se z kuchyně)
 # černá kuchyně: ohniště na hliněném stupni u stěny pece, žebřík na půdu
 box(IN, (-0.15, 3.05, ZF + 0.25), (1.5, 1.6, 0.5), Matrix.Identity(3), "pec_c", uvs=1.0)
 F(IN, [(-0.75, 2.45, ZF + 0.505), (0.45, 2.45, ZF + 0.505), (0.45, 3.70, ZF + 0.505), (-0.75, 3.70, ZF + 0.505)], [(0, 0), (1, 0), (1, 1), (0, 1)], "popel", (0, 0, 1))
@@ -325,7 +330,7 @@ for (nm, wl, ds) in (("Pred", FRONT, D_FRONT), ("Zad", BACK, D_BACK), ("Zapad", 
                      ("PricK", PK, D_PK), ("PricB", PB, D_PB), ("PricZ", PZ, [])):
     wall_cols(nm, *wl, 0.0, ZW, LOG_T, DH(ds))
 colbox("PodlahaDum", (X0, Y0, ZF - 0.3), (X1, Y1, ZF - 0.02))
-colbox("Pec", (-2.75, 1.15, ZF), (XS - 0.1, Y1 - 0.1, ZF + 1.6)); colbox("PecJizba", (XJ, -0.95, ZF), (3.55, 0.4, ZF + 1.3))
+None if PEC_KATALOG else colbox("Pec", (-2.75, 1.15, ZF), (XS - 0.1, Y1 - 0.1, ZF + 1.6)); colbox("PecJizba", (XJ, -0.95, ZF), (3.55, 0.4, ZF + 1.3))
 colbox("Strop", (X0, Y0, ZC), (X1, Y1, ZC + 0.06))
 # křídlo
 for (nm, lo, hi) in (("StajJ", (SX0, SY0, 0), (SX1, SY0 + ST, KZ)), ("StajS", (SX0, SY1 - ST, 0), (SX1, SY1, KZ)), ("StajV", (SX1 - ST, SY0, 0), (SX1, SY1, KZ))):

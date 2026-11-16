@@ -88,7 +88,27 @@ mřížka, ale hotová síť.
 
 ## 3. Výsledky (PC, 16. 11.)
 
-(doplněno níže po testu a snímcích)
+Test `teren_dlazdice` (`tools/beh.sh dl1 testy teren_dlazdice,zamek_terenu,pravidla_cteni`, export 15. 11. + herní
+úpravy, pečení za běhu): **OK**. `zamek_terenu` OK (krok dlaždic síť nemění), `teren_dlazdice.json` 0 nepřečtených klíčů.
+
+- Zdroje: 6 sítí (pásma s ≥ 4000 troj., bez Teren_obzor), po herních úpravách **705 971 troj.** (víc než 547 k z glb –
+  úpravy přidávají trojúhelníky). 273 kusů (dlaždice × materiál/formát), pečení za běhu na PC **4,7 s**.
+- Troj. po úrovních celkem: L0 705 971, L1 205 247 (chyba ≤ 0,3 m), L2 117 105 (≤ 1,2 m). Hrubé úrovně brzdí zamčený
+  okraj (okraj každého kusu zůstává v plném rozlišení) – NAMĚŘENO, prostor pro další krok (větší dlaždice pro L2).
+- Pokrytí (28 798 bodů po 8 m): L0 bez děr, shoda s původní sítí 0,00 m; L1 max 0,21 m, L2 max 1,18 m, děr 0;
+  kolize se liší od původní sítě ve 12 bodech a od LOD0 v týchž 12 (dlaždice nesoulad s fyzikou nepřidávají).
+- Škvíry: šachovnice úrovní (L0/L1, L1/L0, L0/L2, L1/L2) po hranách dlaždic, 451 296 bodů: **0 škvír**.
+- Troj. v zorném jehlanu (výpočet jako Godot: ořez AABB + vzdálenost ke středu AABB, bez hystereze):
+
+| místo → cíl | celé sítě | dlaždice | kusů | podíl |
+|---|---|---|---|---|
+| tvrz (0, 40) → (0, 300) | 705 971 | 321 637 | 72 | 46 % |
+| kopec (73, 947) → ves (470, 830) | 655 874 | 227 234 | 58 | 35 % |
+| potok (822, 215) → (600, 600) | 673 520 | 317 141 | 79 | 47 % |
+| ves (440, 820) → (650, 950) | 655 874 | 121 677 | 22 | 19 % |
+| les (−197, 988) → (300, 900) | 673 520 | 290 237 | 81 | 43 % |
+
+Výkon na tabletu: **NEOVĚŘENO NA ZAŘÍZENÍ** – varianta trasy `teren_dlazdice`.
 
 ## 4. Rizika a otevřené body
 

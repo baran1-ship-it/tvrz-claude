@@ -5905,14 +5905,8 @@ var DUM_MER := {
 	"ChyseKura": {"f": 2.85, "b": -2.85, "hw": 1.9, "rx": 2.25, "rz0": -3.12, "rz1": 2.94, "pod": 0.0, "ft": 4.8, "t_in": -0.03, "t_pas": -0.03},
 	"ChysePrkna": {"f": 2.41, "b": -2.41, "hw": 2.22, "rx": 2.25, "rz0": -2.9, "rz1": 2.9, "pod": 0.5, "ft": 4.8, "t_in": 0.05, "t_pas": -0.02},
 }
-# chyse (Misa/radce 07:45): [x, z, smer predku (uhel osy +z ve svete, rad), model, paseka r (stromy pryc), kam vede
-# vyslapany chodnicek od dveri (Misa 25. 10. "k chysim chodnicky vyslapane a pred vstupy, at vypada zabydlene")]
-# 2x u lomu naproti stene v trave (prkna, dvere k lomu), 2x uhlirske v lese nad vsi (kura, vyklizeny plac)
-const VES_CHYSE := [
-	# mista vybrana podle svahu (place_building: svah pod pudorysem < zidka 0,5 m / kuly 0,29 m) - rovinky 0,2-0,3 m
-	[642.0, 818.0, PI / 4.0, "ChyseKura", 12.0, [Vector2(640.0, 825.0)]],
-	[651.0, 821.0, PI - 0.2, "ChyseKura", 12.0, [Vector2(640.0, 825.0)]],
-]
+# chyse uhliru v lese a u lomu = zemljanky (Misa 16. 11.): polohy, natoceni, paseka a chodnicek k cili jsou zaznam
+# pravidla/svet/lokace.json zemljanky mista (drive konstanta VES_CHYSE); vysku prahu a jamu stavi Blender (svet.json zemljanky)
 # vybaveni (katalog predmetu): [id, x, z, yaw v ramci domu, vyska nad podlahou] - jizba u lavice ve svatem koute
 # (lavice podel +x, pec v koute -x u sine), sin nechava volne dvere, komora zasoby
 # vybaveni domu (nabytek, luzka) = zaznamy pravidla/svet/nabytek.json "domy" (drive konstanta DUM_VYB; Misa 5. 11. postele)
@@ -5968,18 +5962,97 @@ func _nabytek_budov() -> void:
 		var yv := float(ml["natoceni"]) + deg_to_rad(float(v[3]))
 		data["vybaveni"].append({"id": v[0], "p": [wp.x, wp.y, wp.z], "yaw": yv})
 		_postel_zapis(String(v[0]), "mlyn", wp, yv, 0)
+		ohen_predmetu(String(v[0]), wp, yv, "ohen_mlyn", true)
 	for r: Dictionary in Pravidla.cti("nabytek", "svet"):
 		var p := Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))
 		data["vybaveni"].append({"id": r["id"], "p": [p.x, p.y, p.z], "yaw": deg_to_rad(float(r["natoceni_st"]))})
 		_postel_zapis(String(r["id"]), String(r["budova"]), p, deg_to_rad(float(r["natoceni_st"])), int(r.get("mist", 0)))
+		ohen_predmetu(String(r["id"]), p, deg_to_rad(float(r["natoceni_st"])), String(r.get("ohen", "ohen_" + String(r["budova"]))), true)
 	for r: Dictionary in Pravidla.cti("nabytek", "zapecene"):
 		_postel_zapis(String(r["id"]), String(r["budova"]), Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2])),
 				deg_to_rad(float(r["natoceni_st"])), int(r.get("mist", 1)))
+	_mista_predmetu()
 	_nabytek_venku()
 	_sedaky_modelu()
 	print("nabytek budov: %d luzek" % (data.get("postele", []) as Array).size())
 	for e: String in luzka_bez_luzek():
 		push_error("nabytek: " + e)
+
+
+## Ohen a kour kusu katalogu ze znacek modelu (Misa 16. 11.: Topeni_1400 a les_dily „plameny a kour dela hra“;
+## modely.json ohen_znacky): kus s ohen v katalogu -> data ohne (kind hearth na znackach ohne: jm, jm_2...) a data kour
+## (znacky kour - kominy). zap = hori od zacatku. Vrati pocet ohnu.
+func ohen_predmetu(id: String, p: Vector3, yaw: float, jm: String, zap: bool) -> int:
+	if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
+		_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
+	var kt: Dictionary = _kat_p.get(id, {})
+	if not bool(kt.get("ohen", false)):
+		return 0
+	var zn: Dictionary = kt.get("znacky", {})
+	var oz: Dictionary = Pravidla.cti("modely", "ohen_znacky")
+	var xf := Transform3D(Basis(Vector3.UP, yaw), p)
+	var n := 0
+	for z: String in oz["ohen"]:
+		if zn.has(z):
+			var q := xf * _v3(zn[z])
+			data["ohne"].append({"kind": "hearth", "pos": [q.x, q.y, q.z], "name": jm if n == 0 else "%s_%d" % [jm, n + 1],
+					"size": float(oz["velikost_m"]), "zap": zap, "svetlo": oz["svetlo"], "predmet": id})
+			n += 1
+	for z: String in oz["kour"]:
+		if zn.has(z):
+			var q2 := xf * _v3(zn[z])
+			data["kour"].append([q2.x, q2.y, q2.z])
+	return n
+
+
+## Mista z kusu katalogu (lokace.json mista_predmetu - milir uhlire, Misa 16. 11.): kus [id, x, z, natoceni_st] v ramci
+## mista na terenu (Blender pod mistem srovnal teren, kraj.MISTA), ohen a kour ze znacek (ohen_predmetu).
+func _mista_predmetu() -> void:
+	var n := 0
+	for mp: Dictionary in Pravidla.cti("lokace", "mista_predmetu"):
+		var xf := Transform3D(Basis(Vector3.UP, float(mp["natoceni"])), Vector3(float(mp["stred"][0]), 0.0, float(mp["stred"][1])))
+		var i := 0
+		for kv: Array in mp["kusy"]:
+			var w := xf * Vector3(float(kv[1]), 0.0, float(kv[2]))
+			var yw := float(mp["natoceni"]) + deg_to_rad(float(kv[3]))
+			var pw := Vector3(w.x, _vyska(w.x, w.z), w.z)
+			data["vybaveni"].append({"id": String(kv[0]), "p": [pw.x, pw.y, pw.z], "yaw": yw, "misto": String(mp["id"])})
+			ohen_predmetu(String(kv[0]), pw, yw, "%s_%d" % [mp["id"], i], bool(mp.get("ohen", false)))
+			i += 1
+			n += 1
+	print("mista predmetu: %d kusu" % n)
+
+
+## Pec modelu domu pryc (nabytek.json pece_domu pec_modelu, Misa 16. 11. „pece v chalupach Pec_Chalupni“): z interieru
+## vzoru (domy.glb <typ>_Interier) povrchy materialu pece - jen kdyz kus pece z katalogu v domu je; kolize uzly pryc.
+func _bez_pece_modelu(vzor: Node, typ: String) -> void:
+	var pd: Dictionary = Pravidla.cti("nabytek", "pece_domu")
+	var ma_pec := false
+	for kv: Array in ((Pravidla.cti("nabytek", "domy") as Dictionary).get(typ, {}) as Dictionary).get("kusy", []):
+		ma_pec = ma_pec or String(kv[0]) == String(pd["pec"])
+	if not ma_pec:
+		return
+	var mats: Array = pd["pec_modelu"]["materialy"]
+	var mi := vzor.find_child(typ + "_Interier", true, false) as MeshInstance3D
+	if mi and mi.mesh is ArrayMesh:
+		var am := mi.mesh as ArrayMesh
+		var nove := ArrayMesh.new()
+		var pryc := 0
+		for si in am.get_surface_count():
+			var mt := am.surface_get_material(si)
+			var mn := String(mt.resource_name) if mt else ""
+			if mats.any(func(x: String) -> bool: return mn == x or mn.begins_with(x + ".")):
+				pryc += 1
+				continue
+			nove.add_surface_from_arrays(am.surface_get_primitive_type(si), am.surface_get_arrays(si))
+			nove.surface_set_material(nove.get_surface_count() - 1, mt)
+			nove.surface_set_name(nove.get_surface_count() - 1, am.surface_get_name(si))
+		mi.mesh = nove
+		print("pec modelu %s: %d povrchu pryc" % [typ, pryc])
+	var uz: Array = []
+	for u: String in pd["pec_modelu"]["uzly"]:
+		uz.append(typ + u)
+	_vynechat_uzly(vzor as Node3D, uz, "pec_modelu")
 
 
 ## Lavice v modelech budov (nabytek.json sedaky_modelu, Misa 15. 11. „na kazdou lavicku se musi dat sednout, i u mlyna“):
@@ -6155,13 +6228,18 @@ func _domy_ramce() -> void:
 		var xf := Transform3D(b, Vector3(o.x, 0.0, o.y))
 		_domy.append({"k": int(s[0]), "typ": String(s[6]), "m": m, "c": Vector2(s[1], s[2]), "au": au,
 				"av": Vector2(-sin(a), cos(a)), "L": float(s[4]), "W": float(s[5]), "xf": xf, "inv": xf.affine_inverse(), "y": INF})
-	for i in VES_CHYSE.size():
-		var ch: Array = VES_CHYSE[i]
-		var a2 := float(ch[2])
-		var xf2 := Transform3D(Basis(Vector3.UP, PI / 2.0 - a2), Vector3(ch[0], 0.0, ch[1]))
-		_domy.append({"k": 20 + i, "typ": String(ch[3]), "m": DUM_MER[ch[3]], "c": Vector2(ch[0], ch[1]), "au": Vector2(cos(a2), sin(a2)),
+	for zm: Dictionary in (Pravidla.cti("lokace", "zemljanky") as Dictionary).get("mista", []):
+		if not zm.has("stred"):
+			continue                                  # chyse u lomu: _chyse_k_lomu (stred z lom_chyse)
+		var a2 := float(zm["smer"])
+		var c2 := Vector2(float(zm["stred"][0]), float(zm["stred"][1]))
+		var xf2 := Transform3D(Basis(Vector3.UP, PI / 2.0 - a2), Vector3(c2.x, 0.0, c2.y))
+		var kc: Array = []
+		for q: Array in zm.get("k_cili", []):
+			kc.append(Vector2(float(q[0]), float(q[1])))
+		_domy.append({"k": int(zm["k"]), "typ": String(zm["typ"]), "m": DUM_MER[zm["typ"]], "c": c2, "au": Vector2(cos(a2), sin(a2)),
 				"av": Vector2(-sin(a2), cos(a2)), "L": 0.0, "W": 0.0, "xf": xf2, "inv": xf2.affine_inverse(), "y": INF,
-				"paseka": float(ch[4]), "k_cili": ch[5]})
+				"paseka": float(zm["paseka_m"]), "k_cili": kc})
 	# chalupa mlynare u vetrneho mlyna na samote (lokace.json vetrak.chalupa, tools/krok_b/vetrak_misto.py)
 	var ve: Dictionary = Pravidla.cti("lokace", "vetrak")
 	if ve.has("stred") and (ve["chalupa"] as Dictionary).has("stred"):
@@ -6320,11 +6398,21 @@ func _chyse_k_lomu() -> void:
 		return
 	var dvur := (a + b) * 0.5
 	var dc := 0.0
-	var k := 20 + VES_CHYSE.size()          # 14. 11. (test duplicity): chyse uhliru jsou 20, 21 - stejne cislo = stejne jmeno uzlu Dum_ves_20, dvere 2x
+	var k := 22                             # 14. 11. (test duplicity): chyse uhliru jsou 20, 21 - stejne cislo = stejne jmeno uzlu Dum_ves_20, dvere 2x
+	# zemljanky u lomu (lokace.json zemljanky mista s lom_chyse): cislo domu a natoceni ze zaznamu (Blender pod nimi
+	# vyrizl jamu - natoceni se uz nepocita za behu)
+	var zl: Array = []
+	for zm: Dictionary in (Pravidla.cti("lokace", "zemljanky") as Dictionary).get("mista", []):
+		if zm.has("lom_chyse"):
+			zl.append(zm)
+	if zl.size() >= 2:
+		k = int(zl[0]["k"])
 	var lom6: Array = PESINY[6]
 	# Misa 0.88: vchody k lomu; pred chysemi spolecny vyslapany placek (udusana hlina), z nej JEDNA cesticka na cestu
 	# k lomu (ne kazda chyse vlastni)
 	var ks := ((LOM_VCHOD - a).normalized() + (LOM_VCHOD - b).normalized()).normalized()
+	if zl.size() >= 2:
+		ks = Vector2(cos(float(zl[0]["smer"])), sin(float(zl[0]["smer"])))
 	# placek az za strechou: predek strechy chyse (DUM_MER ft 4,8 m) je dal nez prucelí + bezny okap (2,41 + 1,2) - strecha
 	# visela nad placem (test zasazeni dum_v_ceste_pesina / nad_cestou_pesina (167, 959-962), dlouhodobe od 28. 10.)
 	var pred_chyse := maxf(float(DUM_MER["ChysePrkna"]["f"]) + float(pasma()["budova"]["okap_m"]), float(DUM_MER["ChysePrkna"].get("ft", 0.0)))
@@ -6959,12 +7047,21 @@ func _ves_domy(root: Node3D) -> void:
 		var vzor := sc.get_node_or_null(String(d["typ"]))
 		if vzor == null:
 			continue
+		if not vzor.has_meta("bez_pece"):
+			_bez_pece_modelu(vzor, String(d["typ"]))
+			vzor.set_meta("bez_pece", true)
 		var dum := vzor.duplicate() as Node3D
 		dum.name = "Dum_ves_%d" % int(d["k"])
 		# Misa 14. 11.: chyse u lomu bez pryčen a podlahy modelu (lokace lom_chyse vynechat_uzly, i kolize)
 		var lch2: Dictionary = Pravidla.cti("lokace", "lom_chyse")
 		if String(d["typ"]) == String(lch2["typ"]):
 			_vynechat_uzly(dum, lch2["vynechat_uzly"], "lom_chyse")
+		# zemljanka (lokace.json zemljanky): podlaha a pryčny modelu pryc (i kolize), jamu postavil Blender
+		if d.has("zemljanka"):
+			var zv: Array = []
+			for u: String in Pravidla.cti("lokace", "zemljanky", "vynechat_uzly"):
+				zv.append(String(d["typ"]) + u)
+			_vynechat_uzly(dum, zv, "zemljanka")
 		dum.transform = d["xf"]
 		root.add_child(dum)
 		var st_vzor: MeshInstance3D = ssc.find_child(String(d["typ"]) + "_Stredni", true, false) as MeshInstance3D if ssc else null
@@ -7082,7 +7179,9 @@ func _ves_domy(root: Node3D) -> void:
 		for iv in kusy_n.size():
 			var v: Array = kusy_n[iv]
 			var wp := xf * Vector3(float(v[1]), float(m["pod"]) + float(v[4]), float(v[2]))
-			if kusy_y.has(iv):
+			if d.has("zemljanka"):
+				wp = xf * Vector3(float(v[1]), float(d["zemljanka"]["podlaha_y"]) + float(v[4]), float(v[2]))   # dno jamy
+			elif kusy_y.has(iv):
 				wp.y = float(kusy_y[iv]) + float(v[4])
 			var yv := yaw + deg_to_rad(float(v[3]))
 			if v.size() > 5 and String(v[5]) == "o_zed":
@@ -7092,6 +7191,7 @@ func _ves_domy(root: Node3D) -> void:
 				continue
 			data["vybaveni"].append({"id": v[0], "p": [wp.x, wp.y, wp.z], "yaw": yv})
 			_postel_zapis(String(v[0]), String(nb["budova"]) % int(d["k"]), wp, yv, 0)
+			ohen_predmetu(String(v[0]), wp, yv, "ohen_dum_%d" % int(d["k"]), int(d["k"]) % 2 == 1 or typ == "Rychta")
 		# drevo u domu (Misa 27. 10.: nove hranice podle KCD1, kazdy dum jinak): [id, strana (-1 dvur / +1 vstup / 0 zadni
 		# stit), poloha podel steny (0..1 od stitu do navsi k zadu), odstup od zdi m, pootoceni]
 		if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
@@ -7164,6 +7264,15 @@ func _vyska_site_bodu(root: Node3D, body: Array) -> void:
 				b[2] = maxf(float(b[2]), a.y + u * (bb.y - a.y) + w2 * (c.y - a.y))
 
 
+## Zemljanka domu k (svet.json zemljanky z blender/zemljanka.py: k, typ, p = pocatek modelu chyse, smer, podlaha_y,
+## prah_y v souradnicich modelu) nebo {} - chyse bez jamy.
+func zemljanka_dum(k: int) -> Dictionary:
+	for z: Dictionary in data.get("zemljanky", []):
+		if int(z["k"]) == k:
+			return z
+	return {}
+
+
 func _chyse_na_sit(root: Node3D) -> void:
 	var body: Array = []
 	for d: Dictionary in _domy:
@@ -7179,8 +7288,9 @@ func _chyse_na_sit(root: Node3D) -> void:
 	var lch0: Dictionary = Pravidla.cti("lokace", "lom_chyse")
 	var kusy_b: Array = []
 	for d: Dictionary in _domy:
-		if not (d["m"].has("t_pas") and bool(lch0.get("na_terenu", false)) and String(d["typ"]) == String(lch0["typ"])):
-			continue
+		if not (d["m"].has("t_pas") and bool(lch0.get("na_terenu", false)) and String(d["typ"]) == String(lch0["typ"])) \
+				or not zemljanka_dum(int(d["k"])).is_empty():
+			continue                                  # zemljanka: kusy na dne jamy (vyska ze zaznamu, ne ze site)
 		var kusy: Array = ((Pravidla.cti("nabytek", "domy") as Dictionary).get(String(d["typ"]), {}) as Dictionary).get("kusy", [])
 		d["kusy_y"] = {}
 		for i in kusy.size():
@@ -7211,6 +7321,21 @@ func _chyse_na_sit(root: Node3D) -> void:
 				var lq: Vector3 = (d["inv"] as Transform3D) * Vector3((b[1] as Vector2).x, 0.0, (b[1] as Vector2).y)
 				if lq.z <= float(d["m"]["f"]) + 0.01:
 					mx_in = maxf(mx_in, float(b[2]))
+		var zrec := zemljanka_dum(int(d["k"]))
+		if not zrec.is_empty():
+			# zemljanka (lokace.json zemljanky, Misa 16. 11.): vysku prahu spocital Blender ze srovnaneho terenu a pod
+			# chysi vyrizl jamu - chyse stoji presne na ni; teren kolem (dum_teren) na prah: t_pas = prah_y - teren_pod_prahem
+			var m3: Dictionary = (d["m"] as Dictionary).duplicate()
+			m3["t_pas"] = float(zrec["prah_y"]) - float((Pravidla.cti("lokace", "lom_chyse") as Dictionary)["teren_pod_prahem_m"])
+			d["m"] = m3
+			var xz: Transform3D = d["xf"]
+			xz.origin.y = float(zrec["p"][1])
+			d["xf"] = xz
+			d["inv"] = xz.affine_inverse()
+			d["y"] = xz.origin.y
+			d["zemljanka"] = zrec
+			print("zemljanka %s_%d: y %.2f (sit %.2f..%.2f)" % [d["typ"], d["k"], xz.origin.y, mn, mx])
+			continue
 		if mn == INF:
 			continue
 		# place_building: podlaha nad nejvyssim bodem (+0,05), svah vetsi nez zidka (0,5) / kuly v zemi (0,29) = varovani
@@ -10402,6 +10527,7 @@ func _krcma_dil(root: Node3D, parent: Node3D) -> void:
 		var np := xf * Vector3(float(nb[1]), float(nb[4]) if nb.size() > 4 else pod, float(nb[2]))
 		var yaw_n := float(kr["natoceni"]) + deg_to_rad(float(nb[3]))
 		data["vybaveni"].append({"id": String(nb[0]), "p": [np.x, np.y, np.z], "yaw": yaw_n})
+		ohen_predmetu(String(nb[0]), np, yaw_n, "pec_krcma_senkovna", true)   # pec_krcma (pec_senkovna_katalog)
 		if nb.size() > 5:
 			_postel_zapis(String(nb[0]), String(nb[5]), np, yaw_n, 0)
 	# mistnost: [name, titulek, x, z, sirka, delka, ambient, (vyska podlahy - patro kridla)]

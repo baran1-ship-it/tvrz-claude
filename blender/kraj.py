@@ -301,6 +301,11 @@ if _KOV.get("stred"):
 for _i, _m in enumerate(_LOKACE_J.get("lom_chyse", {}).get("mista", [])):
     MISTA.append(("lom_chyse_%d" % _i, _m[0], _m[1], 0.0, _LOKACE_J["lom_chyse"]["rovina_r_m"]))
     PLACKY.append((_m[0], _m[1], _LOKACE_J["lom_chyse"]["plac_r_m"]))
+# mista z kusu katalogu (Misa 16. 11., lokace.json mista_predmetu - milir uhlire): rovina, vegetace pryc, udusana hlina;
+# pred zemljankami, aby rovina chysi zustala presna (pozdejsi MISTA prepise prechod drivejsiho)
+for _m in _LOKACE_J.get("mista_predmetu", []):
+    MISTA.append((_m["id"], _m["stred"][0], _m["stred"][1], _m["natoceni"], _m["rovina_r_m"]))
+    PLACKY.append((_m["stred"][0], _m["stred"][1], _m["plac_r_m"]))
 # zemljanky uhliru v lese (Misa 16. 11., lokace.json zemljanky mista se stredem; chyse u lomu maji rovinu z lom_chyse):
 # rovina pod chysi (vyska prahu = srovnany teren, blender/zemljanka.py), jama v terenu - otvor v Teren_zemljanky
 for _m in _LOKACE_J.get("zemljanky", {}).get("mista", []):

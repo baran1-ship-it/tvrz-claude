@@ -2892,11 +2892,6 @@
     "KrcmaL_Ohen_Kuchyne",
     "hearth",
     "ohen_krcma_kuchyne"
-   ],
-   [
-    "KrcmaL_Pec_Senkovna",
-    "hearth",
-    "pec_krcma_senkovna"
    ]
   ],
   "kour": [
@@ -3073,9 +3068,43 @@
     0.0,
     2.85,
     "krcma_noclezna"
+   ],
+   [
+    "pec_krcma",
+    -2.67,
+    -2.31,
+    -90.0
+   ],
+   [
+    "seno_kupa",
+    11.8,
+    -9.6,
+    0.0,
+    0.05
+   ],
+   [
+    "seno_chomac",
+    14.5,
+    -6.0,
+    40.0,
+    0.05
+   ],
+   [
+    "seno_chomac",
+    15.6,
+    -2.0,
+    160.0,
+    0.05
+   ],
+   [
+    "vidle_drevene",
+    12.9,
+    -8.6,
+    20.0,
+    0.4
    ]
   ],
-  "_nabytek": "Míša 14. 11.: model bez vybavení – vše z katalogu: [id, x, z, natočení_st v rámci modelu, (výška podlahy; jinak podlaha_m), (budova pro spánek u lůžek)]. Šenkovna stoly s lavicemi (x −7…−4), komora sudy (x 4,4…7, z −0,5…−4), jizba hospodského lůžko a truhla, komůrka šenkýřky úzké lůžko, stáj koryta u východní zdi (podlaha stáje 0,05), patro křídla (2,85): pokoj 1 lůžko hráče u značky KrcmaL_Spani_Hrac, pokoj 2 lůžko, nocležna 5 slamníků pro formany. Polohy = odhad z dispozice NAVOD, ověřit snímkem. 16. 11. (Misa: „hospoda dostane chude postele“): lozko a lozko_uzke -> postel_chudy (Luzka_1400, 1,23 x 2,15 m; pokoj 1 z -0,1 -> -0,2 a pokoj 2 z -4,2 -> -4,3, at delsi postel nesaha do pricky); noclezna zustava se slamniky (spolecne nocoviste formanu na slame).",
+  "_nabytek": "Míša 14. 11.: model bez vybavení – vše z katalogu: [id, x, z, natočení_st v rámci modelu, (výška podlahy; jinak podlaha_m), (budova pro spánek u lůžek)]. Šenkovna stoly s lavicemi (x −7…−4), komora sudy (x 4,4…7, z −0,5…−4), jizba hospodského lůžko a truhla, komůrka šenkýřky úzké lůžko, stáj koryta u východní zdi (podlaha stáje 0,05), patro křídla (2,85): pokoj 1 lůžko hráče u značky KrcmaL_Spani_Hrac, pokoj 2 lůžko, nocležna 5 slamníků pro formany. Polohy = odhad z dispozice NAVOD, ověřit snímkem. 16. 11. (Misa: „hospoda dostane chude postele“): lozko a lozko_uzke -> postel_chudy (Luzka_1400, 1,23 x 2,15 m; pokoj 1 z -0,1 -> -0,2 a pokoj 2 z -4,2 -> -4,3, at delsi postel nesaha do pricky); noclezna zustava se slamniky (spolecne nocoviste formanu na slame). 16. 11.: pec_krcma v šenkovně (pec_senkovna_katalog); seno ve stáji (Seno_1400, NAVOD_SENO: kupa na zemi 2,5 × 1,8 m v jihozápadním rohu stáje u vrat, dva rozhozené chomáče u koryt, dřevěné vidle zapíchnuté do kupy 0,35 m nad podlahou).",
   "mistnosti": [
    [
     "krcma_l_senkovna",
@@ -3285,7 +3314,9 @@
     2.36
    ]
   ],
-  "_vyslapano": "Míša 15. 11. (ř. 11, ves.vyslapano): pudorys_lok [[x0, x1, z0, z1]] = podezdívka domu (KrcmaL_Podezdivka) a kamenné křídlo (KrcmaL_Kridlo_Kamen) a kůlna v rohu dvora (_kryti_lok) z modely/krcma/krcma_L.glb; vstupy_lok [[x, z, nx, nz, šířka]] = přízemní dveře a vrata z uzlů modelu (KrcmaL_Dvere_Vchod, _Dvur, KrcmaL_Vrata_L/P, KrcmaL_Vrata_Staj_L/P; střed otvoru, směr ven); dveře na pavlači (patro) a vnitřní ne."
+  "_vyslapano": "Míša 15. 11. (ř. 11, ves.vyslapano): pudorys_lok [[x0, x1, z0, z1]] = podezdívka domu (KrcmaL_Podezdivka) a kamenné křídlo (KrcmaL_Kridlo_Kamen) a kůlna v rohu dvora (_kryti_lok) z modely/krcma/krcma_L.glb; vstupy_lok [[x, z, nx, nz, šířka]] = přízemní dveře a vrata z uzlů modelu (KrcmaL_Dvere_Vchod, _Dvur, KrcmaL_Vrata_L/P, KrcmaL_Vrata_Staj_L/P; střed otvoru, směr ven); dveře na pavlači (patro) a vnitřní ne.",
+  "pec_senkovna_katalog": true,
+  "_pec_senkovna_katalog": "Míša 16. 11. („v krčmě Pec_Krcma“): hliněná pec šenkovny modelu (blender/krcma_L/krcma_L.py clay_oven a kolize Kol_Pec) se nestaví, místo ní kus katalogu pec_krcma (Topeni_1400, NAVOD_PEC: větší chlebová pec do kouřové šenkovny) v nabytku: v jihovýchodním rohu šenkovny zády (zápecím) ke stěně šenkovna|síň, lavicí podél jižní stěny, ústím na západ do šenkovny (natočení −90°). Oheň a světlo ze značky Pec_Ohen (svet.ohen_predmetu, jméno pec_krcma_senkovna); kouř pec nemá komín – jde do místnosti a ven dymníkem (KrcmaL_Kour_Dymnik). Rozměr 3,16 × 3,11 m vč. lavice, zápecí a předpecí (katalog), střed x −1,12 − 3,107/2, z −3,89 + 3,164/2."
  },
  "kovarna_tvrz": {
   "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",
@@ -3766,5 +3797,53 @@
   ],
   "_mista": "k = číslo domu (svet._domy, postavy.json spanek budova chyse_kura_<k> / chyse_<k>); smer = úhel osy +z chýše ve světě (rad, atan2(z, x) jako svet._domy au); rovina terénu pod chýší kraj.MISTA (rovina_r_m)",
   "rovina_r_m": 4.5
- }
+ },
+ "mista_predmetu": [
+  {
+   "id": "uhlir_milir",
+   "nazev": "Milíř uhlíře Pivoňky",
+   "stred": [
+    634.0,
+    837.0
+   ],
+   "natoceni": 0.32,
+   "rovina_r_m": 7.5,
+   "plac_r_m": 6.0,
+   "kusy": [
+    [
+     "milir_horici",
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     "uhlir_drevo",
+     5.6,
+     -1.5,
+     90.0
+    ],
+    [
+     "uhlir_naradi",
+     4.2,
+     2.8,
+     -30.0
+    ],
+    [
+     "uhlir_vozik",
+     -5.2,
+     2.2,
+     30.0
+    ],
+    [
+     "milir_rozebrany",
+     -9.5,
+     -2.0,
+     0.0
+    ]
+   ],
+   "ohen": true,
+   "popis": "Míša 16. 11. („místo uhlířů v lese“, les_dily NAVOD_LES.md): milířiště u uhlířských zemljanek (lokace.json zemljanky k 20, 21) jižně od pěšiny k chýším (cesty.json pesiny[5] ~9 m) – hořící milíř uprostřed (Ø 7 m), rovnaná polena na kraji, hrábě a lopata, kára na uhlí, vedle rozebraný starý milíř (milířiště se používala opakovaně). Kus = [id katalogu, x, z v rámci místa, natočení °]. Rovina a vegetace pryč (kraj.MISTA, rovina_r_m), vyšlapaná hlína (kraj.PLACKY plac_r_m); výška kusu = terén (hra: svet._mista_predmetu), kouř ze značek kusu (modely.json ohen_znacky)."
+  }
+ ],
+ "_mista_predmetu": "Místa složená z kusů katalogu (Míša 16. 11.): Blender pod nimi srovná terén a vyčistí vegetaci (kraj.MISTA, PLACKY), hra položí kusy na terén (svet._mista_predmetu) a ze značek kusů udělá oheň a kouř (svet.ohen_predmetu, ohen = zapnout)."
 }

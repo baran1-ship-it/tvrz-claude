@@ -41,22 +41,22 @@
     ],
     [
      "truhla_vyrezavana",
-     -0.3,
-     4.45,
+     -0.315,
+     2.385,
      0.0,
      0.0
     ],
     [
      "vedro",
-     -1.45,
-     3.1,
+     -1.465,
+     2.085,
      0.0,
      0.0
     ],
     [
      "spalek",
-     -1.2,
-     3.6,
+     -0.615,
+     4.085,
      0.0,
      0.0
     ],
@@ -105,9 +105,16 @@
     ],
     [
      "postel_chudy",
-     -2.705,
-     3.82,
+     0.185,
+     3.785,
      180.0,
+     0.0
+    ],
+    [
+     "pec_chalupni",
+     -2.065,
+     3.585,
+     90.0,
      0.0
     ]
    ]
@@ -118,13 +125,6 @@
     [
      "stul_selsky",
      1.65,
-     3.2,
-     90.0,
-     0.0
-    ],
-    [
-     "lavice_selska",
-     0.85,
      3.2,
      90.0,
      0.0
@@ -145,15 +145,15 @@
     ],
     [
      "bedna",
-     -0.2,
-     4.0,
+     0.18,
+     1.93,
      0.0,
      0.0
     ],
     [
      "vedro",
-     -0.4,
-     3.3,
+     0.83,
+     1.98,
      0.0,
      0.0
     ],
@@ -167,9 +167,16 @@
     ],
     [
      "postel_chudy",
-     -1.81,
-     3.71,
-     90.0,
+     0.33,
+     3.28,
+     0.0,
+     0.0
+    ],
+    [
+     "pec_chalupni",
+     -1.57,
+     3.08,
+     180.0,
      0.0
     ]
    ]
@@ -221,15 +228,15 @@
     ],
     [
      "truhla_vyrezavana",
-     -0.6,
-     3.35,
+     1.185,
+     3.335,
      0.0,
      0.0
     ],
     [
      "kolebka",
-     -1.75,
-     3.2,
+     -0.615,
+     1.135,
      0.0,
      0.0
     ],
@@ -285,9 +292,16 @@
     ],
     [
      "postel_rychtar",
-     -2.98,
-     2.68,
+     -0.015,
+     2.635,
      180.0,
+     0.0
+    ],
+    [
+     "pec_chalupni",
+     -2.365,
+     2.485,
+     90.0,
      0.0
     ]
    ]
@@ -697,6 +711,51 @@
    "natoceni_st": 90.0,
    "budova": "tvrz_ubytovna_zeny",
    "popis": "truhla zen u pricky"
+  },
+  {
+   "id": "kamna_nadobkova",
+   "p": [
+    8.1,
+    3.9,
+    -9.0
+   ],
+   "natoceni_st": 90.0,
+   "budova": "tvrz_palac",
+   "ohen": "kamna_loznice",
+   "popis": "Míša 16. 11. („nová kamna nebo krb na tvrz“): nádobková kamna (Topeni_1400 Kamna_Hradni_Nadobkova) v ložnici pána v patře paláce (svet.json mistnosti loznice x 7,2–17, z −14 až −7,6, podlaha 3,9) zády k příčce s komnatou (x 7,2), ústím do místnosti; jižně od postele (z −12,93). Síň má gotický krb stavby (palace.fireplace) – nádobková kamna patří do vytápěné obytné místnosti (NAVOD_PEC: kamna s přikládáním zvenku, kolem 1400 v obytných světnicích hradů a tvrzí). Oheň ze značky Pec_Ohen."
+  },
+  {
+   "id": "seno_kupa",
+   "p": [
+    -22.6,
+    0.0,
+    -0.55
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_staj",
+   "popis": "Míša 16. 11.: seno ve stáji tvrze – kupa v prázdném třetím boxu (blender/hospodar.py stable: boxy z −8,3 po 3,1 m, střed třetího −0,55; podlaha 0)"
+  },
+  {
+   "id": "vidle_drevene",
+   "p": [
+    -21.7,
+    0.35,
+    -0.2
+   ],
+   "natoceni_st": 15.0,
+   "budova": "tvrz_staj",
+   "popis": "dřevěné vidle zapíchnuté do kupy"
+  },
+  {
+   "id": "seno_chomac",
+   "p": [
+    -21.4,
+    0.0,
+    -3.0
+   ],
+   "natoceni_st": 70.0,
+   "budova": "tvrz_staj",
+   "popis": "rozhozený chomáč u koně"
   }
  ],
  "_svet": "kusy ve svetovych souradnicich (tvrz: kolize modely/svet.json): p = pata predmetu na podlaze, natoceni_st, budova, mist (kolik lidi v luzku spi, jinak z katalogu); poradi kusu = poradi prideleni luzek obyvatelum stejne budovy (lide.gd _postel v poradi postavy.json obyvatele)",
@@ -895,5 +954,37 @@
    ]
   ]
  },
- "_sedaky_modelu": "Míša 15. 11. „u všech staveb je nějaká lavička, chci aby se na ni dalo sednout i u mlýna, projdi všechny“: lavice, které jsou součástí modelu (domy.glb Dum1/Dum2/Rychta – usedlosti 1–7 i dům kováře, mlyn.glb), neměly záznam sed (sedat šlo jen na kusy z katalogu se sed). Stejně jako zapecene u lůžek: [x, z, výška sedáku y, natočení sedícího ° v rámci modelu, popis] → svet.data pouziti kind sed (hráč i postavy). Polohy z rozboru geometrie modelů 15. 11. (plochy ve výšce sedu, *_Kol_Lavice); natočení: zády ke zdi (venku +x modelu ven, v jizbě −x). Kovárna, krčma L a větrný mlýn lavici v modelu nemají. Natočení NEOVĚŘENO snímkem."
+ "_sedaky_modelu": "Míša 15. 11. „u všech staveb je nějaká lavička, chci aby se na ni dalo sednout i u mlýna, projdi všechny“: lavice, které jsou součástí modelu (domy.glb Dum1/Dum2/Rychta – usedlosti 1–7 i dům kováře, mlyn.glb), neměly záznam sed (sedat šlo jen na kusy z katalogu se sed). Stejně jako zapecene u lůžek: [x, z, výška sedáku y, natočení sedícího ° v rámci modelu, popis] → svet.data pouziti kind sed (hráč i postavy). Polohy z rozboru geometrie modelů 15. 11. (plochy ve výšce sedu, *_Kol_Lavice); natočení: zády ke zdi (venku +x modelu ven, v jizbě −x). Kovárna, krčma L a větrný mlýn lavici v modelu nemají. Natočení NEOVĚŘENO snímkem.",
+ "pece_domu": {
+  "pec": "pec_chalupni",
+  "od_zdi_m": 0.03,
+  "pruchod_m": 1.0,
+  "pred_ustim_m": 0.8,
+  "pevne_kusy": [
+   "stul_selsky",
+   "lavice_selska"
+  ],
+  "pec_modelu": {
+   "materialy": [
+    "M_Kamen",
+    "M_PecHlina",
+    "M_PecZacouzena",
+    "M_Tma",
+    "M_Zhar"
+   ],
+   "uzly": [
+    "_Kol_Pec"
+   ]
+  },
+  "popis": "Míša 16. 11. („pece v chalupách nahradit Pec_Chalupni“): pec modelu domu (domy.glb Interier – povrchy materiálů pec_modelu.materialy, celé uvnitř Kol_Pec; rozbor 16. 11.) a její kolize (uzly) hra vynechá (svet._bez_pece_modelu) a postaví kus katalogu pec_chalupni. Nová pec je s lavicí, zápecím a předpecím 2,52 × 2,50 m – na místo staré (1,48 × 1,91 m u dveří jizby) se nevejde, proto tools/krok_b/pece_domu.py hledá místo v jizbě: celá v jizbě (od_zdi_m od líce), mimo průchod dveří (pruchod_m), lavici modelu a stůl s lavicí (pevne_kusy), před ústím volno pred_ustim_m, zápecí a lavice pece ke zdi; pak lůžko a drobné kusy mimo pec (zápis do domy kusy). Oheň a světlo ze značky Pec_Ohen (svet.ohen_predmetu, jméno ohen_dum_<k>).",
+  "typy": {
+   "Dum2": {
+    "vynechat_kusy": [
+     "lavice_selska"
+    ],
+    "pruchod_m": 0.6,
+    "_p": "Dum2 (chalupa) má jizbu 5,8 × 3,4 m – pec 2,5 × 2,5 m, stůl a lůžko se vejdou jen bez volné lavice (sedí se na rohové lavici modelu, nabytek.json sedaky_modelu Dum2) a s průchodem dveří 0,6 m (pec od dveří 0,8 m)"
+   }
+  }
+ }
 }
