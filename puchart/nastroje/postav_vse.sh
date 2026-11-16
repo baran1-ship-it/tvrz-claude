@@ -27,6 +27,8 @@ bash $K/nastroje/stahni_realne.sh   # biotopy, PPV, DMP 1G -> stanoviště 1393,
 python3 $K/nastroje/teren_upravy.py vysek1m vysek1m_upr $K   # plošiny, rampa za branou, průrva (hrad_puchart.json; valy jsou v DMR)
 python3 $K/nastroje/koryta.py vysek1m_upr vysek1m_kor $K   # koryta potoků zaříznutá do terénu (voda_hra.json koryto)
 python3 $K/nastroje/cesty.py vysek1m_kor vysek1m_cesty $K   # cesty (zářez, maska, stromy pryč)
+#   pěšiny k zajímavým místům (k_studanka, k_mlyn) jsou osy v cesty_puchart.json; po posunu místa je přepočítá
+#   python3 $K/nastroje/pesiny_k_mistum.py $K $B/vysek1m_kor (zajimava_mista.py hlásí ZAJIMAVA_POZOR) – Míša 16. 11.
 python3 $K/nastroje/mista_rozmisteni.py vysek1m_cesty vysek1m_mista $K   # stavby nových míst (pravidla/svet/mista.json): domy a plošiny pod nimi
 python3 $K/nastroje/luzka_modely.py $K   # lůžka od modeláře (pravidla/svet/luzka.json, Míša 16. 11.): jen Tablet_1K scény, sítě, 1K materiály a textury do hra/modely/luzka + katalog pískoviště (luzko_*); houně do zemljanek
 cp $K/pravidla/svet/zajimava_mista.json $K/hra/pravidla/svet/ && python3 $K/nastroje/zajimava_modely.py $K && python3 $K/nastroje/zajimava_mista.py vysek1m_mista vysek1m_zaj $K   # zajímavá místa (pravidla/svet/zajimava_mista.json, Míša 15. 11.): modely, poloha, terén, trasy
@@ -59,7 +61,8 @@ python3 $K/nastroje/import_stromy.py $K && (cd $K/hra && $G --headless --import 
 [ -d $K/hra/modely/predmety_h ] || bash $K/nastroje/predmety_z_havrana.sh   # předměty, menu hráče a pískoviště z Havrana (Míša 10. 11.)
 [ -d $B/zdroj_modelar/Seno_1400 ] || (mkdir -p $B/zdroj_modelar && curl -sSL -m 600 -o $B/seno.zip "https://drive.usercontent.google.com/download?id=16P8JpAyu4200ZMkoitR8AaLjzCAYeu8B&export=download&confirm=t" && unzip -oq $B/seno.zip -x "*.blend" -d $B/zdroj_modelar && rm -f $B/seno.zip)   # seno od modeláře (Míšin Disk, Seno_1400.zip)
 [ -d $K/hra/modely/seno ] || (python3 $K/nastroje/seno_modely.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true))   # seno do jeslí + katalog pískoviště (Míša 15. 11.)
-python3 $K/nastroje/luzka_modely.py $K --ikony && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)   # lůžka do katalogu pískoviště (po predmety_z_havrana), ikony 128 px
+python3 $K/nastroje/luzka_modely.py $K --ikony && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)
+python3 $K/nastroje/predmety_mist.py $K --ikony && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)   # uhlí, smola, lomový kámen z funkcí míst do katalogu brašny (Míša 16. 11.)   # lůžka do katalogu pískoviště (po predmety_z_havrana), ikony 128 px
 # topení od Míšina modeláře (pravidla/svet/topeni.json; zdroj build/zdroj_modelar – stáhne nastroje/stavby_z_havrana.sh): přebalené
 # modely do hra/modely/topeni, nádobí do katalogu pískoviště (po predmety_z_havrana – doplní predmety_h.json), trasy průchodu
 python3 $K/nastroje/topeni_modely.py $K && python3 $K/nastroje/topeni_trasy.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)

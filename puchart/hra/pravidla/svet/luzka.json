@@ -9,7 +9,6 @@
   "textury_pripony",
   "katalog",
   "max_troj_pozn",
-  "barvy_vrcholu",
   "normal_import"
  ],
  "slozka": "build/zdroj_modelar/Luzka_1400",
@@ -139,6 +138,7 @@
   "prevest_na_srgb": true,
   "znacka": "barvy_vrcholu_srgb",
   "zprava": "build/luzka_barvy.json",
+  "test": "smysl:luzka_barvy (zpráva převodu: každá síť hra/modely/luzka převedená a od převodu nezměněná, importy normálových map) + pruchod:luzka (síť s COLOR_0 nese metadata znacka)",
   "popis": "barvy vrcholů sítí lůžek (COLOR_0 × albedo, NAVOD_LUZKA.md) převést z lineárních na sRGB (nastroje/godot/luzka_barvy.gd volaný z luzka_modely.py; převedená síť nese metadata znacka). glTF ukládá COLOR_0 lineárně (houně průměr 0,34; 0,25; 0,15 = béžová 0,62; 0,54; 0,42 v sRGB), renderer Compatibility ale násobí albedo (textura × albedo_color × COLOR) v sRGB a teprve výsledek převede do lineárního prostoru (scene.glsl albedo = srgb_to_linear(albedo); vertex_color_is_srgb v Compatibility nic nedělá) → barva vrcholu se vzala jako sRGB a ztmavla na 0,095; 0,051; 0,019: vlněná houně a přikrývka chudé postele téměř černé (pod ACES jen modrý odlesk oblohy), modrá a červená přikrývka, len i dřevo tmavší než předloha. Modelářova kontrola QA_REPORT běžela v Godotu 4.6.3 (jiný renderer), proto vadu neukázala.",
   "zdroj": "předloha build/zdroj_modelar/Luzka_1400/LUZKA_1400_PREHLED.jpg a nahledy/*.jpg (houně béžová, chudá přikrývka olivová, rychtářova světle modrá); snímky ze hry docs/screens/mista_zemljanka_uhlir_uvnitr.png (před) a luzka_barvy_*.png; měření agenta 16. 11. v zemljance u uhlíře: houně s barvou vrcholů = stejný pixel jako albedo_color 0,34; 0,25; 0,15 bez barev vrcholů (7; 5; 3), s albedo_color 0,62; 0,54; 0,42 (= převod) 50; 55; 48 (chyby.md 356)"
  },

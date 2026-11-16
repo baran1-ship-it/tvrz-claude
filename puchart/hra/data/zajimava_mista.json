@@ -46,6 +46,59 @@
   ]
  ],
  "funkce": {
+  "sber": {
+   "popis": "funkce míst „vzít surovinu“ (Míša 16. 11.): nabídka u dílu s funkce (zajimava_mista.json dily[].funkce → uzel dílu ve hře má meta funkce), bod zaměření = uzel (značka modelu) nebo počátek dílu + nad_m; použití dá predmet do brašny (predmety.gd add_inv), s naradi jen když ho má hráč v brašně",
+   "druhy": {
+    "uhli": {
+     "nabidka": "Nabrat uhlí",
+     "uzel": "Les_Milir_Uhli_Kupka",
+     "nad_m": 0.1,
+     "predmet": "uhli_pytel",
+     "zprava": "Nabral jsi pytel dřevěného uhlí.",
+     "zdroj": "Míša 16. 11. milíř „Nabrat uhlí“; uhlí z rozebraného milíře (NAVOD_LES.md stav C: kupka uhlí Milir_Uhli_Kupka)"
+    },
+    "med": {
+     "nabidka": "Vybrat med",
+     "uzel": "Brt",
+     "bod_kmen_m": 1.7,
+     "predmet": "med",
+     "zprava": "Vybral jsi z brtě plástve – hrnec medu.",
+     "zdroj": "Míša 16. 11. brtě „Vybrat med“; med = Hrnec medu z katalogu Havrana; brť je 3–4 m vysoko, nabídka u kmene pod ní (bod_kmen_m nad zemí) – brtník lezl po lezci (NAVRH: lezec se nestaví)"
+    },
+    "smola": {
+     "nabidka": "Nabrat smolu",
+     "uzel": "Les_Smolarna_Hrnec",
+     "nad_m": 0.25,
+     "predmet": "smola_hrnec",
+     "zprava": "Nabral jsi hrnec smoly.",
+     "zdroj": "Míša 16. 11. smolárna „Nabrat smolu“; sběrný hrnec pod žlábkem (NAVOD_LES.md Smolarna_Hrnec)"
+    },
+    "kamen": {
+     "nabidka": "Lámat kámen",
+     "nad_m": 0.9,
+     "predmet": "kamen_lomovy",
+     "naradi": "krumpac",
+     "zprava": "Vylámal jsi kus kamene.",
+     "zprava_bez": "Bez krumpáče kámen nevylámeš.",
+     "trvani_s": 2.0,
+     "zdroj": "Míša 16. 11. lom „Lámat kámen“ (krumpáč – katalog Havrana krumpac)"
+    }
+   }
+  },
+  "mlyn": {
+   "kolo_uzel": "Mlyn_Ovladani_Kolo",
+   "mleti_uzel": "Mlyn_Ovladani_Mleti",
+   "mleti": "Mlít obilí",
+   "obili": "pytel_obili",
+   "mouka": "pytel_mouky",
+   "zprava_stoji": "Kámen stojí – nejdřív pusť kolo do proudu",
+   "zprava_bez_obili": "Nemáš u sebe pytel obilí",
+   "zprava_sype": "Sypeš obilí do násypky…",
+   "zprava_hotovo": "Semleto – pytel mouky v brašně",
+   "zprava_pustit": "Spustil jsi kolo do proudu",
+   "zprava_zastavit": "Zvedl jsi kolo z proudu – kolo se zastaví",
+   "zdroj": "Havran main.gd _on_use mlyn_stavidlo / mlyn_mleti a _mlyn_mlit (pytel obilí z brašny → po mleti_s pytel mouky, jen s kolem v chodu)"
+  },
   "studanka": {
    "uzel": "Les_Studanka_Napit",
    "nabrat_uzel": "Les_Studanka_Potucek_1",
@@ -55,6 +108,18 @@
    "predmet": "voda_mech",
    "dosah_m": 2.2,
    "zprava_napit": "Voda je studená a čistá.",
+   "uhasi_zizen": 1.0,
+   "zizen_pozn": "Havran ani Puchart nemají potřeby hráče (žízeň, hlad) – jen životy a výdrž (Havran player.gd, hud.gd). Napít se zavolá hrac.uhas_zizen(uhasi_zizen), až systém potřeb vznikne; do té doby jen zpráva (Míša 16. 11.: připravit napojení, nevymýšlet celý systém)",
+   "voda": {
+    "material": "M_LesVoda",
+    "hloubka_m": 0.12,
+    "shader": {
+     "rychlost": 0.15,
+     "cirost": 0.25,
+     "hloubka_barvy": 0.2
+    },
+    "zdroj": "Míša 16. 11.: hladina studánky vodním shaderem Puchartu jako potoky (shaders/voda.gdshader, hlavni.mat_voda) místo materiálu modeláře; plocha hladiny z modelu (M_LesVoda: šachta y 0,22 a potůček), UV.x = metry po proudu, hloubka pro krytí jako žlab (funkce.json zlab.shader)"
+   },
    "zdroj": "funkce.json studna (Havran); plán bod 6 – funkce napít / nabrat vodu (měch s vodou z katalogu)"
   },
   "spani": {
@@ -301,6 +366,7 @@
      "z": -826.687,
      "yaw": 1.66285,
      "model": "les/les_milir_c",
+     "funkce": "uhli",
      "y": 124.18,
      "zabor": [
       [
@@ -505,6 +571,7 @@
      "yaw": -1.39949,
      "model": "les/les_smolarna",
      "efekt": "smolarna",
+     "funkce": "smola",
      "y": 122.868,
      "zabor": [
       [
@@ -595,6 +662,7 @@
      "z": -852.0,
      "yaw": -1.25216,
      "strom": "borovice_stara",
+     "funkce": "med",
      "brt": {
       "vyska_m": 3.6,
       "smer_st": 0,
@@ -627,6 +695,7 @@
      "z": -845.974,
      "yaw": -1.25216,
      "strom": "dub_stary",
+     "funkce": "med",
      "brt": {
       "vyska_m": 3.2,
       "smer_st": 30,
@@ -700,6 +769,7 @@
      "z": 390.244,
      "yaw": 3.5303,
      "balvan": "balvan_droba_1",
+     "funkce": "kamen",
      "meritko": 2.8,
      "y": -43.18,
      "u_steny": true,

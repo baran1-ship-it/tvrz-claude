@@ -82,7 +82,7 @@
    "dily": [
     {"model": "les/les_milir_b", "poloha": [0, 0, 0], "lod1_do_m": 300, "efekt": "milir"},
     {"model": "les/les_milir_a", "poloha": [-10, 0, 2.5], "yaw_st": 40},
-    {"model": "les/les_milir_c", "poloha": [10.5, 0, -2.0], "yaw_st": 15, "pozn": "Míša 16. 11. „Nabrat uhlí“ – rozebraný milíř s kupkou uhlí (NAVOD_LES.md stav C: po vychladnutí se milíř rozhrabal a uhlí odváželo)"},
+    {"model": "les/les_milir_c", "poloha": [10.5, 0, -2.0], "yaw_st": 15, "funkce": "uhli", "pozn": "Míša 16. 11. „Nabrat uhlí“ – rozebraný milíř s kupkou uhlí (NAVOD_LES.md stav C: po vychladnutí se milíř rozhrabal a uhlí odváželo)"},
     {"model": "les/les_uhlir_drevo", "poloha": [4.6, 0, -5.2], "yaw_st": 20},
     {"model": "les/les_uhlir_naradi", "poloha": [-3.3, 0, -2.4], "yaw_st": 23},
     {"model": "les/les_uhlir_vozik", "poloha": [4.8, 0, 4.2], "yaw_st": 131},
@@ -97,7 +97,7 @@
    "proc": "v lese kus od uhlíře, u pěšiny (smolné dřevo z pařezů borovic)",
    "hledat": {"u": [-260, -780], "r_m": 220, "les": true, "cesty": ["vozova", "pesina"], "od_osy_m": [8, 30], "od_staveb_m": 150, "od_mista": ["uhlir", 70, 200], "max_prevyseni_m": 0.9, "polomer_m": 5.0, "k_ceste": true},
    "teren": [{"typ": "plosina", "stred": [0, 0], "r_m": 4.5}],
-   "dily": [{"model": "les/les_smolarna", "poloha": [0, 0, 0], "efekt": "smolarna"}]
+   "dily": [{"model": "les/les_smolarna", "poloha": [0, 0, 0], "efekt": "smolarna", "funkce": "smola"}]
   },
   {
    "id": "studanka", "nazev": "Studánka pod skálou", "znacka": "NAVRH",
@@ -113,8 +113,8 @@
    "proc": "staré stromy na kraji lesa u pěšiny (brtník k nim chodí)",
    "hledat": {"u": [-210, -830], "r_m": 260, "les": true, "cesty": ["pesina", "vozova"], "od_osy_m": [6, 25], "od_staveb_m": 150, "max_prevyseni_m": 2.0, "polomer_m": 4.0, "k_ceste": true},
    "dily": [
-    {"strom": "borovice_stara", "poloha": [0, 0, 0], "brt": {"vyska_m": 3.6, "smer_st": 0}},
-    {"strom": "dub_stary", "poloha": [7.5, 0, -3.5], "brt": {"vyska_m": 3.2, "smer_st": 30}}
+    {"strom": "borovice_stara", "poloha": [0, 0, 0], "brt": {"vyska_m": 3.6, "smer_st": 0}, "funkce": "med"},
+    {"strom": "dub_stary", "poloha": [7.5, 0, -3.5], "brt": {"vyska_m": 3.2, "smer_st": 30}, "funkce": "med"}
    ]
   },
   {
@@ -138,7 +138,7 @@
    "teren": [{"typ": "zarez", "sirka_m": 12.0, "hloubka_m": 9.0, "stena_m": 4.0}],
    "dily": [
     {"balvan": "balvan_droba_1", "poloha": [-3.8, 0, -8.0], "meritko": 2.4, "yaw_st": 10, "u_steny": true},
-    {"balvan": "balvan_droba_1", "poloha": [0.2, 0, -8.2], "meritko": 2.8, "yaw_st": 95, "u_steny": true},
+    {"balvan": "balvan_droba_1", "poloha": [0.2, 0, -8.2], "meritko": 2.8, "yaw_st": 95, "u_steny": true, "funkce": "kamen"},
     {"balvan": "balvan_droba_1", "poloha": [4.0, 0, -7.9], "meritko": 2.3, "yaw_st": 200, "u_steny": true},
     {"balvan": "kamen_droba_1", "poloha": [5.2, 0, 1.5], "meritko": 1.5},
     {"balvan": "kamen_droba_1", "poloha": [6.0, 0, 2.6], "meritko": 1.2, "yaw_st": 60},
@@ -175,7 +175,7 @@
     "kolo": [-4.65, 1.15, -3.4],
     "kolo_r_m": 1.84,
     "kolo_od_osy_m": 0.45,
-    "kolo_od_osy_pozn": "střed lopatek 0,45 m od osy toku k protějšímu břehu: stěna budovy (x −3,6) stojí na kraji koryta (Velička půlšířka ~1,5 m), lopatky (x −5,56…−3,79) celé ve vodě",
+    "kolo_od_osy_pozn": "osa toku 0,45 m za středem lopatek (od budovy, místně x −5,1): stěna budovy (x −3,6) stojí na kraji koryta (Velička půlšířka ~1,5 m), lopatky (x −5,56…−3,79 = −0,46…+1,31 m od osy) celé v korytě",
     "kolo_sirka_x": [-5.56, -3.79],
     "kolo_pozn": "osa kola Mlyn_Kolo (mlyn.glb: střed −4,65 / 1,15 / −3,4, poloměr 1,84 m, lopatky x −5,56…−3,79) – střed lopatek nad osou toku",
     "ponor_m": 0.25,
@@ -191,9 +191,27 @@
    }
   }
  ],
+ "predmety": {
+  "popis": "předměty, které dávají funkce míst do brašny (Míša 16. 11.: „předměty do brašny podle inventáře Havrana/Puchartu“). Katalog Havrana (hra/modely/predmety_h.json) má med (Hrnec medu) a krumpáč; uhlí, smolu a lomový kámen nemá – doplní je nastroje/predmety_mist.py jako scény z modelů katalogu (pytel, hliněný hrnec, kámen droby) s ikonou 128 px (nastroje/godot/ikony_predmetu.gd)",
+  "zaznamy": {
+   "uhli_pytel": {"nazev": "Pytel dřevěného uhlí", "kat": "suroviny", "stav": "remeslo", "vaha": 15.0, "cena": 12, "model": "res://modely/predmety_h/pytel_obili.glb", "meritko": 0.8, "zdroj": "uhlí se z milíře odváželo v pytlích a koších na káře (NAVOD_LES.md); model pytle z katalogu Havrana zmenšený"},
+   "smola_hrnec": {"nazev": "Hrnec smoly", "kat": "suroviny", "stav": "remeslo", "vaha": 3.0, "cena": 10, "model": "res://modely/predmety_h/hrnec_hlineny.glb", "meritko": 1.0, "zdroj": "smola/dehet stékal ze smolárny žlábkem do sběrného hrnce (NAVOD_LES.md Smolarna_Hrnec); hliněný hrnec z katalogu Havrana"},
+   "kamen_lomovy": {"nazev": "Lomový kámen", "kat": "suroviny", "stav": "remeslo", "vaha": 20.0, "cena": 2, "model": "res://modely/les/kamen_droba_1.glb", "meritko": 0.45, "zdroj": "lomový kámen z droby na zdivo hradu (rešerše 15 km kap. 10); kámen droby z modelů Havrana (modely/nove kamen_droba_1) zmenšený na kus, který člověk unese"}
+  }
+ },
  "pesiny": {"popis": "pěšiny od nejbližší cesty k místům s pristup (nastroje/pesiny_k_mistum.py → cesty_puchart.json k_<id>, tvar nastroje/cesty.py): A* nad terénem 1 m", "okno_m": 40, "krok_m": 3.0, "k_sklon": 6.0, "sklon_volny": 0.12, "tok_m": 2.5, "tok_prirazka": 8.0, "stavba_m": 2.0, "stavba_prirazka": 50.0, "dil_m": 0.8, "dil_prirazka": 50.0, "zdroj": "nastroje/pristup.py (cena = délka × (1 + k·nadsklon)); pěšina pesina cesty_puchart.json typy (max_sklon 0,7) – chodí se podle terénu, potok se překročí, stavby a díly míst se obcházejí"},
  "funkce": {
-  "studanka": {"uzel": "Les_Studanka_Napit", "nabrat_uzel": "Les_Studanka_Potucek_1", "nabrat_pozn": "nabírá se na konci žlábku (pod stříškou roubenky na hladinu nedosáhne – test pruchod:zajimava_mista)", "napit": "Napít se", "nabrat": "Nabrat vodu", "predmet": "voda_mech", "dosah_m": 2.2, "zprava_napit": "Voda je studená a čistá.", "zdroj": "funkce.json studna (Havran); plán bod 6 – funkce napít / nabrat vodu (měch s vodou z katalogu)"},
+  "sber": {
+   "popis": "funkce míst „vzít surovinu“ (Míša 16. 11.): nabídka u dílu s funkce (zajimava_mista.json dily[].funkce → uzel dílu ve hře má meta funkce), bod zaměření = uzel (značka modelu) nebo počátek dílu + nad_m; použití dá predmet do brašny (predmety.gd add_inv), s naradi jen když ho má hráč v brašně",
+   "druhy": {
+    "uhli": {"nabidka": "Nabrat uhlí", "uzel": "Les_Milir_Uhli_Kupka", "nad_m": 0.1, "predmet": "uhli_pytel", "zprava": "Nabral jsi pytel dřevěného uhlí.", "zdroj": "Míša 16. 11. milíř „Nabrat uhlí“; uhlí z rozebraného milíře (NAVOD_LES.md stav C: kupka uhlí Milir_Uhli_Kupka)"},
+    "med": {"nabidka": "Vybrat med", "uzel": "Brt", "bod_kmen_m": 1.7, "predmet": "med", "zprava": "Vybral jsi z brtě plástve – hrnec medu.", "zdroj": "Míša 16. 11. brtě „Vybrat med“; med = Hrnec medu z katalogu Havrana; brť je 3–4 m vysoko, nabídka u kmene pod ní (bod_kmen_m nad zemí) – brtník lezl po lezci (NAVRH: lezec se nestaví)"},
+    "smola": {"nabidka": "Nabrat smolu", "uzel": "Les_Smolarna_Hrnec", "nad_m": 0.25, "predmet": "smola_hrnec", "zprava": "Nabral jsi hrnec smoly.", "zdroj": "Míša 16. 11. smolárna „Nabrat smolu“; sběrný hrnec pod žlábkem (NAVOD_LES.md Smolarna_Hrnec)"},
+    "kamen": {"nabidka": "Lámat kámen", "nad_m": 0.9, "predmet": "kamen_lomovy", "naradi": "krumpac", "zprava": "Vylámal jsi kus kamene.", "zprava_bez": "Bez krumpáče kámen nevylámeš.", "trvani_s": 2.0, "zdroj": "Míša 16. 11. lom „Lámat kámen“ (krumpáč – katalog Havrana krumpac)"}
+   }
+  },
+  "mlyn": {"kolo_uzel": "Mlyn_Ovladani_Kolo", "mleti_uzel": "Mlyn_Ovladani_Mleti", "mleti": "Mlít obilí", "obili": "pytel_obili", "mouka": "pytel_mouky", "zprava_stoji": "Kámen stojí – nejdřív pusť kolo do proudu", "zprava_bez_obili": "Nemáš u sebe pytel obilí", "zprava_sype": "Sypeš obilí do násypky…", "zprava_hotovo": "Semleto – pytel mouky v brašně", "zprava_pustit": "Spustil jsi kolo do proudu", "zprava_zastavit": "Zvedl jsi kolo z proudu – kolo se zastaví", "zdroj": "Havran main.gd _on_use mlyn_stavidlo / mlyn_mleti a _mlyn_mlit (pytel obilí z brašny → po mleti_s pytel mouky, jen s kolem v chodu)"},
+  "studanka": {"uzel": "Les_Studanka_Napit", "nabrat_uzel": "Les_Studanka_Potucek_1", "nabrat_pozn": "nabírá se na konci žlábku (pod stříškou roubenky na hladinu nedosáhne – test pruchod:zajimava_mista)", "napit": "Napít se", "nabrat": "Nabrat vodu", "predmet": "voda_mech", "dosah_m": 2.2, "zprava_napit": "Voda je studená a čistá.", "uhasi_zizen": 1.0, "zizen_pozn": "Havran ani Puchart nemají potřeby hráče (žízeň, hlad) – jen životy a výdrž (Havran player.gd, hud.gd). Napít se zavolá hrac.uhas_zizen(uhasi_zizen), až systém potřeb vznikne; do té doby jen zpráva (Míša 16. 11.: připravit napojení, nevymýšlet celý systém)", "voda": {"material": "M_LesVoda", "hloubka_m": 0.12, "shader": {"rychlost": 0.15, "cirost": 0.25, "hloubka_barvy": 0.2}, "zdroj": "Míša 16. 11.: hladina studánky vodním shaderem Puchartu jako potoky (shaders/voda.gdshader, hlavni.mat_voda) místo materiálu modeláře; plocha hladiny z modelu (M_LesVoda: šachta y 0,22 a potůček), UV.x = metry po proudu, hloubka pro krytí jako žlab (funkce.json zlab.shader)"}, "zdroj": "funkce.json studna (Havran); plán bod 6 – funkce napít / nabrat vodu (měch s vodou z katalogu)"},
   "spani": {"uzly": ["Zemljanka_Spani_L", "Zemljanka_Spani_P"], "nazev": "rohož v zemljance", "zdroj": "funkce.json spanek (Havran main.gd bed) – spalo se na zemi na rohožích (Míša 15. 11.)"}
  }
 }

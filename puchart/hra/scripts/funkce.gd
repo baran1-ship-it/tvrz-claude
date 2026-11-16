@@ -8,6 +8,9 @@ extends Node
 ## - žlab (Dum2_Kol_Zlab): „Nalít vodu“ – ve žlabu se objeví hladina (shader vody potoků), zůstane
 ## - jesle nad žlabem (dům najde přes Dum2_Kol_Zlab, osazení z dat): „Nasypat seno“ – v jeslích model sena (Seno_Jesle_420), zůstane
 ## - kovadlina kovárny (Kovarna_Kovadlina_misto): pevný díl s kolizí a stupni podle vzdálenosti, osadí osad_kovadliny() při startu
+## - zajímavá místa (zajimava_mista.json funkce; Míša 16. 11.): studánka „Napít se“ / „Nabrat vodu“, sběr u dílů s meta funkce
+##   (milíř „Nabrat uhlí“, brť „Vybrat med“, smolárna „Nabrat smolu“, lom „Lámat kámen“ s krumpáčem) → předmět do brašny,
+##   mlýn: „Zastavit kolo“ / „Pustit kolo“ (zdvihadlo kola na spodní vodu) a „Mlít obilí“ (Havran main.gd _mlyn_mlit)
 ## Tlačítko ve stylu dveří (svitek) nad ostatními tlačítky, jen zaměřená věc (zamer.gd) – jako lavice.gd.
 const Pravidla := preload("res://scripts/pravidla.gd")
 const Zamer := preload("res://scripts/zamer.gd")
@@ -92,6 +95,26 @@ static func polozky(h: Node) -> Array:
 			var voda := zn.get_parent().find_child(String(zs.get("nabrat_uzel", "Les_Studanka_Voda")), true, false) as Node3D
 			out.append({"druh": "studanka_napit", "nazev": String(zs["napit"]), "pos": hl + Vector3.UP * 0.25, "vlastni": []})
 			out.append({"druh": "studanka_nabrat", "nazev": String(zs["nabrat"]), "pos": (voda.global_position if voda else hl) + Vector3.UP * 0.15, "vlastni": []})
+	var sb_: Dictionary = Pravidla.cti("zajimava_mista", "funkce", "sber")["druhy"]   # sběr surovin u dílů míst (meta funkce z zajimava.gd)
+	var zj := h.get_node_or_null("Zajimava")
+	if zj:
+		for n: Node in zj.find_children("*", "Node3D", true, false):
+			if not n.has_meta("funkce") or not sb_.has(String(n.get_meta("funkce"))): continue
+			var dr := String(n.get_meta("funkce")); var c: Dictionary = sb_[dr]
+			var zn := n.find_child(String(c.get("uzel", "")), true, false) as Node3D if String(c.get("uzel", "")) != "" else null
+			var pos := (zn.global_position if zn else (n as Node3D).global_position) + Vector3.UP * float(c.get("nad_m", 0.0))
+			if c.has("bod_kmen_m") and zn:   # brť vysoko na kmeni: nabídka u kmene pod ní
+				var kp := (n as Node3D).global_position; var sm := zn.global_position - kp; sm.y = 0.0
+				pos = kp + sm + Vector3.UP * float(c["bod_kmen_m"])
+			out.append({"druh": "sber", "sber": dr, "nazev": String(c["nabidka"]), "pos": pos, "vlastni": [], "uzel": n})
+		var mf: Dictionary = Pravidla.cti("zajimava_mista", "funkce", "mlyn")
+		for zn in zj.find_children(String(mf["kolo_uzel"]), "Node3D", true, false):
+			var kolo := zn.get_parent().find_child("Mlyn_Kolo", true, false)
+			if kolo == null: continue
+			out.append({"druh": "mlyn_kolo", "nazev": _nazev_kola(kolo), "pos": (zn as Node3D).global_position, "vlastni": [], "kolo": kolo})
+		for zn in zj.find_children(String(mf["mleti_uzel"]), "Node3D", true, false):
+			var kolo2 := zn.get_parent().find_child("Mlyn_Kolo", true, false)
+			out.append({"druh": "mlyn_mleti", "nazev": String(mf["mleti"]), "pos": (zn as Node3D).global_position, "vlastni": [], "kolo": kolo2})
 	var zl: Dictionary = cfg("zlab")
 	for jm in zl["kolize"]:
 		for k: Node in _koreny(h):
@@ -224,6 +247,9 @@ func pouzij_polozku(p: Dictionary) -> void:
 		"zlab": nalij(p)
 		"jesle": nasyp(p)
 		"studanka_napit", "studanka_nabrat": studanka(p)
+		"sber": seber(p)
+		"mlyn_kolo": prepni_kolo(p)
+		"mlyn_mleti": mel(p)
 
 
 ## ---------------------------------------------------------------- studánka (zajimava_mista.json funkce.studanka)
@@ -237,7 +263,71 @@ func studanka(p: Dictionary) -> void:
 		if hv and hv.get("hud"): hv.hud.toast("Nabral jsi vodu do měchu.", 2.2)
 	else:
 		p["napito"] = int(p.get("napito", 0)) + 1
+		# potřeby hráče (žízeň) zatím nejsou ani v Havranovi – až vzniknou, hráč dostane uhas_zizen (zajimava_mista.json zizen_pozn)
+		if hlavni.hrac and hlavni.hrac.has_method("uhas_zizen"): hlavni.hrac.uhas_zizen(float(zs.get("uhasi_zizen", 1.0)))
 		if hv and hv.get("hud"): hv.hud.toast(String(zs["zprava_napit"]), 2.2)
+
+
+## ---------------------------------------------------------------- sběr u míst (zajimava_mista.json funkce.sber)
+var predmety_test: Node = null   # test průchodu: brašna bez menu hráče (inv, add_inv jako predmety.gd)
+func _predmety() -> Node:
+	var hv: Node = _vrstva.get("hv") if _vrstva else null
+	return hv.get("predmety") if hv else predmety_test
+
+
+func _toast(t: String, s := 2.2) -> void:
+	var hv: Node = _vrstva.get("hv") if _vrstva else null
+	if hv and hv.get("hud"): hv.hud.toast(t, s)
+
+
+func seber(p: Dictionary) -> void:
+	var c: Dictionary = Pravidla.cti("zajimava_mista", "funkce", "sber")["druhy"][String(p["sber"])]
+	var pr := _predmety()
+	if c.has("naradi") and (pr == null or int(pr.inv.get(String(c["naradi"]), 0)) < 1):
+		p["bez_naradi"] = int(p.get("bez_naradi", 0)) + 1
+		_toast(String(c.get("zprava_bez", ""))); return
+	if pr: pr.add_inv(String(c["predmet"]))
+	p["sebrano"] = int(p.get("sebrano", 0)) + 1
+	_toast(String(c["zprava"]))
+
+
+## ---------------------------------------------------------------- mlýn (Havran main.gd mlyn_stavidlo, _mlyn_mlit)
+static func _nazev_kola(kolo: Node) -> String:
+	var ml: Dictionary = {}
+	for m: Dictionary in Pravidla.cti("zajimava_mista", "mista"):
+		if m.has("mlyn"): ml = m["mlyn"]["zastavit"]
+	return String(ml.get("nabidka_bezi" if bool(kolo.get("bezi")) else "nabidka_stoji", ""))
+
+
+func prepni_kolo(p: Dictionary) -> void:
+	var mf: Dictionary = Pravidla.cti("zajimava_mista", "funkce", "mlyn")
+	var pustit := not bool((p["kolo"] as Node).get("bezi"))
+	for k in get_tree().get_nodes_in_group("mlyn_kolo"):
+		if (p["kolo"] as Node).get_parent().is_ancestor_of(k) or k == p["kolo"]: k.set("bezi", pustit)
+	for q: Dictionary in polozky_:
+		if q["druh"] == "mlyn_kolo": q["nazev"] = _nazev_kola(q["kolo"])
+	_toast(String(mf["zprava_pustit"] if pustit else mf["zprava_zastavit"]), 2.0)
+
+
+var _mele := false
+func mel(p: Dictionary) -> void:
+	var mf: Dictionary = Pravidla.cti("zajimava_mista", "funkce", "mlyn")
+	var kolo: Node = p["kolo"]
+	if kolo == null or not kolo.call("v_chodu"): p["stoji"] = int(p.get("stoji", 0)) + 1; _toast(String(mf["zprava_stoji"]), 2.5); return
+	if _mele: return
+	var pr := _predmety()
+	if pr == null or int(pr.inv.get(String(mf["obili"]), 0)) < 1: p["bez_obili"] = int(p.get("bez_obili", 0)) + 1; _toast(String(mf["zprava_bez_obili"]), 2.0); return
+	pr.add_inv(String(mf["obili"]), -1)
+	_mele = true
+	var cas := 6.0
+	for m: Dictionary in Pravidla.cti("zajimava_mista", "mista"):
+		if m.has("mlyn"): cas = float(m["mlyn"]["ovladani"]["mleti_s"])
+	_toast(String(mf["zprava_sype"]), cas)
+	await get_tree().create_timer(cas).timeout
+	_mele = false
+	pr.add_inv(String(mf["mouka"]), 1)
+	p["semleto"] = int(p.get("semleto", 0)) + 1
+	_toast(String(mf["zprava_hotovo"]), 2.5)
 
 
 ## ---------------------------------------------------------------- měch (Havran kovarna_mech.gd pumpuj + main.gd boost výhně)

@@ -49,9 +49,9 @@ for m in Z["mista"]:
     W += (KS.query(body)[0] < PR["stavba_m"]).reshape(W.shape) * PR["stavba_prirazka"]
     if KZ is not None: W += (KZ.query(body)[0] < PR["dil_m"]).reshape(W.shape) * PR["dil_prirazka"]
     s = (int(round(st[1] - zh0)) - z0, int(round(st[0] - xh0)) - x0); g = (int(round(cil[1] - zh0)) - z0, int(round(cil[0] - xh0)) - x0)
-    Hl = H[z0:z1 + 1, x0:x1 + 1]; dist = {s: 0.0}; prev = {}; q = [(0.0, s)]
+    Hl = H[z0:z1 + 1, x0:x1 + 1]; dist = {s: 0.0}; prev = {}; q = [(0.0, 0.0, s)]
     while q:
-        d, u = heapq.heappop(q)
+        _, d, u = heapq.heappop(q)
         if u == g: break
         if d > dist[u]: continue
         for dj in (-1, 0, 1):
@@ -61,7 +61,7 @@ for m in Z["mista"]:
                 if not (0 <= w[0] < W.shape[0] and 0 <= w[1] < W.shape[1]): continue
                 L = math.hypot(di, dj); sl = abs(Hl[w] - Hl[u]) / L
                 c_ = d + L * W[w] * (1 + PR["k_sklon"] * max(0.0, sl - PR["sklon_volny"]))
-                if c_ < dist.get(w, 1e18): dist[w] = c_; prev[w] = u; heapq.heappush(q, (c_ + math.hypot(w[0] - g[0], w[1] - g[1]), w))
+                if c_ < dist.get(w, 1e18): dist[w] = c_; prev[w] = u; heapq.heappush(q, (c_ + math.hypot(w[0] - g[0], w[1] - g[1]), c_, w))
     if g not in prev: print("PESINA %s: cesta nenalezena" % m["id"]); continue
     cesta = [g]
     while cesta[-1] != s: cesta.append(prev[cesta[-1]])

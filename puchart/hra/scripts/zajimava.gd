@@ -25,7 +25,9 @@ func _ready() -> void:
 		u.set_meta("nazev", m["nazev"]); u.set_meta("znacka", m["znacka"])
 		for di: Dictionary in m["dily"]:
 			var x := _dil(u, di, m)
-			if x: n += 1
+			if x:
+				n += 1
+				if di.has("funkce"): x.set_meta("funkce", String(di["funkce"]))   # funkce.gd: sběr (uhlí, med, smola, kámen) u dílu
 	_vika()
 	print("ZAJIMAVA míst %d, dílů %d" % [get_child_count(), n])
 
@@ -92,10 +94,40 @@ func _les(u: Node3D, di: Dictionary, jm: String) -> Node3D:
 		for g in l1.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_begin = d0; (g as GeometryInstance3D).visibility_range_end = d1
 		for c in l1.find_children("*", "CollisionObject3D", true, false): c.queue_free()
+	if String(di.get("funkce", "")) == "studanka": _voda_studanky(k)
 	match String(di.get("efekt", "")):
 		"milir": _milir(k)
 		"smolarna": _smolarna(k)
 	return k
+
+
+## Hladina studánky shaderem vody potoků (Míša 16. 11.; zajimava_mista.json funkce.studanka.voda): plocha materiálu modeláře
+## M_LesVoda (šachta a potůček) zůstane tvarem, dostane UV shaderu (UV.x = metry po proudu = místní z, UV.y = 1 − hloubka),
+## bílou barvu vrcholů (kraj, bez pěny) a materiál hlavni.mat_voda s parametry pro mělkou čistou vodu.
+func _voda_studanky(k: Node3D) -> void:
+	var vo: Dictionary = Pravidla.cti("zajimava_mista", "funkce", "studanka").get("voda", {})
+	var mv = hlavni.get("mat_voda")
+	if vo.is_empty() or not (mv is ShaderMaterial): return
+	var m2 := (mv as ShaderMaterial).duplicate() as ShaderMaterial
+	for kk: String in vo["shader"]: m2.set_shader_parameter(kk, float(vo["shader"][kk]))
+	for mi in k.find_children("*", "MeshInstance3D", true, false):
+		var am := (mi as MeshInstance3D).mesh as ArrayMesh
+		if am == null: continue
+		for i in am.get_surface_count():
+			var mt := am.surface_get_material(i)
+			if mt == null or String(mt.resource_name) != String(vo["material"]): continue
+			var arr := am.surface_get_arrays(i)
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var uv := PackedVector2Array(); var co := PackedColorArray()
+			for p in v: uv.append(Vector2(p.z, 1.0 - float(vo["hloubka_m"]))); co.append(Color(1, 1, 1, 1))
+			arr[Mesh.ARRAY_TEX_UV] = uv; arr[Mesh.ARRAY_COLOR] = co
+			var nova := ArrayMesh.new()
+			for j in am.get_surface_count():
+				if j == i: nova.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr); nova.surface_set_material(j, m2)
+				else: nova.add_surface_from_arrays(am.surface_get_primitive_type(j), am.surface_get_arrays(j)); nova.surface_set_material(j, am.surface_get_material(j))
+			(mi as MeshInstance3D).mesh = nova
+			(mi as MeshInstance3D).set_meta("voda_shader", true)
+			break
 
 
 ## NAVOD_LES.md: „Barva vrcholů nese stárnutí – zapni Vertex Color → Use as Albedo“ (mech, saze, vlhko, uhelný prach)
@@ -242,14 +274,23 @@ func _mlyn(u: Node3D, di: Dictionary, m: Dictionary) -> Node3D:
 		for g in l1.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_begin = float(ml.get("dil_do_m", 160.0)); (g as GeometryInstance3D).visibility_range_end = 900.0
 		for cs in l1.find_children("*", "CollisionObject3D", true, false): cs.queue_free()
+	# kolo na spodní vodu (Míša 16. 11.): spodek kola se pohybuje s proudem – kladné otočení kolem místní x posouvá spodek k −z,
+	# +z místa je po proudu (smer 1) nebo proti proudu (smer −1); zastavení zdvižením kola z proudu (mlyn.zastavit)
+	var smer := -float(ml.get("smer", 1.0)); var za: Dictionary = ml.get("zastavit", {})
 	for jm: String in ["Mlyn_Kolo", "Mlyn_Cevnik"]:   # Havran svet.gd _mlyn_dil: kolo kolem místní x, palečník kolem y
 		var k := s.find_child(jm, true, false) as Node3D
 		if k == null: continue
 		k.set_script(preload("res://scripts/mlyn_kolo.gd"))
 		k.set("osa", Vector3.RIGHT if jm == "Mlyn_Kolo" else Vector3.UP)
-		k.set("plna", float(ml.get("kolo_rad_s", 0.9)) * (1.0 if jm == "Mlyn_Kolo" else float(ml.get("cevnik_nasobek", 6.0))))
+		k.set("plna", smer * float(ml.get("kolo_rad_s", 0.9)) * (1.0 if jm == "Mlyn_Kolo" else float(ml.get("cevnik_nasobek", 6.0))))
+		k.set("rozjezd_s", float(za.get("rozjezd_s", 4.0)))
+		if jm == "Mlyn_Kolo": k.set("zdvih_m", float(za.get("zdvih_m", 0.0))); k.set("zdvih_s", float(za.get("zdvih_s", 2.0)))
 		k.set("bezi", true)
 		k.call("_ready"); k.set_process(true); k.add_to_group("mlyn_kolo")
+	var ov: Dictionary = ml.get("ovladani", {})   # značky ovládání (funkce.gd): páka zdvihadla kola u hřídele, mletí u kamene (Havran ovladani)
+	for zn: Array in [["Mlyn_Ovladani_Kolo", "paka"], ["Mlyn_Ovladani_Mleti", "mleti"]]:
+		if not ov.has(zn[1]): continue
+		var q: Array = ov[zn[1]]; var n3 := Node3D.new(); n3.name = zn[0]; n3.position = Vector3(float(q[0]), float(q[1]), float(q[2])); s.add_child(n3)
 	return s
 
 

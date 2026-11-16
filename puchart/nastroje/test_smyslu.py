@@ -222,6 +222,40 @@ else:
     TEST("teren_hra_pod_pasem", False, "chybí hra/data/vysek_sit.r16 (teren_dlazdice.py)")
 TEST("teren_shoda", nad + pod == 0, "z %d vzorků síť nad kolizí %d (boří se), pod kolizí %d (stojí ve vzduchu) %s" % (vz, nad, pod, " ".join(pr)))
 
+# zajímavá místa mimo cesty (Míša 16. 11. ke snímku mista_mlyn_kolo: „kde jsi dal ten mlýn? není v cestě?“ – mlýn stál na údolní
+# cestě): zábor každého dílu (obdélník půdorysu z nastroje/zajimava_mista.py) nezasahuje do pásu cesty (osa ± sirka_m / 2)
+# žádné cesty kromě pěšiny k témuž místu (k_<id>); pěšiny k místům začínají na cestě a končí v bodě přístupu místa
+_CZ = json.load(open(K + "/pravidla/svet/cesty_puchart.json")); _ZM = json.load(open(D + "zajimava_mista.json")); _c30 = []; _c31 = []
+def _hu(o, k=0.5):
+    o = np.asarray(o, float)[:, :2]; d_ = np.r_[0, np.cumsum(np.hypot(*np.diff(o, axis=0).T))]; s_ = np.arange(0, d_[-1] + 1e-6, k)
+    return np.c_[np.interp(s_, d_, o[:, 0]), np.interp(s_, d_, o[:, 1])]
+from scipy.spatial import cKDTree as _KDT
+_pasy = [(c["id"], c.get("k_mistu"), float(_CZ["typy"][c["typ"]]["sirka_m"]) / 2, _KDT(_hu(c["osa"]))) for c in _CZ["cesty"] if c.get("osa") and not c.get("jen_maska")]
+_ndil = 0
+for _m in _ZM["mista"]:
+    for _q in _m["dily"]:
+        for _zb in _q.get("zabor", []):
+            _ndil += 1; _b = _hu(_zb + _zb[:1], 0.25)
+            _b = np.vstack([_b, (np.array(_zb).mean(0))[None]])
+            for _cid, _km, _pul, _kd in _pasy:
+                if _km == _m["id"]: continue
+                _d = float(_kd.query(_b)[0].min())
+                if _d < _pul: _c30.append("%s %s do cesty %s (%.1f m od osy, pás %.1f m)" % (_m["id"], _q.get("model", _q.get("predmet", _q.get("balvan", _q.get("strom", "?")))), _cid, _d, _pul)); break
+TEST("zajimava_mimo_cest", _ndil > 0 and not _c30, "; ".join(_c30[:8]) if _c30 else "%d záborů dílů míst mimo pás cest" % _ndil)
+_kd_cest = _KDT(np.vstack([_hu(c["osa"]) for c in _CZ["cesty"] if c.get("osa") and not c.get("k_mistu") and not c.get("jen_maska")]))
+for _m in _ZM["mista"]:
+    if not _m.get("pristup"): continue
+    _kc = [c for c in _CZ["cesty"] if c.get("k_mistu") == _m["id"]]
+    if not _kc: _c31.append("%s: chybí pěšina k_%s (nastroje/pesiny_k_mistum.py)" % (_m["id"], _m["id"])); continue
+    _o = np.array(_kc[0]["osa"], float)[:, :2]
+    _d0 = float(_kd_cest.query(_o[0])[0]); _d1 = float(np.hypot(*(_o[-1] - np.array(_m["pristup"]["bod"]))))
+    _ho = _hu(_o, 1.0); _ho = _ho[np.hypot(*(_ho - _o[-1]).T) > 2.5]   # poslední 2,5 m u místa (pata stavby, dvůr) se nepočítají
+    _tr = trida(_ho[:, 0], _ho[:, 1]) if len(_ho) else np.array([TR.index("cesta")]); _ces = float(np.mean([TR[int(t_)].startswith(("cesta", "pesina")) for t_ in _tr]))
+    if _d0 > 1.5 or _d1 > 3.0 or _ces < 0.8: _c31.append("%s: pěšina začíná %.1f m od cesty, končí %.1f m od přístupu, vyšlapaná (třída cesta) %.0f %%" % (_m["id"], _d0, _d1, _ces * 100))
+TEST("zajimava_pesiny", not _c31, "; ".join(_c31) if _c31 else "pěšiny k místům (k_studanka, k_mlyn) vedou od cesty k přístupu, vyšlapané")
+odl = [m["id"] for m in json.load(open(K + "/pravidla/svet/zajimava_mista.json"))["mista"] if m.get("odlozeno")]
+TEST("zajimava_odlozena", not [m for m in _ZM["mista"] if m["id"] in odl] and set(odl) <= set(_ZM.get("odlozena", [])), "odložená místa (%s) nejsou ve světě" % ", ".join(odl))
+
 # --- stromy na zemi: pata kmene (les.gd _pata, stromy_modely.json zapusteni) pod nejnižším bodem obvodu kořenového náběhu
 SM = json.load(open(D + "stromy_modely.json")); ZP = SM["zapusteni"]; KR = SM["kolize_kmene"]
 AA_ = np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5); x_, z_, h_ = AA_[:, 0], AA_[:, 1], AA_[:, 2]
@@ -892,6 +926,23 @@ for _f in sorted(_gl.glob(K + "/hra/modely/luzka/*.tscn")):
     for _m in re.findall(r"visibility_range_(?:begin|end)_margin = ([0-9.]+)", open(_f).read()):
         if float(_m) > 0.0: _c22.append("%s margin %s" % (os.path.basename(_f), _m)); break
 TEST("luzka_lod_okraj", not _c22, "; ".join(_c22) if _c22 else "lůžka: LOD bez okraje (žádná mezera ve viditelnosti)")
+
+# lůžka: barvy vrcholů glTF (lineární) převedené na sRGB – Compatibility je násobí s albedem v sRGB (chyby.md 356: houně černá)
+_bv = json.load(open(K + "/pravidla/svet/luzka.json"))["barvy_vrcholu"]; _c23 = []
+_zp = json.load(open(K + "/" + _bv["zprava"])) if os.path.exists(K + "/" + _bv["zprava"]) else {}
+_site = sorted(_gl.glob(K + "/hra/modely/luzka/*_mesh.res"))
+for _f in _site:
+    _r = "res://" + os.path.relpath(_f, K + "/hra")
+    _z = _zp.get(_r)
+    if _z is None: _c23.append("%s chybí ve zprávě %s (luzka_modely.py nepřevedl)" % (os.path.basename(_f), _bv["zprava"])); continue
+    if _z["velikost"] != os.path.getsize(_f): _c23.append("%s změněna po převodu (velikost %d ≠ %d)" % (os.path.basename(_f), os.path.getsize(_f), _z["velikost"])); continue
+    if _bv["prevest_na_srgb"] and _z["vrcholu_s_barvou"] > 0 and not _z["srgb"]: _c23.append("%s barvy vrcholů lineární (nepřevedené)" % os.path.basename(_f))
+# importy normálových map lůžek jako normálové (luzka.json normal_import)
+_ni = json.load(open(K + "/pravidla/svet/luzka.json"))["normal_import"]
+for _f in sorted(_gl.glob(K + "/hra/modely/luzka/textures/*" + _ni["pripona"])):
+    _t = open(_f + ".import").read() if os.path.exists(_f + ".import") else ""
+    if "compress/normal_map=%d" % _ni["normal_map"] not in _t: _c23.append("%s import bez compress/normal_map=%d" % (os.path.basename(_f), _ni["normal_map"]))
+TEST("luzka_barvy", bool(_site) and not _c23, "; ".join(_c23) if _c23 else ("lůžka: %d sítí s barvami vrcholů v sRGB, normálové mapy jako normálové" % len(_site) if _site else "lůžka: žádné sítě v hra/modely/luzka"))
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)

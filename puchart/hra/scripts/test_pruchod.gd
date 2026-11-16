@@ -602,12 +602,14 @@ func _test_luzka() -> void:
 				var m: Material = mi.material_override if mi.material_override else mi.mesh.surface_get_material(s)
 				mats[m] = true
 				if not (m is BaseMaterial3D and (m as BaseMaterial3D).vertex_color_use_as_albedo and (m as BaseMaterial3D).albedo_texture != null): vc = false
+				# barvy vrcholů převedené z lineárních glTF na sRGB (Compatibility násobí albedo v sRGB – chyby.md 356, houně černá)
+				if (mi.mesh.surface_get_format(s) & Mesh.ARRAY_FORMAT_COLOR) and bool(Pravidla.cti("luzka", "barvy_vrcholu", "prevest_na_srgb")) and not mi.mesh.has_meta(StringName(Pravidla.cti("luzka", "barvy_vrcholu", "znacka"))): vc = false
 		var zn := ["Luzko_Lezeni", "Luzko_Hlava", "Luzko_Vstup"].all(func(z: String) -> bool: return n.get_node_or_null(z) is Marker3D)
 		var kol := n.get_node_or_null("Kolize") is StaticBody3D
 		var postel := not bool(lz["katalog"][sc].get("pruchozi", false))
 		var kz: Dictionary = kat.get("luzko_" + sc, {})
 		var ok: bool = troj > 0 and troj <= int(Pravidla.cti("luzka", "max_troj_lod0")) and mats.size() <= int(Pravidla.cti("luzka", "max_materialu")) and vc and zn and (kol or not postel) and bool(kz.get("lehat", false)) and ResourceLoader.exists("res://modely/predmety_h/luzko_%s.png" % sc)
-		print("PRUCHOD luzka %s: troj. LOD0 %d, materiálů %d, COLOR_0×albedo %s, značky %s, kolize %s, katalog lehat %s -> %s" % [sc, troj, mats.size(), vc, zn, kol, kz.get("lehat", false), "OK" if ok else "CHYBA"])
+		print("PRUCHOD luzka %s: troj. LOD0 %d, materiálů %d, COLOR_0(sRGB)×albedo %s, značky %s, kolize %s, katalog lehat %s -> %s" % [sc, troj, mats.size(), vc, zn, kol, kz.get("lehat", false), "OK" if ok else "CHYBA"])
 		if not ok: spatne.append("%s: troj. %d, mat. %d, vc %s, značky %s, kolize %s, katalog %s" % [sc, troj, mats.size(), vc, zn, kol, not kz.is_empty()])
 		n.free()
 	if not kat.has(String(Pravidla.cti("luzka", "vychozi_postel"))): spatne.append("výchozí postel není v katalogu")
@@ -839,6 +841,62 @@ func _test_zajimava() -> void:
 		print("PRUCHOD studanka %s: nabídka %s -> %s" % [p["druh"], p["nazev"], "OK" if ok else "CHYBA"])
 		if not ok: spatne.append("studánka %s nejde použít" % p["nazev"])
 	if ns < 2: spatne.append("studánka: nabídek %d (čeká se Napít se + Nabrat vodu)" % ns)
+	# odložená místa (Míša 16. 11.: poustevna až při rozšíření světa) ve hře nejsou
+	for oid in d.get("odlozena", []):
+		if zj.get_node_or_null("Z_" + String(oid)) != null: spatne.append("%s je odložené, ale ve hře stojí" % oid)
+	for oid in ["poustevna"]:
+		if zj.get_node_or_null("Z_" + oid) != null and not oid in d.get("odlozena", []): spatne.append("%s: čeká se odložená" % oid)
+	# brašna testu (bez menu hráče): inv + add_inv jako predmety.gd
+	var sc := GDScript.new(); sc.source_code = "extends Node\nvar inv := {}\nfunc add_inv(id: String, n: int = 1) -> void:\n\tinv[id] = int(inv.get(id, 0)) + n\n\tif int(inv[id]) <= 0: inv.erase(id)\n"; sc.reload()
+	var bras: Node = sc.new(); add_child(bras); fu.predmety_test = bras
+	# sběr u míst (Míša 16. 11.): milíř uhlí, brtě med, smolárna smola, lom kámen (s krumpáčem) → předmět do brašny
+	var sb_: Dictionary = Pravidla.cti("zajimava_mista", "funkce", "sber")["druhy"]; var druhy_ok := {}
+	for p: Dictionary in fu.polozky_:
+		if p["druh"] != "sber": continue
+		var c: Dictionary = sb_[p["sber"]]
+		var u3: Dictionary = {}
+		for sm in [Vector3(0, 0, 1.4), Vector3(1.4, 0, 0), Vector3(-1.4, 0, 0), Vector3(0, 0, -1.4), Vector3(1.0, 0, 1.0), Vector3(-1.0, 0, 1.0), Vector3(1.0, 0, -1.0), Vector3(-1.0, 0, -1.0)]:
+			u3 = await _k_veci(p["pos"], p["pos"] + sm, p["vlastni"])
+			if not u3.is_empty() and u3["p"] == p: break
+		if u3.is_empty() or u3["p"] != p: spatne.append("%s: není nabídka %s" % [p["sber"], p["nazev"]]); continue
+		var pred := String(c["predmet"]); var n0 := int(bras.inv.get(pred, 0))
+		if c.has("naradi"):
+			bras.inv.erase(String(c["naradi"])); fu.pouzij_polozku(p)
+			if int(bras.inv.get(pred, 0)) != n0: spatne.append("%s: bez nářadí %s dal předmět" % [p["sber"], c["naradi"]])
+			bras.add_inv(String(c["naradi"]))
+		fu.pouzij_polozku(p)
+		var ok2 := int(bras.inv.get(pred, 0)) == n0 + 1
+		print("PRUCHOD zajimava sběr %s: nabídka %s -> %s v brašně %s" % [p["sber"], p["nazev"], pred, "OK" if ok2 else "CHYBA"])
+		if not ok2: spatne.append("%s: %s nedal %s do brašny" % [p["sber"], p["nazev"], pred])
+		else: druhy_ok[p["sber"]] = true
+	for dr in sb_:
+		if not druhy_ok.has(dr): spatne.append("sběr %s: žádná funkční nabídka" % dr)
+	# mlýn: kolo na spodní vodu – „Zastavit kolo“ zdvihne kolo z proudu a zastaví ho, mletí jen s kolem v chodu (Havran _mlyn_mlit)
+	var pk: Dictionary = {}; var pm: Dictionary = {}
+	for p: Dictionary in fu.polozky_:
+		if p["druh"] == "mlyn_kolo": pk = p
+		elif p["druh"] == "mlyn_mleti": pm = p
+	if pk.is_empty() or pm.is_empty(): spatne.append("mlýn: chybí nabídka kola nebo mletí")
+	else:
+		var kolo: Node3D = pk["kolo"]; var y0 := kolo.position.y
+		var uk: Dictionary = await _k_veci(pk["pos"], pk["pos"] + Vector3(0, -0.8, 0) + (kolo.get_parent() as Node3D).global_transform.basis.x * 1.2, [])
+		var vidi_k: bool = not uk.is_empty() and uk["p"]["druh"] == "mlyn_kolo"
+		fu.pouzij_polozku(pk)   # zastavit
+		await get_tree().create_timer(5.0).timeout
+		var w_stop := absf(float(kolo.get("_w"))); var zdvih := kolo.position.y - y0
+		bras.add_inv("pytel_obili")
+		fu.pouzij_polozku(pm); await get_tree().create_timer(0.2).timeout
+		var mouka_stop := int(bras.inv.get("pytel_mouky", 0))
+		fu.pouzij_polozku(pk)   # pustit
+		await get_tree().create_timer(6.0).timeout
+		var v_chodu: bool = kolo.call("v_chodu"); var dole := absf(kolo.position.y - y0)
+		fu.pouzij_polozku(pm)
+		await get_tree().create_timer(float(Pravidla.cti("zajimava_mista", "mista")[-1]["mlyn"]["ovladani"]["mleti_s"]) + 1.0).timeout
+		var mouka := int(bras.inv.get("pytel_mouky", 0))
+		var okm: bool = vidi_k and w_stop < 0.01 and zdvih > 0.3 and mouka_stop == 0 and v_chodu and dole < 0.02 and mouka == 1 and int(bras.inv.get("pytel_obili", 0)) == 0
+		print("PRUCHOD zajimava mlýn: nabídka %s, zastaveno ω %.3f zdvih %.2f m, mouka při stojícím %d, rozjeto %s (dole %.2f), mouka %d -> %s" % [vidi_k, w_stop, zdvih, mouka_stop, v_chodu, dole, mouka, "OK" if okm else "CHYBA"])
+		if not okm: spatne.append("mlýn: nabídka %s, ω po zastavení %.3f, zdvih %.2f, mouka při stojícím kole %d, v chodu %s, mouka %d" % [vidi_k, w_stop, zdvih, mouka_stop, v_chodu, mouka])
+	bras.queue_free(); fu.predmety_test = null
 	vysledek["zajimava_mista"] = "OK" if spatne.is_empty() else "CHYBA: %s" % "; ".join(spatne)
 	print("PRUCHOD zajimava_mista ", vysledek["zajimava_mista"], " (míst %d, dílů na terénu %d, nabídek studánky %d)" % [d["mista"].size(), n, ns])
 
