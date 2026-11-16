@@ -84,7 +84,9 @@ func _houby() -> void:
 				var p := Vector3(t[3] + cos(a) * r, t[7] + 0.02, t[11] + sin(a) * r)
 				if main.svet._les(p.x, p.z) < les_min:
 					continue                                # houba jen v lese (stanoviste les)
-				var zem: float = main.svet._vyska(p.x, p.z)
+				# zem po vsech upravach hry (koryto, srovnana stena lomu, najezdy) - _vyska je jen vyska z exportu: u lomu
+				# (Misa 16. 11. hrib ve vzduchu u (158, 956)) hra teren snizuje, kolize i _vyska tam mohly byt jeste puvodni
+				var zem: float = main.svet.uprava_y(p.x, p.z, main.svet._teren_y(p.x, p.z))
 				# na skutecnou zem: paprsek, ale jen zasah u vysky terenu (ne strecha, kmen ani balvan)
 				var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, zem + 1.0, p.z), Vector3(p.x, zem - 3.0, p.z))
 				var hit := space.intersect_ray(q)

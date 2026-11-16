@@ -24,7 +24,24 @@
   "lan_sirka_m": [
    15.0,
    30.0
-  ]
+  ],
+  "za_vsi": {
+   "stred": [
+    418.4,
+    821.7
+   ],
+   "smer_st": 90.0,
+   "rozevreni_st": 55.0,
+   "okraj_sum_st": 12.0,
+   "duvod": "Misa 15. 11. noc (sceny_kcd_15_11.md „Pole ve vsi“): „pole, ktera mame zbytecne po kraji – stacilo by neco za vesnici a zbytek louky a lesy“. Pole jen ve vysece za vsi z pohledu prijezdu (vjezd od SZ z odbocky, za vsi = jih k vetrnemu mlynu): smer_st od stredu vsi (uhel atan2(dz, dx) ve stupnich, +z = jih), rozevreni_st na kazdou stranu, okraj_sum_st zvlneni hranice. Mimo vysec byvala pole = louka (stanoviste louka) s mezemi s krovim (meze_po_polich), jako bejcek_16/18 pruhy s mezemi a keri."
+  },
+  "meze_po_polich": {
+   "podil_honu": 0.45,
+   "sirka_m": 2.5,
+   "krok_m": 3.0,
+   "hustota": 0.7,
+   "duvod": "Misa 15. 11. „houstina … i na loukach (meze, remizky, kolem cest), ne na vsech loukach“: na byvalych polich mimo vysec za_vsi zustanou meze mezi hony jako pasy krovi (podil_honu = kolik hranic honu ma mez s krovim, ostatni louka otevrena), sirka_m od hranice honu, krok_m mrizka sazeni, hustota = podil bodu s kerem. Skladba les_podrost.json houstina.skladby.mez. Stanoviste bodu = mez (kraj.stanoviste)."
+  }
  },
  "pastvina": {
   "od_sklonu": 0.15,
@@ -39,7 +56,9 @@
   "od_potoka_m": 22.0,
   "do_potoka_m": 160.0,
   "od_vsi_max_m": 250.0,
-  "popis": "radce 15:55: malo poli na rovine u vsi -> lany i v doline u potoka (rovina <= pole.max_sklon), mimo luh a cesty; 28. 10. Misa: v udoli jen par lanu blizko vsi (od_vsi_max_m 900 -> 250, od nejblizsiho domu)"
+  "popis": "radce 15:55: malo poli na rovine u vsi -> lany i v doline u potoka (rovina <= pole.max_sklon), mimo luh a cesty; 28. 10. Misa: v udoli jen par lanu blizko vsi (od_vsi_max_m 900 -> 250, od nejblizsiho domu)",
+  "zapnuto": false,
+  "_zapnuto": "Misa 15. 11. noc: pole jen za vsi (pole.za_vsi) - lany v doline u potoka dal od vsi vypnuty (navrat: true)"
  },
  "teren": {
   "popis": "radce 16:45: svah bez skaly nejvys ~35 st. (sypky material); generator (kraj.vypln) srazi strmejsi svahy shora na svah_max_stupne (rezerva na drobne hrbolky), skalni hreben, tvrz, lom a voda beze zmeny bez_srazeni: obdelniky [x0, z0, x1, z1], kde se svahy nesrazeji (lom, tvrz); skalni hreben a voda se vynechavaji zvlast. srazeni_max_m: svah se srazi nejvys o tolik; co zustane strmejsi, je skalni stena (zem.gdshader kresli strminy nad ~37 st. jako skalu) - 28. 10. srazeni bez meze urizlo kopce u lomu a na vychode az o 27 m na rovne kuzele (Misa: „rovina, ktera neni v realnem zivote prirozena“, hlidac meze_kroku).",

@@ -3097,8 +3097,14 @@ func _houby_na_zemi() -> void:
 	var n := 0
 	var spatne: Array = []
 	for sp: Dictionary in sb.spots:
+		if not (String(sp["id"]) in ["hriby", "bedly"]):
+			continue                                     # byliny (kopriva...) maji vlastni test visici
 		var p: Vector3 = (sp["xf"] as Transform3D).origin
 		n += 1
+		var konec := float(sv.uprava_y(p.x, p.z, sv._teren_y(p.x, p.z)))
+		if p.y - konec > 0.3:
+			spatne.append([p.y - konec, "%s (%.1f, %.1f, %.1f) %.2f m nad terenem po upravach hry" % [sp["id"], p.x, p.y, p.z, p.y - konec]])
+			continue
 		var q := PhysicsRayQueryParameters3D.create(p + Vector3(0, 0.5, 0), p + Vector3(0, -30.0, 0))
 		var h := ds.intersect_ray(q)
 		var pod := INF if h.is_empty() else p.y - float((h["position"] as Vector3).y)

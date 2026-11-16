@@ -565,9 +565,27 @@
    "kryti_dily": [
     "ves_sklep"
    ],
-   "kolize_ze_site": [["ves_sklep", "Ves_Kol_Sklep_Valy", "Ves_Sklep_Valy"]],
+   "kolize_ze_site": [
+    [
+     "ves_sklep",
+     "Ves_Kol_Sklep_Valy",
+     "Ves_Sklep_Valy"
+    ]
+   ],
    "_kolize_ze_site": "Míša 16. 11. r. 2 (snímek 01, (322, 307): do sklepa nejde vejít až dozadu, kolize Ves_Kol_Sklep_Valy 0,5 m v ústí): kolize valu z modelu (-colonly) je uzavřený kopec – 10 trojúhelníků přes ústí chodby (|x| < 1,2, z 0,2–0,4, y 0–2,6 dílu), viditelná síť Ves_Sklep_Valy tam má otvor. [díl, kolize, síť]: tvar kolize = trojúhelníky viditelné sítě (svet._kolize_ze_site), jako kostel kolize_podle_site.",
-   "povrch_jako_teren": {"ves_sklep": {"teren": ["M_DrnVal"], "hlina": ["M_SutZemina"], "louka_g": 0.85, "hlina_g": 0.3, "hlina_nad_m": 0.02}},
+   "povrch_jako_teren": {
+    "ves_sklep": {
+     "teren": [
+      "M_DrnVal"
+     ],
+     "hlina": [
+      "M_SutZemina"
+     ],
+     "louka_g": 0.85,
+     "hlina_g": 0.3,
+     "hlina_nad_m": 0.02
+    }
+   },
    "_povrch_jako_teren": "Míša 16. 11. r. 3 (snímek 02: kopec sklepa žlutozelený, ostré hnědé trojúhelníky): drn valu M_DrnVal je olivová fotka (sRGB průměr 82/81/25) a skvrny suti M_SutZemina leží ve stejné ploše jako drn (rozdíl výšek 0,000 m v 129 vzorcích – z-fighting = ostré hnědé trojúhelníky; normály v pořádku, žádná dolů). Drn = louka světa (materiál zem, barva vrcholu g louka_g jako terén), suť = hlína světa (g hlina_g) vystrčená hlina_nad_m po normále (svet._povrch_jako_teren); tvar z modelu.",
    "_sklep_16_11": "Míša 16. 11. r. 2 a tabulka 15. 11. ř. 23 (test prochod tvrz–ves uvízl u (323, 299) o Ves_Kol_Sklep_Valy): sklep stál na ose návsi (díl −47; −2, 90°, val přes v −9…5 – pěšina tvrz_doubrava končí v −60; 0 a vede osou), na svahu 0,17 (vysky.json). Posunut na −52; −12, 0° (val u −59…−45, v −20…−10; svah 0,004, rozdíl výšek 0,07 m), vchod (+z dílu) k ose návsi 10 m od ní; žádný jiný díl v ploše.",
    "_kryti_dily": "díly s klenbou (sklep v mezi): v půdorysu zdí střecha pro déšť a bez trávy (svet._ruiny_ves_dil → _plants)",
@@ -577,10 +595,27 @@
     "bez": 90,
     "nalet": 140,
     "u_zdi_rozestup_m": 0.9,
-    "u_zdi_pas_m": [0.4, 2.6],
-    "u_zdi_podil": {"kopriva": 0.38, "kapradi": 0.12, "divoka_trava": 0.12, "bez": 0.2, "nalet": 0.18},
-    "nalet_vyska_m": [2.0, 6.5],
-    "nalet_druhy": ["briza", "briza", "briza", "shrub_02"]
+    "u_zdi_pas_m": [
+     0.4,
+     2.6
+    ],
+    "u_zdi_podil": {
+     "kopriva": 0.38,
+     "kapradi": 0.12,
+     "divoka_trava": 0.12,
+     "bez": 0.2,
+     "nalet": 0.18
+    },
+    "nalet_vyska_m": [
+     2.0,
+     6.5
+    ],
+    "nalet_druhy": [
+     "briza",
+     "briza",
+     "briza",
+     "shrub_02"
+    ]
    },
    "_porost": "Míša 16. 11. r. 1 (snímek 03 z 22 m nad vsí: holá louka, pár bříz – „víc zarůst“): porost Blenderu ruiny.zanikla_ves – po celé mýtině (_kraj_ruiny: kopřiva, kapradí, bez černý, nálet bříz a keřů) a u zdí každého dílu pás u_zdi_pas_m od líce po u_zdi_rozestup_m obvodu (podíly druhů). Mimo půdorys zdí, průchody dílů a osu návsi (pruchody_lok) – cesty zůstanou travou. Dříve v kódu 260/90/26/30 a u zdí po 2,5 m (stav 0.999999). Zaniklá ves po 600 letech: zdi zarostlé bezem a kopřivou (dusík), nálet bříz a keřů (Pfaffenschlag, Konůvky – fotky lokalit; počty odhad, NEOVĚŘENO zdrojem)."
   },
@@ -2413,7 +2448,66 @@
   },
   "trava_hustota_naves": 0.6,
   "trava_naves_dosah_m": 30.0,
-  "_trava_hustota_naves": "Míša 15. 11. (ř. 11: „ve vsi je moc trávy … ale ne žádná tráva“; Puchart: tráva jen v zahradách, sadech, na lánech a za ploty): maska trsů vsi (blender/export_game.py §3b) × trava_hustota_naves mimo usedlosti (vesnice.in_homestead) do trava_naves_dosah_m od středu stavby vsi (vesnice.stavby_vsi) – náves a okolí ulice řidší, zahrady a sady beze změny. Míň trsů = míň instancí na GPU (počet NEOVĚŘENO, změřit Měřicí trasou)."
+  "_trava_hustota_naves": "Míša 15. 11. (ř. 11: „ve vsi je moc trávy … ale ne žádná tráva“; Puchart: tráva jen v zahradách, sadech, na lánech a za ploty): maska trsů vsi (blender/export_game.py §3b) × trava_hustota_naves mimo usedlosti (vesnice.in_homestead) do trava_naves_dosah_m od středu stavby vsi (vesnice.stavby_vsi) – náves a okolí ulice řidší, zahrady a sady beze změny. Míň trsů = míň instancí na GPU (počet NEOVĚŘENO, změřit Měřicí trasou).",
+  "zelen_ulice": {
+   "skladba": "ulice",
+   "krok_m": [
+    7.0,
+    12.0
+   ],
+   "od_kraje_m": [
+    0.5,
+    4.0
+   ],
+   "podil": 0.75,
+   "zacatek_m": 0.0,
+   "u_plotu": {
+    "skladba": "u_plotu",
+    "krok_m": [
+     2.6,
+     4.2
+    ],
+    "od_plotu_m": [
+     0.7,
+     1.4
+    ],
+    "podil": 0.6
+   },
+   "_p": "Míša 16. 11. „nelíbí se mi, jak je krajina otevřená, hlavně ve vsi“ (předlohy bejcek_02/08, kcd_sada2_02/03/05): podél osy ulice (ves_ramec.osa_ulice) po krok_m na obě strany strom nebo keř (skladba les_podrost houstina.skladby.ulice) v podílu bodů; vzdálenost od kraje ulice = pasma.cesta.ulice_vsi kmen_m (stromy) nebo ker_od_m (keře) + od_kraje_m. Ne na vyšlapanou hlínu (ves.vyslapano), do budov a vstupů (pasma.budova), na odbočky k vratům, k plotům blíž než 0,8 m. u_plotu: keře zvenku podél bočních a zadních ohrad usedlostí (vesnice.ploty_usedlosti ohrada) po krok_m, od_plotu_m od plotu – dvory oddělené zelení (vesnice.zelen_ulice)."
+  },
+  "ploty_ulice": {
+   "podezdivka": {
+    "vyska_m": 0.42,
+    "sirka_m": 0.45,
+    "zapusteni_m": 0.15,
+    "usedlosti": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ]
+   },
+   "prkenny": {
+    "usedlosti": [
+     2,
+     5,
+     7
+    ],
+    "sirka_prkna_m": [
+     0.16,
+     0.26
+    ],
+    "mezera_m": [
+     0.004,
+     0.015
+    ]
+   },
+   "_p": "Míša 16. 11. (kcd_sada2_03, bejcek_08): ploty do ulice laťkové a prkenné s kamennou podezdívkou (lomový kámen jako podezdívka domů, materiál zdivo_hole). podezdivka: výška nad terénem, šířka, zapuštění; usedlosti k (novy_stred) s podezdívkou; prkenny: u těchto usedlostí plot z prken místo latěk (šířka prkna, mezera). Staví vesnice.picket_fence."
+  }
  },
  "drobne": [
   {
@@ -2467,11 +2561,13 @@
    {
     "id": "prijezd_ves",
     "stred": [
-     330.0,
-     735.0
+     336.0,
+     738.0
     ],
-    "polomer_m": 45.0,
-    "duvod": "prijezdovy pohled na ves z odbocky (po zavrenem useku)"
+    "polomer_m": 14.0,
+    "duvod": "záměrný výhled na celou ves z hrany svahu (hřbet odbočky ~10 m nad vsí, výšky tools/krok_b/vysky.json); Míša 15. 11. „volná ruka“: celá ves se ukazuje z návrší (kcd1_28, ref_kcd2_ves_shora), cesta dolů ke vjezdu je za sadem a houštinou (clony vjezd_*), ves se otevírá až po ohybu ulice. Dříve (330, 735) r 45 = začátek nejdražšího úseku ves-vjezd. smer_st = směr pohledu (atan2(dz, dx) ve stupních), vyska_oci_m nad terénem",
+    "smer_st": 24.0,
+    "vyska_oci_m": 1.7
    },
    {
     "id": "prijezd_hostinec",
@@ -2683,7 +2779,133 @@
     "dohled_m": 300
    }
   ],
-  "_drahe_celky": "hlidac drahych pruhledu (tools/mapa_vyhledu.py, ChatGPT 1. 11.): celky s velkym kreslenim (mereni 0995c: ves 654-1205, mlyn 394-537); misto, odkud je videt >= 2, dostane vykonovy profil"
+  "_drahe_celky": "hlidac drahych pruhledu (tools/mapa_vyhledu.py, ChatGPT 1. 11.): celky s velkym kreslenim (mereni 0995c: ves 654-1205, mlyn 394-537); misto, odkud je videt >= 2, dostane vykonovy profil",
+  "clony": [
+   {
+    "id": "vjezd_sad_sv",
+    "typ": "sad",
+    "skladba": "sad",
+    "osa": [
+     [
+      409.0,
+      749.0
+     ],
+     [
+      424.0,
+      760.0
+     ],
+     [
+      440.0,
+      772.0
+     ]
+    ],
+    "sirka_m": 14.0,
+    "rozestup_m": 7.0,
+    "duvod": "vjezd jako v KCD (ref_kcd2_ves_plot_cesta, kcd1_ves_cesta_svah): ves za sadem a křovím, odkrývá se po ohybu ulice; sad za usedlostí 1 na otevřené louce mezi usedlostmi 1 a 4 (dříve průhled z vjezdu přes celou ves ke krčmě); měření 0.999998 ves-vjezd 810 volání"
+   },
+   {
+    "id": "vjezd_houstina_sv",
+    "typ": "houstina",
+    "skladba": "houstina",
+    "osa": [
+     [
+      401.0,
+      756.0
+     ],
+     [
+      414.0,
+      767.0
+     ],
+     [
+      428.0,
+      779.0
+     ],
+     [
+      441.0,
+      789.0
+     ]
+    ],
+    "sirka_m": 4.0,
+    "rozestup_m": 2.2,
+    "duvod": "hustý pás křovin podél ulice na vnější straně ohybu (sad za ním) – z vjezdu zavře pohled na náves a krčmu"
+   },
+   {
+    "id": "vjezd_houstina_jz",
+    "typ": "houstina",
+    "skladba": "houstina",
+    "osa": [
+     [
+      379.0,
+      762.0
+     ],
+     [
+      389.0,
+      771.0
+     ],
+     [
+      399.0,
+      781.0
+     ]
+    ],
+    "sirka_m": 3.5,
+    "rozestup_m": 2.4,
+    "duvod": "křoví mezi usedlostí 0 a 2 na vnitřní straně ulice – ulice u vjezdu jako zelený tunel (bejcek_03/05)"
+   },
+   {
+    "id": "vjezd_houstina_odbocka",
+    "typ": "houstina",
+    "skladba": "houstina",
+    "osa": [
+     [
+      346.0,
+      754.0
+     ],
+     [
+      356.0,
+      753.0
+     ],
+     [
+      364.0,
+      752.5
+     ]
+    ],
+    "sirka_m": 3.0,
+    "rozestup_m": 2.6,
+    "duvod": "pás křovin na jižní straně odbočky pod hřbetem (kcd1_ves_cesta_svah: cesta mezi plotem a pásem keřů, ves odkrytá jen v ose cesty)"
+   }
+  ],
+  "_clony": "Clony (sceny_kcd_15_11.md krok 2a, Míša 15. 11. „volná ruka“): pás vegetace podél osy (osa = lomená čára [x, z], sirka_m napříč, rozestup_m podél i napříč), skladba = les_podrost.json houstina.skladby. Staví Blender kraj.clony v kroku vegetace (po cestách a budovách, nehýbe jimi): kus se nesází na cestu (pasma.cesta ker_od_m/kmen_m od kraje), do vody (holy_breh_m), do budov a průchodů (pasma.budova kmen_od_zdi_m, pruchod_m), na vyšlapanou hlínu dvorů (ves.vyslapano), do výhledů (kompozice.vyhledy). Test smyslu clona_*; ve hře test clona_vsi (podíl zakrytí vsi z vjezdu, pasma.test.clona_vsi_*). Návrat: záznam smazat.",
+  "remizek_skladba": {
+   "stromy_na_m_polomeru": 0.6,
+   "kere_na_m_polomeru": 1.6,
+   "stromy_do_podilu_r": 0.6,
+   "kere_od_do_podilu_r": [
+    0.55,
+    1.05
+   ],
+   "vyska_stromu_m": [
+    9.0,
+    15.0
+   ],
+   "vyska_keru_m": [
+    1.2,
+    3.0
+   ],
+   "stromy": [
+    "dub_stredni",
+    "lipa_stredni",
+    "dub_stredni",
+    "lipa_stredni",
+    "dub_stary"
+   ],
+   "kere": [
+    "shrub_02",
+    "sipek",
+    "bez_cerny_1",
+    "shrub_02"
+   ],
+   "_p": "skladba remízku (dříve natvrdo kraj.kompozice_remizky, sceny_kcd_15_11.md krok 1 – stejná čísla = stejný výsledek): stromů int(r × stromy_na_m_polomeru) do stromy_do_podilu_r × r od středu, keřů int(r × kere_na_m_polomeru) v mezikruží kere_od_do_podilu_r; keře s druhy.json pouzit false se vynechají"
+  }
  },
  "staj_kone": {
   "popis": "kone ve staji tvrze (blender/hospodar.py stable: boxy pod zapadni hradbou x -25..-20,4, stredy z -6,75 / -3,65 / -0,55), hlavou k jeslim (-x). Modely od Misy 28. 10.: kun_socha = Sketchfab 'Armored Horse' (naminoff, CC-BY 4.0, bez kostry - socha). kun_hnedak = Sketchfab 'Horse' (MAXDESIGN-3D, CC-BY 4.0), kostra 56 kosti, jedna animace 31 s s useky (cval 0-2, krok 3-5, stani 15-18, pastva 18,5-21 s - rozbor kosti 28. 10.); meritko 0,01 (model v cm). horse_1 od Misy ma vadnou sit tela - nepouzit. klip = usek animace [od, do] s, ktery kun ve staji hraje dokola.",

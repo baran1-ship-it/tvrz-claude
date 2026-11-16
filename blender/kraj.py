@@ -2283,10 +2283,23 @@ def sklon(x, z):
 _HUMNA = [tuple(u["novy_stred"]) for u in _LOKACE_J["ves"]["usedlosti"]]
 
 
-def field_strip(x, z, mez=True):
+def za_vsi(x, z):
+    """Bod ve vysece za vsi (plochy.json pole.za_vsi, Misa 15. 11. noc: pole jen za vsi, ostatni louky a lesy)."""
+    zv = _PLOCHY_J["pole"].get("za_vsi")
+    if not zv:
+        return True
+    a = math.degrees(math.atan2(z - zv["stred"][1], x - zv["stred"][0]))
+    da = (a - zv["smer_st"] + 180.0) % 360.0 - 180.0
+    return abs(da) < zv["rozevreni_st"] + zv["okraj_sum_st"] * perlin(x / 70.0 + 2.3, z / 70.0 - 1.1)
+
+
+def field_strip(x, z, mez=True, vysec=True):
     """Pole kolem vsi v honech: kazdy hon (nepravidelny blok) ma lany jinym smerem a jinak siroke, mezi hony
     travnate meze s kerim, nektere hony jsou louka nebo pastvina (uhor). Vnejsi hranice nepravidelna.
-    Vraci (cislo lanu, plodina 0..3) nebo None. Vzor lanu kresli shaders/zem.gdshader stejnou nahodou."""
+    Vraci (cislo lanu, plodina 0..3) nebo None. Vzor lanu kresli shaders/zem.gdshader stejnou nahodou.
+    vysec=False: i byvala pole mimo vysec za_vsi (meze s krovim, mez_krovi)."""
+    if vysec and not za_vsi(x, z):
+        return None
     r = ves_r(x, z)
     wob = 22.0 * perlin(x / 90.0 + 5.0, z / 90.0 - 3.0)
     if r < 60.0 + 0.5 * wob:
@@ -2305,6 +2318,8 @@ def field_strip(x, z, mez=True):
     if r > VES_R + 270.0 + 2.0 * wob:
         # krok B (plochy.json pole_dolina): dal od vsi jen lany v doline u potoka
         pd = _PLOCHY_J["pole_dolina"]
+        if not pd.get("zapnuto", True):
+            return None
         rv = river(x, z)
         if (rv is None or not (pd["od_potoka_m"] < rv[0] < pd["do_potoka_m"]) or dh > pd["od_vsi_max_m"]):
             return None

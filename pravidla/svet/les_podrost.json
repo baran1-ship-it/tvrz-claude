@@ -64,5 +64,478 @@
   "stin_dosah_m": 40.0,
   "kmen_r_podil": 0.012,
   "kmen_r_min_m": 0.12
+ },
+ "houstina": {
+  "popis": "Houstina = kroví jako stálá vrstva krajiny podle stanoviště (Míša 15. 11. večer: „houština = křoví skoro všude jako v KCD, v lese i na loukách, ne na všech loukách“; docs/rozpracovane/sceny_kcd_15_11.md, předlohy sceny_15_11 kcd_sada2_04/12–20, bejcek_03/05/16/18). Jeden záznam pro všechny generátory: les (hra svet.gd _lesni_plast = plášť lesa, _lesni_patro = podrost pod zápojem), louka (Blender kraj.houstiny_meze na bývalých polích, plochy.json pole.meze_po_polich), břeh (kraj.houstiny_breh, přerušované pásy za holým břehem), ves a vjezd (kraj.clony z lokace.json kompozice.clony, vesnice.zelen_ulice). Skladba: [model, váha, [výška od, do m]]; druh jen na svém stanovišti (druhy.json, kraj.druh_smi / svet.druh_smi_hra), odstupy jen z pasma (cesta ker_od_m/kmen_m, budova kmen_od_zdi_m/pruchod_m, voda holy_breh_m). Líska: hotový model nenalezen (Poly Haven 16. 11.: shrub_01–04, žádná Corylus; Quaternius/Kenney stylizované) – za lísku a hloh slouží shrub_02 (Poly Haven „sapling“) a ker_husty (bushcover, Disk, CC-BY).",
+  "skladby": {
+   "mez": {
+    "druhy": [
+     [
+      "shrub_02",
+      0.42,
+      [
+       1.6,
+       3.2
+      ]
+     ],
+     [
+      "bez_cerny_1",
+      0.12,
+      [
+       2.4,
+       3.6
+      ]
+     ],
+     [
+      "bez_cerny_2",
+      0.12,
+      [
+       2.2,
+       3.2
+      ]
+     ],
+     [
+      "briza",
+      0.12,
+      [
+       3.0,
+       6.0
+      ]
+     ],
+     [
+      "dub_stredni",
+      0.04,
+      [
+       9.0,
+       14.0
+      ]
+     ],
+     [
+      "lipa_stredni",
+      0.04,
+      [
+       9.0,
+       13.0
+      ]
+     ],
+     [
+      "bez_cerny_3",
+      0.14,
+      [
+       2.4,
+       3.8
+      ]
+     ]
+    ],
+    "_p": "mez s křovím na bývalých polích (bejcek_16/18): líska/hloh (shrub_02), bez, nálet břízy, sem tam solitérní dub a lípa"
+   },
+   "breh": {
+    "druhy": [
+     [
+      "shrub_02",
+      0.4,
+      [
+       1.6,
+       3.0
+      ]
+     ],
+     [
+      "bez_cerny_1",
+      0.15,
+      [
+       2.4,
+       3.6
+      ]
+     ],
+     [
+      "bez_cerny_2",
+      0.15,
+      [
+       2.2,
+       3.2
+      ]
+     ],
+     [
+      "olse_mlada",
+      0.3,
+      [
+       3.5,
+       6.5
+      ]
+     ]
+    ],
+    "_p": "břehový pás Bystřice: vrbová a olšová houština (olše mladá), líska, bez; za holým břehem, s mezerami"
+   },
+   "sad": {
+    "druhy": [
+     [
+      "jablon",
+      0.8,
+      [
+       5.0,
+       7.0
+      ]
+     ],
+     [
+      "lipa_stredni",
+      0.08,
+      [
+       9.0,
+       12.0
+      ]
+     ],
+     [
+      "bez_cerny_1",
+      0.12,
+      [
+       2.4,
+       3.6
+      ]
+     ]
+    ],
+    "_p": "sad u cesty a vjezdu (ref_kcd2_ves_plot_cesta): jabloně (modely podle lokace ves.dvorec.sad.modely), lípa, bez na kraji"
+   },
+   "houstina": {
+    "druhy": [
+     [
+      "shrub_02",
+      0.4,
+      [
+       1.8,
+       3.4
+      ]
+     ],
+     [
+      "bez_cerny_1",
+      0.15,
+      [
+       2.6,
+       3.8
+      ]
+     ],
+     [
+      "bez_cerny_2",
+      0.15,
+      [
+       2.4,
+       3.4
+      ]
+     ],
+     [
+      "bez_cerny_3",
+      0.1,
+      [
+       2.6,
+       3.8
+      ]
+     ],
+     [
+      "briza",
+      0.1,
+      [
+       3.5,
+       7.0
+      ]
+     ],
+     [
+      "lipa_stredni",
+      0.1,
+      [
+       8.0,
+       12.0
+      ]
+     ]
+    ],
+    "_p": "hustý pás křovin s několika stromy (clona vjezdu, kcd1_ves_cesta_svah): 2–4 m vysoký, kmeny z pasma odstupů"
+   },
+   "ulice": {
+    "druhy": [
+     [
+      "jablon",
+      0.45,
+      [
+       5.0,
+       7.0
+      ]
+     ],
+     [
+      "lipa_stredni",
+      0.2,
+      [
+       9.0,
+       13.0
+      ]
+     ],
+     [
+      "bez_cerny_1",
+      0.12,
+      [
+       2.4,
+       3.6
+      ]
+     ],
+     [
+      "bez_cerny_2",
+      0.11,
+      [
+       2.2,
+       3.2
+      ]
+     ],
+     [
+      "shrub_02",
+      0.12,
+      [
+       1.6,
+       2.8
+      ]
+     ]
+    ],
+    "_p": "zeleň mezi staveními podél ulice (bejcek_02/08, kcd_sada2_02/03/05): ovocné stromy, lípy, bez; keře u plotů"
+   },
+   "u_plotu": {
+    "druhy": [
+     [
+      "bez_cerny_1",
+      0.3,
+      [
+       2.2,
+       3.4
+      ]
+     ],
+     [
+      "bez_cerny_2",
+      0.3,
+      [
+       2.0,
+       3.0
+      ]
+     ],
+     [
+      "shrub_02",
+      0.4,
+      [
+       1.4,
+       2.6
+      ]
+     ]
+    ],
+    "_p": "keře podél plotů a ohrad usedlostí zvenku (bez, líska) – dvory oddělené zelení"
+   }
+  },
+  "meze": {
+   "_p": "viz plochy.json pole.meze_po_polich (místo a hustota); skladba skladby.mez"
+  },
+  "breh": {
+   "od_vody_m": [
+    0.8,
+    4.5
+   ],
+   "usek_m": [
+    14.0,
+    34.0
+   ],
+   "mezera_m": [
+    16.0,
+    40.0
+   ],
+   "krok_m": 2.6,
+   "hustota": 0.75,
+   "volno_u_prechodu_m": 22.0,
+   "volno_u_cesty_m": 4.0,
+   "_p": "Míša 15. 11. noc „u té řeky opatrně se zakrýváním, máme širokou řeku“: houština jen v přerušovaných pásech podél Bystřice – pás začíná od_vody_m[0] za okrajem vody + holým břehem (pasma.voda.holy_breh_m) a končí od_vody_m[1] za ním (vnější strana břehového pásu, ne na hraně vody); úsek s keři usek_m, pak mezera_m bez houštiny (pohled na vodu), na každém břehu nezávisle; u brodů, mostů a mlýna (cesty.json prechody, voda.json mlyn) do volno_u_prechodu_m nic, od kraje cesty volno_u_cesty_m. Okraj vody = pulsirka_vody_m × (1 + 0,75 × peřej) jako kraj.river_bank. Okluzor přes řeku nikdy (pasma.test.okluzor_houstina jen u záznamů clony)."
+  },
+  "plast": {
+   "krok_m": 2.5,
+   "les_kraj": [
+    0.35,
+    0.6
+   ],
+   "dosah_lesa_m": 6.0,
+   "podil_keru": 0.78,
+   "podil_mladych": 0.22,
+   "podil_lemu": 0.35,
+   "druhy": [
+    [
+     "ker_husty_0",
+     0.5,
+     [
+      2.0,
+      3.4
+     ]
+    ],
+    [
+     "bez_cerny_1_0",
+     0.1,
+     [
+      2.4,
+      3.6
+     ]
+    ],
+    [
+     "bez_cerny_2_0",
+     0.1,
+     [
+      2.2,
+      3.2
+     ]
+    ],
+    [
+     "shrub_02_0",
+     0.15,
+     [
+      1.8,
+      3.0
+     ]
+    ],
+    [
+     "shrub_02_1",
+     0.15,
+     [
+      1.8,
+      3.0
+     ]
+    ]
+   ],
+   "mlade": [
+    [
+     "olse_mlada_0",
+     0.35,
+     [
+      3.0,
+      5.5
+     ]
+    ],
+    [
+     "buk_stredni_0",
+     0.35,
+     [
+      3.0,
+      5.0
+     ]
+    ],
+    [
+     "lipa_stredni_0",
+     0.15,
+     [
+      3.5,
+      5.5
+     ]
+    ],
+    [
+     "briza_0",
+     0.15,
+     [
+      3.5,
+      6.0
+     ]
+    ]
+   ],
+   "vyska_modelu_m": {
+    "ker_husty_0": 1.7,
+    "bez_cerny_1_0": 3.9,
+    "bez_cerny_2_0": 3.11,
+    "bez_cerny_3_0": 3.9,
+    "shrub_02_0": 1.69,
+    "shrub_02_1": 1.69,
+    "olse_mlada_0": 7.69,
+    "buk_stredni_0": 15.66,
+    "lipa_stredni_0": 14.6,
+    "briza_0": 13.25,
+    "dry_branches_medium_01_0": 0.34,
+    "dry_branches_medium_01_1": 0.34,
+    "tree_stump_01_0": 0.57,
+    "tree_stump_02_0": 0.52,
+    "kapradi_les_0": 0.6,
+    "kapradi_les_1": 0.5
+   },
+   "_p": "plášť lesa (svet.gd _lesni_plast, Míša 0.64 „kraje lesů všude plné keřů“ + 15. 11. lískový/olšový pás 2–4 m mezi lesem a cestou/loukou, kcd_sada2_04/16/18/19): body mřížky krok_m tam, kde les (svet._les) je mezi les_kraj a do dosah_lesa_m je zapojený les (> les_kraj[1]); vnější lem (les < 0,12) kapradí podle podil_lemu, vnitřní okraj (les > les_kraj[0]) mladé stromy podle podil_mladych, jinak keř s pravděpodobností podil_keru. Výška v m = měřítko × vyska_modelu_m (AABB glb, 16. 11.; shrub_02 a varianty: AABB celého souboru, NEOVĚŘENO po variantách). Dříve čísla v kódu: keře 0,7–1,35 × (ker_husty 1,7 m = 1,2–2,3 m), mladé stromy 0,25–0,5 ×."
+  },
+  "patro": {
+   "les_od": 0.6,
+   "kazdy_strom_drevo": 5,
+   "kazdy_strom_ker": 2,
+   "drevo_od_m": [
+    2.0,
+    6.0
+   ],
+   "ker_od_m": [
+    3.0,
+    7.0
+   ],
+   "hromada_klesti": [
+    2,
+    4
+   ],
+   "kere": [
+    [
+     "ker_husty_0",
+     0.55,
+     [
+      1.4,
+      2.6
+     ]
+    ],
+    [
+     "shrub_02_0",
+     0.2,
+     [
+      1.2,
+      2.4
+     ]
+    ],
+    [
+     "buk_stredni_0",
+     0.25,
+     [
+      1.8,
+      3.5
+     ]
+    ]
+   ],
+   "drevo": [
+    [
+     "tree_stump_01_0",
+     0.25,
+     [
+      0.4,
+      0.7
+     ]
+    ],
+    [
+     "tree_stump_02_0",
+     0.25,
+     [
+      0.4,
+      0.7
+     ]
+    ],
+    [
+     "dry_branches_medium_01_0",
+     0.17,
+     [
+      0.3,
+      0.5
+     ]
+    ],
+    [
+     "dry_branches_medium_01_1",
+     0.17,
+     [
+      0.3,
+      0.5
+     ]
+    ],
+    [
+     "dry_branches_medium_01_2",
+     0.16,
+     [
+      0.3,
+      0.5
+     ]
+    ]
+   ],
+   "_p": "podrost pod zapojenými korunami (svet.gd _lesni_patro; kcd_sada2_12–15/17/19 „les = kmeny + podrost do výšky pasu, žádná louka“): u každého kazdy_strom_ker-tého lesního stromu keř nebo mladý buk drevo_od_m/ker_od_m od kmene, u každého kazdy_strom_drevo-tého pařez nebo hromada klestí (hromada_klesti větví u sebe); jen kde je les (svet._les, maska stanoviště kroku 5+7) ≥ les_od – tam louka nedává trávu (trava.v_zapoji), houština ji nahrazuje (rozbor_gpu_15_11.md K11). Kapradí a byliny dává louka (podrost) a svet._lesni_puda."
+  }
  }
 }
