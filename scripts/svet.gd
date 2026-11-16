@@ -742,6 +742,11 @@ func build(parent: Node3D, quality: int) -> void:
 		# sukne jemne site jen pro oko: jako kolize byla svislou stenou na okraji Teren_most (test prochod, breh potoka)
 		if (nm.begins_with("Teren") or nm.begins_with("Nadvori")) and not nm.ends_with("_sukne"):
 			_trimesh(mi)
+		if nm.begins_with("Teren"):
+			# Misa 15./16. 11. (letajici hriby, trsy, mech - jen tablet): automaticke LOD importu (tvrz.glb generate_lods,
+			# tablet mesh_lod_threshold 10 px) kreslilo teren zjednoduseny niz nez kolize/_vyska, na ktere se sazi houby
+			# a trava -> „vznasi se“. Teren bez automatickeho LOD do vzdalenosti dlazdic (modely.json teren_lod_bias).
+			mi.lod_bias = float(Pravidla.cti("modely", "teren_lod_bias"))
 		if nm.begins_with("Teren") or nm.begins_with("Reka") or nm.begins_with("Ruiny") or nm.begins_with("Skaly") \
 				or nm.ends_with("_zahrady") or nm.begins_with("Hnojiste"):
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # rozpocet: teren, voda, ruiny, zahrady nekreslit do stinu

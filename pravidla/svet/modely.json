@@ -5689,7 +5689,30 @@
   "stredni_do_m": 130.0,
   "stredni_do_m_mobil": 75.0,
   "lod_bias": 50.0,
-  "daleko_textury": {"Sindel": ["Sindel", "Dosky", "Krytina", "Strecha", "Kura", "reed_roof", "thatch", "riet", "bark", "wood_sin", "dosky"], "Roubeni": ["Roubeni", "Omitka", "Podezdivka", "Stena", "plaster", "wood_tram", "stone_wall"]},
+  "daleko_textury": {
+   "Sindel": [
+    "Sindel",
+    "Dosky",
+    "Krytina",
+    "Strecha",
+    "Kura",
+    "reed_roof",
+    "thatch",
+    "riet",
+    "bark",
+    "wood_sin",
+    "dosky"
+   ],
+   "Roubeni": [
+    "Roubeni",
+    "Omitka",
+    "Podezdivka",
+    "Stena",
+    "plaster",
+    "wood_tram",
+    "stone_wall"
+   ]
+  },
   "daleko_triplanar_m": 2.0,
   "daleko_prumer_min": 0.05,
   "_daleko_textury": "Míša 14. 11. (misa_28_chyby ř. 151 „bílé kostky z dálky“; Puchart modely.domy.daleko_textury): hrubý obal _Daleko měl jen barvu materiálu (po zesvětlení vsi světlý) - povrch obalu <koren>_daleko_<klíč> dostane texturu největšího povrchu podrobného vnějšku, jehož materiál nebo soubor textury obsahuje některé slovo seznamu (nic = největší povrch s texturou, který neodpovídá jinému klíči), triplanárně po daleko_triplanar_m; barva = barva obalu (hnědý tón ves_jas.stredni_daleko beze změny) / průměr textury (nejméně daleko_prumer_min na kanál) - průměrná barva stejná, textura přidá kresbu. svet._daleko_textura."
@@ -5700,10 +5723,25 @@
   "stredni_min_m": 0.6,
   "obal_od_m": 130.0,
   "obal_min_m": 1.5,
-  "dynamicke": ["Dvere", "Vrata", "Kridla", "Kolo", "Cevnik", "Paka", "Mech"],
-  "vynechat": ["Teren", "Cesta"],
+  "dynamicke": [
+   "Dvere",
+   "Vrata",
+   "Kridla",
+   "Kolo",
+   "Cevnik",
+   "Paka",
+   "Mech"
+  ],
+  "vynechat": [
+   "Teren",
+   "Cesta"
+  ],
   "drsnost": 0.9,
-  "nahradni_barva": [0.45, 0.38, 0.3],
+  "nahradni_barva": [
+   0.45,
+   0.38,
+   0.3
+  ],
   "lod_bias": 50.0,
   "hruby_troj_max": 3000,
   "test_bila_jas": 0.85,
@@ -5717,9 +5755,36 @@
   "stin_od_m": 2.5,
   "lod_bias": 50.0,
   "lod1_od_m": 8.0,
-  "lod1_od_m_predpony": {"milir_": 40.0, "uhlir_": 40.0, "smolarna": 40.0, "studanka": 40.0, "kriz_": 40.0, "bozi_muka_drevene": 40.0}
+  "lod1_od_m_predpony": {
+   "milir_": 40.0,
+   "uhlir_": 40.0,
+   "smolarna": 40.0,
+   "studanka": 40.0,
+   "kriz_": 40.0,
+   "bozi_muka_drevene": 40.0
+  }
  },
- "ohen_znacky": {"ohen": ["Pec_Ohen", "Pec_Ohen_2", "Krb_Ohen", "Les_Smolarna_Ohen_Dvojhrnec", "Les_Ch_Chyse_Ohniste"], "kour": ["Krb_Kour", "Les_Milir_Kour_Komin", "Les_M_Milir_Kour_Komin", "Les_Smolarna_Kour"], "velikost_m": 0.4, "svetlo": [0.0, 0.5, 0.0]},
+ "ohen_znacky": {
+  "ohen": [
+   "Pec_Ohen",
+   "Pec_Ohen_2",
+   "Krb_Ohen",
+   "Les_Smolarna_Ohen_Dvojhrnec",
+   "Les_Ch_Chyse_Ohniste"
+  ],
+  "kour": [
+   "Krb_Kour",
+   "Les_Milir_Kour_Komin",
+   "Les_M_Milir_Kour_Komin",
+   "Les_Smolarna_Kour"
+  ],
+  "velikost_m": 0.4,
+  "svetlo": [
+   0.0,
+   0.5,
+   0.0
+  ]
+ },
  "_ohen_znacky": "Míša 16. 11. (Topeni_1400, les_dily: modely bez plamene, „plameny a kouř vytváří hra“): kus katalogu s ohen (pec, krb, kamna, milíř, smolárna) má značky v katalogu (blender/predmety.py znacky); hra (svet.ohen_predmetu) dá na značku ohen herní oheň (data ohne kind hearth, velikost_m, svetlo = posun světla) a na značku kour komínový kouř (data kour). Pec bez komína (Pec_Kour je nad ústím, NAVOD_PEC: kouř jde do místnosti) a nádobková kamna (Pec_Kour = konec odtahu v místnosti) kouř ven nemají – jen Krb_Kour a komín milíře/smolárny. Hořící milíř nemá plamen (žár je emisní materiál M_LesZar), jen kouř z komína.",
  "_predmety_lod": "Misa 2. 11. (sekani): velky predmet katalogu (nejvetsi rozmer >= min_velikost_m) s modelem <id>_stredni.glb (blender/lod_barvy.py: jedna sit, barva ve vrcholech, 1 material) - podrobny model jen do stredni_od_m, dal stredni do dosahu predmetu. Stin vrha jen stredni (kopie jen pro stin po cely dosah) - stodola 5 materialu = 5 kresleni ve stinu. Cisla odhad, NEOVERENO na tabletu. Navrat: stredni_od_m >= dosah (80) vypne bez nove verze kodu. stin_od_m: predmet vrha stin jen od teto nejvetsi velikosti (rešerse: stin jen z velkych jednoduchych tvaru; mereni 2. 11. ves_cesta: stiny predmetu 100 z 338 kresleni stinu; drive natvrdo 1 m). Navrat: 1.0. lod1_od_m (16. 11., sady z Disku Luzka/Topeni/les/Seno): predmet s LOD1 od modelare (katalog lod1, <id>_lod1.glb z blender/predmety.py) - podrobny LOD0 do lod1_od_m, dal LOD1 do dosahu; 8 m = hodnota z .tscn modelare (NAVOD_LUZKA, NAVOD_PEC: LOD0 do 8 m, bez prolinani). Seno ma v .tscn 6 m (chomac 2,8 m) - jedna hodnota pro vsechny je zjednoduseni, NEOVERENO na tabletu. Navrat: lod1_od_m >= 80 vypne LOD1. lod1_od_m_predpony: lesni dily (les_dily, NAVOD_LES.md) maji LOD1 jako hruby obal (12-48 troj.) - podrobne do 40 m jako Puchart (zajimava_mista.json modely.lod_les lod0_do_m 40), predpona id -> vzdalenost.",
  "trava_dosah_m": {
@@ -6013,5 +6078,7 @@
    "_pozn": "Míša 15. 11. (ř. 10: z dálky šedobílé domy): střední stupeň (barvy vrcholů domy_stredni.glb, 30–75 m) a hrubý obal _Daleko (barva materiálu v domy.glb) měly jen zesvětlení na cil bez hnědého tónu. Puchart hra/data/mista_stavby.json modely.domy.daleko_textury.jas: skutečná barva × činitel [R, G, B] – střecha (Sindel) [0,66; 0,5; 0,36], stěny (Roubeni, i omítka Dum2 = M_OmitkaPecena) [0,85; 0,66; 0,48] (Míša 14. 11. u Pucharta: „jsou šedé, nemohly by být hnědé? míň to razí“; KCD: střechy a roubení z dálky hnědé). Barva (sRGB) nejdřív stažena na jas nejvýš jas_strop (bílá omítka jako zesvětlené dřevo), pak × činitel. Střecha = vrchol s normálou ny > strecha_ny_min (z trojúhelníků), u _Daleko materiál <koren>_daleko_Sindel. Jednou: asset.extras.stredni_daleko = použité činitele (při změně činitelů se dopočte jen poměr). Test smyslu ves_barva: průměr každého domu R > G > B a jas ≤ test_jas_max (bez činitele 0,5 a šedá)."
   },
   "_pozn": "Míša 14. 11. („puchart udělal vesnici světlejší“): textury domů vsi (modely/ves/domy_*_diff/albedo) na průměrný jas cil (sRGB, nejvýš max_x), sytost × sytost; začouzené aspoň zacouzene.cil; vnitřek, pec, podlaha, omítka a kámen beze změny. Stejně barvy vrcholů středního stupně (domy_stredni.glb) a barva _Daleko (domy.glb). Podle Pucharta nastroje/havran/stavby_export.gd (a4239c63). Nástroj tools/zesvetli_ves.py (opakované spuštění nic nemění)."
- }
+ },
+ "teren_lod_bias": 100.0,
+ "_teren_lod_bias": "16. 11. Míša „létající hřiby“ (jeden model, jen tablet; dříve i trsy a mech, na PC nereprodukováno): sítě Teren* mají automatické LOD z importu tvrz.glb (generate_lods=true) a tablet kreslí s mesh_lod_threshold 10 px (PC 4) → zjednodušený terén leží až decimetry pod kolizí a _vyska(), na které sber._houby a louka sázejí. lod_bias 100 = automatické LOD terénu prakticky vypnuté (jako domy a plůtky lod_bias). Úsporu do dálky přebírají dlaždice terénu (teren_dlazdice.json, úroveň 0 přesná kopie). PODEZŘENÍ – ověřit na tabletu (houby u kmenů v lese ze 2–30 m)."
 }
