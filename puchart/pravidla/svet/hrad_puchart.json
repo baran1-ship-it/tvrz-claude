@@ -634,6 +634,17 @@
    "patro_y": 4.0,
    "pozn_patro": "3. 11. (Míša): kamenná část 8 m = přízemí + patro (podlaha +4 m), schody podél stěny naproti dveřím; hrázděné podkroví nepřístupné (NAVRH)",
    "patro2_y": 8.0,
+   "okna_od": {
+    "strany": {
+     "1": [
+      1.67,
+      6.33
+     ]
+    },
+    "popis": "pevné polohy oken v 1. a 2. patře (od rohu strany na ose zdi, hrady.budova OKNA_OD) místo kroku 3,6 m od 2,5 m: strana 1 = východní čelo (roh x 58,8 z 150,6 → z 142,6; z = 150,6 − od). Krok dával okna od 2,5 a 6,1 (niky z 147,53…148,68 a 143,93…145,08) – mezi nikami jen 2,45 m, krb síně Krb_Sinovy_Vysoky je široký 3,01 m (±1,505, LOD0) a přesahoval do nik o 0,12–0,25 m (topeni.json hradB_krb). Rozestoupení souměrně k ose paláce (od 4,0 = z 146,6, střed krbu): od = 4,0 ± (1,505 krb + 0,25 rezerva + 0,575 polovina niky 1,15) = 1,67 a 6,33; pilíř mezi nikou a vnitřním rohem 0,55 m (líc z 143,15 / 150,05), mezi krbem a nikou zdivo 0,25 m. Ve 2. patře okna nad okny síně (osy oken nad sebou, mezi nimi zdivo pro průduch komína v čele – krby.json hradB_krb_navrh kourovod).",
+    "zdroj": "Míša 16. 11.: „Posunout okna“ (krb síně hradu B přesahoval okenní niky); krb v čele mezi okny a průduch ve zdi: krby.json hradB_krb_navrh (Valdek – síň s krbem, docs/reference/reserse_dispozice_palacu.md); niky se sedátky a okenicemi docs/reference/okna_palace.md; rozměr krbu z hra/modely/topeni/Krb_Sinovy_Vysoky_LOD0.glb",
+    "jistota": "NAVRH"
+   },
    "omitka": false,
    "jistota_kresba": "Míša 5. 11.: kresba misa_01 – palác celý kamenný, strmá sedlová střecha, štít k údolí; hrázděné patro na kresbě není → kamenné 3. podlaží (podlaha +8 m, jako dřív hrázděné)",
    "strecha_pomer": 1.0,

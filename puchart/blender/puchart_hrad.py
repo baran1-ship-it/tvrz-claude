@@ -1922,11 +1922,12 @@ def postav_B(P):
     elif dl.length > 0.1 and vz.get("vstup_ochoz", True):
         plosina(P, (hrana + lav0) / 2, dl, dl.length + 0.3, 1.3, kor, sloupy=False)
     # palác 10×12
-    p = B["palac"]; H.BEZ_OKEN[:] = []; H.OMITKA = p.get("omitka", True); H.STRECHA_POMER = p.get("strecha_pomer", 0.62)   # kresba misa_01: palác B kamenný (Míša 5. 11.: omítka jen dle obrázku)
+    p = B["palac"]; H.BEZ_OKEN[:] = []; H.OKNA_OD.clear(); H.OKNA_OD.update({int(k_): v_ for k_, v_ in p.get("okna_od", {}).get("strany", {}).items()})   # krb síně mezi okny (Míša 16. 11.: „posunout okna“)
+    H.OMITKA = p.get("omitka", True); H.STRECHA_POMER = p.get("strecha_pomer", 0.62)   # kresba misa_01: palác B kamenný (Míša 5. 11.: omítka jen dle obrázku)
     budova_k(P, p["osa"][0], p["osa"][1], p["hloubka"], p["vyska_kamen"], p["vyska_drevo"], "palac",
              k_bodu=tuple(np.mean(np.array(B["hradba"], float), axis=0)), vnitrek=p.get("vnitrek", [(-0.8, -0.7), (-0.6, -0.7)]), patro_y=p.get("patro_y", 4.0),
              patro2_y=p.get("patro2_y"))
-    H.OMITKA = True; H.STRECHA_POMER = 0.62
+    H.OMITKA = True; H.STRECHA_POMER = 0.62; H.OKNA_OD.clear()
     for z_ in p.get("zarizeni", []):   # obytný palác B (Míša 5. a 9. 11.): síň, komnata, hospodářská místnost
         q_ = V((z_["x"], z_["z"])) + UP * z_["y"]; dz_ = Vector((z_["smer"][0], 0, z_["smer"][1])).normalized()
         if z_["co"] == "stul": _stul(P, q_, dz_, z_.get("delka", 2.2), lavice=z_.get("lavice", True))
@@ -2144,7 +2145,7 @@ def stavba(suf):
         for c_, sz_, kdo in _DBGL:
             if (c_ - q_).length < 2.0 + max(sz_) / 2: print("DBGKOL", [round(v, 2) for v in (c_.x, c_.z, c_.y)], [round(v, 2) for v in sz_], kdo)
     import bpy
-    SV.clear(); TR.clear(); STAVBY.clear(); lib.MOVABLE.clear()
+    SV.clear(); TR.clear(); STAVBY.clear(); lib.MOVABLE.clear(); H.NIKY.clear()
     for o in list(bpy.data.objects): bpy.data.objects.remove(o)
     ZAB_REC.clear()
     PA = Part("hrad_A"); postav_A(PA)
@@ -2211,6 +2212,8 @@ def stavba(suf):
                    "relief_krok": RELIEF_KROK, "zdi": ZDI_SIT}, open(os.path.join(K, "build/zdi.json"), "w"), ensure_ascii=False)
         json.dump({"popis": "portály (blender/portaly.py): místo, směr ven, rozměry – snímky zblízka a hlídač portálů", "portaly": portaly.ZAZNAM},
                   open(os.path.join(K, "build/portaly.json"), "w"), ensure_ascii=False, indent=0)
+        json.dump({"popis": "niky oken paláců (hrady.okno_palace): střed niky (x, y 0, z), směr ven, podél zdi, šířka, hloubka, y0–y1 – test smyslu krb_okna (topení nesmí zasahovat do niky)",
+                   "niky": H.NIKY}, open(os.path.join(K, "hra/data/okna_niky.json"), "w"), ensure_ascii=False)
         json.dump({"popis": "záznamy staveb pro test smyslu (blender/puchart_hrad.py)", "stavby": STAVBY}, open(os.path.join(K, "hra/data/stavby_kontrola.json"), "w"), ensure_ascii=False)
         # denní světlo z oken: jedno na shluk oken do 4 m (≈ místnost), bez stínů (rozhodnutí 9. 11.: „světlo z oken“)
         shl_ = []

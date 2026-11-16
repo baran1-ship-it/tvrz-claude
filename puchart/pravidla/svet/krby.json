@@ -192,7 +192,7 @@
   {
    "id": "hradB_krb_navrh",
    "stavba": "hrad B, palác (hrad_puchart.json palac, osa x 49,0–58,8 z 146,6)",
-   "mistnost": "1. patro – síň (stolování, příjem hostů): x 49,55…58,25, z 143,15…150,05, podlaha y 14,63, strop y 18,55 (rozbor paprsky v puchart.glb 15. 11.): severní stěna (z 143,15) = schody do 2. patra (pata x ~51), jižní stěna (z 150,05) okna x 51,0–51,8 a 54,6–55,4 a otvor schodů z přízemí podél ní (z ~149,5, x 51–57,5, zábradlí), západní okna z 144,6–145,4 a 148,2–149,0, východní čelo (hradba nad skalou) okna z 144,0–144,9 a 147,6–148,5",
+   "mistnost": "1. patro – síň (stolování, příjem hostů): x 49,55…58,25, z 143,15…150,05, podlaha y 14,63, strop y 18,55 (rozbor paprsky v puchart.glb 15. 11.): severní stěna (z 143,15) = schody do 2. patra (pata x ~51), jižní stěna (z 150,05) okna x 51,0–51,8 a 54,6–55,4 a otvor schodů z přízemí podél ní (z ~149,5, x 51–57,5, zábradlí), západní okna z 144,6–145,4 a 148,2–149,0, východní čelo (hradba nad skalou) okna z 144,0–144,9 a 147,6–148,5 (16. 11. rozestoupená kvůli krbu: niky z 143,70–144,85 a 148,36–149,51 – hrad_puchart.json B.palac.okna_od)",
    "druh": "NÁVRH: velký krb s pláštěm a římsou",
    "soucasny_stav": "krb není; stůl (56,2; 14,63; 146,6)",
    "poloha": "východní čelo mezi okny: střed přední hrany ohniště (57,32; 14,63; 146,25) – zadní stěna krbu na líci x 58,22",
@@ -203,7 +203,7 @@
    "snimek": "docs/screens/hradB_sin.png (pohled na východ, krb mezi dvěma okny)"
   }
  ],
- "navrhy_hrad": "hrad B: Krb_Sinovy_Vysoky (topeni.json hradB_krb, značka HradB_Krb_Ohen, ohne.json krb_obecny, koren Topeni); hrad A: NEVLOŽENO – místo hradA_krb_navrh blokuje nástup na schody do podkroví a síňový krb (3,0 m) ani hradní (2,67 m) se jinam nevejde (topeni.json neumisteno) – čeká na rozhodnutí",
+ "navrhy_hrad": "hrad B: Krb_Sinovy_Vysoky (topeni.json hradB_krb, značka HradB_Krb_Ohen, ohne.json krb_obecny, koren Topeni); hrad A: BEZ KRBU (Míša 16. 11.: „Bez krbu“) – místo hradA_krb_navrh blokuje nástup na schody do podkroví a síňový krb (3,0 m) ani hradní (2,67 m) se jinam nevejde (topeni.json neumisteno)",
  "reference": [
   "docs/reference/reserse_dispozice_palacu.md (Valdek: síň s krbem; Žebrák, Radyně: kamna přikládaná ze síně; Žebrák: dýmník černé kuchyně)",
   "Přimda – římsa krbu v 1. patře věže (12. st.), is.slu.cz Kultura bydlení hradů a tvrzí: https://is.slu.cz/el/fpf/zima2024/ARCHSTN041/6_Kultura_bydleni__vybaveni_hradu__tvrzi.pdf",

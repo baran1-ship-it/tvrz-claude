@@ -791,6 +791,52 @@ for _f, _e in _RS.get("soubory", {}).items():
         if _t > _e["max_troj"]: _c19.append("%s %s: %d troj. > %d" % (os.path.basename(_f), _m or "", _t, _e["max_troj"]))
 TEST("stavby_rozpocet_troj", _RS and not _c19, "; ".join(_c19) if _c19 else "všechny stavby v rozpočtu (rozpocty.json stavby)")
 
+# Míša 16. 11.: krb síně hradu B přesahoval okenní niky o 0,12–0,25 m („Posunout okna“) – topení na hradech (krb, kamna,
+# topeniště z topeni.json vlozit, kam hrad) nesmí zasahovat do niky okna paláce (hra/data/okna_niky.json z hrady.okno_palace)
+# ve stejné výšce; mezi nimi zdivo aspoň topeni.json odstup_niky_m. Půdorys topení = bbox LOD0 natočený yaw (Godot: +Z → (sin, cos)).
+import sys as _sys2; _sys2.path.insert(0, K + "/nastroje"); import glb_sit as _gs
+def _bbox_glb(f):
+    j_, b_, _ = _gs.nacti(f); lo_ = np.full(3, 1e9); hi_ = -lo_
+    def _w(i, M_):
+        nonlocal lo_, hi_
+        n_ = j_["nodes"][i]; M2 = M_ @ _gs.matice(n_)
+        if "mesh" in n_ and "colonly" not in n_.get("name", ""):
+            for pr_ in j_["meshes"][n_["mesh"]]["primitives"]:
+                P_ = _gs.cti(j_, b_, pr_["attributes"]["POSITION"]); W_ = (M2 @ np.c_[P_, np.ones(len(P_))].T).T[:, :3]
+                lo_ = np.minimum(lo_, W_.min(0)); hi_ = np.maximum(hi_, W_.max(0))
+        for c_ in n_.get("children", []): _w(c_, M2)
+    for r_ in j_["scenes"][0]["nodes"]: _w(r_, np.eye(4))
+    return lo_, hi_
+_TP = json.load(open(K + "/pravidla/svet/topeni.json")); _odst = float(_TP.get("odstup_niky_m", 0.2)); _c20 = []; _min20 = []
+_pred20 = float(json.load(open(K + "/pravidla/svet/hrac.json"))["sezeni"]["vstat_m"]) + float(json.load(open(K + "/pravidla/svet/hrad_puchart.json"))["sedatko_niky"]["okraj_otvoru_m"])
+_nk = json.load(open(D + "okna_niky.json"))["niky"] if os.path.exists(D + "okna_niky.json") else []
+if not _nk: _c20.append("chybí hra/data/okna_niky.json (blender/puchart_hrad.py)")
+for _v in _TP.get("vlozit", []):
+    if _v.get("kam") != "hrad": continue
+    _f = K + "/hra/modely/topeni/%s_LOD0.glb" % _v["topeni"]
+    if not os.path.exists(_f): _c20.append("%s: chybí %s" % (_v["id"], os.path.basename(_f))); continue
+    _lo, _hi = _bbox_glb(_f); _a = math.radians(_v["yaw_deg"]); _q = _v["poloha"]
+    _ex = np.array([math.cos(_a), -math.sin(_a)]); _ez = np.array([math.sin(_a), math.cos(_a)])   # místní X a Z ve světě (x, z)
+    _rc = [np.array([_q[0], _q[2]]) + _ex * x_ + _ez * z_ for x_ in (_lo[0], _hi[0]) for z_ in (_lo[2], _hi[2])]
+    _ty0, _ty1 = _q[1] + _lo[1], _q[1] + _hi[1]; _bl = None
+    for _n in _nk:
+        if _n["y1"] <= _ty0 or _n["y0"] >= _ty1: continue
+        _c = np.array([_n["stred"][0], _n["stred"][2]]); _u = np.array(_n["ven"]); _p = np.array(_n["podel"])
+        # nika + volno před ní do místnosti (vstání ze sedátka hrac.json vstat_m + poloměr postavy sedatko_niky.okraj_otvoru_m):
+        # krb přisazený k líci by jinak „nezasahoval“ (záda krbu 1 cm před nikou) – rozhoduje přesah podél zdi
+        _nr = [_c + _u * (su * _n["hloubka"] / 2) + _p * (sp * _n["sirka"] / 2) for su in (-1, 1) for sp in (-1, 1)]
+        _nr += [r_ - _u * _pred20 for r_ in _nr]
+        if min(np.linalg.norm(r_ - _c) for r_ in _rc) > 6.0: continue
+        # mezera = největší oddělení půdorysů na osách obou obdélníků (SAT); záporná = překryv
+        _gap = -1e9
+        for _ax in (_u, _p, _ex, _ez):
+            a0, a1 = min(r_ @ _ax for r_ in _rc), max(r_ @ _ax for r_ in _rc); b0, b1 = min(r_ @ _ax for r_ in _nr), max(r_ @ _ax for r_ in _nr)
+            _gap = max(_gap, b0 - a1, a0 - b1)
+        if _bl is None or _gap < _bl: _bl = _gap
+        if _gap < _odst - 1e-3: _c20.append("%s (%s) od niky okna u (%.2f; %.2f) jen %.2f m (min %.2f; záporné = zasahuje)" % (_v["id"], _v["topeni"], _c[0], _c[1], _gap, _odst))
+    if _bl is not None: _min20.append("%s %.2f m" % (_v["id"], _bl))
+TEST("krb_okna", not _c20, "; ".join(_c20) if _c20 else "topení hradů mimo okenní niky (nejbližší zdivo: %s; min %.2f m)" % (", ".join(_min20) or "žádná nika ve výšce", _odst))
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

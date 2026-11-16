@@ -93,6 +93,8 @@ def nastav_detail(ano):
 OKNA_SVETLA = []   # denní světlo z oken do místnosti (Míša 9. 11.: „ve většině místností je tma“) → hra/data/svetla.json
 POSL_OKNA = []   # okna poslední postavené budovy (strana, od, šířka, y0, y1, …) – vnitřek paláce (obklad světnice) se jim vyhne
 BEZ_OKEN = []   # [(a, b, y0, y1)] vnitřní schodiště u zdí – okna tam ne (puchart_hrad plní před stavbou paláce)
+OKNA_OD = {}   # {strana: [od rohu, …]} pevné polohy oken v patrech (ui ≥ 1) místo kroku – hrad_puchart.json palac.okna_od (puchart_hrad plní)
+NIKY = []      # niky oken paláců pro test smyslu krb_okna: {stred, smer ven, podel, sirka, hloubka, y0, y1} → build/okna_niky.json
 def _dist_seg(p, a, b):
     p = Vector((p.x, 0, p.z)); a = Vector((a.x, 0, a.z)); b = Vector((b.x, 0, b.z)); ab = b - a
     t_ = 0.0 if ab.length < 1e-6 else max(0.0, min(1.0, (p - a).dot(ab) / ab.length_squared)); return (p - (a + ab * t_)).length
@@ -593,6 +595,8 @@ def okno_palace(P, c, dd, nout, t, w, ya, yb, dvoj, ys, yn):
         if DETAIL: vypln_okna(P, m, x0, x1, ya + 0.02, yb - 0.02, zg, "sklo" if dvoj else "blana")
     OKNA_SVETLA.append(f - nout * (t + 1.2) + UP * ((ya + yb) / 2))
     hn = t - sl   # nika: sedátko a okenice
+    if hn >= 0.05: NIKY.append({"stred": [round(v, 3) for v in (f - nout * (sl + hn / 2))], "ven": [round(nout.x, 4), round(nout.z, 4)], "podel": [round(dd.x, 4), round(dd.z, 4)],
+                                "sirka": round(wn, 3), "hloubka": round(hn, 3), "y0": round(ys, 3), "y1": round(yn, 3)})
     # okenice vnitřní (docs/reference/okna_palace.md), blízká verze: pohyblivá křídla Pohyb_okeniceN_l/_p (pohyb_okenice)
     use_ = m @ Vector((0.0, (ya + yb) / 2, -sl - POHYB_OK["ovladani_do_mistnosti_m"]))
     if hn < 0.05:   # přízemí a okénka v hradbě: okenice na vnitřním líci zdi, otevřené k líci
@@ -681,7 +685,8 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                     if not (HRADBA_OKENKA and ui == len(urovne) - 1): continue
                     dvoj = False; w_ = 0.32; yb = min(ya + 0.85, strop - 0.6); krok_ = 3.4
                     if yb - ya < 0.5: continue
-                for k in np.arange(2.5, Ls - 1.5, krok_):
+                ks_ = OKNA_OD.get(si) if ui >= 1 and si in OKNA_OD else np.arange(2.5, Ls - 1.5, krok_)   # pevné polohy z dat (krb mezi okny)
+                for k in ks_:
                     if any(o[0] == si and abs(o[1] - k) < o[2] / 2 + w_ / 2 + 0.9 for o in otvory) or any(o[0] == si and abs(o[1] - k) < 1.6 and abs(o[3] - ya) < 0.1 for o in OKNA): continue
                     nn_ = -(p1 - p0).normalized().cross(UP).normalized(); hk_ = u_hradby(p0 + (p1 - p0).normalized() * k - nn_ * (t / 2 + 0.5), 2.2)
                     if hk_ is not None and ya < hk_ + 1.0 and not v_hr_: continue   # před oknem hradba – zazděné okno (Míša 4. 11.)

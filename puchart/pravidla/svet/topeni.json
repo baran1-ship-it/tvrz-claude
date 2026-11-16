@@ -166,6 +166,8 @@
   "kat": "nadoby",
   "stav": "dekorace"
  },
+ "odstup_niky_m": 0.2,
+ "_odstup_niky_pozn": "nejmenší zdivo mezi topením (krb, kamna, topeniště – bbox LOD0 natočený podle yaw) a nikou okna paláce (hra/data/okna_niky.json z hrady.okno_palace) ve stejné výšce; nika se počítá i s volnem před ní do místnosti (hrac.json sezeni.vstat_m + hrad_puchart.json sedatko_niky.okraj_otvoru_m – místo vstání ze sedátka), takže rozhoduje přesah podél zdi – test smyslu krb_okna; ostění krbu nesmí zasahovat do niky ani okenic otevřených k ostění niky (Míša 16. 11.: krb B přesahoval niky o 0,12–0,25 m → „posunout okna“)",
  "vlozit": [
   {
    "id": "pec_dum1",
@@ -342,12 +344,12 @@
    "poloha": [
     57.86,
     14.63,
-    146.3
+    146.6
    ],
    "yaw_deg": -90.0,
-   "proc": "síň 1. patra paláce B, východní čelo (líc x 58,25) mezi okny (otvory z 144,05…145,05 a 147,55…148,55 ve výšce 1,4–2,4 m): krb š 3,00 m (z 144,80…147,80) – ostění a konzoly přesahují ostění oken o 0,12–0,25 m; strop 18,39 (výška 3,76 m) – krb 3,34 m pod ním",
+   "proc": "síň 1. patra paláce B, východní čelo (líc x 58,25) uprostřed mezi okny: krb š 3,01 m (z 145,10…148,10, střed na ose paláce z 146,6); okna čela rozestoupená (hrad_puchart.json B.palac.okna_od – Míša 16. 11. „Posunout okna“): niky z 143,70…144,85 a 148,36…149,51, mezi krbem a nikou zdivo 0,25 m (dřív krb přesahoval niky o 0,12–0,25 m); strop 18,39 (výška 3,76 m) – krb 3,34 m pod ním",
    "jistota": "NAVRH",
-   "zdroj": "krby.json hradB_krb_navrh; paprsky KOLIZE puchart.glb 15. 11."
+   "zdroj": "krby.json hradB_krb_navrh; paprsky KOLIZE puchart.glb 15. 11.; hlídá smysl:krb_okna"
   }
  ],
  "upravy_domy": {
@@ -672,7 +674,8 @@
    "proc": "síň 1. patra paláce A: Krb_Sinovy_Vysoky (šířka 3,00 m) se mezi příčku světnice (líc u 5,06) a schody do podkroví (od u 7,75) nevejde – volno 2,7 m (paprsky KOLIZE 15. 11.); Krb_Hradni (2,67 m) u 5,05…7,71, záda na líci hradby (v −2,99); výška 3,42 m vs. strop 3,26 m – vrchol dýmníku 0,16 m v tloušťce stropu (strop 45,86, podlaha podkroví nad ním)",
    "jistota": "NAVRH",
    "zdroj": "krby.json hradA_krb_navrh (síň s krbem – Valdek)",
-   "proc_neumisteno": "NEVLOŽENO (čeká na rozhodnutí Míši): v síni 1. patra paláce A je na zdi hradby mezi příčkou světnice (líc u 5,06) a schody do podkroví (od u 7,75) jen 2,7 m; Krb_Sinovy_Vysoky má 3,00 m, Krb_Hradni 2,67 m – ten se vejde, ale zakryje nástup na schody do podkroví (trasa A_palac bod u 6,83 v −2,49 před prvním stupněm – test průchodu 15. 11.: „uvízla … narazila na Krb_Hradni“). Nádvorní zeď síně má dveře na pavlač (u 6,0–6,6), příčky jsou dřevěné. Možnosti: přesunout schody do podkroví (hrad_puchart.json A dispozice podkrovi_schody) nebo krb do jiné místnosti – návrh ke schválení"
+   "rozhodnuti": "Míša 16. 11.: „Bez krbu“ – síň paláce A zůstává bez krbu (vytápí ji kamna světnice přikládaná ze síně, hradA_kamna); nevkládá se, poloha jen pro záznam (chyby.md #341)",
+   "proc_neumisteno": "NEVLOŽENO (rozhodnutí Míši 16. 11. „Bez krbu“): v síni 1. patra paláce A je na zdi hradby mezi příčkou světnice (líc u 5,06) a schody do podkroví (od u 7,75) jen 2,7 m; Krb_Sinovy_Vysoky má 3,00 m, Krb_Hradni 2,67 m – ten se vejde, ale zakryje nástup na schody do podkroví (trasa A_palac bod u 6,83 v −2,49 před prvním stupněm – test průchodu 15. 11.: „uvízla … narazila na Krb_Hradni“). Nádvorní zeď síně má dveře na pavlač (u 6,0–6,6), příčky jsou dřevěné. Možnosti: přesunout schody do podkroví (hrad_puchart.json A dispozice podkrovi_schody) nebo krb do jiné místnosti – návrh ke schválení"
   }
  ]
 }

@@ -36,8 +36,8 @@ Počátek = střed přední hrany ohniště na podlaze, +Z do místnosti; prázd
 na ohništi; kolize `-colonly`; vnitřní sítě se slovem `Vnitrek`; do 15 tis. troj., max 3 materiály.
 | Krb | Místo (souřadnice) | Volný prostor š × h × v | Kouř |
 |---|---|---|---|
-| Hrad A – síň 1. patra (`HradA_Krb_Ohen1`) | střed přední hrany (−8,68; 42,60; −1,36), yaw 98°, zeď hradby bez oken | 1,6 × 0,9 × 3,26 | komín v tloušťce hradby 1,1 m, ústí nad korunou |
-| Hrad B – síň 1. patra (`HradB_Krb_Ohen1`) | východní čelo mezi okny, (57,32; 14,63; 146,25), yaw −90° | 1,8 × 0,9 × 3,9 | komín ve východním čele přes 2. patro nad střechu |
+| Hrad A – síň 1. patra (`HradA_Krb_Ohen1`) | **zrušeno – Míša 16. 11.: „Bez krbu“** (krb by zakryl nástup na schody do podkroví, chyby.md #341); dřív střed přední hrany (−8,68; 42,60; −1,36), yaw 98° | – | – |
+| Hrad B – síň 1. patra (`HradB_Krb_Ohen1`) | východní čelo mezi okny, (57,32; 14,63; 146,25), yaw −90°; osazený Krb_Sinovy_Vysoky (š 3,01 m) uprostřed čela z 146,6 – okna čela rozestoupená (Míša 16. 11. „Posunout okna“, hrad_puchart.json B.palac.okna_od) | 1,8 × 0,9 × 3,9 (po rozestoupení oken 3,51 m mezi nikami) | komín ve východním čele přes 2. patro nad střechu |
 | Rychta – jizba (krb_rychta.glb) | na příčce jizba/síň vpravo od dveří jizby, (1,55; 0,30; −0,45) v souř. modelu Rychty, yaw 0 | 3,2 × 1,05 × 2,29 (krb š 1,8–2,0) | komín: otvor v záklopu 2,59–2,64, střecha nad x 1,55 y ~6,0, hřeben 8,23, vrchol komína ≥ 8,6 |
 Hradní krb: kamenné ostění s konzolami, římsa, plášť do průduchu ve zdi, kozlíky, polena, osmahlá zadní stěna.
 Krb Rychty: menší, lomový kámen a hlína, překlad, plášť z omítnutého proutí/hlíny, komín přes střechu.
@@ -58,7 +58,7 @@ Chalupní pec: hliněná klenutá pec na kamenné podezdívce, ústí s čelem, 
 a trojnožkou, začouzené okolí ústí a strop, lavice kolem, zápecí. Hradní kamna: kachle 14. st.
 (miskové/nádobkové) v hliněném plášti. Ohniště černé kuchyně: vyvýšené kamenné, dýmník, trojnožka a kotel.
 Snímky současného stavu: docs/screens/pec_stav_*.jpg.
-**Dodáno 15. 11.** (Topeni_1400 + Doplněk, Disk): osazeno podle `pravidla/svet/topeni.json` (vlozit, proc u každého místa) – pece chalup a hájovny Pec_Chalupni, krčma Pec_Krcma + Topeniste_Kuchynske_Siroke, hrad A kuchyně Topeniste (bez odtahu) a Kamna_Hradni_Nadobkova, hrad B Krb_Sinovy_Vysoky, Rychta Krb_Rychta + 5× Komin_Rychta_Dil_1m (síňový krb je na jizbu vysoký), krb síně hradu A nevložen (blokoval by schody do podkroví – chyby.md 341), Zacouzeni_Stropu nevloženo (omítka na dřevěném záklopu – 343); snímky docs/screens/topeni_*.png.
+**Dodáno 15. 11.** (Topeni_1400 + Doplněk, Disk): osazeno podle `pravidla/svet/topeni.json` (vlozit, proc u každého místa) – pece chalup a hájovny Pec_Chalupni, krčma Pec_Krcma + Topeniste_Kuchynske_Siroke, hrad A kuchyně Topeniste (bez odtahu) a Kamna_Hradni_Nadobkova, hrad B Krb_Sinovy_Vysoky, Rychta Krb_Rychta + 5× Komin_Rychta_Dil_1m (síňový krb je na jizbu vysoký), krb síně hradu A nevložen (blokoval by schody do podkroví – chyby.md 341; Míša 16. 11.: „Bez krbu“), Zacouzeni_Stropu nevloženo (omítka na dřevěném záklopu – 343); snímky docs/screens/topeni_*.png.
 
 ## 8) Seno (předloha docs/reference/seno/kcd1_seno_staj_misa_15_11.jpg)
 Fotorealistické suché luční seno, bledé slámově béžovo-šedé, matné; hustá spleť tenkých zvlněných stébel,
