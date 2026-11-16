@@ -496,7 +496,7 @@ hostinec 26/34/33/41 (27/25/26/34), věž 24/24/24/23 (27/25/30/29). Paměť VRA
 
 
 
-## 0.999999 – NEOVĚŘENO NA ZAŘÍZENÍ (vydání 15. 11. noc)
+## 0.999999 (commit 3b6c1cc, vydáno 16. 11. 01:04) – NEOVĚŘENO NA ZAŘÍZENÍ (testovací, bez z_postavy – oděvy ř. 3 v další verzi)
 Změny proti 0.999998: krčma dvůr (déšť pod střechami, cesty ze dvora, schody), tráva v hostinci/u dveří (jeden zákaz
 trávy), kostel = zřícenina z Disku (kolize zdi podle sítě, střední LOD s barvou vrcholů), zaniklá ves Doubrava z dílů,
 rybník v2 z jednoho záznamu (vlastní vzhled hladiny), vodopád/kaskáda, ves hnědá + vyšlapaná hlína podle Pucharta, lavice
