@@ -359,3 +359,10 @@ pak oprava. Hypotézu nevydávat za opravu.
   MultiMesh → čas přechodu po buňce (custom data/uniform instance), ne po stromu; hystereze proti kmitání na hraně.
   Totéž pro dlaždice terénu (pás 40 m) a díly (_dil_lod).
 - Data: `modely.json lod_prolinani {"druh": "cas"|"pasmo", "cas_s": 0.25}`, varianta trasy pro A/B. NEOVĚŘENO – po vydání.
+- **Míša 16. 11.: „my máme jen 3 druhy, tady je jich mrtě a ještě impostory“.** Změřeno z glb: naše stromy LOD0 ~11–12 tis.
+  troj. (dub, buk, lípa, olše, jabloně 12 000; bříza 7,5 tis.; smrk 6,9 tis.), pak rovnou impostor (6 troj., `_daleko`)
+  od 40 m (tablet, `STROM_PREP`). Předloha: 1 081 → 787 → 524 → 361 → impostor 2. Tj. náš blízký strom je ~11× těžší
+  a mezi 12 tis. a impostorem není nic → ostrý skok, proto pásmo prolínání (2× kreslení). Import má `generate_lods=true`
+  (automatické mezistupně Godotu uvnitř LOD0), ale ty listí karet nezjednoduší dobře (podezření, neměřeno, kolik se jich
+  na tabletu reálně použije). Návrh: vlastní LOD1 ~3 tis. a LOD2 ~1 tis. (Blender decimace karet / méně karet, jako
+  `trees.py` karty), impostor až dál, s časovaným prolínáním K13 → méně trojúhelníků ve 15–40 m i kratší 2× kreslení.
