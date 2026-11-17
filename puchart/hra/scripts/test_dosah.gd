@@ -317,36 +317,50 @@ func _starty() -> Array:
 func _svah(ha: float, hb_: float, d: float) -> bool:
 	return hb_ - ha <= maxf(schod_max, d * tan_max)
 
-## Chůze kapsle hráče z p k cíli (x, z): podkroky – rovně, po pochozím svahu, krok nahoru (s dosednutím na stupeň výš),
+## Chůze kapsle hráče z p k cíli (x, z) jako hrac.gd: po podkrocích (podkrok_m) míří k cíli – rovně, po pochozím svahu,
+## krok nahoru (hrac.json schod_m, dosednout výš na pochozí plochu, ne přeskok zídky), u stěny klouže podél ní (move_and_slide),
 ## pak dopad. Vrací polohu dopadu; Vector3.INF = neprojde; y = −INF = pod sebou nemá kolizi (díra).
 func _jdi(p: Vector3, cil: Vector2) -> Vector3:
 	chuzi += 1
-	var d := Vector3(cil.x - p.x, 0, cil.y - p.z); var L := d.length()
-	var n := maxi(1, ceili(L / float(cfg["podkrok_m"]))); var s := d / n
+	var pk := float(cfg["podkrok_m"])
 	var q := p + Vector3(0, 0.01, 0)
-	for i in n:
-		var xf := Transform3D(Basis(), q)
-		if hrac.test_move(xf, s, _col):
-			var jde := false
-			var nr := _col.get_normal()
-			if nr.y >= cos_max:   # pochozí svah: posun po rovině svahu
-				var s2 := Vector3(s.x, -(nr.x * s.x + nr.z * s.z) / nr.y + 0.01, s.z)
-				if not hrac.test_move(xf, s2): q += s2; jde = true
-			if not jde:
-				for vy in schody:
-					var v := float(vy)
-					if hrac.test_move(xf, Vector3.UP * v): continue
-					var up := xf.translated(Vector3.UP * v)
-					if hrac.test_move(up, s): continue
-					if not hrac.test_move(up.translated(s), Vector3.DOWN * (v + 0.05), _col): continue
-					if v - _col.get_travel().length() < 0.02 or _col.get_normal().y < cos_max: continue   # dosednout výš, na pochozí plochu (ne přeskok zídky)
-					q = up.origin + s + _col.get_travel(); jde = true; break
-			if not jde: return Vector3.INF
-		else:
-			q += s
+	var L := Vector2(cil.x - p.x, cil.y - p.z).length()
+	for it in ceili(L / pk) * 3 + 4:
+		var d := Vector3(cil.x - q.x, 0, cil.y - q.z)
+		if d.length() < 0.05: return q
+		var s := d.limit_length(pk)
+		var r := _podkrok(q, s)
+		if r == Vector3.INF:
+			var nr := Vector3(_col.get_normal().x, 0, _col.get_normal().z)   # stěna: klouzat podél ní
+			if nr.length() < 0.1: return Vector3.INF
+			var s2 := s.slide(nr.normalized())
+			if s2.length() < 0.05: return Vector3.INF
+			r = _podkrok(q, s2)
+			if r == Vector3.INF: return Vector3.INF
+		q = r
 		if hrac.test_move(Transform3D(Basis(), q), Vector3.DOWN * float(cfg["pad_hledat_m"]), _col): q += _col.get_travel()
 		else: return Vector3(q.x, -INF, q.z)
-	return q
+	return q if Vector2(cil.x - q.x, cil.y - q.z).length() < 0.15 else Vector3.INF
+
+## jeden podkrok s: rovně / po svahu / krok nahoru; INF = narazil (normála v _col)
+func _podkrok(q: Vector3, s: Vector3) -> Vector3:
+	var xf := Transform3D(Basis(), q)
+	if not hrac.test_move(xf, s, _col): return q + s
+	var nr := _col.get_normal()
+	if nr.y >= cos_max:   # pochozí svah: posun po rovině svahu
+		var s2 := Vector3(s.x, -(nr.x * s.x + nr.z * s.z) / nr.y + 0.01, s.z)
+		if not hrac.test_move(xf, s2): return q + s2
+	var k2 := KinematicCollision3D.new()
+	for vy in schody:
+		var v := float(vy)
+		if hrac.test_move(xf, Vector3.UP * v): continue
+		var up := xf.translated(Vector3.UP * v)
+		if hrac.test_move(up, s): continue
+		if not hrac.test_move(up.translated(s), Vector3.DOWN * (v + 0.05), k2): continue
+		if v - k2.get_travel().length() < 0.02 or k2.get_normal().y < cos_max: continue   # dosednout výš, na pochozí plochu
+		return up.origin + s + k2.get_travel()
+	hrac.test_move(xf, s, _col)   # normála stěny pro klouzání
+	return Vector3.INF
 
 ## uzel v jemném sloupci (fx, fz) nejblíž výšce y (patro do shoda_patra_m, terén do 2× víc)
 func _uzel(fx: int, fz: int, y: float) -> int:
