@@ -37,6 +37,7 @@ var dvere: Array = []                 # [{jm, p: Vector3}] – uzly id NB + NU +
 var dv_bliz: Dictionary = {}          # uzel -> [indexy dveří]
 var lezeni: Dictionary = {}           # uzel žebříku -> [uzel na druhém konci] (hlavni.zebriky – lezení, ne chůze)
 var n_zebriku := 0
+var puda_ven: Array = []              # odchody z půdy ven střechou / štítem (z horního konce žebříku)
 var stav := PackedByteArray()
 var rev: Dictionary = {}              # cíl -> [zdroje] (hrany přes stavby a dveře; terén se počítá znovu)
 var diry: Array = []
@@ -113,6 +114,12 @@ func spust(h: Node, p: CharacterBody3D) -> Dictionary:
 	var uviz := _shluky(func(i: int) -> bool: return (stav[i] & DOSAZENO) != 0 and (stav[i] & NAVRAT) == 0)
 	var ostr := _shluky(func(i: int) -> bool: return (stav[i] & DOSAZENO) == 0 and i < NB + NU and (i >= NB or slozite[i] == 0))
 	ostr = ostr.filter(func(s: Dictionary) -> bool: return int(s["uzlu"]) >= int(cfg["ostrov_min_uzlu"]))
+	var ostr_vyj: Array = []   # místa bez přístupu záměrně (kontroly_hra.json dosah nepristupne – s důvodem, chyby.md 390)
+	for s_: Dictionary in ostr:
+		for v: Dictionary in cfg.get("nepristupne", []):
+			if Vector2(float(s_["x"]) - float(v["x"]), float(s_["z"]) - float(v["z"])).length() <= float(v["r_m"]) and float(v["y"][0]) <= float(s_["y"]) and float(s_["y"]) <= float(v["y"][1]):
+				s_["vyjimka"] = v["id"]; ostr_vyj.append(s_); break
+	ostr = ostr.filter(func(s_: Dictionary) -> bool: return not s_.has("vyjimka"))
 	var dv_bez: Array = []
 	for i in dvere.size():
 		if dvere[i]["dvere"] and (stav[NB + NU + i] & DOSAZENO) == 0: dv_bez.append({"dvere": dvere[i]["jm"], "x": snappedf(dvere[i]["p"].x, 0.1), "z": snappedf(dvere[i]["p"].z, 0.1), "y": snappedf(dvere[i]["p"].y, 0.1)})
@@ -129,12 +136,13 @@ func spust(h: Node, p: CharacterBody3D) -> Dictionary:
 	for s in uviz: n_uv += int(s["uzlu"])
 	if m.get("uviznuti_max_uzlu") != null and n_uv > int(m["uviznuti_max_uzlu"]): chyby.append("uvíznutí %d uzlů > %d" % [n_uv, int(m["uviznuti_max_uzlu"])])
 	if m.get("dvere_bez_dosahu_max") != null and dv_bez.size() > int(m["dvere_bez_dosahu_max"]): chyby.append("dveří bez dosahu %d > %d" % [dv_bez.size(), int(m["dvere_bez_dosahu_max"])])
+	if m.get("puda_ven_max") != null and puda_ven.size() > int(m["puda_ven_max"]): chyby.append("odchodů z půdy ven %d > %d: %s" % [puda_ven.size(), int(m["puda_ven_max"]), _kde(puda_ven)])
 	var vm := int(cfg["vypis_max"])
 	vysl = {"popis": "mřížka dosažitelnosti (hra/scripts/test_dosah.gd, kontroly_hra.json dosah)", "mrizka": [NBX, NBZ, kb, kf],
 		"uzlu_teren": NB - slozite.count(1), "uzlu_stavby": NU, "dveri": dvere.filter(func(d: Dictionary) -> bool: return d["dvere"]).size(), "bodu_tras": dvere.filter(func(d: Dictionary) -> bool: return not d["dvere"]).size(), "dosazeno": dos, "navrat": nav, "chuzi": chuzi,
 		"starty": starty.map(func(i: int) -> Array: var q := _poz(i); return [snappedf(q.x, 0.1), snappedf(q.z, 0.1), snappedf(q.y, 0.1)]),
 		"diry": diry.slice(0, vm), "diry_pocet": diry.size(), "unik": unik, "okraj_dosazeny": okraj.size(),
-		"uviznuti_uzlu": n_uv, "uviznuti": uviz.slice(0, vm), "ostrovy_pocet": ostr.size(), "ostrovy": ostr.slice(0, vm), "dvere_bez_dosahu": dv_bez,
+		"uviznuti_uzlu": n_uv, "uviznuti": uviz.slice(0, vm), "ostrovy_pocet": ostr.size(), "ostrovy": ostr.slice(0, vm), "ostrovy_vyjimky": ostr_vyj, "dvere_bez_dosahu": dv_bez, "zebriku": n_zebriku, "puda_ven_pocet": puda_ven.size(), "puda_ven": puda_ven,
 		"cas_ms": {"rastr": t1 - t0, "sloupce": t2 - t1, "dopredu": t3 - t2, "zpet": t4 - t3, "shluky": t5 - t4, "unik": t6 - t5, "celkem": t6 - t0},
 		"chyby": chyby}
 	var cesta := OS.get_environment("PUCHART_DOSAH") if OS.has_environment("PUCHART_DOSAH") else "user://dosah.json"
@@ -147,6 +155,7 @@ func spust(h: Node, p: CharacterBody3D) -> Dictionary:
 	for s in uviz.slice(0, 8): print("DOSAH uvíznutí ", s)
 	for s in ostr.slice(0, 8): print("DOSAH ostrov ", s)
 	for s in dv_bez.slice(0, 12): print("DOSAH dveře bez dosahu ", s)
+	print("DOSAH půda ven %d (žebříků %d), ostrovů s výjimkou %d" % [puda_ven.size(), n_zebriku, ostr_vyj.size()])
 	return vysl
 
 func _kde(a: Array) -> String:
@@ -279,6 +288,13 @@ func _zebriky() -> void:
 			konce.append(_pridej_bod("zebrik/%s/%s" % [zb.get("nazev", "Žebřík"), k], pb, Vector3.ZERO, false))
 		lezeni.get_or_add(konce[0], []).append(konce[1]); lezeni.get_or_add(konce[1], []).append(konce[0])
 		n_zebriku += 1
+		# půda bez obvodu (chyby.md 391): z horního konce žebříku chůze puda_ven_m do 8 směrů – dopad o víc než puda_ven_dy níž
+		# a puda_ven_m daleko = hráč z půdy odešel střechou / štítem ven a spadl (stěny kolize domů jen do podlahy půdy)
+		var top := _poz(konce[1]); var dm := float(cfg.get("puda_ven_m", 8.0))
+		for k in 8:
+			var a := k * PI / 4.0; var c := _jdi(top, Vector2(top.x + cos(a) * dm, top.z + sin(a) * dm))
+			if c != Vector3.INF and c.y != -INF and c.y < top.y - float(cfg.get("puda_ven_dy", 1.0)):
+				puda_ven.append({"zebrik": String(zb.get("nazev", "Žebřík")), "smer_st": k * 45, "x": snappedf(c.x, 0.1), "z": snappedf(c.z, 0.1), "y": snappedf(c.y, 0.1), "od_y": snappedf(top.y, 0.1)})
 
 ## uzel navíc (dveře, bod trasy) spojený chůzí s uzly mřížky do dvere_r_m (výškově do dvere_dy_m)
 func _pridej_bod(jm: String, p: Vector3, nn: Vector3, je_dvere: bool) -> int:

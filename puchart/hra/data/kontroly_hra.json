@@ -93,6 +93,15 @@
   "zebriky_pozn": "žebříky z dat (hlavni.zebriky: mista.json modely.zebriky domů, celky zebrik – zebriky.gd) jsou dva uzly navíc (podlaha u nástupu a u sestupu) spojené lezením oběma směry; s mřížkou chůzí do dvere_r_m jako dveře (chyby.md 390: půdy domů vsi bez přístupu – test nelezl)",
   "trasy_pozn": "body tras průchodu (hra/data/pruchody*.json) jsou uzly navíc spojené chůzí s předchozím bodem trasy a s buňkami do dvere_r_m – úzké schody a průlezy (pod 1 m) mřížka mine; trasy samy prochází test průchodu",
   "ostrov_min_uzlu": 6,
+  "puda_ven_m": 8.0,
+  "puda_ven_dy": 1.0,
+  "puda_ven_pozn": "z horního konce každého žebříku chůze puda_ven_m do 8 směrů: dopad o víc než puda_ven_dy níž = z půdy se dá odejít střechou / štítem a spadnout ven (kolize stěn domů z Havrana jen do podlahy půdy – chyby.md 391); meze puda_ven_max = stav 17. 11., jen klesá",
+  "nepristupne": [
+   {"id": "hrad_A_berma", "x": -17.0, "z": 3.0, "r_m": 16.0, "y": [33.0, 39.5], "duvod": "berma za západní zdí jádra hradu A mezi zdí a vnitřním příkopem A_vnitrni (hrad_puchart.json teren.prikopy, dno 28,4 – 7 m skalní stěna), od jihu uzavřená hradbou z JZ nároží jádra (A.hradba_val, Míša 30. 10.: hradba připojená k hornímu hradu; 5. 11. končí v JZ nároží); vstup ze dvora jádra ne (podél Z zdi palác a budova A_sz, úsek 6 nepřístupný – A.ochoz pozn_12_11). Ve 14. st. prostor mezi zdí jádra a příkopem obvykle bez vstupu (jen obranný pás); NAVRH k rozhodnutí Míši: fortna z předhradí přes příkop nebo schody z ochozu (snímek docs/screens/dosah_17_11_hradA_berma.jpg)"},
+   {"id": "hrad_B_pata_utesu", "x": 71.0, "z": 118.0, "r_m": 10.0, "y": [-5.0, 1.0], "duvod": "pata skalní stěny pod východní hradbou hradu B (hrad_puchart.json teren.utesy ostroh_B: stěna ~10 m, odebraná suť) – lesní svah 40–45° nad Kouteckým potokem, žádná cesta; kam se nechodí"},
+   {"id": "hrad_B_vez_koruna", "x": 55.2, "z": 133.3, "r_m": 5.0, "y": [23.0, 24.5], "duvod": "koruna zdí věže hradu B (B.vez vrch_y 23,6) pod krovem – zhlaví, ne podlaha; nejvyšší patro věže 20,4 (trasa B_vez_nahoru), podkroví nepřístupné (B.vez pozn)"},
+   {"id": "stola_dutina", "x": 137.0, "z": -342.0, "r_m": 11.0, "y": [-4.5, -2.0], "duvod": "horní plocha výdřevy chodby štoly pod víkem kolize terénu (jednostranné, zespodu nekoliduje) – uzavřená dutina ve skále; od 17. 11. víko i nad ústím (chyby.md 389), zvenku se do ní nedá dostat"}
+  ],
   "vypis_max": 25,
   "unik_zkousek": 8,
   "unik_chuze_s": 4.0,
@@ -101,7 +110,8 @@
    "diry_max": 0,
    "unik_max": 0,
    "uviznuti_max_uzlu": null,
-   "dvere_bez_dosahu_max": null
+   "dvere_bez_dosahu_max": null,
+   "puda_ven_max": null
   },
   "cas_max_s": 900,
   "zdroj": "postup: sonda --reach a tools/seal_world.py v Alchemists of Prague (github.com/msveshnikov/alchemists-of-prague, kód nepřevzat – licence neuvedena), rešerše docs/rozpracovane/reserse_pdf_17_11.md bod 2 a Havran docs/rozpracovane/reserse_17_11_pdf.md (mřížka od brány vsi a hradů). Krok 2 m venku = efektivní rozlišení DMR 5G (~3,6 m, dlazdice.json lod), 1 m u staveb = šířka dveří; kapsle hráče r 0,3 m, výška 1,75 (hlavni.gd), schod a sklon z hráče (hrac.json schod_m, hrac.gd floor_max_angle 50°). Cíl běhu < 10 min na PC (zadání 17. 11.)."
