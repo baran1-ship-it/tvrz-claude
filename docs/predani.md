@@ -1569,6 +1569,7 @@ Hotovo v kódu a datech (testy u každého):
   albedo modulace podle předlohy).
 
 ## Poučení 16.–17. 11. (vydání 0.9999991)
+- **Fronta na zámek Godotu (17. 11.):** `flock build/beh/godot.lock …` na pozadí čeká, dokud běží cizí export (i 30+ min) – výchozí limit úlohy na pozadí 30 min ji zabije dřív, než se dostane na řadu (focení fcer). Úlohy ve frontě spouštět s `timeout` 7200000.
 - **Stínové světlo ohně nesmí ležet uvnitř modelu pece** (dum1: černá kopule, stín přes celou jizbu). Pece z katalogu
   (`ohen_znacky.k_usti_predmety`): světlo před ústím (`svetlo_pred_ustim_m`), plamen v ústí.
 - **Rozmístění nábytku a test chůze musí hlídat stejnou cestu** (`pece_domu.za_dvermi_m`, `pruchod_k_stredu_m` ×
@@ -1612,4 +1613,7 @@ Hotovo v kódu a datech (testy u každého):
   nejširší cestě (`CESTA_PREDNOST`), jinak údaje vrcholů skáčou mezi osami (razítka). Test `cesta_skoky`.
 - **Krytí louky (`kryti.bin`) po každém exportu** je teď krok 18 `tools/export.sh`; otisk exportu v `modely/louka/kryti_otisk.txt`,
   test `kryti_otisk`. Předměty, pod kterými nemá růst tráva, potřebují kolizi (`kit.stone` ji nemá – dlažba přelivu `P.cols`).
+- **Past `svet._collisions`:** kvádr exportu do 2 m (výška < 2,5) v 1 m od „měkké rostliny“ (MEKKE: tráva, kapradí, keř…)
+  hra vyřadí jako kolizi rostliny – i dlažbu nebo nízkou zídku, když na ní (chybou) roste rostlina. Stavby rybníka v2 proto
+  v `kraj.stavba_near` (`ryb2_stavba`); heuristika filtru zůstává (PODEZŘENÍ na další nízké stavby, nerozebráno).
 - Přeliv × výpust: test smyslu `preliv_vypust`, délka křídla v záznamu `vypust.kridlo_m`.
