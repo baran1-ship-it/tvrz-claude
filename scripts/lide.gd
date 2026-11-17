@@ -545,7 +545,10 @@ func _misto(c: Dictionary, kde: String) -> Array:
 							var qq := Vector2(float(r2["p"][0]) + gx * 0.25, float(r2["p"][2]) + gz * 0.25)
 							if not is_nan(_nav_bunka(_nav_ij(qq), float(r2["p"][1]))):
 								volnych += 1
-					kde_vsech.append("(%.1f, %.1f) %s y %.2f volnych bunek do 2 m %d" % [float(r2["p"][0]), float(r2["p"][2]), _mistnost_u(Vector3(float(r2["p"][0]), float(r2["p"][1]), float(r2["p"][2]))), float(r2["p"][1]), volnych])
+					var rq := PhysicsRayQueryParameters3D.create(Vector3(float(r2["p"][0]), 80.0, float(r2["p"][2])), Vector3(float(r2["p"][0]), -80.0, float(r2["p"][2])))
+					var hz := get_viewport().get_world_3d().direct_space_state.intersect_ray(rq)
+					var zem_s := "%.2f %s" % [(hz["position"] as Vector3).y, (hz["collider"] as Node).name] if not hz.is_empty() else "zadna kolize"
+					kde_vsech.append("(%.1f, %.1f) %s y %.2f zem %s volnych bunek do 2 m %d" % [float(r2["p"][0]), float(r2["p"][2]), _mistnost_u(Vector3(float(r2["p"][0]), float(r2["p"][1]), float(r2["p"][2]))), float(r2["p"][1]), zem_s, volnych])
 			push_warning("lide: misto %s - predmet %s v %s nenalezen (kusy %s)" % [kde, z["u_predmetu"], z.get("mistnost", ""), str(kde_vsech)])
 			return [Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z), INF]   # stat na miste, ne k (0,0); nepamatovat
 	elif z.has("u_steny") and main.svet != null and is_inside_tree():
