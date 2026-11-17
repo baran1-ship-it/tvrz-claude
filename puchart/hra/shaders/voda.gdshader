@@ -20,6 +20,7 @@ uniform float drsnost_klid = 0.08;
 uniform float drsnost_pena = 0.5;
 uniform float specular = 0.12;
 uniform vec3 odraz : source_color = vec3(0.282, 0.302, 0.149);   // barva odrazu lesa (Compatibility nemá SSR – odraz jen oblohy by byl šedá deska)
+uniform float kryti_min = 0.0;      // nejmenší krytí hladiny (voda_hra.json vzhled_13_11 kryti_min; Míša 17. 11.: „nemáš vodu v potoce“ – mělká průsvitná hladina se tmavým dnem se četla jako prázdné koryto)
 uniform float kraj_m = 0.08;         // m hloubky, na kterých krytí u čáry vody doroste
 uniform float rychlost = 0.45;        // m/s
 uniform float meritko = 2.2;          // m na dlaždici vln
@@ -65,5 +66,5 @@ void fragment() {
 	ALBEDO = mix(mix(col, odraz, fr), pena_barva, pena);   // při šikmém pohledu převáží odraz okolí (les u potoka)
 	ROUGHNESS = mix(drsnost_klid, drsnost_pena, pena); METALLIC = 0.0; SPECULAR = specular;   // lesk slunce, ne zrcadlo oblohy
 	float kraj = COLOR.a * smoothstep(0.0, kraj_m, h);   // krajní řada a vrcholy nad vodou: 0 (žádná hrana sítě)
-	ALPHA = clamp(max(pohl, fr) + pena * 0.25, 0.0, 1.0) * kraj;
+	ALPHA = clamp(max(max(pohl, fr), kryti_min) + pena * 0.25, 0.0, 1.0) * kraj;
 }
