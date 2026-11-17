@@ -539,7 +539,13 @@ func _misto(c: Dictionary, kde: String) -> Array:
 			var kde_vsech := []
 			for r2: Dictionary in vb:
 				if String(r2["id"]) == String(z["u_predmetu"]):
-					kde_vsech.append("(%.1f, %.1f) %s" % [float(r2["p"][0]), float(r2["p"][2]), _mistnost_u(Vector3(float(r2["p"][0]), float(r2["p"][1]), float(r2["p"][2])))])
+					var volnych := 0
+					for gx in range(-8, 9):
+						for gz in range(-8, 9):
+							var qq := Vector2(float(r2["p"][0]) + gx * 0.25, float(r2["p"][2]) + gz * 0.25)
+							if not is_nan(_nav_bunka(_nav_ij(qq), float(r2["p"][1]))):
+								volnych += 1
+					kde_vsech.append("(%.1f, %.1f) %s y %.2f volnych bunek do 2 m %d" % [float(r2["p"][0]), float(r2["p"][2]), _mistnost_u(Vector3(float(r2["p"][0]), float(r2["p"][1]), float(r2["p"][2]))), float(r2["p"][1]), volnych])
 			push_warning("lide: misto %s - predmet %s v %s nenalezen (kusy %s)" % [kde, z["u_predmetu"], z.get("mistnost", ""), str(kde_vsech)])
 			return [Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z), INF]   # stat na miste, ne k (0,0); nepamatovat
 	elif z.has("u_steny") and main.svet != null and is_inside_tree():
