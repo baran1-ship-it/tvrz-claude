@@ -1802,7 +1802,11 @@ func _koryto_terenu(root: Node3D) -> void:
 	# nad travou a suche koryto vedle (Misa 0.98); pravidla zasazeni: voda po stavbach, pozdejsi krok nehybe drivejsim
 	_koryta_naposled(root)
 	_krok_cas("koryto: _koryta_naposled")
-	_svy_terenu(root)
+	# pruchody: nejdriv jemnejsi sit na ridsi hranu, pak body ridsi site, ktere jemnejsi nema (deleni cest u obou siti
+	# nemusi byt vnorene) na uz srovnanou jemnejsi - spolecna lomena cara
+	for _p in 3:
+		if _svy_terenu(root) == 0:
+			break
 	_krok_cas("koryto: _svy_terenu")
 	# mrizka vysek (2 m) pro rostliny a louku
 	var g: Dictionary = data["trava_kraj"]
@@ -2143,7 +2147,7 @@ func _koryta_naposled(root: Node3D) -> void:
 ## sit s mene body (hrubsi); vrchol jemnejsi site lezici uvnitr jeji otevrene hrany ma jeji vysku (linearne). Kroky hry
 ## (koryto, najezd mostu, cesty, koryta toku...) meni vrcholy funkci polohy - na hustsi siti je hrana lomena jinak nez na
 ## ridsi (Teren_most 1 m x Teren_okoli 5 m u (275, 596): 2,5 m; test teren_svy).
-func _svy_terenu(root: Node3D) -> void:
+func _svy_terenu(root: Node3D) -> int:
 	var site: Array = []                    # [mi, xf, pole povrchu, okraj: bunka 1 m -> [[a, b]], okrajove vrcholy [si, i]]
 	for t0 in root.find_children("Teren*", "MeshInstance3D", true, false):
 		var nm := String(t0.name)
@@ -2221,6 +2225,8 @@ func _svy_terenu(root: Node3D) -> void:
 					var t := clampf((w2 - p2).dot(q2 - p2) / (L * L), 0.0, 1.0)
 					if w2.distance_to(p2.lerp(q2, t)) > 0.01:
 						continue
+					if absf(lerpf(p.y, q.y, t) - w.y) < 0.001:
+						break                    # uz na hrane (dalsi pruchod)
 					var kk := Vector2i(ai, bi)
 					if not kand.has(kk):
 						kand[kk] = []
@@ -2277,6 +2283,7 @@ func _svy_terenu(root: Node3D) -> void:
 			nove.surface_set_name(si, am.surface_get_name(si))
 		mi.mesh = nove
 	print("svy terenu: %d vrcholu na hranu ridsi site, nejvic %.2f m u (%.1f, %.1f)" % [n, nej, nej_m.x, nej_m.z])
+	return n
 
 
 ## Radce 17:05 bod 6 (Misa 0.70 "vratka ve vzduchu"): branky a vrata ve vsi visely 0,1-0,74 m nad terenem
@@ -7335,10 +7342,6 @@ func _ves_domy(root: Node3D) -> void:
 	var st_mat := StandardMaterial3D.new()
 	st_mat.vertex_color_use_as_albedo = true
 	st_mat.roughness = 0.9
-	# Misa 17. 11. r. 5 (domy zdalky cerne): stredni stupen lezel ve stinu vlastniho stinoveho telesa (_Daleko_Stin, obal
-	# stejne velky) - steny proti slunci rozhodoval jen bias stinu, tmave hneda ve stinu = po tonovani cerna. Pravidlo:
-	# stredni stupen stin neprijima (stin na zem vrha obal), ve hre overeno neosvetlenym materialem (barvy dorazi)
-	st_mat.disable_receive_shadows = true
 	for d: Dictionary in _domy:
 		var vzor := sc.get_node_or_null(String(d["typ"]))
 		if vzor == null:
@@ -11042,7 +11045,6 @@ func _dil_lod(sc: Node3D, zaz: Dictionary, interier: Node, jm: String) -> float:
 	mat.vertex_color_use_as_albedo = true
 	mat.vertex_color_is_srgb = true
 	mat.roughness = float(lod["drsnost"])
-	mat.disable_receive_shadows = true                    # stredni stupen stin neprijima (Misa 17. 11. r. 5, viz ves)
 	me.surface_set_material(0, mat)
 	var s := MeshInstance3D.new()
 	s.name = jm + "_Stredni"
@@ -11696,6 +11698,9 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 				continue
 			ven = 1.0 if i == 0 else -1.0
 			g = float((zem["position"] as Vector3).y)
+			# chuzi rozhoduje podlaha za prahem, ne spodek kridla (krcma 17. 11.: podlaha o 0,04 m vys nez kridlo)
+			prah = maxf(prah, float((o["position"] as Vector3).y))
+			c.y = prah
 			model = not _je_teren(strany[i][0])          # pred prahem nejdriv stupen modelu (domy vsi, mlyn)
 		if OS.has_environment("TVRZ_SCHODY_LADENI"):
 			var pp: Array = []

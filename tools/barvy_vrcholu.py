@@ -61,6 +61,9 @@ def preved(cesta, modulace):
 
 
 def soubory():
+    for f in C.get("soubory", []):                # dalsi GLB s barvou vrcholu (stredni stupen domu vsi, Misa 17. 11. r. 5)
+        if os.path.exists(f):
+            yield "soubory", {}, f
     for s, sd in C["sady"].items():
         for i in sd["ids"]:
             for suf in ("", "_lod1"):

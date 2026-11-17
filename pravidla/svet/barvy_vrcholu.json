@@ -74,5 +74,9 @@
    },
    "pozn": "Seno_1400: atlas sena s šedým COLOR_0 (průměr 0,79); albedo_modulace = baseColorFactor materiálu, jehož jméno začíná klíčem – Puchart seno.json (KCD1 bledě slámově béžová, poměr G/R 0,92, B/R 0,76; bez ní zelenošedé)"
   }
- }
+ },
+ "soubory": [
+  "modely/ves/domy_stredni.glb"
+ ],
+ "_soubory_17_11": "Míša 17. 11. ř. 5 (domy zdálky černé): střední stupeň domů vsi (blender/ves_domy_lod.py, barva zapečená do COLOR_0, lineárně) – Compatibility ho bral jako sRGB, hnědá 0,15 → 0,02 = černá (izolovaná scéna build/dbg/stredni_sky.png: tatáž hnědá jako albedo_color hnědá, jako barva vrcholů černá). Převod týmž nástrojem. Zbývá: střední stupně předmětů (blender/lod_barvy.py → modely/predmety/<id>_stredni.glb – zdroje v kontejneru nejsou) – převod přidat do lod_barvy.py a ves_domy_lod.py při příští stavbě."
 }

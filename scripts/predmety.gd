@@ -218,7 +218,6 @@ func spawn(rec: Dictionary) -> void:
 				_st_mat = StandardMaterial3D.new()
 				_st_mat.vertex_color_use_as_albedo = true
 				_st_mat.roughness = 0.9
-				_st_mat.disable_receive_shadows = true      # stredni stupen stin neprijima (Misa 17. 11. r. 5, stodola cerna)
 			for g in m.find_children("*", "GeometryInstance3D", true, false):
 				(g as GeometryInstance3D).visibility_range_end = od
 				(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
