@@ -20,7 +20,9 @@ PRED = os.path.join(K, "hra/modely/predmety_h")
 EXT = {"image/jpeg": ".jpg", "image/png": ".png"}
 
 
-def prebal(src, dst, vynechat=(), bez_znacek=False, odebrat=()):
+def prebal(src, dst, vynechat=(), bez_znacek=False, odebrat=(), meritko=None):
+    """meritko = [sx, sy, sz] varianty (topeni.json varianty[].meritko): zapečené do vrcholů, normál, tečen a poloh uzlů (značky
+    Pec_Ohen, Pec_Usti…), kolize -convcolonly se škálují s nimi – v Godotu pak žádné nerovnoměrné měřítko uzlu (kolize ho nesnesou)."""
     """odebrat = [{"uzel": začátek jména uzlu se sítí, "kvadr": [x0, x1, y0, y1, z0, z1]}] – trojúhelníky sítě celé uvnitř
     kvádru (souřadnice sítě glTF) se vypustí: výbava sloučená modelářem do sítě pevného dílu (pekařská lopata v síti lavice)"""
     j, b, _ = nacti(src)
@@ -43,15 +45,23 @@ def prebal(src, dst, vynechat=(), bez_znacek=False, odebrat=()):
            "scene": 0, "scenes": [{"name": sc.get("name", ""), "nodes": koreny}], "nodes": uzly,
            "meshes": [], "materials": [], "textures": [], "images": [], "samplers": [], "accessors": [], "bufferViews": [], "buffers": [{"byteLength": 0}]}
     nb = bytearray(); mm = {}; mt = {}; mx = {}; mi = {}; ms = {}; ma = {}
-    def acc(i):
-        if i in ma: return ma[i]
+    MS = np.array(meritko, float) if meritko else None
+    def acc(i, role=None):
+        kl = (i, role if MS is not None else None)
+        if kl in ma: return ma[kl]
         a = dict(j["accessors"][i]); d = cti(j, b, i)
+        if MS is not None and role in ("POSITION", "NORMAL", "TANGENT"):
+            d = np.array(d, np.float32)
+            if role == "POSITION": d[:, :3] *= MS; a["min"] = [float(v) for v in d[:, :3].min(0)]; a["max"] = [float(v) for v in d[:, :3].max(0)]
+            else:
+                d[:, :3] = d[:, :3] * (MS if role == "TANGENT" else 1.0 / MS)
+                d[:, :3] /= np.maximum(np.linalg.norm(d[:, :3], axis=1, keepdims=True), 1e-8)
         nb.extend(b"\0" * ((4 - len(nb) % 4) % 4)); off = len(nb); dd = np.ascontiguousarray(d); nb.extend(dd.tobytes())
         bv = {"buffer": 0, "byteOffset": off, "byteLength": dd.nbytes}
         t = j["bufferViews"][a["bufferView"]].get("target")
         if t: bv["target"] = t
         out["bufferViews"].append(bv); a["bufferView"] = len(out["bufferViews"]) - 1; a.pop("byteOffset", None)
-        out["accessors"].append(a); ma[i] = len(out["accessors"]) - 1; return ma[i]
+        out["accessors"].append(a); ma[kl] = len(out["accessors"]) - 1; return ma[kl]
     def img(i):
         if i in mi: return mi[i]
         im = j["images"][i]; nm = im.get("name") or "obr%d" % i; ext = EXT.get(im.get("mimeType"), ".png")
@@ -96,12 +106,17 @@ def prebal(src, dst, vynechat=(), bez_znacek=False, odebrat=()):
         if n["mesh"] not in mm or kv is not None:
             m = json.loads(json.dumps(j["meshes"][n["mesh"]]))
             for p, p0 in zip(m["primitives"], j["meshes"][n["mesh"]]["primitives"]):
-                p["attributes"] = {k_: acc(v_) for k_, v_ in p["attributes"].items()}
+                p["attributes"] = {k_: acc(v_, k_) for k_, v_ in p["attributes"].items()}
                 if "indices" in p: p["indices"] = bez_kusu(p0, kv) if kv is not None else acc(p["indices"])
                 if "material" in p: p["material"] = mat(p["material"])
                 p.pop("targets", None)
             out["meshes"].append(m); mm[n["mesh"]] = len(out["meshes"]) - 1
         n["mesh"] = mm[n["mesh"]]
+    if MS is not None:
+        for k_ in koreny: assert not any(x in uzly[k_] for x in ("rotation", "scale", "matrix")), "meritko: kořen modelu s transformací"
+        for n in uzly:
+            if "translation" in n: n["translation"] = [float(v) for v in np.array(n["translation"]) * MS]
+            assert "matrix" not in n
     for k_ in ("samplers", "images", "textures"):
         if not out[k_]: del out[k_]
     uloz(dst, out, nb)
@@ -126,7 +141,7 @@ for jm, v in C["varianty"].items():
     for lod in ("LOD0", "LOD1"):
         s = zdroj(v["z"], lod)
         if not os.path.exists(s): print("TOPENI_CHYBI", s); continue
-        n, vel = prebal(s, os.path.join(OUT, "%s_%s.glb" % (jm, lod)), v.get("vynechat", ()), bez_znacek=lod == "LOD1", odebrat=C["modely"].get(v["z"], {}).get("odebrat", ()))
+        n, vel = prebal(s, os.path.join(OUT, "%s_%s.glb" % (jm, lod)), v.get("vynechat", ()), bez_znacek=lod == "LOD1", odebrat=C["modely"].get(v["z"], {}).get("odebrat", ()), meritko=v.get("meritko"))
         print("TOPENI %s_%s (z %s bez %s) uzlů %d, %.2f MB" % (jm, lod, v["z"], v.get("vynechat"), n, vel / 1e6))
 
 # nádobí → katalog předmětů (RigidBody3D z dodané .tscn: freeze, mass, tvar FyzickaKolize)
