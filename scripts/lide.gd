@@ -536,7 +536,11 @@ func _misto(c: Dictionary, kde: String) -> Array:
 			if not u.is_empty():
 				out = u
 		if out[0] == Vector2.ZERO:
-			push_warning("lide: misto %s - predmet %s v %s nenalezen" % [kde, z["u_predmetu"], z.get("mistnost", "")])
+			var kde_vsech := []
+			for r2: Dictionary in vb:
+				if String(r2["id"]) == String(z["u_predmetu"]):
+					kde_vsech.append("(%.1f, %.1f) %s" % [float(r2["p"][0]), float(r2["p"][2]), _mistnost_u(Vector3(float(r2["p"][0]), float(r2["p"][1]), float(r2["p"][2])))])
+			push_warning("lide: misto %s - predmet %s v %s nenalezen (kusy %s)" % [kde, z["u_predmetu"], z.get("mistnost", ""), str(kde_vsech)])
 			return [Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z), INF]   # stat na miste, ne k (0,0); nepamatovat
 	elif z.has("u_steny") and main.svet != null and is_inside_tree():
 		# Misa 10. 11. (KCD: hostinsky opreny o zed u pultu): nejblizsi stena (kolize) od bodu do hledat_m paprsky ve
