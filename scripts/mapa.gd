@@ -298,9 +298,16 @@ func _draw_jizda(r: Rect2, u: float, s: Vector2) -> void:
 	var cf: Dictionary = Pravidla.cti("jizda", "rychle_cestovani")
 	var t: Texture2D = _fig.get("kun" if bool(_jizda["kun"]) else "pesky")
 	var fs := float(cf["figurka_px"]) * u * 1.6
-	var dalsi := _bod_trasy(minf(sj + 15.0, float(_jizda["L"])))
-	var vlevo := dalsi.x < poz.x - 0.01
-	var fr := Rect2(ps - Vector2(fs * 0.5, fs * 0.86), Vector2(fs, fs))
+	# Misa 17. 11. („figurka sem tam odskoci do lesa a pak se vrati, trasa se nemeni“): figurka se zrcadlila podle bodu
+	# 15 m dal - na klikate ceste se otacela tam a zpet a obrazek (postava neni uprostred ctverce) poskakoval do strany.
+	# Ted se otoci, jen kdyz cesta na dalsich otoc_m vede zretelne (otoc_dx_m) na druhou stranu.
+	var cf2: Dictionary = Pravidla.cti("jizda", "rychle_cestovani")
+	var dalsi := _bod_trasy(minf(sj + float(cf2["otoc_m"]), float(_jizda["L"])))
+	var vlevo := bool(_jizda.get("vlevo", dalsi.x < poz.x))
+	if absf(dalsi.x - poz.x) > float(cf2["otoc_dx_m"]):
+		vlevo = dalsi.x < poz.x
+	_jizda["vlevo"] = vlevo
+	var fr := Rect2(ps - Vector2(fs * 0.52, fs * 0.96), Vector2(fs, fs))   # nohy figurky (obrazek: x 0,52, spodek 0,96) na bode trasy
 	if t:
 		_c.draw_texture_rect(t, Rect2(fr.position + (Vector2(fs, 0) if vlevo else Vector2.ZERO), Vector2(-fs if vlevo else fs, fs)), false)
 	else:
