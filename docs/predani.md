@@ -1617,3 +1617,6 @@ Hotovo v kódu a datech (testy u každého):
   hra vyřadí jako kolizi rostliny – i dlažbu nebo nízkou zídku, když na ní (chybou) roste rostlina. Stavby rybníka v2 proto
   v `kraj.stavba_near` (`ryb2_stavba`); heuristika filtru zůstává (PODEZŘENÍ na další nízké stavby, nerozebráno).
 - Přeliv × výpust: test smyslu `preliv_vypust`, délka křídla v záznamu `vypust.kridlo_m`.
+- **Stav 17. 11. odpoledne (snímky `build/m17/pred_*` × `po_*`):** rybník s vodou OK, razítka pryč, přeliv bez křížení.
+  Otevřené: čáry na hranách pásem terénu dál ve hře (Blender je už čistý → příčina v úpravách terénu ve hře, viz tabulka
+  ř. 6); tráva na dolním konci dlažby přelivu; `hladiny_lod` hlásí LOD u vody v kádi a korytech pro koně; `cesta_skoky` 789.
