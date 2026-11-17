@@ -160,6 +160,7 @@ func _akce(co: String, arg: Variant) -> void:
 		"story", "sandbox":   # výběr hry jako v Havranovi (Míša 10. 11.): pískoviště = stavění a předměty z katalogu
 			hv.mode = "piskoviste" if co == "sandbox" else "pribeh"
 			if hv.mode == "piskoviste" and hv.predmety.inv.is_empty(): hv.predmety.start_kit()
+			mapa.objevena.clear()   # nová hra: zajímavá místa neobjevená (mapa.gd, Míša 17. 11.)
 			_na_start()   # nová hra: u vnější branky (mapa_body.json start), denní doba od začátku (den.json start)
 			if hlavni.den: hlavni.den.set_time(String(hlavni.den.cfg["start"]), 0.01)
 			menu.in_game = true; menu.can_save = true
@@ -213,7 +214,7 @@ func _na_start() -> void:
 
 
 ## Ukládání a nahrávání (Havran main.gd _save_game/_list_saves/_apply_save): user://ulozeni/hra_<čas>.json, posledních 20.
-## Uloží režim, polohu a pohled, brašnu, výbavu a položené předměty (predmety.to_save) a dovednosti.
+## Uloží režim, polohu a pohled, brašnu, výbavu a položené předměty (predmety.to_save), dovednosti a objevená místa mapy.
 const SAVE_DIR := "user://ulozeni"
 const REZIMY := {"pribeh": "Příběh", "piskoviste": "Pískoviště"}
 func _seznam_ulozeni() -> Array:
@@ -231,7 +232,8 @@ func _uloz() -> void:
 	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
 	var now := Time.get_unix_time_from_system(); var dt := Time.get_datetime_dict_from_system(); var p := hrac.global_position
 	var j := {"mode": hv.mode, "unix": int(now), "kdy": "%d. %d. %d  %02d:%02d" % [dt["day"], dt["month"], dt["year"], dt["hour"], dt["minute"]],
-		"pos": [p.x, p.y, p.z], "yaw": hrac._yaw, "pitch": hrac._pitch, "let": hrac.leti, "predmety": hv.predmety.to_save(), "dovednosti": hv.dovednosti.to_save()}
+		"pos": [p.x, p.y, p.z], "yaw": hrac._yaw, "pitch": hrac._pitch, "let": hrac.leti, "predmety": hv.predmety.to_save(), "dovednosti": hv.dovednosti.to_save(),
+		"objevena": mapa.objevena.duplicate()}   # objevená zajímavá místa (znaky mapy v příběhu, Havran main.gd objevena)
 	if hlavni.den: j["hodina"] = hlavni.den.hour; j["den"] = hlavni.den.day_n   # Havran save: denní doba
 	var fa := FileAccess.open(SAVE_DIR + "/hra_%d.json" % int(now), FileAccess.WRITE); fa.store_string(JSON.stringify(j)); fa.close()
 	var old := _seznam_ulozeni()
@@ -243,6 +245,7 @@ func _nahraj(path: String) -> void:
 	hv.mode = String(j.get("mode", "pribeh"))
 	if j.has("dovednosti"): hv.dovednosti.from_save(j["dovednosti"])
 	if j.has("predmety"): hv.predmety.from_save(j["predmety"])
+	mapa.objevena = Array(j.get("objevena", []))
 	if hlavni.den and j.has("hodina"): hlavni.den.day_n = int(j.get("den", 1)); hlavni.den.set_hour(float(j["hodina"]), 0.01)
 	var a: Array = j["pos"]
 	hlavni.svet.kolize_ihned(Vector3(a[0], a[1], a[2]))

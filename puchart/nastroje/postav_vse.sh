@@ -49,6 +49,7 @@ cp $K/pravidla/svet/stromy_modely.json $K/hra/data/
 python3 $K/nastroje/cesty_graf.py $K   # síť cest pro rychlé cestování po mapě (Míša 14. 11.)
 python3 $K/nastroje/mapa.py $K   # pergamenová mapa z dat (cesty, pěšiny, potoky) – 14. 11.: mapa ze 30. 10. neměla lesní cesty a pěšiny
 python3 $K/nastroje/mapa_figurka.py $K $G   # figurky rytíře pro jízdu po mapě
+python3 $K/nastroje/mapa_znaky.py $K   # znaky zajímavých míst na mapě (mapa_body.json zajimava.znak_sada) – 17. 11.
 cd $K/hra && $G --headless --import > /dev/null 2>&1 || true
 cp $K/nastroje/godot/r16_zstd.gd $K/hra/_r16z.gd && $G --headless --path $K/hra -s res://_r16z.gd; rm -f $K/hra/_r16z.gd*
 # hrady (návrhy): Blender 4.2 jako modul v /opt/bl (tools/prostredi.sh Havrana)

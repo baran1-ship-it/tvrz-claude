@@ -31,7 +31,14 @@ var _hover := -1
 var _astar := AStar2D.new()
 var _fig := {}                  # "kun" / "pesky" -> Texture2D (nastroje/mapa_figurka.py)
 var _jizda := {}                # běžící cesta: body, kum (kumulativní délky), L, s, rychlost_m_s (mapa), km_h, cil, pohled, hod0
-var zajimava: Array = []        # značky zajímavých míst [{nazev, p: Vector2, tvar}] (mapa_body.json zajimava; Míša 17. 11.)
+var zajimava: Array = []        # značky zajímavých míst [{nazev, p: Vector2, tvar, znak, okruh}] (mapa_body.json zajimava; Míša 17. 11.)
+# znaky a objevování (Míša 17. 11.: „zájmové body pod pěkným malým znakem, ale jen v pískovišti a potom v příběhu, když to
+# objevím“; Havran mapa.gd objevena, KCD): v pískovišti vidět vše, v příběhu znak až po příchodu do okruhu (zajimava.objev)
+var objevena: Array = []        # id objevených zajímavých míst (ukládá prochazka.gd _uloz, nová hra smaže)
+var _znak_tex := {}             # znak -> Texture2D (hra/textury/ui/mapa_znaky z nastroje/mapa_znaky.py)
+var _hover_z := -1              # znak pod kurzorem
+var _vyber_z := -1              # znak, na který hráč klepl (ukáže název)
+var _objev_t := 0.0
 
 
 ## Místa mapy z dat: pevná (cil/pohled) i odvozená ze staveb nových míst (misto + prichod).
@@ -85,8 +92,34 @@ static func nacti_zajimava(c: Dictionary) -> Array:
 	if zc.is_empty() or not FileAccess.file_exists(String(zc["soubor"])): return out
 	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(String(zc["soubor"])))
 	for m: Dictionary in d.get("mista", []):
-		out.append({"id": m["id"], "nazev": m["nazev"], "p": Vector2(float(m["x"]), float(m["z"])), "tvar": String((zc["druhy"] as Dictionary).get(m["id"], zc["vychozi"]))})
+		var ob: Dictionary = zc.get("objev", {})
+		out.append({"id": m["id"], "nazev": m["nazev"], "p": Vector2(float(m["x"]), float(m["z"])), "tvar": String((zc["druhy"] as Dictionary).get(m["id"], zc["vychozi"])),
+			"znak": String((zc.get("znaky", {}) as Dictionary).get(m["id"], "")), "okruh": float((ob.get("okruh_druh", {}) as Dictionary).get(m["id"], ob.get("okruh_m", 35.0)))})
 	return out
+
+
+## Režim hry (hv_most.gd mode z hlavní nabídky: pribeh | piskoviste); bez propojky (testy) příběh.
+func rezim() -> String:
+	return String(proch.hv.mode) if proch != null and proch.get("hv") != null and proch.hv != null else "pribeh"
+
+
+## Je znak místa na mapě? Pískoviště vždy, příběh až po objevení.
+func znak_videt(z: Dictionary) -> bool:
+	return rezim() == "piskoviste" or objevena.has(String(z["id"]))
+
+
+## Objevování chůzí (Havran mapa.gd: kontrola jednou za sekundu i při zavřené mapě): hráč v okruhu místa → objeveno;
+## v příběhu krátké oznámení jako KCD („Objeveno: Mlýn na Veličce“), v pískovišti tiše (znaky vidí stejně).
+func kontroluj_objevy() -> void:
+	if hrac == null: return
+	var pp := Vector2(hrac.global_position.x, hrac.global_position.z)
+	var ob: Dictionary = (cfg.get("zajimava", {}) as Dictionary).get("objev", {})
+	for z: Dictionary in zajimava:
+		if objevena.has(String(z["id"])) or pp.distance_to(z["p"]) > float(z["okruh"]): continue
+		objevena.append(String(z["id"]))
+		print("MAPA objeveno %s" % z["id"])
+		if rezim() != "piskoviste" and proch and proch.get("hv") != null and proch.hv and proch.hv.get("hud") != null:
+			proch.hv.hud.toast(String(ob.get("oznameni", "Objeveno: %s")) % z["nazev"], float(ob.get("oznameni_s", 3.0)))
 
 
 ## Bod na zemi pro hráče (Havran fast_travel: volné místo pro kapsli po spirále): paprsek dolů od terénu + paprsek_nad_m
@@ -129,6 +162,9 @@ func _ready() -> void:
 	cfg = JSON.parse_string(FileAccess.get_file_as_string("res://data/mapa_body.json"))
 	mista = nacti_mista(cfg)
 	zajimava = nacti_zajimava(cfg)
+	for z: Dictionary in zajimava:   # obrázky znaků; chybí-li (starý datový balík), kreslí se náhradní tvar
+		var cz := "res://textury/ui/mapa_znaky/%s.png" % z["znak"]
+		if z["znak"] != "" and not _znak_tex.has(z["znak"]) and ResourceLoader.exists(cz): _znak_tex[z["znak"]] = load(cz)
 	_tex = load("res://textury/ui/mapa.png") if ResourceLoader.exists("res://textury/ui/mapa.png") else null
 	_fb = load("res://fonty/GrenzeGotisch-Bold.ttf"); _fm = load("res://fonty/GrenzeGotisch-Medium.ttf")
 	for m: Dictionary in mista:
@@ -153,7 +189,7 @@ func prepni() -> void:
 
 func show_map() -> void:
 	if otevrena or _tex == null or hrac == null: return
-	otevrena = true; asking = false; visible = true
+	otevrena = true; asking = false; visible = true; _vyber_z = -1
 	_opened_ms = Time.get_ticks_msec()
 	sel = 1 if _here() == 0 and mista.size() > 1 else 0
 	_cursor_to(sel)
@@ -179,6 +215,10 @@ func _here() -> int:
 
 
 func _process(_d: float) -> void:
+	_objev_t -= _d
+	if _objev_t <= 0.0 and not otevrena and not get_tree().paused:
+		_objev_t = float((cfg.get("zajimava", {}) as Dictionary).get("objev", {}).get("kontrola_s", 1.0))
+		kontroluj_objevy()
 	if otevrena and not _jizda.is_empty():
 		_jizda["s"] = minf(float(_jizda["s"]) + float(_jizda["rychlost_m_s"]) * _d, float(_jizda["L"]))
 		_c.queue_redraw()
@@ -202,6 +242,14 @@ func _update_hover() -> void:
 		var c := _to_screen(r, mista[i]["p"]) - Vector2(0, 34.0 * _u(r))
 		var d := c.distance_to(_cur)
 		if d < bd: bd = d; best = i
+	# znak zajímavého místa pod kurzorem: bližší než erb → název znaku místo erbu (klepnutí neptá cestování)
+	_hover_z = -1
+	var zd := float((cfg.get("zajimava", {}) as Dictionary).get("popisek", {}).get("zasah_px", 30)) * _u(r)
+	for j in zajimava.size():
+		if not znak_videt(zajimava[j]): continue
+		var dz := _to_screen(r, zajimava[j]["p"]).distance_to(_cur)
+		if dz < zd and dz < bd: zd = dz; _hover_z = j
+	if _hover_z >= 0: best = -1
 	_hover = best
 	if best >= 0: sel = best
 
@@ -272,46 +320,54 @@ func _draw_all() -> void:
 	if asking: _draw_ask(s, u)
 
 
-## Značky zajímavých míst inkoustem (kříž, oheň milíře a smolárny, strom brtě, kapka studánky, kladívko a želízko štoly
-## a lomu, kolo mlýna) a název pod značkou na světlém podkladu.
+## Znaky zajímavých míst (mapa_body.json zajimava.znak_sada, obrázky z nastroje/mapa_znaky.py): malý piktogram inkoustem,
+## název jen u znaku pod kurzorem nebo po klepnutí (KCD – mapa nepřeplněná popisky). V příběhu jen objevená místa.
 func _draw_zajimava(r: Rect2, u: float) -> void:
 	var zc: Dictionary = cfg.get("zajimava", {})
 	if zajimava.is_empty(): return
 	var bv: Array = zc["barva"]; var ink := Color(bv[0], bv[1], bv[2])
 	var pk: Array = zc["podklad"]; var bg := Color(pk[0], pk[1], pk[2], pk[3])
-	var a := float(zc["velikost_px"]) * u; var w := maxf(2.0, 2.4 * u)
-	for z: Dictionary in zajimava:
+	var zs: Dictionary = zc.get("znak_sada", {})
+	var a := float(zs.get("velikost_px", 36)) * u
+	for i in zajimava.size():
+		var z: Dictionary = zajimava[i]
+		if not znak_videt(z): continue
 		var c := _to_screen(r, z["p"])
-		_c.draw_circle(c, a * 1.05, bg)
-		match String(z["tvar"]):
-			"kriz":
-				_c.draw_line(c + Vector2(0, -a), c + Vector2(0, a), ink, w); _c.draw_line(c + Vector2(-a * 0.55, -a * 0.35), c + Vector2(a * 0.55, -a * 0.35), ink, w)
-			"kolo":
-				_c.draw_arc(c, a * 0.8, 0.0, TAU, 20, ink, w)
-				for k in 4: _c.draw_line(c - Vector2.from_angle(k * PI / 4.0) * a * 0.8, c + Vector2.from_angle(k * PI / 4.0) * a * 0.8, ink, w * 0.6)
-			"kladivka":
-				for sg in [-1.0, 1.0]:
-					var d := Vector2(sg * 0.7, 0.7)
-					_c.draw_line(c - d * a, c + d * a, ink, w)
-					var hl := c - d * a; var kol := Vector2(-d.y, d.x) * a * 0.35
-					_c.draw_line(hl - kol, hl + kol, ink, w * 1.6)
-			"ohen":
-				_c.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -a), c + Vector2(a * 0.6, a * 0.2), c + Vector2(a * 0.35, a * 0.8), c + Vector2(-a * 0.35, a * 0.8), c + Vector2(-a * 0.6, a * 0.2)]), ink)
-			"kapka":
-				_c.draw_circle(c + Vector2(0, a * 0.25), a * 0.55, ink)
-				_c.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -a), c + Vector2(a * 0.5, a * 0.1), c + Vector2(-a * 0.5, a * 0.1)]), ink)
-			"strom":
-				_c.draw_line(c + Vector2(0, a), c + Vector2(0, 0), ink, w); _c.draw_circle(c + Vector2(0, -a * 0.3), a * 0.6, ink)
-			_:
-				_c.draw_circle(c, a * 0.45, ink)
-		var fs := float(zc["pismo_px"]) * u; var od := float(zc["popisek_pod_px"]) * u
-		var tw := _fm.get_string_size(String(z["nazev"]), HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs)).x * 0.5 + fs * 1.4
-		var kam := Vector2(0, a + od + fs)   # popisek pod značkou, u shluků podle dat jinam (zajimava.popisky)
-		match String((zc.get("popisky", {}) as Dictionary).get(z["id"], "pod")):
-			"nad": kam = Vector2(0, -a - od)
-			"vpravo": kam = Vector2(a + od + tw, fs * 0.35)
-			"vlevo": kam = Vector2(-a - od - tw, fs * 0.35)
-		_text(c + kam, String(z["nazev"]), int(fs), ink, bg, _fm)
+		var ak := a * (1.2 if i == _hover_z or i == _vyber_z else 1.0)
+		if _znak_tex.has(z["znak"]): _c.draw_texture_rect(_znak_tex[z["znak"]], Rect2(c - Vector2(ak, ak) * 0.5, Vector2(ak, ak)), false)
+		else: _kresli_tvar(c, String(z["tvar"]), float(zc["velikost_px"]) * u, maxf(2.0, 2.4 * u), ink, bg)
+		_rects.append([Rect2(c - Vector2(ak, ak) * 0.5, Vector2(ak, ak)).grow(8.0 * u), "znak", i])
+	for i in [_hover_z, _vyber_z]:   # název až nakonec, ať ho nepřekryje sousední znak
+		if i < 0 or i >= zajimava.size() or not znak_videt(zajimava[i]): continue
+		var c2 := _to_screen(r, zajimava[i]["p"])
+		_text(c2 + Vector2(0, -a * 0.6 - float(zc["popisek_pod_px"]) * u), String(zajimava[i]["nazev"]), int(float(zc["pismo_px"]) * 1.25 * u), ink, Color(bg, 0.92), _fm)
+		if _hover_z == _vyber_z: break
+
+
+## Náhradní tvar znaku vektorem (bez obrázků v datovém balíku): kříž, oheň, strom, kapka, kladívka, kolo.
+func _kresli_tvar(c: Vector2, tvar: String, a: float, w: float, ink: Color, bg: Color) -> void:
+	_c.draw_circle(c, a * 1.05, bg)
+	match tvar:
+		"kriz":
+			_c.draw_line(c + Vector2(0, -a), c + Vector2(0, a), ink, w); _c.draw_line(c + Vector2(-a * 0.55, -a * 0.35), c + Vector2(a * 0.55, -a * 0.35), ink, w)
+		"kolo":
+			_c.draw_arc(c, a * 0.8, 0.0, TAU, 20, ink, w)
+			for k in 4: _c.draw_line(c - Vector2.from_angle(k * PI / 4.0) * a * 0.8, c + Vector2.from_angle(k * PI / 4.0) * a * 0.8, ink, w * 0.6)
+		"kladivka":
+			for sg in [-1.0, 1.0]:
+				var d := Vector2(sg * 0.7, 0.7)
+				_c.draw_line(c - d * a, c + d * a, ink, w)
+				var hl := c - d * a; var kol := Vector2(-d.y, d.x) * a * 0.35
+				_c.draw_line(hl - kol, hl + kol, ink, w * 1.6)
+		"ohen":
+			_c.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -a), c + Vector2(a * 0.6, a * 0.2), c + Vector2(a * 0.35, a * 0.8), c + Vector2(-a * 0.35, a * 0.8), c + Vector2(-a * 0.6, a * 0.2)]), ink)
+		"kapka":
+			_c.draw_circle(c + Vector2(0, a * 0.25), a * 0.55, ink)
+			_c.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -a), c + Vector2(a * 0.5, a * 0.1), c + Vector2(-a * 0.5, a * 0.1)]), ink)
+		"strom":
+			_c.draw_line(c + Vector2(0, a), c + Vector2(0, 0), ink, w); _c.draw_circle(c + Vector2(0, -a * 0.3), a * 0.6, ink)
+		_:
+			_c.draw_circle(c, a * 0.45, ink)
 
 
 ## Jízda po mapě: ujetá část trasy plnou čarou, zbytek čárkovaně, figurka (zrcadlí se podle směru), hodina dne, Zastavit.
@@ -424,10 +480,11 @@ func _input(event: InputEvent) -> void:
 				match String(rr[1]):
 					"zavrit": close()
 					"misto": sel = int(rr[2]); _ask()
+					"znak": _vyber_z = -1 if _vyber_z == int(rr[2]) else int(rr[2])   # název znaku (klepnutí znovu skryje)
 					"odpoved": _answer(bool(rr[2]))
 				_c.queue_redraw(); return
 		if not asking:
-			_cur = pos; _update_hover()
+			_cur = pos; _update_hover(); _vyber_z = _hover_z
 			if _hover >= 0: sel = _hover; _ask()
 		_c.queue_redraw()
 	elif event is InputEventScreenTouch or event is InputEventMouseButton:

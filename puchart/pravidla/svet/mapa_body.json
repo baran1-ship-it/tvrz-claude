@@ -53,6 +53,47 @@
   "popisek_pod_px": 6,
   "barva": [0.2, 0.12, 0.06],
   "podklad": [0.96, 0.9, 0.76, 0.75],
-  "barva_pozn": "inkoust mapy (mapa.gd INK), popisek na světlém pergamenu jako názvy erbů"
+  "barva_pozn": "inkoust mapy (mapa.gd INK), popisek na světlém pergamenu jako názvy erbů",
+  "znaky": {"kriz_rozcesti": "kriz_dreveny", "kriz_smirci": "kriz_kamenny", "bozi_muka": "bozi_muka", "uhlir": "milir", "smolarna": "smolarna", "brte": "brt", "studanka": "studanka", "lom": "lom", "stola": "dul", "mlyn": "mlyn"},
+  "znaky_pozn": "místo (id z hra/data/zajimava_mista.json) → znak ze znak_sada (obrázek res://textury/ui/mapa_znaky/<znak>.png z nastroje/mapa_znaky.py); bez obrázku (starý datový balík) kreslí mapa.gd náhradní tvar z druhy",
+  "znak_sada": {
+   "popis": "sada malých piktogramů mapy jako ruční kresba inkoustem na pergamenu (Míša 17. 11.: „chci zájmové body mít taky pod nějakým pěkným malým znakem“); generuje nastroje/mapa_znaky.py do hra/textury/ui/mapa_znaky/. velikost_px = strana znaku na mapě při výšce mapy 900 px (mapa.gd násobí měřítkem u, tablet 1600×1000 → ~47 px; 36 px na snímku 17. 11. byly v tečkách lesa málo vidět); textura_px = strana obrázku (2,5× zmenšení – ostré i na tabletu s hustými pixely); lem = světlý pergamenový lem pod kresbou, aby znak četl i na tečkách lesa",
+   "zdroj": "KCD 1 a 2 mapa (docs/reference/kcd_mapa_znaky.md): pergamenová mapa, místa jako drobné kreslené symboly v barvě inkoustu, akcent červenou, body zájmu až po objevení, popisky střídmě; inspirace stylem, nic nekopírováno. Barva inkoustu = nastroje/mapa.py INK (58, 36, 20) a mapa.gd INK; červená = Styl.RED pečeti",
+   "velikost_px": 44,
+   "textura_px": 112,
+   "lem_sirka": 0.09,
+   "barvy": {"inkoust": [0.23, 0.14, 0.08], "cervena": [0.6, 0.1, 0.06], "lem": [0.95, 0.9, 0.77, 0.88]},
+   "znaky": {
+    "kriz_dreveny": {"popis": "dřevěný kříž na rozcestí se stříškou a příčným prahem", "zdroj": "NAVOD_LES.md (dubový sloupek, příčka na plát, stříška); model les/les_kriz_rozcesti"},
+    "kriz_kamenny": {"popis": "smírčí kříž – nízký kamenný, šrafovaný, rozšířená ramena", "zdroj": "smírčí kříže 13.–16. st. (zajimava_mista.json kriz_smirci); model les/les_kriz_smirci"},
+    "bozi_muka": {"popis": "sloupek s výklenkem pod stříškou, červený křížek", "zdroj": "NAVOD_LES.md dřevěná boží muka; model les/les_bozi_muka"},
+    "milir": {"popis": "kupa milíře (šrafy) a červený kouř z vrcholu", "zdroj": "NAVOD_LES.md milíř a/b; rešerše 15 km kap. 9"},
+    "smolarna": {"popis": "hliněná kopule nad jámou, žlábek a hrnec s dehtem (červeně)", "zdroj": "NAVOD_LES.md smolárna (kopule, žlábek, dvojhrnec)"},
+    "brt": {"popis": "kmen s dlužkou a česnem (červeně), tři včely", "zdroj": "zajimava_mista.json brte (dutina 3–6 m, dlužka s česnem)"},
+    "studanka": {"popis": "roubená obruba pod stříškou, červené vlnky vody", "zdroj": "NAVOD_LES.md studánka (roubenka se stříškou, žlábek)"},
+    "lom": {"popis": "stupňovitá skalní stěna (šrafy) a krumpáč", "zdroj": "rešerše 15 km kap. 10 malý lom; předměty lomu (krumpáč, kvádry)"},
+    "dul": {"popis": "kladívko a želízko zkřížené nad ústím štoly", "zdroj": "hornický symbol Schlägel und Eisen, doložen od 15. st. – https://de.wikipedia.org/wiki/Schl%C3%A4gel_und_Eisen"},
+    "mlyn": {"popis": "vodní kolo s lopatkami nad červenou vlnkou", "zdroj": "model mlýna Havrana (kolo na spodní vodu, mlyn_kolo.gd)"},
+    "ves": {"popis": "dvě chalupy se sedlovou střechou (sada – pro ves, zatím erb)", "zdroj": "KCD mapa: sídla jako kreslené domky; ves Předhradí (mista_stavby.json)"},
+    "hrad": {"popis": "věž s cimbuřím a červeným praporcem (sada – hrady mají erb)", "zdroj": "KCD mapa: hrady jako kreslená věž"},
+    "krcma": {"popis": "džbán s uchem (sada – krčma má erb piti)", "zdroj": "krčma U Tlustého Jana (mista_stavby.json KrcmaL)"},
+    "kovarna": {"popis": "kovadlina, kladivo a jiskry (sada – kovárna zatím na mapě není)", "zdroj": "Havran lokace.json kovarna_ves; funkce.json měch kovárny"},
+    "hajovna": {"popis": "smrk a srub (sada – hájovna má erb naradi)", "zdroj": "Hájovna (mista_stavby.json)"}
+   }
+  },
+  "objev": {
+   "popis": "objevování (Míša 17. 11.: „jen v pískovišti a potom v příběhu, když to objevím“): v pískovišti vidět všechny znaky; v příběhu se znak objeví, až hráč dojde do okruhu m od středu místa (x, z ze zajimava_mista.json; u velkých míst okruh podle druhu). Kontrola jednou za kontrola_s, i v pískovišti (objevená místa se pamatují); stav v uložené hře (prochazka.gd _uloz 'objevena'), nová hra ho smaže. Oznámení nenápadné (toast HUD Havrana) jen v příběhu.",
+   "zdroj": "Havran scripts/mapa.gd (OBJEV_R 40 m, objevena v main.gd save, toast „Objeveno místo: …“, v pískovišti vše); KCD 1/2: mapa zakrytá, místa se ukážou po objevení, krátká zpráva v rohu",
+   "okruh_m": 35.0,
+   "okruh_druh": {"mlyn": 45.0, "lom": 40.0, "uhlir": 40.0, "stola": 30.0, "brte": 30.0},
+   "kontrola_s": 1.0,
+   "oznameni": "Objeveno: %s",
+   "oznameni_s": 3.0
+  },
+  "popisek": {
+   "kdy": "vyber",
+   "popis": "název znaku jen po klepnutí na znak nebo pod kurzorem (KCD: mapa bez stálých popisků bodů zájmu, název při najetí); zasah_px = poloměr klepnutí při výšce mapy 900 px",
+   "zasah_px": 30
+  }
  }
 }

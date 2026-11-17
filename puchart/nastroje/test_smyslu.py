@@ -1306,6 +1306,30 @@ for _id32 in ("stola", "lom", "mlyn", "studanka", "uhlir"):
     if _id32 not in [m_["id"] for m_ in _zz32]: _c32.append("místo %s chybí v datech" % _id32)
 TEST("mapa_zajimava", not _c32, "; ".join(_c32) if _c32 else "%d zajímavých míst na mapě se značkou a názvem (důl, lom, mlýn, studánka, milíř…)" % len(_zz32))
 
+# znaky mapy a objevování (Míša 17. 11.: „zájmové body pod pěkným malým znakem, ale jen v pískovišti a potom v příběhu, když
+# to objevím“): každé zajímavé místo má znak ze sady (popis, zdroj, kresba v nastroje/mapa_znaky.py, obrázek v
+# hra/textury/ui/mapa_znaky), okruh objevení v mezích, stav objevení se ukládá a nová hra ho smaže; test hry mapa_znaky
+_c33m = []; _zs33 = _mb32.get("znak_sada", {}); _zn33 = _zs33.get("znaky", {}); _ob33 = _mb32.get("objev", {})
+_mz33 = open(K + "/nastroje/mapa_znaky.py").read()
+for m_ in _zz32:
+    j_ = _mb32.get("znaky", {}).get(m_["id"])
+    if not j_: _c33m.append("%s bez znaku (mapa_body.json zajimava.znaky)" % m_["id"]); continue
+    if j_ not in _zn33: _c33m.append("%s: znak %s není v znak_sada" % (m_["id"], j_))
+for j_, v_ in _zn33.items():
+    if not v_.get("popis") or not v_.get("zdroj"): _c33m.append("znak %s bez popisu nebo zdroje" % j_)
+    if "def %s(p)" % j_ not in _mz33: _c33m.append("znak %s nemá kresbu v mapa_znaky.py" % j_)
+    if not os.path.exists(K + "/hra/textury/ui/mapa_znaky/%s.png" % j_): _c33m.append("chybí obrázek hra/textury/ui/mapa_znaky/%s.png" % j_)
+for f_ in ("velikost_px", "textura_px", "barvy"):
+    if f_ not in _zs33: _c33m.append("znak_sada bez %s" % f_)
+_ok33 = [float(_ob33.get("okruh_m", 0))] + [float(v_) for v_ in _ob33.get("okruh_druh", {}).values()]
+if not _ok33 or not all(20.0 <= o_ <= 60.0 for o_ in _ok33): _c33m.append("okruh objevení mimo 20–60 m: %s" % _ok33)
+if "%s" not in str(_ob33.get("oznameni", "")): _c33m.append("oznámení objevení bez názvu místa")
+if not set(_ob33.get("okruh_druh", {})) <= {m_["id"] for m_ in _zz32}: _c33m.append("okruh_druh pro neznámé místo")
+_pr33 = open(K + "/hra/scripts/prochazka.gd").read()
+if '"objevena": mapa.objevena' not in _pr33 or 'mapa.objevena = Array(j.get("objevena"' not in _pr33 or "mapa.objevena.clear()" not in _pr33: _c33m.append("prochazka.gd neukládá / nenahrává / nemaže objevená místa")
+if 'rezim() == "piskoviste" or objevena.has' not in _mg32 or "kontroluj_objevy()" not in _mg32: _c33m.append("mapa.gd: znaky nezávisí na režimu a objevení")
+TEST("mapa_znaky", not _c33m, "; ".join(_c33m) if _c33m else "%d míst se znakem ze sady %d znaků (obrázky, kresba, zdroj); okruh objevení %.0f–%.0f m, stav v uložené hře" % (len(_zz32), len(_zn33), min(_ok33), max(_ok33)))
+
 # dymník černé kuchyně celku (Míša 17. 11., snímek 12: digestoř končí v podkroví „?“; NAVOD_KRCMA_L: kouř odchází dymníkem
 # v hřebeni): průduch (díly Dymnik_* v mista.json upravy_modelu) začíná na odtahu topeniště (topeni.json kuchyne, značka
 # Pec_Kour), končí pod značkou kouře dymníku (*_Kour_Dymnik, vodorovně ≤ 0,8 m, pod hřebenem) a neprostupuje krovem ani krytinou

@@ -84,6 +84,10 @@ grep -q "^REGULATOR_TEST OK" $S || { rc=1; echo "REGULATOR CHYBA: automatika det
 # běh a létání na obrazovce (Míša 12. 11. večer, Havran hud.gd): dotyk na kruh Běh/Let přepne hrac.bezi/leti a zase zpět
 krok "běh a let dotykem"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_beh_let.gd timeout 600 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | grep -E "^BEHLET_TEST" | tee -a $S)
 grep -q "^BEHLET_TEST OK" $S || { rc=1; echo "BEHLET CHYBA: kruh Běh nebo Let nereaguje na dotyk" | tee -a $S; }
+# znaky mapy (Míša 17. 11.: „jen v pískovišti a potom v příběhu, když to objevím“): příběh skrytý → příchod → viditelný →
+# uložit / nová hra / nahrát → zůstane; pískoviště vše hned
+krok "znaky mapy a objevování"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_mapa_znaky.gd timeout 600 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | grep -E "^MAPA_ZNAKY_TEST" | tee -a $S)
+grep -q "^MAPA_ZNAKY_TEST OK" $S || { rc=1; echo "MAPA_ZNAKY CHYBA: znak zajímavého místa se neobjeví, nezůstane po nahrání nebo chybí v pískovišti" | tee -a $S; }
 krok "měření (zkrácené)"
 (cd $K/hra && PUCHART_MERENI=1 PUCHART_MERENI_RYCHLE=1 PUCHART_MERENI_BEZ_CEKANI=1 timeout 420 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 > $K/build/hlidaci_mereni.log 2>&1)
 MU=$(python3 -c "import json;d=json.load(open('$K/hra/data/mereni.json'));print(len(d['useky'])*len(d.get('scale_3d',[1]))+len(d.get('varianty',[])))")
