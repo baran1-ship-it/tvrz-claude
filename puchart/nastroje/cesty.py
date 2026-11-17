@@ -207,6 +207,7 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     c["_osa_px"] = px; c["_osa_pz"] = pz; c["_hw"] = hw
 # násyp u konce mostu (zemní těleso za opěrou – Havran kraj.py, reserse_mosty_krcma.md): plošina 3 m kolem nástupu ve výšce
 # mostovky, svah do terénu 1:1,5 – úzký násyp pěšiny vyhlazení terénu (sigma 1,5 m) snížilo o 0,4 m (test nastup_mostu_v_terenu 9. 11.)
+NASYP_ = np.full(H.shape, -1e9)   # cílová výška násypu u nástupů (plošina + pod začátkem mostovky) – platí i přes zářez koryt (jámy níže)
 for nx_, nz_, ny_, od_, *ven_ in NASTUPY_:
     R0_, R1_ = 4.5, 4.5 + 6.0   # plošina 4,5 m: síť terénu 2 m na ní leží rovně až k mostovce   # svah 1:3 (dřív 1:1,5 – síť terénu 2 m ho nesledovala, teren_shoda 0,22 m)
     c0 = int(max(0, nx_ - xh0 - R1_ - 1)); c1 = int(min(nx, nx_ - xh0 + R1_ + 2)); r0 = int(max(0, nz_ - zh0 - R1_ - 1)); r1 = int(min(ny, nz_ - zh0 + R1_ + 2))
@@ -220,6 +221,8 @@ for nx_, nz_, ny_, od_, *ven_ in NASTUPY_:
     # pod prvními 3 m mostovky terén klesá od 0,12 m pod mostovkou (opěra) – síť 2 m u konce mostu neudělá schod
     # (lavka_most_440_5 10. 11.: hrana 0,16 m zastavila postavu), hlína ale nad prkna nevyleze (test most_bez_hliny)
     if ven_: H[r0:r1, c0:c1] = np.where(pod_, np.maximum(H[r0:r1, c0:c1], (ny_ - od_ - 0.12) + 0.5 * np.minimum(za_ + 0.2, 0)), H[r0:r1, c0:c1])
+    NASYP_[r0:r1, c0:c1] = np.maximum(NASYP_[r0:r1, c0:c1], np.where(dd_ < R0_, ny_ - od_, -1e9))
+    if ven_: NASYP_[r0:r1, c0:c1] = np.maximum(NASYP_[r0:r1, c0:c1], np.where(pod_, (ny_ - od_ - 0.12) + 0.5 * np.minimum(za_ + 0.2, 0), -1e9))
     na_ceste[r0:r1, c0:c1] |= dd_ < R0_
 # příčný sklon jízdního pásu na výsledném terénu (Míša 6. 11.: „hrb na straně cesty, vozy by se převrátily do rokle“)
 for c in C["cesty"]:
@@ -250,7 +253,14 @@ Image.fromarray((kol[:2000 * KR // 1, :2000 * KR // 1][:4000, :4000] * 255).asty
 rez = np.clip(gaussian_filter(rez, 1.0) * (0.75 + 0.35 * sum_), 0, 1)
 np.save(out + ".npy", H.astype(np.float32)); shutil.copy(pre + ".json", out + ".json")
 if os.path.exists(pre + "_jamy.npz"):   # sklep a šíje (teren_upravy.py): cesty je nemění, jen se předají dál
-    J = np.load(pre + "_jamy.npz"); H[J["r"], J["c"]] = J["y"]; np.save(out + ".npy", H.astype(np.float32)); shutil.copy(pre + "_jamy.npz", out + "_jamy.npz")
+    J = np.load(pre + "_jamy.npz"); Jd = {k_: J[k_] for k_ in J.files}
+    # zářez koryt (jámy od n_upr dál; sklep a šíje beze změny) pod plošinou nástupu a pod začátkem mostovky zvednout na násyp:
+    # jinak zůstala u konce mostovky jáma koryta (most_440_1 17. 11.: buňka 1,7 m pod mostovkou 0,7 m od konce, síť 2 m pod
+    # koncem mostovky o 0,21 m níž – povrch_kolize „stojí nad viditelným“, chyby.md 385)
+    _nu = int(J["n_upr"]) if "n_upr" in J.files else len(J["r"]); _yk = Jd["y"].astype(np.float64)
+    _yk[_nu:] = np.maximum(_yk[_nu:], NASYP_[J["r"][_nu:], J["c"][_nu:]]); Jd["y"] = _yk.astype(J["y"].dtype)
+    print("násyp nástupů přes zářez koryt: buněk %d" % int((Jd["y"] != J["y"]).sum()))
+    H[J["r"], J["c"]] = Jd["y"]; np.save(out + ".npy", H.astype(np.float32)); np.savez(out + "_jamy.npz", **Jd)
     # jen sklep a šíje (prvních n_upr, koryta.py) – ne zářez koryt: celé koryto i břeh pak byly třída „cesta“, holé bez trávy
     # a bylin až k vodě (13. 11., Míša: „hlavně ty břehy a přechod vody a hlíny plus vegetace“; docs/chyby.md)
     _nu = int(J["n_upr"]) if "n_upr" in J.files else len(J["r"]); na_ceste[J["r"][:_nu], J["c"][:_nu]] = True

@@ -97,3 +97,7 @@ for soubor, U in UP.items():
             n_ += 1
         print("UPRAVA", soubor, u.get("popis", ""), "ploch", n_)
     bpy.ops.export_scene.gltf(filepath=os.path.join(K, "hra/modely/stavby_h", soubor), export_format="GLB", export_extras=True, export_yup=True)
+# stavba se přepsala z originálu (build/zdroj_celky) – lůžka osazená do staveb (pravidla/svet/luzka.json osazeni: staré lůžko
+# hájovny a jeho kolize Hajovna_Kol_Postel pryč) se musí uplatnit znovu, jinak se v síti vrátí staré lůžko (chyby.md 384)
+import subprocess
+if subprocess.run(["python3", os.path.join(K, "nastroje/luzka_modely.py"), K, "--osazeni"]).returncode != 0: sys.exit("UPRAVA lůžka: osazení selhalo")
