@@ -11176,7 +11176,7 @@ func _schody_vstupu() -> void:
 					break
 				var y1 := float((h["position"] as Vector3).y)
 				nejvic = maxf(nejvic, y0 - y1)
-				prof.append("%.2f:%.2f %s" % [d, y1 - float(z["prah_y"]), String((h["collider"] as Node).name).left(14)])
+				prof.append("%.2f:%.2f %s" % [d, y1 - float(z["prah_y"]), String((h["collider"] as Node).get_path()).right(45)])
 				y0 = y1
 				d += 0.08
 			if nejvic > smax + tol:
