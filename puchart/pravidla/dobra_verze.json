@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "24f5ac0",
+ "commit": "2483b4e",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -54,6 +54,10 @@
    "trasy_pruchodu": true,
    "mista_ve_vyseku": true,
    "lod_navaznost": true,
+   "zasoba_multimeshu": true,
+   "lod_casove_prolnuti": true,
+   "shluky_vlna": true,
+   "houstiny_plast": true,
    "dohled_za_porostem": true,
    "sceny_spocteny": true,
    "vyhledy_otevrene": true,
@@ -119,7 +123,19 @@
    "stin_domu": true,
    "luzka_lod_okraj": true,
    "barvy_vrcholu": true,
-   "luzka_normaly": true
+   "luzka_normaly": true,
+   "pavlac_zabradli": true,
+   "chyse_bez_pruduchu": true,
+   "strechy_krytina": true,
+   "topeni_bez_vybavy": true,
+   "ochoz_mimo_budovy": true,
+   "usti_kamen": true,
+   "trava_zapoj": true,
+   "voda_viditelna": true,
+   "mlyn_dvere_dvur": true,
+   "most_najezd_bez_haku": true,
+   "mapa_zajimava": true,
+   "dymnik_kuchyne": true
   },
   "pruchod": {
    "A_branka_patro": true,
@@ -137,6 +153,7 @@
    "A_vezicka_prizemi": true,
    "A_vstup": true,
    "A_vstup_ven": true,
+   "B_ochoz_k_budove_9_8": true,
    "B_ochoz_vez": true,
    "B_stit_prizemi": true,
    "B_vez_nadvori": true,
@@ -170,6 +187,7 @@
    "dum_predhradi_Dum2_7": true,
    "dum_predhradi_Rychta_8": true,
    "dum_predhradi_Rychta_9": true,
+   "dvere_mist": true,
    "jesle_seno": true,
    "kovadlina_osazena": true,
    "kovarna_mech": true,
@@ -235,6 +253,8 @@
    "zajimava_lom_zemljanka": true,
    "zajimava_mista": true,
    "zajimava_mlyn": true,
+   "zajimava_mlyn_dvur": true,
+   "zajimava_mlyn_lavka": true,
    "zajimava_mlyn_pesina": true,
    "zajimava_smolarna": true,
    "zajimava_stola": true,
@@ -248,26 +268,26 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1056828,
-    "troj_max": 1079994,
-    "kresleni_p95": 374,
-    "kresleni_m_median": 478.0
+    "troj_p95": 1052051,
+    "troj_max": 1078606,
+    "kresleni_p95": 371,
+    "kresleni_m_median": 477.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1621529,
-    "troj_max": 1842140,
-    "kresleni_p95": 874,
-    "kresleni_m_median": 714.5
+    "troj_p95": 1607264,
+    "troj_max": 1838583,
+    "kresleni_p95": 876,
+    "kresleni_m_median": 711.5
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1568085,
-    "troj_max": 1749354,
-    "kresleni_p95": 1061,
-    "kresleni_m_median": 1755.5
+    "troj_p95": 1571782,
+    "troj_max": 1761808,
+    "kresleni_p95": 1059,
+    "kresleni_m_median": 1763.0
    },
-   "zmena_median": 33.68,
+   "zmena_median": 34.08,
    "doskoky": [],
    "ve_zdi": 2
   },
