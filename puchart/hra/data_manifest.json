@@ -1,16 +1,16 @@
 {
  "popis": "hern\u00ed data mimo APK po skupin\u00e1ch (nastroje/data_balik.py, scripts/data.gd) \u2013 stahuj\u00ed se jen zm\u011bn\u011bn\u00e9",
  "vetev": "ccr-f2d32673-9fi7m5",
- "zdroj": "09f0faebb5c2897bdb3c4246a04cc864",
+ "zdroj": "b44ff3e0a42b215f89d44ae2187743b7",
  "packs": {
   "puchart_zaklad": {
-   "md5": "dad6122abec96e334eabefe8cfc19a71",
-   "size": 23304604,
+   "md5": "b32ed072f45319e43d9365fc79546618",
+   "size": 28349984,
    "parts": [
     {
-     "file": "puchart_zaklad-dad6122abe.pck.000",
-     "size": 23304604,
-     "md5": "dad6122abec96e334eabefe8cfc19a71"
+     "file": "puchart_zaklad-b32ed072f4.pck.000",
+     "size": 28349984,
+     "md5": "b32ed072f45319e43d9365fc79546618"
     }
    ]
   },
@@ -42,76 +42,61 @@
    ]
   },
   "puchart_predmety": {
-   "md5": "da3866a8f767b8e673952408a3abbaa9",
-   "size": 266794108,
+   "md5": "a0db9edd61d227135ba07fde12c3e2af",
+   "size": 176315648,
    "parts": [
     {
-     "file": "puchart_predmety-da3866a8f7.pck.000",
+     "file": "puchart_predmety-a0db9edd61.pck.000",
      "size": 94371840,
-     "md5": "e8c877135b8c40838641ad4e56a9ef32"
+     "md5": "7bafed75de5e9e1995cf4030bd7a8048"
     },
     {
-     "file": "puchart_predmety-da3866a8f7.pck.001",
-     "size": 94371840,
-     "md5": "9cf044676340372f77b8f75e59c94633"
-    },
-    {
-     "file": "puchart_predmety-da3866a8f7.pck.002",
-     "size": 78050428,
-     "md5": "2101274982c20f1fb7887fb3e52b38cc"
+     "file": "puchart_predmety-a0db9edd61.pck.001",
+     "size": 81943808,
+     "md5": "f4a7aea6029e6ff2d5d687d70a200575"
     }
    ]
   },
   "puchart_stavby": {
-   "md5": "bd5d3f946c64760db97181165be1b3d7",
-   "size": 374507432,
+   "md5": "36d3006b0aabe674191279a677296598",
+   "size": 182453876,
    "parts": [
     {
-     "file": "puchart_stavby-bd5d3f946c.pck.000",
+     "file": "puchart_stavby-36d3006b0a.pck.000",
      "size": 94371840,
-     "md5": "45f7393096ba6ec941d52d2b314015d9"
+     "md5": "49834f4f220e175f531308455bf175f2"
     },
     {
-     "file": "puchart_stavby-bd5d3f946c.pck.001",
-     "size": 94371840,
-     "md5": "89bed8de9202357459665c55277dc1fe"
-    },
-    {
-     "file": "puchart_stavby-bd5d3f946c.pck.002",
-     "size": 94371840,
-     "md5": "404e129a7eeb9f3e9990db3bb254fc4f"
-    },
-    {
-     "file": "puchart_stavby-bd5d3f946c.pck.003",
-     "size": 91391912,
-     "md5": "24999362ed303198bd19a0da92f38432"
+     "file": "puchart_stavby-36d3006b0a.pck.001",
+     "size": 88082036,
+     "md5": "3ab24544163edbbfa52937f00f385f26"
     }
    ]
   },
   "puchart_rostliny": {
-   "md5": "ab95fdbfbc46b580956282aac6764c3e",
-   "size": 130049840,
+   "md5": "02c5b8c5622ecccfd3f933f138b096e1",
+   "size": 130784440,
    "parts": [
     {
-     "file": "puchart_rostliny-ab95fdbfbc.pck.000",
+     "file": "puchart_rostliny-02c5b8c562.pck.000",
      "size": 94371840,
-     "md5": "b3e0af991a062830a1781c6733d4b789"
+     "md5": "458227f09e5b61e0962de3bafae22e80"
     },
     {
-     "file": "puchart_rostliny-ab95fdbfbc.pck.001",
-     "size": 35678000,
-     "md5": "021d6efb7abfba4edb9be6134382315e"
+     "file": "puchart_rostliny-02c5b8c562.pck.001",
+     "size": 36412600,
+     "md5": "f6301d08e263a5f12dd145a19ad6b269"
     }
    ]
   },
   "puchart_teren": {
-   "md5": "13a38cec0416d98db898b5a954d72d90",
-   "size": 33615012,
+   "md5": "b4099bebf73c949db20c721877f0171f",
+   "size": 44533720,
    "parts": [
     {
-     "file": "puchart_teren-13a38cec04.pck.000",
-     "size": 33615012,
-     "md5": "13a38cec0416d98db898b5a954d72d90"
+     "file": "puchart_teren-b4099bebf7.pck.000",
+     "size": 44533720,
+     "md5": "b4099bebf73c949db20c721877f0171f"
     }
    ]
   }

@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "2483b4e",
+ "commit": "a9930dd",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -135,7 +135,10 @@
    "mlyn_dvere_dvur": true,
    "most_najezd_bez_haku": true,
    "mapa_zajimava": true,
-   "dymnik_kuchyne": true
+   "mapa_znaky": true,
+   "dymnik_kuchyne": true,
+   "cesty_souvislost": true,
+   "modely_textury_odkazy": true
   },
   "pruchod": {
    "A_branka_patro": true,
@@ -145,6 +148,7 @@
    "A_palac_komora": true,
    "A_palac_sin_svetnice": true,
    "A_palac_svetnice": true,
+   "A_prikop_vez_most": true,
    "A_sklep_kobky": true,
    "A_sklep_ven": true,
    "A_vezicka": true,
@@ -163,6 +167,7 @@
    "budova_palac_-3_14": true,
    "budova_palac_54_147": true,
    "cesta_mezi_hrady": true,
+   "dosah": true,
    "dum_hajovna_Hajovna": true,
    "dum_krcma_KrcmaL": true,
    "dum_predhradi_Dum1_10": true,
@@ -268,26 +273,26 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1052051,
-    "troj_max": 1078606,
-    "kresleni_p95": 371,
-    "kresleni_m_median": 477.0
+    "troj_p95": 1054471,
+    "troj_max": 1079906,
+    "kresleni_p95": 373,
+    "kresleni_m_median": 478.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1607264,
-    "troj_max": 1838583,
-    "kresleni_p95": 876,
-    "kresleni_m_median": 711.5
+    "troj_p95": 1607161,
+    "troj_max": 1838981,
+    "kresleni_p95": 878,
+    "kresleni_m_median": 716.5
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1571782,
-    "troj_max": 1761808,
-    "kresleni_p95": 1059,
-    "kresleni_m_median": 1763.0
+    "troj_p95": 1571874,
+    "troj_max": 1761728,
+    "kresleni_p95": 1061,
+    "kresleni_m_median": 1762.5
    },
-   "zmena_median": 34.08,
+   "zmena_median": 34.34,
    "doskoky": [],
    "ve_zdi": 2
   },
