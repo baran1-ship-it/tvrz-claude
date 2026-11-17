@@ -79,7 +79,17 @@ func spust(h: Node, p: CharacterBody3D) -> Dictionary:
 	_dvere()
 	stav.resize(NB + NU + dvere.size())
 	var starty := _starty()
-	print("DOSAH mřížka %d × %d (%.1f m, u staveb %.1f m), základních buněk se stavbou %d, uzlů staveb %d, dveří %d, startů %d; příprava %d + %d ms" % [NBX, NBZ, kb, kf, slozite.count(1), NU, dvere.size(), starty.size(), t1 - t0, t2 - t1])
+	for usek in OS.get_environment("PUCHART_DOSAH_LADIT").split(";", false):   # rozbor: chůze kapsle "x,z,x2,z2" (od terénu / nejbližšího patra)
+		var c4 := usek.split_floats(",")
+		var od := Vector3(c4[0], hl.svet.vyska(c4[0], c4[1]), c4[1])
+		if c4.size() > 4: od.y = c4[4]
+		print("DOSAH ladění ", od, " → ", Vector2(c4[2], c4[3]), " = ", _jdi(od, Vector2(c4[2], c4[3])), " patra cíle ", _uzly_sloupce(roundi((c4[2] - x0) / kf), roundi((c4[3] - z0) / kf)).map(func(u: int) -> float: return _poz(u).y))
+	for i in dvere.size():
+		if OS.get_environment("PUCHART_DOSAH_LADIT") != "" and String(dvere[i]["jm"]) in OS.get_environment("PUCHART_DOSAH_DVERE").split(","): print("DOSAH ladění dveře ", dvere[i], " uzly ", dv_bliz.get(NB + NU + i, []).map(func(u: int) -> Vector3: return _poz(u)))
+	if OS.get_environment("PUCHART_DOSAH_LADIT") != "":
+		hl.svet.kolize_do_m = kdo; hrac.set_physics_process(true)
+		return {"chyby": ["jen ladění"]}
+	print("DOSAH mřížka %d × %d (%.1f m, u staveb %.1f m), základních buněk se stavbou %d, uzlů staveb %d, dveří a bodů tras %d, startů %d; příprava %d + %d ms" % [NBX, NBZ, kb, kf, slozite.count(1), NU, dvere.size(), starty.size(), t1 - t0, t2 - t1])
 	_dopredu(starty)
 	var t3 := Time.get_ticks_msec()
 	_zpet(starty)
@@ -94,7 +104,7 @@ func spust(h: Node, p: CharacterBody3D) -> Dictionary:
 	ostr = ostr.filter(func(s: Dictionary) -> bool: return int(s["uzlu"]) >= int(cfg["ostrov_min_uzlu"]))
 	var dv_bez: Array = []
 	for i in dvere.size():
-		if (stav[NB + NU + i] & DOSAZENO) == 0: dv_bez.append({"dvere": dvere[i]["jm"], "x": snappedf(dvere[i]["p"].x, 0.1), "z": snappedf(dvere[i]["p"].z, 0.1), "y": snappedf(dvere[i]["p"].y, 0.1)})
+		if dvere[i]["dvere"] and (stav[NB + NU + i] & DOSAZENO) == 0: dv_bez.append({"dvere": dvere[i]["jm"], "x": snappedf(dvere[i]["p"].x, 0.1), "z": snappedf(dvere[i]["p"].z, 0.1), "y": snappedf(dvere[i]["p"].y, 0.1)})
 	var t5 := Time.get_ticks_msec()
 	var unik: Array = await _unik()
 	hl.svet.kolize_do_m = kdo
@@ -110,7 +120,7 @@ func spust(h: Node, p: CharacterBody3D) -> Dictionary:
 	if m.get("dvere_bez_dosahu_max") != null and dv_bez.size() > int(m["dvere_bez_dosahu_max"]): chyby.append("dveří bez dosahu %d > %d" % [dv_bez.size(), int(m["dvere_bez_dosahu_max"])])
 	var vm := int(cfg["vypis_max"])
 	vysl = {"popis": "mřížka dosažitelnosti (hra/scripts/test_dosah.gd, kontroly_hra.json dosah)", "mrizka": [NBX, NBZ, kb, kf],
-		"uzlu_teren": NB - slozite.count(1), "uzlu_stavby": NU, "dveri": dvere.size(), "dosazeno": dos, "navrat": nav, "chuzi": chuzi,
+		"uzlu_teren": NB - slozite.count(1), "uzlu_stavby": NU, "dveri": dvere.filter(func(d: Dictionary) -> bool: return d["dvere"]).size(), "bodu_tras": dvere.filter(func(d: Dictionary) -> bool: return not d["dvere"]).size(), "dosazeno": dos, "navrat": nav, "chuzi": chuzi,
 		"starty": starty.map(func(i: int) -> Array: var q := _poz(i); return [snappedf(q.x, 0.1), snappedf(q.z, 0.1), snappedf(q.y, 0.1)]),
 		"diry": diry.slice(0, vm), "diry_pocet": diry.size(), "unik": unik, "okraj_dosazeny": okraj.size(),
 		"uviznuti_uzlu": n_uv, "uviznuti": uviz.slice(0, vm), "ostrovy_pocet": ostr.size(), "ostrovy": ostr.slice(0, vm), "dvere_bez_dosahu": dv_bez,
@@ -122,7 +132,7 @@ func spust(h: Node, p: CharacterBody3D) -> Dictionary:
 	_obrazek(cesta.get_basename() + ".png", uviz, ostr, dv_bez, unik)
 	if (t6 - t0) / 1000.0 > float(cfg["cas_max_s"]): chyby.append("běh %.0f s > %d s" % [(t6 - t0) / 1000.0, int(cfg["cas_max_s"])])
 	vysl["chyby"] = chyby
-	print("DOSAH uvíznutí %d uzlů v %d shlucích, ostrovů %d, dveří bez dosahu %d/%d, děr %d, únik %d (okraj dosažen v %d uzlech), %.0f s" % [n_uv, uviz.size(), ostr.size(), dv_bez.size(), dvere.size(), diry.size(), unik.size(), okraj.size(), (t6 - t0) / 1000.0])
+	print("DOSAH uvíznutí %d uzlů v %d shlucích, ostrovů %d, dveří bez dosahu %d/%d, děr %d, únik %d (okraj dosažen v %d uzlech), %.0f s" % [n_uv, uviz.size(), ostr.size(), dv_bez.size(), dvere.filter(func(d: Dictionary) -> bool: return d["dvere"]).size(), diry.size(), unik.size(), okraj.size(), (t6 - t0) / 1000.0])
 	for s in uviz.slice(0, 8): print("DOSAH uvíznutí ", s)
 	for s in ostr.slice(0, 8): print("DOSAH ostrov ", s)
 	for s in dv_bez.slice(0, 12): print("DOSAH dveře bez dosahu ", s)
@@ -198,46 +208,76 @@ func _vejde(p: Vector3) -> bool:
 	_sq.transform = Transform3D(Basis(), p + Vector3(0, 0.05 + _tvar_y, 0))
 	return space.intersect_shape(_sq, 1).is_empty()
 
-## dveře z dat: křídla *_Dvere_* ve vsi a místech, dveře hradu (pohyb.json, skupina = střed křídel)
+## dveře z dat (hrad pohyb.json, domy pohyb_mista.json, vrata a vrátka vsi ves.pohyb_dily): střed zavřeného křídla
+## (kolizní deska cols v zavřené poloze = osa otvoru; zavřeno = základ × otočení −open, dvere.gd), skupina = průměr křídel
 func _dvere() -> void:
 	var sk := {}
-	var hr := hl.get_node_or_null("Hrad")
-	if hr != null and FileAccess.file_exists("res://data/pohyb.json"):
-		for e: Dictionary in JSON.parse_string(FileAccess.get_file_as_string("res://data/pohyb.json"))["dily"]:
-			if String(e.get("kind", "dvere")) != "dvere": continue
-			var u := hr.find_child(String(e["name"]), true, false) as Node3D
-			if u != null: sk.get_or_add("Hrad/" + String(e.get("group", e["name"])), []).append(_stred(u))
-	for k in ["Mista", "Ves", "Zajimava"]:
-		var kk := hl.get_node_or_null(k)
-		if kk == null: continue
-		for u in kk.find_children("*_Dvere_*", "Node3D", true, false):
-			if String(u.name).begins_with("Schod_") or (u.get_parent() != null and "_Dvere_" in String(u.get_parent().name)): continue
-			sk.get_or_add("%s/%s/%s" % [k, u.get_parent().name, u.name], []).append(_stred(u as Node3D))
+	var zdroje: Array = []
+	if FileAccess.file_exists("res://data/pohyb.json"): zdroje.append(["Hrad", JSON.parse_string(FileAccess.get_file_as_string("res://data/pohyb.json"))["dily"]])
+	if FileAccess.file_exists("res://data/pohyb_mista.json"): zdroje.append(["", JSON.parse_string(FileAccess.get_file_as_string("res://data/pohyb_mista.json"))["dily"]])
+	var ves := hl.get_node_or_null("Ves")
+	if ves != null and ves.get("pohyb_dily") != null: zdroje.append(["Ves", ves.pohyb_dily])
+	for zd: Array in zdroje:
+		for e: Dictionary in zd[1]:
+			var g := String(e.get("group", e["name"]))
+			if String(e.get("kind", "dvere")) not in ["dvere", "vrata"] or "okenice" in g.to_lower(): continue
+			var kor := hl.get_node_or_null(String(zd[0]) if zd[0] != "" else String(e.get("koren", "Mista")))
+			if kor == null: continue
+			for u: Node in ([kor.find_child(String(e["name"]), true, false)] if zd[0] != "" else kor.find_children(String(e["name"]), "Node3D", true, false)):
+				if not (u is Node3D): continue
+				sk.get_or_add("%s/%s" % [kor.name, g if zd[0] != "" else "%s@%s" % [g, u.get_parent().name]], []).append(_stred(u as Node3D, e))
 	for jm in sk:
-		var s := Vector3.ZERO
-		for q: Vector3 in sk[jm]: s += q
-		s /= float(sk[jm].size())
+		var s := Vector3.ZERO; var nn := Vector3.ZERO
+		for q: Array in sk[jm]:
+			s += q[0]; nn += q[1] * (1.0 if nn.dot(q[1]) >= 0.0 else -1.0)
+		s /= float(sk[jm].size()); nn = Vector3(nn.x, 0, nn.z).normalized() if Vector2(nn.x, nn.z).length() > 0.1 else Vector3.ZERO
 		var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(s + Vector3(0, 0.5, 0), s - Vector3(0, 2.5, 0), hrac.collision_mask, [hrac.get_rid()]))
 		var py: float = (h["position"] as Vector3).y if not h.is_empty() else s.y - 1.0
-		var p := Vector3(s.x, py, s.z)
-		var id := NB + NU + dvere.size()
-		dvere.append({"jm": jm, "p": p})
-		var r := float(cfg["dvere_r_m"]); var dy := float(cfg["dvere_dy_m"])
-		for fz in range(floori((p.z - r - z0) / kf), ceili((p.z + r - z0) / kf) + 1):
-			for fx in range(floori((p.x - r - x0) / kf), ceili((p.x + r - x0) / kf) + 1):
-				if fx < 0 or fz < 0 or fx >= NFX or fz >= NFZ: continue
-				for u in _uzly_sloupce(fx, fz):
-					var q := _poz(u)
-					if Vector2(q.x - p.x, q.z - p.z).length() <= r and absf(q.y - p.y) <= dy:
-						dv_bliz.get_or_add(u, []).append(id); dv_bliz.get_or_add(id, []).append(u)
+		_pridej_bod(jm, Vector3(s.x, py, s.z), nn, true)
+	if cfg.get("trasy_jako_uzly", false):   # body tras průchodu (pruchody*.json): známé spoje (úzké schody, průlezy), které mřížka 1 m mine
+		for f in DirAccess.get_files_at("res://data"):
+			if not (f.begins_with("pruchody") and f.ends_with(".json")): continue
+			var tr: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/" + f))["trasy"]
+			for jt in tr:
+				var pred := -1
+				for i in (tr[jt] as Array).size():
+					var b: Array = tr[jt][i]
+					var y0: float = float(b[2]) if b[2] != null else hl.svet.vyska(b[0], b[1])
+					var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(b[0], y0 + 0.6, b[1]), Vector3(b[0], y0 - 1.0, b[1]), hrac.collision_mask, [hrac.get_rid()]))
+					if h.is_empty(): pred = -1; continue
+					var id := _pridej_bod("trasa/%s/%d" % [jt, i], h["position"], Vector3.ZERO, false)
+					if pred >= 0: dv_bliz.get_or_add(id, []).append(pred); dv_bliz.get_or_add(pred, []).append(id)
+					pred = id
 
-func _stred(u: Node3D) -> Vector3:
+## uzel navíc (dveře, bod trasy) spojený chůzí s uzly mřížky do dvere_r_m (výškově do dvere_dy_m)
+func _pridej_bod(jm: String, p: Vector3, nn: Vector3, je_dvere: bool) -> int:
+	var id := NB + NU + dvere.size()
+	dvere.append({"jm": jm, "p": p, "n": nn, "dvere": je_dvere})
+	var r := float(cfg["dvere_r_m"]); var dy := float(cfg["dvere_dy_m"])
+	for fz in range(floori((p.z - r - z0) / kf), ceili((p.z + r - z0) / kf) + 1):
+		for fx in range(floori((p.x - r - x0) / kf), ceili((p.x + r - x0) / kf) + 1):
+			if fx < 0 or fz < 0 or fx >= NFX or fz >= NFZ: continue
+			for u in _uzly_sloupce(fx, fz):
+				var q := _poz(u)
+				if Vector2(q.x - p.x, q.z - p.z).length() <= r and absf(q.y - p.y) <= dy:
+					dv_bliz.get_or_add(u, []).append(id); dv_bliz.get_or_add(id, []).append(u)
+	return id
+
+func _stred(u: Node3D, e: Dictionary) -> Array:   # [střed, normála křídla]
+	var cols: Array = e.get("cols", [])
+	if not cols.is_empty() and u.get_parent() is Node3D:
+		var ot := Transform3D(Basis(Vector3.UP, deg_to_rad(-float(e.get("open", 0.0)))), Vector3.ZERO)
+		var zav: Transform3D = (u.get_meta("pohyb_zaklad") * ot) if u.has_meta("pohyb_zaklad") else (u.transform if bool(e.get("glb_zavreno", false)) else u.transform * ot)
+		var c: Array = cols[0]
+		var gx: Transform3D = (u.get_parent() as Node3D).global_transform * zav
+		var osa := 0 if float(c[3]) <= minf(float(c[4]), float(c[5])) else (1 if float(c[4]) <= float(c[5]) else 2)   # nejtenčí rozměr desky = kolmo k otvoru
+		return [gx * Vector3(c[0], c[1], c[2]), gx.basis[osa].normalized()]
 	var bb := AABB(); var je := false
 	for m in [u] + u.find_children("*", "VisualInstance3D", true, false):
 		if m is VisualInstance3D:
 			var a := (m as VisualInstance3D).global_transform * (m as VisualInstance3D).get_aabb()
 			bb = a if not je else bb.merge(a); je = true
-	return bb.get_center() if je else u.global_position
+	return [bb.get_center() if je else u.global_position, Vector3.ZERO]
 
 ## uzly ve sloupci jemné mřížky (patra u staveb, jinak uzel terénu, je-li to jeho roh)
 func _uzly_sloupce(fx: int, fz: int) -> Array:
@@ -356,14 +396,28 @@ func _hrany(u: int) -> Array:
 				var c := _jdi(pu, Vector2(x0 + (nb % NBX) * kb, z0 + (nb / NBX) * kb))
 				if c != Vector3.INF and c.y != -INF and absf(c.y - hb[nb]) <= 2.0 * float(cfg["shoda_patra_m"]): out.append(nb); rev.get_or_add(nb, []).append(u)
 				elif c != Vector3.INF and c.y == -INF and diry.size() < 1000: diry.append({"x": snappedf(c.x, 0.1), "z": snappedf(c.z, 0.1), "od_y": snappedf(pu.y, 0.1)})
-	for dv in dv_bliz.get(u, []):   # dveře (uzel ↔ střed křídla)
+	for dv in dv_bliz.get(u, []):   # dveře (uzel ↔ střed křídla, přes bod před otvorem na straně výchozího uzlu – rovně do otvoru)
 		var p2 := _poz(dv)
-		var c := _jdi(pu, Vector2(p2.x, p2.z))
+		var c := _jdi_dvermi(pu, u, Vector2(p2.x, p2.z), false) if u >= NB + NU else _jdi_dvermi(pu, dv, Vector2(p2.x, p2.z), true)
 		if c == Vector3.INF or c.y == -INF: continue
-		if u >= NB + NU:
-			if absf(c.y - p2.y) <= float(cfg["dvere_dy_m"]): out.append(dv); rev.get_or_add(dv, []).append(u)
-		elif absf(c.y - p2.y) <= float(cfg["shoda_patra_m"]) * 2.0: out.append(dv); rev.get_or_add(dv, []).append(u)
+		if absf(c.y - p2.y) <= float(cfg["shoda_patra_m"]) * 2.0: out.append(dv); rev.get_or_add(dv, []).append(u)
 	return out
+
+## chůze k dveřím / od dveří: přes bod dvere_pred_m před otvorem (na straně uzlu mimo dveře), kolmo k desce křídla
+func _jdi_dvermi(p: Vector3, dv: int, cil: Vector2, k_dverim: bool) -> Vector3:
+	var d: Dictionary = dvere[dv - NB - NU]; var n: Vector3 = d["n"]
+	if n == Vector3.ZERO: return _jdi(p, cil)
+	var mimo: Vector3 = p if k_dverim else Vector3(cil.x, 0, cil.y)   # bod na „své“ straně otvoru
+	var dp: Vector3 = d["p"]
+	var st := signf(n.dot(mimo - dp)); if st == 0.0: st = 1.0
+	var pred: Vector3 = dp + n * st * float(cfg["dvere_pred_m"])
+	if k_dverim:
+		var a := _jdi(p, Vector2(pred.x, pred.z))
+		if a == Vector3.INF or a.y == -INF: return a
+		return _jdi(a, cil)
+	var b := _jdi(p, Vector2(pred.x, pred.z))
+	if b == Vector3.INF or b.y == -INF: return b
+	return _jdi(b, cil)
 
 func _na_okraji(u: int) -> void:
 	if (stav[u] & OKRAJ) == 0: stav[u] |= OKRAJ; okraj.append(u)

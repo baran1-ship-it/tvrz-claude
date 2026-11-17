@@ -73,7 +73,7 @@
   "zdroj": "zadání 15. 11. (č. 315: „postava nesmí vyskakovat na hrany zdí a zábradlí“); předprseň ochozu blender/hrady.py (zeď do pasu), zábradlí pavlače krčmy (č. 313)"
  },
  "dosah": {
-  "popis": "test průchodu dosah (hra/scripts/test_dosah.gd, plán 17. 11. B1): mřížka dosažitelnosti celého výseku. Od startu hráče a míst mapy (mapa_body.json start + mista: hrady, krčma, ves, hájovna) se po mřížce buněk rozlévá chůze. Buňky jen s terénem (krok_venku_m): přechod podle sklonu terénu (floor_max_angle hráče, hrac.gd) nebo schodu (nejvyšší hrac.json schod_m). Buňky do okraj_kolize_m od kolize mimo terén (stavby, skály, mosty, kmeny) se dělí na jemne_deleni × jemne_deleni a mají patra (paprsek shora, normála do floor_max_angle, kapsle hráče se vejde); přechod mezi nimi kráčí kapsle hráče fyzikálně (test_move po podkrok_m: rovně / po svahu / krok nahoru s dosednutím na stupeň / dopad). Dveře z dat (křídla *_Dvere_* ve vsi a místech, dveře hradu z pohyb.json) jsou uzly navíc (střed křídla, propojené chůzí s buňkami do dvere_r_m). CHYBA: díra (dopad bez kolize do pad_hledat_m), únik ze světa (hráč postavený na dosažitelný okraj výseku jde unik_chuze_s ven a ocitne se za hranicí terénu nebo propadne) – meze diry_max, unik_max. Výpis (meze null = jen výpis): uvíznutí (dosažitelné, ale odtud se nedá vrátit ke startu), ostrovy pochozích míst mimo dosah (od ostrov_min_uzlu), dveře bez dosahu. Výstup PUCHART_DOSAH (hlídači build/dosah.json + build/dosah.png).",
+  "popis": "test průchodu dosah (hra/scripts/test_dosah.gd, plán 17. 11. B1): mřížka dosažitelnosti celého výseku. Od startu hráče a míst mapy (mapa_body.json start + mista: hrady, krčma, ves, hájovna) se po mřížce buněk rozlévá chůze. Buňky jen s terénem (krok_venku_m): přechod podle sklonu terénu (floor_max_angle hráče, hrac.gd) nebo schodu (nejvyšší hrac.json schod_m). Buňky do okraj_kolize_m od kolize mimo terén (stavby, skály, mosty, kmeny) se dělí na jemne_deleni × jemne_deleni a mají patra (paprsek shora, normála do floor_max_angle, kapsle hráče se vejde); přechod mezi nimi kráčí kapsle hráče fyzikálně (test_move po podkrok_m: rovně / po svahu / krok nahoru s dosednutím na stupeň / dopad). Dveře z dat (hrad pohyb.json, domy pohyb_mista.json, vrata a vrátka vsi; okenice ne) jsou uzly navíc (střed zavřeného křídla = osa otvoru, propojené chůzí s buňkami do dvere_r_m přes bod dvere_pred_m před otvorem kolmo ke křídlu). CHYBA: díra (dopad bez kolize do pad_hledat_m), únik ze světa (hráč postavený na dosažitelný okraj výseku jde unik_chuze_s ven a ocitne se za hranicí terénu nebo propadne) – meze diry_max, unik_max. Výpis (meze null = jen výpis): uvíznutí (dosažitelné, ale odtud se nedá vrátit ke startu), ostrovy pochozích míst mimo dosah (od ostrov_min_uzlu), dveře bez dosahu. Výstup PUCHART_DOSAH (hlídači build/dosah.json + build/dosah.png).",
   "krok_venku_m": 2.0,
   "jemne_deleni": 2,
   "okraj_kolize_m": 1.5,
@@ -85,6 +85,9 @@
   "pad_hledat_m": 80.0,
   "dvere_r_m": 2.5,
   "dvere_dy_m": 1.6,
+  "dvere_pred_m": 1.2,
+  "trasy_jako_uzly": true,
+  "trasy_pozn": "body tras průchodu (hra/data/pruchody*.json) jsou uzly navíc spojené chůzí s předchozím bodem trasy a s buňkami do dvere_r_m – úzké schody a průlezy (pod 1 m) mřížka mine; trasy samy prochází test průchodu",
   "ostrov_min_uzlu": 6,
   "vypis_max": 25,
   "unik_zkousek": 12,
