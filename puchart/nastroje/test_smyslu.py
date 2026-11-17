@@ -1157,6 +1157,32 @@ else:
             if _in: _c29.append("ochoz y %.2f u (%.1f; %.1f) vede do %s (%d vzorků desky uvnitř)" % (_y, _in[0][0], _in[0][1], _b["jm"], len(_in)))
 TEST("ochoz_mimo_budovy", _n29 > 0 and not _c29, "; ".join(_c29[:6]) if _c29 else "%d desek ochozů obou hradů mimo budovy a věže (%d obrysů)" % (_n29, len(_bd29)))
 
+# Míša 17. 11. (snímek 03, „Uhasit oheň“): ústí kamen paláce A ze síně – z dřevěné příčky trčela čela přikládacího tunelu modelu
+# kamen kolem tmavé desky. Kamenné ostění ústí (hrad_puchart.json A.palac_interier.dispozice.kamna.usti) musí krýt průřez zdí
+# tunelu modelu (uzly Zadni_prikladaci_tunel* v LOD0) a otvor nesmí být širší/vyšší než světlost tunelu.
+_c30 = []; _KM = K + "/hra/modely/topeni/Kamna_Hradni_Nadobkova_LOD0.glb"
+_us = json.load(open(K + "/pravidla/svet/hrad_puchart.json"))["A"]["palac_interier"]["dispozice"]["kamna"].get("usti")
+if not _us: _c30.append("chybí hrad_puchart.json A.palac_interier.dispozice.kamna.usti")
+elif not os.path.exists(_KM): _c30.append("chybí %s" % os.path.basename(_KM))
+else:
+    j_, b_, _ = _gs.nacti(_KM); _tl = []
+    def _w30(i, M_):
+        n_ = j_["nodes"][i]; M2 = M_ @ _gs.matice(n_)
+        if "mesh" in n_ and n_.get("name", "").startswith("Zadni_prikladaci_tunel"):
+            for pr_ in j_["meshes"][n_["mesh"]]["primitives"]:
+                P_ = _gs.cti(j_, b_, pr_["attributes"]["POSITION"]); _tl.append((M2 @ np.c_[P_, np.ones(len(P_))].T).T[:, :3])
+        for c_ in n_.get("children", []): _w30(c_, M2)
+    for r_ in j_["scenes"][0]["nodes"]: _w30(r_, np.eye(4))
+    if not _tl: _c30.append("v modelu kamen chybí uzly Zadni_prikladaci_tunel*")
+    else:
+        _T = np.vstack(_tl); _x1 = float(np.abs(_T[:, 0]).max()); _y0, _y1 = float(_T[:, 1].min()), float(_T[:, 1].max())
+        _sv = min(float(np.abs(_T[:, 0][np.abs(_T[:, 0]) > 0.01]).min()), 1.0)   # vnitřní líc boků tunelu
+        _ow, (_oy0, _oy1), _rw = _us["otvor_sirka_m"], _us["otvor_y_m"], _us["ramec_m"]
+        if _ow / 2 + _rw < _x1 + 0.02: _c30.append("rám ±%.2f m nekryje boky tunelu ±%.2f m" % (_ow / 2 + _rw, _x1))
+        if _oy1 + 0.28 < _y1 + 0.02 or _oy0 - 0.15 > _y0 - 0.0: _c30.append("rám %.2f–%.2f m nekryje tunel %.2f–%.2f m" % (_oy0 - 0.15, _oy1 + 0.28, _y0, _y1))
+        if _ow / 2 > _sv + 0.02: _c30.append("otvor ±%.2f m širší než světlost tunelu ±%.2f m" % (_ow / 2, _sv))
+TEST("usti_kamen", not _c30, "; ".join(_c30) if _c30 else "kamenné ostění ústí kamen kryje čela přikládacího tunelu modelu (A.palac_interier kamna.usti)")
+
 # --- tráva podle zápoje korun (Míša 17. 11.: „Havran má velkou hustotu trávy, ale pod stromy v lese ne“; Havran test les_trava,
 # pravidla/svet/louka.json les + test): pod zapojenými korunami ≈ žádná tráva louky, na louce a světlinách hustá; koruny se tu
 # počítají nezávisle na kryt.png (kruh poloměru koruny glb modelu × měřítko les.gd) – chyba 17. 11.: kryt_korun.py brala

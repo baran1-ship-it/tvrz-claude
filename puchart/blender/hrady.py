@@ -1386,30 +1386,11 @@ def zapec_ao(obs, paprsku=10, dosah=2.5):
             g = ter(p.x, -p.y)   # Blender: hra z = −y
             pata = min(1.0, max(0.0, (p.z - g) / 1.6))   # do 1,6 m nad terénem vlhko a hlína
             ao[v.index] = max(0.05, a) * (0.62 + 0.38 * pata)
-        # dřevo (prkna, trámy, krakorce): kvádr má 8 společných vrcholů – normála vrcholu míří šikmo přes roh, paprsky z rohu prkna
-        # zasáhly sousední prkna a trám pod nimi → spodek podlah a pavlačí G 0,15 (Míša 17. 11., snímek 06: „spodek podlahy úplně
-        # černý“, strop přízemí paláce B). Pro plochy dřeva AO na roh plochy s normálou plochy, bod kousek do plochy (ne na hraně).
-        drevo = {i for i, m_ in enumerate(me.materials) if m_ is not None and m_.name.startswith(AO_PLOCHY)}
-        ao_l = {}
-        for poly in me.polygons:
-            if poly.material_index not in drevo: continue
-            n = (nm @ poly.normal).normalized()
-            if n.length < 0.5: continue
-            t_ = n.orthogonal().normalized(); b_ = n.cross(t_); cp_ = mw @ poly.center
-            for li in poly.loop_indices:
-                p = mw @ me.vertices[me.loops[li].vertex_index].co; p = p + (cp_ - p) * 0.2
-                hit = 0.0
-                for sm in smery:
-                    loc, _, _, dist = tree.ray_cast(p + n * 0.01, t_ * sm.x + b_ * sm.y + n * sm.z, dosah)
-                    if loc is not None: hit += 1.0 - (dist / dosah) * 0.6
-                g = ter(p.x, -p.y); pata = min(1.0, max(0.0, (p.z - g) / 1.6))
-                ao_l[li] = max(0.05, 1.0 - hit / paprsku) * (0.62 + 0.38 * pata)
         nv += len(me.vertices)
-        barva_kusu(ob, ao, ao_l)
+        barva_kusu(ob, ao)
     print("AO zapečeno: vrcholů %d, %.0f s" % (nv, time.time() - t0), flush=True)
 
-AO_PLOCHY = ("prkn", "dub", "rez_drevo")   # materiály, jejichž AO se peče na roh plochy (zapec_ao)
-def barva_kusu(ob, ao=None, ao_l=None):
+def barva_kusu(ob, ao=None):
     """Havran blender/export_game.py vertex_colors(): atribut rnd (každý kus jiný) -> barva vrcholu: R = odstín kusu
     0,8 + 0,2·rnd, B = semeno kusu (shadery textura/zdivo: jiný výřez fotky, jas po délce – Míša 5. 11.: „vše je jen rastr“)."""
     me = ob.data; rnd = me.attributes.get("rnd")
@@ -1420,7 +1401,7 @@ def barva_kusu(ob, ao=None, ao_l=None):
     for poly in me.polygons:
         r = rv[poly.index]
         for li in range(poly.loop_start, poly.loop_start + poly.loop_total):
-            data[li * 4:li * 4 + 4] = [0.8 + 0.2 * r, ao_l[li] if ao_l and li in ao_l else (ao[me.loops[li].vertex_index] if ao else 1.0), r, 1.0]
+            data[li * 4:li * 4 + 4] = [0.8 + 0.2 * r, ao[me.loops[li].vertex_index] if ao else 1.0, r, 1.0]
     col.data.foreach_set("color", data); me.color_attributes.active_color = col
 
 def barvy_vrcholu(ob, barvy):
