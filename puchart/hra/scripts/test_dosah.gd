@@ -45,6 +45,7 @@ var _q := PhysicsRayQueryParameters3D.new()
 var _sq := PhysicsShapeQueryParameters3D.new()
 var _tvar_y := 0.875
 var chuzi := 0
+var _ladit := false
 
 func spust(h: Node, p: CharacterBody3D) -> Dictionary:
 	hl = h; hrac = p
@@ -79,6 +80,7 @@ func spust(h: Node, p: CharacterBody3D) -> Dictionary:
 	_dvere()
 	stav.resize(NB + NU + dvere.size())
 	var starty := _starty()
+	_ladit = OS.get_environment("PUCHART_DOSAH_LADIT") != ""
 	for usek in OS.get_environment("PUCHART_DOSAH_LADIT").split(";", false):   # rozbor: chůze kapsle "x,z,x2,z2" (od terénu / nejbližšího patra)
 		var c4 := usek.split_floats(",")
 		var od := Vector3(c4[0], hl.svet.vyska(c4[0], c4[1]), c4[1])
@@ -320,7 +322,7 @@ func _svah(ha: float, hb_: float, d: float) -> bool:
 ## Chůze kapsle hráče z p k cíli (x, z) jako hrac.gd: po podkrocích (podkrok_m) míří k cíli – rovně, po pochozím svahu,
 ## krok nahoru (hrac.json schod_m, dosednout výš na pochozí plochu, ne přeskok zídky), u stěny klouže podél ní (move_and_slide),
 ## pak dopad. Vrací polohu dopadu; Vector3.INF = neprojde; y = −INF = pod sebou nemá kolizi (díra).
-func _jdi(p: Vector3, cil: Vector2) -> Vector3:
+func _jdi(p: Vector3, cil: Vector2, tol := 0.15) -> Vector3:
 	chuzi += 1
 	var pk := float(cfg["podkrok_m"])
 	var q := p + Vector3(0, 0.01, 0)
@@ -332,15 +334,21 @@ func _jdi(p: Vector3, cil: Vector2) -> Vector3:
 		var r := _podkrok(q, s)
 		if r == Vector3.INF:
 			var nr := Vector3(_col.get_normal().x, 0, _col.get_normal().z)   # stěna: klouzat podél ní
-			if nr.length() < 0.1: return Vector3.INF
+			if nr.length() < 0.1 or s.slide(nr.normalized()).length() < 0.05:
+				if d.length() <= tol: return q   # u cíle (bod trasy / dveře u zdi): došla jako test průchodu (tolerance bodu)
+				if _ladit: print("DOSAH ladění   čelně u ", q, " normála ", _col.get_normal(), " ", _col.get_collider().get_parent().name if _col.get_collider() else "?")
+				return Vector3.INF
 			var s2 := s.slide(nr.normalized())
-			if s2.length() < 0.05: return Vector3.INF
 			r = _podkrok(q, s2)
-			if r == Vector3.INF: return Vector3.INF
+			if r == Vector3.INF:
+				if d.length() <= tol: return q
+				if _ladit: print("DOSAH ladění   stop u ", q, " normála ", _col.get_normal(), " ", _col.get_collider().get_parent().name if _col.get_collider() else "?", "/", _col.get_collider().name if _col.get_collider() else "?")
+				return Vector3.INF
 		q = r
 		if hrac.test_move(Transform3D(Basis(), q), Vector3.DOWN * float(cfg["pad_hledat_m"]), _col): q += _col.get_travel()
 		else: return Vector3(q.x, -INF, q.z)
-	return q if Vector2(cil.x - q.x, cil.y - q.z).length() < 0.15 else Vector3.INF
+	if _ladit and Vector2(cil.x - q.x, cil.y - q.z).length() > tol: print("DOSAH ladění   nedošla, konec ", q)
+	return q if Vector2(cil.x - q.x, cil.y - q.z).length() <= tol else Vector3.INF
 
 ## jeden podkrok s: rovně / po svahu / krok nahoru; INF = narazil (normála v _col)
 func _podkrok(q: Vector3, s: Vector3) -> Vector3:
@@ -412,26 +420,24 @@ func _hrany(u: int) -> Array:
 				elif c != Vector3.INF and c.y == -INF and diry.size() < 1000: diry.append({"x": snappedf(c.x, 0.1), "z": snappedf(c.z, 0.1), "od_y": snappedf(pu.y, 0.1)})
 	for dv in dv_bliz.get(u, []):   # dveře (uzel ↔ střed křídla, přes bod před otvorem na straně výchozího uzlu – rovně do otvoru)
 		var p2 := _poz(dv)
-		var c := _jdi_dvermi(pu, u, Vector2(p2.x, p2.z), false) if u >= NB + NU else _jdi_dvermi(pu, dv, Vector2(p2.x, p2.z), true)
+		var tc := float(cfg["bod_tolerance_m"]) if dv >= NB + NU else 0.15
+		var c := _jdi_dvermi(pu, u, Vector2(p2.x, p2.z), false, tc) if u >= NB + NU else _jdi_dvermi(pu, dv, Vector2(p2.x, p2.z), true, tc)
 		if c == Vector3.INF or c.y == -INF: continue
 		if absf(c.y - p2.y) <= float(cfg["shoda_patra_m"]) * 2.0: out.append(dv); rev.get_or_add(dv, []).append(u)
 	return out
 
 ## chůze k dveřím / od dveří: přes bod dvere_pred_m před otvorem (na straně uzlu mimo dveře), kolmo k desce křídla
-func _jdi_dvermi(p: Vector3, dv: int, cil: Vector2, k_dverim: bool) -> Vector3:
+func _jdi_dvermi(p: Vector3, dv: int, cil: Vector2, k_dverim: bool, tol_cil: float) -> Vector3:
 	var d: Dictionary = dvere[dv - NB - NU]; var n: Vector3 = d["n"]
-	if n == Vector3.ZERO: return _jdi(p, cil)
+	var tol := float(cfg["bod_tolerance_m"])
+	if n == Vector3.ZERO: return _jdi(p, cil, tol_cil)
 	var mimo: Vector3 = p if k_dverim else Vector3(cil.x, 0, cil.y)   # bod na „své“ straně otvoru
 	var dp: Vector3 = d["p"]
 	var st := signf(n.dot(mimo - dp)); if st == 0.0: st = 1.0
 	var pred: Vector3 = dp + n * st * float(cfg["dvere_pred_m"])
-	if k_dverim:
-		var a := _jdi(p, Vector2(pred.x, pred.z))
-		if a == Vector3.INF or a.y == -INF: return a
-		return _jdi(a, cil)
-	var b := _jdi(p, Vector2(pred.x, pred.z))
-	if b == Vector3.INF or b.y == -INF: return b
-	return _jdi(b, cil)
+	var a := _jdi(p, Vector2(pred.x, pred.z), tol)
+	if a == Vector3.INF or a.y == -INF: return a
+	return _jdi(a, cil, tol_cil)
 
 func _na_okraji(u: int) -> void:
 	if (stav[u] & OKRAJ) == 0: stav[u] |= OKRAJ; okraj.append(u)
