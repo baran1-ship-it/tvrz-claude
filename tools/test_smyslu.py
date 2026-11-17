@@ -1029,6 +1029,33 @@ for ryb in kraj.RYBNIKY:
     tv = (p0[0] - vy["celo"][0]) * vy["smer"][0] + (p0[1] - vy["celo"][1]) * vy["smer"][1]
     if dv > 1.0 or tv <= 0.0 or abs(p0[2] - vy["hladina_y"]) > 0.005:
         chyba("vypust", vy["tok"], "odtok zacina %.2f m od cela vypusti (max 1 m, pred licem %.2f), hladina %.3f / vypust %.3f" % (dv, tv, p0[2], vy["hladina_y"]))
+    # preliv_vypust (Misa 17. 11. r. 2, snimek 03 x 501 z 881: „kvadry nesedi na sebe“): dlazba prelivu s obrubou (pas
+    # v ramci hraze a .. a + sirka/2 + obruba, t od navodni hrany koruny - presah po konec + presah) nesmi zasahovat do zdi
+    # cela ani kridel vypusti (osa zdi kraj.ryb2_vypust_zdi, pul tloustky + spara dlazby). 16. 11.: kridlo l1 (1,6 m pod
+    # 45 st.) prochazelo pres obrubu a dlazbu v t 4,7-5,3 m.
+    if "preliv" in ryb and "dlazba" in ryb["preliv"]:
+        g_ = kraj.ryb2(ryb)
+        pr_, dl_ = ryb["preliv"], ryb["preliv"]["dlazba"]
+        ap_, t0_, t1_, _y0, _y1 = kraj.ryb2_preliv(ryb)
+        sir_ = pr_["sirka_m"] / 2.0 + dl_["obruba_sirka_m"]
+        ta_, tb_ = t0_ - dl_["presah_m"], t1_ + dl_["presah_m"]
+        hz_ = ryb["hraz"]
+        kolize_pv = []
+        for (pa, pb) in kraj.ryb2_vypust_zdi(ryb):
+            L_ = math.hypot(pb[0] - pa[0], pb[1] - pa[1])
+            for i_ in range(int(L_ / 0.05) + 1):
+                f_ = i_ * 0.05 / max(L_, 1e-6)
+                qx, qz = pa[0] + (pb[0] - pa[0]) * f_, pa[1] + (pb[1] - pa[1]) * f_
+                a_q = (qx - hz_["stred"][0]) * g_["u"][0] + (qz - hz_["stred"][1]) * g_["u"][1]
+                t_q = (qx - hz_["stred"][0]) * g_["n"][0] + (qz - hz_["stred"][1]) * g_["n"][1]
+                da = max(0.0, abs(a_q - ap_) - sir_)
+                dt = max(0.0, ta_ - t_q, t_q - tb_)
+                if math.hypot(da, dt) < kraj.ZED_VYPUSTI_M / 2.0 + dl_["spara_m"]:
+                    kolize_pv.append((round(qx, 2), round(qz, 2)))
+        if kolize_pv:
+            chyba("preliv_vypust", "rybnik", "dlazba prelivu (osa a %.2f, +-%.2f m) zasahuje do zdi vypusti v %d bodech %s" % (
+                ap_, sir_, len(kolize_pv), kolize_pv[:4]))
+        print("SMYSL preliv: osa a %.2f m, pas +-%.2f, t %.2f..%.2f; kolize se zdi vypusti %d" % (ap_, sir_, ta_, tb_, len(kolize_pv)))
     print("SMYSL rybnik v2: vtok %.0f st. od kolmice, skok %.3f m; hladina %d troj., okraj %d hran, tvrdych %d; nad brehem %d, bez vody %d; odtok %.2f m od cela" % (
         uhel(vt["smer"], nrm), skok, len(tr_), len(kr_), len(tvrde), len(nad_brehem), len(bez_vody), dv))
 
