@@ -10275,6 +10275,11 @@ func _vybaveni_mimo_cest() -> void:
 					var q := c + u * su * pu + v * sv2 * pv
 					if cesta_kraj_osa(q.x, q.y).x < 0.0:
 						return false
+					# Misa 17. 11. r. 14 (test schody_vstupu: predmet domu 6 na stupnich chleva, skok 0,76 m): stupne pred
+					# dvermi (_schody_obrys, stavene pred vegetaci) jsou pro predmety jako cesta
+					for so: Array in _schody_obrys:
+						if (so[1] as AABB).has_point((so[0] as Transform3D) * Vector3(q.x, 0.0, q.y)):
+							return false
 			return true
 		if volno.call(p0):
 			zust.append(it)
