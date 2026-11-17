@@ -11142,6 +11142,7 @@ func _sklep_vstup() -> void:
 func _schody_vstupu() -> void:
 	var smax := float(Pravidla.cti("nabytek", "schody_vstupu", "stupen_max_m"))
 	var hl := float(Pravidla.cti("nabytek", "schody_vstupu", "hloubka_m"))
+	var pas := float(Pravidla.cti("nabytek", "schody_vstupu", "pas_chuze_podil"))
 	var tol := 0.03
 	var space := player.get_world_3d().direct_space_state
 	var spatne: Array = []
@@ -11164,7 +11165,7 @@ func _schody_vstupu() -> void:
 		var n: Vector3 = z["n"]
 		var t := Vector3.UP.cross(n).normalized()
 		var dl := float(z["hloubka_m"]) + hl * 2.0
-		for bok: float in [-0.25, 0.0, 0.25]:
+		for bok: float in [-pas, 0.0, pas]:
 			var y0 := float(z["prah_y"])
 			var d := 0.1
 			var nejvic := 0.0

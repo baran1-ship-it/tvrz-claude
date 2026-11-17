@@ -1074,7 +1074,9 @@
   "zapust_m": 0.15,
   "mereni_m": 0.5,
   "mereni_do_m": 2.0,
+  "pas_chuze_podil": 0.25,
   "vstup_do_m": 1.5,
-  "dosah_m": 80.0
+  "dosah_m": 80.0,
+  "_pas_chuze_podil": "pás chůze dveřmi ± podíl šířky dveří od osy: stupeň modelu (domy vsi Kol_Schod, mlýn) platí, jen když v celém pásu klesá od prahu (mlýnice 17. 11.: stupeň modelu užší, po straně z podlahy rovnou na terén 0,31 m); v témže pásu test schody_vstupu měří profil (žádný skok nad stupen_max_m)"
  }
 }

@@ -1807,6 +1807,7 @@ func _koryto_terenu(root: Node3D) -> void:
 	for _p in 3:
 		if _svy_terenu(root) == 0:
 			break
+	_lem_normaly(root)
 	_krok_cas("koryto: _svy_terenu")
 	# mrizka vysek (2 m) pro rostliny a louku
 	var g: Dictionary = data["trava_kraj"]
@@ -2147,6 +2148,29 @@ func _koryta_naposled(root: Node3D) -> void:
 ## sit s mene body (hrubsi); vrchol jemnejsi site lezici uvnitr jeji otevrene hrany ma jeji vysku (linearne). Kroky hry
 ## (koryto, najezd mostu, cesty, koryta toku...) meni vrcholy funkci polohy - na hustsi siti je hrana lomena jinak nez na
 ## ridsi (Teren_most 1 m x Teren_okoli 5 m u (275, 596): 2,5 m; test teren_svy).
+func _lem_normaly(root: Node3D) -> void:
+	# svisly lem pod hranou pasem (Teren_lem) je videt jen skrz skvirku T-spoje (cara pres cestu, Misa 17. 11. r. 6, po_08
+	# bez vyskoveho rozdilu): normala vzhuru = osvetleny jako zem kolem, ne tmavy svisly pruh
+	for t0 in root.find_children("Teren_lem", "MeshInstance3D", true, false):
+		var mi := t0 as MeshInstance3D
+		var am := mi.mesh as ArrayMesh
+		if am == null:
+			continue
+		var inv_b := mi.global_transform.basis.inverse()
+		var nove := ArrayMesh.new()
+		for si in am.get_surface_count():
+			var arr := am.surface_get_arrays(si)
+			var nn := PackedVector3Array()
+			nn.resize((arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size())
+			nn.fill((inv_b * Vector3.UP).normalized())
+			arr[Mesh.ARRAY_NORMAL] = nn
+			arr[Mesh.ARRAY_TANGENT] = null
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr, [], {}, _cesta_format(arr))
+			nove.surface_set_material(si, am.surface_get_material(si))
+			nove.surface_set_name(si, am.surface_get_name(si))
+		mi.mesh = nove
+
+
 func _svy_terenu(root: Node3D) -> int:
 	var site: Array = []                    # [mi, xf, pole povrchu, okraj: bunka 1 m -> [[a, b]], okrajove vrcholy [si, i]]
 	for t0 in root.find_children("Teren*", "MeshInstance3D", true, false):
@@ -6379,6 +6403,8 @@ func _nabytek_venku() -> void:
 	if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
 		_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
 	var pr: Dictionary = Pravidla.cti("nabytek", "venku_pravidla")
+	# 17. 11. (test schody_vstupu: lavice pred dvermi chleva domu 6 - mrizka pruchodu z doby pred dvermi novych domu)
+	_pruchody = {}
 	var n := 0
 	for d: Dictionary in _domy:
 		if int(d["k"]) >= 20:
@@ -11600,6 +11626,7 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 	var zapust := float(Pravidla.cti("nabytek", "schody_vstupu", "zapust_m"))
 	var mer := float(Pravidla.cti("nabytek", "schody_vstupu", "mereni_m"))
 	var mer_do := float(Pravidla.cti("nabytek", "schody_vstupu", "mereni_do_m"))
+	var pas := float(Pravidla.cti("nabytek", "schody_vstupu", "pas_chuze_podil"))
 	var vmax := float(Pravidla.cti("nabytek", "schody_vstupu", "vstup_do_m"))
 	var dosah := float(Pravidla.cti("nabytek", "schody_vstupu", "dosah_m"))
 	var ps: PackedScene = load("res://modely/predmety/%s.glb" % String(Pravidla.cti("nabytek", "schody_vstupu", "model")))
@@ -11717,24 +11744,30 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 		var t := Vector3.UP.cross(n).normalized()
 		var zed := 0.0
 		var od := c                                    # odkud stupne (prah nebo posledni stupen modelu)
+		var y_m := prah
+		var d_m := 0.0
 		if model:
 			# vstup se stupni modelu (domy vsi Dum1/Dum2/Rychta Kol_Schod, mlyn, chalupy Blenderu): nase stupne az od
 			# posledniho stupne modelu, kdyz ten nekonci na terenu (test 17. 11.: dum 6 chlev 0,57 m, mlynice 0,31 m).
 			# Po krocich 0,08 m ven ve trech pruzich sirky: nejnizsi vrch stupne modelu a nejvzdalenejsi jeho celo.
-			zaznam["model"] = true
-			var y_m := prah
-			var d_m := 0.0
-			for ss: float in [-0.35, 0.0, 0.35]:
+			# Stupen modelu plati, jen kdyz je pres celou sirku dveri (mlyn 17. 11.: stupen modelu uzsi nez dvere, po
+			# strane z podlahy rovnou na teren 0,31 m) a klesa (predmet vys nez prah = prekazka, ne stupen).
+			var kryje := true
+			for ss: float in [-pas, 0.0, pas]:
 				var dd := 0.1
 				var y_p := prah
 				while dd <= mer_do:
 					var hm: Dictionary = dolu.call(c + n * dd + t * ss * sirka, 0.3, vmax + 1.0)
-					if hm.is_empty() or _je_teren(hm):
+					if hm.is_empty() or _je_teren(hm) or float((hm["position"] as Vector3).y) > y_p + 0.02:
 						break
 					y_p = float((hm["position"] as Vector3).y)
 					dd += 0.08
+				kryje = kryje and y_p < prah - smax * 0.25
 				y_m = minf(y_m, y_p)
 				d_m = maxf(d_m, dd)
+			model = kryje
+		if model:
+			zaznam["model"] = true
 			zaznam["hloubka_m"] = d_m
 			zaznam["stupen_modelu_y"] = y_m
 			vyska = y_m - g
@@ -11747,9 +11780,13 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 			print("schody vstupu: %s prah %.2f m nad terenem > vstup_do_m - neni vstup ze zeme, nestavi se" % [nm, vyska])
 			continue
 		# lic podezdivky / zdi pod prahem: paprsek zvenku vodorovne k dverim (bez zasahu = rovina dveri)
-		var hz := space.intersect_ray(PhysicsRayQueryParameters3D.create(c + n * 1.5 + Vector3(0, -smax * 0.5, 0), c - n * 0.3 + Vector3(0, -smax * 0.5, 0)))
-		if not model and not hz.is_empty() and not _je_teren(hz):
-			zed = clampf(((hz["position"] as Vector3) - c).dot(n), 0.0, 1.0)
+		# ve trech pruzich sirky, nejblizsi lic (uzky stupen modelu pred dvermi mlynice neni lic zdi)
+		if not model:
+			zed = 1.0
+			for ss: float in [-pas, 0.0, pas]:
+				var o3 := c + t * ss * sirka + Vector3(0, -smax * 0.5, 0)
+				var hz := space.intersect_ray(PhysicsRayQueryParameters3D.create(o3 + n * 1.5, o3 - n * 0.3))
+				zed = minf(zed, 0.0 if hz.is_empty() or _je_teren(hz) else clampf(((hz["position"] as Vector3) - o3).dot(n), 0.0, 1.0))
 		prah = od.y
 		c = od
 		# pocet vysek z terenu u paty nejnizsiho stupne (dvakrat: s vic stupni pata dal od zdi)
