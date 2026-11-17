@@ -1569,6 +1569,7 @@ Hotovo v kódu a datech (testy u každého):
   albedo modulace podle předlohy).
 
 ## Poučení 16.–17. 11. (vydání 0.9999991)
+- **Tmavé/černé modely s barvou vrcholů = NEJDŘÍV `pravidla/svet/barvy_vrcholu.json`** (17. 11., ř. 5 domy zdálky černé, několik hodin): Compatibility bere COLOR_0 jako sRGB, glTF ho ukládá lineárně → hnědá 0,15 = černá. Známé od 16. 11. (Puchart, sady), a přesto jsem hádal stíny (2 pokusy naslepo). Postup: izolovaná scéna – tatáž barva jako albedo_color × jako barva vrcholu; když se liší, převod `tools/barvy_vrcholu.py` (seznam `soubory`/`sady`). Než se začne hádat, projít `docs/predani.md` a pravidla na známou příčinu.
 - **Fronta na zámek Godotu (17. 11.):** `flock build/beh/godot.lock …` na pozadí čeká, dokud běží cizí export (i 30+ min) – výchozí limit úlohy na pozadí 30 min ji zabije dřív, než se dostane na řadu (focení fcer). Úlohy ve frontě spouštět s `timeout` 7200000.
 - **Stínové světlo ohně nesmí ležet uvnitř modelu pece** (dum1: černá kopule, stín přes celou jizbu). Pece z katalogu
   (`ohen_znacky.k_usti_predmety`): světlo před ústím (`svetlo_pred_ustim_m`), plamen v ústí.
