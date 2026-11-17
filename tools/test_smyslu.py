@@ -903,7 +903,9 @@ else:
             _raw = _np.frombuffer(_b, _np.uint8, _st * (_a["count"] - 1) + _k * _sz, _off)
             _ix = (_np.arange(_a["count"])[:, None] * _st + _np.arange(_k * _sz)[None, :]).ravel()
             _c = _raw[_ix].view(_dt).reshape(-1, _k)[:, :3].astype(float) / {5126: 1.0, 5121: 255.0, 5123: 65535.0}[_a["componentType"]]
-            _c = _np.where(_c <= 0.0031308, _c * 12.92, 1.055 * _np.power(_np.clip(_c, 0, None), 1 / 2.4) - 0.055)
+            # COLOR_0 uz prevedene do sRGB (tools/barvy_vrcholu.py, znacka v asset.extras; Misa 17. 11. r. 5) se neprevadi znovu
+            if not _js.get("asset", {}).get("extras", {}).get(J("barvy_vrcholu.json")["znacka"]):
+                _c = _np.where(_c <= 0.0031308, _c * 12.92, 1.055 * _np.power(_np.clip(_c, 0, None), 1 / 2.4) - 0.055)
             _sum += _c.sum(0)
             _n += len(_c)
         if _n:
