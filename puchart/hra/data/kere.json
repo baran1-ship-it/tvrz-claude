@@ -18,23 +18,25 @@
  },
  "tridy": {
   "les_okraj": {
-   "liska": 0.03,
-   "hloh": 0.012,
-   "trnka": 0.01,
-   "bez": 0.008,
-   "sipek": 0.006,
-   "zmlazeni_buk": 0.004
+   "liska": 0.04,
+   "hloh": 0.018,
+   "trnka": 0.012,
+   "bez": 0.014,
+   "sipek": 0.008,
+   "zmlazeni_buk": 0.012,
+   "zmlazeni_jedle": 0.004
   },
   "les_paseka": {
-   "liska": 0.006,
-   "bez": 0.008,
-   "zmlazeni_buk": 0.006,
-   "zmlazeni_jedle": 0.003
+   "liska": 0.012,
+   "hloh": 0.004,
+   "bez": 0.012,
+   "zmlazeni_buk": 0.02,
+   "zmlazeni_jedle": 0.01
   },
   "luh": {
-   "bez": 0.012,
-   "liska": 0.006,
-   "vrba_ker": 0.0015
+   "bez": 0.016,
+   "liska": 0.01,
+   "vrba_ker": 0.003
   },
   "breh": {
    "vrba_ker": 0.01,
@@ -51,9 +53,9 @@
    "sipek": 0.0008
   },
   "les_dubohabrina": {
-   "liska": 0.003,
-   "hloh": 0.002,
-   "zmlazeni_buk": 0.0015
+   "liska": 0.0045,
+   "hloh": 0.003,
+   "zmlazeni_buk": 0.0025
   },
   "les_doubrava": {
    "liska": 0.003,
@@ -61,19 +63,19 @@
    "trnka": 0.002
   },
   "les_bucina": {
-   "zmlazeni_buk": 0.003,
-   "zmlazeni_jedle": 0.0015,
-   "liska": 0.001
+   "zmlazeni_buk": 0.0045,
+   "zmlazeni_jedle": 0.0025,
+   "liska": 0.002
   },
   "les_bucina_kysela": {
-   "zmlazeni_buk": 0.002,
-   "zmlazeni_jedle": 0.002,
-   "liska": 0.001
+   "zmlazeni_buk": 0.003,
+   "zmlazeni_jedle": 0.003,
+   "liska": 0.0015
   },
   "les_sut": {
-   "liska": 0.003,
-   "bez": 0.003,
-   "zmlazeni_jedle": 0.001
+   "liska": 0.004,
+   "bez": 0.004,
+   "zmlazeni_jedle": 0.0015
   },
   "skala": {
    "liska": 0.002,
@@ -151,5 +153,28 @@
  "pozn_vrby": "13. 11.: keřové vrby (Salix triandra/viminalis vrba_ker_1 ~3,6 m, S. purpurea vrba_ker_2 ~2,6 m; blender/rostliny_u_vody.py, 4,6 a 3,4 tis. troj.) – breh 0,03/m² (líska 0,03 → 0,02), luh 0,004/m²; hustoty NEOVERENO. Zdroj: docs/reference/potoky/README_jak_se_stavi.md §2.3 a krok 8 (pásma u vody podle snímků KCD a misa_real_01–04; Chytrý et al. 2010, Katalog biotopů ČR: K2 vrbové křoviny 2–5 m na březích a náplavech, M5 devětsilové lemy podhorských potoků 450–800 m n. m.); modely blender/rostliny_u_vody.py (licence hra/modely/rostliny/LICENCE.txt)",
  "pozn_vykon_13_11": "vrba_ker 4,6 tis. troj.: na břehu 0,03 → 0,01/m² (tablet: les bez keřů o 9 ms rychlejší, měření 13. 11.)",
  "stavba_okraj_m": -0.1,
- "pozn_stavba_okraj_14_11": "Míša 14. 11.: „pořád je tráva v hájovně“ – kopřiva a tráva rostly 0,1–0,2 m za stěnou srubu a listy prostrčily dovnitř; půdorys mista_stavby (o ~0,36 m větší než zdi) zvětšený o 0,1 m: rostliny ≥ 0,45 m od zdi (záporná hodnota = zvětšení)"
+ "pozn_stavba_okraj_14_11": "Míša 14. 11.: „pořád je tráva v hájovně“ – kopřiva a tráva rostly 0,1–0,2 m za stěnou srubu a listy prostrčily dovnitř; půdorys mista_stavby (o ~0,36 m větší než zdi) zvětšený o 0,1 m: rostliny ≥ 0,45 m od zdi (záporná hodnota = zvětšení)",
+ "shluky_tridy": {
+  "les_okraj": {
+   "vlna_m": 20,
+   "min": 0.6,
+   "max": 1.4
+  },
+  "les_paseka": {
+   "vlna_m": 16,
+   "min": 0.2,
+   "max": 1.8
+  },
+  "breh": {
+   "vlna_m": 24,
+   "prah": 0.42,
+   "min": 1.0,
+   "max": 2.2
+  },
+  "popis": "Houštiny po třídách stanoviště (byliny.gd: hustota × šum, místo společných shluky): plášť lesa (les_okraj) souvislá stěna keřů a zmlazení bez velkých děr (min 0,6); paseka shluky náletu; břeh v pásech s mezerami – pod prahem šumu nic (pohled na vodu), v pásu 1,0–2,2× (Havran les_podrost.json houstina.breh usek_m 14–34, mezera_m 16–40; Míša 15. 11. u Havrana „u řeky opatrně se zakrýváním“). Průměr přes plochu ≈ dřívější 1,0 (prah 0,42 ≈ 1/3 břehu bez keřů, NEOVERENO měřením podílu).",
+  "zdroj": "Havran větev claude/new-session-0dtk58 pravidla/svet/les_podrost.json houstina (plast, breh, patro; svet.gd _lesni_plast/_lesni_patro, 15.–16. 11.), fotky KCD: Havran docs/screens/ref_kcd2_louka_les.jpg („okraj lesa = souvislá zelená stěna z keřů a mladých stromů“), ref_kcd2_cesta_les.jpg, Havran sceny_kcd_15_11.md kcd1_21/kcd1_36 (husté křoví u potoka), kcd1_29–38 (podrost a mladé stromy zavřou pohled po 30–50 m)"
+ },
+ "pozn_houstiny_17_11": "Míša 16. 11. („plnější příroda a scény s houštinami, jak teď dělá Havran“): hustoty podle Havrana houstina – plášť lesa (les_okraj) 0,07 → 0,108/m² (Havran plášť: mřížka 2,5 m × keř 0,78 ≈ 0,12/m², vnitřní okraj mladé stromy 22 % → zmlazení buk+jedle 0,016); paseka zarůstá náletem (zmlazení 0,009 → 0,03, líska, hloh, bez); pod zápojem (patro) ×1,5 (Havran: keř u každého 2. stromu = buk. les 2,06 stromu/100 m² → 0,010/m², tj. ×2,3 – zatím jen ×1,5, keře jsou drahé: tablet les bez keřů −9 ms 13. 11., NEOVERENO po zvýšení); luh ×1,4. Dřív: {\"les_okraj\": {\"liska\": 0.03, \"hloh\": 0.012, \"trnka\": 0.01, \"bez\": 0.008, \"sipek\": 0.006, \"zmlazeni_buk\": 0.004}, \"les_paseka\": {\"liska\": 0.006, \"bez\": 0.008, \"zmlazeni_buk\": 0.006, \"zmlazeni_jedle\": 0.003}, \"luh\": {\"bez\": 0.012, \"liska\": 0.006, \"vrba_ker\": 0.0015}, \"les_dubohabrina\": {\"liska\": 0.003, \"hloh\": 0.002, \"zmlazeni_buk\": 0.0015}, \"les_bucina\": {\"zmlazeni_buk\": 0.003, \"zmlazeni_jedle\": 0.0015, \"liska\": 0.001}, \"les_bucina_kysela\": {\"zmlazeni_buk\": 0.002, \"zmlazeni_jedle\": 0.002, \"liska\": 0.001}, \"les_sut\": {\"liska\": 0.003, \"bez\": 0.003, \"zmlazeni_jedle\": 0.001}}",
+ "shluky_frekvence": 1.0,
+ "_shluky_frekvence": "frekvence šumu shluků (byliny.gd _sum); souřadnice se dělí vlna_m → vlna ≈ vlna_m. Do 17. 11. výchozí 0,01 (vlna 4,8 km, shluky nefungovaly)"
 }

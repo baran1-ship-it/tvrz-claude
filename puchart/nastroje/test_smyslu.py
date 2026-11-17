@@ -4,7 +4,7 @@ testy_puchart) a tabulka chyb (docs/chyby.md). Výsledek build/test_smyslu.json;
 Geometrii (visí / pod terénem) počítá blender/kontrola_geometrie.py – zde se porovná se schváleným stavem
 (pravidla/svet/kontroly.json geometrie.schvaleno): nový visící kus = chyba, opravený = zlepšení.
   python3 nastroje/test_smyslu.py <koren>"""
-import sys, os, json, math
+import sys, os, json, math, re
 import numpy as np
 from PIL import Image
 K = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else ".")
@@ -316,6 +316,27 @@ TEST("mista_ve_vyseku", all(VY["x0_hra"] < m["kde"][0] < VY["x0_hra"] + VY["sirk
 SM = json.load(open(D + "stromy_modely.json")); SP = json.load(open(D + "sceny_pravidla.json"))["hra"]
 TEST("lod_navaznost", SM["lod0_m"] < SM["blizko_m"] and KE["zanik_m"][1] <= KE["dosah_m"] and BY["dosah_m"] <= KE["dosah_m"],
      "lod0 %s < blízko %s; keře zánik %s ≤ dosah %s; byliny %s ≤ keře %s" % (SM["lod0_m"], SM["blizko_m"], KE["zanik_m"][1], KE["dosah_m"], BY["dosah_m"], KE["dosah_m"]))
+# P2 výkon (17. 11., vykon_z_havrana_15_11.md): vrstvy po buňkách berou MultiMesh ze zásoby (zasoba_mm.gd), ne MultiMesh.new() při přestavbě
+_RZ = json.load(open(D + "rozpocty.json")).get("zasoba_mm", {}); _tk = _RZ.get("tridy_kapacity", [])
+_mmnew = [f for f in ("louka.gd", "byliny.gd", "bunky_kolem.gd") if re.search(r"^\s*func (_vloz|mmi)[\s\S]*?MultiMesh\.new\(", open(K + "/hra/scripts/" + f).read(), re.M) and "ZasobaMM.vezmi" not in open(K + "/hra/scripts/" + f).read()]
+TEST("zasoba_multimeshu", bool(_RZ.get("zapnuto")) and _tk == sorted(_tk) and len(_tk) > 0 and int(_RZ.get("stari_snimku", 0)) >= 2 and not _mmnew and _RZ.get("zdroj"),
+     "rozpocty.json zasoba_mm zapnuto %s, třídy %s, stáří %s snímků; vrstvy s MultiMesh.new při přestavbě: %s" % (_RZ.get("zapnuto"), _tk, _RZ.get("stari_snimku"), _mmnew))
+# časované prolnutí LOD stromů (video Míši 16. 11., Havran K13): data, shadery s kamera_pred, ≤ 13 vzorkovačů (Adreno), bez kopie obrazovky
+_LC = SM.get("lod_casove", {}); _shz = []
+for _f in ("listi", "kura", "impostor"):
+    _t = open(K + "/hra/shaders/%s.gdshader" % _f).read()
+    if "lod_casove" not in _t or "kamera_pred" not in _t or len(re.findall(r"uniform\s+sampler2D", _t)) > 13 or re.search(r"screen_texture|hint_screen_texture|SCREEN_TEXTURE", _t): _shz.append(_f)
+TEST("lod_casove_prolnuti", 0.05 <= float(_LC.get("cas_s", 0)) <= 1.0 and float(_LC.get("skok_m", 0)) > 2.0 and not _shz and _LC.get("zdroj") and "_kamera_pred" in open(K + "/hra/scripts/les.gd").read(),
+     "stromy_modely.json lod_casove %s s; shadery bez časovaného prolnutí / nad 13 vzorkovačů / kopie obrazovky: %s" % (_LC.get("cas_s"), _shz))
+# shluky keřů a bylin: šum s vlnou ~vlna_m (17. 11.: frekvence 0,01 dávala vlnu 4,8 km – shluky nefungovaly)
+TEST("shluky_vlna", all(float(x.get("shluky_frekvence", 0)) == 1.0 for x in (BY, KE)) and re.search(r"_sum\.frequency\s*=", open(K + "/hra/scripts/byliny.gd").read()) is not None,
+     "byliny/kere shluky_frekvence %s / %s" % (BY.get("shluky_frekvence"), KE.get("shluky_frekvence")))
+# houštiny podle Havrana (les_podrost.json houstina, Míša 16. 11.): plášť lesa souvislý a hustý, břeh v pásech s mezerami, paseka zarůstá
+_ok_pl = sum(KE["tridy"].get("les_okraj", {}).values()); _sht = KE.get("shluky_tridy", {})
+_pas_z = sum(v for k_, v in KE["tridy"].get("les_paseka", {}).items() if k_.startswith("zmlazeni"))
+TEST("houstiny_plast", _ok_pl >= 0.1 and float(_sht.get("les_okraj", {}).get("min", 0)) >= 0.5 and float(_sht.get("breh", {}).get("prah", 0)) > 0.2 and _pas_z >= 0.02 and _sht.get("zdroj") and
+     float(BY["tridy"].get("les_okraj", {}).get("kapradi", 0)) >= 0.1,
+     "plášť les_okraj %.3f/m² (≥ 0,1), shluky plášť min %s, břeh práh %s, zmlazení paseky %.3f, kapradí lemu %s" % (_ok_pl, _sht.get("les_okraj", {}).get("min"), _sht.get("breh", {}).get("prah"), _pas_z, BY["tridy"].get("les_okraj", {}).get("kapradi")))
 TEST("dohled_za_porostem", min(t["kresleni_min_m"] for t in SP["typy"].values()) * SP["mlha_od"] > KE["dosah_m"],
      "nejkratší kreslení × začátek mlhy = %.0f m > dosah keřů %s m (keře nemizí v mlze dřív, než se rozpustí)" % (min(t["kresleni_min_m"] for t in SP["typy"].values()) * SP["mlha_od"], KE["dosah_m"]))
 SC = json.load(open(D + "sceny.json"))["body"]

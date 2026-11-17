@@ -26,8 +26,8 @@
   "les_paseka": {
    "trava": 1.5,
    "vysoka": 0.8,
-   "kapradi": 0.2,
-   "ostruzina": 0.2,
+   "kapradi": 0.25,
+   "ostruzina": 0.3,
    "parez": 0.008,
    "kopriva": 0.04,
    "spalek": 0.001
@@ -36,13 +36,13 @@
    "trava": 0.4
   },
   "les_bucina": {
-   "kapradi": 0.08,
+   "kapradi": 0.14,
    "mech": 0.1,
-   "parez": 0.00072,
+   "parez": 0.001,
    "kmen": 0.001,
    "kamen": 0.01,
    "trava": 0.12,
-   "ostruzina": 0.02
+   "ostruzina": 0.04
   },
   "les_sut": {
    "kapradi": 0.12,
@@ -59,16 +59,16 @@
   },
   "les_dubohabrina": {
    "trava": 0.5,
-   "kapradi": 0.06,
-   "ostruzina": 0.05,
+   "kapradi": 0.1,
+   "ostruzina": 0.07,
    "mech": 0.04,
    "parez": 0.00048,
    "kmen": 0.0006
   },
   "les_bucina_kysela": {
-   "kapradi": 0.1,
+   "kapradi": 0.16,
    "mech": 0.12,
-   "parez": 0.00072,
+   "parez": 0.001,
    "kmen": 0.001,
    "kamen": 0.01
   },
@@ -79,9 +79,9 @@
   "les_okraj": {
    "trava": 1.0,
    "vysoka": 0.5,
-   "ostruzina": 0.15,
+   "ostruzina": 0.2,
    "kopriva": 0.06,
-   "kapradi": 0.04
+   "kapradi": 0.12
   },
   "skala": {
    "mech": 0.1,
@@ -361,5 +361,8 @@
  "pozn_padle_stromy": "13. 11. (Míša 13. 11.: „není tam těch klád zase moc? a mají to být popadané stromy, ne pokácené“): kmen = padlé stromy s vylomenými konci (Poly Haven dead_tree_trunk_02 a dead_tree_trunk, CC0; build/padle_stromy/skripty/preved.py), staré rovně uříznuté špalky kmen_1/2 jen jako „spalek“ na pasekách u pařezů (stopa těžby, pozn_parezy). Hustoty: břeh 0,05 → 0,0025/m² (≈1 na 400 m² břehu a jen v lese, les_okoli; předtím 1 na 20 m²), les ~1 na 1000 m² (bučiny 0,001, suť 0,0015, dubohabřina 0,0006), paseka špalek 0,001. Vše NEOVERENO (žádné měření mrtvého dřeva 1393; les se tehdy probíral na palivo – docs/reference/potoky/README_jak_se_stavi.md krok 9: „hustota NEOVERENO, první návrh pár míst“); laděno snímkem. Kořenový talíř (vývrat) chybí: Poly Haven nemá CC0 model vývratu.",
  "pozn_vykon_13_11": "Míša 13. 11. měření na tabletu (7478176): les p95 21,5 → 55 ms, voda 23,6 → 50 ms („kolem vody se to seká“) – porost břehu (třída breh po opravě, dřív omylem cesta) a pás u vody ~2× snížen; vzhled hlídat snímkem vedle předlohy",
  "stavba_okraj_m": -0.1,
- "pozn_stavba_okraj_14_11": "Míša 14. 11.: „pořád je tráva v hájovně“ – kopřiva a tráva rostly 0,1–0,2 m za stěnou srubu a listy prostrčily dovnitř; půdorys mista_stavby (o ~0,36 m větší než zdi) zvětšený o 0,1 m: rostliny ≥ 0,45 m od zdi (záporná hodnota = zvětšení)"
+ "pozn_stavba_okraj_14_11": "Míša 14. 11.: „pořád je tráva v hájovně“ – kopřiva a tráva rostly 0,1–0,2 m za stěnou srubu a listy prostrčily dovnitř; půdorys mista_stavby (o ~0,36 m větší než zdi) zvětšený o 0,1 m: rostliny ≥ 0,45 m od zdi (záporná hodnota = zvětšení)",
+ "pozn_houstiny_17_11": "Míša 16. 11. (houštiny jako Havran): podrost do pasu levnými druhy (kapradí 80–120 troj., ostružiník 0,7 tis.) – KCD les = kmeny + podrost do výšky pasu (Havran les_podrost.json houstina.patro, kcd_sada2_12–19); vnější lem pláště kapradí (Havran plast podil_lemu 0,35 × 1–3 kapradí na 2,5 m); paseka ostružiník a kapradí (zarůstající mýtina). Pařez do kontroly parez_max 0,001 (Míša 13. 11. „není tam těch klád moc?“ – kmeny beze změny; Havranova hromada klestí každý 5. strom: model chybí, nepřevzato). Shluky: šum měl frekvenci 0,01 → vlna 100 × vlna_m (4,8 km), opraveno v byliny.gd (shluky_frekvence 1). Dřív: {\"les_okraj\": {\"trava\": 1.0, \"vysoka\": 0.5, \"ostruzina\": 0.15, \"kopriva\": 0.06, \"kapradi\": 0.04}, \"les_paseka\": {\"trava\": 1.5, \"vysoka\": 0.8, \"kapradi\": 0.2, \"ostruzina\": 0.2, \"parez\": 0.008, \"kopriva\": 0.04, \"spalek\": 0.001}, \"les_bucina\": {\"kapradi\": 0.08, \"mech\": 0.1, \"parez\": 0.00072, \"kmen\": 0.001, \"kamen\": 0.01, \"trava\": 0.12, \"ostruzina\": 0.02}, \"les_bucina_kysela\": {\"kapradi\": 0.1, \"mech\": 0.12, \"parez\": 0.00072, \"kmen\": 0.001, \"kamen\": 0.01}, \"les_dubohabrina\": {\"trava\": 0.5, \"kapradi\": 0.06, \"ostruzina\": 0.05, \"mech\": 0.04, \"parez\": 0.00048, \"kmen\": 0.0006}}",
+ "shluky_frekvence": 1.0,
+ "_shluky_frekvence": "frekvence šumu shluků (byliny.gd _sum); souřadnice se dělí vlna_m → vlna ≈ vlna_m. Do 17. 11. výchozí 0,01 (vlna 4,8 km, shluky nefungovaly)"
 }

@@ -24,3 +24,24 @@ Pořadí: po dokončení funkcí a hlídačů, před vydáním APK měřit P1 a 
 | Tráva: dither maska do dálky | byliny i louka – rozpouštění ditheringem / zmenšení trsu podle hustoty(vzdálenost) | nic |
 | Tráva z dálky: impostorové buňky (2 troj./buňka místo karet) | louka jen v okruhu buněk, dál barva terénu | P3: zvážit „travní impostor“ pásmo, pokud dálka louky vypadá holá |
 | Záseky Havrana (bohatší příroda) | Puchart P2 výše: zásoba MultiMeshů, plánovač | měřit trasou na tabletu |
+
+## Stav 17. 11. (bod 1b plánu po APK)
+- **P2 hotovo:** `hra/scripts/zasoba_mm.gd` (rozpocty.json `zasoba_mm`) – louka, byliny, keře, les zblízka, kameny koryt,
+  rostliny skal a drobnosti vsi berou MultiMesh ze zásoby; přestavba = přepis bufferu stejné velikosti (`glBufferData` bez
+  `glGenBuffers`), slot znovu až po 3 snímcích. Zdroj Godot 4.7.2 gles3 `mesh_storage.cpp`: změna sítě u MultiMeshe
+  s nahraným bufferem čte buffer z GPU → klíč zásoby obsahuje síť. Havran K5 zatím jen v plánu – tady první.
+- **Časované prolnutí stromů hotovo** (bez kopie obrazovky, bez vzorkovače navíc): shader porovná vzdálenost stromu teď
+  a před `cas_s` (uniform `kamera_pred`) → bez stavu na strom; `stromy_modely.json lod_casove`, A/B `PUCHART_LOD_PASMO=1`.
+- **Měření PC** (llvmpipe, 1200×750 = 75 %, stejná trasa, A = vše vypnuto, B1 = P2 + časovaný LOD, B = + houštiny):
+
+| úsek | A p50/p95 | B1 p50/p95 | B p50/p95 | A/B1/B >2×p50 | troj M A/B |
+|---|---|---|---|---|---|
+| hrad | 248/312 | 210/242 | 218/255 | 0/0/0 | 1,82/1,83 |
+| les | 485/1145 | 335/548 | 381/565 | 30/0/0 | 1,36/1,47 |
+| voda | 265/323 | 187/226 | 194/262 | 0/0/0 | 1,06/1,10 |
+| vyhlídka | 239/341 | 151/209 | 170/225 | 0/0/0 | 0,89/0,93 |
+| les znovu | 353/719 | 334/554 | 381/579 | 15/0/0 | 1,33/1,45 |
+
+  Alokací MultiMeshů za trasu: A 20 257 → B 9 257 nových + 12 247 znovu (volných na konci 442, VRAM +8 MB).
+  Pozor: llvmpipe kreslí na CPU (každý snímek > 40 ms), rozptyl mezi běhy velký (výchozí běh téže verze les p50 341,
+  p95 736) – směr ano, čísla pro tablet NEOVERENO. Záseky tabletu změří Míša (řádek „zásoba MM“ a sloupec >2×p50 v měření).

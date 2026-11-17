@@ -11,10 +11,14 @@ var meshe := {}
 var bunky := {}
 var cam: Camera3D
 var _sum := FastNoiseLite.new()
+const ZasobaMM := preload("res://scripts/zasoba_mm.gd")
 
 func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json") -> void:
 	svet = s; cam = kamera
 	cfg = JSON.parse_string(FileAccess.get_file_as_string(cesta))
+	# šum shluků: souřadnice se dělí vlna_m, frekvence 1 = vlna ~vlna_m (17. 11.: výchozí 0,01 dávala vlnu 100 × vlna_m = 4,8 km –
+	# „shluky“ keřů byly jeden pomalý přechod přes celou mapu, žádné houštiny a světliny)
+	_sum.frequency = float(cfg.get("shluky_frekvence", 1.0))
 	sj = JSON.parse_string(FileAccess.get_file_as_string("res://data/stanoviste.json"))
 	st = load("res://data/stanoviste.png").get_image()
 	if ResourceLoader.exists("res://data/kamenitost.png"): km_img = load("res://data/kamenitost.png").get_image()   # kde je kamenito (stavby_vegetace.py)
@@ -134,7 +138,7 @@ func aktualizuj(max_novych: int) -> void:
 			if chci.has(k): bunky[k] = _vloz(data); vl += 1
 	for k in bunky.keys():
 		if not chci.has(k):
-			for x in bunky[k]: x.queue_free()
+			for x in bunky[k]: ZasobaMM.vrat_strom(x); x.queue_free()
 			bunky.erase(k)
 
 func _uloha(k: Vector2i, B: float) -> void:
@@ -167,10 +171,8 @@ func _vloz(data: Dictionary) -> Array:
 	for klic: String in data:
 		if klic == "_stred": continue
 		var druh: String = klic.rstrip("0123456789")
-		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = meshe[druh][int(klic.substr(druh.length()))]
 		var buf: PackedFloat32Array = data[klic]
-		mm.instance_count = buf.size() / 12; mm.buffer = buf
+		var mm := ZasobaMM.vezmi(meshe[druh][int(klic.substr(druh.length()))], buf, buf.size() / 12)   # zásoba MultiMeshů (P2)
 		var mi := MultiMeshInstance3D.new(); mi.multimesh = mm
 		mi.position = data.get("_stred", Vector3.ZERO)
 		mi.visibility_range_end = float(cfg["dosah_m"]) + float(cfg["bunka_m"]) * 0.75   # buňky předstihu se nekreslí (jen připravené)
@@ -225,8 +227,11 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 		if not tridy.has(tr): continue
 		var h: Dictionary = tridy[tr]
 		var nas := 1.0
-		if not sh.is_empty():   # shluky: hustota × šum (světliny a hustá místa, ne rovnoměrný posyp)
-			nas = lerpf(float(sh["min"]), float(sh["max"]), clampf(_sum.get_noise_2d(x / float(sh["vlna_m"]), z / float(sh["vlna_m"])) * 0.5 + 0.5, 0.0, 1.0))
+		var sht: Dictionary = cfg.get("shluky_tridy", {}).get(tr, sh)   # houštiny po třídách (Havran les_podrost.json houstina: plášť souvislý, břeh v pásech s mezerami)
+		if not sht.is_empty():   # shluky: hustota × šum (světliny a hustá místa, ne rovnoměrný posyp)
+			var u := clampf(_sum.get_noise_2d(x / float(sht["vlna_m"]), z / float(sht["vlna_m"])) * 0.5 + 0.5, 0.0, 1.0)
+			var pr := float(sht.get("prah", 0.0))   # pod prahem nic (mezera v pásu – pohled na vodu), nad ním min..max
+			nas = 0.0 if u < pr else lerpf(float(sht["min"]), float(sht["max"]), (u - pr) / maxf(1.0 - pr, 0.001))
 		for druh in h:
 			if not meshe.has(druh) or meshe[druh].is_empty(): continue
 			var nk := 1.0
