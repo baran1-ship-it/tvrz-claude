@@ -551,3 +551,6 @@ Paměť: **VRAM 1145 MB (textury 822, buffery 322)**, halda 1645 MB (max 1738), 
 
 ## 0.9999992 (commit ed2beec, vydáno 17. 11. 20:42)
 Změny: domy vsi zdálky hnědé (barvy vrcholu středního stupně do sRGB), voda bez automatického LOD (rybník, káď, koryta), schody ke vstupům (7), štít krčmy, jádro koruny bez černých čtverců, mapa (figurka menší a bez uskakování, mapa kryje načítání), keře zdálky (impostory do 400 m) a impostory stromů do 2 500 m, +4 tis. keřů na okrajích lesů a u pěšin, dlaždice terénu znovu upečené; švy terénu ve hře vypnuty (+34 s načtení). Varianty trasy: bez_postav, postavy_skryte, postavy_stoji, bez_animace, bez_houstin, bez_obzoru. Výkon NEOVĚŘENO NA ZAŘÍZENÍ (čeká na měřicí trasu).
+
+## 0.9999993 (vydáno 17. 11.)
+Proti 0.9999992 jen kód: předměty dvora se nepokládají na stupně před dveřmi (plůtek domu 6, test schody_vstupu OK). Balíky beze změny. Výkon NEOVĚŘENO NA ZAŘÍZENÍ.
