@@ -187,3 +187,18 @@ Pozor do budoucna: nástroje, které mění vložené textury staveb (`domy_vzhl
 (pořadí v `stavby_z_havrana.sh`); po samostatném spuštění úpravy glb znovu `stromy_sdilene_textury.py hra/modely/stavby_h`.
 Zbývá: duplicity `modely/predmety_h` (Havran, 43× / 126× stejná textura, „možná“ – nahrávají se v pískovišti) stejným
 nástrojem; maska kolejí znaménkovou vzdáleností 1 m (3,8 MB) při příští stavbě cesty.py (NAVRH).
+
+## Pískoviště – sdílené textury předmětů (Míša 17. 11.: „uprav i pískoviště“)
+- Stejný nástroj `nastroje/stromy_sdilene_textury.py` na `hra/modely/predmety_h`: zapojený na konec `nastroje/predmety_z_havrana.sh`
+  a na konec `nastroje/postav_vse.sh` (po všech, kdo do predmety_h zapisují glb: předměty Havrana, `blender/stodoly.py`,
+  `blender/kovadlina.py`), pak `import_velikost.py` a import. Nově `tex/puvod.json` (hash → modely) – podle něj import drží
+  kovadlinu ≤ `kovadlina_max_px`. Soubory, jejichž jméno používá hra přímo (`plutek_kura_kul_*.jpg` v mista_stavby.json, ikony),
+  nástroj nemaže.
+- 332 glb, 1038 vložených obrázků → 583 jedinečných; smazáno 1036 vytažených kopií (+ importy).
+- Nástroj: `modely/predmety_h` 161,8 → 88,3 MB (−73,5 MB); celý projekt 559,8 → 486,2 MB; duplicit 163 → 98 skupin.
+- Ve hře (PC, všech 364 předmětů katalogu osazeno v mřížce u louky −500,280): Godot textury 516 → 442 MB, VRAM celkem
+  838 → 764 MB (−74 MB). Tablet NEOVERENO.
+- Snímky zblízka před/po (prohlédnuté, bez rozdílu kromě trávy ve větru): `docs/screens/textury_vram_17_11_predmety.jpg`
+  (káď, stolička, stůl, štít, soudek / stan kupce, bedny, vidle, hrábě / kovadlina, měch, brus, vědro, ponk kovárny).
+- Hlídač: `smysl:modely_textury_odkazy` – žádný glb v hra/modely neodkazuje na chybějící nebo neimportovanou texturu
+  (616 glb, 2600 odkazů OK).
