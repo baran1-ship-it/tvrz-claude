@@ -735,14 +735,15 @@
   {
    "id": "kamna_nadobkova",
    "p": [
-    8.1,
+    14.73,
     3.9,
-    -9.0
+    -10.8
    ],
-   "natoceni_st": 90.0,
+   "natoceni_st": 270.0,
    "budova": "tvrz_palac",
    "ohen": "kamna_loznice",
-   "popis": "Míša 16. 11. („nová kamna nebo krb na tvrz“): nádobková kamna (Topeni_1400 Kamna_Hradni_Nadobkova) v ložnici pána v patře paláce (svet.json mistnosti loznice x 7,2–17, z −14 až −7,6, podlaha 3,9) zády k příčce s komnatou (x 7,2), ústím do místnosti; jižně od postele (z −12,93). Síň má gotický krb stavby (palace.fireplace) – nádobková kamna patří do vytápěné obytné místnosti (NAVOD_PEC: kamna s přikládáním zvenku, kolem 1400 v obytných světnicích hradů a tvrzí). Oheň ze značky Pec_Ohen."
+   "popis": "Míša 16. 11. („nová kamna nebo krb na tvrz“): nádobková kamna (Topeni_1400 Kamna_Hradni_Nadobkova) v ložnici pána v patře paláce (svet.json mistnosti loznice x 7,2–17, z −14 až −7,6, podlaha 3,9) zády k příčce s komnatou (x 7,2), ústím do místnosti; jižně od postele (z −12,93). Síň má gotický krb stavby (palace.fireplace) – nádobková kamna patří do vytápěné obytné místnosti (NAVOD_PEC: kamna s přikládáním zvenku, kolem 1400 v obytných světnicích hradů a tvrzí). Oheň ze značky Pec_Ohen.",
+   "_misto_17_11": "Míša 17. 11. (snímky 19, 20: „kamna jsi dal do dveří, na druhé straně místnosti je komín“): kamna přisazená ke komínu ložnice (blender/palace.py komín x 15,6–17, z −11,5 až −10,1), ústím (Pec_Usti místní −z) do komína – přikládání a kouř do komína; šířka kamen (1,39 m) = šířka komína"
   },
   {
    "id": "vidle_drevene",

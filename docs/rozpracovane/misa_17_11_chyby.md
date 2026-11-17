@@ -12,7 +12,7 @@ Míša: „vesnice top, bez záseků; záseky jen u rybníka, v lese za lomem a 
 | 6 | Tmavé čáry přes cesty (08 x 309 z 716, 10 x 313 z 672, 11 x 276 z 620 – šev se stěnou hlíny) | | | | OTEVŘENO – rozbor |
 | 7 | Obdélníkové „razítka“ v hlíně cesty (09 x 315 z 681) | | | | OTEVŘENO – rozbor |
 | 8 | Víc houštin; keře zdálky nejsou vidět a pak se objeví – impostory i pro křoví, doplnit impostory stromů v dálce | | | | OTEVŘENO – rozbor |
-| 9 | Kamna v tvrzi stojí ve dveřích, komín je na druhé straně místnosti (19, 20, x 12 z −12) | | | | OTEVŘENO – rozbor |
+| 9 | Kamna v tvrzi stojí ve dveřích, komín je na druhé straně místnosti (19, 20, x 12 z −12) | POTVRZENO v datech: `nabytek.json` kamna_nadobkova (8,1; −9,0) u příčky x 7,2 = před dveřmi z komnaty; komín ložnice `blender/palace.py` x 15,6–17, z −11,5 až −10,1 | záznam: kamna (14,73; −10,8), natočení 270 (ústí Pec_Usti místní −z do komína), šířka kamen 1,39 = šířka komína | `ohen_u_pece`, snímek ložnice | OPRAVENO v datech, snímek NEOVĚŘENO |
 | 10 | Hrudník postav – oděv roztrhaný, díry (15) | známé: sady oděvů postav rozbité (15 sad, gltf × bin), 0.9999991 vydána bez z_postavy | | | OTEVŘENO – oprava sad postav |
 | 11 | Záseky: u rybníka (02: GPU 92,9 ms), les za lomem (16: FPS 25), hostinec (17: FPS 20, lidé 11 ms), tvrz (18: 581 ms, swap/GPU 520 ms) | | | měřicí trasa (Míša pošle) | OTEVŘENO – rozbor po měření |
-| 12 | Návrh Míši: pevných 30 FPS místo 40–50, šetřit procesor | | | | OTEVŘENO – rozbor |
+| 12 | Návrh Míši: pevných 30 FPS místo 40–50, šetřit procesor | POTVRZENO v kódu: volba už existuje (Nastavení → Snímky: pevně 30 FPS, main.snimky_i; na tabletu výchozí od 13. 11. `kvalita.json snimky_vychozi_mobil` 1), ale uložená volba hráče má přednost – Míša má uloženo „volně“ (snímky FPS 55) | žádná (přepnout v Nastavení) | – | OTEVŘENO – čeká na Míšu (přepnout a porovnat teplo/záseky) |
