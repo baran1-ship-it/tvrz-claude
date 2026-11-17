@@ -22,7 +22,7 @@ Výklad červených čar je můj (Claude) – kde si nejsem jistý, je to napsan
 | 13 | 13 | 76.4 334.3 y-9.0 (let) | potok bez vody (koryto prázdné) „?“ | C voda |
 | 14 | 14 | 110.4 517.9 (let) | lávka: pěšina za lávkou přeškrtnutá (klička do kopce), dokreslena trasa vpravo podél údolí | C voda |
 | 15 | 15 | 63.9 396.8 y-42.7 | chýše (A-střecha): dveře stojí samostatně vedle stavby „?“ | B ves |
-| 16 | 16 | 61.3 395.8 y-42.5 | chýše zepředu: klikyhák přes příkop/jámu v podlaze před lůžky „?“ | B ves |
+| 16 | 16 | 61.3 395.8 y-42.5 | chýše zepředu: přední stěna nesahá až na zem – mezera mezi spodkem stěny a podlahou (upřesnila Míša) | B ves |
 | 17 | 17 | -323.2 -208.2 | mlýn: hromada pytlů přeškrtnutá (ploché plachty, ošklivé) | C voda |
 | 18 | 18 | -314.1 -217.5 | mlýn: přeškrtnutý polorozpadlý plot a „žebřík/plot“ v keřích | C voda |
 | 19 | 19 | -336.2 -213.3 | mlýnské kolo na suchu – žádná voda „?“ | C voda |
