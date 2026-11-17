@@ -501,6 +501,29 @@ Změny pro měření: nové předměty z Disku (sdílené textury tex_predmety2,
 48 %), plášť lesa i východně od vsi, `teren_lod_bias` 4 (víc trojúhelníků terénu na tabletu – NEOVĚŘENO), dlaždice terénu
 v datech, ale VYPNUTÉ (`teren_dlazdice.json zapnuto false`). Měřicí trasa: porovnat úseky ves-vjezd, ves, louka s 0.999999.
 
+### 0.9999991 – Měřicí trasa 17. 11. 09:36 (sestavení 8ff85a8, manifest a702d335) – NEDOKONČENA (60 ze 135 úseků, pád ve 4. variantě, věž)
+p50/p95 (ms), varianty vše / terén dlaždice / bez postav / dohled x0.6:
+| úsek | vše | dlaždice | bez postav | dohled x0.6 |
+|---|---|---|---|---|
+| tvrz-cesta | 47/82 | **33/38** | 31/38 | 28/54 |
+| louka | 36/56 | **24/31** | 19/24 | 34/47 |
+| les | 21/33 | 21/30 | 20/25 | 25/64 |
+| skály | 31/38 | 29/38 | 20/24 | 29/39 |
+| kůň-les | 24/31 | 24/31 | 20/25 | 28/42 |
+| ves | 36/48 | 37/49 | **26/32** | 25/29 |
+| ves-vjezd | 34/41 | 34/44 | 38/46 | 46/58 |
+| ves-dvory | 44/56 | 41/53 | **27/35** | 36/46 |
+| krčma-kovárna | 35/53 | 35/51 | **24/35** | 26/32 |
+| hostinec | 33/38 | 34/42 | 27/33 | 30/36 |
+| věž-výhled | 33/39 | 33/41 | 22/45 | 22/40 |
+- **Dlaždice terénu: NAMĚŘENÝ vliv** – tvrz-cesta p50 −14 ms, louka −12 ms, trojúhelníky −35 až −60 % (louka 1,33 → 0,92 M), ves beze změny
+  (+1 ms v šumu). Varianta jela po „vše“ (teplejší tablet) – vliv tím spíš skutečný.
+- **Postavy: NAMĚŘENÝ vliv ve vsi** – ves-dvory 44 → 27, ves 36 → 26, krčma-kovárna 35 → 24 ms p50; skripty jen 8 → 4 ms
+  → zbytek je kreslení postav (podezření: skinning/stíny postav, LOD postav) – rozbor.
+- Paměť: VRAM 1067 MB (textury 673, buffery 394), halda 1738 MB, varování RAM 1712–1749 MB (práh 1200). Pád/zamrznutí
+  po ~44 min (2647 s) jako 0.999999 (45 úseků) – PODEZŘENÍ tlak paměti (halda u stropu), buffery 286 (0.999998) → 394.
+- Míša: „vesnice top, bez záseků“; záseky u rybníka, v lese za lomem, hostinec, tvrz (misa_17_11_chyby.md ř. 11).
+
 ## 0.999999 (commit 3b6c1cc, vydáno 16. 11. 01:04) – NEOVĚŘENO NA ZAŘÍZENÍ (testovací, bez z_postavy – oděvy ř. 3 v další verzi)
 Změny proti 0.999998: krčma dvůr (déšť pod střechami, cesty ze dvora, schody), tráva v hostinci/u dveří (jeden zákaz
 trávy), kostel = zřícenina z Disku (kolize zdi podle sítě, střední LOD s barvou vrcholů), zaniklá ves Doubrava z dílů,
