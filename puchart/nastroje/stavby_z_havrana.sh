@@ -46,4 +46,8 @@ python3 $K/nastroje/topeni_domy.py $K
 python3 $K/nastroje/domy_vzhled.py $K
 python3 $K/nastroje/topeni_modely.py $K
 /opt/bl/bin/python $K/blender/stredni_lod.py -- $K
+# sdílené textury staveb (docs/rozpracovane/textury_vram_17_11.md T1: 123 skupin stejných textur Poly Haven / Havrana pod
+# různými cestami ~198 MB VRAM – každý glb i LOD1 měl vlastní kopii): obrázky z glb jednou podle obsahu do stavby_h/tex/<hash>,
+# glb na ně odkazují uri; až po všech úpravách glb výše (ty čtou vložené textury); import pak nastroje/import_velikost.py
+python3 $K/nastroje/stromy_sdilene_textury.py $K/hra/modely/stavby_h $K/hra
 rm -rf $T; ls -la $K/hra/modely/stavby_h/

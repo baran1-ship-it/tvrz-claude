@@ -150,6 +150,7 @@ func _physics_process(dt: float) -> void:
 		var smer := cam.global_transform.basis * v.limit_length(1.0) + Vector3.UP * clampf(nah, -1.0, 1.0)
 		velocity = smer * (let * (3.0 if rychle else 1.0))
 		move_and_slide()
+		_hranice()
 		return
 	if autopilot != Vector3.INF:
 		var k := Vector3(autopilot.x - position.x, 0, autopilot.z - position.z)
@@ -166,6 +167,20 @@ func _physics_process(dt: float) -> void:
 	# schod nebo práh: zkus se na něj vysunout (Havran player.gd _step_up; č. 315 – stupně místo ramp)
 	if na_zemi and is_on_wall() and Vector2(v.x, v.z).length() > 0.3:
 		_krok_nahoru(Vector3(v.x, 0, v.z).normalized(), pred, dt)
+	_hranice()
+
+## Hranice světa (pruchod:dosah 17. 11.: na okraji výseku končí terén i kolize – hráč spadl do prázdna; postup hraničních
+## zdí seal_world z Alchemists of Prague): poloha zůstává hrac.json hranice_sveta_m uvnitř okraje terénu (vysek.json)
+var _mez := Rect2()
+func _hranice() -> void:
+	if _mez.size == Vector2.ZERO:
+		var vi: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/vysek.json"))
+		var o := float(Pravidla.cti("hrac", "hranice_sveta_m"))
+		_mez = Rect2(float(vi["x0_hra"]) + o, float(vi["z0_hra"]) + o, float(vi["sirka"]) - 1.0 - 2.0 * o, float(vi["vyska"]) - 1.0 - 2.0 * o)
+	var x := clampf(position.x, _mez.position.x, _mez.end.x); var z := clampf(position.z, _mez.position.y, _mez.end.y)
+	if x != position.x or z != position.z:
+		position.x = x; position.z = z
+		velocity.x = 0.0; velocity.z = 0.0
 
 
 ## Krok nahoru (Havran player.gd _step_up/_zkus_schod, hrac.json schod_m): zvednout kapsli o výšku kroku (nejdřív nejvyšší,

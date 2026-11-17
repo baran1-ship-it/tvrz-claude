@@ -15,7 +15,7 @@ for _r in vysek vysek_sit; do
 done
 # staré výsledky pryč (QA 2. 11.: když Godot/Blender spadne, nesmí projít výsledky minulého běhu)
 rm -f $K/build/kontrola_geometrie.json $K/build/test_smyslu.json $K/build/hlidaci_beh_godot.log $K/build/hlidaci_otisk
-[ "$1" != "--rychle" ] && rm -f $K/build/pruchod.json $K/build/sceny.json $K/build/kontrola_scen.json
+[ "$1" != "--rychle" ] && rm -f $K/build/pruchod.json $K/build/sceny.json $K/build/kontrola_scen.json $K/build/dosah.json $K/build/dosah.png
 # trvání kroků (rada 9. 11.: měřit čekací doby, ať je vidět, co má smysl pouštět souběžně) → build/hlidaci_casy.txt
 _T0=$(date +%s); _KROK=""; : > $K/build/hlidaci_casy.txt
 krok() { _T=$(date +%s); [ -n "$_KROK" ] && echo "$_KROK $((_T - _T0)) s" >> $K/build/hlidaci_casy.txt; _KROK="$1"; _T0=$_T; echo "== $1" | tee -a $S; }
@@ -39,7 +39,9 @@ if [ "$1" != "--rychle" ]; then
   krok "test průchodu + hlídač scén (souběžně)"
   (cd $K/hra && PUCHART_TEST=sceny PUCHART_VYSTUP=$K/build/sceny.json timeout 2400 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 > $K/build/hlidaci_sceny_godot.log 2>&1) &
   _PSC=$!
-  (cd $K/hra && PUCHART_TEST=pruchod PUCHART_VYSTUP=$K/build/pruchod.json timeout 5400 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | tee $K/build/hlidaci_beh_godot.log | grep -E "^PRUCHOD" | cut -c1-160 | tee -a $S)
+  # + mřížka dosažitelnosti (pruchod:dosah, plán 17. 11. B1): díry a únik ze světa = CHYBA, uvíznutí / ostrovy / dveře bez dosahu
+  # výpis; mapa build/dosah.png, nálezy build/dosah.json (pravidla kontroly_hra.json dosah)
+  (cd $K/hra && PUCHART_TEST=pruchod PUCHART_VYSTUP=$K/build/pruchod.json PUCHART_DOSAH=$K/build/dosah.json timeout 5400 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | tee $K/build/hlidaci_beh_godot.log | grep -E "^PRUCHOD|^DOSAH (mřížka|uvíznutí [0-9])" | cut -c1-200 | tee -a $S)
   # všechny trasy z dat i pevné testy musí mít výsledek OK (audit 15. 11.: chybějící trasa dřív prošla)
   python3 - "$K" <<'PY' | tee -a $S || rc=1
 import json, sys
@@ -48,7 +50,7 @@ oc = set()
 for f in ("pruchody.json", "pruchody_mista.json"):
     try: oc |= set(json.load(open(K + "/hra/data/" + f))["trasy"].keys())
     except Exception: pass
-oc |= {"strom_kolize", "povrch_kolize", "vrata_funkce", "mapa_cestovani", "zebrik_lezeni"}
+oc |= {"strom_kolize", "povrch_kolize", "vrata_funkce", "mapa_cestovani", "zebrik_lezeni", "dosah"}
 chybi = sorted(oc - set(d)); spatne = sorted(k for k, v in d.items() if v != "OK")
 print("PRUCHOD_UPLNOST tras %d, chybí %d %s, chybných %d %s" % (len(d), len(chybi), chybi[:6], len(spatne), spatne[:6]))
 sys.exit(1 if chybi or spatne else 0)
@@ -94,6 +96,9 @@ MU=$(python3 -c "import json;d=json.load(open('$K/hra/data/mereni.json'));print(
 if ! grep -q "^MERENI_KONEC úseků $MU" $K/build/hlidaci_mereni.log; then rc=1; echo "MERENI CHYBA: měření nedoběhlo všech $MU částí ($(grep -o 'MERENI_KONEC.*' $K/build/hlidaci_mereni.log))" | tee -a $S
 elif grep -q "SCRIPT ERROR" $K/build/hlidaci_mereni.log; then rc=1; echo "MERENI CHYBA: chyba skriptu" | tee -a $S; grep -m3 -A2 "SCRIPT ERROR" $K/build/hlidaci_mereni.log | tee -a $S
 else echo "MERENI OK: $MU částí, bez chyb" | tee -a $S; fi
+# B4 (plán 17. 11.): kamera měření došla do cíle každého úseku (mereni.gd MERENI_CIL, mez hra/data/mereni.json dojit_mez_m)
+if grep -q "^MERENI_CIL OK" $K/build/hlidaci_mereni.log; then grep -m1 "^MERENI_CIL" $K/build/hlidaci_mereni.log | tee -a $S
+else rc=1; echo "MERENI_CIL CHYBA: $(grep -m1 -o 'MERENI_CIL.*' $K/build/hlidaci_mereni.log || echo 'kontrola cíle úseků nevypsána')" | tee -a $S; fi
 krok "matice vztahů"; python3 $K/nastroje/kontrola_vztahu.py $K $1 | tee -a $S || rc=1
 krok "tabulka chyb"; python3 $K/nastroje/kontrola_tabulek.py $K $1 | tee -a $S || rc=1
 # poslední dobrá verze (GPT studio bod 7): při úspěchu uložit výsledky s commitem; při chybě vypsat rozdíl proti ní

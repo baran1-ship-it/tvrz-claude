@@ -96,6 +96,10 @@ func spust(h: Node, p: CharacterBody3D) -> Dictionary:
 	var t3 := Time.get_ticks_msec()
 	_zpet(starty)
 	var t4 := Time.get_ticks_msec()
+	for i in dvere.size():   # rozbor: stav bodů vybraných tras (PUCHART_DOSAH_TRASA=A_palac,…)
+		var jt := String(dvere[i]["jm"]).get_slice("/", 1)
+		if String(dvere[i]["jm"]).begins_with("trasa/") and jt in OS.get_environment("PUCHART_DOSAH_TRASA").split(","):
+			print("DOSAH bod ", dvere[i]["jm"], " ", dvere[i]["p"], " stav ", stav[NB + NU + i], " sousedů ", dv_bliz.get(NB + NU + i, []).size())
 	var dos := 0; var nav := 0
 	for i in stav.size():
 		if stav[i] & DOSAZENO: dos += 1
@@ -241,15 +245,20 @@ func _dvere() -> void:
 			if not (f.begins_with("pruchody") and f.ends_with(".json")): continue
 			var tr: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/" + f))["trasy"]
 			for jt in tr:
-				var pred := -1
-				for i in (tr[jt] as Array).size():
-					var b: Array = tr[jt][i]
-					var y0: float = float(b[2]) if b[2] != null else hl.svet.vyska(b[0], b[1])
-					var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(b[0], y0 + 0.6, b[1]), Vector3(b[0], y0 - 1.0, b[1]), hrac.collision_mask, [hrac.get_rid()]))
-					if h.is_empty(): pred = -1; continue
-					var id := _pridej_bod("trasa/%s/%d" % [jt, i], h["position"], Vector3.ZERO, false)
-					if pred >= 0: dv_bliz.get_or_add(id, []).append(pred); dv_bliz.get_or_add(pred, []).append(id)
-					pred = id
+				var body: Array = tr[jt]; var pred := -1; var pred2 := -1
+				for i in body.size():
+					var b: Array = body[i]
+					var y0: float = float(b[2]) if b[2] != null else (_poz(pred).y if pred >= 0 else hl.svet.vyska(b[0], b[1]))   # bez výšky: navazuje na předchozí bod (schody, rampa)
+					var pb := Vector3.INF   # podlaha, kam se kapsle vejde, nejblíž výšce bodu; u zdi posun do bod_tolerance_m (jako test průchodu)
+					for o: Vector2 in [Vector2.ZERO, Vector2(0.3, 0), Vector2(-0.3, 0), Vector2(0, 0.3), Vector2(0, -0.3), Vector2(0.3, 0.3), Vector2(-0.3, 0.3), Vector2(0.3, -0.3), Vector2(-0.3, -0.3), Vector2(0.55, 0), Vector2(-0.55, 0), Vector2(0, 0.55), Vector2(0, -0.55)]:
+						for yy in _patra(float(b[0]) + o.x, float(b[1]) + o.y, y0 + 2.0):
+							if absf(yy - y0) <= (0.6 if b[2] != null else 2.0) and (pb == Vector3.INF or absf(yy - y0) < absf(pb.y - y0)): pb = Vector3(float(b[0]) + o.x, yy, float(b[1]) + o.y)
+						if pb != Vector3.INF: break
+					if pb == Vector3.INF: continue   # bod bez místa pro kapsli (pod klenbou schodů): trasa pokračuje dalším bodem
+					var id := _pridej_bod("trasa/%s/%d" % [jt, i], pb, Vector3.ZERO, false)
+					for pp in [pred, pred2]:   # s předchozím a ob jeden (bod posunutý od zdi nemusí být na cestě)
+						if pp >= 0: dv_bliz.get_or_add(id, []).append(pp); dv_bliz.get_or_add(pp, []).append(id)
+					pred2 = pred; pred = id
 
 ## uzel navíc (dveře, bod trasy) spojený chůzí s uzly mřížky do dvere_r_m (výškově do dvere_dy_m)
 func _pridej_bod(jm: String, p: Vector3, nn: Vector3, je_dvere: bool) -> int:
@@ -346,18 +355,29 @@ func _jdi(p: Vector3, cil: Vector2, tol := 0.15) -> Vector3:
 				return Vector3.INF
 		q = r
 		if hrac.test_move(Transform3D(Basis(), q), Vector3.DOWN * float(cfg["pad_hledat_m"]), _col): q += _col.get_travel()
-		else: return Vector3(q.x, -INF, q.z)
+		else:   # pod sebou nic – ověřit paprskem (kapsle zaklíněná v kolizi test_move nehlásí): zásah = zaklíněná, neprojde
+			_q.from = q + Vector3(0, 0.3, 0); _q.to = q - Vector3(0, float(cfg["pad_hledat_m"]), 0)
+			if not space.intersect_ray(_q).is_empty(): return Vector3.INF
+			return Vector3(q.x, -INF, q.z)
 	if _ladit and Vector2(cil.x - q.x, cil.y - q.z).length() > tol: print("DOSAH ladění   nedošla, konec ", q)
 	return q if Vector2(cil.x - q.x, cil.y - q.z).length() <= tol else Vector3.INF
 
-## jeden podkrok s: rovně / po svahu / krok nahoru; INF = narazil (normála v _col)
+## jeden podkrok s: klouzání jako move_and_slide (po pochozím svahu i nahoru, po stěně jen vodorovně) / krok nahoru;
+## INF = nepostoupila (normála v _col)
 func _podkrok(q: Vector3, s: Vector3) -> Vector3:
 	var xf := Transform3D(Basis(), q)
 	if not hrac.test_move(xf, s, _col): return q + s
-	var nr := _col.get_normal()
-	if nr.y >= cos_max:   # pochozí svah: posun po rovině svahu
-		var s2 := Vector3(s.x, -(nr.x * s.x + nr.z * s.z) / nr.y + 0.01, s.z)
-		if not hrac.test_move(xf, s2): return q + s2
+	var rem := s; var qq := q; var k3 := KinematicCollision3D.new()
+	for k in 4:
+		if not hrac.test_move(Transform3D(Basis(), qq), rem, k3): qq += rem; break
+		qq += k3.get_travel()
+		var n := k3.get_normal()
+		if n.y < cos_max:   # stěna / příkrý svah: bez stoupání
+			n = Vector3(n.x, 0, n.z).normalized() if Vector2(n.x, n.z).length() > 0.01 else Vector3.UP
+		rem = (rem - k3.get_travel()).slide(n)
+		if rem.length() < 0.01: break
+	var sd := Vector3(s.x, 0, s.z)
+	if Vector3(qq.x - q.x, 0, qq.z - q.z).dot(sd.normalized()) >= 0.6 * sd.length(): return qq
 	var k2 := KinematicCollision3D.new()
 	for vy in schody:
 		var v := float(vy)

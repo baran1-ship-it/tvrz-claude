@@ -33,11 +33,19 @@ var vykreslovani := ""   # renderer · ovladač · GPU · API (vykreslovani.gd p
 var _vyk_id := ""
 var _cil_ms := 1000.0 / 30.0   # snímek pod cílem FPS (rozpocty.json snimek.cil_fps)
 signal konec
+# B4 (plán 17. 11., Alchemists autotest „bot musí dojít do cíle“): kamera trasy musí na konci každého úseku stát v jeho cíli –
+# odchylka skutečné polohy kamery od zadané (něco ji táhne, např. hráč 12. 11.) i vzdálenost od konce úseku ≤ mereni.json dojit_mez_m
+var _cam_cil := Vector3.INF
+var _odchylka := 0.0
+var _dojit_mez := 0.5
+var _nedosel: Array = []
+var _do_cile_max := 0.0
 
 func zacni(s: Node3D, kamera: Camera3D) -> void:
 	svet = s; cam = kamera
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mereni.json"))
 	trasa = cfg["useky"]; verze = cfg.get("verze", "") + " / Godot " + Engine.get_version_info()["string"]
+	_dojit_mez = float(cfg.get("dojit_mez_m", 0.5))
 	varianty = cfg.get("varianty", [])
 	var jen := OS.get_environment("PUCHART_MERENI_JEN")   # PC vývoj: jen vybrané úseky a jejich varianty (např. "les"), méně času a paměti
 	if jen != "":
@@ -75,9 +83,11 @@ func _process(d: float) -> void:
 	var now := Time.get_ticks_usec(); var ms := (now - _posl) / 1000.0; _posl = now
 	var u: Dictionary = trasa[i_usek]
 	t += d
+	if _cam_cil != Vector3.INF: _odchylka = maxf(_odchylka, cam.global_position.distance_to(_cam_cil))   # kde kamera skutečně byla minulý snímek
 	var celk := 5.0 + 30.0 if OS.get_environment("PUCHART_MERENI_RYCHLE") == "" else 1.0 + 2.0   # hlídač: zkrácené úseky
 	var pc := _bod(u, clampf(t / celk, 0.0, 1.0))
 	cam.look_at_from_position(pc[0], pc[1], Vector3.UP)
+	_cam_cil = pc[0]
 	if t > celk - 30.0 * (1.0 if OS.get_environment("PUCHART_MERENI_RYCHLE") == "" else 2.0 / 30.0):
 		casy.append(ms)
 		_proc_max = maxf(_proc_max, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
@@ -103,6 +113,10 @@ func _process(d: float) -> void:
 			"pod_cil_pct": 100.0 * pod / n, "p99": s[mini(int(n * 0.99), n - 1)], "nejh5": nejh,
 			"vram_mb": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0,
 			"halda_mb": OS.get_static_memory_usage() / 1048576.0})
+		var do_cile := maxf(_odchylka, (pc[0] as Vector3).distance_to(_bod(u, 1.0)[0]))   # B4: došla kamera do cíle úseku?
+		useky[-1]["do_cile_m"] = do_cile; _do_cile_max = maxf(_do_cile_max, do_cile); _odchylka = 0.0
+		if do_cile > _dojit_mez:
+			_nedosel.append("%s %.2f m" % [useky[-1]["jmeno"], do_cile]); push_error("MERENI_CIL úsek %s: kamera %.2f m od cíle (mez %.2f)" % [useky[-1]["jmeno"], do_cile, _dojit_mez])
 		casy = PackedFloat32Array(); _proc_max = 0.0; kres = 0; troj = 0; vzorku = 0; t = 0.0
 		i_usek += 1
 		if i_usek >= trasa.size() and i_sk + 1 < skaly.size():   # další rozlišení 3D, stejná trasa
@@ -175,6 +189,7 @@ func _konec() -> void:
 	var f := FileAccess.open("user://mereni.txt", FileAccess.WRITE)
 	if f: f.store_string(txt); f.close()
 	print(txt)
+	print("MERENI_CIL %s (úseků %d, nejvíc %.2f m od cíle, mez %.2f m)%s" % ["OK" if _nedosel.is_empty() else "CHYBA", useky.size(), _do_cile_max, _dojit_mez, (": " + ", ".join(_nedosel)) if not _nedosel.is_empty() else ""])
 	print("MERENI_KONEC úseků %d" % useky.size())
 	if OS.get_environment("PUCHART_MERENI_RYCHLE") != "":   # hlídač: chvíli procházky po měření (předání kamery), pak konec
 		await get_tree().create_timer(5.0).timeout

@@ -128,7 +128,8 @@
  "meritko_max_stare": 1.8,
  "impostor": {
   "px_na_pohled": 256,
-  "barva_max_px": 2048,
+  "barva_max_px": 1024,
+ "barva_max_px_pozn": "17. 11. (docs/rozpracovane/textury_vram_17_11.md T4): import atlasu barvy 2048 → 1024 (128 px na pohled; 13 dřevin × 5,3 → 1,3 MB ETC2_RGBA8 ve VRAM); impostor se ukazuje až od ~32 m (LOD1 do 32 m), snímek hranice LOD1 → impostor před/po 17. 11. bez viditelného rozdílu",
   "normaly_max_px": 1024,
   "pozn": "2. 11. (Míša: stromy blízko a stejně rozmazané): dřív 128 px/pohled a import 512 px kvůli APK (= 64 px/pohled). Data mimo APK → atlas 2048 (256 px/pohled), normály 1024; VRAM odhad ~100 MB (16 dřevin × 2048 barva + 1024 normály, QA 2. 11.) NEOVERENO – měřit na tabletu"
  },

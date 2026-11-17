@@ -1,5 +1,7 @@
 {
  "verze": "M: déšť (pocasi.gd), obloha Havrana, menu, mapa, opravy hradů / 75 %",
+ "dojit_mez_m": 0.5,
+ "pozn_dojit": "plán 17. 11. B4 (Alchemists autotest: bot musí dojít do cíle úseku): kamera měření na konci každého úseku nejvýš tolik m od cíle a nikdy tolik od zadané polohy (mereni.gd MERENI_CIL; 12. 11. se kamera přetahovala s hráčem) – jinak chyba měření (hlídači)",
  "useky": [
   {
    "jmeno": "hrad",

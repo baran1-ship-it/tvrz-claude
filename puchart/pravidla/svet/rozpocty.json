@@ -92,6 +92,21 @@
    "pozn": "Míša 2. 11.: jako Havran – APK jen kód a nastavení, herní data jako balík .pck po částech v puchart/data/, stáhne se při prvním spuštění (scripts/data.gd); limit 100 MB na soubor GitHubu se tím netýká APK"
   }
  },
+ "textury_vram": {
+  "popis": "Textury v grafické paměti (tablet ukazoval VRAM 938 MB a rostl): pravidla importu, která čte nastroje/import_velikost.py. Sdílené textury staveb (T1) dělá nastroje/stromy_sdilene_textury.py na konci nastroje/stavby_z_havrana.sh – každá textura jednou v modely/stavby_h/tex/<hash>.",
+  "zdroj": "docs/rozpracovane/textury_vram_17_11.md (T1–T4, nástroj nastroje/textury_vram.py, ve hře scripts/textury_vram.gd); textury_px.bezna (běžný předmět 512–1024)",
+  "stavby_max_px": 1024,
+  "stavby_max_px_pozn": "modely/stavby_h/tex: jabloně z Disku měly barvu i normály 2048² (3 stejné kopie); stavba ani strom nejsou dominanta → horní mez textury_px.bezna",
+  "kovadlina_max_px": 1024,
+  "kovadlina_pozn": "kovadlina_1393 (blender/kovadlina.py peče 2048²): drobný předmět, podrobný model jen zblízka (funkce.json kovadlina) → horní mez textury_px.bezna",
+  "maska_koleje": {
+   "vram": true,
+   "mipmapy": true,
+   "pozn": "4000² po 0,5 m (cesty.py: vzdálenost od osy kolejí) bez komprese L8 15,3 MB → VRAM komprese s mipmapami 10,2 MB (Godot z L8 dělá ETC2_RGB8; R11 nenabízí – jednokanálová R dává RG11 16 MB). Chyba vzdálenosti od osy po kompresi p95 0,16 m, na snímcích vozové cesty zblízka 17. 11. bez viditelného rozdílu (koleje modulované šumem). Rozlišení zůstává: při 1 m se neznaménková vzdálenost v interpolaci u osy ztratí (až 0,5 m – hřbet by mizel), koleje by se posunuly o ≤ 5 cm; znaménková vzdálenost (1 m, 3,8 MB) = NAVRH pro cesty.py při příští stavbě"
+  },
+  "rostliny_barva_vram": true,
+  "rostliny_barva_pozn": "modely/rostliny/*_color.png (s alfou listů) RGBA8 bez komprese 4 B/px → ETC2_RGBA8 1 B/px (alfa EAC 8 bit); okraje listů ověřeny snímkem zblízka 17. 11."
+ },
  "snimky_max": {
   "tablet": 30,
   "pc": 0,

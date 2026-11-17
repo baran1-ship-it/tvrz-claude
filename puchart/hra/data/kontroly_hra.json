@@ -92,8 +92,8 @@
   "trasy_pozn": "body tras průchodu (hra/data/pruchody*.json) jsou uzly navíc spojené chůzí s předchozím bodem trasy a s buňkami do dvere_r_m – úzké schody a průlezy (pod 1 m) mřížka mine; trasy samy prochází test průchodu",
   "ostrov_min_uzlu": 6,
   "vypis_max": 25,
-  "unik_zkousek": 12,
-  "unik_chuze_s": 6.0,
+  "unik_zkousek": 8,
+  "unik_chuze_s": 4.0,
   "unik_ven_m": 30.0,
   "meze": {
    "diry_max": 0,

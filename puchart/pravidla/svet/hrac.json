@@ -118,6 +118,8 @@
   "rychlost_m_s": 5.0,
   "spicka_ms": 50.0
  },
+ "hranice_sveta_m": 1.0,
+ "_hranice_sveta_m": "Hranice světa (plán 17. 11. B1, test pruchod:dosah našel únik: na okraji výseku 2×2 km končí terén i jeho kolize, hráč spadl do prázdna): hrac.gd drží polohu hráče (chůze, běh, let) tolik m uvnitř okraje terénu (hra/data/vysek.json x0_hra, z0_hra, sirka, vyska). Zdroj: Alchemists of Prague tools/seal_world.py (hraniční zdi podle mapy dosažitelnosti, postup – kód nepřevzat); KCD drží hráče na okraji mapy neviditelnou hranicí.",
  "schod_m": [
   0.45,
   0.25,

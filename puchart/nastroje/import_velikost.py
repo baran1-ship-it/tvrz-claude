@@ -34,4 +34,17 @@ for f in glob.glob(K + "/hra/modely/stromy/tex/*.import"):
     n += uprav(f, [("process/size_limit", 256 if "compress/normal_map=1" in t else min(512, int(re.search(r"size_limit=(\d+)", t).group(1)) or 512))])
 for f in glob.glob(K + "/hra/modely/rostliny/*normal*.png.import"):
     n += uprav(f, VRAM + [("compress/normal_map", 1)])
+# textury v grafické paměti (rozpocty.json textury_vram, docs/rozpracovane/textury_vram_17_11.md T1–T4)
+TV = json.load(open(K + "/pravidla/svet/rozpocty.json")).get("textury_vram", {})
+if TV.get("rostliny_barva_vram"):   # barvy rostlin s alfou: RGBA8 → ETC2_RGBA8 (4× méně)
+    for f in glob.glob(K + "/hra/modely/rostliny/*.png.import"):
+        if "normal" not in os.path.basename(f): n += uprav(f, VRAM)
+MK = TV.get("maska_koleje")
+if MK and os.path.exists(K + "/hra/textury/maska_koleje.png.import"):   # maska kolejí 4000² L8 → ETC2_R11 s mipmapami
+    n += uprav(K + "/hra/textury/maska_koleje.png.import", [("compress/mode", 2 if MK.get("vram") else 0), ("mipmaps/generate", str(bool(MK.get("mipmapy"))).lower())])
+for f in glob.glob(K + "/hra/modely/stavby_h/tex/*.import"):   # sdílené textury staveb (stromy_sdilene_textury.py): jako dřív vytažené
+    # z glb (VRAM, normály ETC2_RGB8 jako dosud – detekce normálové mapy by je zdvojnásobila na RG11), horní mez stavby_max_px
+    n += uprav(f, VRAM + [("compress/normal_map", 2), ("process/size_limit", TV.get("stavby_max_px", 0))])
+for f in glob.glob(K + "/hra/modely/predmety_h/kovadlina_1393_*.import"):
+    n += uprav(f, [("process/size_limit", TV.get("kovadlina_max_px", 0))])
 print("upraveno importů", n)

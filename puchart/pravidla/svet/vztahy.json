@@ -407,7 +407,8 @@
    "navrh": "Nový `cesty.json krizovatka.rozsireni_m` 2.",
    "zdroj": "S9",
    "testy_puchart": [
-    "smysl:cesta_zarez"
+    "smysl:cesta_zarez",
+    "smysl:cesty_souvislost"
    ]
   },
   "cesta|budova": {
@@ -871,7 +872,8 @@
    "testy_puchart": [
     "pruchod:povrch_kolize",
     "pruchod:vse",
-    "smysl:teren_shoda"
+    "smysl:teren_shoda",
+    "pruchod:dosah"
    ]
   },
   "teren|kun": {
