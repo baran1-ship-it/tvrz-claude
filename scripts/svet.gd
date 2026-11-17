@@ -812,7 +812,26 @@ func build(parent: Node3D, quality: int) -> void:
 	# K4 teren na dlazdice s LOD (scripts/teren_dlazdice.gd, pravidla/svet/teren_dlazdice.json): az z hotove site, nic nemeni
 	teren_dlazdice = load("res://scripts/teren_dlazdice.gd").pripoj(root, parent)
 	_krok_cas("teren_dlazdice")
+	_vody_bez_lod(root)
 	protokol_zapis()
+
+
+## Kazda hotova voda s hloubkou ve vrcholech bez automatickych LOD (nastav_vodu) - i ta, ktera material dostala jinou
+## cestou nez nastav_vodu (hladina Lhoty: material ze sveta az po _ryb_vzhled; test hladiny_lod 17. 11.: 1 LOD).
+func _vody_bez_lod(root: Node) -> void:
+	var n := 0
+	for mi0 in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		for si in mi.mesh.get_surface_count():
+			var m := mi.get_active_material(si)
+			var sm := m as ShaderMaterial
+			if sm and sm.shader and sm.shader.resource_path.ends_with("voda.gdshader") and bool(sm.get_shader_parameter("hloubka_vrcholu")):
+				if not mi.mesh.has_meta("bez_lod"):
+					n += 1
+				nastav_vodu(mi, si, m)
+	print("vody bez LOD: %d sit" % n)
 
 
 # ------------------------------------------------------------------ deleni velkych siti (0.60)
@@ -1783,6 +1802,8 @@ func _koryto_terenu(root: Node3D) -> void:
 	# nad travou a suche koryto vedle (Misa 0.98); pravidla zasazeni: voda po stavbach, pozdejsi krok nehybe drivejsim
 	_koryta_naposled(root)
 	_krok_cas("koryto: _koryta_naposled")
+	_svy_terenu(root)
+	_krok_cas("koryto: _svy_terenu")
 	# mrizka vysek (2 m) pro rostliny a louku
 	var g: Dictionary = data["trava_kraj"]
 	var ys := Marshalls.base64_to_raw(String(g["y"]))
@@ -2115,6 +2136,147 @@ func _koryta_naposled(root: Node3D) -> void:
 		zmen += zde
 	_vys = {}
 	print("koryta toku naposled: %d vrcholu terenu, nejvic %.2f m u (%.0f, %.0f) sit %s y %.2f -> %.2f" % [zmen, nej, nej_m.x, nej_m.z, nej_sit, nej_m.y, nej_y2])
+
+
+## Svy siti terenu po vsech upravach hry (Misa 17. 11. r. 6: cary a hlineny hreben na hranach pasem; 2. oprava, rozbor
+## v tabulce misa_17_11_chyby.md). Pravidlo stejne jako Blender (kraj._hrana_hrube): na spolecne hrane dvou siti plati hrana
+## sit s mene body (hrubsi); vrchol jemnejsi site lezici uvnitr jeji otevrene hrany ma jeji vysku (linearne). Kroky hry
+## (koryto, najezd mostu, cesty, koryta toku...) meni vrcholy funkci polohy - na hustsi siti je hrana lomena jinak nez na
+## ridsi (Teren_most 1 m x Teren_okoli 5 m u (275, 596): 2,5 m; test teren_svy).
+func _svy_terenu(root: Node3D) -> void:
+	var site: Array = []                    # [mi, xf, pole povrchu, okraj: bunka 1 m -> [[a, b]], okrajove vrcholy [si, i]]
+	for t0 in root.find_children("Teren*", "MeshInstance3D", true, false):
+		var nm := String(t0.name)
+		if nm == "Teren_obzor" or nm.begins_with("Teren_cesta") or nm.ends_with("_sukne") or nm == "Teren_lem":
+			continue
+		var mi := t0 as MeshInstance3D
+		var am := mi.mesh as ArrayMesh
+		if am == null:
+			continue
+		var xf := mi.global_transform
+		var pole: Array = []
+		var poc := {}
+		var hr := {}
+		var vrch := {}                      # klic hrany -> [[si, ia], [si, ib]]
+		var plos := {}                      # Vector2i(si, i) vrcholu plochy povrchu (ne jen svisleho lemu)
+		for si in am.get_surface_count():
+			var arr := am.surface_get_arrays(si)
+			pole.append(arr)
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX] if arr[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+			var nt := idx.size() / 3 if not idx.is_empty() else v.size() / 3
+			for t in nt:
+				var ii := [idx[t * 3], idx[t * 3 + 1], idx[t * 3 + 2]] if not idx.is_empty() else [t * 3, t * 3 + 1, t * 3 + 2]
+				var a := xf * v[ii[0]]
+				var b := xf * v[ii[1]]
+				var c := xf * v[ii[2]]
+				var nn := (b - a).cross(c - a)
+				if nn.length() < 1e-6 or absf(nn.y) < 0.2 * nn.length():
+					continue                     # svisle plochy (lemy) nejsou povrch
+				for k in 3:
+					plos[Vector2i(si, ii[k])] = true
+					var p := xf * v[ii[k]]
+					var q := xf * v[ii[(k + 1) % 3]]
+					var ka := Vector2i(roundi(p.x * 100.0), roundi(p.z * 100.0))
+					var kb := Vector2i(roundi(q.x * 100.0), roundi(q.z * 100.0))
+					var kk := [ka, kb] if (ka.x < kb.x or (ka.x == kb.x and ka.y < kb.y)) else [kb, ka]
+					poc[kk] = int(poc.get(kk, 0)) + 1
+					hr[kk] = [p, q]
+					vrch[kk] = [Vector2i(si, ii[k]), Vector2i(si, ii[(k + 1) % 3])]
+		var okr := {}
+		var okv := {}
+		for kk in poc:
+			if int(poc[kk]) != 1:
+				continue
+			var p: Vector3 = hr[kk][0]
+			var q: Vector3 = hr[kk][1]
+			for cx in range(floori(minf(p.x, q.x)) - 1, floori(maxf(p.x, q.x)) + 1):
+				for cz in range(floori(minf(p.z, q.z)) - 1, floori(maxf(p.z, q.z)) + 1):
+					var ck := Vector2i(cx, cz)
+					if not okr.has(ck):
+						okr[ck] = []
+					(okr[ck] as Array).append([p, q])
+			for e: Vector2i in vrch[kk]:
+				okv[e] = true
+		site.append([mi, xf, pole, okr, okv.keys(), plos])
+	# kandidati: vrchol site A uvnitr otevrene hrany site B (ne v jejim koncovem bodu)
+	var kand := {}                          # Vector2i(A, B) -> [[si, i, y]]
+	for ai in site.size():
+		var sa: Array = site[ai]
+		var xf: Transform3D = sa[1]
+		for e: Vector2i in sa[4]:
+			var w := xf * ((sa[2][e.x] as Array)[Mesh.ARRAY_VERTEX] as PackedVector3Array)[e.y]
+			var w2 := Vector2(w.x, w.z)
+			for bi in site.size():
+				if bi == ai:
+					continue
+				for sg: Array in (site[bi][3] as Dictionary).get(Vector2i(floori(w.x), floori(w.z)), []):
+					var p: Vector3 = sg[0]
+					var q: Vector3 = sg[1]
+					var p2 := Vector2(p.x, p.z)
+					var q2 := Vector2(q.x, q.z)
+					var L := p2.distance_to(q2)
+					if L < 0.02 or w2.distance_to(p2) < 0.01 or w2.distance_to(q2) < 0.01:
+						continue
+					var t := clampf((w2 - p2).dot(q2 - p2) / (L * L), 0.0, 1.0)
+					if w2.distance_to(p2.lerp(q2, t)) > 0.01:
+						continue
+					var kk := Vector2i(ai, bi)
+					if not kand.has(kk):
+						kand[kk] = []
+					(kand[kk] as Array).append([e.x, e.y, lerpf(p.y, q.y, t)])
+					break
+	# na kazde dvojici se prizpusobi sit s vice kandidaty (jemnejsi); ridsi hrana plati
+	var zmeny := {}                         # ai -> {Vector2i(si, i): y}
+	var nej := 0.0
+	var nej_m := Vector3.ZERO
+	for kk: Vector2i in kand:
+		var obr := Vector2i(kk.y, kk.x)
+		var na := (kand[kk] as Array).size()
+		var nb := (kand[obr] as Array).size() if kand.has(obr) else 0
+		if na < nb or (na == nb and kk.x > kk.y):
+			continue
+		if not zmeny.has(kk.x):
+			zmeny[kk.x] = {}
+		for c: Array in kand[kk]:
+			zmeny[kk.x][Vector2i(c[0], c[1])] = c[2]
+	var n := 0
+	for ai: int in zmeny:
+		var sa: Array = site[ai]
+		var mi: MeshInstance3D = sa[0]
+		var xf: Transform3D = sa[1]
+		var inv := xf.affine_inverse()
+		var am := mi.mesh as ArrayMesh
+		var nove := ArrayMesh.new()
+		# vyska podle polohy (cm): i dalsi vrcholy na tomtez miste (svy UV, vlastni kanaly) stejne
+		var cil := {}
+		for e: Vector2i in zmeny[ai]:
+			var w := xf * ((sa[2][e.x] as Array)[Mesh.ARRAY_VERTEX] as PackedVector3Array)[e.y]
+			cil[Vector2i(roundi(w.x * 100.0), roundi(w.z * 100.0))] = float(zmeny[ai][e]) - w.y      # posun povrchu
+		for si in am.get_surface_count():
+			var arr: Array = sa[2][si]
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			for i in v.size():
+				var w := xf * v[i]
+				var pk := Vector2i(roundi(w.x * 100.0), roundi(w.z * 100.0))
+				if not cil.has(pk):
+					continue
+				# povrch na hranu ridsi site; svisly lem pod hranou (vrchy i spodek) o tentyz posun - visi dal pod hranou
+				var dy := float(cil[pk])
+				if (sa[5] as Dictionary).has(Vector2i(si, i)) and absf(dy) > nej:
+					nej = absf(dy)
+					nej_m = w
+				w.y += dy
+				v[i] = inv * w
+				n += 1
+			arr[Mesh.ARRAY_VERTEX] = v
+			_normaly_z_ploch(arr)
+			arr[Mesh.ARRAY_TANGENT] = null
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr, [], {}, _cesta_format(arr))
+			nove.surface_set_material(si, am.surface_get_material(si))
+			nove.surface_set_name(si, am.surface_get_name(si))
+		mi.mesh = nove
+	print("svy terenu: %d vrcholu na hranu ridsi site, nejvic %.2f m u (%.1f, %.1f)" % [n, nej, nej_m.x, nej_m.z])
 
 
 ## Radce 17:05 bod 6 (Misa 0.70 "vratka ve vzduchu"): branky a vrata ve vsi visely 0,1-0,74 m nad terenem
@@ -7173,6 +7335,10 @@ func _ves_domy(root: Node3D) -> void:
 	var st_mat := StandardMaterial3D.new()
 	st_mat.vertex_color_use_as_albedo = true
 	st_mat.roughness = 0.9
+	# Misa 17. 11. r. 5 (domy zdalky cerne): stredni stupen lezel ve stinu vlastniho stinoveho telesa (_Daleko_Stin, obal
+	# stejne velky) - steny proti slunci rozhodoval jen bias stinu, tmave hneda ve stinu = po tonovani cerna. Pravidlo:
+	# stredni stupen stin neprijima (stin na zem vrha obal), ve hre overeno neosvetlenym materialem (barvy dorazi)
+	st_mat.disable_receive_shadows = true
 	for d: Dictionary in _domy:
 		var vzor := sc.get_node_or_null(String(d["typ"]))
 		if vzor == null:
@@ -10876,6 +11042,7 @@ func _dil_lod(sc: Node3D, zaz: Dictionary, interier: Node, jm: String) -> float:
 	mat.vertex_color_use_as_albedo = true
 	mat.vertex_color_is_srgb = true
 	mat.roughness = float(lod["drsnost"])
+	mat.disable_receive_shadows = true                    # stredni stupen stin neprijima (Misa 17. 11. r. 5, viz ves)
 	me.surface_set_material(0, mat)
 	var s := MeshInstance3D.new()
 	s.name = jm + "_Stredni"
@@ -11542,11 +11709,32 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 		var vyska := prah - g
 		var zaznam := {"dvere": nm, "p": c, "n": n, "prah_y": prah, "teren_y": g, "vyska": vyska, "sirka": sirka, "stupnu": 0}
 		vstupy_mereni.append(zaznam)
+		var t := Vector3.UP.cross(n).normalized()
+		var zed := 0.0
+		var od := c                                    # odkud stupne (prah nebo posledni stupen modelu)
 		if model:
-			# vstup se stupni modelu (domy vsi Dum1/Dum2/Rychta Kol_Schod, mlyn): nestavi se, profil hlida test
+			# vstup se stupni modelu (domy vsi Dum1/Dum2/Rychta Kol_Schod, mlyn, chalupy Blenderu): nase stupne az od
+			# posledniho stupne modelu, kdyz ten nekonci na terenu (test 17. 11.: dum 6 chlev 0,57 m, mlynice 0,31 m).
+			# Po krocich 0,08 m ven ve trech pruzich sirky: nejnizsi vrch stupne modelu a nejvzdalenejsi jeho celo.
 			zaznam["model"] = true
-			zaznam["hloubka_m"] = float((strany[0 if ven > 0.0 else 1][1] as Dictionary)["d"])
-			continue
+			var y_m := prah
+			var d_m := 0.0
+			for ss: float in [-0.35, 0.0, 0.35]:
+				var dd := 0.1
+				var y_p := prah
+				while dd <= mer_do:
+					var hm: Dictionary = dolu.call(c + n * dd + t * ss * sirka, 0.3, vmax + 1.0)
+					if hm.is_empty() or _je_teren(hm):
+						break
+					y_p = float((hm["position"] as Vector3).y)
+					dd += 0.08
+				y_m = minf(y_m, y_p)
+				d_m = maxf(d_m, dd)
+			zaznam["hloubka_m"] = d_m
+			zaznam["stupen_modelu_y"] = y_m
+			vyska = y_m - g
+			od = Vector3(c.x, y_m, c.z)
+			zed = d_m
 		if vyska <= smax:
 			continue
 		if vyska > vmax:
@@ -11554,13 +11742,13 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 			print("schody vstupu: %s prah %.2f m nad terenem > vstup_do_m - neni vstup ze zeme, nestavi se" % [nm, vyska])
 			continue
 		# lic podezdivky / zdi pod prahem: paprsek zvenku vodorovne k dverim (bez zasahu = rovina dveri)
-		var zed := 0.0
 		var hz := space.intersect_ray(PhysicsRayQueryParameters3D.create(c + n * 1.5 + Vector3(0, -smax * 0.5, 0), c - n * 0.3 + Vector3(0, -smax * 0.5, 0)))
-		if not hz.is_empty() and not _je_teren(hz):
+		if not model and not hz.is_empty() and not _je_teren(hz):
 			zed = clampf(((hz["position"] as Vector3) - c).dot(n), 0.0, 1.0)
+		prah = od.y
+		c = od
 		# pocet vysek z terenu u paty nejnizsiho stupne (dvakrat: s vic stupni pata dal od zdi)
 		var nv := ceili(vyska / smax)
-		var t := Vector3.UP.cross(n).normalized()
 		var w := sirka + 2.0 * presah
 		for it in 2:
 			# teren pred patou nejnizsiho stupne po cele sirce (nejnizsi bod - posledni vyska nesmi byt vyssi nez stupen)
