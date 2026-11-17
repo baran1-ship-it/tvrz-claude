@@ -77,12 +77,18 @@ for soubor, U in UP.items():
             if u.get("smazat"): bpy.data.objects.remove(o, do_unlink=True)
             else: o.matrix_world.translation += d
         for q in u.get("pridat", []):   # nové trámky (zábradlí): kvádr [střed], [rozměr] v souřadnicích modelu Godot, materiál z uzlu
-            c = q["stred"]; r = q["rozmer"]
+            if "od" in q:   # kvádr podél osy od → do (šikmý díl, např. dymník), průřez [šířka v x, hloubka] kolmo k ose
+                a_ = Vector((q["od"][0], -q["od"][2], q["od"][1])); b_ = Vector((q["do"][0], -q["do"][2], q["do"][1]))
+                c = [(q["od"][i] + q["do"][i]) / 2 for i in range(3)]; r = [q["prurez"][0], (b_ - a_).length, q["prurez"][1]]
+            else:
+                c = q["stred"]; r = q["rozmer"]
             me = bpy.data.meshes.new("pridano"); ob = bpy.data.objects.new(q.get("jmeno", "Pridano"), me); bpy.context.scene.collection.objects.link(ob)
             bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0); bmesh.ops.scale(bm, vec=Vector((r[0], r[2], r[1])), verts=bm.verts); bm.to_mesh(me); bm.free()
             ob.location = Vector((c[0], -c[2], c[1]))
-            src_ = bpy.data.objects.get(q["material_z"])
-            if src_ and src_.data.materials: me.materials.append(src_.data.materials[0])
+            if "od" in q: ob.rotation_mode = "QUATERNION"; ob.rotation_quaternion = Vector((0, 0, 1)).rotation_difference((b_ - a_).normalized())
+            src_ = bpy.data.objects.get(q["material_z"]) if "material_z" in q else None
+            if "material" in q and bpy.data.materials.get(q["material"]): me.materials.append(bpy.data.materials[q["material"]])
+            elif src_ and src_.data.materials: me.materials.append(src_.data.materials[0])
             for uv_ in [me.uv_layers.new()]:   # UV podél nejdelší strany (textura dřeva)
                 for li, lo in enumerate(me.loops): uv_.data[li].uv = (me.vertices[lo.vertex_index].co.x * r[0] + me.vertices[lo.vertex_index].co.y * r[2] + me.vertices[lo.vertex_index].co.z * r[1], 0.5 + me.vertices[lo.vertex_index].co.z * 0.1)
             if q.get("kolize"):

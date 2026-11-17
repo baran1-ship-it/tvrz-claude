@@ -61,7 +61,7 @@ ZE = MO["zemljanky"]
 def jama_steny(t, kp):
     """hliněné stěny jámy (vnitřní líc), podlaha, stupně a obklad z kůlů; vše v souřadnicích chýše (+z dveře)"""
     x0, x1, z0, z1 = t["jama"]; yf = t["podlaha_y"]; yt = 0.02
-    n = ZE["schody"]["pocet"]; h = (t["prah_y"] - yf) / (n + 1); dz = ZE["schody"]["hloubka_m"]; sw = ZE["schody"]["sirka_m"] / 2
+    n = t.get("schody_pocet", ZE["schody"]["pocet"]); h = (t["prah_y"] - yf) / (n + 1); dz = ZE["schody"]["hloubka_m"]; sw = ZE["schody"]["sirka_m"] / 2
     zs = z1 - n * dz   # začátek stupňů (strana do jámy)
     hl = []; dr = []; kol = []
     # podlaha
@@ -98,21 +98,56 @@ def jama_steny(t, kp):
     return spoj(*hl), spoj(*dr), kol, zs
 
 
+def podezdivka_stitu(pb, t):
+    """Štíty až k zemi (Míša 17. 11., snímek 16: „stěna nesahá až na zem“; „ať jim tam fouká“): u chýše na zvýšené podlaze
+    (ChysePrkna – štíty od 0,41 m, pod nimi byla podlaha, která se v zemljance vypouští) pokračuje kamenná zídka na sucho
+    z boků i pod oběma štíty. Kameny = kopie kamenů boční zídky vzoru (oblast zdroj [x0, x1, y_max, z0, z1]) otočené o ±90°
+    pod štít (osa z_stit); pod dveřmi tvoří kamenný práh ve výšce podlahy chýše, před dveřmi kamenný stupeň (schod)."""
+    P_ = t["podezdivka_stitu"]; j, b = pb.j, pb.b
+    vn = pb.najdi(P_["uzel"]); M = matice(j["nodes"][vn]); R3 = M[:3, :3]
+    x0, x1, ym, z0, z1 = P_["zdroj"]; xc = P_["osa_zidky_x"]; zg = P_["z_stit"]
+    casti = []
+    for pr in j["meshes"][j["nodes"][vn]["mesh"]]["primitives"]:
+        mn = j["materials"][pr["material"]]["name"] if "material" in pr else ""
+        if mn not in P_["materialy"]: continue
+        X = cti(j, b, pr["attributes"]["POSITION"]).astype(float); X = X @ R3.T + M[:3, 3]
+        Nn = cti(j, b, pr["attributes"]["NORMAL"]).astype(float) @ R3.T
+        UV = cti(j, b, pr["attributes"]["TEXCOORD_0"]).astype(float)
+        I = cti(j, b, pr["indices"]).reshape(-1, 3)
+        V = X[I]; ok = (V[..., 0].min(1) >= x0) & (V[..., 0].max(1) <= x1) & (V[..., 1].max(1) <= ym) & (V.mean(1)[:, 2] >= z0) & (V.mean(1)[:, 2] <= z1)
+        if not ok.any(): continue
+        I = I[ok]; u, inv = np.unique(I, return_inverse=True); I2 = inv.reshape(-1, 3)
+        Xs, Ns, UVs = X[u], Nn[u], UV[u]
+        for sm in (1, -1):   # přední štít (+z): x' = −z, z' = (x − xc) + zg (otočení +90°); zadní: x' = z, z' = −(x − xc) − zg
+            Xn = np.c_[-sm * Xs[:, 2], Xs[:, 1], sm * ((Xs[:, 0] - xc) + zg)]
+            Nr = np.c_[-sm * Ns[:, 2], Ns[:, 1], sm * Ns[:, 0]]
+            casti.append((pb.material(mn), Xn, Nr, UVs, I2.ravel()))
+    tl = P_["tl_m"]; ya = t["prah_y"]; S = P_["stupen"]
+    kol = [kvadr(-xc + tl / 2, xc - tl / 2, -0.2, ya, sm * zg - tl / 2, sm * zg + tl / 2)[0] for sm in (1, -1)]
+    zs0 = zg + tl / 2; ys = (ya + 0.02) / 2   # stupeň před dveřmi v polovině výšky prahu (pod hrac.json schod_m)
+    st = kvadr(-S["sirka_m"] / 2, S["sirka_m"] / 2, -0.1, ys, zs0, zs0 + S["hloubka_m"], uv_m=0.5)
+    casti.append((pb.material(P_["materialy"][0]),) + st); kol.append(kvadr(-S["sirka_m"] / 2, S["sirka_m"] / 2, -0.2, ys, zs0, zs0 + S["hloubka_m"])[0])
+    pb.pridej_sit("Zemljanka_Podezdivka", casti, kolize=kol)
+
+
 VZ = K + "/" + ZE["vzor"]
 for jm_t, t in ZE["typy"].items():
     if not os.path.exists(VZ): print("ZAJIMAVA_CHYBI", VZ); break
     pb = Prebal(VZ).vyber([t["koren"]], vynechat=[t["koren"] + v for v in ZE["vynechat"]])
     kor = pb.uzly[pb.koreny[0]]; kor["name"] = "Zemljanka"
     # dveře otevřené ven: otočení kolem svislé osy v pantu (levá zárubeň)
+    # počátek uzlu dveří = pant (síť křídla x 0…0,81 od počátku, uzel v (−0,41; práh; 2,28)) → jen otočit, poloha zůstává;
+    # dřív se poloha přepsala, jako by síť byla v souřadnicích chýše – křídlo stálo 1,9 m vedle chýše (Míša 17. 11., snímek 15)
     dv = pb.uzel(t["koren"] + "_Dvere")
     if dv:
-        a = math.radians(ZE["dvere_otevrit_st"]); hx, hz = t["dvere_x"][0], t["dvere_z"]
-        c, s_ = math.cos(a), math.sin(a)
-        tx = hx - (c * hx + s_ * hz); tz = hz - (-s_ * hx + c * hz)
-        dv["rotation"] = [0, math.sin(a / 2), 0, math.cos(a / 2)]; dv["translation"] = [tx, 0, tz]
+        a = math.radians(ZE["dvere_otevrit_st"])
+        dv["rotation"] = [0, math.sin(a / 2), 0, math.cos(a / 2)]
     hl, dr, kol, zs = jama_steny(t, ZE["kuly"])
     mh = pb.material(t["hlina_mat"]); md = pb.material(t["drevo_mat"]); mr = pb.material(t["rohoz_mat"])
     pb.pridej_sit("Zemljanka_Jama", [(mh,) + hl, (md,) + dr], kolize=kol)
+    if t.get("podezdivka_stitu"): podezdivka_stitu(pb, t)
+    if t.get("podmazavka"):   # spodek stěn zevnitř podmazaný hlínou – bez průduchů u země (Míša 17. 11.)
+        pb.pridej_sit("Zemljanka_Podmazavka", [(mh,) + spoj(*[kvadr(*q, uv_m=0.8) for q in t["podmazavka"]])])
     # rohože a houně vlevo a vpravo (pevný díl), značky spánku
     R = ZE["rohoz"]; x0, x1 = t["jama"][0], t["jama"][1]; yf = t["podlaha_y"]
     ro = []; zn = {}
@@ -126,7 +161,8 @@ for jm_t, t in ZE["typy"].items():
     dst = "%s/%s/%s.glb" % (K, ZE["vystup"], jm_t)
     n, vel, tri = pb.uloz(dst, "%s/%s/textury_zemljanka" % (K, ZE["vystup"]))
     INFO["modely"][jm_t] = {"aabb": bbox(dst), "jama": t["jama"], "pod_strechou": t.get("pod_strechou"), "podlaha_y": yf, "prah_y": t["prah_y"], "schody_od_z": zs,
-                            "spani": zn, "bedna": [0.0, yf, t["jama"][2] + 0.31], "dvere_z": t["dvere_z"], "troj": tri}
+                            "spani": zn, "bedna": [0.0, yf, t["jama"][2] + 0.31], "dvere_z": t["dvere_z"], "troj": tri,
+                            "schody_pocet": t.get("schody_pocet", ZE["schody"]["pocet"])}
     print("ZAJIMAVA %s uzlů %d, %.2f MB, troj %d" % (jm_t, n, vel / 1e6, tri))
 
 # ------------------------------------------------------------------ 3) štola

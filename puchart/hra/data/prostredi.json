@@ -74,7 +74,7 @@
    "rychlost": 1.5,
    "pozn": "Havran _amb: pod střechou/klenbou méně modrého světla z oblohy (tablet 2. 11.: modré interiéry věží)",
    "pozn_9_11": "Míša 9. 11.: „ve většině místností je tma“ – dřív ambient 0,35 × (1 − 0,7) ≈ 0,1; teď 0,6 × 0,55 ≈ 0,33 + světlo z oken",
-   "ambient_tma": 0.015,
+   "odrazy_oblohy": false, "pod_strechou_obloha": 1.0, "pod_strechou_barva": 0.3, "pod_strechou_pozn": "pod krytinou bez stropu (půda, pavlač, přesah – strechy.gd) zůstává venkovní okolní světlo (otevřené strany, obloha – pod_strechou_obloha = násobek podílu oblohy), barva z 30 % teplá jako uvnitř (ambient_barva); 0,3 oblohy dalo černou pavlač (snímek 17. 11.); interiér se stropem (paprsek kolize) beze změny – světlo podle otvorů (Míša 13. 11.)", "odrazy_oblohy_pozn": "Míša 17. 11. (docs/screens/misa_17_11/08.jpg, x −76,9 z 95,8): podlaha pavlače krčmy téměř černomodrá. Příčina: krytina nemá kolizi → pod přesahem střechy hra myslela, že je venku (opraveno hra/scripts/strechy.gd), a i pak tmavé dřevo (albedo ~0,03, drsnost 0,9, KHR specular 0,6) odráží v Compatibility oblohu (radiance) – modrá převáží nad okolním světlem. Pod střechou (interiér, pavlač, podkroví) se obloha neodráží (reflected_light_source DISABLED, venku BG). NEOVERENO na tablešu: první přepnutí může sestavit variantu shaderu (krátký zásek při prvním vstupu pod střechu).", "ambient_tma": 0.015,
    "ambient_okno": 0.22,
    "otvory_paprsky": 16,
    "otvory_delka_m": 30.0,

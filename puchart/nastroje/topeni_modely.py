@@ -20,7 +20,9 @@ PRED = os.path.join(K, "hra/modely/predmety_h")
 EXT = {"image/jpeg": ".jpg", "image/png": ".png"}
 
 
-def prebal(src, dst, vynechat=(), bez_znacek=False):
+def prebal(src, dst, vynechat=(), bez_znacek=False, odebrat=()):
+    """odebrat = [{"uzel": začátek jména uzlu se sítí, "kvadr": [x0, x1, y0, y1, z0, z1]}] – trojúhelníky sítě celé uvnitř
+    kvádru (souřadnice sítě glTF) se vypustí: výbava sloučená modelářem do sítě pevného dílu (pekařská lopata v síti lavice)"""
     j, b, _ = nacti(src)
     sc = j["scenes"][j.get("scene", 0)]
     pryc = lambda n: any(n.get("name", "").startswith(v) for v in vynechat)
@@ -78,13 +80,24 @@ def prebal(src, dst, vynechat=(), bez_znacek=False):
         for k_, v_ in C.get("materialy", {}).get(m.get("name", ""), {}).items():   # úprava materiálu u zdroje (topeni.json materialy)
             if not k_.startswith("_"): m.setdefault("pbrMetallicRoughness", {})[k_] = v_
         out["materials"].append(m); mt[i] = len(out["materials"]) - 1; return mt[i]
+    def bez_kusu(p, kv):   # nový accessor indexů bez trojúhelníků celých v kvádru kv
+        X = cti(j, b, p["attributes"]["POSITION"]); I = cti(j, b, p["indices"]).reshape(-1, 3); V = X[I]
+        uvnitr = np.ones(len(I), bool)
+        for o_ in range(3): uvnitr &= (V[..., o_] >= kv[2 * o_]).all(1) & (V[..., o_] <= kv[2 * o_ + 1]).all(1)
+        I = np.ascontiguousarray(I[~uvnitr].ravel().astype(np.uint32))
+        nb.extend(b"\0" * ((4 - len(nb) % 4) % 4)); off = len(nb); nb.extend(I.tobytes())
+        out["bufferViews"].append({"buffer": 0, "byteOffset": off, "byteLength": I.nbytes, "target": 34963})
+        out["accessors"].append({"bufferView": len(out["bufferViews"]) - 1, "componentType": 5125, "count": int(I.size), "type": "SCALAR"})
+        print("TOPENI_ODEBRANO %s troj %d" % (dst.split("/")[-1], int(uvnitr.sum())))
+        return len(out["accessors"]) - 1
     for n in uzly:
         if "mesh" not in n: continue
-        if n["mesh"] not in mm:
+        kv = next((o_["kvadr"] for o_ in odebrat if n.get("name", "").startswith(o_["uzel"])), None)
+        if n["mesh"] not in mm or kv is not None:
             m = json.loads(json.dumps(j["meshes"][n["mesh"]]))
-            for p in m["primitives"]:
+            for p, p0 in zip(m["primitives"], j["meshes"][n["mesh"]]["primitives"]):
                 p["attributes"] = {k_: acc(v_) for k_, v_ in p["attributes"].items()}
-                if "indices" in p: p["indices"] = acc(p["indices"])
+                if "indices" in p: p["indices"] = bez_kusu(p0, kv) if kv is not None else acc(p["indices"])
                 if "material" in p: p["material"] = mat(p["material"])
                 p.pop("targets", None)
             out["meshes"].append(m); mm[n["mesh"]] = len(out["meshes"]) - 1
@@ -102,17 +115,18 @@ def zdroj(model, lod):
 
 hotovo = []
 for model in C["modely"]:
+    if model.startswith("_"): continue   # poznámky (_kolize_pozn) – dřív tu nástroj padal
     for lod in ("LOD0", "LOD1"):
         s = zdroj(model, lod)
         if not os.path.exists(s): print("TOPENI_CHYBI", s); continue
-        n, vel = prebal(s, os.path.join(OUT, "%s_%s.glb" % (model, lod)), bez_znacek=lod == "LOD1")
+        n, vel = prebal(s, os.path.join(OUT, "%s_%s.glb" % (model, lod)), bez_znacek=lod == "LOD1", odebrat=C["modely"][model].get("odebrat", ()))
         hotovo.append(model); print("TOPENI %s_%s uzlů %d, %.2f MB" % (model, lod, n, vel / 1e6))
 for jm, v in C["varianty"].items():
     if jm.startswith("_"): continue
     for lod in ("LOD0", "LOD1"):
         s = zdroj(v["z"], lod)
         if not os.path.exists(s): print("TOPENI_CHYBI", s); continue
-        n, vel = prebal(s, os.path.join(OUT, "%s_%s.glb" % (jm, lod)), v.get("vynechat", ()), bez_znacek=lod == "LOD1")
+        n, vel = prebal(s, os.path.join(OUT, "%s_%s.glb" % (jm, lod)), v.get("vynechat", ()), bez_znacek=lod == "LOD1", odebrat=C["modely"].get(v["z"], {}).get("odebrat", ()))
         print("TOPENI %s_%s (z %s bez %s) uzlů %d, %.2f MB" % (jm, lod, v["z"], v.get("vynechat"), n, vel / 1e6))
 
 # nádobí → katalog předmětů (RigidBody3D z dodané .tscn: freeze, mass, tvar FyzickaKolize)

@@ -384,12 +384,15 @@ for m in Z["mista"]:
             q = {"model": d["model"], "x": wx, "y": yz, "z": wz, "yaw": yaw, "zemljanka": True}
             po_ = ZZ["porost_okraj_m"]; zaz["dily"].append(q); PUD.append(poly_svet(oz, min(-2.6, ps_[0] - po_), max(2.6, ps_[1] + po_), min(-3.2, ps_[2] - po_), max(4.2, ps_[3] + po_)))
             # trasa: před dveřmi → stupně → podlaha → zpět ven
-            n_ = ZE["schody"]["pocet"]; hst = (zj["prah_y"] - zj["podlaha_y"]) / (n_ + 1); dz_ = ZE["schody"]["hloubka_m"]; zd = zj["dvere_z"]
+            n_ = zj.get("schody_pocet", ZE["schody"]["pocet"]); hst = (zj["prah_y"] - zj["podlaha_y"]) / (n_ + 1); dz_ = ZE["schody"]["hloubka_m"]; zd = zj["dvere_z"]
             ven = [*svet(oz, 0, zd + 2.2), None]
             tz = [ven, [*svet(oz, 0, zd + 0.6), None, 0.35]]
+            prah_ = [[*svet(oz, 0, zd), round(yz + zj["prah_y"], 3), 0.3]] if zj["prah_y"] > 0.2 else []   # kamenný práh pod dveřmi (zajimava_mista.json podezdivka_stitu)
+            tz += prah_
             for k_ in range(n_): tz.append([*svet(oz, 0, z1 - (k_ + 0.5) * dz_), round(yz + zj["prah_y"] - (k_ + 1) * hst, 3), 0.3])
             tz.append([*svet(oz, 0, z0 + 1.2), round(yz + zj["podlaha_y"], 3), 0.5])
             for k_ in reversed(range(n_)): tz.append([*svet(oz, 0, z1 - (k_ + 0.5) * dz_), round(yz + zj["prah_y"] - (k_ + 1) * hst, 3), 0.3])
+            tz += prah_
             tz.append(ven)
             TRASY["zajimava_%s_zemljanka" % m["id"]] = tz
             continue

@@ -390,7 +390,13 @@ func _atmosfera(d: float) -> void:
 		var les: Node = get_node_or_null("Les")
 		_les_cil = les.zapoj(p.x, p.z, lm) if les and les.has_method("zapoj") and not lm.is_empty() else 0.0
 		var q := PhysicsRayQueryParameters3D.create(p, p + Vector3.UP * float(it.get("paprsek_nahoru_m", 25.0)))
+		if not it.is_empty() and _strechy_cfg.is_empty() and FileAccess.file_exists("res://data/pocasi.json"):
+			_strechy_cfg = (JSON.parse_string(FileAccess.get_file_as_string("res://data/pocasi.json")) as Dictionary).get("strechy", {"materialy": ["sindel"]})
+		if not it.is_empty(): preload("res://scripts/strechy.gd").zajisti(self, _strechy_cfg)
 		_uvnitr_cil = 1.0 if not it.is_empty() and get_world_3d().direct_space_state.intersect_ray(q).size() > 0 else 0.0
+		# jen krytina bez stropu nad hlavou (půda, pavlač, přesah střechy): světlo zůstává venkovní (otevřené strany), ale bez modré
+		# z oblohy a bez jejího odrazu (Míša 17. 11., snímky 08 a 12) – prostredi.json interier.pod_strechou
+		_strecha_cil = 1.0 if not it.is_empty() and _uvnitr_cil < 0.5 and preload("res://scripts/strechy.gd").nad(p, float(it.get("paprsek_nahoru_m", 25.0))) else 0.0
 		if _uvnitr_cil > 0.5 and it.has("otvory_paprsky"):   # kolik je vidět ven (okna, dveře) – světlo jen přes otvory (Míša 13. 11.)
 			var n_ := int(it["otvory_paprsky"]); var ven_ := 0; var zd: Array = it["otvory_zdvih_st"]; var L_ := float(it["otvory_delka_m"])
 			for k_ in n_:
@@ -398,7 +404,7 @@ func _atmosfera(d: float) -> void:
 				var sm := Vector3(cos(az) * cos(el), sin(el), sin(az) * cos(el))
 				if get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(p, p + sm * L_)).is_empty(): ven_ += 1
 			_otvory_cil = float(ven_) / float(n_)
-	_les = move_toward(_les, _les_cil, d * float(lm.get("rychlost", 0.5))); _uvnitr = move_toward(_uvnitr, _uvnitr_cil, d * float(it.get("rychlost", 1.5)))
+	_les = move_toward(_les, _les_cil, d * float(lm.get("rychlost", 0.5))); _uvnitr = move_toward(_uvnitr, _uvnitr_cil, d * float(it.get("rychlost", 1.5))); _strecha = move_toward(_strecha, _strecha_cil, d * float(it.get("rychlost", 1.5)))
 	var hloubkova := _sceny(d, cam) > 0.0
 	if not lm.is_empty():
 		var lb: Array = lm["barva"]
@@ -415,14 +421,23 @@ func _atmosfera(d: float) -> void:
 		var amb_in := float(it["ambient"]) * (1.0 - ub)
 		if it.has("ambient_tma"): amb_in = lerpf(float(it["ambient_tma"]), float(it["ambient_okno"]), sqrt(_otvory))
 		_env.ambient_light_energy = lerpf(float(ve.get("ambient", it["ambient"])), amb_in, _uvnitr) * (float(den.okolni_e) if den else 1.0)
-		_env.ambient_light_sky_contribution = lerpf(vo, 1.0, _uvnitr) * (1.0 - _uvnitr * ub)
+		var ps_ := float(it.get("pod_strechou_obloha", 1.0))   # podíl oblohy v okolním světle pod krytinou (venkovní jas, bez modré shora)
+		_env.ambient_light_sky_contribution = lerpf(vo, 1.0, _uvnitr) * (1.0 - _uvnitr * ub) * lerpf(1.0, ps_, _strecha)
 		var ok_ := float(den.okolni) if den else 1.0   # v noci teplá složka ubude s oblohou (den.json okolni_pozn)
-		var ac_ := Color(vb[0], vb[1], vb[2]).lerp(Color(ab[0], ab[1], ab[2]), _uvnitr)
+		var ac_ := Color(vb[0], vb[1], vb[2]).lerp(Color(ab[0], ab[1], ab[2]), maxf(_uvnitr, _strecha * float(it.get("pod_strechou_barva", 0.0))))
 		_env.ambient_light_color = Color(ac_.r * ok_, ac_.g * ok_, ac_.b * ok_)
 		_env.tonemap_exposure = 1.0 + _uvnitr * float(it["expozice_navic"])
+		# pod střechou se obloha v podlaze a stěnách nezrcadlí (Míša 17. 11., snímek 08: podlaha pavlače tmavomodrá – tmavé dřevo
+		# s drsností 0,9 odráželo jen oblohu; podlaha pod střechou vidí nad sebou podbití, ne nebe) – prostredi.json interier.odrazy_oblohy
+		if not bool(it.get("odrazy_oblohy", true)):
+			var rs := Environment.REFLECTION_SOURCE_DISABLED if maxf(_uvnitr, _strecha) > 0.5 else Environment.REFLECTION_SOURCE_BG
+			if _env.reflected_light_source != rs: _env.reflected_light_source = rs
 
 var _les_cil := 0.0
+var _strechy_cfg: Dictionary = {}
 var _uvnitr_cil := 0.0
+var _strecha_cil := 0.0
+var _strecha := 0.0   # 0 venku, 1 pod krytinou bez stropu (strechy.gd)
 var _otvory := 1.0
 var _otvory_cil := 1.0
 var _dh: Dictionary = {}        # data/dohled.json (nastroje/viditelnost.py: dohled na mřížce × směry)
@@ -740,7 +755,32 @@ func _mista() -> void:
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	sc.queue_free()
 	if ssc: ssc.queue_free()
+	jas_materialu = md.get("jas_materialu", {}); jas_materialu_uzel(uzel)
 	print("MISTA staveb %d" % uzel.get_child_count())
+
+
+## Násobek barvy vybraných materiálů staveb (mista.json modely.domy.jas_materialu; Míša 17. 11., snímek 08: podlaha pavlače
+## téměř černá – prkna podlah a podbití M_Podbiti mají v modelech Havrana texturu průměrně jen 49/37/29 sRGB, pod střechou bez
+## odrazu oblohy černá). Jméno materiálu začíná klíčem → kopie materiálu s albedem × násobek (i přes dřívější ztlumení _ztlum).
+var jas_materialu: Dictionary = {}
+var _jas_mat_cache: Dictionary = {}
+func jas_materialu_uzel(koren: Node) -> void:
+	if jas_materialu.is_empty() or koren == null: return
+	for g in koren.find_children("*", "MeshInstance3D", true, false):
+		var mi := g as MeshInstance3D
+		if mi.mesh == null: continue
+		for i in mi.mesh.get_surface_count():
+			var mt := mi.get_active_material(i) as BaseMaterial3D
+			if mt == null: continue
+			var zdroj_ := mi.mesh.surface_get_material(i)
+			var jm := String(zdroj_.resource_name) if zdroj_ else ""
+			var k_ := 1.0
+			for kl in jas_materialu:
+				if not String(kl).begins_with("_") and jm.begins_with(String(kl)): k_ = float(jas_materialu[kl])
+			if absf(k_ - 1.0) < 0.001: continue
+			if not _jas_mat_cache.has(mt):
+				var m2 := mt.duplicate() as BaseMaterial3D; m2.albedo_color = mt.albedo_color * Color(k_, k_, k_); _jas_mat_cache[mt] = m2
+			mi.set_surface_override_material(i, _jas_mat_cache[mt])
 
 
 ## Topení od modeláře (data/topeni.json vlozit[]: kam dum / celek / hrad, model = instance domu nebo celku, topeni = glb

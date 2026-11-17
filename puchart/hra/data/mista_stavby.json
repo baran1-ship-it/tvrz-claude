@@ -302,6 +302,10 @@
     "jas_pozn": "násobek barvy textury [R, G, B] hrubých stupňů (obal nemá normálovou mapu – bez ztmavení byl šindel skoro bílý, snímek 14. 11. d2_srov); Míša 14. 11.: „jsou šedé, nemohly by být hnědé? míň to razí“ → teplý hnědý tón jako ztmavlé dřevo (KCD: střechy a roubení z dálky hnědé)"
    },
    "jas_podrobny": 0.8,
+   "jas_materialu": {
+    "M_Podbiti": 1.7,
+    "_pozn": "Míša 17. 11. (docs/screens/misa_17_11/08.jpg): podlaha pavlače krčmy téměř černá. Prkna podlah půd a pavlače i podbití střech mají ve všech modelech Havrana (domy, krčma, hájovna, mlýn) materiál M_Podbiti s texturou weathered_planks_pod průměrně 49/37/29 sRGB (lineárně ~0,03 – uhel), dřevo stěn M_Roubeni 85/76/64; pod střechou bez odrazu oblohy (prostredi.json interier.odrazy_oblohy) byla podlaha černá, s odrazem tmavomodrá. Násobek 1,7 → ~83/63/49 sRGB, jas jako trámy stěn téhož modelu (reference: KCD dřevěné podlahy a pavlače hnědé, ne černé – docs/reference/kcd_vzhled). hlavni.gd jas_materialu_uzel (domy, celky, mlýn)."
+   },
    "jas_podrobny_pozn": "Míša 14. 11. (foto x −65 z −141, Dum1): „domy jsou hezké světlé, ale až moc vypadají bílé“ – textury domů Havrana jsou při převodu zesvětlené na průměrný jas 0,5 (nastroje/havran/stavby_export.gd JAS_CIL, KCD1 ves_2); ve hře násobek barvy podrobného modelu (vnějšek, ne vnitřek) – ~0,4 jako hospodářské stavby (JAS_PREDMETY 0,42); hrubé stupně mají vlastní daleko_textury.jas",
    "stin_obal": {
     "popis": "stínová kopie hrubého obalu <Dům>_Daleko_Stin (nastroje/domy_vzhled.py, hlavni.gd _mista: kreslí se jen do stínu, do vzdálenosti, kde začíná obal): stěny obalu (plochy *_daleko_Roubeni) posunuté o odsazeni_m dovnitř, střecha beze změny. Stín vrhal přímo obal, jehož stěny leží na líci nebo před ním (Dum2 obal ±3,32 m, omítka ±3,13; Dum1 a Rychta obal = líc trámů) – zeď na slunci ležela ve stínu vlastního obalu a kde ji líc přesáhl, svítily pilovité světlé pruhy",

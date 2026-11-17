@@ -8,6 +8,7 @@ extends Node3D
 ## bez kapek a tlumeně (paprsek nad kamerou). Výkon: 2 průhledné vrstvy, 1 emitor částic, žádné nové světlo ani stín.
 ## PUCHART_DEST=0..1 vynutí sílu deště (snímky, měření varianta „déšť“).
 
+const Strechy := preload("res://scripts/strechy.gd")
 var cfg: Dictionary = {}
 var den: Node = null
 var sila := 0.0          # 0..1 – kapky a zvuk
@@ -129,7 +130,8 @@ func _process(dt: float) -> void:
 	if _t_paprsek <= 0.0 and (sila > 0.001 or mokro > 0.001):
 		_t_paprsek = 0.25
 		var q := PhysicsRayQueryParameters3D.create(cam.global_position, cam.global_position + Vector3.UP * float(cfg["strecha_m"]))
-		_uvnitr_cil = 0.0 if get_world_3d().direct_space_state.intersect_ray(q).is_empty() else 1.0
+		Strechy.zajisti(get_tree().current_scene, cfg.get("strechy", {}))   # krytina bez kolize (strechy.gd; Míša 17. 11.: v podkroví pršelo)
+		_uvnitr_cil = 0.0 if get_world_3d().direct_space_state.intersect_ray(q).is_empty() and not Strechy.nad(cam.global_position, float(cfg["strecha_m"])) else 1.0
 	_uvnitr = move_toward(_uvnitr, _uvnitr_cil, dt * 2.0)
 	var venku := sila * (1.0 - _uvnitr)
 	var p := cam.global_position
@@ -184,6 +186,7 @@ func _strechy(p: Vector3) -> void:
 	if _sm_i < 0:
 		if st.distance_to(_sm_stred) < float(sc["posun_m"]): return
 		_sm_novy = st; _sm_i = 0
+	Strechy.zajisti(get_tree().current_scene, sc)
 	var ss := get_world_3d().direct_space_state; var hr: Node = get_tree().current_scene.get("hrac")
 	var ex: Array[RID] = []
 	if hr is CollisionObject3D: ex.append((hr as CollisionObject3D).get_rid())
@@ -192,7 +195,8 @@ func _strechy(p: Vector3) -> void:
 		var x := _sm_novy.x + (i % n - r) * k; var z := _sm_novy.y + (i / n - r) * k
 		var q := PhysicsRayQueryParameters3D.create(Vector3(x, p.y + float(sc["nad_m"]), z), Vector3(x, p.y - 60.0, z)); q.exclude = ex
 		var h := ss.intersect_ray(q)
-		_sm_img.set_pixel(i % n, i / n, Color((h["position"] as Vector3).y if not h.is_empty() else -1e4, 0, 0))
+		var hs := Strechy.vyska(q.from, q.to)   # krytina staveb (bez kolize – strechy.gd): pod ní neprší
+		_sm_img.set_pixel(i % n, i / n, Color(maxf((h["position"] as Vector3).y if not h.is_empty() else -1e4, hs if hs > -INF else -1e4), 0, 0))
 	_sm_i = konec
 	if _sm_i >= n * n:   # hotovo: shader dostane mapu (levý horní roh = střed buňky − k/2)
 		_sm_i = -1; _sm_stred = _sm_novy

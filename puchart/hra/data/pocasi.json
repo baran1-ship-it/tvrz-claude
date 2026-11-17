@@ -92,6 +92,11 @@
   "popis": "Míša 15. 11.: „rozumím, že v budovách neprší, ale na budovu musí pršet, a když se podívám z okna, tak taky uvidím venku déšť, a když jsem pod přístřeškem, tak taky musím vidět déšť – logicky z hlediska fyziky“. Dřív se celý déšť vypnul, jakmile byla nad kamerou střecha. Teď déšť padá vždy; mapa střech kolem kamery (paprsek shora dolů v mřížce krok_m do polomer_m, první zásah = střecha nebo terén) a shader dest.gdshader zahodí kapky pod nejvyšší plochou – pod střechou a přístřeškem neprší, na střechu a venku za oknem ano. Mapa se přepočítá po paprsku_na_snimek, když se kamera posune o posun_m.",
   "krok_m": 1.0,
   "polomer_m": 13,
+  "materialy": ["sindel"],
+  "uzly_konec": ["_Daleko"],
+  "uzly_zacatek": ["LOD1_"],
+  "predci": ["Hrad"],
+  "krytina_pozn": "Míša 17. 11. (docs/screens/misa_17_11/12.jpg, x −88,5 z 93,6 – půda krčmy): „v interiéru padá déšť“. Krokve a krytina staveb nemají kolizi (chyby.md 312), paprsek shora tak trefil až podlahu půdy a pod střechou pršelo; totéž pod přesahem nad pavlačí. Krytina všech staveb (plochy s materiálem materialy – šindel krčmy, domů, hájovny, kovárny, mlýna, zemljanek i hradů) z hrubých obalů (uzly *_Daleko, LOD1_*) a z hradů (potomci predci) jde do vlastního fyzikálního prostoru hra/scripts/strechy.gd – mapa střech i paprsek „pod střechou“ (déšť, zvuk, světlo interiéru hlavni.gd) berou vyšší z obou zásahů. Test smysl:strechy_krytina (každá stavba vsi a zajímavých míst má obal s krytinou).",
   "paprsku_na_snimek": 80,
   "posun_m": 3.0,
   "nad_m": 30.0

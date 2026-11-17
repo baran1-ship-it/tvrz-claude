@@ -262,6 +262,7 @@ func _mlyn(u: Node3D, di: Dictionary, m: Dictionary) -> Node3D:
 	var ml: Dictionary = m.get("mlyn", {})
 	var s := (load(c) as PackedScene).instantiate() as Node3D
 	s.name = "Mlyn"; s.transform = _xf(di); u.add_child(s)
+	if hlavni.has_method("jas_materialu_uzel"): hlavni.jas_materialu_uzel(s)   # prkna podlah a podbití (mista.json modely.domy.jas_materialu)
 	for jm in ml.get("vynechat", []):
 		var vn := s.find_child(String(jm), true, false)
 		if vn: vn.get_parent().remove_child(vn); vn.free()

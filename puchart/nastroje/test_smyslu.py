@@ -1010,6 +1010,171 @@ for _f in sorted(_gl.glob(K + "/hra/modely/luzka/textures/*" + _ni["pripona"])):
     if "compress/normal_map=%d" % _ni["normal_map"] not in _t: _c24.append("%s import bez compress/normal_map=%d" % (os.path.basename(_f), _ni["normal_map"]))
 TEST("luzka_normaly", not _c24, "; ".join(_c24) if _c24 else "lůžka: normálové mapy importované jako normálové")
 
+# --- stavby vsi z Míšina průchodu 17. 11. (docs/rozpracovane/chyby_misa_17_11.md 8–16) ---------------------------------
+def _glb_svet(f):   # [(jméno uzlu, materiál, P trojúhelníků (n,3,3))] ve světě modelu
+    j_, b_, _ = _gs.nacti(f); out_ = []
+    def go(i, M):
+        n = j_["nodes"][i]; M = M @ _gs.matice(n)
+        if "mesh" in n:
+            for p in j_["meshes"][n["mesh"]]["primitives"]:
+                X = _gs.cti(j_, b_, p["attributes"]["POSITION"]).astype(float); X = X @ M[:3, :3].T + M[:3, 3]
+                I = _gs.cti(j_, b_, p["indices"]).reshape(-1, 3) if "indices" in p else np.arange(len(X)).reshape(-1, 3)
+                out_.append((n.get("name", ""), j_["materials"][p["material"]]["name"] if "material" in p else "", X[I]))
+        for c in n.get("children", []): go(c, M)
+    for r in j_["scenes"][j_.get("scene", 0)]["nodes"]: go(r, np.eye(4))
+    return out_, j_
+
+# pavlače celků bez mezer v zábradlí (Míša 17. 11., snímky 09, 10: „chybí zábradlí v mezeře mezi sloupem a stěnou“): po obvodu
+# pochozí plochy (mista.json modely.celky.<model>.pavlace) po 0,2 m – od 0,15 m uvnitř do 0,35 m ven kolize (konvexní -convcolonly) ve výšce
+# 0,3–0,9 m nad podlahou (zábradlí, stěna), nebo navazující pochozí plocha 0–0,5 m pod úrovní (podesta, podlaha za dveřmi)
+from scipy.spatial import Delaunay as _Del
+_MJ = json.load(open(K + "/pravidla/svet/mista.json")); _c25 = []; _n25 = 0
+for _mm, _cv in _MJ["modely"]["celky"].items():
+    if not isinstance(_cv, dict) or not _cv.get("pavlace"): continue
+    _f = K + "/hra/" + _cv["soubor"].replace("res://", "")
+    if not os.path.exists(_f): _c25.append("%s chybí %s" % (_mm, _f)); continue
+    _hull = []
+    for _jm, _mt, _T in _glb_svet(_f)[0]:
+        if "colonly" in _jm and len(_T): _hull.append(_Del(np.unique(_T.reshape(-1, 3).round(4), axis=0)))
+    def _v_kolizi(P): return np.any([h.find_simplex(P) >= 0 for h in _hull], axis=0)
+    for _pv in _cv["pavlace"]:
+        x0, x1, z0, z1 = _pv["oblast"]; y = _pv["y"]
+        obv = [((x, z0), (0, -1)) for x in np.arange(x0, x1 + 1e-6, 0.2)] + [((x, z1), (0, 1)) for x in np.arange(x0, x1 + 1e-6, 0.2)] + \
+              [((x0, z), (-1, 0)) for z in np.arange(z0, z1 + 1e-6, 0.2)] + [((x1, z), (1, 0)) for z in np.arange(z0, z1 + 1e-6, 0.2)]
+        for (px, pz), (dx, dz) in obv:
+            _n25 += 1; ok = False
+            for d in (-0.15, -0.08, 0.0, 0.1, 0.2, 0.35):   # zábradlí stojí i kousek uvnitř hrany podlahy (sloupy pavlače)
+                q = np.array([[px + dx * d, y + h, pz + dz * d] for h in (0.3, 0.6, 0.9)])
+                if _v_kolizi(q).all(): ok = True; break
+                if d > 0 and _v_kolizi(np.array([[px + dx * d, y - h, pz + dz * d] for h in (0.05, 0.3, 0.5)])).any(): ok = True; break
+            if not ok: _c25.append("%s (%.2f; %.2f) ven (%d, %d)" % (_mm, px, pz, dx, dz))
+TEST("pavlac_zabradli", _n25 > 0 and not _c25, ("%d míst bez zábradlí: %s" % (len(_c25), _c25[:6])) if _c25 else "pavlače celků: %d bodů obvodu, všude zábradlí, stěna nebo navazující podlaha" % _n25)
+
+# chýše (zemljanky z A-chýší Havrana) bez průduchů u země (Míša 17. 11., snímek 16: „stěna nesahá až na zem“; „kontroluj všechny
+# strany… ať jim tam fouká“): vodorovné paprsky ze středu chýše ve výšce 0,05–0,45 m nad zemí do všech stran (144 směrů, 3 body
+# podél osy) musí do 4 m trefit stěnu, střechu nebo zídku; jen dveřní otvor nad prahem je volný. Dveře v otvoru: pant uzlu
+# křídla na ostění (dvere_x, dvere_z), křídlo nejdál 1 m od pantu (snímek 15: dveře stály 1,9 m vedle chýše)
+_ZT = json.load(open(K + "/pravidla/svet/zajimava_mista.json"))["modely"]["zemljanky"]; _c26 = []; _n26 = 0
+def _paprsek(T, o, d):
+    e1 = T[:, 1] - T[:, 0]; e2 = T[:, 2] - T[:, 0]; hh = np.cross(d, e2); a = (e1 * hh).sum(1)
+    okk = np.abs(a) > 1e-9; f = np.where(okk, 1 / np.where(okk, a, 1), 0); s_ = o - T[:, 0]; u = f * (s_ * hh).sum(1)
+    q = np.cross(s_, e1); v = f * (q @ d); t = f * (e2 * q).sum(1)
+    hit = okk & (u >= 0) & (u <= 1) & (v >= 0) & (u + v <= 1) & (t > 1e-4)
+    return t[hit].min() if hit.any() else None
+for _zm, _zt in _ZT["typy"].items():
+    _f = "%s/%s/%s.glb" % (K, _ZT["vystup"], _zm)
+    if not os.path.exists(_f): _c26.append("%s chybí" % _zm); continue
+    _site, _j26 = _glb_svet(_f)
+    _T = np.concatenate([T for jm, mt, T in _site if not any(v in jm for v in ("Jama", "Rohoze", "Daleko", "Spani", "colonly", "Kol"))])
+    _yt = 0.02; _der = []
+    for h in (0.05, 0.15, 0.25, 0.35, 0.45):
+        for k in range(144):
+            a = 2 * math.pi * k / 144; d = np.array([math.sin(a), 0.0, math.cos(a)])
+            for z0_ in (-1.2, 0.0, 1.2):
+                _n26 += 1; tt = _paprsek(_T, np.array([0.0, _yt + h, z0_]), d)
+                if tt is not None and tt < 4.0: continue
+                if d[2] > 0.05:
+                    xg = d[0] * (_zt["dvere_z"] - z0_) / d[2]
+                    if _zt["dvere_x"][0] - 0.02 <= xg <= _zt["dvere_x"][1] + 0.02 and _yt + h >= _zt["prah_y"] - 0.05: continue
+                _der.append("h %.2f směr %d°" % (h, round(math.degrees(a))))
+    if _der: _c26.append("%s: %d průduchů (%s)" % (_zm, len(_der), ", ".join(_der[:4])))
+    _dv = next((n for n in _j26["nodes"] if n.get("name", "").endswith("_Dvere")), None)
+    if _dv is None: _c26.append("%s bez dveří" % _zm)
+    else:
+        _tr = _dv.get("translation", [0, 0, 0])
+        if not (_zt["dvere_x"][0] - 0.1 <= _tr[0] <= _zt["dvere_x"][1] + 0.1 and abs(_tr[2] - _zt["dvere_z"]) <= 0.15):
+            _c26.append("%s: pant dveří (%.2f; %.2f) mimo otvor x %s z %.2f" % (_zm, _tr[0], _tr[2], _zt["dvere_x"], _zt["dvere_z"]))
+        _P = np.concatenate([T.reshape(-1, 3) for jm, mt, T in _site if jm.endswith("_Dvere")])
+        if np.linalg.norm((_P - np.array(_tr))[:, [0, 2]], axis=1).max() > 1.0: _c26.append("%s: křídlo dveří dál než 1 m od pantu" % _zm)
+TEST("chyse_bez_pruduchu", _n26 > 0 and not _c26, "; ".join(_c26) if _c26 else "zemljanky %s: %d paprsků u země, všechny strany uzavřené, dveře v otvoru" % (", ".join(_ZT["typy"]), _n26))
+
+# krytina všech staveb pro déšť a „pod střechou“ (Míša 17. 11., snímek 12: v podkroví krčmy pršelo; hra/scripts/strechy.gd):
+# každý model stavby vsi, celku a zemljanky má hrubý obal (*_Daleko / LOD1_*) s plochou krytiny (pocasi.json strechy.materialy)
+_PS = json.load(open(K + "/pravidla/svet/pocasi.json"))["strechy"]; _c27 = []; _n27 = 0
+def _krytina(f, jen=None):
+    j_, _, _ = _gs.nacti(f); n_ = 0
+    for n in j_["nodes"]:
+        nm = n.get("name", "")
+        if "mesh" not in n or nm.endswith("_Stin") or not (any(nm.endswith(k) for k in _PS["uzly_konec"]) or any(nm.startswith(k) for k in _PS["uzly_zacatek"])): continue
+        if jen and not nm.startswith(jen): continue
+        for p in j_["meshes"][n["mesh"]]["primitives"]:
+            if "material" in p and any(m.lower() in j_["materials"][p["material"]]["name"].lower() for m in _PS["materialy"]): n_ += 1
+    return n_
+_MS = json.load(open(D + "mista_stavby.json"))
+for _md in sorted({s["model"] for s in _MS["stavby"] if "soubor" not in s}):
+    _n27 += 1
+    if _krytina(K + "/hra/modely/stavby_h/domy.glb", _md + "_Daleko") == 0: _c27.append("dům %s bez krytiny v obalu" % _md)
+for _s in {s["soubor"]: s for s in _MS["stavby"] if "soubor" in s}.values():
+    _n27 += 1; _f = K + "/hra/" + str(_s.get("lod1", "")).replace("res://", "")
+    if not _s.get("lod1") or not os.path.exists(_f) or _krytina(_f) == 0: _c27.append("celek %s bez LOD1 s krytinou" % _s["model"])
+for _zm in _ZT["typy"]:
+    _n27 += 1
+    if _krytina("%s/%s/%s.glb" % (K, _ZT["vystup"], _zm)) == 0: _c27.append("%s bez krytiny v obalu" % _zm)
+if os.path.exists(K + "/hra/modely/stavby_h/mlyn_lod1.glb"):
+    _n27 += 1
+    if _krytina(K + "/hra/modely/stavby_h/mlyn_lod1.glb") == 0: _c27.append("mlýn bez krytiny v LOD1")
+TEST("strechy_krytina", _n27 > 0 and not _c27, "; ".join(_c27) if _c27 else "%d typů staveb má v obalu krytinu (strechy.gd: pod ní neprší, uvnitř světlo interiéru)" % _n27)
+
+# topení bez výbavy sloučené do sítě (Míša 17. 11., snímek 11: lopata prochází pecí): v přebalených modelech (hra/modely/topeni)
+# nezbyl žádný trojúhelník celý v kvádru topeni.json modely.<model>.odebrat (LOD0, LOD1 i varianty z něj)
+_TJ = json.load(open(K + "/pravidla/svet/topeni.json")); _c28 = []; _n28 = 0
+for _tm, _tv in _TJ["modely"].items():
+    if not isinstance(_tv, dict) or not _tv.get("odebrat"): continue
+    _jm28 = [_tm] + [k for k, v in _TJ["varianty"].items() if isinstance(v, dict) and v.get("z") == _tm]
+    for _v in _jm28:
+        for _lod in ("LOD0", "LOD1"):
+            _f = "%s/%s/%s_%s.glb" % (K, _TJ["vystup"], _v, _lod)
+            if not os.path.exists(_f): _c28.append("%s chybí" % os.path.basename(_f)); continue
+            j_, b_, _ = _gs.nacti(_f); _n28 += 1
+            for n in j_["nodes"]:
+                for o in _tv["odebrat"]:
+                    if "mesh" not in n or not n.get("name", "").startswith(o["uzel"]): continue
+                    for p in j_["meshes"][n["mesh"]]["primitives"]:
+                        V = _gs.cti(j_, b_, p["attributes"]["POSITION"])[_gs.cti(j_, b_, p["indices"]).reshape(-1, 3)]; kv = o["kvadr"]
+                        uv = np.ones(len(V), bool)
+                        for a_ in range(3): uv &= (V[..., a_] >= kv[2 * a_]).all(1) & (V[..., a_] <= kv[2 * a_ + 1]).all(1)
+                        if uv.any(): _c28.append("%s %s: %d troj. v kvádru odebrat" % (os.path.basename(_f), n["name"], int(uv.sum())))
+TEST("topeni_bez_vybavy", _n28 > 0 and not _c28, "; ".join(_c28) if _c28 else "%d modelů topení bez odebrané výbavy (lopata pece krčmy)" % _n28)
+
+# dymník černé kuchyně celku (Míša 17. 11., snímek 12: digestoř končí v podkroví „?“; NAVOD_KRCMA_L: kouř odchází dymníkem
+# v hřebeni): průduch (díly Dymnik_* v mista.json upravy_modelu) začíná na odtahu topeniště (topeni.json kuchyne, značka
+# Pec_Kour), končí pod značkou kouře dymníku (*_Kour_Dymnik, vodorovně ≤ 0,8 m, pod hřebenem) a neprostupuje krovem ani krytinou
+_c29 = []; _n29 = 0
+for _sb, _uv in _MJ["upravy_modelu"].items():
+    if not isinstance(_uv, dict): continue
+    _dd = [q for c_ in _uv.get("casti", []) for q in c_.get("pridat", []) if str(q.get("jmeno", "")).startswith("Dymnik_")]
+    if not _dd: continue
+    _f = K + "/hra/modely/stavby_h/" + _sb
+    if not os.path.exists(_f): _c29.append("%s chybí" % _sb); continue
+    _site, _j29 = _glb_svet(_f); _n29 += 1
+    _mod = next((m for m, cv in _MJ["modely"]["celky"].items() if isinstance(cv, dict) and cv.get("soubor", "").endswith(_sb.replace(".glb", "") + ".glb")), None)
+    _ku = [v for v in _TJ["vlozit"] if v.get("kam") == "celek" and v.get("model") == _mod and _TJ["modely"].get(v["topeni"], {}).get("druh") == "kuchyne"]
+    if not _ku: _c29.append("%s: bez kuchyňského topeniště" % _sb); continue
+    _jt, _, _ = _gs.nacti("%s/%s/%s_LOD0.glb" % (K, _TJ["vystup"], _ku[0]["topeni"]))
+    _mk = next(n.get("translation") for n in _jt["nodes"] if n.get("name") == "Pec_Kour")
+    _a = math.radians(_ku[0]["yaw_deg"]); _po = _ku[0]["poloha"]
+    _odt = np.array([_po[0] + math.cos(_a) * _mk[0] + math.sin(_a) * _mk[2], _po[1] + _mk[1], _po[2] - math.sin(_a) * _mk[0] + math.cos(_a) * _mk[2]])
+    if np.linalg.norm(np.array(_dd[0]["od"]) - _odt) > 0.15: _c29.append("%s: průduch nezačíná na odtahu %s (od %s)" % (_sb, _odt.round(2).tolist(), _dd[0]["od"]))
+    _zn = next((n.get("translation") for n in _j29["nodes"] if n.get("name", "").endswith("_Kour_Dymnik")), None)
+    if _zn is None: _c29.append("%s: bez značky dymníku" % _sb)
+    else:
+        _e = np.array(_dd[-1]["do"])
+        if math.hypot(_e[0] - _zn[0], _e[2] - _zn[2]) > 0.8 or not (_zn[1] - 2.0 < _e[1] < _zn[1]): _c29.append("%s: ústí %s není pod dymníkem %s" % (_sb, _e.tolist(), _zn))
+    _K29 = np.concatenate([T for jm, mt, T in _site if ("Krov" in jm or "Strecha" in jm) and "colonly" not in jm])
+    for q in _dd:
+        if not any(jm == q["jmeno"] for jm, mt, T in _site): _c29.append("%s: chybí díl %s" % (_sb, q["jmeno"])); continue
+        A_ = np.array(q["od"], float); B_ = np.array(q["do"], float); ax = (B_ - A_) / np.linalg.norm(B_ - A_)
+        u_ = np.cross(ax, [0, 1, 0] if abs(ax[1]) < 0.9 else [1, 0, 0]); u_ /= np.linalg.norm(u_); w_ = np.cross(ax, u_)
+        hs = np.array(q["prurez"]) / 2 - 0.01; L_ = np.linalg.norm(B_ - A_)
+        kol = 0
+        for a_, c_ in ((0, 1), (1, 2), (2, 0)):
+            for t in np.linspace(0, 1, 400):
+                S = _K29[:, a_] + (_K29[:, c_] - _K29[:, a_]) * t - A_
+                pa = S @ ax; pu = np.abs(S @ u_); pw = np.abs(S @ w_)
+                kol += int(((pa > 0.01) & (pa < L_ - 0.01) & (pu < min(hs)) & (pw < min(hs))).sum())
+        if kol: _c29.append("%s %s: prostupuje krovem/krytinou (%d bodů)" % (_sb, q["jmeno"], kol))
+TEST("dymnik_kuchyne", _n29 > 0 and not _c29, "; ".join(_c29) if _c29 else "%d celků: dymník z černé kuchyně od odtahu pod hřeben, bez prostupu krovem" % _n29)
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

@@ -45,6 +45,8 @@
   "Pec_Krcma": {
    "sada": "Topeni_1400",
    "druh": "pec",
+   "odebrat": [{"uzel": "Noha_lavice.004_", "kvadr": [1.0, 1.5, -0.05, 1.6, -1.0, 0.75], "co": "pekařská lopata (Sazeci_lopata_topurko + Sazeci_lopata_list, ASSETY.json) – modelář ji sloučil do sítě lavice (materiál Rucne_opracovane_drevo_PBR); kusy sítě x 1,08…1,43, y 0,03…1,46, z −0,91…0,68 (rozbor 17. 11.), lavice je na x < −1,3"}],
+   "_odebrat_pozn": "Míša 17. 11. (snímek docs/screens/misa_17_11/11.jpg, x −94,2 z 92,0 – přeškrtnuto): topůrko lopaty opřené o pec prochází klenbou; stavby bez výbavy (CLAUDE.md, Míša 12. a 14. 11.) – lopata je nářadí, ne pevný díl pece → z modelu pryč (LOD0 i LOD1, nastroje/topeni_modely.py odebrat). Hrnec na trojnožce (Hrnec_hlineny, Trojnozka) zůstává – Míša ho nepřeškrtla (dotaz ve zprávě). Pec_Chalupni lopatu nemá (kusy sítě lavice jen x < −1,0).",
    "usti": [
     0.72,
     0.57
