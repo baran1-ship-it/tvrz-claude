@@ -1345,6 +1345,48 @@ for _sb, _uv in _MJ["upravy_modelu"].items():
         if kol: _c29.append("%s %s: prostupuje krovem/krytinou (%d bodů)" % (_sb, q["jmeno"], kol))
 TEST("dymnik_kuchyne", _n29 > 0 and not _c29, "; ".join(_c29) if _c29 else "%d celků: dymník z černé kuchyně od odtahu pod hřeben, bez prostupu krovem" % _n29)
 
+# souvislost sítě cest a pěšin (plán 17. 11. B2, Havran: síť cest = graf): komponenty grafu os cesty_puchart.json
+# (dotyk os, konec do spoj_konce_m = spojka cesty.py, most, nástupy hradů) ≤ komponent_max; odtržené kusy s polohou
+_KS = KC["cesty_sit"]; _CP = json.load(open(K + "/pravidla/svet/cesty_puchart.json")); _CC = _CP["cesty"]
+def _hust_c(o, k):
+    o = np.array(o, float)[:, :2]; d = np.r_[0, np.cumsum(np.hypot(*np.diff(o, axis=0).T))]; s_ = np.r_[np.arange(0, d[-1], k), d[-1]]
+    return np.c_[np.interp(s_, d, o[:, 0]), np.interp(s_, d, o[:, 1])]
+_HC = [_hust_c(c["osa"], float(_KS["zhusteni_m"])) for c in _CC]; _par = list(range(len(_CC)))
+def _fc(a):
+    while _par[a] != a: _par[a] = _par[_par[a]]; a = _par[a]
+    return a
+def _uc(a, b): _par[_fc(a)] = _fc(b)
+_vyn = [set(v["mezi"]) for v in _CP.get("spojky_vynechat", [])]
+for _i, _a in enumerate(_HC):
+    for _j, _b in enumerate(_HC):
+        if _i == _j: continue
+        _dd = np.hypot(_b[:, 0][:, None] - _a[:, 0][None, :], _b[:, 1][:, None] - _a[:, 1][None, :])
+        if _dd.min() <= float(_KS["dotyk_m"]): _uc(_i, _j); continue
+        for _ko in (0, -1):
+            if _CC[_i].get("k_mistu") and _ko == -1: continue   # pěšina k místu končí u místa (cesty.py)
+            if _dd[:, _ko].min() <= float(_KS["spoj_konce_m"]) and {_CC[_i]["id"], _CC[_j]["id"]} not in _vyn: _uc(_i, _j)
+_skup = [([m_["u_bodu"]], float(_KS["most_r_m"])) for m_ in json.load(open(K + "/pravidla/svet/voda_hra.json")).get("mosty", [])]   # konce u téhož mostu
+_skup.append(([q[:2] for q in json.load(open(D + "nastupy_mostu.json"))["nastupy"]], float(_KS["hrad_r_m"])))   # nástupy hradů: skrz hrady
+for _body, _r in _skup:
+    _k = [i for i in range(len(_CC)) for ko in (0, -1) for q in _body if math.dist(_HC[i][ko], q) < _r]
+    for _a in _k[1:]: _uc(_k[0], _a)
+_g = {}
+for _i in range(len(_CC)): _g.setdefault(_fc(_i), []).append(_i)
+_dl = lambda i: float(np.hypot(*np.diff(np.array(_CC[i]["osa"], float)[:, :2], axis=0).T).sum())
+_gs = sorted(_g.values(), key=lambda v: -sum(_dl(i) for i in v)); _Ph = np.vstack([_HC[i] for i in _gs[0]]); _odt = []
+for _v in _gs[1:]:
+    _P = np.vstack([_HC[i] for i in _v]); _dd = np.hypot(_P[:, 0][:, None] - _Ph[:, 0][None, :], _P[:, 1][:, None] - _Ph[:, 1][None, :]); _a = np.unravel_index(_dd.argmin(), _dd.shape)
+    _odt.append("%s (%.0f m) %.0f m od sítě u [%.0f, %.0f]" % ("+".join(sorted({_CC[i]["id"] for i in _v})), sum(_dl(i) for i in _v), _dd.min(), _P[_a[0]][0], _P[_a[0]][1]))
+_cg = json.load(open(D + "cesty_graf.json")); _sg = [[] for _ in _cg["uzly"]]
+for _a, _b in _cg["hrany"]: _sg[_a].append(_b); _sg[_b].append(_a)
+_vg = {0} if _sg else set(); _st = [0] if _sg else []
+while _st:
+    for _b in _sg[_st.pop()]:
+        if _b not in _vg: _vg.add(_b); _st.append(_b)
+for _o in _odt: print("SMYSL   odtržený kus cest:", _o)
+TEST("cesty_souvislost", len(_gs) <= int(_KS["komponent_max"]) and len(_vg) == len(_cg["uzly"]),
+     "komponent sítě cest %d (mez %d), hlavní %.0f m; mapa cesty_graf %d/%d uzlů souvisle; odtržené: %s" % (len(_gs), int(_KS["komponent_max"]), sum(_dl(i) for i in _gs[0]), len(_vg), len(_cg["uzly"]), "; ".join(_odt[:4]) + (" …" if len(_odt) > 4 else "")))
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

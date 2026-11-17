@@ -71,5 +71,32 @@
   "max_stoupani_m": 0.05,
   "min_zkousek": 6,
   "zdroj": "zadání 15. 11. (č. 315: „postava nesmí vyskakovat na hrany zdí a zábradlí“); předprseň ochozu blender/hrady.py (zeď do pasu), zábradlí pavlače krčmy (č. 313)"
+ },
+ "dosah": {
+  "popis": "test průchodu dosah (hra/scripts/test_dosah.gd, plán 17. 11. B1): mřížka dosažitelnosti celého výseku. Od startu hráče a míst mapy (mapa_body.json start + mista: hrady, krčma, ves, hájovna) se po mřížce buněk rozlévá chůze. Buňky jen s terénem (krok_venku_m): přechod podle sklonu terénu (floor_max_angle hráče, hrac.gd) nebo schodu (nejvyšší hrac.json schod_m). Buňky do okraj_kolize_m od kolize mimo terén (stavby, skály, mosty, kmeny) se dělí na jemne_deleni × jemne_deleni a mají patra (paprsek shora, normála do floor_max_angle, kapsle hráče se vejde); přechod mezi nimi kráčí kapsle hráče fyzikálně (test_move po podkrok_m: rovně / po svahu / krok nahoru s dosednutím na stupeň / dopad). Dveře z dat (křídla *_Dvere_* ve vsi a místech, dveře hradu z pohyb.json) jsou uzly navíc (střed křídla, propojené chůzí s buňkami do dvere_r_m). CHYBA: díra (dopad bez kolize do pad_hledat_m), únik ze světa (hráč postavený na dosažitelný okraj výseku jde unik_chuze_s ven a ocitne se za hranicí terénu nebo propadne) – meze diry_max, unik_max. Výpis (meze null = jen výpis): uvíznutí (dosažitelné, ale odtud se nedá vrátit ke startu), ostrovy pochozích míst mimo dosah (od ostrov_min_uzlu), dveře bez dosahu. Výstup PUCHART_DOSAH (hlídači build/dosah.json + build/dosah.png).",
+  "krok_venku_m": 2.0,
+  "jemne_deleni": 2,
+  "okraj_kolize_m": 1.5,
+  "podkrok_m": 0.5,
+  "pater_max": 6,
+  "zasahu_max": 24,
+  "pod_terenem_m": 12.0,
+  "shoda_patra_m": 0.4,
+  "pad_hledat_m": 80.0,
+  "dvere_r_m": 2.5,
+  "dvere_dy_m": 1.6,
+  "ostrov_min_uzlu": 6,
+  "vypis_max": 25,
+  "unik_zkousek": 12,
+  "unik_chuze_s": 6.0,
+  "unik_ven_m": 30.0,
+  "meze": {
+   "diry_max": 0,
+   "unik_max": 0,
+   "uviznuti_max_uzlu": null,
+   "dvere_bez_dosahu_max": null
+  },
+  "cas_max_s": 900,
+  "zdroj": "postup: sonda --reach a tools/seal_world.py v Alchemists of Prague (github.com/msveshnikov/alchemists-of-prague, kód nepřevzat – licence neuvedena), rešerše docs/rozpracovane/reserse_pdf_17_11.md bod 2 a Havran docs/rozpracovane/reserse_17_11_pdf.md (mřížka od brány vsi a hradů). Krok 2 m venku = efektivní rozlišení DMR 5G (~3,6 m, dlazdice.json lod), 1 m u staveb = šířka dveří; kapsle hráče r 0,3 m, výška 1,75 (hlavni.gd), schod a sklon z hráče (hrac.json schod_m, hrac.gd floor_max_angle 50°). Cíl běhu < 10 min na PC (zadání 17. 11.)."
  }
 }

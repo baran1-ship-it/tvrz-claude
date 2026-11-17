@@ -45,8 +45,9 @@ func _process(_d: float) -> void:
 	var vp := get_viewport(); var rid := vp.get_viewport_rid()
 	var vel := vp.get_visible_rect().size; var sc := vp.scaling_3d_scale
 	var gpu := RenderingServer.viewport_get_measured_render_time_gpu(rid); var cpu := RenderingServer.viewport_get_measured_render_time_cpu(rid)
-	lbl.text = "FPS %d  p95 %s ms  záseky>40 ms %d\nkreslení %d  troj. %.2f M\nVRAM %d MB  halda(debug) %s\nokno %dx%d  3D %d%% = %dx%d  GPU %s CPU %s ms  %s\n%s\npoloha x %.1f  z %.1f  y %.1f  směr %d°" % [
-		Engine.get_frames_per_second(), ("%.1f" % p95) if p95 >= 0 else "N/A", zaseky,
+	var reg := get_tree().get_first_node_in_group("regulator")   # stav automatiky detailu (regulator.gd)
+	lbl.text = "FPS %d  p95 %s ms  záseky>40 ms %d\n%s\nkreslení %d  troj. %.2f M\nVRAM %d MB  halda(debug) %s\nokno %dx%d  3D %d%% = %dx%d  GPU %s CPU %s ms  %s\n%s\npoloha x %.1f  z %.1f  y %.1f  směr %d°" % [
+		Engine.get_frames_per_second(), ("%.1f" % p95) if p95 >= 0 else "N/A", zaseky, reg.panel() if reg else "automatika: N/A",
 		kres, troj / 1e6, vram / 1048576, ("%d MB" % (halda / 1048576)) if halda > 0 else "N/A",
 		vel.x, vel.y, roundi(sc * 100), roundi(vel.x * sc), roundi(vel.y * sc),
 		("%.1f" % gpu) if gpu > 0.0 else "N/A", ("%.1f" % cpu) if cpu > 0.0 else "N/A", sestava, vykreslovani, _kam().x, _kam().z, _kam().y, _smer()]

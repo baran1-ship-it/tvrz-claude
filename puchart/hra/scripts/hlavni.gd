@@ -168,6 +168,7 @@ func _start() -> void:
 	hrac.position = start
 	hrac.look_at(Vector3(0.0, svet.vyska(0.0, 0.0) + 1.6, 0.0), Vector3.UP)
 	hrac.rotation.x = 0.0
+	var reg_: Node = load("res://scripts/regulator.gd").new(); reg_.name = "Regulator"; add_child(reg_)   # automatika detailu (rozpocty.json automatika, plán 17. 11. A1)
 	add_child(Diag.new())
 	if FileAccess.file_exists("res://data/ohne.json"): var oh_: Node3D = load("res://scripts/ohne.gd").new(); oh_.name = "Ohne"; add_child(oh_); oh_.zacni(self)   # ohně ve stavbách (Míša 15. 11.; ohne.gd)
 	if chce_mereni(true):

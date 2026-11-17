@@ -78,6 +78,9 @@ grep -q "^LOUC_TEST zapaleni.*-> OK" $S || { rc=1; echo "LOUC CHYBA: akce předm
 # ohně (Míša 15. 11.: „dodělej ohně“, místnost osvětlená ode dveří): místa z modelů, zapálit/uhasit, rozpočet světel
 krok "ohně"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_ohne.gd timeout 600 $G --headless 2>&1 | grep -E "^OHNE_TEST" | tee -a $S)
 grep -q "^OHNE_TEST.*OK" $S || { rc=1; echo "OHNE CHYBA: ohně se nepostavily nebo nejdou zapálit/uhasit" | tee -a $S; }
+# automatika detailu (plán 17. 11. A1, regulator.gd): simulované pomalé snímky ubírají stupně, klidné je vracejí, měření ji vypíná
+krok "automatika detailu"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_regulator.gd timeout 600 $G --headless 2>&1 | grep -E "^REGULATOR_TEST" | tee -a $S)
+grep -q "^REGULATOR_TEST OK" $S || { rc=1; echo "REGULATOR CHYBA: automatika detailu nemění nebo nevrací stupně" | tee -a $S; }
 # běh a létání na obrazovce (Míša 12. 11. večer, Havran hud.gd): dotyk na kruh Běh/Let přepne hrac.bezi/leti a zase zpět
 krok "běh a let dotykem"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_beh_let.gd timeout 600 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | grep -E "^BEHLET_TEST" | tee -a $S)
 grep -q "^BEHLET_TEST OK" $S || { rc=1; echo "BEHLET CHYBA: kruh Běh nebo Let nereaguje na dotyk" | tee -a $S; }

@@ -946,6 +946,16 @@ func _test_dvere_mist() -> void:
 	vysledek["dvere_mist"] = "OK" if spatne.is_empty() and n > 0 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádné dveře")
 	print("PRUCHOD dvere_mist ", vysledek["dvere_mist"], " (křídel %d)" % n)
 
+## dosah (plán 17. 11. B1, princip sondy --reach z Alchemists of Prague): mřížka dosažitelnosti celého výseku – díry, únik
+## ze světa (CHYBA), uvíznutí, ostrovy, dveře bez dosahu (výpis); hra/scripts/test_dosah.gd, kontroly_hra.json dosah
+func _test_dosah() -> void:
+	var td: Node = load("res://scripts/test_dosah.gd").new(); add_child(td)
+	var v: Dictionary = await td.spust(hlavni, hrac)
+	td.queue_free()
+	var ch: Array = v.get("chyby", ["bez výsledku"])
+	vysledek["dosah"] = "OK" if ch.is_empty() else "CHYBA: " + "; ".join(ch)
+	print("PRUCHOD dosah ", vysledek["dosah"])
+
 func _chyba(t: String) -> void:
 	for i in hrac.get_slide_collision_count():
 		var c := hrac.get_slide_collision(i)
@@ -955,6 +965,7 @@ func _chyba(t: String) -> void:
 
 func _konec() -> void:
 	var jen := OS.get_environment("PUCHART_JEN")
+	if jen == "" or "dosah" in jen: await _test_dosah()   # první: dveře míst ještě bez kolize křídel (otevřené), jen padací mosty z dvere.gd
 	if jen == "" or "kmene" in jen: await _test_kmene()
 	if jen == "" or "povrch" in jen: await _test_povrch()
 	if jen == "" or "vrata" in jen: await _test_vrata()

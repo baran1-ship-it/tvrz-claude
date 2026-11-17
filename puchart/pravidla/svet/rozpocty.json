@@ -160,5 +160,41 @@
   "_stari_snimku": "vrácený MultiMesh smí grafika číst ještě 2–3 snímky (fronta snímků); dřív se nepoužije",
   "max_volnych_na_klic": 12,
   "_max_volnych_na_klic": "strop odložených slotů na síť a třídu (paměť); přebytečný se uvolní jako dřív. NEOVERENO, kolik je potřeba na tabletu"
+ },
+ "automatika": {
+  "popis": "Automatika detailu (hra/scripts/regulator.gd, plán z rešerše 17. 11. A1): 75. percentil skutečné délky snímku za posledních okno_s s, vyhodnocení po kontrola_s. Když p75 drží nad dolu_p75_ms po dolu_vydrz_s, ubere jeden stupeň detailu; když drží pod nahoru_p75_ms po nahoru_vydrz_s (tablet vychladl), jeden stupeň vrátí. Stupně jsou kumulativní (stupeň 2 = páky stupně 1 i 2) a mění jen parametry hotových věcí: trava_dosah = násobek úbytku trávy (stebla.gdshader hust_do, hust_konec), kere_dosah = násobek rozpouštění keřů a bylin do dálky (listi.gdshader zanik, distance_fade), stiny_dosah_m = dosah stínu slunce (místo stiny.dosah_m), lod_prah_nasobek = násobek Viewport.mesh_lod_threshold. Nikdy rozlišení 3D (nastavení hráče, obraz_3d). Během měření vypnuto (mereni.gd). Stav v ladicím panelu (diag.gd). Na PC jen s PUCHART_AUTOMATIKA=1.",
+  "zdroj": "CLAUDE.md (automatika jen v extrému – teplo, dlouhý pokles FPS; snížení detailu, ne rozlišení; po zchladnutí zpět; Míša 6. 11.), docs/ZAVER_tablet_grafika.md §0, Halcyon (PDF 1 s. 3, https://github.com/billpwchan/halcyon: governor podle p75 s hysterezí, jeden dlouhý snímek ignoruje, zpět po klidné době), docs/rozpracovane/reserse_pdf_17_11.md A4 a plán A1",
+  "zapnuto": true,
+  "okno_s": 5.0,
+  "kontrola_s": 1.0,
+  "dolu_p75_ms": 40.0,
+  "_dolu_p75_ms": "p75 nad 40 ms = čtvrtina snímků pod 25 FPS; 40 ms je mezicíl p95 (snimek.p95_ms) – zasáhne jen při dlouhém poklesu, ne při běžném kolísání. NEOVERENO na tabletu",
+  "dolu_vydrz_s": 15.0,
+  "nahoru_p75_ms": 36.0,
+  "_nahoru_p75_ms": "tablet má limit 30 FPS (snimky_max) = snímek nejméně 33,3 ms, proto návrat už pod 36 ms (klidný běh u limitu); Halcyon vrací po klidné době. NEOVERENO na tabletu",
+  "nahoru_vydrz_s": 60.0,
+  "zahrati_s": 20.0,
+  "_zahrati_s": "prvních 20 s po startu hry se nehodnotí (načítání, první sestavení shaderů)",
+  "max_snimek_ms": 1000.0,
+  "_max_snimek_ms": "delší snímek = pauza, nabídka nebo načítání – do okna se nepočítá",
+  "stupne": [
+   {
+    "jmeno": "tráva blíž",
+    "trava_dosah": 0.7
+   },
+   {
+    "jmeno": "keře blíž",
+    "kere_dosah": 0.7
+   },
+   {
+    "jmeno": "stíny 25 m",
+    "stiny_dosah_m": 25.0
+   },
+   {
+    "jmeno": "LOD dřív",
+    "lod_prah_nasobek": 2.0
+   }
+  ],
+  "_stupne": "pořadí podle rešerše (A4): 1) dohled louky, 2) keře a byliny, 3) stíny 40 → 25 m, 4) dřívější LOD. Násobky 0,7 a 2,0 jsou NAVRH – cena jednotlivých pák na tabletu NEOVERENO (měřit variantami mereni.json)"
  }
 }
