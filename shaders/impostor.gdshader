@@ -10,6 +10,7 @@ uniform sampler2D normaly : filter_linear_mipmap;   // normala ve svete (ne tecn
 uniform vec3 stred = vec3(0.0, 8.0, 0.0);     // stred koule stromu nad patou (m, meritko 1)
 uniform float polomer = 8.0;
 uniform float fade_od = 50.0;                 // nabeh (plny strom konci na 60 m)
+uniform float fade_pas = 10.0;               // delka nabehu ditherem (kere: les_podrost.json dalka.kere_prolinani_m)
 uniform float fade_do = 900.0;
 uniform vec4 tint = vec4(1.0);      // odstin listi druhu (svet.TINT_LISTI) - jako plny strom
 
@@ -43,7 +44,7 @@ void vertex() {
 	vec2 k = (UV - 0.5) * 2.0 * polomer * s;
 	VERTEX = c - o + r * k.x - u * k.y;
 	float dist = distance(c, cam);
-	viditelnost = smoothstep(fade_od, fade_od + 10.0, dist) * (1.0 - smoothstep(fade_do - 60.0, fade_do, dist));
+	viditelnost = smoothstep(fade_od, fade_od + fade_pas, dist) * (1.0 - smoothstep(fade_do - 60.0, fade_do, dist));
 	prah = fract(sin(dot(ic.xz + o.xz, vec2(12.9898, 78.233))) * 43758.5453);
 }
 

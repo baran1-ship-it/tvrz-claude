@@ -24,6 +24,12 @@ DRUHY = {
     "olse_stredni": ("olse_stredni", "olse_stredni_0"), "olse_mlada": ("olse_mlada", "olse_mlada_0"),
     "buk_stredni": ("buk_stredni", "buk_stredni_0"), "vrba": ("vrba", "vrba_0"),
 }
+# kere (Misa 17. 11. r. 8: „kere z dalky nejsou videt a pak se objevi“): stejny atlas, vlastni seznam kere.json -
+# hra je ma jen za koncem 3D kere (svet._plants, les_podrost.json dalka), ne jako stromy (kmen, koruna, kolize).
+# Varianty modelu sdileji obrazek (shrub_02_0..3 -> shrub_02, bez_cerny_1..3 -> bez_cerny), meritko podle vysky.
+# 3. pole = zahusteni alfy (px pohledu 128): shrub_02 je ridky prut s listky - mipmapy alfu zprumeruji pod prah 0,5
+# a keř by v dalce zmizel; rozsireni alfy (MaxFilter) = hmota listi, jak ji oko z dalky vidi.
+DRUHY_KERE = {"shrub_02": ("shrub_02", "shrub_02_0", 5), "bez_cerny": ("bez_cerny_1", "bez_cerny_1_0", 0)}
 
 
 def smer(i, j):
@@ -77,7 +83,7 @@ def _emise(mat, normal):
     nt.links.new(mix.outputs[0], out.inputs["Surface"])
 
 
-def druh(name, soubor, uzel, meta):
+def druh(name, soubor, uzel, meta, zahusteni=0):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, "modely", "rostliny", soubor + ".glb"))
     ob = bpy.data.objects.get(uzel)
@@ -132,7 +138,15 @@ def druh(name, soubor, uzel, meta):
                 sc.render.filepath = os.path.join(tmp, "v.png")
                 bpy.ops.render.render(write_still=True)
                 atlas.paste(Image.open(sc.render.filepath).convert("RGBA"), (i * PX, j * PX))
-        if not normal:
+        if zahusteni:
+            from PIL import ImageFilter
+            # alfa rozsirena (hmota listi); barva / normala pod novymi pixely z okoli (jako okraje listi nize)
+            alfa = atlas.split()[3].filter(ImageFilter.MaxFilter(zahusteni))
+            bg = atlas.copy()
+            for _ in range(zahusteni):
+                bg = Image.alpha_composite(bg.filter(ImageFilter.MaxFilter(3)), atlas)
+            atlas = Image.merge("RGBA", (*bg.convert("RGB").split(), alfa))
+        elif not normal:
             # okraje listi: barva pod pruhlednymi pixely z okoli (mipmapy netahnou cerny lem)
             bg = atlas.copy()
             for _ in range(4):
@@ -147,16 +161,19 @@ def druh(name, soubor, uzel, meta):
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    meta = {}
-    only = [a for a in sys.argv[1:] if a in DRUHY]
-    for name, (soubor, uzel) in DRUHY.items():
-        if only and name not in only:
+    only = [a for a in sys.argv[1:] if a in DRUHY or a in DRUHY_KERE]
+    for seznam, soubor_meta in ((DRUHY, "impostory.json"), (DRUHY_KERE, "kere.json")):
+        meta = {}
+        for name, (soubor, uzel, *dal) in seznam.items():
+            if only and name not in only:
+                continue
+            druh(name, soubor, uzel, meta, *dal)
+        if not meta:
             continue
-        druh(name, soubor, uzel, meta)
-    mp = os.path.join(OUT, "impostory.json")
-    old = json.load(open(mp)) if os.path.exists(mp) else {}
-    old.update(meta)
-    json.dump(old, open(mp, "w"), indent=1)
+        mp = os.path.join(OUT, soubor_meta)
+        old = json.load(open(mp)) if os.path.exists(mp) else {}
+        old.update(meta)
+        json.dump(old, open(mp, "w"), indent=1)
     # Blender pri ukonceni s nactenymi modely pada (rc 139, 14. 11.) - vse zapsane, konec bez uklidu (jako export_game.py)
     import sys as _s
     _s.stdout.flush()

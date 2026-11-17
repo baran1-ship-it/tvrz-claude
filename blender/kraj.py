@@ -848,6 +848,26 @@ def ryb2_preliv(ryb):
     return ap, -hz["koruna_sirka_m"] / 2.0, t1, ryb["hladina_y"] + pr["koruna_nad_hladinou_m"], vy["hladina_y"] + pr["konec_nad_hladinou_m"]
 
 
+def ryb2_vypust_zdi(ryb):
+    """Osy zdi vypusti (zed tl. ZED_VYPUSTI_M na ose): [cela l0-l1, kridlo l0, kridlo l1] jako ((ax, az), (bx, bz))."""
+    g = ryb2(ryb)
+    vy = ryb["vypust"]
+    ux, uz = g["u"]
+    nx, nz = g["n"]
+    cx_, cz_ = vy["celo"]
+    sir = vy["celo_sirka_m"]
+    l0 = (cx_ - ux * sir / 2 - nx * 0.22, cz_ - uz * sir / 2 - nz * 0.22)
+    l1 = (cx_ + ux * sir / 2 - nx * 0.22, cz_ + uz * sir / 2 - nz * 0.22)
+    out = [(l0, l1)]
+    for sg, l in ((-1, l0), (1, l1)):
+        kr = vy["kridlo_m"]
+        out.append((l, (l[0] + (nx + ux * sg) * kr / math.sqrt(2), l[1] + (nz + uz * sg) * kr / math.sqrt(2))))
+    return out
+
+
+ZED_VYPUSTI_M = 0.45      # tloustka zdi cela a kridel (zed() v ryb2_predmety, vychozi tl)
+
+
 def ryb2_preliv_dno(x, z, ryb):
     """Dno koryta prelivu (+inf mimo): na korune vodorovne v koruna_nad_hladinou_m, za vzdusnou hranou koruny linearne
     dolu na konec; napric sirka_m, po stranach svah nabeh_m."""
@@ -2017,7 +2037,7 @@ def ryb2_predmety(coll, ryb, land_fn, vs, tris, hl):
     y_vrch = vy["hladina_y"] + vy["celo_vyska_m"] + 0.15
     sir = vy["celo_sirka_m"]
 
-    def zed(ax, az, bx, bz, y0, y1, tl=0.45):
+    def zed(ax, az, bx, bz, y0, y1, tl=ZED_VYPUSTI_M):
         L = math.hypot(bx - ax, bz - az)
         if L < 0.1:
             return
@@ -2038,14 +2058,9 @@ def ryb2_predmety(coll, ryb, land_fn, vs, tris, hl):
             y += hh
             rada += 1
         P.cols.append((M(((ax + bx) / 2, (y0 + y1) / 2, (az + bz) / 2), yaw), (L, y1 - y0, tl)))
-    # lice cela (osa u), zed tl. 0,45 za licem
-    l0 = (cx_ - ux * sir / 2 - nx * 0.22, cz_ - uz * sir / 2 - nz * 0.22)
-    l1 = (cx_ + ux * sir / 2 - nx * 0.22, cz_ + uz * sir / 2 - nz * 0.22)
-    zed(l0[0], l0[1], l1[0], l1[1], y_dno - 0.2, y_vrch)
-    for sg, l in ((-1, l0), (1, l1)):
-        kr = 1.6
-        ex, ez = l[0] + (nx + ux * sg) * kr / math.sqrt(2), l[1] + (nz + uz * sg) * kr / math.sqrt(2)
-        zed(l[0], l[1], ex, ez, y_dno - 0.2, y_vrch - 0.35)
+    # lice cela (osa u), zed tl. 0,45 za licem; kridla 45 st. (ryb2_vypust_zdi - stejne segmenty kontroluje test smyslu)
+    for k_z, (a_, b_) in enumerate(ryb2_vypust_zdi(ryb)):
+        zed(a_[0], a_[1], b_[0], b_[1], y_dno - 0.2, y_vrch if k_z == 0 else y_vrch - 0.35)
     # trouba: vydlabany kmen z hraze, konec 0,25 m pred licem, dno trouby na hladine odtoku
     rt = vy["trouba_prumer_m"] / 2.0
     ty = vy["hladina_y"] + rt + 0.02
@@ -2132,11 +2147,16 @@ def ryb2_predmety(coll, ryb, land_fn, vs, tris, hl):
             cen = Vector(c) - B.col[1] * (tl / 2.0 - dl["nad_dnem_m"])
             kit.stone(P, M(cen, basis=B), (t1 - t - sp, tl, o1 - o0 - sp), "kvadr_sedy", cham=0.025, rough=0.01)
             o = o1
+        # kolize rady dlazby (Misa 17. 11. r. 2, snimek 03: „trava roste skrz dlazbu“ - kit.stone kolizi nema, paprsky
+        # kryti louky shora (louka._zasah) padaly na teren dna prelivu = trsy mezi kameny; hrac chodil po dne pod kameny)
+        B, c = baze(t, t1, 0.0)
+        P.cols.append((M(Vector(c) - B.col[1] * (tl / 2.0 - dl["nad_dnem_m"]), basis=B), (t1 - t, tl, 2.0 * hw)))
         for sg in (-1, 1):                               # obruba: kvadr podel osy na kraji koryta
             oo = sg * (hw + dl["obruba_sirka_m"] / 2.0)
             B, c = baze(t, t1, oo)
             cen = Vector(c) + B.col[1] * (dl["obruba_nad_m"] - dl["obruba_vyska_m"] / 2.0)
             kit.stone(P, M(cen, basis=B), (t1 - t - sp, dl["obruba_vyska_m"], dl["obruba_sirka_m"]), "kvadr_sedy", cham=0.035, rough=0.015)
+            P.cols.append((M(cen, basis=B), (t1 - t, dl["obruba_vyska_m"], dl["obruba_sirka_m"])))
         t = t1
         rada += 1
 
@@ -2762,9 +2782,20 @@ def _skirt(verts, faces, attrs, rect, step, land_fn, depth=0.8):
     pts += [(x1 - (x1 - x0) * i / n, z1) for i in range(n)]
     pts += [(x0, z1 - (z1 - z0) * k / m) for k in range(m)]
     pts.append(pts[0])
+    if _HRUBY[0] is not None and any(tuple(rect) == tuple(r) for r in _HRANY_JEMNE):
+        # lem jemneho pasma pod hranou k Teren_okoli: horni hrana po hrube hrane (_hruba_hrana_y), i s body hrube mrizky
+        # (jinak lem trci nad povrch - Misa 17. 11. r. 6, tmava cara)
+        k = _HRUBY[0][0]
+        jemny = math.gcd(int(round(step * 1000)), int(round(k * 1000))) / 1000.0
+        pts = []
+        for (ax, az), (bx, bz) in (((x0, z0), (x1, z0)), ((x1, z0), (x1, z1)), ((x1, z1), (x0, z1)), ((x0, z1), (x0, z0))):
+            nn = int(round(max(abs(bx - ax), abs(bz - az)) / jemny))
+            pts += [(ax + (bx - ax) * i / nn, az + (bz - az) * i / nn) for i in range(nn)]
+        pts.append(pts[0])
     prev = None
     for x, z in pts:
-        y = land_fn(x, z)
+        yh = _hruba_hrana_y(x, z, rect, land_fn) if _HRUBY[0] is not None and any(tuple(rect) == tuple(r) for r in _HRANY_JEMNE) else None
+        y = land_fn(x, z) if yh is None else yh
         a = len(verts)
         verts.append((x, y, z))
         verts.append((x, y - depth, z))
@@ -2773,6 +2804,86 @@ def _skirt(verts, faces, attrs, rect, step, land_fn, depth=0.8):
         if prev is not None:
             faces.append((prev, prev + 1, a + 1, a))
         prev = a
+
+
+# Hrana jemneho pasma (Teren_ves 2 m, Teren_most 1 m) k hrubemu okoli (Teren_okoli, krok _HRUBY[0]): Misa 17. 11. r. 6
+# (08 x 309 z 716, 10 x 313 z 672, 11 x 276 z 620 - tmave cary a schod se stenou hliny pres cesty). Kazda sit brala na
+# spolecne hrane land_fn ve svych bodech, hruba sit mezi body po 5 m linearne -> rozdil az 0,37 m (ves z 670) a 0,46 m
+# (most x 275) v exportu 16. 11.; lem pod hranou byl videt jako cara nebo stena. Pravidlo jako _teren_u_vody: vrchol jemne
+# site na hrane k hrube bunce ma vysku hrube hrany (linearne mezi body hrube mrizky) a body hrube mrizky na hrane ma i jemna
+# sit (krok 2 m nedeli 5 m) - spolecna lomena cara bez skulin. Ne tam, kde hrubou bunku vynechal pas reky (Teren_reka).
+_HRUBY = [None]          # (krok, x0, z0) mrizky Teren_okoli - nastavi tiles()
+_HRANY_JEMNE = []        # obdelniky jemnych pasem s hranou k Teren_okoli (VRECT, BRECT) - nastavi tiles()
+
+
+def _hruba_hrana_y(x, z, rect, land_fn):
+    """Vyska bodu na hrane obdelniku jemneho pasma podle hrube mrizky okoli; None, kdyz bod na hrane neni nebo hrubou
+    bunku za hranou nahrazuje pas reky."""
+    if _HRUBY[0] is None:
+        return None
+    k, gx0, gz0 = _HRUBY[0]
+    e = 1e-6
+    na_x = abs(x - rect[0]) < e or abs(x - rect[1]) < e
+    na_z = abs(z - rect[2]) < e or abs(z - rect[3]) < e
+    if not (na_x or na_z):
+        return None
+    if na_x and na_z:
+        return land_fn(x, z)
+    if na_x:
+        ven = x - k / 2.0 if abs(x - rect[0]) < e else x + k / 2.0
+        a = gz0 + math.floor((z - gz0) / k + e) * k
+        if _v_pasu_reky(ven, a + k / 2.0):
+            return None
+        return land_fn(x, a) + (land_fn(x, a + k) - land_fn(x, a)) * (z - a) / k
+    ven = z - k / 2.0 if abs(z - rect[2]) < e else z + k / 2.0
+    a = gx0 + math.floor((x - gx0) / k + e) * k
+    if _v_pasu_reky(a + k / 2.0, ven):
+        return None
+    return land_fn(a, z) + (land_fn(a + k, z) - land_fn(a, z)) * (x - a) / k
+
+
+def _hrana_hrube(verts, faces, rect, land_fn):
+    """Jemna sit pasma rect: vrcholy na hrane k hrubemu okoli na hrubou hranu (_hruba_hrana_y) a body hrube mrizky,
+    ktere na hrane chybi, vlozit do ploch (n-uhelnik) - stejna lomena cara jako Teren_okoli."""
+    k, gx0, gz0 = _HRUBY[0]
+    for i, (x, y, z) in enumerate(verts):
+        yh = _hruba_hrana_y(x, z, rect, land_fn)
+        if yh is not None:
+            verts[i] = (x, yh, z)
+    novy = {}
+    out = []
+    for f in faces:
+        poly = []
+        for j in range(len(f)):
+            a, b = f[j], f[(j + 1) % len(f)]
+            poly.append(a)
+            (ax, _, az), (bx, _, bz) = verts[a], verts[b]
+            for osa, c0, c1, pevna in ((0, ax, bx, (az, bz)), (2, az, bz, (ax, bx))):
+                if abs(pevna[0] - pevna[1]) > 1e-6:
+                    continue
+                g0 = gx0 if osa == 0 else gz0
+                lo, hi = min(c0, c1), max(c0, c1)
+                body = []
+                q = g0 + math.ceil((lo - g0) / k - 1e-6) * k
+                while q < hi - 1e-6:
+                    if q > lo + 1e-6:
+                        body.append(q)
+                    q += k
+                if c0 > c1:
+                    body.reverse()
+                for q in body:
+                    x, z = (q, pevna[0]) if osa == 0 else (pevna[0], q)
+                    yh = _hruba_hrana_y(x, z, rect, land_fn)
+                    if yh is None:
+                        continue
+                    key = (round(x * 16), round(z * 16))
+                    if key not in novy:
+                        novy[key] = len(verts)
+                        verts.append((x, yh, z))
+                    poly.append(novy[key])
+        out.append(tuple(poly))
+    faces[:] = out
+    return len(novy)
 
 
 def tiles(coll, land_fn):
@@ -2785,8 +2896,11 @@ def tiles(coll, land_fn):
     _REKA_MIMO[:] = [VRECT, BRECT]
     jemne = {}
     zemljanky_bunky = {}
-    for name, rect, inner, step in (("Teren_ves", VRECT, [], 2.0), ("Teren_most", BRECT, [], 1.0),
-                                    ("Teren_okoli", ACT, [NEAR, VRECT, BRECT], 5.0), ("Teren_obzor", FAR, ACT, 25.0)):
+    pasma = (("Teren_ves", VRECT, [], 2.0), ("Teren_most", BRECT, [], 1.0),
+             ("Teren_okoli", ACT, [NEAR, VRECT, BRECT], 5.0), ("Teren_obzor", FAR, ACT, 25.0))
+    _HRUBY[0] = next((st, r[0], r[2]) for nm, r, _i, st in pasma if nm == "Teren_okoli")
+    _HRANY_JEMNE[:] = [VRECT, BRECT]
+    for name, rect, inner, step in pasma:
         _KROK_SITE[0] = step                                  # sum masky povrchu podle rozliseni pasma
         xs = [rect[0] + step * i for i in range(int(round((rect[1] - rect[0]) / step)) + 1)]
         zs = [rect[2] + step * k for k in range(int(round((rect[3] - rect[2]) / step)) + 1)]
@@ -2803,6 +2917,10 @@ def tiles(coll, land_fn):
             return bk in jem or bk in zem
         verts, faces, attrs = _grid(xs, zs, inner, land_fn, name, None, coll,
                                     skip_fn=vynech if name in ("Teren_okoli", "Teren_ves") else None)
+        if name in ("Teren_ves", "Teren_most"):
+            nv = _hrana_hrube(verts, faces, rect, land_fn)
+            attrs += [ground_attrs(x, z) for x, _y, z in verts[len(attrs):]]
+            print("%s: hrana k Teren_okoli po hrube mrizce, vlozeno %d bodu" % (name, nv))
         # obzor: lesy jako tmava vyvysena koruna (z dalky vypada jako les, stromy by stály moc)
         if name == "Teren_obzor":
             verts = [(x, y + 11.0 * a[1] * smooth(0.0, 1.0, a[1]), z) for (x, y, z), a in zip(verts, attrs)]

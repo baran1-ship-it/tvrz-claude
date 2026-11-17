@@ -4517,8 +4517,18 @@ func _obal(st: SurfaceTool, cen: Vector3, sz: Vector3, r: RandomNumberGenerator)
 
 
 const IMP_BUNKA := 1024.0               # Misa 0.92 (tablet 1300 kresleni): 256 m = 312 uzlu, 180-220 kresleni u rybnika/hostince
-const IMP_DOHLED := 900.0
 var _imp_meta := {}
+var _imp_ker_meta := {}                 # impostory keru (obrazky/impostory/kere.json, blender/impostory.py DRUHY_KERE)
+
+
+## Impostor keru (Misa 17. 11. r. 8, les_podrost.json dalka): jen za koncem 3D kere, ne jako strom (kmen, koruna).
+func _imp_ker(kind: String) -> String:
+	if _imp_ker_meta.is_empty() and FileAccess.file_exists("res://obrazky/impostory/kere.json"):
+		_imp_ker_meta = JSON.parse_string(FileAccess.get_file_as_string("res://obrazky/impostory/kere.json"))
+	for d: String in _imp_ker_meta:
+		if kind.begins_with(d):
+			return d
+	return ""
 
 
 func _imp_druh(kind: String) -> String:
@@ -4534,7 +4544,11 @@ func _imp_druh(kind: String) -> String:
 
 ## Impostory: jeden ctverec na strom, MultiMesh po druzich a bunkach 256 m, jednotkove transformace
 ## (poloha v INSTANCE_CUSTOM), obal bunky rucne (jinak by Godot videl vsechny instance v pocatku).
-func _impostory(root: Node3D, imp: Dictionary, bunka := IMP_BUNKA, dohled := IMP_DOHLED, jmeno := "impostor") -> void:
+## meta = stred/polomer/vyska druhu (stromy _imp_meta, kere _imp_ker_meta); od = {druh: fade_od} (kere: konec 3D kere),
+## pas = delka nabehu ditherem (les_podrost.json dalka.kere_prolinani_m; stromy vychozi shaderu).
+func _impostory(root: Node3D, imp: Dictionary, bunka: float, dohled: float, jmeno := "impostor", meta := {}, od := {}, pas := 0.0) -> void:
+	if meta.is_empty():
+		meta = _imp_meta
 	var quad := ArrayMesh.new()
 	var a := []
 	a.resize(Mesh.ARRAY_MAX)
@@ -4548,10 +4562,12 @@ func _impostory(root: Node3D, imp: Dictionary, bunka := IMP_BUNKA, dohled := IMP
 		m.shader = load("res://shaders/impostor.gdshader")
 		m.set_shader_parameter("barva", load("res://obrazky/impostory/%s_a.png" % d))
 		m.set_shader_parameter("normaly", load("res://obrazky/impostory/%s_n.png" % d))
-		var st: Array = _imp_meta[d]["stred"]
+		var st: Array = meta[d]["stred"]
 		m.set_shader_parameter("stred", Vector3(st[0], st[1], st[2]))
-		m.set_shader_parameter("polomer", float(_imp_meta[d]["polomer"]))
-		m.set_shader_parameter("fade_od", STROM_PREP - 10.0)
+		m.set_shader_parameter("polomer", float(meta[d]["polomer"]))
+		m.set_shader_parameter("fade_od", float(od[d]) - pas if od.has(d) else STROM_PREP - 10.0)
+		if pas > 0.0:
+			m.set_shader_parameter("fade_pas", pas)
 		m.set_shader_parameter("fade_do", dohled)
 		for pf: String in TINT_LISTI:
 			if d.begins_with(pf):
@@ -4573,7 +4589,7 @@ func _impostory(root: Node3D, imp: Dictionary, bunka := IMP_BUNKA, dohled := IMP
 				mm.set_instance_custom_data(i, c)
 				lo = lo.min(Vector3(c.r, c.g, c.b))
 				hi = hi.max(Vector3(c.r, c.g, c.b))
-			var r := float(_imp_meta[d]["polomer"]) * 2.5
+			var r := float(meta[d]["polomer"]) * 2.5
 			mm.custom_aabb = AABB(lo - Vector3(r, r, r), hi - lo + Vector3(r, r, r) * 2.0)
 			var mmi := MultiMeshInstance3D.new()
 			mmi.multimesh = mm
@@ -4674,7 +4690,7 @@ func _obzor_les(root: Node3D) -> void:
 	var uzel := Node3D.new()
 	uzel.name = "Obzor_les"
 	root.add_child(uzel)
-	_impostory(uzel, imp, OBZ_BUNKA, 2500.0, "obzor")
+	_impostory(uzel, imp, OBZ_BUNKA, float(Pravidla.cti("les_podrost", "dalka", "obzor_do_m")), "obzor")
 
 
 ## Realie 1393 (Misa, radce 09:20): smrk v niznim udoli nerostl. Pod 25 m nad tvrzi (udoli, okoli vsi, louky)
@@ -8653,7 +8669,7 @@ func _cesty_cache_cesta() -> String:
 	return "user://cache/cesty_%s_%s_%d.bin" % [String(j.get("commit", "")), String(j.get("manifest", "")), CESTA_VERZE]
 
 
-const CESTA_VERZE := 2                   # zvysit pri zmene vypoctu cest v terenu (zneplatni ulozene)
+const CESTA_VERZE := 3                   # zvysit pri zmene vypoctu cest v terenu (zneplatni ulozene)
 const ZAMEK_VERZE := 1                   # zvysit pri zmene _zamek_terenu
 
 
@@ -8912,13 +8928,17 @@ func _cesta_povrch(arr: Array, xf: Transform3D) -> Array:
 						uv2[i] if not uv2.is_empty() else Vector2.ZERO, cl[i] if not cl.is_empty() else Color.WHITE, vy[i])
 			nove += 1
 			continue
-		# hrany: plna, kdyz ji sdili dva rozdelene trojuhelniky; jinak linearne (soused se nedeli)
+		# hrany: plna, kdyz ji sdili dva rozdelene trojuhelniky; jinak linearne (soused se nedeli). Hrana na okraji site
+		# (jediny trojuhelnik) plna: soused je v jine siti terenu (Teren_ves 2 m / Teren_okoli 5 m / Teren_most 1 m) a pocita
+		# tutez funkci profilu ve svych bodech - linearne mezi rohy ruzne dlouhych hran dalo schod az o profil cesty (Misa
+		# 17. 11. r. 6, tmave cary a schod pres cesty na styku siti). Nedeleny soused v jine siti lezi za ok + 0,8 (deli),
+		# kde je cesta_d nulova - plny profil tam = linearni.
 		var ka: Vector2i = klic.call(w[ia])
 		var kb: Vector2i = klic.call(w[ib])
 		var kc: Vector2i = klic.call(w[ic])
 		var plna := func(k1: Vector2i, k2: Vector2i) -> bool:
 			var he := [k1, k2] if (k1.x < k2.x or (k1.x == k2.x and k1.y < k2.y)) else [k2, k1]
-			return int(hrany.get(he, 0)) >= 2 and int(hrany_vse.get(he, 0)) == 2
+			return int(hrany_vse.get(he, 0)) == 1 or (int(hrany.get(he, 0)) >= 2 and int(hrany_vse.get(he, 0)) == 2)
 		var p_ab: bool = plna.call(ka, kb)
 		var p_ac: bool = plna.call(ka, kc)
 		var p_bc: bool = plna.call(kb, kc)
@@ -13434,6 +13454,11 @@ var _hl_ryb: Array = []                 # [stred Lhota, zaznam Lhota (obrys), hl
 func _ryb_vzhled(mi: MeshInstance3D, si: int) -> void:
 	if not String(mi.name).begins_with("Rybnik_lhota_voda"):
 		return
+	# Misa 17. 11. r. 1 (01, 02: „rybnik bez vody“): hladina nese pruhlednost v barve vrcholu (COLOR.r * 4 = hloubka, kraj 0
+	# = pruhledny). Automaticke LOD importu (tvrz.glb generate_lods) rovnou plochu zjednodusi skoro na obrys - zbyde barva
+	# kraje 0 = cela hladina pruhledna, i zblizka (chyba roviny = 0 -> nejhrubsi stupen vzdy). Do 16. 11. LOD zahodil
+	# prepis nadrz.hloubka_hladiny (nova ArrayMesh); po vyrazeni z nadrzi (16. 11. r. 6) zustala sit z importu s LOD.
+	mi.mesh = _bez_lod(mi.mesh)
 	var vz: Dictionary = Pravidla.cti("prostredi", "rybnik_lhota_vzhled")
 	var mt := mi.get_active_material(si) as ShaderMaterial
 	if vz.is_empty() or mt == null:
@@ -13444,6 +13469,20 @@ func _ryb_vzhled(mi: MeshInstance3D, si: int) -> void:
 	sm.set_shader_parameter("deep", Color(float(vz["deep"][0]), float(vz["deep"][1]), float(vz["deep"][2])))
 	mi.set_surface_override_material(si, sm)
 	vodni.append(sm)
+
+
+## Sit bez automatickych LOD importu (hladina s udaji v barve vrcholu): povrchy, materialy a jmena stejne. Uz bez LOD = beze zmeny.
+static func _bez_lod(me: Mesh) -> Mesh:
+	var am := me as ArrayMesh
+	if am == null or am.has_meta("bez_lod"):
+		return me
+	var nove := ArrayMesh.new()
+	for s in am.get_surface_count():
+		nove.add_surface_from_arrays(am.surface_get_primitive_type(s), am.surface_get_arrays(s))
+		nove.surface_set_material(s, am.surface_get_material(s))
+		nove.surface_set_name(s, am.surface_get_name(s))
+	nove.set_meta("bez_lod", true)
+	return nove
 
 
 static func voda_odraz(m: ShaderMaterial) -> void:
@@ -14748,6 +14787,9 @@ func _plants(parent: Node3D, quality: int) -> void:
 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))
 	var mat_zaklad := {}                 # druh -> {jmeno materialu: Material}
 	var imp := {}                        # druh impostoru -> {bunka 256 m: [Color(pata xyz, meritko+otoceni)]}
+	var imp_ker := {}                    # totez pro kere (les_podrost.json dalka) za koncem 3D kere
+	var ker_konec := {}                  # druh impostoru kere -> konec 3D kere (m) = zacatek impostoru
+	var dalka: Dictionary = Pravidla.cti("les_podrost", "dalka")     # kere_do_m 0 = bez impostoru keru (navrat)
 	for key: String in klice:
 		var kind := key.substr(0, key.rfind("_"))
 		if not scenes.has(kind):
@@ -15035,6 +15077,20 @@ func _plants(parent: Node3D, quality: int) -> void:
 				if puda and (OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")):
 					mmi.visibility_range_end = 40.0
 					mmi.visibility_range_end_margin = 6.0
+				# Misa 17. 11. r. 8 („kere z dalky nejsou videt a pak se objevi“): za koncem 3D kere impostor (les_podrost.json
+				# dalka) - stejne jako strom za STROM_PREP; poloha, meritko a otoceni z instance, vyska podle modelu varianty
+				var ik := _imp_ker(kind) if float(dalka["kere_do_m"]) > 0.0 else ""
+				if ik != "":
+					ker_konec[ik] = mmi.visibility_range_end
+					var iks := mesh.get_aabb().size.y / float(_imp_ker_meta[ik]["vyska"])
+					if not imp_ker.has(ik):
+						imp_ker[ik] = {}
+					for xf: Transform3D in list:
+						var bc := Vector2i(floori(xf.origin.x / IMP_BUNKA), floori(xf.origin.z / IMP_BUNKA))
+						if not imp_ker[ik].has(bc):
+							imp_ker[ik][bc] = []
+						var yaw := fposmod(atan2(-xf.basis.x.z, xf.basis.x.x), TAU)
+						imp_ker[ik][bc].append(Color(xf.origin.x, xf.origin.y, xf.origin.z, roundf(xf.basis.get_scale().y * iks * 256.0) + yaw / TAU * 0.999))
 			elif kind.begins_with("balvan_") or kind.begins_with("kamen_"):
 				# 0.60: balvany 1-2 m a kameny se kreslily do 450 m (prikop: 84 kresleni, 3 plochy na kus) - dal jsou pixel
 				var bal := kind.begins_with("balvan_")
@@ -15048,7 +15104,8 @@ func _plants(parent: Node3D, quality: int) -> void:
 					and imp_druh == "" and tvar_mesh == null and not kind.begins_with("skala_"):
 				mmi.set_meta("tok", true)
 			root.add_child(mmi)
-	_impostory(root, imp)
+	_impostory(root, imp, IMP_BUNKA, float(dalka["stromy_do_m"]))
+	_impostory(root, imp_ker, IMP_BUNKA, float(dalka["kere_do_m"]), "ker_imp", _imp_ker_meta, ker_konec, float(dalka["kere_prolinani_m"]))
 	_obzor_les.call_deferred(root.get_parent() if root.get_parent() else root)
 	for kind: String in scenes:
 		if scenes[kind]:

@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "sklep_vstup", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400", "houby_na_zemi", "clona_vsi", "houstina_volno"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "hladiny_lod", "teren_svy", "sklep_vstup", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400", "houby_na_zemi", "clona_vsi", "houstina_volno"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -10793,6 +10793,156 @@ func _nevisi_1400() -> void:
 ## na kraji (hloubka 0) ne pod hladinou o vic nez pasma.voda.ryb_kraj_tolerance_m (jinak hrana vody ve vzduchu), uvnitr ne
 ## nize nez Blender o vic nez totez (kuly lavky jsou zapustene 0,4 m do terenu Blenderu). Nohy lavky (voda.json lavka) dosahnou
 ## na viditelny teren hry.
+## Misa 17. 11. r. 6 (08 x 309 z 716, 10 x 313 z 672, 11 x 276 z 620: tmave cary pres cesty, schod se stenou hliny): site
+## terenu (Teren_ves 2 m, Teren_most 1 m, Teren_okoli 5 m, Teren_toky...) se potkavaji na hranach pasem. Na kazde otevrene
+## hrane site (hrana jen jednoho trojuhelniku, ne svisle lemy) po 0,5 m: vyska sousedni site v temze bodu se nesmi lisit
+## o vic nez pasma.test.teren_svy_m; vrchol svisleho lemu (Teren_lem, lem Teren_most/okoli) nesmi trcet nad povrch o vic.
+func _teren_svy() -> void:
+	var tol := float(sv.pasma()["test"]["teren_svy_m"])
+	var site: Array = []                    # [jmeno, mrizka trojuhelniku, aabb]
+	var hrany: Array = []                   # [index site, a, b]
+	var lem_v: Array = []                   # [jmeno, vrchol svisle plochy]
+	for mi0 in main.find_children("Teren*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		var nm := String(mi.name)
+		if mi.mesh == null or not mi.is_visible_in_tree() or nm == "Teren_obzor" or nm.begins_with("Teren_cesta") or nm.ends_with("_sukne"):
+			continue
+		var f := mi.mesh.get_faces()
+		var xf := mi.global_transform
+		var plos := PackedVector3Array()
+		var poc := {}
+		var hr := {}
+		for i in range(0, f.size(), 3):
+			var a := xf * f[i]
+			var b := xf * f[i + 1]
+			var c := xf * f[i + 2]
+			var nn := (b - a).cross(c - a)
+			if nn.length() < 1e-6:
+				continue
+			if absf(nn.y) < 0.2 * nn.length():
+				for q in [a, b, c]:
+					lem_v.append([nm, q])
+				continue
+			plos.append(a)
+			plos.append(b)
+			plos.append(c)
+			for e in [[a, b], [b, c], [c, a]]:
+				var ka := Vector2i(roundi(e[0].x * 100.0), roundi(e[0].z * 100.0))
+				var kb := Vector2i(roundi(e[1].x * 100.0), roundi(e[1].z * 100.0))
+				var k := [ka, kb] if (ka.x < kb.x or (ka.x == kb.x and ka.y < kb.y)) else [kb, ka]
+				poc[k] = int(poc.get(k, 0)) + 1
+				hr[k] = e
+		if plos.is_empty():
+			continue
+		var ab := AABB(plos[0], Vector3.ZERO)
+		for q in plos:
+			ab = ab.expand(q)
+		site.append([nm, sv._tri_mrizka(plos, Transform3D()), ab.grow(0.1)])
+		for k in poc:
+			if int(poc[k]) == 1:
+				hrany.append([site.size() - 1, hr[k][0], hr[k][1]])
+	var vys := func(g: Dictionary, x: float, z: float) -> float:
+		for t: Array in g.get(Vector2i(floori(x / 2.0), floori(z / 2.0)), []):
+			var a: Vector3 = t[0]
+			var b: Vector3 = t[1]
+			var c: Vector3 = t[2]
+			var den := (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z)
+			if absf(den) < 1e-9:
+				continue
+			var w1 := ((b.z - c.z) * (x - c.x) + (c.x - b.x) * (z - c.z)) / den
+			var w2 := ((c.z - a.z) * (x - c.x) + (a.x - c.x) * (z - c.z)) / den
+			var w3 := 1.0 - w1 - w2
+			if w1 >= -1e-4 and w2 >= -1e-4 and w3 >= -1e-4:
+				return w1 * a.y + w2 * b.y + w3 * c.y
+		return NAN
+	var par := {}                           # "A|B" -> [vzorku, nad tol, nejvic, kde]
+	var n_vz := 0
+	for h: Array in hrany:
+		var si: int = h[0]
+		var a: Vector3 = h[1]
+		var b: Vector3 = h[2]
+		var m := maxi(1, ceili(Vector2(a.x, a.z).distance_to(Vector2(b.x, b.z)) / 0.5))
+		for j in m:
+			var p := a.lerp(b, (j + 0.5) / m)
+			for sj in site.size():
+				if sj == si or not (site[sj][2] as AABB).has_point(Vector3(p.x, (site[sj][2] as AABB).get_center().y, p.z)):
+					continue
+				var y: float = vys.call(site[sj][1], p.x, p.z)
+				if is_nan(y):
+					continue
+				n_vz += 1
+				var kl := "%s|%s" % [site[si][0], site[sj][0]] if String(site[si][0]) < String(site[sj][0]) else "%s|%s" % [site[sj][0], site[si][0]]
+				if not par.has(kl):
+					par[kl] = [0, 0, 0.0, Vector2.ZERO]
+				var r: Array = par[kl]
+				r[0] = int(r[0]) + 1
+				var d := absf(p.y - y)
+				if d > tol:
+					r[1] = int(r[1]) + 1
+				if d > float(r[2]):
+					r[2] = d
+					r[3] = Vector2(p.x, p.z)
+	var lem := {}                           # jmeno -> [nad tol, nejvic, kde]
+	for lv: Array in lem_v:
+		var q: Vector3 = lv[1]
+		var ys := -INF
+		for s: Array in site:
+			if (s[2] as AABB).has_point(Vector3(q.x, (s[2] as AABB).get_center().y, q.z)):
+				var y: float = vys.call(s[1], q.x, q.z)
+				if not is_nan(y):
+					ys = maxf(ys, y)
+		if ys == -INF or q.y - ys < -1e-3:
+			continue
+		var k := String(lv[0])
+		if not lem.has(k):
+			lem[k] = [0, 0.0, Vector2.ZERO]
+		if q.y - ys > tol:
+			lem[k][0] = int(lem[k][0]) + 1
+		if q.y - ys > float(lem[k][1]):
+			lem[k][1] = q.y - ys
+			lem[k][2] = Vector2(q.x, q.z)
+	var ok := true
+	var txt: Array = []
+	for kl in par:
+		var r: Array = par[kl]
+		ok = ok and int(r[1]) == 0
+		txt.append("%s %d/%d nad %.2f, nejvic %.3f u (%.1f, %.1f)" % [kl, r[1], r[0], tol, r[2], r[3].x, r[3].y])
+	for k in lem:
+		ok = ok and int(lem[k][0]) == 0
+		txt.append("lem %s trci %d vrch., nejvic %.3f u (%.1f, %.1f)" % [k, lem[k][0], lem[k][1], lem[k][2].x, lem[k][2].y])
+	_vysledek("teren_svy", ok and n_vz > 0, "hran %d, vzorku %d; %s" % [hrany.size(), n_vz, "; ".join(txt)])
+
+
+func _hladiny_lod() -> void:
+	# Misa 17. 11. r. 1 (01, 02: rybnik Lhota bez vody): hladina s hloubkou v barve vrcholu (voda.gdshader hloubka_vrcholu,
+	# kraj COLOR.r 0 = pruhledny) nesmi mit automaticke LOD importu - plocha se zjednodusi na obrys s barvou kraje a cela
+	# hladina zmizi. Kazdy viditelny povrch s timto shaderem: pocet LOD urovni v RenderingServeru 0. Pro zaznam i pocet LOD
+	# hladiny Lhoty v samotnem importu tvrz.glb (pricina).
+	var chyby: Array = []
+	var n := 0
+	for mi0 in main.find_children("*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		if mi.mesh == null or not mi.is_visible_in_tree():
+			continue
+		for si in mi.mesh.get_surface_count():
+			var m := mi.get_active_material(si) as ShaderMaterial
+			if m == null or m.shader == null or not m.shader.resource_path.ends_with("voda.gdshader"):
+				continue
+			if not bool(m.get_shader_parameter("hloubka_vrcholu")):
+				continue
+			n += 1
+			var lods: Array = RenderingServer.mesh_get_surface(mi.mesh.get_rid(), si).get("lods", [])
+			if not lods.is_empty():
+				chyby.append("%s/%d: %d LOD" % [mi.name, si, lods.size()])
+	var imp := "?"
+	var sc: Node = (load("res://modely/tvrz.glb") as PackedScene).instantiate()
+	var hv := sc.find_child("Rybnik_lhota_voda*", true, false) as MeshInstance3D
+	if hv and hv.mesh:
+		imp = str((RenderingServer.mesh_get_surface(hv.mesh.get_rid(), 0).get("lods", []) as Array).size())
+	sc.free()
+	_vysledek("hladiny_lod", chyby.is_empty() and n > 0, "povrchu hladin s hloubkou ve vrcholech %d, s LOD %d %s; import tvrz.glb Rybnik_lhota_voda LOD %s" % [n, chyby.size(), str(chyby.slice(0, 6)), imp])
+
+
 func _ryb_vznaseni() -> void:
 	var tol := float(sv.pasma()["voda"]["ryb_kraj_tolerance_m"])
 	var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")

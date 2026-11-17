@@ -1610,6 +1610,8 @@
    "celo_vyska_m": 0.9,
    "zacatek_m": 0.5,
    "celo_sirka_m": 2.4,
+   "kridlo_m": 1.6,
+   "_kridlo_m": "délka křídla čela 45° (dřív číslo v kraj.ryb2_predmety); test smyslu preliv_vypust: přeliv s obrubou nesmí zasahovat do zdi čela ani křídel",
    "tune_polomer_m": 1.0,
    "tune_hloubka_m": 0.5,
    "trouba_prumer_m": 0.3,
@@ -6164,7 +6166,8 @@
   "mlyn/dil/s_toku",
   "mlyn/dil/zdroj",
   "prikop/hladina_y",
-  "mlyn/dil/odpad_za_dilem_m", "rybnik_lhota/pozerak/lavka_kuly_po_m", "rybnik_lhota/pozerak/kul_zapust_m", "rybnik_lhota/preliv/dlazba"
+  "mlyn/dil/odpad_za_dilem_m", "rybnik_lhota/pozerak/lavka_kuly_po_m", "rybnik_lhota/pozerak/kul_zapust_m", "rybnik_lhota/preliv/dlazba",
+  "rybnik_lhota/vypust/kridlo_m"
  ],
  "prikop": {
   "hladina_y": -2.0,

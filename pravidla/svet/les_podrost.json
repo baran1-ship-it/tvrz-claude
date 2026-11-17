@@ -544,5 +544,12 @@
    ],
    "_p": "podrost pod zapojenými korunami (svet.gd _lesni_patro; kcd_sada2_12–15/17/19 „les = kmeny + podrost do výšky pasu, žádná louka“): u každého kazdy_strom_ker-tého lesního stromu keř nebo mladý buk drevo_od_m/ker_od_m od kmene, u každého kazdy_strom_drevo-tého pařez nebo hromada klestí (hromada_klesti větví u sebe); jen kde je les (svet._les, maska stanoviště kroku 5+7) ≥ les_od – tam louka nedává trávu (trava.v_zapoji), houština ji nahrazuje (rozbor_gpu_15_11.md K11). Kapradí a byliny dává louka (podrost) a svet._lesni_puda."
   }
+ },
+ "dalka": {
+  "popis": "Vegetace v dálce (Míša 17. 11., tablet 0.9999991, tabulka misa_17_11_chyby r. 8: „impostory v dálce a taky pro křoví, protože z dálky není vidět a pak se objeví“). Keř (shrub_02, bez_cerny) se kreslí jako 3D jen do konce svého dosahu (svet._plants: tablet 40 m, PC 50/70/95 m podle kvality) – dál dřív nebylo nic a keř ve 40 m naskočil. Nově od tohoto konce impostor keře (blender/impostory.py DRUHY_KERE → obrazky/impostory/kere.json, 1 čtverec = 2 troj. na keř, MultiMesh po druhu × buňce svet.IMP_BUNKA) s prolnutím ditherem (shaders/impostor.gdshader fade_od až fade_od + fade_pas) a postupným zánikem do kere_do_m (dither posledních 60 m). Stromy: impostory končily na svet.IMP_DOHLED 900 m, kdežto les za okrajem mapy (obzor) až do 2 500 m – uvnitř mapy byl dál než 900 m holý terén před zalesněným obzorem; dosah stromů = stromy_do_m, obzor obzor_do_m (vrchol vrcholů i fragmentů stejný, buňky 1 024 m nemají visibility_range – vzdálené impostory se kreslily i dřív, jen se zahodily v fragmentu).",
+  "kere_do_m": 0.0,
+  "kere_prolinani_m": 10.0,
+  "stromy_do_m": 900.0,
+  "obzor_do_m": 2500.0
  }
 }
