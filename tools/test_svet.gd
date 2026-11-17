@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "hladiny_lod", "teren_svy", "kryti_otisk", "cesta_skoky", "sklep_vstup", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400", "houby_na_zemi", "clona_vsi", "houstina_volno"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "hladiny_lod", "teren_svy", "kryti_otisk", "cesta_skoky", "sklep_vstup", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400", "houby_na_zemi", "clona_vsi", "houstina_volno", "schody_vstupu"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -11115,3 +11115,54 @@ func _sklep_vstup() -> void:
 		if zl > -4.4:
 			chyby.append("y %.1f kolize %s v chodbe z %.2f" % [h, jm, zl])
 	_vysledek("sklep_vstup", chyby.is_empty(), "%s u %s; %s" % [str(chyby), str(xf.origin.snapped(Vector3.ONE * 0.1)), "; ".join(radky)])
+
+
+## Misa 17. 11. r. 14 (snimek 21: dvere krcmy na podezdivce bez schodu, „u vsech budov“): kazdy vstup budovy (svet
+## vstupy_mereni: dvere s podlahou za prahem a terenem pred nim) s prahem vys nez nabytek.json schody_vstupu stupen_max_m
+## nad terenem ma stupne; fyzicky profil pred dvermi (paprsky dolu na kolize po 0,08 m od roviny dveri az za patu
+## stupnu) nema skok vetsi nez stupen_max_m + tolerance - dojde se po nem nahoru i dolu (hrac schod 0,45, postavy 0,28).
+func _schody_vstupu() -> void:
+	var smax := float(Pravidla.cti("nabytek", "schody_vstupu", "stupen_max_m"))
+	var hl := float(Pravidla.cti("nabytek", "schody_vstupu", "hloubka_m"))
+	var tol := 0.03
+	var space := player.get_world_3d().direct_space_state
+	var spatne: Array = []
+	var vysoko: Array = []
+	var nad := 0
+	for z: Dictionary in sv.vstupy_mereni:
+		var vy := float(z["vyska"])
+		print("SCHODY_VSTUPU %-30s (%.1f, %.1f) prah %.2f teren %.2f vyska %.2f stupnu %d" % [z["dvere"], (z["p"] as Vector3).x, (z["p"] as Vector3).z,
+				z["prah_y"], z["teren_y"], vy, z["stupnu"]])
+		if vy <= smax:
+			continue
+		if z.get("vysoko", false):
+			vysoko.append(String(z["dvere"]))
+			continue
+		nad += 1
+		if int(z["stupnu"]) < 1:
+			spatne.append("%s bez schodu (%.2f m)" % [z["dvere"], vy])
+			continue
+		var c: Vector3 = z["p"]
+		var n: Vector3 = z["n"]
+		var t := Vector3.UP.cross(n).normalized()
+		var dl := float(z["hloubka_m"]) + hl * 2.0
+		for bok: float in [-0.25, 0.0, 0.25]:
+			var y0 := float(z["prah_y"])
+			var d := 0.1
+			var nejvic := 0.0
+			while d < dl:
+				var q := c + n * d + t * bok * float(z["sirka"])
+				var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(q + Vector3(0, 0.3, 0), q - Vector3(0, 3.0, 0)))
+				if h.is_empty():
+					break
+				var y1 := float((h["position"] as Vector3).y)
+				nejvic = maxf(nejvic, y0 - y1)
+				y0 = y1
+				d += 0.08
+			if nejvic > smax + tol:
+				spatne.append("%s skok %.2f m (bok %.2f)" % [z["dvere"], nejvic, bok])
+				break
+	if not vysoko.is_empty():
+		print("SCHODY_VSTUPU nad vstup_do_m (neni vstup ze zeme, bez schodu): ", vysoko)
+	_vysledek("schody_vstupu", sv.vstupy_mereni.size() > 0 and spatne.is_empty(), "vstupu budov %d, nad %.2f m %d, se schody %d, vysoko %d, spatne %s" % [
+			sv.vstupy_mereni.size(), smax, nad, sv.schody_vstupu.size(), vysoko.size(), str(spatne.slice(0, 6))])

@@ -793,6 +793,8 @@ func build(parent: Node3D, quality: int) -> void:
 	_nabytek_budov()
 	_zamek_terenu(parent)                      # pipeline krok 4/zamek: mrizka vysek = hotova sit terenu (pred rostlinami)
 	_krok_cas("_zamek_terenu")
+	_schody_vstupu(root, parent)               # Misa 17. 11. r. 14: stupne k vysokym dverim (po budovach a zamku terenu, pred vegetaci)
+	_krok_cas("_schody_vstupu")
 	_vybaveni_na_teren()
 	_erb_tvrze(root)
 	_krok_cas("_erb_tvrze")
@@ -11394,6 +11396,188 @@ func _mlyn_zebrik(sc: Node3D, xf: Transform3D, d: Dictionary) -> void:
 	zebrik_use({"pata": pata, "vrchol": vrchol, "nastup": xf * _v3(z[2]), "sestup": xf * _v3(z[3])})
 
 
+## Schody ke vstupum budov (Misa 17. 11. r. 14, snimek 21: dvere krcmy na podezdivce 0,3-0,5 m nad zemi bez schodu -
+## „u vsech budov, co maji tak vysoko dvere, dej schody“). Jedno pravidlo nabytek.json schody_vstupu pro kazde dvere
+## a vrata z dat pohyb (tvrz, ves, krcma, kovarna, mlyn, kostel, lom): vstup budovy = na jedne strane podlaha (kolize
+## mimo teren nejvys stupen_max_m pod prahem), na druhe teren. Prah nad terenem > stupen_max_m -> stupne z otesanych
+## kvadru (zaznam schody_vstupu: dvere, prah, teren, pocet, rozmery), kolize kvadr, obrys do _schody_obrys (louka a
+## rozsev ho berou jako pudorys stavby). Krok stavby po budovach a zamku terenu, pred vegetaci; teren nemeni.
+var schody_vstupu: Array = []          # [{dvere, p (stred prahu), n (ven), prah_y, teren_y, vyska, stupnu, ...}]
+var vstupy_mereni: Array = []          # kazdy nalezeny vstup budovy (i bez schodu) - test schody_vstupu, rozbor
+var _schody_obrys: Array = []          # [inverze, AABB] obrys stupnu pro _uvnitr
+
+
+static func _je_teren(h: Dictionary) -> bool:
+	var co: Object = h.get("collider")
+	if co == null or not (co is Node):
+		return false
+	var nd := co as Node
+	return String(nd.name).to_lower().contains("teren") or (nd.get_parent() != null and String(nd.get_parent().name).to_lower().contains("teren"))
+
+
+func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
+	var t0 := Time.get_ticks_msec()
+	schody_vstupu.clear()
+	vstupy_mereni.clear()
+	_schody_obrys.clear()
+	var smax := float(Pravidla.cti("nabytek", "schody_vstupu", "stupen_max_m"))
+	var hl := float(Pravidla.cti("nabytek", "schody_vstupu", "hloubka_m"))
+	var presah := float(Pravidla.cti("nabytek", "schody_vstupu", "presah_m"))
+	var do_zdi := float(Pravidla.cti("nabytek", "schody_vstupu", "do_zdi_m"))
+	var zapust := float(Pravidla.cti("nabytek", "schody_vstupu", "zapust_m"))
+	var mer := float(Pravidla.cti("nabytek", "schody_vstupu", "mereni_m"))
+	var vmax := float(Pravidla.cti("nabytek", "schody_vstupu", "vstup_do_m"))
+	var dosah := float(Pravidla.cti("nabytek", "schody_vstupu", "dosah_m"))
+	var ps: PackedScene = load("res://modely/predmety/%s.glb" % String(Pravidla.cti("nabytek", "schody_vstupu", "model")))
+	var sit: Mesh = null
+	if ps:
+		var inst := ps.instantiate()
+		var mis := inst.find_children("*", "MeshInstance3D", true, false)
+		if not mis.is_empty():
+			sit = (mis[0] as MeshInstance3D).mesh
+		inst.free()
+	if sit == null:
+		push_error("schody vstupu: chybi model")
+		return
+	var ma := sit.get_aabb()
+	var mat: BaseMaterial3D = null
+	var om := sit.surface_get_material(0) as BaseMaterial3D
+	if om:
+		mat = om.duplicate() as BaseMaterial3D
+		mat.albedo_color = Color(1.55, 1.52, 1.45)          # zula svetle seda jako kvadry lomu (_lom_sut)
+	var space := root.get_world_3d().direct_space_state
+	var uzly := {}
+	for nd in root.find_children("Pohyb_*", "", true, false):
+		uzly[String(nd.name)] = nd
+	var dolu := func(p: Vector3, nad: float, pod: float) -> Dictionary:
+		return space.intersect_ray(PhysicsRayQueryParameters3D.create(p + Vector3(0, nad, 0), p - Vector3(0, pod, 0)))
+	var uzel := Node3D.new()
+	uzel.name = "Schody_vstupu"
+	parent.add_child(uzel)
+	var kol := StaticBody3D.new()
+	kol.name = "Schody_vstupu_kolize"
+	uzel.add_child(kol)
+	var nbloku := 0
+	for e: Dictionary in data.get("pohyb", []):
+		var nm := String(e.get("name", ""))
+		if not (String(e.get("kind", "")) in ["dvere", "vrata"] or nm.contains("dvere") or nm.contains("vrata")):
+			continue
+		var nd: Node3D = uzly.get(nm)
+		if nd == null:
+			continue
+		# obrys kridla ve svete (zavrene, jak je v modelu): prah = spodek, smer ven = nejtensi vodorovna osa
+		var bb := AABB()
+		var prvni := true
+		var osa_x := Vector3.ZERO
+		var osa_z := Vector3.ZERO
+		var tl_x := 0.0
+		var tl_z := 0.0
+		for mi: Node in [nd] + nd.find_children("*", "MeshInstance3D", true, false):
+			var m3 := mi as MeshInstance3D
+			if m3 == null or m3.mesh == null:
+				continue
+			var ab := m3.global_transform * m3.get_aabb()
+			bb = ab if prvni else bb.merge(ab)
+			if prvni:
+				var gb := m3.global_transform.basis
+				osa_x = gb.x
+				osa_z = gb.z
+				tl_x = m3.get_aabb().size.x * gb.x.length()
+				tl_z = m3.get_aabb().size.z * gb.z.length()
+			prvni = false
+		if prvni:
+			continue
+		var tenka := osa_z if tl_z < tl_x else osa_x
+		var n := Vector3(tenka.x, 0.0, tenka.z).normalized()
+		var sirka := maxf(tl_x, tl_z)
+		var c := bb.get_center()
+		var prah := bb.position.y
+		c.y = prah
+		var strany: Array = []
+		for s: float in [1.0, -1.0]:
+			strany.append(dolu.call(c + n * s * mer, 0.3, vmax + 1.0))
+		var ven := 0.0
+		var g := 0.0
+		for i in 2:
+			var h: Dictionary = strany[i]
+			var o: Dictionary = strany[1 - i]
+			if h.is_empty() or not _je_teren(h):
+				continue
+			if o.is_empty() or _je_teren(o) or float((o["position"] as Vector3).y) < prah - smax:
+				continue
+			ven = 1.0 if i == 0 else -1.0
+			g = float((h["position"] as Vector3).y)
+		if ven == 0.0:
+			continue                                    # vnitrni dvere, branka v plotu, dvere na pavlac
+		n *= ven
+		var vyska := prah - g
+		var zaznam := {"dvere": nm, "p": c, "n": n, "prah_y": prah, "teren_y": g, "vyska": vyska, "sirka": sirka, "stupnu": 0}
+		vstupy_mereni.append(zaznam)
+		if vyska <= smax:
+			continue
+		if vyska > vmax:
+			zaznam["vysoko"] = true
+			print("schody vstupu: %s prah %.2f m nad terenem > vstup_do_m - neni vstup ze zeme, nestavi se" % [nm, vyska])
+			continue
+		# lic podezdivky / zdi pod prahem: paprsek zvenku vodorovne k dverim (bez zasahu = rovina dveri)
+		var zed := 0.0
+		var hz := space.intersect_ray(PhysicsRayQueryParameters3D.create(c + n * 1.5 + Vector3(0, -smax * 0.5, 0), c - n * 0.3 + Vector3(0, -smax * 0.5, 0)))
+		if not hz.is_empty() and not _je_teren(hz):
+			zed = clampf(((hz["position"] as Vector3) - c).dot(n), 0.0, 1.0)
+		# pocet vysek z terenu u paty nejnizsiho stupne (dvakrat: s vic stupni pata dal od zdi)
+		var nv := ceili(vyska / smax)
+		for it in 2:
+			var hp: Dictionary = dolu.call(c + n * (zed + (nv - 1) * hl + hl * 0.5), 0.3, vmax + 1.0)
+			if not hp.is_empty():
+				g = minf(g, float((hp["position"] as Vector3).y))
+			vyska = prah - g
+			nv = ceili(vyska / smax)
+		var vys1 := vyska / nv
+		var t := Vector3.UP.cross(n).normalized()
+		var w := sirka + 2.0 * presah
+		var zac := zed - do_zdi
+		for k in range(1, nv):
+			var vrch := prah - k * vys1
+			var kon := zed + k * hl
+			var pod := vrch
+			for dd: float in [zac + 0.05, kon - 0.05]:
+				for ss: float in [-0.5, 0.5]:
+					var hq: Dictionary = dolu.call(c + n * dd + t * ss * w, 0.3, vmax + 1.0)
+					if not hq.is_empty() and _je_teren(hq):
+						pod = minf(pod, float((hq["position"] as Vector3).y))
+			pod -= zapust
+			var stred := c + n * ((zac + kon) * 0.5) + Vector3(0, (vrch + pod) * 0.5 - prah, 0)
+			var roz := Vector3(w, vrch - pod, kon - zac)
+			var b := Basis(t * (roz.x / ma.size.x), Vector3.UP * (roz.y / ma.size.y), n * (roz.z / ma.size.z))
+			var mi2 := MeshInstance3D.new()
+			mi2.name = "Schod_%s_%d" % [nm.trim_prefix("Pohyb_"), k]
+			mi2.mesh = sit
+			if mat:
+				mi2.material_override = mat
+			mi2.visibility_range_end = dosah
+			uzel.add_child(mi2)
+			mi2.global_transform = Transform3D(b, stred - b * ma.get_center())
+			var cs := CollisionShape3D.new()
+			var bx := BoxShape3D.new()
+			bx.size = roz
+			cs.shape = bx
+			kol.add_child(cs)
+			cs.global_transform = Transform3D(Basis(t, Vector3.UP, n), stred)
+			nbloku += 1
+		zaznam["stupnu"] = nv - 1
+		zaznam["vyska"] = vyska
+		zaznam["vyska_stupne"] = vys1
+		zaznam["zed_m"] = zed
+		zaznam["hloubka_m"] = zed + (nv - 1) * hl
+		schody_vstupu.append(zaznam)
+		var xf := Transform3D(Basis(t, Vector3.UP, n), c)
+		_schody_obrys.append([xf.affine_inverse(), AABB(Vector3(-w * 0.5, -50.0, zac), Vector3(w, 100.0, zed + (nv - 1) * hl - zac))])
+	for z: Dictionary in vstupy_mereni:
+		print("schody vstupu: %-28s (%.1f, %.1f) prah %.2f teren %.2f vyska %.2f stupnu %d" % [z["dvere"], (z["p"] as Vector3).x, (z["p"] as Vector3).z,
+				z["prah_y"], z["teren_y"], z["vyska"], z["stupnu"]])
+	print("schody vstupu: %d vstupu budov, se schody %d, kvadru %d, %d ms" % [vstupy_mereni.size(), schody_vstupu.size(), nbloku, Time.get_ticks_msec() - t0])
+
+
 ## Kolize schodu dilu (*Kol_Schody*: konvexni obal z modelu = klin, u vetrneho mlyna 56 st. nad floor_max_angle hrace -
 ## Misa 0.99 „do mlyna nemuzu vejit“) -> schody z kvadru vysky hrac.json schod_kolize_m. Horni konec klinu = strana
 ## bliz stredu modelu (schody vedou ke dverim), klin podel delsi vodorovne osy.
@@ -14764,6 +14948,10 @@ func _plants(parent: Node3D, quality: int) -> void:
 	# dil mlyna (vlastni teren, dvur, budova): zadna trava ani rozsev uvnitr ctverce dilu (jako budova)
 	if _mlyn_inv != Transform3D():
 		uvnitr.append([_mlyn_inv, AABB(Vector3(-22.0, -30.0, -25.0), Vector3(40.0, 60.0, 40.0)), "dil"])     # louka: trava z terenu dilu
+	# stupne pred vysokymi dvermi (_schody_vstupu): pudorys bez travy a rozsevu, ne strecha
+	for so: Array in _schody_obrys:
+		uvnitr.append(so)
+		_uvnitr_bez_strechy.append(so)
 	_uvnitr = uvnitr
 	_mist_obd.clear()
 	for r: Dictionary in data.get("mistnosti", []):
