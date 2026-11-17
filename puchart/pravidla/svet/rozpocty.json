@@ -141,5 +141,24 @@
     "max_troj": 70000
    }
   }
+ },
+ "zasoba_mm": {
+  "popis": "Pevná zásoba MultiMeshů pro vrstvy po buňkách (hra/scripts/zasoba_mm.gd: louka, byliny, keře, les zblízka, kameny koryt, rostliny skal, drobnosti vsi). MultiMesh má pevnou kapacitu (nejbližší vyšší třída), přestavba buňky = přepis bufferu stejné velikosti + visible_instance_count, vrácený slot se znovu použije nejdřív po stari_snimku snímcích (kruh bufferů); nad největší třídou alokace jako dřív. zapnuto false = dřívější MultiMesh.new() při každé přestavbě (A/B).",
+  "zdroj": "Havran docs/rozpracovane/rozbor_gpu_15_11.md Z4 a K5 (louka: nová alokace GPU bufferu při každé přestavbě buňky, špička 1,2 s); Godot 4.7.2 drivers/gles3/storage/mesh_storage.cpp (_multimesh_allocate_data = glGenBuffers + glBufferData, _multimesh_set_mesh s nahraným bufferem = čtení z GPU → klíč zásoby obsahuje síť); Qualcomm developer fórum (kruh bufferů pro často měněné VBO, NEOVERENO na Adreno tabletu); docs/rozpracovane/vykon_z_havrana_15_11.md P2",
+  "zapnuto": true,
+  "tridy_kapacity": [
+   64,
+   128,
+   256,
+   512,
+   1024,
+   2048,
+   4096
+  ],
+  "_tridy_kapacity": "kapacita slotu = nejmenší třída >= počet instancí (louka buňka 32 m / krok 0,5 m = nejvýš 4096 trsů; les zblízka dávky 512); odpad paměti nejvýš 2× (48 B na instanci, 64 B s custom)",
+  "stari_snimku": 3,
+  "_stari_snimku": "vrácený MultiMesh smí grafika číst ještě 2–3 snímky (fronta snímků); dřív se nepoužije",
+  "max_volnych_na_klic": 12,
+  "_max_volnych_na_klic": "strop odložených slotů na síť a třídu (paměť); přebytečný se uvolní jako dřív. NEOVERENO, kolik je potřeba na tabletu"
  }
 }

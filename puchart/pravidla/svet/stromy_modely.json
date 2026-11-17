@@ -154,5 +154,12 @@
  "pozn_jadro_stin": "Míša 10. 11. („aplikuj, co víš“): overdraw listí = hlavní brzda lesa (70 % rozlišení ≈ poloviční čas, tráva pod korunami −90 % → les p95 48,9 → 27,2). jadro_koruny: listy s těžištěm uvnitř elipsoidu koruny × 0,6 bez alfy/discard (early-Z, les.gd _jadro, LOD0); stin_proxy: stín slunce z elipsoidu koruny + kmene místo z listí (listí se nekreslí podruhé ve stínovém průchodu).",
  "pozn_pad_10_11": "Míša 10. 11.: verze s jádrem korun a stínovým tělesem padala na tabletu hned při startu (PC běží) – vypnuto; úpravy modelů za běhu (surface_get_arrays/ArrayMesh) přesunout do stavby světa (offline), ne na tablet.",
  "pozn_bunka_11_11": "LOD po stromech (blikání, 10. 11.) kreslí v pásu přechodu obě podoby celé buňky – buňka 24 m dávala v lese 3,5–4,6 M troj. (hlídač scén); 4 m a prolnutí 2 m = pod 2,1 M",
- "lod_prolnuti_m": 2.0
+ "lod_prolnuti_m": 2.0,
+ "lod_casove": {
+  "zapnuto": true,
+  "cas_s": 0.25,
+  "skok_m": 20.0,
+  "popis": "Časované prolnutí stupňů stromu (LOD0 → LOD1 v lod0_m, LOD1 → impostor v blizko_m − prechod_m/2): shader (listi, kura, impostor.gdshader lod_casove) porovná vzdálenost stromu od kamery teď a před cas_s (les.gd _kamera_pred) – překročil-li strom mez v posledních cas_s, prolne se ditheringem 0→1 za cas_s, jinak je celý v jednom stupni. Dřív doplňkový dithering po celém pásmu lod_prolnuti_m / prechod_m = stromy v pásmu kreslené 2× po celou dobu, co tam hráč stojí. Bez kopie obrazovky, žádný vzorkovač navíc (uniform kamera_pred). skok_m: pohyb kamery za snímek nad tolik = teleport, historie znovu. zapnuto false (nebo PUCHART_LOD_PASMO=1) = dřívější pásmo (A/B).",
+  "zdroj": "video Míši 16. 11. (LOD stromů a trávy: timed fade 0,25 s místo pásma podle vzdálenosti), Havran docs/rozpracovane/rozbor_gpu_15_11.md K13 (fadeTime 0,25 s, předloha docs/reference/lod_casovane_prolinani/); docs/rozpracovane/vykon_z_havrana_15_11.md „Video Míši 16. 11.“. Úspora NEOVERENO na tabletu (měřicí trasa, úsek les)."
+ }
 }

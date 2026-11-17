@@ -11,6 +11,7 @@ var useky := []
 var i_usek := 0
 var t := 0.0
 var casy := PackedFloat32Array()
+var _proc_max := 0.0   # nejdelší _process za úsek (ms, Performance.TIME_PROCESS) – špičky přestavby buněk i na PC, kde llvmpipe kreslí > 40 ms
 var kres := 0.0
 var troj := 0.0
 var vzorku := 0
@@ -65,6 +66,7 @@ func _process(d: float) -> void:
 	cam.look_at_from_position(pc[0], pc[1], Vector3.UP)
 	if t > celk - 30.0 * (1.0 if OS.get_environment("PUCHART_MERENI_RYCHLE") == "" else 2.0 / 30.0):
 		casy.append(ms)
+		_proc_max = maxf(_proc_max, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
 		kres += RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 		troj += RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
 		vzorku += 1
@@ -72,15 +74,17 @@ func _process(d: float) -> void:
 	if t >= celk:
 		var s := casy.duplicate(); s.sort()
 		var n := s.size()
-		var zas := 0
+		var zas := 0; var zas2 := 0   # záseky nad 40 ms (rozpocty.json zasek_ms) a nad 2× medián (PC: llvmpipe kreslí každý snímek nad 40 ms)
 		for x in s:
 			if x > 40.0: zas += 1
+			if x > 2.0 * s[n / 2]: zas2 += 1
 		var v := get_viewport().get_visible_rect().size * get_viewport().scaling_3d_scale   # skutečné 3D rozlišení (i varianta „les 70 %“)
 		useky.append({"jmeno": ("%s %d%%" % [u["jmeno"], roundi(float(skaly[i_sk]) * 100)]) if i_var < 0 else String(varianty[i_var]["jmeno"]), "px": "%dx%d" % [roundi(v.x), roundi(v.y)], "p50": s[n / 2], "p95": s[int(n * 0.95)], "max": s[n - 1], "zaseky": zas,
 			"snimku": n, "kresleni": kres / vzorku, "troj_m": troj / vzorku / 1e6,
+			"proc_max": _proc_max, "nad_2p50": zas2,
 			"vram_mb": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0,
 			"halda_mb": OS.get_static_memory_usage() / 1048576.0})
-		casy = PackedFloat32Array(); kres = 0; troj = 0; vzorku = 0; t = 0.0
+		casy = PackedFloat32Array(); _proc_max = 0.0; kres = 0; troj = 0; vzorku = 0; t = 0.0
 		i_usek += 1
 		if i_usek >= trasa.size() and i_sk + 1 < skaly.size():   # další rozlišení 3D, stejná trasa
 			i_sk += 1; i_usek = 0; get_viewport().scaling_3d_scale = float(skaly[i_sk])
@@ -120,9 +124,10 @@ func _konec() -> void:
 	trasa = []; set_process(false)
 	get_viewport().scaling_3d_scale = _hra_3d
 	var txt := "VÝSLEDEK %s\nvykreslování: %s\n%s\n" % [verze, vykreslovani, Time.get_datetime_string_from_system()]
-	txt += "úsek            3D px       p50   p95   max  záseky  snímků  kreslení  troj M  VRAM MB\n"
+	txt += "úsek            3D px       p50   p95   max  záseky  snímků  kreslení  troj M  VRAM MB  >2×p50  proc max\n"
 	for u in useky:
-		txt += "%-14s %-10s %5.1f %5.1f %5.0f %6d %7d %8.0f %7.2f %8.0f\n" % [u["jmeno"], u["px"], u["p50"], u["p95"], u["max"], u["zaseky"], u["snimku"], u["kresleni"], u["troj_m"], u["vram_mb"]]
+		txt += "%-14s %-10s %5.1f %5.1f %5.0f %6d %7d %8.0f %7.2f %8.0f %7d %9.1f\n" % [u["jmeno"], u["px"], u["p50"], u["p95"], u["max"], u["zaseky"], u["snimku"], u["kresleni"], u["troj_m"], u["vram_mb"], u["nad_2p50"], u["proc_max"]]
+	txt += preload("res://scripts/zasoba_mm.gd").souhrn() + "\n"   # P2: kolik MultiMeshů vzniklo / použilo se znovu
 	var f0 := FileAccess.open("user://mereni.txt", FileAccess.WRITE)   # uložit hned (Míša 12. 11.: výsledek zmizel pod nabídkou)
 	if f0: f0.store_string(txt); f0.close()
 	var f1 := FileAccess.open("user://mereni_%s.txt" % _vyk_id, FileAccess.WRITE)   # poslední výsledek každého vykreslování zvlášť – srovnání v nabídce Měření

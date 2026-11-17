@@ -16,6 +16,7 @@ var bunky := {}            # Vector2i -> MultiMeshInstance3D / null (prázdná)
 var _ceka := {}            # Vector2i -> id úlohy
 var _hotove: Array = []
 var _zamek := Mutex.new()
+const ZasobaMM := preload("res://scripts/zasoba_mm.gd")
 const ATLAS_POMER := 341.0 / 256.0   # Havran: šířka : výška buňky atlasu (3×2, 1024×512)
 
 func postav(s: Node3D, kamera: Camera3D) -> void:
@@ -127,7 +128,7 @@ func _process(_d: float) -> void:
 	for k in bunky.keys():   # uvolnit vzdálené
 		var stred := Vector2((k.x + 0.5) * B, (k.y + 0.5) * B)
 		if stred.distance_to(Vector2(p.x, p.z)) > R + B * 1.6:
-			if bunky[k] != null: bunky[k].queue_free()
+			if bunky[k] != null: ZasobaMM.vrat_strom(bunky[k]); bunky[k].queue_free()
 			bunky.erase(k)
 
 func _rozsej(k: Vector2i) -> void:
@@ -152,7 +153,7 @@ func _rozsej(k: Vector2i) -> void:
 					acc += float(pod[di])
 					if u <= acc: druh = di; break
 				var hs := rng.randf() * 0.999
-				cust.append_array([float(druh) + hs, px - cx, svet.vyska(px, pz) - 0.04, pz - cz])
+				cust.append_array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, float(druh) + hs, px - cx, svet.vyska(px, pz) - 0.04, pz - cz])   # formát MultiMesh.buffer: jednotková transformace + custom (zásoba MM)
 			x += krok
 		z += krok
 	_zamek.lock(); _hotove.append([k, cust]); _zamek.unlock()
@@ -160,15 +161,10 @@ func _rozsej(k: Vector2i) -> void:
 func _vloz(h: Array) -> void:
 	var k: Vector2i = h[0]; var cust: PackedFloat32Array = h[1]
 	if _ceka.has(k): WorkerThreadPool.wait_for_task_completion(_ceka[k]); _ceka.erase(k)
-	var n := cust.size() / 4
+	var n := cust.size() / 16
 	if n == 0: bunky[k] = null; return
 	var B := float(cfg["bunka_m"])
-	var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.use_custom_data = true; mm.mesh = _trs
-	mm.instance_count = n
-	for i in n:
-		mm.set_instance_transform(i, Transform3D.IDENTITY)
-		mm.set_instance_custom_data(i, Color(cust[4 * i], cust[4 * i + 1], cust[4 * i + 2], cust[4 * i + 3]))
-	mm.custom_aabb = AABB(Vector3(-B * 0.5 - 1, -200, -B * 0.5 - 1), Vector3(B + 2, 400, B + 2))
+	var mm := ZasobaMM.vezmi(_trs, cust, n, true, AABB(Vector3(-B * 0.5 - 1, -200, -B * 0.5 - 1), Vector3(B + 2, 400, B + 2)))
 	var mi := MultiMeshInstance3D.new(); mi.multimesh = mm; mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.position = Vector3((k.x + 0.5) * B, 0, (k.y + 0.5) * B)
 	add_child(mi); bunky[k] = mi

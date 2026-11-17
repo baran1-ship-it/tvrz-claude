@@ -8,6 +8,7 @@ extends Node3D
 ## buňka je vidět až celá (žádné díry), uvolňování až když nic nechybí. Start a skok (teleport, test) = vše hned.
 
 const Pravidla := preload("res://scripts/pravidla.gd")
+const ZasobaMM := preload("res://scripts/zasoba_mm.gd")   # pevná zásoba MultiMeshů (P2, rozpocty.json zasoba_mm)
 const DAVKA := 512                 # instancí na jeden MultiMesh (Havran rostliny_rozdel)
 
 var B := 25.0                      # m, strana buňky
@@ -100,7 +101,7 @@ func _chybi(p: Vector3) -> Array:
 func _uvolni(p: Vector3) -> void:
 	for c: Vector2i in _uzly.keys():
 		if _vzd(c, p) > R + rezerva:
-			_uzly[c].queue_free(); _uzly.erase(c); _rozest.erase(c)
+			ZasobaMM.vrat_strom(_uzly[c]); _uzly[c].queue_free(); _uzly.erase(c); _rozest.erase(c)
 
 func _vzd(c: Vector2i, p: Vector3) -> float:
 	return Vector2((c.x + 0.5) * B - p.x, (c.y + 0.5) * B - p.z).length()
@@ -130,9 +131,8 @@ func vzory() -> Array:
 			out.append_array(vyrob.call(e[0], (e[1] as PackedFloat32Array).slice(0, 12), 1))
 	return out
 
-## MultiMeshInstance3D ze sítě a bufferu instancí (12 floatů na instanci – formát MultiMesh.buffer)
+## MultiMeshInstance3D ze sítě a bufferu instancí (12 floatů na instanci – formát MultiMesh.buffer); MultiMesh ze zásoby
+## (zasoba_mm.gd: přestavba buňky = přepis bufferu, ne nová alokace na grafice), vrací se v _uvolni
 static func mmi(mesh: Mesh, buf: PackedFloat32Array, n: int) -> MultiMeshInstance3D:
-	var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = mesh
-	mm.instance_count = n; mm.buffer = buf
-	var m := MultiMeshInstance3D.new(); m.multimesh = mm
+	var m := MultiMeshInstance3D.new(); m.multimesh = ZasobaMM.vezmi(mesh, buf, n)
 	return m

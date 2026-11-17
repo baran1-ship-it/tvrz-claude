@@ -94,13 +94,32 @@ func _process(d: float) -> void:
 	var kc := get_viewport().get_camera_3d()
 	if kc:   # LOD po stromech: poloha kamery do materiálů listí, kůry a impostorů (ne global uniform – 12. 11.)
 		var kp := kc.global_position
-		for m: ShaderMaterial in _lod_mat: m.set_shader_parameter("kamera_hrace", kp)
+		var kpred := _kamera_pred(kp)
+		for m: ShaderMaterial in _lod_mat:
+			m.set_shader_parameter("kamera_hrace", kp); m.set_shader_parameter("kamera_pred", kpred)
 	_kol_cas -= d
 	if _kol_cas > 0.0 or _kr.is_empty(): return
 	_kol_cas = 0.1
 	var cam := get_viewport().get_camera_3d()
 	if cam == null: return
 	aktualizuj_kolize(cam.global_position)
+
+## Časované prolnutí LOD (stromy_modely.json lod_casove; video Míši 16. 11., Havran rozbor_gpu K13): shader porovná
+## vzdálenost stromu od kamery teď a před cas_s – oba stupně se kreslí jen cas_s po překročení meze, ne po celou dobu
+## v pásmu. Skok kamery (teleport, test) nad skok_m za snímek = historie znovu (žádné prolínání celé mapy).
+var _hist: Array = []   # [[čas s, poloha], ...] nejstarší vpředu
+func _kamera_pred(kp: Vector3) -> Vector3:
+	var lc: Dictionary = cfg.get("lod_casove", {})
+	if not bool(lc.get("zapnuto", false)): return kp
+	var t := Time.get_ticks_msec() / 1000.0; var T := float(lc.get("cas_s", 0.25))
+	if not _hist.is_empty() and ((_hist[-1][1] as Vector3).distance_to(kp) > float(lc.get("skok_m", 20.0))): _hist.clear()
+	_hist.append([t, kp])
+	while _hist.size() > 2 and float(_hist[1][0]) <= t - T: _hist.pop_front()
+	var a: Array = _hist[0]
+	if float(a[0]) >= t - T or _hist.size() < 2: return a[1]
+	var b: Array = _hist[1]   # poloha přesně v t − T (lineárně mezi dvěma záznamy)
+	var f := clampf((t - T - float(a[0])) / maxf(float(b[0]) - float(a[0]), 0.0001), 0.0, 1.0)
+	return (a[1] as Vector3).lerp(b[1], f)
 
 var _vse := false
 func aktualizuj_kolize(p: Vector3, vse := false) -> void:
@@ -153,6 +172,7 @@ func _impostory(imp: Dictionary, meta: Dictionary, bl: float, pr: float) -> void
 		m.set_shader_parameter("fade_od", bl - 8.0)   # náběh 10 m přes dithering plného stromu (bl - pr .. bl)
 		m.set_shader_parameter("fade_do", 1600.0)
 		m.set_shader_parameter("lod_daleko", Vector2(bl - pr * 0.5, pr))   # stejná mez jako LOD1, doplňkový dithering
+		m.set_shader_parameter("lod_cas", _lod_cas())
 		for bc: Vector2i in imp[d]:
 			var list: Array = imp[d][bc]
 			var mm := MultiMesh.new()
@@ -188,6 +208,9 @@ func _mesh(cesta: String) -> Mesh:
 ## Listí (převzato z Havrana svet.gd _listi_shader + shaders/listi.gdshader, Míša 3. 11.: „střapáče zblízka“):
 ## normály od středu koruny – koruna se nasvítí jako objem, ne jako jednotlivé karty; vítr; zadní strana prosvítá;
 ## alfa roste s úrovní mipmapy (řídké listí z dálky nezmizí). zanik = (od, do) rozpouštění ditheringem jako _fade.
+func _lod_cas() -> float:
+	return 1.0 if bool(cfg.get("lod_casove", {}).get("zapnuto", false)) and OS.get_environment("PUCHART_LOD_PASMO") == "" else 0.0
+
 var _listi_sh: Shader
 var _lod_mat: Array[ShaderMaterial] = []   # materiály s kamera_hrace (listí, kůra, impostory)
 var _kura_sh: Shader
@@ -206,6 +229,7 @@ func _listi(m: Mesh, od := 0.0, do_ := 0.0, strom := true, lod := Vector3.ZERO, 
 			sm.set_shader_parameter("sila_vetru", 1.0 if strom else 0.6)
 			sm.set_shader_parameter("objem", 0.65 if strom else 0.5)
 			sm.set_shader_parameter("zanik", Vector2(od, do_)); sm.set_shader_parameter("lod_mez", lod); sm.set_shader_parameter("lod_daleko", daleko)
+			sm.set_shader_parameter("lod_cas", _lod_cas())
 			mm.surface_set_material(i, sm)
 		elif om is BaseMaterial3D and lod.z > 0.5:   # kůra: LOD po stromech (kura.gdshader) + rozpouštění do dálky
 			if _kura_sh == null: _kura_sh = load("res://shaders/kura.gdshader")
@@ -213,6 +237,7 @@ func _listi(m: Mesh, od := 0.0, do_ := 0.0, strom := true, lod := Vector3.ZERO, 
 			km.set_shader_parameter("barva", b.albedo_texture); km.set_shader_parameter("tint", b.albedo_color)
 			if b.normal_enabled and b.normal_texture: km.set_shader_parameter("normala", b.normal_texture); km.set_shader_parameter("ma_normalu", true)
 			km.set_shader_parameter("zanik", Vector2(od, do_)); km.set_shader_parameter("lod_mez", lod); km.set_shader_parameter("lod_daleko", daleko)
+			km.set_shader_parameter("lod_cas", _lod_cas())
 			mm.surface_set_material(i, km)
 		elif om is BaseMaterial3D and od != do_:   # kůra: dithering jako dřív
 			var cm: BaseMaterial3D = om.duplicate(); cm.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER

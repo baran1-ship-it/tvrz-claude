@@ -22,6 +22,19 @@ uniform vec2 zanik = vec2(0.0);
 uniform vec3 lod_mez = vec3(0.0);
 uniform vec2 lod_daleko = vec2(0.0);   // (mez, prolnutí) přechodu na impostor – doplňkový dithering s impostor.gdshader
 uniform vec3 kamera_hrace;   // poloha kamery hráče – nastavuje les.gd každý snímek (12. 11.: ne global uniform – pád na tabletu při startu)
+uniform vec3 kamera_pred;   // poloha kamery hráče před lod_cas_s (les.gd) – časované prolnutí LOD (stromy_modely.json lod_casove)
+uniform float lod_cas = 0.0;   // 1 = časované prolnutí (při překročení meze krátce oba stupně), 0 = pásmo podle vzdálenosti
+// Časované prolnutí bez stavu: vzdálenost k stromu teď a před lod_cas_s (kamera_pred); překročila-li mez v tom okně,
+// podíl uplynulé doby od překročení = (d_ted − mez) / (d_ted − d_pred) (lineárně mezi polohami kamery). Stojí-li hráč,
+// strom je celý v jednom stupni (žádné trvalé dvojí kreslení v pásmu); jinak 0→1 během lod_cas_s (video Míši 16. 11., Havran K13).
+float lod_casove(float d_ted, float d_pred, float mez) {
+	bool dal = d_ted >= mez;
+	if (dal != (d_pred >= mez) && abs(d_ted - d_pred) > 0.0001) {
+		float e = clamp((d_ted - mez) / (d_ted - d_pred), 0.0, 1.0);
+		return dal ? e : 1.0 - e;
+	}
+	return dal ? 1.0 : 0.0;
+}
 varying float v_lod;
 varying float v_far;   // Puchart: jako distance_fade (min, max): průhlednost = (d − min)/(max − min); min > max = mizí s dálkou
 varying float v_ao;          // vnitrek koruny tmavsi (Misa 0.61 "placacky": koruna jako jedna plocha bez hloubky)
@@ -32,8 +45,14 @@ void vertex() {
 	v_lod = 1.0; v_far = 1.0;
 	if (lod_mez.z > 0.5) {
 		float di = length((MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz - kamera_hrace);
-		v_lod = clamp((di - (lod_mez.x - lod_mez.y * 0.5)) / max(lod_mez.y, 0.01), 0.0, 1.0);   // 0 blízko, 1 daleko
-		if (lod_daleko.y > 0.0) v_far = 1.0 - clamp((di - (lod_daleko.x - lod_daleko.y * 0.5)) / lod_daleko.y, 0.0, 1.0);
+		if (lod_cas > 0.5) {
+			float dp = length((MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz - kamera_pred);
+			v_lod = lod_casove(di, dp, lod_mez.x);
+			if (lod_daleko.y > 0.0) v_far = 1.0 - lod_casove(di, dp, lod_daleko.x);
+		} else {
+			v_lod = clamp((di - (lod_mez.x - lod_mez.y * 0.5)) / max(lod_mez.y, 0.01), 0.0, 1.0);   // 0 blízko, 1 daleko
+			if (lod_daleko.y > 0.0) v_far = 1.0 - clamp((di - (lod_daleko.x - lod_daleko.y * 0.5)) / lod_daleko.y, 0.0, 1.0);
+		}
 		bool pryc = lod_mez.z < 1.5 ? v_lod >= 1.0 : (v_lod <= 0.0 || v_far <= 0.0);
 		if (pryc) { VERTEX = vec3(0.0); }
 	}

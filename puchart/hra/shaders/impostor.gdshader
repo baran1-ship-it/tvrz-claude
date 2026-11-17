@@ -13,6 +13,19 @@ uniform float fade_od = 50.0;                 // nabeh (plny strom konci na 60 m
 uniform float fade_do = 900.0;
 uniform vec2 lod_daleko = vec2(0.0);   // jako les.gd LOD1 (mez, prolnutí): doplňkový dithering po pixelech, ne náhodný skok celého stromu
 uniform vec3 kamera_hrace;   // poloha kamery hráče – nastavuje les.gd každý snímek (12. 11.: ne global uniform – pád na tabletu při startu)
+uniform vec3 kamera_pred;   // poloha kamery hráče před lod_cas_s (les.gd) – časované prolnutí LOD (stromy_modely.json lod_casove)
+uniform float lod_cas = 0.0;   // 1 = časované prolnutí (při překročení meze krátce oba stupně), 0 = pásmo podle vzdálenosti
+// Časované prolnutí bez stavu: vzdálenost k stromu teď a před lod_cas_s (kamera_pred); překročila-li mez v tom okně,
+// podíl uplynulé doby od překročení = (d_ted − mez) / (d_ted − d_pred) (lineárně mezi polohami kamery). Stojí-li hráč,
+// strom je celý v jednom stupni (žádné trvalé dvojí kreslení v pásmu); jinak 0→1 během lod_cas_s (video Míši 16. 11., Havran K13).
+float lod_casove(float d_ted, float d_pred, float mez) {
+	bool dal = d_ted >= mez;
+	if (dal != (d_pred >= mez) && abs(d_ted - d_pred) > 0.0001) {
+		float e = clamp((d_ted - mez) / (d_ted - d_pred), 0.0, 1.0);
+		return dal ? e : 1.0 - e;
+	}
+	return dal ? 1.0 : 0.0;
+}
 uniform vec4 tint = vec4(1.0);      // odstin listi druhu (svet.TINT_LISTI) - jako plny strom
 
 const float N = 8.0;
@@ -54,7 +67,8 @@ void vertex() {
 	prah = fract(sin(dot(ic.xz + o.xz, vec2(12.9898, 78.233))) * 43758.5453);   // jen odstín stromu
 	if (lod_daleko.y > 0.0) {
 		float di = length(ic.xyz + o - kamera_hrace);
-		viditelnost = clamp((di - (lod_daleko.x - lod_daleko.y * 0.5)) / lod_daleko.y, 0.0, 1.0) * (1.0 - smoothstep(fade_do - 60.0, fade_do, dist));
+		float v = lod_cas > 0.5 ? lod_casove(di, length(ic.xyz + o - kamera_pred), lod_daleko.x) : clamp((di - (lod_daleko.x - lod_daleko.y * 0.5)) / lod_daleko.y, 0.0, 1.0);
+		viditelnost = v * (1.0 - smoothstep(fade_do - 60.0, fade_do, dist));
 		if (viditelnost <= 0.0) VERTEX = vec3(0.0);
 	} else {
 		viditelnost = smoothstep(fade_od, fade_od + 10.0, dist) * (1.0 - smoothstep(fade_do - 60.0, fade_do, dist));
