@@ -35,6 +35,8 @@ var usl := PackedInt32Array()         # uzel stavby -> sloupec
 var NU := 0                           # uzlů staveb
 var dvere: Array = []                 # [{jm, p: Vector3}] – uzly id NB + NU + i
 var dv_bliz: Dictionary = {}          # uzel -> [indexy dveří]
+var lezeni: Dictionary = {}           # uzel žebříku -> [uzel na druhém konci] (hlavni.zebriky – lezení, ne chůze)
+var n_zebriku := 0
 var stav := PackedByteArray()
 var rev: Dictionary = {}              # cíl -> [zdroje] (hrany přes stavby a dveře; terén se počítá znovu)
 var diry: Array = []
@@ -78,6 +80,7 @@ func spust(h: Node, p: CharacterBody3D) -> Dictionary:
 	_sloupce()
 	var t2 := Time.get_ticks_msec()
 	_dvere()
+	_zebriky()
 	stav.resize(NB + NU + dvere.size())
 	var starty := _starty()
 	_ladit = OS.get_environment("PUCHART_DOSAH_LADIT") != ""
@@ -89,9 +92,11 @@ func spust(h: Node, p: CharacterBody3D) -> Dictionary:
 	for i in dvere.size():
 		if OS.get_environment("PUCHART_DOSAH_LADIT") != "" and String(dvere[i]["jm"]) in OS.get_environment("PUCHART_DOSAH_DVERE").split(","): print("DOSAH ladění dveře ", dvere[i], " uzly ", dv_bliz.get(NB + NU + i, []).map(func(u: int) -> Vector3: return _poz(u)))
 	if OS.get_environment("PUCHART_DOSAH_LADIT") != "":
+		for i in dvere.size():   # žebříky: uzly a jejich sousedé (chůze do dvere_r_m)
+			if String(dvere[i]["jm"]).begins_with("zebrik/"): print("DOSAH ladění ", dvere[i]["jm"], " ", dvere[i]["p"], " sousedé ", dv_bliz.get(NB + NU + i, []).map(func(u: int) -> Vector3: return _poz(u)))
 		hl.svet.kolize_do_m = kdo; hrac.set_physics_process(true)
 		return {"chyby": ["jen ladění"]}
-	print("DOSAH mřížka %d × %d (%.1f m, u staveb %.1f m), základních buněk se stavbou %d, uzlů staveb %d, dveří a bodů tras %d, startů %d; příprava %d + %d ms" % [NBX, NBZ, kb, kf, slozite.count(1), NU, dvere.size(), starty.size(), t1 - t0, t2 - t1])
+	print("DOSAH mřížka %d × %d (%.1f m, u staveb %.1f m), základních buněk se stavbou %d, uzlů staveb %d, dveří, bodů tras a žebříků %d (žebříků %d), startů %d; příprava %d + %d ms" % [NBX, NBZ, kb, kf, slozite.count(1), NU, dvere.size(), n_zebriku, starty.size(), t1 - t0, t2 - t1])
 	_dopredu(starty)
 	var t3 := Time.get_ticks_msec()
 	_zpet(starty)
@@ -259,6 +264,21 @@ func _dvere() -> void:
 					for pp in [pred, pred2]:   # s předchozím a ob jeden (bod posunutý od zdi nemusí být na cestě)
 						if pp >= 0: dv_bliz.get_or_add(id, []).append(pp); dv_bliz.get_or_add(pp, []).append(id)
 					pred2 = pred; pred = id
+
+## žebříky z dat (hlavni.zebriky: mista.json modely.zebriky domů, celky zebrik – zebriky.gd): dolní uzel na podlaze u nástupu,
+## horní na podlaze u sestupu, spojené lezením oběma směry (hrac.chyt_zebrik); s mřížkou chůzí jako dveře (do dvere_r_m)
+func _zebriky() -> void:
+	if not cfg.get("zebriky", true) or hl.get("zebriky") == null: return
+	for zb: Dictionary in hl.zebriky:
+		var konce: Array = []
+		for k in ["nastup", "sestup"]:
+			var q: Vector3 = zb[k]; var pb := Vector3.INF
+			for yy in _patra(q.x, q.z, q.y + 1.0):
+				if absf(yy - q.y) <= float(cfg["shoda_patra_m"]) and (pb == Vector3.INF or absf(yy - q.y) < absf(pb.y - q.y)): pb = Vector3(q.x, yy, q.z)
+			if pb == Vector3.INF: pb = q   # podlaha bez kapsle (nízká půda): uzel v bodě dat, s mřížkou ho spojí chůze do dvere_r_m
+			konce.append(_pridej_bod("zebrik/%s/%s" % [zb.get("nazev", "Žebřík"), k], pb, Vector3.ZERO, false))
+		lezeni.get_or_add(konce[0], []).append(konce[1]); lezeni.get_or_add(konce[1], []).append(konce[0])
+		n_zebriku += 1
 
 ## uzel navíc (dveře, bod trasy) spojený chůzí s uzly mřížky do dvere_r_m (výškově do dvere_dy_m)
 func _pridej_bod(jm: String, p: Vector3, nn: Vector3, je_dvere: bool) -> int:
@@ -438,6 +458,8 @@ func _hrany(u: int) -> Array:
 				var c := _jdi(pu, Vector2(x0 + (nb % NBX) * kb, z0 + (nb / NBX) * kb))
 				if c != Vector3.INF and c.y != -INF and absf(c.y - hb[nb]) <= 2.0 * float(cfg["shoda_patra_m"]): out.append(nb); rev.get_or_add(nb, []).append(u)
 				elif c != Vector3.INF and c.y == -INF and diry.size() < 1000: diry.append({"x": snappedf(c.x, 0.1), "z": snappedf(c.z, 0.1), "od_y": snappedf(pu.y, 0.1)})
+	for z_ in lezeni.get(u, []):   # žebřík: lezení nahoru / dolů (bez chůze)
+		out.append(z_); rev.get_or_add(z_, []).append(u)
 	for dv in dv_bliz.get(u, []):   # dveře (uzel ↔ střed křídla, přes bod před otvorem na straně výchozího uzlu – rovně do otvoru)
 		var p2 := _poz(dv)
 		var tc := float(cfg["bod_tolerance_m"]) if dv >= NB + NU else 0.15
@@ -462,13 +484,26 @@ func _jdi_dvermi(p: Vector3, dv: int, cil: Vector2, k_dverim: bool, tol_cil: flo
 func _na_okraji(u: int) -> void:
 	if (stav[u] & OKRAJ) == 0: stav[u] |= OKRAJ; okraj.append(u)
 
+var _odkud := PackedInt32Array()   # rozbor (PUCHART_DOSAH_ODKUD="x,z"): předchůdce uzlu při rozlévání – cesta od startu
 func _dopredu(starty: Array) -> void:
 	var fr := PackedInt32Array(); var h := 0
+	var sl := OS.get_environment("PUCHART_DOSAH_ODKUD") != ""
+	if sl: _odkud.resize(stav.size()); _odkud.fill(-1)
 	for s in starty: stav[s] |= DOSAZENO; fr.append(s)
 	while h < fr.size():
 		var u := fr[h]; h += 1
 		for v in _hrany(u):
-			if (stav[v] & DOSAZENO) == 0: stav[v] |= DOSAZENO; fr.append(v)
+			if (stav[v] & DOSAZENO) == 0:
+				stav[v] |= DOSAZENO; fr.append(v)
+				if sl: _odkud[v] = u
+	if sl:
+		var c := OS.get_environment("PUCHART_DOSAH_ODKUD").split_floats(",")
+		var nej := -1; var nd := INF
+		for u in range(NB, stav.size()):
+			if stav[u] & DOSAZENO and Vector2(_poz(u).x - c[0], _poz(u).z - c[1]).length() < nd: nd = Vector2(_poz(u).x - c[0], _poz(u).z - c[1]).length(); nej = u
+		var cesta: Array = []
+		while nej >= 0 and cesta.size() < 60: cesta.append(_poz(nej)); nej = _odkud[nej]
+		print("DOSAH odkud ", cesta)
 
 func _zpet(starty: Array) -> void:
 	var fr := PackedInt32Array(); var h := 0

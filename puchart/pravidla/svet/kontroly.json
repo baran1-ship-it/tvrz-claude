@@ -537,14 +537,13 @@
  "zed_nad_strechou_max": 20,
  "zed_nad_strechou_pozn": "test smyslu zed_nad_strechou: vrcholy zdiva nad šikmou střechou, nekryté jinou střechou (10. 11.: před opravou 599, po 12 – líc zdi pod stříškou pavlače)",
  "cesty_sit": {
-  "popis": "test smyslu cesty_souvislost (plán 17. 11. B2, Havran: síť cest jako graf): osy cest a pěšin pravidla/svet/cesty_puchart.json jako graf – dvě cesty jsou spojené, když se osy (zhuštěné po zhusteni_m) dotknou do dotyk_m, nebo konec jedné leží do spoj_konce_m od druhé (pravidlo spojek nastroje/cesty.py: 1,5–25 m, mimo spojky_vynechat), konce u téhož mostu (voda_hra.json mosty u_bodu do most_r_m) a u nástupů hradních mostů (hra/data/nastupy_mostu.json do hrad_r_m – hrady jsou propojené, cesta vede skrz). Počet souvislých komponent ≤ komponent_max, odtržené kusy se vypíší s polohou nejbližšího místa k hlavní síti. Mapa (hra/data/cesty_graf.json) musí být jedna komponenta.",
+  "popis": "test smyslu cesty_souvislost (plán 17. 11. B2, Havran: síť cest jako graf): osy cest a pěšin pravidla/svet/cesty_puchart.json jako graf – dvě cesty jsou spojené, když se osy (zhuštěné po zhusteni_m) dotknou do dotyk_m, nebo konec jedné leží u druhé podle pravidla spojek nastroje/cesty.py (cesty_puchart.json spojky_pravidlo: do max_m, přes potok do brod_max_m; mimo spojky_vynechat); propojky odtržených kusů jsou osy cest (cesty_puchart.json propojky, nastroje/pesiny_k_mistum.py --propojky), konce u téhož mostu (voda_hra.json mosty u_bodu do most_r_m) a u nástupů hradních mostů (hra/data/nastupy_mostu.json do hrad_r_m – hrady jsou propojené, cesta vede skrz). Počet souvislých komponent ≤ komponent_max, odtržené kusy se vypíší s polohou nejbližšího místa k hlavní síti. Mapa (hra/data/cesty_graf.json) musí být jedna komponenta.",
   "zhusteni_m": 5.0,
   "dotyk_m": 2.5,
-  "spoj_konce_m": 25.0,
   "most_r_m": 15.0,
   "hrad_r_m": 15.0,
-  "komponent_max": 11,
-  "pozn_komponent": "17. 11. stav 11 komponent (hlavní údolní síť + 10 odtržených kusů, docs/chyby.md 386) – mez = dnešní stav, nový odtržený kus = CHYBA; po napojení kusů snížit",
-  "zdroj": "nastroje/cesty.py (spojky 1,5–25 m), nastroje/cesty_graf.py (slouceni_m 2,5, spoj_konce_m), plán docs/rozpracovane/plan_z_reserse_17_11.md B2"
+  "komponent_max": 1,
+  "pozn_komponent": "17. 11. dopoledne 11 komponent (chyby.md 388); po napojení (brody do 32 m u konců OSM úseků na potocích – údolní cesta Kouteckého potoka spojila síť ostrohu s údolní, propojky 19–20, studánka, 23–4) jedna síť – nový odtržený kus = CHYBA",
+  "zdroj": "nastroje/cesty.py (spojky cesty_puchart.json spojky_pravidlo), nastroje/cesty_graf.py (slouceni_m 2,5, spoj_konce_m), plán docs/rozpracovane/plan_z_reserse_17_11.md B2"
  }
 }

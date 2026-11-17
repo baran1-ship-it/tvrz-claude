@@ -89,6 +89,8 @@
   "bod_tolerance_m": 0.6,
   "bod_tolerance_pozn": "k bodu trasy a do dveří stačí dojít na tolik (test průchodu: bod do 0,6 m vodorovně, test_pruchod.gd) – body u zdi kapsle r 0,3 přesně netrefí",
   "trasy_jako_uzly": true,
+  "zebriky": true,
+  "zebriky_pozn": "žebříky z dat (hlavni.zebriky: mista.json modely.zebriky domů, celky zebrik – zebriky.gd) jsou dva uzly navíc (podlaha u nástupu a u sestupu) spojené lezením oběma směry; s mřížkou chůzí do dvere_r_m jako dveře (chyby.md 390: půdy domů vsi bez přístupu – test nelezl)",
   "trasy_pozn": "body tras průchodu (hra/data/pruchody*.json) jsou uzly navíc spojené chůzí s předchozím bodem trasy a s buňkami do dvere_r_m – úzké schody a průlezy (pod 1 m) mřížka mine; trasy samy prochází test průchodu",
   "ostrov_min_uzlu": 6,
   "vypis_max": 25,

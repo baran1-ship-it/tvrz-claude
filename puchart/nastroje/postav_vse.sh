@@ -71,3 +71,6 @@ python3 $K/nastroje/topeni_modely.py $K && python3 $K/nastroje/topeni_trasy.py $
 # pak znovu vrata do hra/data/pohyb_mista.json (uzly *_Dvere_* stodol) a import
 [ -x /opt/bl/bin/python ] && /opt/bl/bin/python $K/blender/stodoly.py $K && python3 $K/nastroje/pohyb_mista.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)
 [ -x /opt/bl/bin/python ] && [ ! -f $K/hra/modely/predmety_h/kovadlina_1393.glb ] && /opt/bl/bin/python $K/blender/kovadlina.py $K --prac $B/kovadlina && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)   # kovadlina 1393 (Míša 15. 11., KCD2) – jen když chybí, ~50 min Cycles
+# sdílené textury předmětů pískoviště (Míša 17. 11.) až po všech, kdo do predmety_h zapisují glb (předměty Havrana, stodoly,
+# kovadlina): jedna textura podle obsahu v predmety_h/tex, pak pravidla importu (rozpocty.json textury_vram) a import
+python3 $K/nastroje/stromy_sdilene_textury.py $K/hra/modely/predmety_h $K/hra && python3 $K/nastroje/import_velikost.py $K && (cd $K/hra && $G --headless --import > /dev/null 2>&1 || true)

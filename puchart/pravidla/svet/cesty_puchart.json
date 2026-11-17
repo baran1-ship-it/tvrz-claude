@@ -68,6 +68,57 @@
    "pozn_11_11": "Míša 11. 11.: „nemůžeme vykopat půl kopce, abychom měli dálnici, jsme ve středověku, chodilo se podle terénu“; „nahoru dolů je to v pořádku, ale velký sklon do boku by nedával smysl… samozřejmě lehce“ – podélně podle terénu (max_uprava_m), napříč jen lehce srovnat (max_uprava_napric_m; vozová ve svahu = polovina zářez, polovina násyp). Výjimka: doložené nájezdy k mostům."
   }
  },
+ "spojky_pravidlo": {
+  "popis": "spojky nastroje/cesty.py: volný konec cesty min_m–max_m od jiné cesty se s ní spojí rovným úsekem; přes potok (střed spojky do brod_tok_m od osy toku = brod: jen povrch, terén a koryto beze změny) až do brod_max_m; ne u mostu (střed do most_m) a u nástupu mostu (konec do nastup_m). Test smysl:cesty_souvislost bere totéž pravidlo.",
+  "min_m": 1.5,
+  "max_m": 25.0,
+  "brod_max_m": 32.0,
+  "brod_tok_m": 8.0,
+  "most_m": 15.0,
+  "nastup_m": 8.0,
+  "zdroj": "Míša 9. 11. (chyby.md 134: „na spoustě míst je cesta přerušená travou“ – konce úseků OSM u potoků); brod_max_m 17. 11. (chyby.md 388): OSM úseky končí u potoka na obou březích, mezery 26,6–30,6 m (osm_track_0–1–2 údolní cesta Kouteckého potoka, vojenská mapa 1:25 000 docs/reference/misa_12_11/vojenska_mapa.jpg; osm_track_2–34, osm_path_10, osm_track_20–21, osm_track_27, udoli_440_7–8) – všechny přes tok; nejbližší delší konec bez toku 32,9 m (osm_track_22) se nespojí"
+ },
+ "propojky": [
+  {
+   "id": "propojka_osm19_osm20",
+   "od": [
+    "osm_track_19",
+    -1
+   ],
+   "do": [
+    "osm_track_20",
+    0
+   ],
+   "jistota": "NAVRH podle OSM way 368171601 (jeden track od Olšovce na západ; osm_track_19, 20, 21 jsou jeho kusy, úsek 96 m podél potoka při převzetí OSM 5. 11. vypadl) – pěšina podle terénu (nastroje/pesiny_k_mistum.py --propojky)",
+   "zdroj": "docs/reference/osm_cesty_2026-11-05.json (way 368171601), chyby.md 388"
+  },
+  {
+   "id": "propojka_studanka",
+   "od": {
+    "cesta": "osm_track_16"
+   },
+   "do": [
+    "k_studanka",
+    -1
+   ],
+   "jistota": "NAVRH (lesní studánka na průchozí pěšině: od nejbližší cesty sítě dál ke studánce – osm_track_16, 93 m, převýšení 13 m; dřív k ní vedla jen pěšina od osm_track_4, který se se sítí potkává až za okrajem výseku); k_mistu: vede k místu (při hledání polohy místa se nepočítá, konec u místa se nespojuje)",
+   "zdroj": "chyby.md 388; Míša 16. 11. (vyšlapaná pěšina ke studánce)",
+   "k_mistu": "studanka"
+  },
+  {
+   "id": "propojka_osm23_osm4",
+   "od": [
+    "osm_track_23",
+    0
+   ],
+   "do": [
+    "osm_track_4",
+    0
+   ],
+   "jistota": "NAVRH podle OSM: way 376828533 (osm_track_23, žlutá KČT zluta_16) a way 215802549 (osm_track_4) se potkávají 14–24 m za severním okrajem výseku u (−527; −1121) – ve hře (hranice světa) by kusy zůstaly oddělené; propojka uvnitř výseku sleduje jejich spojení",
+   "zdroj": "docs/reference/osm_cesty_2026-11-05.json, docs/reference/osm_zluta_kct_2960811.json, chyby.md 388"
+  }
+ ],
  "cesty": [
   {
    "id": "hlavni_kyzlirov",
@@ -21699,6 +21750,394 @@
    "max_nasyp_m": 0.0,
    "max_uprava_m": 0.03,
    "max_pricny": 0.037
+  },
+  {
+   "id": "propojka_osm19_osm20",
+   "typ": "pesina",
+   "propojka": true,
+   "jistota": "NAVRH podle OSM way 368171601 (jeden track od Olšovce na západ; osm_track_19, 20, 21 jsou jeho kusy, úsek 96 m podél potoka při převzetí OSM 5. 11. vypadl) – pěšina podle terénu (nastroje/pesiny_k_mistum.py --propojky)",
+   "osa": [
+    [
+     -661.73,
+     591.81
+    ],
+    [
+     -664.14,
+     590.61
+    ],
+    [
+     -666.38,
+     588.62
+    ],
+    [
+     -668.5,
+     586.5
+    ],
+    [
+     -670.8,
+     584.59
+    ],
+    [
+     -673.33,
+     582.97
+    ],
+    [
+     -675.74,
+     581.19
+    ],
+    [
+     -677.9,
+     579.1
+    ],
+    [
+     -680.02,
+     576.98
+    ],
+    [
+     -682.26,
+     575.0
+    ],
+    [
+     -684.6,
+     573.11
+    ],
+    [
+     -686.87,
+     571.15
+    ],
+    [
+     -689.19,
+     569.25
+    ],
+    [
+     -691.52,
+     567.37
+    ],
+    [
+     -693.69,
+     565.31
+    ],
+    [
+     -695.82,
+     563.18
+    ],
+    [
+     -697.94,
+     561.06
+    ],
+    [
+     -700.06,
+     558.94
+    ],
+    [
+     -702.18,
+     556.82
+    ],
+    [
+     -704.3,
+     554.7
+    ],
+    [
+     -706.42,
+     552.58
+    ],
+    [
+     -708.54,
+     550.46
+    ],
+    [
+     -710.67,
+     548.33
+    ],
+    [
+     -712.79,
+     546.22
+    ],
+    [
+     -715.11,
+     544.32
+    ],
+    [
+     -717.44,
+     542.43
+    ],
+    [
+     -719.63,
+     540.37
+    ],
+    [
+     -721.75,
+     538.25
+    ],
+    [
+     -723.87,
+     536.13
+    ],
+    [
+     -725.87,
+     533.9
+    ],
+    [
+     -727.65,
+     531.5
+    ],
+    [
+     -728.72,
+     528.7
+    ],
+    [
+     -729.31,
+     523.62
+    ]
+   ],
+   "delka_m": 97,
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1,
+   "max_uprava_m": 0.3,
+   "max_pricny": 0.446
+  },
+  {
+   "id": "propojka_studanka",
+   "typ": "pesina",
+   "propojka": true,
+   "k_mistu": "studanka",
+   "jistota": "NAVRH (lesní studánka na průchozí pěšině: od nejbližší cesty sítě dál ke studánce – osm_track_16, 93 m, převýšení 13 m; dřív k ní vedla jen pěšina od osm_track_4, který se se sítí potkává až za okrajem výseku); k_mistu: vede k místu (při hledání polohy místa se nepočítá, konec u místa se nespojuje)",
+   "osa": [
+    [
+     -395.35,
+     -926.47
+    ],
+    [
+     -397.76,
+     -928.16
+    ],
+    [
+     -400.64,
+     -928.96
+    ],
+    [
+     -403.56,
+     -929.56
+    ],
+    [
+     -406.1,
+     -931.13
+    ],
+    [
+     -408.23,
+     -933.23
+    ],
+    [
+     -410.35,
+     -935.35
+    ],
+    [
+     -412.48,
+     -937.48
+    ],
+    [
+     -414.9,
+     -939.22
+    ],
+    [
+     -417.78,
+     -939.98
+    ],
+    [
+     -420.76,
+     -940.29
+    ],
+    [
+     -423.44,
+     -941.59
+    ],
+    [
+     -425.63,
+     -943.63
+    ],
+    [
+     -427.86,
+     -945.63
+    ],
+    [
+     -430.6,
+     -946.8
+    ],
+    [
+     -433.57,
+     -947.2
+    ],
+    [
+     -436.54,
+     -947.65
+    ],
+    [
+     -439.52,
+     -948.0
+    ],
+    [
+     -442.52,
+     -948.0
+    ],
+    [
+     -445.52,
+     -948.0
+    ],
+    [
+     -448.52,
+     -948.0
+    ],
+    [
+     -451.5,
+     -948.23
+    ],
+    [
+     -454.36,
+     -949.12
+    ],
+    [
+     -457.25,
+     -949.9
+    ],
+    [
+     -460.25,
+     -950.0
+    ],
+    [
+     -463.25,
+     -950.0
+    ],
+    [
+     -466.25,
+     -950.0
+    ],
+    [
+     -469.2,
+     -950.43
+    ],
+    [
+     -471.81,
+     -951.87
+    ],
+    [
+     -473.97,
+     -953.95
+    ],
+    [
+     -476.53,
+     -955.49
+    ],
+    [
+     -479.4,
+     -956.33
+    ],
+    [
+     -482.38,
+     -956.61
+    ],
+    [
+     -484.44,
+     -954.54
+    ]
+   ],
+   "delka_m": 98,
+   "max_rez_m": 0.0,
+   "max_nasyp_m": 0.0,
+   "max_uprava_m": 0.23,
+   "max_pricny": 0.204
+  },
+  {
+   "id": "propojka_osm23_osm4",
+   "typ": "pesina",
+   "propojka": true,
+   "jistota": "NAVRH podle OSM: way 376828533 (osm_track_23, žlutá KČT zluta_16) a way 215802549 (osm_track_4) se potkávají 14–24 m za severním okrajem výseku u (−527; −1121) – ve hře (hranice světa) by kusy zůstaly oddělené; propojka uvnitř výseku sleduje jejich spojení",
+   "osa": [
+    [
+     -581.28,
+     -1098.48
+    ],
+    [
+     -578.36,
+     -1098.09
+    ],
+    [
+     -575.36,
+     -1098.0
+    ],
+    [
+     -572.36,
+     -1098.0
+    ],
+    [
+     -569.36,
+     -1098.0
+    ],
+    [
+     -566.36,
+     -1098.0
+    ],
+    [
+     -563.36,
+     -1098.0
+    ],
+    [
+     -560.36,
+     -1098.0
+    ],
+    [
+     -557.36,
+     -1098.0
+    ],
+    [
+     -554.36,
+     -1098.0
+    ],
+    [
+     -551.36,
+     -1098.0
+    ],
+    [
+     -548.36,
+     -1098.0
+    ],
+    [
+     -545.36,
+     -1098.0
+    ],
+    [
+     -542.36,
+     -1098.0
+    ],
+    [
+     -539.36,
+     -1098.0
+    ],
+    [
+     -536.36,
+     -1098.0
+    ],
+    [
+     -533.36,
+     -1098.0
+    ],
+    [
+     -530.36,
+     -1098.0
+    ],
+    [
+     -527.36,
+     -1098.0
+    ],
+    [
+     -522.85,
+     -1097.23
+    ]
+   ],
+   "delka_m": 58,
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1,
+   "max_uprava_m": 0.14,
+   "max_pricny": 0.063
   }
  ],
  "vysledek": {
@@ -22164,6 +22603,30 @@
    "max_nasyp_m": 0.0,
    "max_pricny": 0.037,
    "max_uprava_m": 0.03,
+   "podle_terenu": true
+  },
+  "propojka_osm19_osm20": {
+   "delka_m": 97,
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.446,
+   "max_uprava_m": 0.3,
+   "podle_terenu": true
+  },
+  "propojka_studanka": {
+   "delka_m": 98,
+   "max_rez_m": 0.0,
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.204,
+   "max_uprava_m": 0.23,
+   "podle_terenu": true
+  },
+  "propojka_osm23_osm4": {
+   "delka_m": 58,
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.063,
+   "max_uprava_m": 0.14,
    "podle_terenu": true
   }
  },

@@ -19,3 +19,6 @@ for d in $T/davka_*; do
   (cd $T && timeout 1200 $G --headless --path . -s ex.gd -- pk/*.pck 2>&1 | grep -c "^ID")
 done
 rm -rf $T; ls $K/hra/modely/predmety_h/*.glb | wc -l
+# sdílené textury předmětů (Míša 17. 11.: „uprav i pískoviště“; stejné textury Havrana 43× a 126× pod různými cestami):
+# jednou podle obsahu do predmety_h/tex/<hash>, glb odkazují uri (nastroje/stromy_sdilene_textury.py, import nastroje/import_velikost.py)
+python3 $K/nastroje/stromy_sdilene_textury.py $K/hra/modely/predmety_h $K/hra

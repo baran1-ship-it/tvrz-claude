@@ -6,7 +6,8 @@ koryta toků a stavby jsou drahé – pěšina obchází, potok překročí jen 
 pristup.cesty, konec v bodě pristup.bod (hra/data/zajimava_mista.json z nastroje/zajimava_mista.py).
 Pořadí: zajimava_mista.py (poloha místa) → tento nástroj → cesty.py … → zajimava_mista.py (místo stojí, pěšina vede k němu;
 zajimava_mista.py hlásí ZAJIMAVA_POZOR, když se místo posune a pěšina k němu nevede).
-  python3 nastroje/pesiny_k_mistum.py <K> <vysek_prefix (build/vysek1m_kor)>"""
+  python3 nastroje/pesiny_k_mistum.py <K> <vysek_prefix (build/vysek1m_kor)> [--propojky]
+--propojky: jen propojky odtržených kusů sítě (cesty_puchart.json propojky, chyby.md 388), pěšiny k místům beze změny."""
 import sys, os, json, math, heapq
 import numpy as np
 from scipy.spatial import cKDTree
@@ -31,14 +32,8 @@ MS = json.load(open(K + "/hra/data/mista_stavby.json"))
 KS = cKDTree(np.array([p for q in MS["pudorysy"] for p in q] + [[s["x"], s["z"]] for s in MS["stavby"]]))
 dily = [p for m in Z["mista"] for q in m["dily"] for z in q.get("zabor", []) for p in hust(z + z[:1], 0.5)]
 KZ = cKDTree(np.array(dily)) if dily else None
-C["cesty"] = [c for c in C["cesty"] if not c.get("k_mistu")]
-for m in Z["mista"]:
-    pr = m.get("pristup")
-    if not pr: continue
-    osy = [hust(np.array(c["osa"])[:, :2]) for c in C["cesty"] if c["typ"] in pr["cesty"] and c.get("osa") and not c.get("jen_maska")]
-    kd = cKDTree(np.vstack(osy)); cil = np.array(pr["bod"], float)
-    _, i = kd.query(cil); st = kd.data[i]
-    # A* v okně kolem úsečky začátek–cíl (okraj PR.okno_m)
+def astar(st, cil):
+    """osa pěšiny A* nad terénem od st k cil (vyhlazená, krok PR.krok_m) nebo None"""
     ok = PR["okno_m"]; x0 = int(min(st[0], cil[0]) - ok - xh0); x1 = int(max(st[0], cil[0]) + ok - xh0)
     z0 = int(min(st[1], cil[1]) - ok - zh0); z1 = int(max(st[1], cil[1]) + ok - zh0)
     x0, z0 = max(x0, 1), max(z0, 1); x1, z1 = min(x1, nx - 2), min(z1, ny - 2)
@@ -49,6 +44,7 @@ for m in Z["mista"]:
     W += (KS.query(body)[0] < PR["stavba_m"]).reshape(W.shape) * PR["stavba_prirazka"]
     if KZ is not None: W += (KZ.query(body)[0] < PR["dil_m"]).reshape(W.shape) * PR["dil_prirazka"]
     s = (int(round(st[1] - zh0)) - z0, int(round(st[0] - xh0)) - x0); g = (int(round(cil[1] - zh0)) - z0, int(round(cil[0] - xh0)) - x0)
+    s = (min(max(s[0], 0), W.shape[0] - 1), min(max(s[1], 0), W.shape[1] - 1)); g = (min(max(g[0], 0), W.shape[0] - 1), min(max(g[1], 0), W.shape[1] - 1))
     Hl = H[z0:z1 + 1, x0:x1 + 1]; dist = {s: 0.0}; prev = {}; q = [(0.0, 0.0, s)]
     while q:
         _, d, u = heapq.heappop(q)
@@ -62,7 +58,7 @@ for m in Z["mista"]:
                 L = math.hypot(di, dj); sl = abs(Hl[w] - Hl[u]) / L
                 c_ = d + L * W[w] * (1 + PR["k_sklon"] * max(0.0, sl - PR["sklon_volny"]))
                 if c_ < dist.get(w, 1e18): dist[w] = c_; prev[w] = u; heapq.heappush(q, (c_ + math.hypot(w[0] - g[0], w[1] - g[1]), c_, w))
-    if g not in prev: print("PESINA %s: cesta nenalezena" % m["id"]); continue
+    if g not in prev: return None
     cesta = [g]
     while cesta[-1] != s: cesta.append(prev[cesta[-1]])
     cesta = np.array([[c_[1] + x0 + xh0, c_[0] + z0 + zh0] for c_ in cesta[::-1]], float)
@@ -74,9 +70,45 @@ for m in Z["mista"]:
         for i_ in range(k_, len(hc) - k_): sm[i_] = hc[i_ - k_:i_ + k_ + 1].mean(0)
         hc = sm
     osa = hust(hc, PR["krok_m"]); osa[-1] = cil
+    return osa
+
+
+JEN_PROPOJKY = "--propojky" in sys.argv   # jen propojky (pěšiny k místům zůstanou, jak jsou – chyby.md 388)
+if not JEN_PROPOJKY:
+    C["cesty"] = [c for c in C["cesty"] if not c.get("k_mistu")]
+    for m in Z["mista"]:
+        pr = m.get("pristup")
+        if not pr: continue
+        osy = [hust(np.array(c["osa"])[:, :2]) for c in C["cesty"] if c["typ"] in pr["cesty"] and c.get("osa") and not c.get("jen_maska") and not c.get("propojka")]
+        kd = cKDTree(np.vstack(osy)); cil = np.array(pr["bod"], float)
+        _, i = kd.query(cil); st = kd.data[i]
+        osa = astar(st, cil)
+        if osa is None: print("PESINA %s: cesta nenalezena" % m["id"]); continue
+        dl = float(np.hypot(*np.diff(osa, axis=0).T).sum())
+        C["cesty"].append({"id": "k_" + m["id"], "typ": "pesina", "k_mistu": m["id"],
+                           "jistota": "NAVRH (Míša 16. 11.: vyšlapaná pěšina od nejbližší cesty k místu – nastroje/pesiny_k_mistum.py)",
+                           "osa": [[round(float(a), 2), round(float(b), 2)] for a, b in osa]})
+        print("PESINA k_%s: od cesty [%.1f, %.1f] k [%.1f, %.1f], %.0f m, %d bodů" % (m["id"], st[0], st[1], cil[0], cil[1], dl, len(osa)))
+
+# PROPOJKY (chyby.md 388, test smysl:cesty_souvislost): odtržené kusy sítě cest spojené pěšinou podle terénu (stejné A*) –
+# záznamy cesty_puchart.json propojky {id, od, do, jistota, zdroj}: od / do = [id cesty, index bodu osy] (konec cesty)
+# nebo {"cesta": id} = nejbližší bod osy té cesty k druhému konci. Výsledek je cesta {id, typ pesina, propojka: true, osa};
+# s k_mistu vede k zajímavému místu (končí u něj, zajimava_mista.py ji při hledání polohy nepočítá – jako k_<id>).
+def _bod(spec, druhy=None):
+    if isinstance(spec, dict):
+        o = hust(np.array(next(c for c in C["cesty"] if c["id"] == spec["cesta"])["osa"], float)[:, :2], 0.5)
+        return o[int(np.hypot(*(o - druhy).T).argmin())]
+    return np.array(next(c for c in C["cesty"] if c["id"] == spec[0])["osa"][spec[1]][:2], float)
+C["cesty"] = [c for c in C["cesty"] if not c.get("propojka")]
+for pj in C.get("propojky", []):
+    a = _bod(pj["od"]) if not isinstance(pj["od"], dict) else None
+    b = _bod(pj["do"], a) if a is not None else _bod(pj["do"])
+    if a is None: a = _bod(pj["od"], b)
+    osa = astar(a, b)
+    if osa is None: print("PROPOJKA %s: cesta nenalezena" % pj["id"]); continue
+    osa[0] = a
     dl = float(np.hypot(*np.diff(osa, axis=0).T).sum())
-    C["cesty"].append({"id": "k_" + m["id"], "typ": "pesina", "k_mistu": m["id"],
-                       "jistota": "NAVRH (Míša 16. 11.: vyšlapaná pěšina od nejbližší cesty k místu – nastroje/pesiny_k_mistum.py)",
-                       "osa": [[round(float(a), 2), round(float(b), 2)] for a, b in osa]})
-    print("PESINA k_%s: od cesty [%.1f, %.1f] k [%.1f, %.1f], %.0f m, %d bodů" % (m["id"], st[0], st[1], cil[0], cil[1], dl, len(osa)))
+    C["cesty"].append(dict({"id": pj["id"], "typ": pj.get("typ", "pesina"), "propojka": True}, **({"k_mistu": pj["k_mistu"]} if pj.get("k_mistu") else {}),
+                           jistota=pj["jistota"], osa=[[round(float(x_), 2), round(float(z_), 2)] for x_, z_ in osa]))
+    print("PROPOJKA %s: [%.1f, %.1f] → [%.1f, %.1f], %.0f m, %d bodů" % (pj["id"], a[0], a[1], b[0], b[1], dl, len(osa)))
 json.dump(C, open(CP, "w"), ensure_ascii=False, indent=1)

@@ -235,7 +235,7 @@ func _vika() -> void:
 					var n_: Vector3 = ((t[1] as Vector3) - (t[0] as Vector3)).cross((t[2] as Vector3) - (t[0] as Vector3))
 					if n_.y > 0.0: body.append_array([t[0], t[2], t[1]])   # Godot: líc po směru hodinových ručiček
 					else: body.append_array([t[0], t[1], t[2]])
-		if v.get("viditelne", false):   # záplata otvoru terénu (materiál terénu), kolize ne
+		if v.get("viditelne", false):   # záplata otvoru terénu (materiál terénu), kolize jen s kolize: true
 			var arr := []; arr.resize(Mesh.ARRAY_MAX); arr[Mesh.ARRAY_VERTEX] = body
 			var nn := PackedVector3Array()
 			for t_ in body.size(): nn.append(Vector3.UP)
@@ -243,7 +243,7 @@ func _vika() -> void:
 			var am := ArrayMesh.new(); am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 			var mi := MeshInstance3D.new(); mi.name = "Zaplata_" + String(v["misto"]); mi.mesh = am; mi.visibility_range_end = 400.0
 			mi.material_override = sv.get("mat_zem"); add_child(mi)
-			continue
+			if not v.get("kolize", false): continue   # záplata s kolizí (ústí štoly: otvor terénu i snížená kolize – chyby.md 389)
 		var sh := ConcavePolygonShape3D.new(); sh.set_faces(body); sh.backface_collision = false
 		var sb := StaticBody3D.new(); sb.name = "Viko_" + String(v["misto"]); var cs := CollisionShape3D.new(); cs.shape = sh; sb.add_child(cs); add_child(sb)
 

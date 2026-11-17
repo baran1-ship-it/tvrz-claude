@@ -46,7 +46,7 @@ OSY = {}
 for c in C["cesty"]:   # pěšiny k místům (k_mistu, nastroje/pesiny_k_mistum.py) se při hledání polohy nepočítají – vedou k místu, které se teprve hledá
     if c.get("osa") and not c.get("jen_maska") and not c.get("k_mistu"): OSY.setdefault(c["typ"], []).append(hust(np.array(c["osa"])[:, :2]))
 SIRKA = {t: float(v["sirka_m"]) for t, v in C["typy"].items()}   # pás cesty = sirka_m / 2 od osy (test smysl:zajimava_mimo_cest)
-K_MISTU = {c["k_mistu"]: c for c in C["cesty"] if c.get("k_mistu") and c.get("osa")}
+K_MISTU = {c["k_mistu"]: c for c in C["cesty"] if c.get("k_mistu") and c.get("osa") and not c.get("propojka")}   # pěšina k_<id>; propojka k místu (chyby.md 388) je druhý přístup
 KD = {t: cKDTree(np.vstack(v)) for t, v in OSY.items()}
 VSE = cKDTree(np.vstack([np.vstack(v) for v in OSY.values()]))
 SEG = [(c["id"], hust(np.array(c["osa"])[:, :2])) for c in C["cesty"] if c.get("osa") and not c.get("jen_maska") and not c.get("k_mistu")]
@@ -324,7 +324,9 @@ for m in Z["mista"]:
             KOL.append({"misto": m["id"], "poly": poly_svet(o, -cw, cw, -dl, -0.3), "y": round(y0 - 1.5, 3)})
             VIKA.append({"misto": m["id"], "poly": poly_svet(o, -cw - 0.6, cw + 0.6, -dl, -3.6), "od_z": -3.6})
             # viditelná záplata nad otvorem: síť terénu, ale ne níž než strop chodby (snímek 16. 11. f_stola: otvorem nad tlamou bylo vidět nebe)
-            VIKA.append({"misto": m["id"] + "_otvor", "poly": poly_svet(o, -1.8, 1.8, -3.7, -0.25), "y_min": round(y0 + t["strop_m"], 3), "viditelne": True})
+            # i víko kolize (chyby.md 389, mřížka dosahu 17. 11.): nad ústím je otvor viditelné sítě (DIRY) i snížená kolize (KOL),
+            # bez víka hráč z trávy záplaty propadl na strop výdřevy (−3,4) do dutiny pod víkem chodby a zpět nevylezl
+            VIKA.append({"misto": m["id"] + "_otvor", "poly": poly_svet(o, -1.8, 1.8, -3.7, -0.25), "y_min": round(y0 + t["strop_m"], 3), "viditelne": True, "kolize": True})
             KRYTE.append({"misto": m["id"], "poly": poly_svet(o, -4.6, 4.5, -1.6, 0.6)})
             zaz["stola"] = {"zarez_m": round(L, 2), "kryt_m": m["hledat"]["kryt_m"], "y0": round(y0, 3)}
             PUD.append(poly_svet(o, -w - 2, w + 2, -1, L + 3))

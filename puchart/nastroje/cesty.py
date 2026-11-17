@@ -50,7 +50,9 @@ PORADI_ = {"pesina": 0, "stezka": 1, "hrebenova": 2, "vozova": 3}
 # SPOJKY (Míša 9. 11.: „na spoustě míst je cesta přerušená travou“, brody „děs“): volný konec úseku cesty, který končí
 # 1,5–25 m od jiné cesty, se s ní spojí rovným úsekem. Přes potok (brod) jen povrch a bez porostu – terén se nemění,
 # koryto (koryta.py) zůstane a cesta vede jeho dnem jako v Havranovi (brod = cesta přes mělké koryto, bez kamenů navíc).
-# U mostu (střed spojky do 15 m od mostu) se nespojuje – tam navazuje most.
+# U mostu (střed spojky do 15 m od mostu) se nespojuje – tam navazuje most. Meze v datech: cesty_puchart.json spojky_pravidlo
+# (přes potok – brod – až brod_max_m: OSM úseky končí u potoka na obou březích, mezera 26–31 m, chyby.md 388).
+_SP = C.get("spojky_pravidlo", {"min_m": 1.5, "max_m": 25.0, "brod_max_m": 25.0, "brod_tok_m": 8.0, "most_m": 15.0, "nastup_m": 8.0})
 _VH = json.load(open(os.path.join(K, "pravidla/svet/voda_hra.json")))
 _TH = os.path.join(K, "hra/data/toky_hladina.json")
 _tok = np.vstack([np.array(t["osa"])[:, :2] for t in json.load(open(_TH))["toky"].values()]) if os.path.exists(_TH) else np.zeros((1, 2)) + 1e9
@@ -99,15 +101,16 @@ for i, c in enumerate(C["cesty"]):
             if j == i: continue
             dd = np.hypot(q[:, 0] - p_[0], q[:, 1] - p_[1]); k_ = int(dd.argmin())
             if best is None or dd[k_] < best[0]: best = (float(dd[k_]), j, q[k_])
-        if best is None or not (1.5 < best[0] < 25): continue
+        if best is None or not (_SP["min_m"] < best[0] < max(_SP["max_m"], _SP["brod_max_m"])): continue
         mid = (p_ + best[2]) / 2
-        if any(math.hypot(p_[0] - q_[0], p_[1] - q_[1]) < 8 or math.hypot(best[2][0] - q_[0], best[2][1] - q_[1]) < 8 for q_ in NASTUPY_): continue   # u nástupu mostu nespojovat (napříč nájezdem)
-        if min(np.hypot(m_["u_bodu"][0] - mid[0], m_["u_bodu"][1] - mid[1]) for m_ in _VH.get("mosty", [])) < 15: continue
+        brod = float(np.hypot(_tok[:, 0] - mid[0], _tok[:, 1] - mid[1]).min()) < _SP["brod_tok_m"]
+        if best[0] >= _SP["max_m"] and not brod: continue   # delší spojka jen přes potok (brod)
+        if any(math.hypot(p_[0] - q_[0], p_[1] - q_[1]) < _SP["nastup_m"] or math.hypot(best[2][0] - q_[0], best[2][1] - q_[1]) < _SP["nastup_m"] for q_ in NASTUPY_): continue   # u nástupu mostu nespojovat (napříč nájezdem)
+        if min(np.hypot(m_["u_bodu"][0] - mid[0], m_["u_bodu"][1] - mid[1]) for m_ in _VH.get("mosty", [])) < _SP["most_m"]: continue
         if any(np.hypot(*(np.array(sp["osa"][0]) - best[2])) < 3 and np.hypot(*(np.array(sp["osa"][1]) - p_)) < 3 for sp in SPOJKY): continue   # opačný směr už je
         if any(sp["id"] == "spojka_%s_%s" % (c["id"], C["cesty"][best[1]]["id"]) for sp in SPOJKY): continue   # jedna spojka na dvojici cest
         if any({c["id"], C["cesty"][best[1]]["id"]} == set(v_["mezi"]) for v_ in C.get("spojky_vynechat", [])): continue   # zbytečný brod (Míša 15. 11.)
         typ = min((c["typ"], C["cesty"][best[1]]["typ"]), key=lambda t_: PORADI_.get(t_, 0))
-        brod = float(np.hypot(_tok[:, 0] - mid[0], _tok[:, 1] - mid[1]).min()) < 8.0
         SPOJKY.append({"id": "spojka_%s_%s" % (c["id"], C["cesty"][best[1]]["id"]), "typ": typ, "osa": [p_.tolist(), best[2].tolist()],
                        "spojka": True, "jen_maska": brod})
         print("spojka", SPOJKY[-1]["id"], "%.1f m" % best[0], "brod" if brod else "")

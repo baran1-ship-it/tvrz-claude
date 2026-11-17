@@ -1370,7 +1370,7 @@ for _sb, _uv in _MJ["upravy_modelu"].items():
 TEST("dymnik_kuchyne", _n29 > 0 and not _c29, "; ".join(_c29) if _c29 else "%d celků: dymník z černé kuchyně od odtahu pod hřeben, bez prostupu krovem" % _n29)
 
 # souvislost sítě cest a pěšin (plán 17. 11. B2, Havran: síť cest = graf): komponenty grafu os cesty_puchart.json
-# (dotyk os, konec do spoj_konce_m = spojka cesty.py, most, nástupy hradů) ≤ komponent_max; odtržené kusy s polohou
+# (dotyk os, konec podle cesty_puchart.json spojky_pravidlo = spojka cesty.py, přes potok do brod_max_m, most, nástupy hradů) ≤ komponent_max; odtržené kusy s polohou
 _KS = KC["cesty_sit"]; _CP = json.load(open(K + "/pravidla/svet/cesty_puchart.json")); _CC = _CP["cesty"]
 def _hust_c(o, k):
     o = np.array(o, float)[:, :2]; d = np.r_[0, np.cumsum(np.hypot(*np.diff(o, axis=0).T))]; s_ = np.r_[np.arange(0, d[-1], k), d[-1]]
@@ -1381,6 +1381,8 @@ def _fc(a):
     return a
 def _uc(a, b): _par[_fc(a)] = _fc(b)
 _vyn = [set(v["mezi"]) for v in _CP.get("spojky_vynechat", [])]
+_SPJ = _CP["spojky_pravidlo"]   # stejné pravidlo spojek jako nastroje/cesty.py (přes potok – brod – až brod_max_m, chyby.md 388)
+_TOK = np.vstack([np.array(t["osa"])[:, :2] for t in json.load(open(D + "toky_hladina.json"))["toky"].values()])
 for _i, _a in enumerate(_HC):
     for _j, _b in enumerate(_HC):
         if _i == _j: continue
@@ -1388,7 +1390,10 @@ for _i, _a in enumerate(_HC):
         if _dd.min() <= float(_KS["dotyk_m"]): _uc(_i, _j); continue
         for _ko in (0, -1):
             if _CC[_i].get("k_mistu") and _ko == -1: continue   # pěšina k místu končí u místa (cesty.py)
-            if _dd[:, _ko].min() <= float(_KS["spoj_konce_m"]) and {_CC[_i]["id"], _CC[_j]["id"]} not in _vyn: _uc(_i, _j)
+            if {_CC[_i]["id"], _CC[_j]["id"]} in _vyn: continue
+            _k2 = int(_dd[:, _ko].argmin()); _d2 = float(_dd[_k2, _ko])
+            _mid = (_a[_ko] + _b[_k2]) / 2
+            if _d2 <= float(_SPJ["max_m"]) or (_d2 <= float(_SPJ["brod_max_m"]) and float(np.hypot(*(_TOK - _mid).T).min()) < float(_SPJ["brod_tok_m"])): _uc(_i, _j)
 _skup = [([m_["u_bodu"]], float(_KS["most_r_m"])) for m_ in json.load(open(K + "/pravidla/svet/voda_hra.json")).get("mosty", [])]   # konce u téhož mostu
 _skup.append(([q[:2] for q in json.load(open(D + "nastupy_mostu.json"))["nastupy"]], float(_KS["hrad_r_m"])))   # nástupy hradů: skrz hrady
 for _body, _r in _skup:
@@ -1410,6 +1415,23 @@ while _st:
 for _o in _odt: print("SMYSL   odtržený kus cest:", _o)
 TEST("cesty_souvislost", len(_gs) <= int(_KS["komponent_max"]) and len(_vg) == len(_cg["uzly"]),
      "komponent sítě cest %d (mez %d), hlavní %.0f m; mapa cesty_graf %d/%d uzlů souvisle; odtržené: %s" % (len(_gs), int(_KS["komponent_max"]), sum(_dl(i) for i in _gs[0]), len(_vg), len(_cg["uzly"]), "; ".join(_odt[:4]) + (" …" if len(_odt) > 4 else "")))
+
+# sdílené textury modelů (nastroje/stromy_sdilene_textury.py – stromy, stavby_h, predmety_h; Míša 17. 11.: „uprav i pískoviště“):
+# žádný glb neodkazuje (uri) na chybějící obrázek a každý odkazovaný obrázek má import Godotu (jinak model bez textury)
+import glob as _g31, struct as _s31
+_c31 = []; _n31 = 0; _u31 = 0
+for _f in _g31.glob(K + "/hra/modely/**/*.glb", recursive=True):
+    _b = open(_f, "rb").read(20); _l = _s31.unpack("<I", _b[12:16])[0]
+    try: _j = json.loads(open(_f, "rb").read(20 + _l)[20:])
+    except Exception: continue
+    _n31 += 1
+    for _im in _j.get("images", []):
+        _u = _im.get("uri")
+        if not _u or _u.startswith("data:"): continue
+        _u31 += 1; _q = os.path.join(os.path.dirname(_f), _u)
+        if not os.path.exists(_q): _c31.append("%s → %s chybí" % (os.path.relpath(_f, K + "/hra"), _u))
+        elif not os.path.exists(_q + ".import"): _c31.append("%s → %s bez importu" % (os.path.relpath(_f, K + "/hra"), _u))
+TEST("modely_textury_odkazy", not _c31, "; ".join(_c31[:8]) if _c31 else "%d glb, %d odkazů na sdílené textury – všechny existují a jsou importované" % (_n31, _u31))
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)

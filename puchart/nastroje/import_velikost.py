@@ -45,6 +45,11 @@ if MK and os.path.exists(K + "/hra/textury/maska_koleje.png.import"):   # maska 
 for f in glob.glob(K + "/hra/modely/stavby_h/tex/*.import"):   # sdílené textury staveb (stromy_sdilene_textury.py): jako dřív vytažené
     # z glb (VRAM, normály ETC2_RGB8 jako dosud – detekce normálové mapy by je zdvojnásobila na RG11), horní mez stavby_max_px
     n += uprav(f, VRAM + [("compress/normal_map", 2), ("process/size_limit", TV.get("stavby_max_px", 0))])
-for f in glob.glob(K + "/hra/modely/predmety_h/kovadlina_1393_*.import"):
+_PV = os.path.join(K, "hra/modely/predmety_h/tex/puvod.json"); PV = json.load(open(_PV)) if os.path.exists(_PV) else {}
+for f in glob.glob(K + "/hra/modely/predmety_h/tex/*.import"):   # sdílené textury předmětů pískoviště (Míša 17. 11.): jako dřív vytažené
+    h = os.path.basename(f).split(".")[0]   # kovadlina_1393 (i stupně _stredni/_daleko): horní mez kovadlina_max_px
+    kov = any(m.startswith("kovadlina_1393") for m in PV.get(h, []))
+    n += uprav(f, VRAM + [("compress/normal_map", 2), ("process/size_limit", TV.get("kovadlina_max_px", 0) if kov else 0)])
+for f in glob.glob(K + "/hra/modely/predmety_h/kovadlina_1393_*.import"):   # před sdílením (vytažené z glb vedle modelu)
     n += uprav(f, [("process/size_limit", TV.get("kovadlina_max_px", 0))])
 print("upraveno importů", n)
