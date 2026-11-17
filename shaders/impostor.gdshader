@@ -46,6 +46,11 @@ void vertex() {
 	float dist = distance(c, cam);
 	viditelnost = smoothstep(fade_od, fade_od + fade_pas, dist) * (1.0 - smoothstep(fade_do - 60.0, fade_do, dist));
 	prah = fract(sin(dot(ic.xz + o.xz, vec2(12.9898, 78.233))) * 43758.5453);
+	// mimo pasmo (blizko pod plnym modelem, za dosahem): ctverec do bodu - nerasterizuje se (driv cely ctverec
+	// prosel fragmentem a zahodil se; blizky ker / strom = velka plocha zahozenych pixelu, rozbor_gpu_15_11 H3)
+	if (viditelnost <= 0.0) {
+		VERTEX = c - o;
+	}
 }
 
 void fragment() {

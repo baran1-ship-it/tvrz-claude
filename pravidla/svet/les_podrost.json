@@ -543,13 +543,81 @@
     ]
    ],
    "_p": "podrost pod zapojenými korunami (svet.gd _lesni_patro; kcd_sada2_12–15/17/19 „les = kmeny + podrost do výšky pasu, žádná louka“): u každého kazdy_strom_ker-tého lesního stromu keř nebo mladý buk drevo_od_m/ker_od_m od kmene, u každého kazdy_strom_drevo-tého pařez nebo hromada klestí (hromada_klesti větví u sebe); jen kde je les (svet._les, maska stanoviště kroku 5+7) ≥ les_od – tam louka nedává trávu (trava.v_zapoji), houština ji nahrazuje (rozbor_gpu_15_11.md K11). Kapradí a byliny dává louka (podrost) a svet._lesni_puda."
+  },
+  "pesiny": {
+   "les_min": 0.0,
+   "podil": 0.6,
+   "usek_prah": 0.1,
+   "od_osy_m": [
+    1.8,
+    5.0
+   ],
+   "druhy": [
+    [
+     "shrub_02_0",
+     0.2,
+     [
+      1.6,
+      2.8
+     ]
+    ],
+    [
+     "shrub_02_1",
+     0.2,
+     [
+      1.6,
+      2.8
+     ]
+    ],
+    [
+     "shrub_02_2",
+     0.15,
+     [
+      1.4,
+      2.4
+     ]
+    ],
+    [
+     "bez_cerny_1_0",
+     0.15,
+     [
+      2.2,
+      3.4
+     ]
+    ],
+    [
+     "bez_cerny_2_0",
+     0.15,
+     [
+      2.0,
+      3.0
+     ]
+    ],
+    [
+     "bez_cerny_3_0",
+     0.15,
+     [
+      2.2,
+      3.4
+     ]
+    ]
+   ],
+   "_p": "keře podél pěšin (svet.gd _kere_podel_pesin, Míša 0.64 „lemy cest jsou především keře“, 17. 11. r. 8 „víc houštin … u cest“): na ose pěšiny každý druhý bod, na každé straně keř s pravděpodobností podil, jen v úsecích (pomalý šum podél pěšiny > usek_prah), od_osy_m od osy × šířka pěšiny; les_min = nejmenší zápoj lesa v okolí 8 m (0 = i pěšiny přes louku; dřív 0,25 jen v lese, ale druhy ker_husty/sipek v datech nebyly → 0 keřů). Odstup od pěšiny pasma pesina_ker_m, ne v obci (uzivani), ne ve vodě (druh_smi_hra). Tvrz má vlastní (_tvrz_zvenci)."
+  },
+  "okraj_novych_lesu": {
+   "kusu": [
+    3,
+    6
+   ],
+   "rozptyl_m": 2.5,
+   "_p": "okraj lesů ze šumu (svet.gd _nove_lesy, Míša 0.64 „vstupy do lesů a lemy cest jsou především keře, hustě“): na bodě mřížky v pásu okraje kusu keřů ze skladby houstina.plast.druhy rozptýlených ± rozptyl_m; do 17. 11. natvrdo ker_husty a šípek, které v datech nejsou (log „keru na okraji 0“)."
   }
  },
  "dalka": {
   "popis": "Vegetace v dálce (Míša 17. 11., tablet 0.9999991, tabulka misa_17_11_chyby r. 8: „impostory v dálce a taky pro křoví, protože z dálky není vidět a pak se objeví“). Keř (shrub_02, bez_cerny) se kreslí jako 3D jen do konce svého dosahu (svet._plants: tablet 40 m, PC 50/70/95 m podle kvality) – dál dřív nebylo nic a keř ve 40 m naskočil. Nově od tohoto konce impostor keře (blender/impostory.py DRUHY_KERE → obrazky/impostory/kere.json, 1 čtverec = 2 troj. na keř, MultiMesh po druhu × buňce svet.IMP_BUNKA) s prolnutím ditherem (shaders/impostor.gdshader fade_od až fade_od + fade_pas) a postupným zánikem do kere_do_m (dither posledních 60 m). Stromy: impostory končily na svet.IMP_DOHLED 900 m, kdežto les za okrajem mapy (obzor) až do 2 500 m – uvnitř mapy byl dál než 900 m holý terén před zalesněným obzorem; dosah stromů = stromy_do_m, obzor obzor_do_m (vrchol vrcholů i fragmentů stejný, buňky 1 024 m nemají visibility_range – vzdálené impostory se kreslily i dřív, jen se zahodily v fragmentu).",
-  "kere_do_m": 0.0,
+  "kere_do_m": 400.0,
   "kere_prolinani_m": 10.0,
-  "stromy_do_m": 900.0,
+  "stromy_do_m": 2500.0,
   "obzor_do_m": 2500.0
  }
 }

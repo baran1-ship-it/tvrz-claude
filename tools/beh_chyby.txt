@@ -6,3 +6,4 @@ Invalid access to property or key
 Condition "err != OK" is true
 No loader found for resource
 Trying to assign value of type
+neimportovany - druh vynechan

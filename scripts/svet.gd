@@ -4560,8 +4560,15 @@ func _impostory(root: Node3D, imp: Dictionary, bunka: float, dohled: float, jmen
 	for d: String in imp:
 		var m := ShaderMaterial.new()
 		m.shader = load("res://shaders/impostor.gdshader")
-		m.set_shader_parameter("barva", load("res://obrazky/impostory/%s_a.png" % d))
-		m.set_shader_parameter("normaly", load("res://obrazky/impostory/%s_n.png" % d))
+		# 17. 11.: nove atlasy bez importu (.import neni v gitu) = load null = bile ctverce v krajine (fdl, build/sady) -
+		# druh bez atlasu se nekresli, chyba do logu (beh.sh ji hlasi); oprava = godot --headless --import
+		var tx_a: Texture2D = load("res://obrazky/impostory/%s_a.png" % d) if ResourceLoader.exists("res://obrazky/impostory/%s_a.png" % d) else null
+		var tx_n: Texture2D = load("res://obrazky/impostory/%s_n.png" % d) if ResourceLoader.exists("res://obrazky/impostory/%s_n.png" % d) else null
+		if tx_a == null or tx_n == null:
+			push_error("impostor %s: atlas %s_a/_n.png neimportovany - druh vynechan (godot --headless --import)" % [jmeno, d])
+			continue
+		m.set_shader_parameter("barva", tx_a)
+		m.set_shader_parameter("normaly", tx_n)
 		var st: Array = meta[d]["stred"]
 		m.set_shader_parameter("stred", Vector3(st[0], st[1], st[2]))
 		m.set_shader_parameter("polomer", float(meta[d]["polomer"]))
@@ -5206,6 +5213,7 @@ func _nove_lesy() -> void:
 	nd.frequency = 0.02
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 6412
+	_okraj_nl = []
 	var nt := 0
 	var nk := 0
 	var y := obl.position.y
@@ -5230,24 +5238,44 @@ func _nove_lesy() -> void:
 			if koryto and not koryto.blizko(p.x, p.y).is_empty() and koryto.strop(p.x, p.y, false) < hy + 1.5:
 				continue                                  # zarez potoka
 			if v < 0.48:
-				# okraj lesa: husty lem keru (Misa: "vstupy do lesu a lemy cest jsou predevsim kere, huste")
-				for _j in rng.randi_range(3, 6):
-					var q := p + Vector2(rng.randf_range(-2.5, 2.5), rng.randf_range(-2.5, 2.5))
-					if pes_blizko.call(q, 2.5):
-						continue
-					var kk: String = ["ker_husty_0", "sipek_0", "sipek_2", "ker_husty_0", "ker_husty_0"][rng.randi() % 5]
-					if not r.has(kk) or (r[kk] as Array).is_empty():
-						continue
-					var s0 := 1.0 if kk.begins_with("ker_husty") else Vector3(r[kk][0][0], r[kk][0][4], r[kk][0][8]).length()
-					(r[kk] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.06, q.y, rng.randf() * TAU, s0 * rng.randf_range(0.7, 1.3)))
-					nk += 1
+				# okraj lesa: husty lem keru (Misa: "vstupy do lesu a lemy cest jsou predevsim kere, huste") - jen bod okraje;
+				# kere az _okraj_novych_lesu po stanovisti (druh_smi_hra cte masky kroku 5+7, ty tu jeste nejsou)
+				_okraj_nl.append(p)
+				nk += 1
 				continue
 			var jeh := hy > 25.0 and not jehl.is_empty() and nd.get_noise_2d(p.x, p.y) > -0.2
 			var k: String = jehl[rng.randi() % jehl.size()] if jeh else listn[rng.randi() % listn.size()]
 			(r[k] as Array).append(_xf(p.x, hy - 0.1, p.y, rng.randf() * TAU, float(sc_ref[k]) * rng.randf_range(0.75, 1.15)))
 			nt += 1
 		y += 5.0
-	print("nove lesy: stromu %d, keru na okraji %d" % [nt, nk])
+	print("nove lesy: stromu %d, bodu okraje %d" % [nt, nk])
+
+
+## Kere na okraji lesu ze sumu (_nove_lesy zapamatuje body okraje): skladba plaste lesa (les_podrost.json houstina.plast.druhy),
+## pocet a rozptyl houstina.okraj_novych_lesu. Do 17. 11. natvrdo ker_husty_0 a sipek_*, ktere v datech nejsou = log
+## „keru na okraji 0“ (Misa 17. 11. r. 8 „pridal bych vice houstin“). Po _stanoviste: druh_smi_hra cte jeho masky.
+var _okraj_nl: Array = []
+
+
+func _okraj_novych_lesu() -> void:
+	var r: Dictionary = data["rostliny"]
+	var okr: Dictionary = Pravidla.cti("les_podrost", "houstina", "okraj_novych_lesu")
+	var kere: Array = _hou_druhy(Pravidla.cti("les_podrost", "houstina", "plast")["druhy"])
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 6415
+	var n := 0
+	for p: Vector2 in _okraj_nl:
+		for _j in rng.randi_range(int(okr["kusu"][0]), int(okr["kusu"][1])):
+			var q := p + Vector2(rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0)) * float(okr["rozptyl_m"])
+			if kere.is_empty() or pes_d(q.x, q.y) < pesina_ker_m() or not smi_tu_byt(q.x, q.y, "ker"):
+				continue
+			var vk: Array = _hou_vyber(kere, rng)
+			if not druh_smi_hra(vk[0], q.x, q.y):
+				continue
+			(r[vk[0]] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.06, q.y, rng.randf() * TAU, _hou_meritko(vk[0], vk[1])))
+			n += 1
+	_okraj_nl = []
+	print("okraj novych lesu: keru %d" % n)
 
 
 ## Lesni plast (Misa 0.64: "kraje lesu vsude jsou plne keru, dle reality"): prechod les - louka je v prirode pas
@@ -5351,11 +5379,11 @@ func _lesni_plast() -> void:
 ## Kere podel pesin v lese a na jeho okraji (Misa 0.64: "lemy cest jsou predevsim kere a huste"): po ose pesiny
 ## kazde 3 m na obe strany 1,8-3,2 m od osy ker (70 %), kde je les nebo jeho okraj (zapoj v okoli 8 m).
 func _kere_podel_pesin() -> void:
+	# Misa 17. 11. r. 8 („vic houstin … u cest“): skladba a odstupy z les_podrost.json houstina.pesiny; do 17. 11. natvrdo
+	# ker_husty_0 a sipek_*, ktere v datech nejsou (sipek pouzit false, ker_husty mimo export) = 0 keru (log bez radku)
 	var r: Dictionary = data["rostliny"]
-	var kere: Array = []
-	for k: String in ["ker_husty_0", "sipek_0", "sipek_1", "ker_husty_0"]:
-		if r.has(k) and not (r[k] as Array).is_empty():
-			kere.append(k)
+	var hp: Dictionary = Pravidla.cti("les_podrost", "houstina", "pesiny")
+	var kere: Array = _hou_druhy(hp["druhy"])
 	if kere.is_empty():
 		return
 	var rng := RandomNumberGenerator.new()
@@ -5369,19 +5397,21 @@ func _kere_podel_pesin() -> void:
 			continue
 		var p := osa[i]
 		var lz := maxf(maxf(_les(p.x, p.y), _les(p.x + 8.0, p.y)), maxf(_les(p.x - 8.0, p.y), maxf(_les(p.x, p.y + 8.0), _les(p.x, p.y - 8.0))))
-		if lz < 0.25 or absf(p.x + 4.0) < 75.0 and absf(p.y) < 70.0:
+		if lz < float(hp["les_min"]) or absf(p.x + 4.0) < 75.0 and absf(p.y) < 70.0:
 			continue
 		var bok := (b - a).normalized().orthogonal()
+		var od: Array = hp["od_osy_m"]
 		for sd: float in [-1.0, 1.0]:
 			# Misa 0.87 „pravidelne“: jen v usecich (pomaly sum podel pesiny), ne kazdy druhy bod obe strany
-			if rng.randf() > 0.45 or _vln(float(i) * 0.09 + sd * 3.1) < 0.1:
+			if rng.randf() > float(hp["podil"]) or _vln(float(i) * 0.09 + sd * 3.1) < float(hp["usek_prah"]):
 				continue
-			var q := p + bok * sd * rng.randf_range(1.8, 5.0) * pes_f[i] + (b - a).normalized() * rng.randf_range(-1.0, 1.0)
-			if pes_d(q.x, q.y) < 1.5 or _u_mostu(q.x, q.y) or not smi_tu_byt(q.x, q.y, "ker"):
+			var q := p + bok * sd * rng.randf_range(float(od[0]), float(od[1])) * pes_f[i] + (b - a).normalized() * rng.randf_range(-1.0, 1.0)
+			if pes_d(q.x, q.y) < pesina_ker_m() or _u_mostu(q.x, q.y) or not smi_tu_byt(q.x, q.y, "ker"):
 				continue
-			var k: String = kere[rng.randi() % kere.size()]
-			var s0 := 1.0 if k.begins_with("ker_husty") else Vector3(r[k][0][0], r[k][0][4], r[k][0][8]).length()
-			(r[k] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.06, q.y, rng.randf() * TAU, s0 * rng.randf_range(0.75, 1.3)))
+			var vk: Array = _hou_vyber(kere, rng)
+			if not druh_smi_hra(vk[0], q.x, q.y):
+				continue
+			(r[vk[0]] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.06, q.y, rng.randf() * TAU, _hou_meritko(vk[0], vk[1])))
 			n += 1
 	print("kere podel pesin: %d" % n)
 
@@ -14742,6 +14772,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	# kryt 7 (jehlicnan / listnac podle porostu) a kryt nemeni (mlade stromy a lem uvnitr a na kraji zapoje)
 	_les_hustsi()
 	_lesni_plast()
+	_okraj_novych_lesu()
 	# krok 8 vstup: kazdy kus z Blenderu a kroku 6 na stanovisti sveho druhu podle masek kroku 7 (druhy.json vyjma:
 	# kosena_louka - smrk a kameni ne v kosene louce, radce 17:00); dal kazdy rozsev vola druh_smi_hra sam
 	_vstup_druhu()
