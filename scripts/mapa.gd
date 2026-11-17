@@ -309,7 +309,11 @@ func _draw_jizda(r: Rect2, u: float, s: Vector2) -> void:
 	_jizda["vlevo"] = vlevo
 	var fr := Rect2(ps - Vector2(fs * 0.52, fs * 0.96), Vector2(fs, fs))   # nohy figurky (obrazek: x 0,52, spodek 0,96) na bode trasy
 	if t:
-		_c.draw_texture_rect(t, Rect2(fr.position + (Vector2(fs, 0) if vlevo else Vector2.ZERO), Vector2(-fs if vlevo else fs, fs)), false)
+		# zrcadleni kolem bodu trasy (prevzato od Pucharta 17. 11., jeho Misa 14. 11. „odskakovala z linie do lesa“):
+		# obdelnik se zapornou sirkou Godot kreslil o celou sirku vedle - figurka uskocila z cesty pri kazdem otoceni
+		_c.draw_set_transform(ps, 0.0, Vector2(-1.0 if vlevo else 1.0, 1.0))
+		_c.draw_texture_rect(t, Rect2(-Vector2(fs * 0.52, fs * 0.96), Vector2(fs, fs)), false)
+		_c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	else:
 		_c.draw_circle(ps, 10.0 * u, Color(0.7, 0.08, 0.05))
 	_rects.append([fr.grow(10), "zastavit", 0])
