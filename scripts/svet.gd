@@ -7533,22 +7533,36 @@ func _ves_domy(root: Node3D) -> void:
 		if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
 			_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
 		var kat_p: Dictionary = _kat_p
+		# 17. 11. (test schody_vstupu: hranice drevo_dlouha_2 domu 6 pred dvermi chleva, 0,16 m nad prahem): jako lavice
+		# u domu (nabytek.json venku_pravidla pokusu / posun_podel) - kus, jehoz stred nebo konec je v pruchodu dveri
+		# (v_pruchodu, mrizka znovu - dvere tohoto domu pribyly prave ted), se posune podel zdi, jinak se nepolozi
+		_pruchody = {}
+		var prv: Dictionary = Pravidla.cti("nabytek", "venku_pravidla")
 		for v2: Array in DUM_DREVO.get(int(d["k"]), []):
 			var rz2: Array = (kat_p.get(String(v2[0]), {}) as Dictionary).get("rozmer", [1.5, 0.8, 0.5])
 			var hl := float(rz2[2]) * 0.5 + float(v2[3])
-			var lp := Vector3.ZERO
-			var yl := 0.0
-			if int(v2[1]) == 0:
-				lp = Vector3(lerpf(-float(m["hw"]), float(m["hw"]), float(v2[2])), 0.0, float(m["b"]) - hl)
-				yl = 0.0
-			else:
-				lp = Vector3(float(v2[1]) * (float(m["hw"]) + hl), 0.0, lerpf(float(m["b"]) + 0.8, float(m["f"]) - 0.8, float(v2[2])))
-				yl = PI / 2.0
-			var wq := xf * lp
 			# smer podel zdi (posun mimo pesiny v kroku 9, _vybaveni_mimo_cest) a pulrozmery pudorysu
 			var podel := (xf.basis * (Vector3.RIGHT if int(v2[1]) == 0 else Vector3.BACK)).normalized()
-			data["vybaveni"].append({"id": v2[0], "p": [wq.x, _vyska_min(wq.x, wq.z, 0.8) - 0.03, wq.z], "yaw": yaw + yl + float(v2[4]),
-					"podel_zdi": [podel.x, podel.z], "pul": [float(rz2[0]) * 0.5, float(rz2[2]) * 0.5]})
+			for pokus in int(prv["pokusu"]):
+				var pol := float(v2[2]) + float(pokus) * float(prv["posun_podel"])
+				var lp := Vector3.ZERO
+				var yl := 0.0
+				if int(v2[1]) == 0:
+					lp = Vector3(lerpf(-float(m["hw"]), float(m["hw"]), pol), 0.0, float(m["b"]) - hl)
+					yl = 0.0
+				else:
+					lp = Vector3(float(v2[1]) * (float(m["hw"]) + hl), 0.0, lerpf(float(m["b"]) + 0.8, float(m["f"]) - 0.8, pol))
+					yl = PI / 2.0
+				var wq := xf * lp
+				var v_pr := false
+				for kk: float in [-1.0, 0.0, 1.0]:
+					var qk := wq + podel * kk * float(rz2[0]) * 0.5
+					v_pr = v_pr or v_pruchodu(qk.x, qk.z)
+				if v_pr:
+					continue
+				data["vybaveni"].append({"id": v2[0], "p": [wq.x, _vyska_min(wq.x, wq.z, 0.8) - 0.03, wq.z], "yaw": yaw + yl + float(v2[4]),
+						"podel_zdi": [podel.x, podel.z], "pul": [float(rz2[0]) * 0.5, float(rz2[2]) * 0.5]})
+				break
 	sc.free()
 	if ssc:
 		ssc.free()

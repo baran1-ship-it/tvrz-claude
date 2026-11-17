@@ -10880,7 +10880,10 @@ func _teren_svy() -> void:
 					continue
 				var na_okraji := false
 				for sg: Array in (site[sj][3] as Dictionary).get(Vector2i(floori(p.x), floori(p.z)), []):
-					if Geometry2D.get_closest_point_to_segment(Vector2(p.x, p.z), sg[0], sg[1]).distance_to(Vector2(p.x, p.z)) < 0.01:
+					# soubezna hrana (ne roh diry v jine siti, kde sousedem je treti sit)
+					var d1 := ((sg[1] as Vector2) - (sg[0] as Vector2)).normalized()
+					var d2 := Vector2(b.x - a.x, b.z - a.z).normalized()
+					if absf(d1.cross(d2)) < 0.05 and Geometry2D.get_closest_point_to_segment(Vector2(p.x, p.z), sg[0], sg[1]).distance_to(Vector2(p.x, p.z)) < 0.01:
 						na_okraji = true
 						break
 				if not na_okraji:
