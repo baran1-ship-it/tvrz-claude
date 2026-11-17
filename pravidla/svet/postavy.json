@@ -6403,9 +6403,11 @@
    "nizka_m": 0.25
   },
   "od_m_predmet": {
-   "stul_hospoda": 0.55
+   "stul_hospoda": 0.55,
+   "kovadlina_spalek": 0.45
   },
-  "_od_m_predmet": "Misa 11. 11. (senkyrka splyvala se stolem): u stolu stoji dal - klip Interact se predklani a natahuje ruce pres hranu stolu ~0,25 m; od_m 0,3 = trup ve stole"
+  "_od_m_predmet": "Misa 11. 11. (senkyrka splyvala se stolem): u stolu stoji dal - klip Interact se predklani a natahuje ruce pres hranu stolu ~0,25 m; od_m 0,3 = trup ve stole",
+  "_od_kovadlina": "17. 11. (lide_chovani: u kovadliny tvrze všechny 4 strany bez průchozí buňky při od_m 0,3 – postava r 0,28 se dotýkala kolize špalku): kovář/kameník stojí 0,45 m od půdorysu"
  },
  "rozestup": {
   "_popis": "Misa 0.99994 r. 63 a 71 (tri s kbeliky se prolinaji, dva na zahonu v sobe): cil cinnosti do misto_m od ciloveho mista jine postavy -> posun o misto_m (smeru kandidatu, 1-2 kruhy, volna bunka mrizky); pri chuzi postava pocka za jinou postavou pred sebou do chuze_m (kuzel 60 st.), nejvys cekani_max_s, kdo uz ceka na ni, na toho neceka (bez zablokovani)",
