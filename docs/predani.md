@@ -1643,3 +1643,13 @@ Hotovo v kódu a datech (testy u každého):
 - **Návrhy (potřebují zdroje / export):** rostliny = krok exportu podle `textury_predmetu` s vlastní složkou a limity
   podle druhu (nutný plný export – rostliny jsou v otisku); staré předměty jen přestavbou glb; mlýn+větrák vlastní
   složka se stropem 512. Snímky před/po a měření VRAM na PC NEPROVEDENY (limit), tablet NEOVĚŘENO.
+
+## Míša 17. 11. ř. 14 – schody k vysokým dveřím (pomocník 17. 11.)
+- Pravidlo `nabytek.json schody_vstupu` (mimo otisk exportu, žádný export): `svet._schody_vstupu` po `_zamek_terenu`
+  projde všechny dveře/vrata z `data.pohyb`, paprsky na kolize určí vstup budovy (podlaha za prahem, terén / `Nadvori`
+  do `mereni_do_m` před ním), výšku prahu (= podlaha, ne spodek křídla) a postaví stupně z `kvadr_hruby_2` s kolizí;
+  stupně modelu (Kol_Schod domů vsi, mlýn) platí jen přes celý pás chůze, jinak se staví od jejich čela.
+  Záznamy `svet.schody_vstupu`, měření všech vstupů `svet.vstupy_mereni` (log „schody vstupu:“). Test `schody_vstupu`.
+- Past: mřížka průchodů `v_pruchodu` (`_pruchody`) se plní při prvním dotazu – kdo se ptá dřív, než přibudou dveře
+  domů, dostane starou mřížku. `_nabytek_venku` a dřevo u domů ji teď znovu staví.
+- Zbývá: předmět 1,9 m před dveřmi chléva domu 6 na stupních (test hlásí), snímky kostel/mlýn NEOVĚŘENO.
