@@ -15,7 +15,7 @@ Výklad červených čar je můj (Claude) – kde si nejsem jistý, je to napsan
 | 6 | 06 | 56.2 148.9 y12.9 | venkovní ochoz (podlaha, krakorce) prostupuje zdí dovnitř místnosti – zevnitř vidět jeho černý spodek (upřesnila Míša) | A hrad |
 | 7 | 07 | -8.4 9.7 y47.2 | klikyhák přes zeď, která protíná okno – zeď navíc / zeď přes okno (po posunu oken B?) | A hrad |
 | 8 | 08 | -76.9 95.8 y-30.8 | bez čar; podlaha pavlače téměř černá (tmavomodrá) | B ves |
-| 9 | 09 | -76.7 95.9 y-30.8 | chybí zábradlí u vyústění schodů | B ves |
+| 9 | 09 | -76.7 95.9 y-30.8 | chybí zábradlí na západním konci pavlače krčmy (mezera sloup–nároží) | B ves |
 | 10 | 10 | -72.7 97.5 y-30.8 | pavlač: chybí zábradlí v mezeře mezi sloupem a stěnou | B ves |
 | 11 | 11 | -94.2 92.0 y-33.2 | pec (kopule): přeškrtnutá lopata/tyč s prknem prochází pecí – pryč nebo položit správně | B ves |
 | 12 | 12 | -88.5 93.6 y-30.6 | digestoř nad ohništěm končí v podkroví „?“ – chybí komín ven; v interiéru padá DÉŠŤ (bílé čárky) | B ves |
