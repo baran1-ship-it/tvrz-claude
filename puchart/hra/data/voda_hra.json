@@ -410,6 +410,7 @@
    0.9
   ],
   "zdroj_15_11": "Míša 15. 11. (foto x −49,8 z 120,2): „voda je dost bílá i některé kameny“ – pěna 0,72 → 0,44 (světlé čárky za kameny jen naznačené), jas kamenů koryta (drobné 1,75 → 1,05, balvany 1,25 → 0,9; dřív v kódu hlavni.gd _kameny_koryta)",
-  "kryti_min": 0.45
+  "kryti_min": 0.45,
+  "zdroj_17_11": "Míša 17. 11. (tablet, docs/screens/misa_17_11/13.jpg a 19.jpg: „nemáš vodu v potoce“, mlýnské kolo na suchu): voda na tabletu je, snímek PC z týchž poloh vypadá stejně (docs/screens/voda_17_11_pred_*.png) – příčina není export ani Adreno, ale vzhled: shora krytí jen 1 − exp(−h/0,5) (mělčina 0,1 m → 18 %), Fresnel 2 %, specular 0,05 s drsností 0,3 → průsvitná tmavá hladina na ztmaveném dně = prázdné koryto. Předloha misa_real_01: hladinu čte lesk oblohy a vlnky i tam, kde je vidět dno. Proto kryti_min 0,45 (krytí hladiny i na mělčině, kraj u čáry vody dál do ztracena kraj_m), čirost 0,3 m (Havran reka 0,35), specular 0,3 a drsnost 0,15 (lesk vlnek; 13. 11. bílá deska byla 0,35/0,08 + pěna všude 8 %). Ověřeno snímky docs/screens/voda_17_11_po_*.png, tablet NEOVERENO"
  }
 }

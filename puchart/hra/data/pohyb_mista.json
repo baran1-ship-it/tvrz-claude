@@ -875,6 +875,131 @@
    ],
    "open": 100.0,
    "dur": 1.1
+  },
+  {
+   "name": "Mlyn_Dvere_Dvur",
+   "dum": "Mlyn",
+   "kind": "dvere",
+   "group": "Mlyn_Dvere_Dvur",
+   "glb_zavreno": true,
+   "koren": "Zajimava",
+   "cols": [
+    [
+     0.039,
+     0.902,
+     -0.42,
+     0.079,
+     1.795,
+     0.834
+    ]
+   ],
+   "use_mistni": [
+    0.039,
+    1.0,
+    -0.42
+   ],
+   "open": -100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "Mlyn_Dvere_MlyniceVen",
+   "dum": "Mlyn",
+   "kind": "dvere",
+   "group": "Mlyn_Dvere_MlyniceVen",
+   "glb_zavreno": true,
+   "koren": "Zajimava",
+   "cols": [
+    [
+     -0.039,
+     0.902,
+     0.62,
+     0.079,
+     1.795,
+     1.234
+    ]
+   ],
+   "use_mistni": [
+    -0.039,
+    1.0,
+    0.62
+   ],
+   "open": -100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "Mlyn_Dvere_Vstup",
+   "dum": "Mlyn",
+   "kind": "dvere",
+   "group": "Mlyn_Dvere_Vstup",
+   "glb_zavreno": true,
+   "koren": "Zajimava",
+   "cols": [
+    [
+     -0.039,
+     0.902,
+     0.495,
+     0.079,
+     1.795,
+     0.984
+    ]
+   ],
+   "use_mistni": [
+    -0.039,
+    1.0,
+    0.495
+   ],
+   "open": -100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "Mlyn_Dvere_Jizba",
+   "dum": "Mlyn",
+   "kind": "dvere",
+   "group": "Mlyn_Dvere_Jizba",
+   "glb_zavreno": true,
+   "koren": "Zajimava",
+   "cols": [
+    [
+     0.445,
+     0.968,
+     0.039,
+     0.884,
+     1.925,
+     0.079
+    ]
+   ],
+   "use_mistni": [
+    0.445,
+    1.0,
+    0.039
+   ],
+   "open": 100.0,
+   "dur": 1.1
+  },
+  {
+   "name": "Mlyn_Dvere_Mlynice",
+   "dum": "Mlyn",
+   "kind": "dvere",
+   "group": "Mlyn_Dvere_Mlynice",
+   "glb_zavreno": true,
+   "koren": "Zajimava",
+   "cols": [
+    [
+     -0.47,
+     0.968,
+     -0.039,
+     0.934,
+     1.925,
+     0.079
+    ]
+   ],
+   "use_mistni": [
+    -0.47,
+    1.0,
+    -0.039
+   ],
+   "open": 100.0,
+   "dur": 1.1
   }
  ]
 }

@@ -22,5 +22,11 @@
   "skupina_pozn": "obě křídla jedna skupina <Uzel>_Dvere@instance (jedno tlačítko otevře obě, jako vrata plotů ves_vrata_*); místo ovládání = střed průjezdu (zámková hrana křídla)",
   "zdroj": "vrata stodol se otvírají VEN (zadání 14. 11.: vrata stodol ven): uvnitř je mlat a sklizeň (snopy, vůz) – křídla dovnitř by narážela; KCD1/KCD2 stodoly a Havran vlastni.stodola mají svlaky a vzpěru na vnější straně, závěsy vně; úhel 95° (křídlo kolmo od stěny, ne přes sousední prkna), doba 1,6 s jako vrata plotů (ves.gd _kridlo)",
   "kolna_pozn": "kůlna je otevřená (Havran kolna: 3 pole bez vrat) – v souboru se hledá jen pro úplnost, uzly vrat nemá"
+ },
+ "zajimava": {
+  "popis": "dveře staveb zajímavých míst (Míša 17. 11.: „do mlýna se nedá dostat, nemá funkční dveře“) – stejný mechanismus jako dveře domů: uzly <Model>_Dvere_* modelu (pant = počátek uzlu, křídlo podle obalu sítě, úhel a směr z extras modelu otevreni_deg / osa „otevírá se dovnitř“), instance pod uzlem Zajimava (zajimava.gd), skupina dveře@rodič uzlu",
+  "soubory": ["hra/modely/stavby_h/mlyn.glb"],
+  "koren": "Zajimava",
+  "zdroj": "Havran scripts/svet.gd _mlyn_dvere (Míša 28. 10. v Havranovi: „do mlýna se nedá dostat, žádné dveře nefungují“ – křídla Mlyn_Dvere_* jako dveře domů vsi, otevírají se dovnitř ke středu budovy); model Havrana mlyn.glb extras otevreni_deg 100"
  }
 }
