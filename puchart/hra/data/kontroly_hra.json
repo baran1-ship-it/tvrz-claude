@@ -111,7 +111,7 @@
    "unik_max": 0,
    "uviznuti_max_uzlu": null,
    "dvere_bez_dosahu_max": null,
-   "puda_ven_max": null
+   "puda_ven_max": 55
   },
   "cas_max_s": 900,
   "zdroj": "postup: sonda --reach a tools/seal_world.py v Alchemists of Prague (github.com/msveshnikov/alchemists-of-prague, kód nepřevzat – licence neuvedena), rešerše docs/rozpracovane/reserse_pdf_17_11.md bod 2 a Havran docs/rozpracovane/reserse_17_11_pdf.md (mřížka od brány vsi a hradů). Krok 2 m venku = efektivní rozlišení DMR 5G (~3,6 m, dlazdice.json lod), 1 m u staveb = šířka dveří; kapsle hráče r 0,3 m, výška 1,75 (hlavni.gd), schod a sklon z hráče (hrac.json schod_m, hrac.gd floor_max_angle 50°). Cíl běhu < 10 min na PC (zadání 17. 11.)."
