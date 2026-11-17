@@ -252,6 +252,7 @@ def main():
         bvhs.append(BVHTree.FromPolygons([v.co.copy() for v in me_t.vertices], [tuple(p.vertices) for p in me_t.polygons]))
         bpy.data.meshes.remove(me_t)
     posazeno = 0
+    na_stavbe = 0
     for ob in veg_coll.objects:
         hit = lookup.get(ob.data.name)
         if hit is None:
@@ -269,6 +270,12 @@ def main():
             mw.translation.z = zem - 0.04
             posazeno += 1
         mg = C @ mw @ CI
+        # zadna rostlina na stavbe rybnika v2 (dlazba prelivu, zdi vypusti) - jedna brana pro vsechny generatory vegetace
+        # (Misa 17. 11. r. 2, 03: trava skrz dlazbu; test smyslu preliv_rostliny)
+        if kraj.ryb2_stavba(mg[0][3], mg[2][3], 0.0):
+            gone.append(ob.name)
+            na_stavbe += 1
+            continue
         key = "%s_%d" % hit
         # instance v ramci nove vsi (nove.NOVY_RAMEC: zahumenky, lipa na navsi) zvlast - hra je pripoji az po presunu vsi
         cil = inst_novy if (round(mg[0][3], 1), round(mg[2][3], 1)) in nove.NOVY_RAMEC else inst
@@ -287,7 +294,7 @@ def main():
         for par in [bpy.context.scene.collection] + list(bpy.data.collections):
             if veg_coll.name in par.children:
                 par.children.unlink(veg_coll)
-    print("rostliny posazene na teren:", posazeno)
+    print("rostliny posazene na teren:", posazeno, "| vynechane na stavbe rybnika (kraj.ryb2_stavba):", na_stavbe)
     _cas("rostliny posazeni")
     export_plants()
     _cas("rostliny glb")
