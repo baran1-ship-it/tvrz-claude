@@ -46,6 +46,10 @@ func _ready() -> void:
 	_start()
 
 func _start() -> void:
+	# načítací obrazovka „Blood for Blood“ (nacitani.gd): karta hned, těžké zdroje vláknem, stavba pak z mezipaměti
+	var nac := get_node_or_null("/root/Nacitani")
+	if nac and (not nac.aktivni or chce_mereni()): nac = null   # měření a testy bez ní
+	if nac: await nac.zacni()
 	_prostredi()
 	if FileAccess.file_exists("res://data/rozpocty.json"):   # rozlišení 3D (rozpocty.json obraz_3d)
 		var o: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json")).get("obraz_3d", {})
@@ -226,6 +230,7 @@ func _start() -> void:
 	elif _foto == "" and not meri:
 		_prochazka.call_deferred()
 	if OS.get_environment("PUCHART_SKRIPT") != "": var ts_: Node = load(OS.get_environment("PUCHART_SKRIPT")).new(); add_child(ts_)   # ladicí skript (testy funkcí)
+	if nac: nac.hotovo()   # svět stojí: karta po 10 s prolne do černé a do nabídky (menu.gd play_intro čeká)
 	for jm in OS.get_environment("PUCHART_SKRYJ").split(",", false):   # diagnostika výkonu: skrýt vrstvu (Les, Kere, Byliny, Hrad, Skaly, Voda)
 		var n := get_node_or_null(jm)
 		if n: n.visible = false

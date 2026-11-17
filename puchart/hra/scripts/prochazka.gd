@@ -127,7 +127,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	_na_start()
 	get_tree().paused = true
 	_fps_menu(true)
-	menu.play_intro()   # úvod: erb Bočka z Kunštátu, název hry, hudba (Havran)
+	menu.play_intro()   # úvod „Blood for Blood“: nabídka se vynoří z černé po načítací obrazovce (menu.gd, nacitani.gd)
 	if OS.get_environment("PUCHART_SAVETEST") != "":   # test ukládání: pískoviště, předmět do brašny, uložit, posunout, nahrát
 		await get_tree().create_timer(3.0).timeout
 		_akce("sandbox", null); await get_tree().create_timer(0.5).timeout
@@ -164,6 +164,7 @@ func _akce(co: String, arg: Variant) -> void:
 			_na_start()   # nová hra: u vnější branky (mapa_body.json start), denní doba od začátku (den.json start)
 			if hlavni.den: hlavni.den.set_time(String(hlavni.den.cfg["start"]), 0.01)
 			menu.in_game = true; menu.can_save = true
+			await _do_hry()
 			zavri_nabidku()
 		"mapa":
 			zavri_nabidku(); mapa.prepni()
@@ -181,9 +182,10 @@ func _akce(co: String, arg: Variant) -> void:
 			if menu.can_save: _uloz()
 			get_tree().quit()
 		"continue":
-			if not menu.saves.is_empty(): _nahraj(String(menu.saves[0]["file"]))
+			if not menu.saves.is_empty():
+				await _do_hry(); _nahraj(String(menu.saves[0]["file"]))
 		"load":
-			_nahraj(String(arg))
+			await _do_hry(); _nahraj(String(arg))
 		"set:beh":
 			hrac.bezi = not hrac.bezi; hrac._beh_packa = false   # přepínač: běh trvá, dokud ho hráč nevypne (Havran _beh_tl)
 		"set:let":
@@ -200,6 +202,15 @@ func _akce(co: String, arg: Variant) -> void:
 		"vol:hudba":
 			_hudba = float(arg); menu.music.volume_db = linear_to_db(maxf(_hudba, 0.001)) - 6.0
 	_nastaveni()
+
+## Vstup do hry z nabídky přes načítací obrazovku (nacitani.gd, Míša 17. 11.: karta nejméně 10 s, prolnutí do černé
+## a do hry); vrátí se v černé. Bez obrazovky (testy, data pri_vstupu_do_hry false) hned.
+func _do_hry() -> void:
+	var nc := get_node_or_null("/root/Nacitani")
+	if nc == null or not nc.aktivni or not bool(nc.cfg.get("pri_vstupu_do_hry", true)): return
+	get_viewport().gui_release_focus()
+	await nc.prechod()
+
 
 ## Začátek hry (mapa_body.json start): výška paprskem dolů na kolize jako u cestování po mapě (mapa.gd cil_na_zemi).
 func _na_start() -> void:

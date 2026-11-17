@@ -90,6 +90,10 @@ grep -q "^BEHLET_TEST OK" $S || { rc=1; echo "BEHLET CHYBA: kruh Běh nebo Let n
 # uložit / nová hra / nahrát → zůstane; pískoviště vše hned
 krok "znaky mapy a objevování"; (cd $K/hra && PUCHART_SKRIPT=res://scripts/test_mapa_znaky.gd timeout 600 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | grep -E "^MAPA_ZNAKY_TEST" | tee -a $S)
 grep -q "^MAPA_ZNAKY_TEST OK" $S || { rc=1; echo "MAPA_ZNAKY CHYBA: znak zajímavého místa se neobjeví, nezůstane po nahrání nebo chybí v pískovišti" | tee -a $S; }
+# hlavní nabídka a načítací obrazovka Blood for Blood (Míša 17. 11.): fokus šipkami/ovladačem, A/B, myš, dotyk, žádná pečeť;
+# karty z dat (12–20, každá vlastní obrázek s autorem), karta vidět nejméně 10 s, prolnutí do černé (scripts/test_nabidka.gd)
+krok "nabídka a načítací obrazovka"; (cd $K/hra && timeout 300 xvfb-run -a -s "-screen 0 1600x1000x24" $G --rendering-driver opengl3 --resolution 1600x1000 -s res://scripts/test_nabidka.gd 2>&1 | grep -E "^NABIDKA_TEST|CHYBA|SCRIPT ERROR" | tee -a $S)
+grep -q "^NABIDKA_TEST OK" $S || { rc=1; echo "NABIDKA CHYBA: nabídka nebo načítací obrazovka (ovládání, data karet, 10 s)" | tee -a $S; }
 krok "měření (zkrácené)"
 (cd $K/hra && PUCHART_MERENI=1 PUCHART_MERENI_RYCHLE=1 PUCHART_MERENI_BEZ_CEKANI=1 timeout 420 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 > $K/build/hlidaci_mereni.log 2>&1)
 MU=$(python3 -c "import json;d=json.load(open('$K/hra/data/mereni.json'));print(len(d['useky'])*len(d.get('scale_3d',[1]))+len(d.get('varianty',[])))")

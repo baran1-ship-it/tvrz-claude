@@ -204,3 +204,167 @@ static func kresli_pecet(ci: CanvasItem, c: Vector2, r: float, znak := "x") -> v
 		ci.draw_line(c + Vector2(-d, -d), c + Vector2(d, d), col, r * 0.13, true)
 		ci.draw_line(c + Vector2(d, -d), c + Vector2(-d, d), col, r * 0.13, true)
 	ci.draw_circle(c + Vector2(-r * 0.3, -r * 0.35), r * 0.12, Color(1, 0.6, 0.5, 0.25))
+
+
+# ------------------------------------------------------------ Blood for Blood (nabídka a načítání, Míša 17. 11.)
+# Předloha: návrh „Blood for Blood“ (menu/index.html, nacitani/index.html, schváleno 17. 11.). Barvy z předlohy (:root).
+
+const BFB_INK := Color("#e9dcc0")        # světlý pergamen – text
+const BFB_INK_DIM := Color("#a8987a")    # položky nabídky, převod pořekadla
+const BFB_INK_OFF := Color("#5f5546")    # nedostupná položka, verze
+const BFB_RUBRIC := Color("#b8352a")     # rumělka – frakturová iniciála
+const BFB_GOLD := Color("#c9a463")       # zlatá nabídky
+const BFB_GOLD_NAC := Color("#b8924f")   # zlatá načítací obrazovky
+const BFB_SEL_INK := Color("#2f1c0b")    # tmavý inkoust vybrané položky na pergamenu
+const BFB_NOC := Color("#0d0a07")
+
+static var _pisma := {}
+
+
+## Písma předlohy: titul Grenze Gotisch, kapitálky Cormorant SC, text Cormorant Garamond, iniciála UnifrakturMaguntia
+## (bez Č/Ř – záloha Grenze Gotisch). mezera = proložení písmen v px (letter-spacing předlohy).
+static func pismo(druh: String, mezera := 0) -> Font:
+	var key := "%s%d" % [druh, mezera]
+	if _pisma.has(key):
+		return _pisma[key]
+	var f: Font
+	if mezera != 0:
+		var fv := FontVariation.new()
+		fv.base_font = pismo(druh)
+		fv.spacing_glyph = mezera
+		f = fv
+	else:
+		var soubor: String = {"titul": "GrenzeGotisch-Bold", "sc": "CormorantSC-Medium", "text": "CormorantGaramond-Regular",
+				"kurziva": "CormorantGaramond-Italic", "fraktura": "UnifrakturMaguntia-Regular"}[druh]
+		var ff: FontFile = load("res://fonty/%s.ttf" % soubor)
+		if druh == "fraktura":
+			ff = ff.duplicate()
+			ff.fallbacks = [load("res://fonty/GrenzeGotisch-Bold.ttf")]
+		f = ff
+	_pisma[key] = f
+	return f
+
+
+static func bfb_label(t: String, druh: String, fs: int, col: Color, mezera := 0) -> Label:
+	var l := Label.new()
+	l.text = t
+	l.add_theme_font_override("font", pismo(druh, mezera))
+	l.add_theme_font_size_override("font_size", fs)
+	l.add_theme_color_override("font_color", col)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return l
+
+
+## Kosočtverec (čtverec otočený o 45°) – obrys, volitelně výplň.
+static func kresli_kosoctverec(ci: CanvasItem, c: Vector2, a: float, col: Color, vypln := Color(0, 0, 0, 0)) -> void:
+	var h := a * 0.7071
+	var p := PackedVector2Array([c + Vector2(0, -h), c + Vector2(h, 0), c + Vector2(0, h), c + Vector2(-h, 0)])
+	if vypln.a > 0.0:
+		ci.draw_colored_polygon(p, vypln)
+	p.append(p[0])
+	ci.draw_polyline(p, col, 1.0, true)
+
+
+## Tenká linka se zlatým kosočtvercem uprostřed (předloha .rule: 2× 120 px přechod do ztracena, mezera 14, kosočtverec 7).
+class Linka extends Control:
+	var barva := BFB_GOLD
+	func _init(col: Color) -> void:
+		barva = col
+		custom_minimum_size = Vector2(120 * 2 + 14 * 2 + 9, 12)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+	func _draw() -> void:
+		var y := size.y * 0.5
+		var c0 := Color(barva, 0.0)
+		draw_polygon(PackedVector2Array([Vector2(0, y - 0.5), Vector2(120, y - 0.5), Vector2(120, y + 0.5), Vector2(0, y + 0.5)]),
+				PackedColorArray([barva, c0, c0, barva]))
+		var x2 := 120.0 + 28.0 + 9.0
+		draw_polygon(PackedVector2Array([Vector2(x2, y - 0.5), Vector2(x2 + 120, y - 0.5), Vector2(x2 + 120, y + 0.5), Vector2(x2, y + 0.5)]),
+				PackedColorArray([c0, barva, barva, c0]))
+		Styl.kresli_kosoctverec(self, Vector2(120 + 14 + 4.5, y), 7.0, barva)
+
+
+static var _zrno: Texture2D
+## Jemné zrno (předloha: feTurbulence, opacity .16 overlay) – šum v teplé šedi, kreslí se dlaždicí s malou průhledností.
+static func zrno() -> Texture2D:
+	if _zrno == null:
+		var n := FastNoiseLite.new()
+		n.noise_type = FastNoiseLite.TYPE_VALUE
+		n.frequency = 0.9
+		n.fractal_octaves = 3
+		var img := Image.create(256, 256, false, Image.FORMAT_RGBA8)
+		for y in 256:
+			for x in 256:
+				var v := clampf(n.get_noise_2d(x, y) * 0.5 + 0.5, 0.0, 1.0)
+				img.set_pixel(x, y, Color(v, v * 0.9, v * 0.8, absf(v - 0.5) * 2.0))
+		_zrno = ImageTexture.create_from_image(img)
+	return _zrno
+
+
+## Přechod jako textura: body [[poloha 0–1, Color], …]; radial = kruh ze středu (roztáhne se na elipsu podle obdélníku).
+static func prechod(body: Array, radial := false, svisle := false) -> GradientTexture2D:
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array(body.map(func(b: Array) -> float: return float(b[0])))
+	g.colors = PackedColorArray(body.map(func(b: Array) -> Color: return b[1]))
+	var t := GradientTexture2D.new()
+	t.gradient = g
+	t.width = 256
+	t.height = 256
+	if radial:
+		t.fill = GradientTexture2D.FILL_RADIAL
+		t.fill_from = Vector2(0.5, 0.5)
+		t.fill_to = Vector2(1.0, 0.5)
+	elif svisle:
+		t.fill_from = Vector2(0, 0)
+		t.fill_to = Vector2(0, 1)
+	else:
+		t.fill_from = Vector2(0, 0)
+		t.fill_to = Vector2(1, 0)
+	return t
+
+
+## Vrstva přes celou plochu z textury (přechod, vinětace).
+static func vrstva(parent: Node, tex: Texture2D, a := 1.0) -> TextureRect:
+	var r := TextureRect.new()
+	r.texture = tex
+	r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	r.stretch_mode = TextureRect.STRETCH_SCALE
+	r.set_anchors_preset(Control.PRESET_FULL_RECT)
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	r.modulate.a = a
+	parent.add_child(r)
+	return r
+
+
+## Zrno a vinětace (předloha .grain + .vignette: elipsa 85 % × 80 %, tma .7 na kraji). stred_x = střed elipsy (0,55 nabídka, 0,5 načítání).
+static func zrno_a_vineta(parent: Node, stred_x: float, tma: float) -> void:
+	var z := TextureRect.new()
+	z.texture = zrno()
+	z.stretch_mode = TextureRect.STRETCH_TILE
+	z.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	z.set_anchors_preset(Control.PRESET_FULL_RECT)
+	z.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	z.modulate = Color(1, 1, 1, 0.07)
+	parent.add_child(z)
+	# elipsa s poloosami 85 % šířky a 80 % výšky: obdélník 2× tak velký se středem v (stred_x, 0,5)
+	var v := TextureRect.new()
+	v.texture = prechod([[0.0, Color(0, 0, 0, 0)], [0.55, Color(0, 0, 0, 0)], [1.0, Color(0, 0, 0, tma)]], true)
+	v.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	v.stretch_mode = TextureRect.STRETCH_SCALE
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.anchor_left = stred_x - 0.85; v.anchor_right = stred_x + 0.85
+	v.anchor_top = 0.5 - 0.8; v.anchor_bottom = 0.5 + 0.8
+	parent.add_child(v)
+	# mimo elipsu (rohy za obdélníkem nejsou) – rohy pokryje sama elipsa, protože obdélník přesahuje obrazovku
+
+
+## Pořekadlo s červenou frakturovou iniciálou (předloha .saw / .quote) do RichTextLabel.
+static func porekadlo(rt: RichTextLabel, ini: String, text: String, fs: int, fs_ini: int, col: Color) -> void:
+	rt.clear()
+	rt.push_font(pismo("fraktura"), fs_ini)
+	rt.push_color(BFB_RUBRIC)
+	rt.add_text(ini)
+	rt.pop(); rt.pop()
+	rt.push_font(pismo("kurziva"), fs)
+	rt.push_color(col)
+	rt.add_text(text)
+	rt.pop(); rt.pop()
