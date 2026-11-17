@@ -72,7 +72,7 @@ func _run() -> void:
 	nac.hotovo()   # načteno hned – karta musí zůstat
 	while v_cerne[0] < 0.0 and nac.cas < 20.0: await process_frame
 	var mc: float = nac.min_cas()
-	ok(v_cerne[0] >= mc + nac.prolnuti() - 0.05, "karta vidět nejméně %.0f s + prolnutí (do černé v %.2f s)" % [mc, v_cerne[0]])
+	ok(v_cerne[0] >= mc + nac.prolnuti() - 0.12, "karta vidět nejméně %.0f s + prolnutí (do černé v %.2f s)" % [mc, v_cerne[0]])   # tolerance ~3 snímky: prolnutí běží tweenem, nac.cas sčítá delta – pod zátěží hlídačů (17. 11.: 10,62 s) se rozejdou o pár snímků
 	ok(v_cerne[0] < mc + nac.prolnuti() + 0.6, "po %.0f s jde do hry bez čekání na tlačítko" % mc)
 	ok(nac._clona.color.a > 0.99, "prolnutí do černé")
 	await cekej(1.0)
