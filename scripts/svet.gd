@@ -11507,6 +11507,11 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 				continue
 			ven = 1.0 if i == 0 else -1.0
 			g = float((h["position"] as Vector3).y)
+		if OS.has_environment("TVRZ_SCHODY_LADENI"):
+			var pp: Array = []
+			for hh: Dictionary in strany:
+				pp.append("-" if hh.is_empty() else "%s %.2f" % [String((hh["collider"] as Node).get_path()).right(60), float((hh["position"] as Vector3).y) - prah])
+			print("SCHODY_LADENI %s c %s n %s sirka %.2f prah %.2f: %s" % [nm, str(c.snapped(Vector3.ONE * 0.1)), str(n.snapped(Vector3.ONE * 0.01)), sirka, prah, str(pp)])
 		if ven == 0.0:
 			continue                                    # vnitrni dvere, branka v plotu, dvere na pavlac
 		n *= ven

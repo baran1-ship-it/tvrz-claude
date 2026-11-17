@@ -10837,10 +10837,21 @@ func _teren_svy() -> void:
 		var ab := AABB(plos[0], Vector3.ZERO)
 		for q in plos:
 			ab = ab.expand(q)
-		site.append([nm, sv._tri_mrizka(plos, Transform3D()), ab.grow(0.1)])
+		# otevrene hrany site v mrizce 1 m (xz) - sev = bod na otevrene hrane obou siti (prekryv siti, napr. pas reky pres
+		# okoli nebo zaplata, sev neni)
+		var okr := {}
 		for k in poc:
 			if int(poc[k]) == 1:
-				hrany.append([site.size() - 1, hr[k][0], hr[k][1]])
+				hrany.append([site.size(), hr[k][0], hr[k][1]])
+				var e0: Vector3 = hr[k][0]
+				var e1: Vector3 = hr[k][1]
+				for cx in range(floori(minf(e0.x, e1.x)) - 1, floori(maxf(e0.x, e1.x)) + 1):
+					for cz in range(floori(minf(e0.z, e1.z)) - 1, floori(maxf(e0.z, e1.z)) + 1):
+						var kk := Vector2i(cx, cz)
+						if not okr.has(kk):
+							okr[kk] = []
+						(okr[kk] as Array).append([Vector2(e0.x, e0.z), Vector2(e1.x, e1.z)])
+		site.append([nm, sv._tri_mrizka(plos, Transform3D()), ab.grow(0.1), okr])
 	var vys := func(g: Dictionary, x: float, z: float) -> float:
 		for t: Array in g.get(Vector2i(floori(x / 2.0), floori(z / 2.0)), []):
 			var a: Vector3 = t[0]
@@ -10866,6 +10877,13 @@ func _teren_svy() -> void:
 			var p := a.lerp(b, (j + 0.5) / m)
 			for sj in site.size():
 				if sj == si or not (site[sj][2] as AABB).has_point(Vector3(p.x, (site[sj][2] as AABB).get_center().y, p.z)):
+					continue
+				var na_okraji := false
+				for sg: Array in (site[sj][3] as Dictionary).get(Vector2i(floori(p.x), floori(p.z)), []):
+					if Geometry2D.get_closest_point_to_segment(Vector2(p.x, p.z), sg[0], sg[1]).distance_to(Vector2(p.x, p.z)) < 0.01:
+						na_okraji = true
+						break
+				if not na_okraji:
 					continue
 				var y: float = vys.call(site[sj][1], p.x, p.z)
 				if is_nan(y):
