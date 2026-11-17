@@ -45,3 +45,43 @@ Pořadí: po dokončení funkcí a hlídačů, před vydáním APK měřit P1 a 
   Alokací MultiMeshů za trasu: A 20 257 → B 9 257 nových + 12 247 znovu (volných na konci 442, VRAM +8 MB).
   Pozor: llvmpipe kreslí na CPU (každý snímek > 40 ms), rozptyl mezi běhy velký (výchozí běh téže verze les p50 341,
   p95 736) – směr ano, čísla pro tablet NEOVERENO. Záseky tabletu změří Míša (řádek „zásoba MM“ a sloupec >2×p50 v měření).
+
+## Tráva podle Havrana (17. 11., Míša: „Havran má velkou hustotu trávy, ale pod stromy v lese ne, a už mu i FPS vychází“)
+Havran (FETCH claude/new-session-0dtk58 d53fa65): `pravidla/svet/les_podrost.json`, `scripts/svet.gd` _koruny_stin/zapoj_v/_puda_zapoj,
+`scripts/louka.gd` _svetlo_lesa, `modely.json trava_unshaded`, `docs/mereni_verze.md`.
+
+| | Havran | Puchart před | Puchart teď |
+|---|---|---|---|
+| koruny pro trávu | všechny stromy po všech krocích sázení, poloměr z glb modelu | stromy.bin, poloměr 0,2 × výška (modely mají 0,23–0,6, buk 0,32–0,35) → koruny 1,6× užší | jako Havran: glb × měřítko les.gd (`nastroje/kryt_korun.py`) |
+| zápoj | krytí × zápoj okolí (samotný strom v louce bez zápoje), přechod 6 m | jen třídy les_*/luh, kryt 0,6–1,0 | krytí × okolí 0,35–0,6 (les Puchartu má krytí 0,59), přechod 3 m, všechny třídy |
+| tráva pod zápojem | × 0,015 (nic) | × 0,1 (louka 0,05 trsu/bod), byliny tráva bez omezení | × 0,015; byliny tráva/vysoká také (`byliny.json zapoj`) |
+| tráva na světle v lese | jako louka | 0,5 | 0,9 (jako paseka/okraj) |
+| půda pod zápojem | zem.gdshader hrabanka/listí z masky + zápoj | opad jen podle masky svahu | zem.gdshader: zápoj → opad, světlina v lese → drn (`louka.json les.puda`) |
+| podrost | řídké kapradí/byliny z atlasu podle zápoje | byliny.gd kapradí, mech, ostružiník podle třídy | beze změny (už je) |
+| tráva bez stínového průchodu | `trava_unshaded` (v datech tablet **false** – barva lesa; měřeno: unshaded p50 ≈ bez trávy) | stínovaná všude (stebla vertex_lighting) | **tablet unshaded** (`louka.json unshaded`), světlo okolí + slunce × (1 − 0,6 × zápoj), kalibrace barvy na PC ±2 % |
+
+Co Havranovi dalo FPS (jeho měření 0.9999991, tablet): dlaždice terénu (louka −12, tvrz-cesta −14 ms p50), méně trávy pod
+korunami (les 21/33 ms) a jádro korun; unshaded tráva naměřena 0.99992 (p50 ≈ bez trávy), ale vydaná jen jako varianta.
+Puchart tablet 17. 11.: les 35,2 ms, bez trávy 22,9 → tráva v lese 12 ms; Havranova zkušenost: ~60 % ceny trávy = stínový průchod.
+
+Měření PC 17. 11. (llvmpipe, souběžně cizí Godoty, `PUCHART_MERENI_JEN=les PUCHART_MERENI_RYCHLE=1` – 16 snímků na úsek,
+před = moje soubory z b362d2a, oba stavy 2 běhy těsně po sobě; **pro tablet NEOVERENO**, llvmpipe kreslí na CPU – stínový
+průchod trávy tu cenu nemá jako na Adrenu), p50 / p95 ms, běh 1 · běh 2:
+
+| úsek | před | po |
+|---|---|---|
+| les | 491/765 · 467/755 | 455/694 · 431/819 |
+| les bez trávy | 437/689 · 442/683 | 494/709 · 449/726 |
+| les tráva stínovaná | 459/761 · 454/814 | 453/702 · 453/769 |
+| les tráva unshaded | (před: metoda chybí = les) | 462/698 · 463/828 |
+| troj M les | 1,55 · 1,55 | 1,50 · 1,51 |
+
+PC: les p50 −6 až −8 % (v šumu), trojúhelníky −0,05 M; unshaded na llvmpipe bez rozdílu (očekávané – rozhodne tablet).
+Deterministicky (trsy louky do 66 m / trávy bylin do 32 m z dat): zapojený les (372, −195) 9 039 → 995 (−89 %) / 390 → 6;
+měřicí úsek les (−160, −160, hlavně paseka a suť) 34 499 → 31 702 / 4 213 → 3 635; okraj (−60, −140) −14 %; louka beze změny;
+vyhlídka (bučina s mezerami) +29 % (světliny 0,9). Tablet: změří Míša – varianty `les trava stinovana` / `les trava unshaded`.
+Snímky: `docs/screens/trava_havran_17_11_{pred,po,un}_{les,okraj,louka}.png`. Test: `smysl:trava_zapoj`.
+Zbývá: tablet změřit (les, varianty stínovaná/unshaded) a porovnat barvu unshaded trávy na tabletu a v jiných denních dobách
+(kalibrace jen PC odpoledne); unshaded tráva nemá stín samotných stromů na louce (zápoj okolí = 0 – snímek _un_okraj: chybí stín
+koruny vlevo) – když bude vadit, stin_korun z čistého krytí místo zápoje; louka krok 0,5 m (Havran 0,36 + drn) – hustší jen po
+měření tabletu (rozpočet scén 2,1 M troj.).

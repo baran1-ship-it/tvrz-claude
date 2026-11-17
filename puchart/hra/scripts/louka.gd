@@ -87,7 +87,8 @@ func _svetlo_travy(dt: float) -> void:
 	var zen: Color = (sky.get_shader_parameter("zenith") as Color).srgb_to_linear()
 	var hor: Color = (sky.get_shader_parameter("horizon") as Color).srgb_to_linear()
 	var sp := env.ambient_light_sky_contribution
-	var ok := hor.lerp(zen, float(u["obloha_zenit"])) * float(sky.get_shader_parameter("energy")) * env.ambient_light_energy * sp \
+	var en: Variant = sky.get_shader_parameter("energy")   # neseřízený uniform = null → výchozí 1,0 (sky.gdshader)
+	var ok := hor.lerp(zen, float(u["obloha_zenit"])) * (1.0 if en == null else float(en)) * env.ambient_light_energy * sp \
 			+ env.ambient_light_color.srgb_to_linear() * env.ambient_light_energy * (1.0 - sp)
 	var ks: Array = u["slunce_x"]; var ko: Array = u["okoli_x"]
 	var vs := Vector3(sl.r * float(ks[0]), sl.g * float(ks[1]), sl.b * float(ks[2]))

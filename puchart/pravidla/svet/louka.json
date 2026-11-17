@@ -135,16 +135,16 @@
   "obal": 0.9,
   "obloha_zenit": 0.78,
   "slunce_x": [
-   1.5,
-   1.48,
-   2.78
+   0.787,
+   0.776,
+   1.746
   ],
   "okoli_x": [
-   12.17,
-   11.2,
-   7.72
+   6.39,
+   5.872,
+   4.854
   ],
-  "_kalibrace": "Havran kalibrace PC (odpoledne, el 22°) proti stínované trávě – Puchart má touž oblohu (sky.gdshader Havrana) a ACES white 1,6; ověřeno snímkem dvojice PC 17. 11. (docs/screens/trava_havran_17_11_un_*), jiné denní doby a tablet NEOVERENO",
+  "_kalibrace": "Výchozí Havranova kalibrace (slunce_x 1,5/1,48/2,78, okoli_x 12,17/11,2/7,72) dávala v Puchartu louku 2× světlejší (jiný podíl oblohy v okolním světle – hlavni.gd atmosfera venku). 17. 11. kalibrace PC (odpoledne, el 22°, louka −436, 301): 3 kroky po kanálech (odezva value ∝ f^k z dvojice snímků) proti stínované trávě téhož místa – průměr sRGB pásu 700–1000 px stín 77/100/30, unshaded 77/99/30 (±2 %), docs/screens/trava_havran_17_11_po_louka.png × _un_louka.png. Jiné denní doby a tablet NEOVERENO.",
   "stin_korun": 0.6,
   "_stin_korun": "o kolik slunce na trávě ubere zápoj korun (0..1); tráva pod plným zápojem skoro není, jde o mezery a kraje korun. NAVRH, NEOVERENO proti stínované trávě; cena 1 čtení textury ve vrcholu (Havran 3 čtení ≈ +7 ms les tablet 0.99993 – PODEZŘENÍ)"
  },
