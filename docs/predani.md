@@ -1567,3 +1567,16 @@ Hotovo v kódu a datech (testy u každého):
   seno modrošedé, lůžkoviny černé, houně tmavě modré – testy barvy neměří. U sad od modeláře vždy nejdřív Puchart
   (`origin/ccr-f2d32673-9fi7m5`: nativní .tscn + sdílený materiál, barvy vrcholů lineární → sRGB `barvy_vrcholu.json`,
   albedo modulace podle předlohy).
+
+## Poučení 16.–17. 11. (vydání 0.9999991)
+- **Stínové světlo ohně nesmí ležet uvnitř modelu pece** (dum1: černá kopule, stín přes celou jizbu). Pece z katalogu
+  (`ohen_znacky.k_usti_predmety`): světlo před ústím (`svetlo_pred_ustim_m`), plamen v ústí.
+- **Rozmístění nábytku a test chůze musí hlídat stejnou cestu** (`pece_domu.za_dvermi_m`, `pruchod_k_stredu_m` ×
+  test `dvere_domu`: rovně dveřmi za příčku, pak ke středu jizby). Pec v rohu (2 zdi), lůžko v nejbližším volném koutě,
+  kontroly přímo v `tools/krok_b/pece_domu.py` (spadne, když ne).
+- **Místa „u_predmetu“ s více kusy stejného id**: bez `blizko` se brali kusy podle x – kameník z lomu šel ke kovadlině
+  kovárny tvrze. Nově `postavy.json` `blizko` + `blizko_r_m`. Výpis všech kusů v lide.gd při nenalezení.
+- `lide_chovani` sám (bez předchozích testů) hlásí lom_spalek „žádná průchozí buňka“ – kolize lomu (skála, lešení) se
+  načtou až po návštěvě lomu; v plné sadě OK. PODEZŘENÍ, ne potvrzeno.
+- Dva běhy Godot foto najednou = nedostatek paměti (zabité oba). Foto vždy po jednom.
+- Restart kontejneru v noci: soubory (build/, klíč) přežily, jen běžící úlohy zmizely – pustit znovu.
