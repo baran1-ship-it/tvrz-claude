@@ -496,6 +496,11 @@ hostinec 26/34/33/41 (27/25/26/34), věž 24/24/24/23 (27/25/30/29). Paměť VRA
 
 
 
+## 0.9999991 (commit d7c765b, vydáno 17. 11. 01:52) – NEOVĚŘENO NA ZAŘÍZENÍ (testovací, bez z_postavy)
+Změny pro měření: nové předměty z Disku (sdílené textury tex_predmety2, LOD1), houština a clony vsi (víc keřů, `clona_vsi`
+48 %), plášť lesa i východně od vsi, `teren_lod_bias` 4 (víc trojúhelníků terénu na tabletu – NEOVĚŘENO), dlaždice terénu
+v datech, ale VYPNUTÉ (`teren_dlazdice.json zapnuto false`). Měřicí trasa: porovnat úseky ves-vjezd, ves, louka s 0.999999.
+
 ## 0.999999 (commit 3b6c1cc, vydáno 16. 11. 01:04) – NEOVĚŘENO NA ZAŘÍZENÍ (testovací, bez z_postavy – oděvy ř. 3 v další verzi)
 Změny proti 0.999998: krčma dvůr (déšť pod střechami, cesty ze dvora, schody), tráva v hostinci/u dveří (jeden zákaz
 trávy), kostel = zřícenina z Disku (kolize zdi podle sítě, střední LOD s barvou vrcholů), zaniklá ves Doubrava z dílů,
