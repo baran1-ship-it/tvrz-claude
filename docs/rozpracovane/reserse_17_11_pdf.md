@@ -88,3 +88,10 @@ je Blender skripty → glb → Godot, s pravidly v datech.
 
 Mimo top 5: VAT pro vzdálené postavy a zvířata, až když trasa naměří cenu postav za 25 m. Plugin chce Godot 4.5, takže
 vlastní shader. Tripo, Rodin, Meshy a Terrain3D teď nepoužívat (rozpočet trojúhelníků, licence, rozbití pipeline).
+
+## Porovnání s rozborem Pucharta (Míša poslala snímek 17. 11. 15:31)
+Puchart ze stejných PDF vybral navíc (u nás zatím nezapsáno):
+- **Kontrola nového materiálu ve třech světlech** (ráno, poledne, večer + interiér s loučí) – hodí se nám hned: černé domy zdálky (ř. 5) a černé listí (ř. 3) by takový snímek odhalil dřív. → snímky `foto` ve 3 hodinách jako součást kontroly změny materiálu.
+- **AI modely jen na drobné předměty:** TRELLIS.2 – podle Pucharta zdarma i pro hru (NEOVĚŘENO námi); Hunyuan3D v EU podle licence nesmíme.
+- Stíny mraků přes krajinu, opotřebení staveb (špína bez textur navíc), ohyb trávy kolem hráče – možná, po fotkách z KCD a měření.
+- Automatické ubírání detailu při zahřátí – u nás už je (`kvalita.gd`, jen v extrému, rozlišení nemění).
