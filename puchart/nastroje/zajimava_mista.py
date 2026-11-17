@@ -421,6 +421,9 @@ for m in Z["mista"]:
             tr = [[float(cp[0]), float(cp[1]), None], [float(cil[0]), float(cil[1]), None]]
     if m["id"] == "lom":
         tr = [[float(cp[0]), float(cp[1]), None], [*svet(o, 0, 4), None], [*svet(o, 0, -4.0), None]]
+    for jm_, body_ in m.get("mlyn", {}).get("trasy_mistni", {}).items():   # trasy dovnitř stavby (Míša 17. 11.: do mlýna se nedá dostat)
+        if jm_ == "pozn": continue
+        TRASY["zajimava_%s_%s" % (m["id"], jm_)] = [[*svet(o, b_[0], b_[1]), None if b_[2] is None else round(o["y"] + b_[2], 3)] + list(b_[3:]) for b_ in body_]
     if m.get("pristup"):   # přístup od cesty (Míša 16. 11.): bod, ke kterému vede pěšina k_<id> (nastroje/pesiny_k_mistum.py → cesty_puchart.json)
         pb = svet(o, *m["pristup"]["bod"]); zaz["pristup"] = {"bod": [round(pb[0], 2), round(pb[1], 2)], "cesty": m["pristup"]["cesty"]}
         kc = K_MISTU.get(m["id"])

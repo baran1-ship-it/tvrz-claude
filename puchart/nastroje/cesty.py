@@ -77,6 +77,8 @@ for m_ in _VH.get("mosty", []):
         o_ = np.array(c["osa"], float)
         if k == -1: o_ = o_[::-1]
         hu = _husta(o_); dl = np.r_[0, np.cumsum(np.hypot(*np.diff(hu, axis=0).T))]
+        _nc = m_.get("najezd_cesty", {}).get(c["id"], {})   # nájezd jen jedné cesty (most_440_1 Míša 17. 11.: hák za mostem na východě)
+        ROVNE_M = float(_nc.get("rovne_m", m_.get("najezd_rovne_m", 6.0))); OBLOUK_M = float(_nc.get("oblouk_m", m_.get("najezd_oblouk_m", 26.0)))
         if dl[-1] < OBLOUK_M + 4: continue
         # rovně ROVNE_M od mostu, pak plynulý oblouk zpět do původní trasy do OBLOUK_M (Míša 9. 11.: za mostem ostrý háček)
         w_ = np.clip((OBLOUK_M - dl) / (OBLOUK_M - ROVNE_M), 0, 1); w_ = w_ * w_ * (3 - 2 * w_)

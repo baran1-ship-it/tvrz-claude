@@ -1,6 +1,6 @@
 {
  "popis": "Byliny u hráče (Havran louka.gd v malém): trsy podle třídy stanoviště 1393, buňky 10 m do dosah_m, deterministicky (stejné místo = stejná tráva). Hustoty jsou NAVRH pro tablet: KCD má 6+/m², tablet ~2,5/m² do 30 m (odhad 140 k troj., NEOVERENO).",
- "dosah_m": 32,
+ "zapoj": {"druhy": ["trava", "vysoka"], "popis": "17. 11. (Havran les_podrost.json, Míša 17. 11.): trsy trávy bylin × násobek zápoje korun (hra/data/kryt.png, pravidlo pravidla/svet/louka.json les) – pod zapojenými korunami žádná tráva; kapradí, mech, ostružiník, pařezy beze změny = řídký podrost (KCD docs/reference/les/kcd_les_svetlo_havran_9_11.png)"}, "dosah_m": 32,
  "bunka_m": 10,
  "tridy": {
   "louka_kosena": {

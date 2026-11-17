@@ -129,6 +129,13 @@
    "jarmo_po_m": 3.5,
    "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
    "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)",
+   "najezd_cesty": {
+    "udoli_440_1": {
+     "rovne_m": 1.0,
+     "oblouk_m": 5.0
+    }
+   },
+   "pozn_najezd_17_11": "Míša 17. 11. (docs/screens/misa_17_11/14.jpg, x 110,4 z 517,9: pěšina za lávkou přeškrtnutá – klička do kopce, dokreslené vedení vpravo podél údolí k cestě): výchozí nájezd 6 m rovně v ose mostu (na východ) + oblouk 26 m vytlačil cestu udoli_440_1 z údolí do svahu a zpět na jih (hák až x 160 při ose x 153,5); jako most_440_3 (Míša 15. 11.) nájezd 1 m + oblouk 5 m, ale jen pro východní cestu udoli_440_1 (najezd_cesty, cesty.py) – za mostem hned na jih podél Veličky; západní udoli_440_2 s ostrým nájezdem měla příčný sklon 0,10 (test cesta_pricny_sklon), zůstává výchozí",
    "_konce": [
     [
      153.6699981689453,
@@ -380,6 +387,8 @@
   ],
   "zdroj_odraz": "pipeta (medián) misa_real_01_potok_trava_kameny.jpg výřez x 330–420, y 230–270 (vzdálenější hladina zrcadlící keře); KCD kcd1_lesni_potok_kameny_mech.jpg: hladina tmavá, zrcadlí koruny",
   "kraj_m": 0.08,
+  "kryti_min": 0.45,
+  "zdroj_17_11": "Míša 17. 11. (tablet, docs/screens/misa_17_11/13.jpg a 19.jpg: „nemáš vodu v potoce“, mlýnské kolo na suchu): voda na tabletu je, snímek PC z týchž poloh vypadá stejně (docs/screens/voda_17_11_pred_*.png) – příčina není export ani Adreno, ale vzhled: shora krytí jen 1 − exp(−h/0,5) (mělčina 0,1 m → 18 %), Fresnel 2 %, specular 0,05 s drsností 0,3 → průsvitná tmavá hladina na ztmaveném dně = prázdné koryto. Předloha misa_real_01: hladinu čte lesk oblohy a vlnky i tam, kde je vidět dno. Proto kryti_min 0,45 (krytí hladiny i na mělčině, kraj u čáry vody dál do ztracena kraj_m), čirost 0,3 m (Havran reka 0,35), specular 0,3 a drsnost 0,15 (lesk vlnek; 13. 11. bílá deska byla 0,35/0,08 + pěna všude 8 %). Ověřeno snímky docs/screens/voda_17_11_po_*.png, tablet NEOVERENO",
   "zdroj_kraj": "krytí u čáry vody doroste na prvních 8 cm hloubky (hrana vody se nečte jako čára – README_jak_se_stavi.md §2.2 d) – NEOVERENO, snímek",
   "pena_kamen_polomer": 0.8,
   "pena_kamen_po_proudu": 2.0,
@@ -409,8 +418,6 @@
    1.05,
    0.9
   ],
-  "zdroj_15_11": "Míša 15. 11. (foto x −49,8 z 120,2): „voda je dost bílá i některé kameny“ – pěna 0,72 → 0,44 (světlé čárky za kameny jen naznačené), jas kamenů koryta (drobné 1,75 → 1,05, balvany 1,25 → 0,9; dřív v kódu hlavni.gd _kameny_koryta)",
-  "kryti_min": 0.45,
-  "zdroj_17_11": "Míša 17. 11. (tablet, docs/screens/misa_17_11/13.jpg a 19.jpg: „nemáš vodu v potoce“, mlýnské kolo na suchu): voda na tabletu je, snímek PC z týchž poloh vypadá stejně (docs/screens/voda_17_11_pred_*.png) – příčina není export ani Adreno, ale vzhled: shora krytí jen 1 − exp(−h/0,5) (mělčina 0,1 m → 18 %), Fresnel 2 %, specular 0,05 s drsností 0,3 → průsvitná tmavá hladina na ztmaveném dně = prázdné koryto. Předloha misa_real_01: hladinu čte lesk oblohy a vlnky i tam, kde je vidět dno. Proto kryti_min 0,45 (krytí hladiny i na mělčině, kraj u čáry vody dál do ztracena kraj_m), čirost 0,3 m (Havran reka 0,35), specular 0,3 a drsnost 0,15 (lesk vlnek; 13. 11. bílá deska byla 0,35/0,08 + pěna všude 8 %). Ověřeno snímky docs/screens/voda_17_11_po_*.png, tablet NEOVERENO"
+  "zdroj_15_11": "Míša 15. 11. (foto x −49,8 z 120,2): „voda je dost bílá i některé kameny“ – pěna 0,72 → 0,44 (světlé čárky za kameny jen naznačené), jas kamenů koryta (drobné 1,75 → 1,05, balvany 1,25 → 0,9; dřív v kódu hlavni.gd _kameny_koryta)"
  }
 }

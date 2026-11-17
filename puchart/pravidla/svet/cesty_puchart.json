@@ -1360,10 +1360,10 @@
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 325,
-   "max_rez_m": 1.5,
-   "max_nasyp_m": 1.5,
-   "max_pricny": 0.048,
+   "delka_m": 319,
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 2.9,
+   "max_pricny": 0.032,
    "max_uprava_m": 2.0
   },
   {
@@ -21727,10 +21727,10 @@
    "podle_terenu": true
   },
   "udoli_440_1": {
-   "delka_m": 325,
-   "max_rez_m": 1.5,
-   "max_nasyp_m": 1.5,
-   "max_pricny": 0.048,
+   "delka_m": 319,
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 2.9,
+   "max_pricny": 0.032,
    "max_uprava_m": 2.0,
    "podle_terenu": true
   },

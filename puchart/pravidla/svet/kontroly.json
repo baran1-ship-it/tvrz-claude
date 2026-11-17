@@ -487,7 +487,7 @@
  },
  "spoje": {
   "popis": "Hlídač tesařských spojů (nastroje/kontrola_spoju.py, docs/reference/tesarske_spoje.md): vadné = vrostlý + křížení. Strop jen klesá – nové vady nesmí přibýt (Míša 3. 11.: „stolařsky správně všude“). 3. 11. večer: 1557 → 32 (s novými ochozy hradeb).",
-  "max_vadnych": 36,
+  "max_vadnych": 35, "pozn_17_11": "17. 11.: 36 → 35 – zábradlí se staví se stálým semínkem náhody (puchart_hrad.stavba: R.seed před zabradli_stavba), počet dílů před ním (ochozy paláce B, Míša 17. 11.) už chvění nepřenáší; spoj schodů A (1,2; −9,1) vyhověl",
   "pozn_16_11": "16. 11.: 45 → 43 (studna) → 36. Vady navíc proti dobré verzi 336efdb (41) nebyly nové díly: P.box/P.beam berou náhodu (lib.box, jit), nový kód okenic/sedátek/studny posunul stav náhody a chvění j přeneslo spoje, které vyhovovaly jen těsně – sloup kozy mostu stejně široký jako příčník (puchart_hrad.most2 → sloup čelem pod příčník + čep), příčníky padacího mostu s mezerou 3,5 cm pod podélníky při j=1 (kit.drawbridge → j 0,4), střední tyč zábradlí lícující s bokem sloupku (puchart_hrad zábradlí → osa 0,05 m, zapuštěná do mezisloupků).",
   "vyjimka": {
    "strop_puvodni": 32,

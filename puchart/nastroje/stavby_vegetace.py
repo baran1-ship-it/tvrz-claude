@@ -187,7 +187,10 @@ if os.path.exists(D + "pruchody_voda.json"):
     mm = Image.new("L", ms.size, 0); dm_ = ImageDraw.Draw(mm)
     for b_ in json.load(open(D + "pruchody_voda.json"))["trasy"].values():
         dm_.line([pix(q[:2]) for q in b_], fill=1, width=max(2, int(5.5 / ks)))
-    mm = np.array(mm).astype(bool); st[mm] = SJ["tridy"].index("cesta"); Image.fromarray(st).save(D + "stanoviste.png")
+    mm = np.array(mm).astype(bool)
+    # koryto pod mostem a lávkou zůstává korytem (test smysl:mlyn_koryto – 17. 11. po přestavbě terénu byla osa Veličky pod
+    # lávkou k mlýnu třídou cesta); bez stromů a keřů je i tak
+    st[mm & (st != SJ["tridy"].index("koryto_kamenite"))] = SJ["tridy"].index("cesta"); Image.fromarray(st).save(D + "stanoviste.png")
     keep &= ~mm[r, c]
 # brody (blender/voda.py → hra/data/brody.json): pás 9 m podél cesty přes tok, 6 m široký, bez stromů a keřů, třída cesta
 # (Havran _cesty_rostliny + louka.gd: bez trsů v potoce u brodu; Míša 6. 11.: brody zarostlé křovím)

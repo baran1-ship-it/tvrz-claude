@@ -39,5 +39,20 @@
   {"id": "predhradi", "nazev": "Ves Předhradí", "erb": "jidlo", "misto": "predhradi", "prichod": "naves"},
   {"id": "hajovna", "nazev": "Hájovna", "erb": "naradi", "misto": "hajovna", "prichod": "vstup_domu"}
  ],
- "mista_pozn": "mlýn na Veličce (mista.json mlyn_velicka) zatím není postaven – na mapu až se stavbou"
+ "mista_pozn": "mlýn na Veličce (mista.json mlyn_velicka) zatím není postaven – na mapu až se stavbou",
+ "zajimava": {
+  "popis": "značky zajímavých míst na mapě s popiskem (Míša 17. 11.: „nevím kde je důl a další zajímavé věci, hoď mi je do mapy“): všechna místa z hra/data/zajimava_mista.json (nastroje/zajimava_mista.py – poloha x, z a název z pravidla/svet/zajimava_mista.json), kreslí hra/scripts/mapa.gd inkoustem na pergamen pod erby; značka podle druhu místa (tvar), místo bez záznamu v druzich má tvar vychozi. Jen značka a název, ne rychlé cestování (cíl na zemi u štoly a zemljanek by vyžadoval vlastní příchod – zatím NAVRH)",
+  "zdroj": "Havran scripts/mapa.gd (erby míst s názvem, inkoust INK); KCD1/KCD2 mapa: body zájmu jako drobné kreslené symboly s názvem vedle erbů měst; hornický symbol kladívko a želízko (Schlägel und Eisen, doložen od 15. st. – https://de.wikipedia.org/wiki/Schl%C3%A4gel_und_Eisen) pro štolu a lom",
+  "soubor": "res://data/zajimava_mista.json",
+  "druhy": {"kriz_rozcesti": "kriz", "kriz_smirci": "kriz", "bozi_muka": "kriz", "uhlir": "ohen", "smolarna": "ohen", "brte": "strom", "studanka": "kapka", "lom": "kladivka", "stola": "kladivka", "mlyn": "kolo"},
+  "vychozi": "kruh",
+  "popisky": {"bozi_muka": "vlevo", "kriz_rozcesti": "nad", "kriz_smirci": "vpravo", "uhlir": "vlevo", "brte": "nad", "smolarna": "pod", "studanka": "vpravo"},
+  "popisky_pozn": "kam od značky jde název (pod / nad / vpravo / vlevo, výchozí pod) – milíř, brtě a smolárna jsou od sebe 40–70 m (na mapě 20–35 px), studánka u titulku mapy, kříž na rozcestí pod erbem Předhradí (snímek docs/screens/mapa_17_11_zajimava.png)",
+  "velikost_px": 15,
+  "pismo_px": 17,
+  "popisek_pod_px": 6,
+  "barva": [0.2, 0.12, 0.06],
+  "podklad": [0.96, 0.9, 0.76, 0.75],
+  "barva_pozn": "inkoust mapy (mapa.gd INK), popisek na světlém pergamenu jako názvy erbů"
+ }
 }

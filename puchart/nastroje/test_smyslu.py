@@ -1136,6 +1136,150 @@ for _tm, _tv in _TJ["modely"].items():
                         if uv.any(): _c28.append("%s %s: %d troj. v kvádru odebrat" % (os.path.basename(_f), n["name"], int(uv.sum())))
 TEST("topeni_bez_vybavy", _n28 > 0 and not _c28, "; ".join(_c28) if _c28 else "%d modelů topení bez odebrané výbavy (lopata pece krčmy)" % _n28)
 
+# Míša 17. 11. (snímek 06, palác B): pavlač hradby vedla skrz zeď do paláce – prkna, krakorce a zábradlí ochozu v přízemní síni
+# („spodek ochozu černý“). Deska žádného ochozu obou hradů (hra/data/ochozy_kontrola.json z puchart_hrad.ochoz2) nesmí ležet
+# v obrysu budovy nebo věže po vnější líc zdí (BUDOVY_K) ve výšce budovy – ochoz končí na líci, dovnitř vede jen portálkem.
+_OK29 = D + "ochozy_kontrola.json"; _c29 = []; _n29 = 0
+if not os.path.exists(_OK29): _c29.append("chybí hra/data/ochozy_kontrola.json (blender/puchart_hrad.py)")
+else:
+    _oj = json.load(open(_OK29)); _bd29 = _oj.get("budovy", [])
+    if not _bd29: _c29.append("žádné budovy v ochozy_kontrola.json")
+    for _rh, _y in _oj.get("ochozy", []):
+        _n29 += 1; _R = np.array(_rh, float); _vz = []
+        for a_ in np.linspace(0.03, 0.97, 12):
+            for b_ in np.linspace(0.06, 0.94, 4):
+                _vz.append(_R[0] + (_R[1] - _R[0]) * a_ + (_R[3] - _R[0]) * b_)
+        for _b in _bd29:
+            if not (_b["y0"] - 0.05 <= _y <= _b["y1"] + 0.05): continue
+            _c = np.array(_b["c"]); _d = np.array(_b["d"]); _s = np.array(_b["s"])
+            _z = _b.get("zed", 0.0)   # vnitřek = obrys bez zdí (konec desky smí být zapuštěný ve zdivu – šikmý líc)
+            _in = [q for q in _vz if abs((q - _c) @ _d) < _b["pul_d"] - _z - 0.02 and abs((q - _c) @ _s) < _b["pul_s"] - _z - 0.02]
+            if _in: _c29.append("ochoz y %.2f u (%.1f; %.1f) vede do %s (%d vzorků desky uvnitř)" % (_y, _in[0][0], _in[0][1], _b["jm"], len(_in)))
+TEST("ochoz_mimo_budovy", _n29 > 0 and not _c29, "; ".join(_c29[:6]) if _c29 else "%d desek ochozů obou hradů mimo budovy a věže (%d obrysů)" % (_n29, len(_bd29)))
+
+# --- tráva podle zápoje korun (Míša 17. 11.: „Havran má velkou hustotu trávy, ale pod stromy v lese ne“; Havran test les_trava,
+# pravidla/svet/louka.json les + test): pod zapojenými korunami ≈ žádná tráva louky, na louce a světlinách hustá; koruny se tu
+# počítají nezávisle na kryt.png (kruh poloměru koruny glb modelu × měřítko les.gd) – chyba 17. 11.: kryt_korun.py brala
+# korunu 0,2 × výška (modely 0,23–0,6) a tráva rostla pod korunami
+import glob as _gl, struct as _sx
+from scipy.ndimage import uniform_filter as _uf
+_LO = json.load(open(D + "louka.json")); _LL = _LO["les"]; _LT = _LO["test"]; _SM = json.load(open(D + "stromy_modely.json"))
+_KRP = np.array(Image.open(D + "kryt.png"), float) / 255.0; _KRP = _KRP[..., 0] if _KRP.ndim == 3 else _KRP
+def _rglb(f):
+    b = open(f, "rb").read(); n = _sx.unpack("<I", b[12:16])[0]; g = json.loads(b[20:20 + n]); mn, mx = [1e9] * 3, [-1e9] * 3
+    for m in g["meshes"]:
+        for p in m["primitives"]:
+            a = g["accessors"][p["attributes"]["POSITION"]]; mn = [min(x, y) for x, y in zip(mn, a["min"])]; mx = [max(x, y) for x, y in zip(mx, a["max"])]
+    return ((mx[0] - mn[0]) + (mx[2] - mn[2])) / 4.0
+_RM = {os.path.basename(f)[:-4]: _rglb(f) for f in _gl.glob(K + "/hra/modely/stromy/*.glb") if not f.endswith(("_daleko.glb", "_lod1.glb"))}
+_SA = np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5); _SDR = json.load(open(D + "stromy.json"))["dreviny"]
+_kk = SJ["krok_m"]; _cov = np.zeros(ST.shape, bool); _yy, _xx = np.mgrid[-14:15, -14:15]; _mer = _SM["meritko"]
+for x_, z_, h_, d_, _ in _SA:
+    mo = _SM["dreviny"][_SDR[int(d_)]]["model"]; vh = _SM["varianty"][mo]
+    nj = min((v for v in vh if not v.startswith("star")), key=lambda v: abs(vh[v] - h_))
+    r_ = _RM.get("%s_%s" % (mo, nj), 0.3 * vh[nj]) * min(max(h_ / vh[nj], _mer[0]), max(_mer[1], _SM.get("meritko_max_stare", _mer[1]))) * 0.88 / _kk   # 0,88: kraj koruny (smoothstep 0,7–1,05)
+    ci = int((x_ - SJ["x0_hra"]) / _kk); ri = int((z_ - SJ["z0_hra"]) / _kk)
+    if not (14 <= ci < ST.shape[1] - 14 and 14 <= ri < ST.shape[0] - 14): continue
+    _cov[ri - 14:ri + 15, ci - 14:ci + 15] |= (_xx + ci + 0.5 - (x_ - SJ["x0_hra"]) / _kk) ** 2 + (_yy + ri + 0.5 - (z_ - SJ["z0_hra"]) / _kk) ** 2 <= r_ * r_
+_nok = max(1, int(round(_LL["okoli_m"] / (2 * _kk)))) * 2 + 1
+_okol = _uf(_cov.astype(float), _nok)
+_lesm = np.isin(ST, [i for i, t in enumerate(TR) if t.startswith("les")])
+def _ss(a, e0, e1): t = np.clip((a - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t)
+_HU = np.array([float(_LO["tridy"].get(t, 0.0)) for t in TR])[ST] * (1 - _LL["ubytek"] * _ss(_KRP, _LL["kryt_od"], _LL["kryt_do"]))
+_pz = _lesm & _cov & (_okol >= _LL["okoli_do"])
+_lou = np.isin(ST, [TR.index(t) for t in ("louka_kosena", "pastvina") if t in TR])
+_svt = _lesm & (_uf(_cov.astype(float), 3) == 0) & np.isin(ST, [i for i, t in enumerate(TR) if _LO["tridy"].get(t, 0) > 0])   # světlo: bez koruny ±3 m
+_h_pz = float(_HU[_pz].mean()) if _pz.any() else 1.0; _p_pz = float((_HU[_pz] >= _LT["prah"]).mean()) if _pz.any() else 1.0
+_h_lo = float(_HU[_lou].mean()) if _lou.any() else 0.0; _h_sv = float(_HU[_svt].mean()) if _svt.any() else 0.0
+_bz = "trava" in BY.get("zapoj", {}).get("druhy", [])
+TEST("trava_zapoj", _pz.sum() > 1000 and _h_pz <= _LT["max_hustota"] and _p_pz <= _LT["max_podil_travy"] and _h_lo >= _LT["louka_min"] and _h_sv >= _LT["svetlina_min"] and _bz,
+     "pod zapojenými korunami (%d bodů 2 m, %.0f %% lesa): hustota trávy %.3f (mez %.2f), bodů s trávou %.1f %% (mez %.0f %%); louka %.2f (min %.2f), světliny v lese %.2f (min %.2f, %d bodů); byliny tráva podle zápoje %s"
+     % (int(_pz.sum()), 100 * _pz.sum() / max(_lesm.sum(), 1), _h_pz, _LT["max_hustota"], 100 * _p_pz, 100 * _LT["max_podil_travy"], _h_lo, _LT["louka_min"], _h_sv, _LT["svetlina_min"], int(_svt.sum()), _bz))
+
+# --- skupina C Míšina průchodu 17. 11. (voda, mlýn, lávka, mapa) ---
+# voda je vidět (Míša 17. 11., snímky 13 a 19: „nemáš vodu v potoce“): hladina má nejmenší krytí i na mělčině a lesk vlnek,
+# hra čte stejná čísla, shader je použije (kryti_min v ALPHA, hlavni.gd předá)
+_c29 = []; _vz29 = json.load(open(K + "/pravidla/svet/voda_hra.json"))["vzhled_13_11"]; _vh29 = json.load(open(K + "/hra/data/voda_hra.json"))["vzhled_13_11"]
+if float(_vz29.get("kryti_min", 0)) < 0.3: _c29.append("kryti_min %.2f < 0,3 (mělká voda shora průhledná = prázdné koryto)" % float(_vz29.get("kryti_min", 0)))
+if float(_vz29.get("specular", 0)) < 0.2: _c29.append("specular %.2f < 0,2 (hladina bez lesku)" % float(_vz29.get("specular", 0)))
+for _k29 in ("kryti_min", "cirost_m", "specular", "drsnost_klid"):
+    if _vz29.get(_k29) != _vh29.get(_k29): _c29.append("hra/data/voda_hra.json %s %s ≠ pravidla %s" % (_k29, _vh29.get(_k29), _vz29.get(_k29)))
+_sh29 = open(K + "/hra/shaders/voda.gdshader").read()
+if "uniform float kryti_min" not in _sh29 or not re.search(r"ALPHA\s*=.*kryti_min", _sh29): _c29.append("voda.gdshader nepoužije kryti_min")
+if '"kryti_min"' not in open(K + "/hra/scripts/hlavni.gd").read(): _c29.append("hlavni.gd nepředá kryti_min shaderu")
+TEST("voda_viditelna", not _c29, "; ".join(_c29) if _c29 else "krytí hladiny ≥ %.2f, specular %.2f, drsnost %.2f (hra = pravidla)" % (_vz29["kryti_min"], _vz29["specular"], _vz29["drsnost_klid"]))
+
+# mlýn (Míša 17. 11.: „do mlýna se nedá dostat, nemá funkční dveře“; snímky 17, 18: pytle a plot pryč): všechna křídla
+# Mlyn_Dvere_* modelu mají záznam dveří (pohyb_mista.json, kořen Zajimava), výbava dvora a plot cesty modelu se vynechá,
+# trasy dovnitř vedou otvory dveří a po podlaze (Mlyn_Kol_Podlaha) – průchod pruchod:zajimava_mlyn_dvur/_lavka, pruchod:dvere_mist
+_c30 = []; _mu30 = _glb_uzly(K + "/hra/modely/stavby_h/mlyn.glb")
+_pm30 = {e["name"]: e for e in json.load(open(K + "/hra/data/pohyb_mista.json"))["dily"] if e.get("koren") == "Zajimava"}
+_dv30 = [n_ for n_, nd in _mu30.items() if n_.startswith("Mlyn_Dvere_") and "mesh" in nd]
+for _n30 in _dv30:
+    if _n30 not in _pm30: _c30.append("%s bez záznamu dveří" % _n30)
+_zm30 = [m_ for m_ in json.load(open(K + "/pravidla/svet/zajimava_mista.json"))["mista"] if m_["id"] == "mlyn"][0]["mlyn"]
+_zh30 = [m_ for m_ in json.load(open(K + "/hra/data/zajimava_mista.json"))["mista"] if m_["id"] == "mlyn"][0]
+for _n30 in ("Mlyn_Dvur", "Mlyn_Cesta"):
+    if _n30 not in _mu30: _c30.append("%s v mlyn.glb není (jméno uzlu?)" % _n30)
+    if _n30 not in _zm30["vynechat"] or _n30 not in _zh30["mlyn"]["vynechat"]: _c30.append("%s se nevynechá" % _n30)
+_tr30 = json.load(open(K + "/hra/data/pruchody_zajimava.json"))["trasy"]
+for _t30 in ("zajimava_mlyn_dvur", "zajimava_mlyn_lavka"):
+    if _t30 not in _tr30: _c30.append("trasa %s chybí" % _t30); continue
+    _yw30 = math.cos(_zh30["yaw"]), math.sin(_zh30["yaw"]); _uvn = 0
+    for _b30 in _tr30[_t30]:
+        _dx, _dz = _b30[0] - _zh30["x"], _b30[1] - _zh30["z"]; _lx = _dx * _yw30[0] - _dz * _yw30[1]; _lz = _dx * _yw30[1] + _dz * _yw30[0]
+        if _b30[2] is not None:
+            _uvn += 1
+            if not (-3.31 < _lx < 3.31 and -5.61 < _lz < 5.61): _c30.append("%s bod [%.1f, %.1f] s výškou podlahy mimo podlahu mlýna" % (_t30, _lx, _lz))
+    if _uvn < 3: _c30.append("%s nevede dovnitř" % _t30)
+TEST("mlyn_dvere_dvur", not _c30 and len(_dv30) >= 5, "; ".join(_c30) if _c30 else "%d křídel mlýna funkčních, bez výbavy dvora a plotu, trasy dovnitř z dvora i od lávky" % len(_dv30))
+
+# nájezd na most bez háku (Míša 17. 11., snímek 14: pěšina za lávkou most_440_1 dělala kličku do kopce; 15. 11. most_440_3):
+# stejný výpočet jako cesty.py (rovně najezd_rovne_m v ose mostu, pak oblouk do původní osy) – u mostů, které Míša hlásila,
+# se cesta od původní osy neodchýlí víc než 3 m; ostatní mosty jen ve výpisu
+def _husta31(o):
+    o = np.array(o, float)[:, :2]; d_ = np.r_[0, np.cumsum(np.hypot(*np.diff(o, axis=0).T))]; s_ = np.arange(0, d_[-1] + 0.01, 0.5)
+    return np.c_[np.interp(s_, d_, o[:, 0]), np.interp(s_, d_, o[:, 1])]
+_HLASENE31 = {("most_440_1", "udoli_440_1"), ("most_440_3", "udoli_440_3")}   # Míša 17. 11. (snímek 14) a 15. 11. (x −27,2 z 206,2)
+_c31 = []; _info31 = []; _cs31 = [c_ for c_ in json.load(open(K + "/pravidla/svet/cesty_puchart.json"))["cesty"] if not c_.get("spojka")]
+for _m31 in json.load(open(K + "/pravidla/svet/voda_hra.json"))["mosty"]:
+    _R, _O = float(_m31.get("najezd_rovne_m", 6.0)), float(_m31.get("najezd_oblouk_m", 26.0)); _u31 = np.array(_m31["u_bodu"], float); _ko = []
+    for c_ in _cs31:
+        for k_ in (0, -1):
+            e_ = np.array(c_["osa"][k_][:2], float)
+            if np.hypot(*(e_ - _u31)) < 15: _ko.append((float(np.hypot(*(e_ - _u31))), c_, k_))
+    _ko.sort(key=lambda t_: t_[0])
+    if len(_ko) < 2: continue
+    (_, c1_, k1_), (_, c2_, k2_) = _ko[:2]; e1_ = np.array(c1_["osa"][k1_][:2], float); e2_ = np.array(c2_["osa"][k2_][:2], float); _mx = 0.0
+    for c_, k_, e_, a_ in ((c1_, k1_, e1_, (e1_ - e2_) / np.hypot(*(e1_ - e2_))), (c2_, k2_, e2_, (e2_ - e1_) / np.hypot(*(e2_ - e1_)))):
+        _nc31 = _m31.get("najezd_cesty", {}).get(c_["id"], {}); _R = float(_nc31.get("rovne_m", _m31.get("najezd_rovne_m", 6.0))); _O = float(_nc31.get("oblouk_m", _m31.get("najezd_oblouk_m", 26.0)))
+        o_ = np.array(c_["osa"], float); o_ = o_[::-1] if k_ == -1 else o_
+        hu_ = _husta31(o_); dl_ = np.r_[0, np.cumsum(np.hypot(*np.diff(hu_, axis=0).T))]
+        if dl_[-1] < _O + 4: continue
+        w_ = np.clip((_O - dl_) / (_O - _R), 0, 1); w_ = w_ * w_ * (3 - 2 * w_)
+        nov_ = (e_[None, :] + a_[None, :] * dl_[:, None]) * w_[:, None] + hu_ * (1 - w_[:, None]); _od = float(np.hypot(*(nov_ - hu_).T).max())
+        _info31.append("%s/%s %.1f m" % (_m31["id"], c_["id"], _od))
+        if (_m31["id"], c_["id"]) in _HLASENE31 and _od > 3.0: _c31.append("%s: cesta %s za mostem uhne od osy %.1f m (hák do svahu)" % (_m31["id"], c_["id"], _od))
+TEST("most_najezd_bez_haku", not _c31 and len(_info31) >= 4, "; ".join(_c31) if _c31 else "odchylka nájezdu od osy cesty: " + ", ".join(_info31))
+
+# mapa (Míša 17. 11.: „nevím kde je důl a další zajímavé věci, hoď mi je do mapy“): každé zajímavé místo z dat má na mapě
+# značku (mapa_body.json zajimava, druh nebo výchozí tvar), leží uvnitř mapy a mapa.gd značky kreslí
+_c32 = []; _mb32 = json.load(open(K + "/hra/data/mapa_body.json")).get("zajimava", {}); _mi32 = json.load(open(K + "/hra/data/mapa.json"))
+_tv32 = {"kriz", "kolo", "kladivka", "ohen", "kapka", "strom", "kruh"}
+if not _mb32: _c32.append("mapa_body.json bez zajimava")
+else:
+    if _mb32.get("soubor") != "res://data/zajimava_mista.json": _c32.append("značky nečtou hra/data/zajimava_mista.json")
+    for t_ in list(_mb32["druhy"].values()) + [_mb32["vychozi"]]:
+        if t_ not in _tv32: _c32.append("neznámý tvar značky %s" % t_)
+_zz32 = json.load(open(K + "/hra/data/zajimava_mista.json"))["mista"]
+for m_ in _zz32:
+    if not (_mi32["x0"] <= m_["x"] <= _mi32["x1"] and _mi32["z0"] <= m_["z"] <= _mi32["z1"]): _c32.append("%s mimo mapu" % m_["id"])
+_mg32 = open(K + "/hra/scripts/mapa.gd").read()
+if "_draw_zajimava(r, u)" not in _mg32 or "nacti_zajimava(cfg)" not in _mg32: _c32.append("mapa.gd značky nekreslí")
+for _id32 in ("stola", "lom", "mlyn", "studanka", "uhlir"):
+    if _id32 not in [m_["id"] for m_ in _zz32]: _c32.append("místo %s chybí v datech" % _id32)
+TEST("mapa_zajimava", not _c32, "; ".join(_c32) if _c32 else "%d zajímavých míst na mapě se značkou a názvem (důl, lom, mlýn, studánka, milíř…)" % len(_zz32))
+
 # dymník černé kuchyně celku (Míša 17. 11., snímek 12: digestoř končí v podkroví „?“; NAVOD_KRCMA_L: kouř odchází dymníkem
 # v hřebeni): průduch (díly Dymnik_* v mista.json upravy_modelu) začíná na odtahu topeniště (topeni.json kuchyne, značka
 # Pec_Kour), končí pod značkou kouře dymníku (*_Kour_Dymnik, vodorovně ≤ 0,8 m, pod hřebenem) a neprostupuje krovem ani krytinou

@@ -597,6 +597,10 @@ def okno_palace(P, c, dd, nout, t, w, ya, yb, dvoj, ys, yn):
     hn = t - sl   # nika: sedátko a okenice
     if hn >= 0.05: NIKY.append({"stred": [round(v, 3) for v in (f - nout * (sl + hn / 2))], "ven": [round(nout.x, 4), round(nout.z, 4)], "podel": [round(dd.x, 4), round(dd.z, 4)],
                                 "sirka": round(wn, 3), "hloubka": round(hn, 3), "y0": round(ys, 3), "y1": round(yn, 3)})
+    else:   # světlík přes celou zeď (přízemí): okenice otevřené naplocho k vnitřnímu líci (uhel_lic) – zábor líce pro test krb_okna
+        # (Míša 17. 11., snímek 01: topeniště černé kuchyně A stálo před okénkem přízemí, test hlídal jen niky v patře)
+        NIKY.append({"stred": [round(v, 3) for v in (f - nout * t)], "ven": [round(nout.x, 4), round(nout.z, 4)], "podel": [round(dd.x, 4), round(dd.z, 4)],
+                     "sirka": round(2 * (w + POHYB_OK.get("presah_m", 0.02)) + 0.04, 3), "hloubka": 0.1, "y0": round(ya - 0.1, 3), "y1": round(yb + 0.1, 3), "druh": "svetlik"})
     # okenice vnitřní (docs/reference/okna_palace.md), blízká verze: pohyblivá křídla Pohyb_okeniceN_l/_p (pohyb_okenice)
     use_ = m @ Vector((0.0, (ya + yb) / 2, -sl - POHYB_OK["ovladani_do_mistnosti_m"]))
     if hn < 0.05:   # přízemí a okénka v hradbě: okenice na vnitřním líci zdi, otevřené k líci
@@ -1382,11 +1386,30 @@ def zapec_ao(obs, paprsku=10, dosah=2.5):
             g = ter(p.x, -p.y)   # Blender: hra z = −y
             pata = min(1.0, max(0.0, (p.z - g) / 1.6))   # do 1,6 m nad terénem vlhko a hlína
             ao[v.index] = max(0.05, a) * (0.62 + 0.38 * pata)
+        # dřevo (prkna, trámy, krakorce): kvádr má 8 společných vrcholů – normála vrcholu míří šikmo přes roh, paprsky z rohu prkna
+        # zasáhly sousední prkna a trám pod nimi → spodek podlah a pavlačí G 0,15 (Míša 17. 11., snímek 06: „spodek podlahy úplně
+        # černý“, strop přízemí paláce B). Pro plochy dřeva AO na roh plochy s normálou plochy, bod kousek do plochy (ne na hraně).
+        drevo = {i for i, m_ in enumerate(me.materials) if m_ is not None and m_.name.startswith(AO_PLOCHY)}
+        ao_l = {}
+        for poly in me.polygons:
+            if poly.material_index not in drevo: continue
+            n = (nm @ poly.normal).normalized()
+            if n.length < 0.5: continue
+            t_ = n.orthogonal().normalized(); b_ = n.cross(t_); cp_ = mw @ poly.center
+            for li in poly.loop_indices:
+                p = mw @ me.vertices[me.loops[li].vertex_index].co; p = p + (cp_ - p) * 0.2
+                hit = 0.0
+                for sm in smery:
+                    loc, _, _, dist = tree.ray_cast(p + n * 0.01, t_ * sm.x + b_ * sm.y + n * sm.z, dosah)
+                    if loc is not None: hit += 1.0 - (dist / dosah) * 0.6
+                g = ter(p.x, -p.y); pata = min(1.0, max(0.0, (p.z - g) / 1.6))
+                ao_l[li] = max(0.05, 1.0 - hit / paprsku) * (0.62 + 0.38 * pata)
         nv += len(me.vertices)
-        barva_kusu(ob, ao)
+        barva_kusu(ob, ao, ao_l)
     print("AO zapečeno: vrcholů %d, %.0f s" % (nv, time.time() - t0), flush=True)
 
-def barva_kusu(ob, ao=None):
+AO_PLOCHY = ("prkn", "dub", "rez_drevo")   # materiály, jejichž AO se peče na roh plochy (zapec_ao)
+def barva_kusu(ob, ao=None, ao_l=None):
     """Havran blender/export_game.py vertex_colors(): atribut rnd (každý kus jiný) -> barva vrcholu: R = odstín kusu
     0,8 + 0,2·rnd, B = semeno kusu (shadery textura/zdivo: jiný výřez fotky, jas po délce – Míša 5. 11.: „vše je jen rastr“)."""
     me = ob.data; rnd = me.attributes.get("rnd")
@@ -1397,7 +1420,7 @@ def barva_kusu(ob, ao=None):
     for poly in me.polygons:
         r = rv[poly.index]
         for li in range(poly.loop_start, poly.loop_start + poly.loop_total):
-            data[li * 4:li * 4 + 4] = [0.8 + 0.2 * r, ao[me.loops[li].vertex_index] if ao else 1.0, r, 1.0]
+            data[li * 4:li * 4 + 4] = [0.8 + 0.2 * r, ao_l[li] if ao_l and li in ao_l else (ao[me.loops[li].vertex_index] if ao else 1.0), r, 1.0]
     col.data.foreach_set("color", data); me.color_attributes.active_color = col
 
 def barvy_vrcholu(ob, barvy):

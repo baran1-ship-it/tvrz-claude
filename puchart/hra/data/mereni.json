@@ -98,6 +98,16 @@
    ]
   },
   {
+   "jmeno": "les trava stinovana",
+   "usek": "les",
+   "trava_unshaded": false
+  },
+  {
+   "jmeno": "les trava unshaded",
+   "usek": "les",
+   "trava_unshaded": true
+  },
+  {
    "jmeno": "les dest",
    "usek": "les",
    "dest": 1.0
@@ -126,5 +136,6 @@
    "popis": "JEN POPIS, mereni.gd ji nespouští: přepnutí vyžaduje restart. Postup (Míša): 1) Nastavení → Spustit test výkonu v Compatibility, vyfotit; 2) Nastavení → Vykreslování → Vulkan (Mobile) – hra se restartuje; 3) znovu Spustit test výkonu, vyfotit. Výsledek nese řádek „vykreslování:“, poslední výsledek každého režimu zůstává v user://mereni_<id>.txt a nabídka Měření ukáže oba."
   }
  ],
- "pozn_vykreslovani": "Míša 15. 11.: „Vulkan chci vyzkoušet“ – stejná trasa v obou režimech (pravidla/svet/vykreslovani.json, hra/scripts/vykreslovani.gd); první průchod ve Vulkanu kompiluje pipeline – úsek „hrad“ porovnávat s opatrností (záseky), rozhodují les a voda."
+ "pozn_vykreslovani": "Míša 15. 11.: „Vulkan chci vyzkoušet“ – stejná trasa v obou režimech (pravidla/svet/vykreslovani.json, hra/scripts/vykreslovani.gd); první průchod ve Vulkanu kompiluje pipeline – úsek „hrad“ porovnávat s opatrností (záseky), rozhodují les a voda.",
+ "pozn_trava_17_11": "17. 11. (Havran trava_unshaded): tráva stínovaná / unshaded na tabletu i PC (výchozí: tablet unshaded, PC stínovaná – louka.json unshaded)"
 }

@@ -31,6 +31,7 @@ var _hover := -1
 var _astar := AStar2D.new()
 var _fig := {}                  # "kun" / "pesky" -> Texture2D (nastroje/mapa_figurka.py)
 var _jizda := {}                # běžící cesta: body, kum (kumulativní délky), L, s, rychlost_m_s (mapa), km_h, cil, pohled, hod0
+var zajimava: Array = []        # značky zajímavých míst [{nazev, p: Vector2, tvar}] (mapa_body.json zajimava; Míša 17. 11.)
 
 
 ## Místa mapy z dat: pevná (cil/pohled) i odvozená ze staveb nových míst (misto + prichod).
@@ -77,6 +78,17 @@ static func nacti_mista(c: Dictionary) -> Array:
 	return out
 
 
+## Značky zajímavých míst (Míša 17. 11.: „nevím kde je důl a další zajímavé věci, hoď mi je do mapy“): poloha a název
+## z hra/data/zajimava_mista.json, tvar značky podle druhu z mapa_body.json zajimava.druhy.
+static func nacti_zajimava(c: Dictionary) -> Array:
+	var zc: Dictionary = c.get("zajimava", {}); var out: Array = []
+	if zc.is_empty() or not FileAccess.file_exists(String(zc["soubor"])): return out
+	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(String(zc["soubor"])))
+	for m: Dictionary in d.get("mista", []):
+		out.append({"id": m["id"], "nazev": m["nazev"], "p": Vector2(float(m["x"]), float(m["z"])), "tvar": String((zc["druhy"] as Dictionary).get(m["id"], zc["vychozi"]))})
+	return out
+
+
 ## Bod na zemi pro hráče (Havran fast_travel: volné místo pro kapsli po spirále): paprsek dolů od terénu + paprsek_nad_m
 ## na kolize (podlaha nádvoří, dlažba, terén); kolize terénu a kmenů se v cíli postaví hned.
 static func cil_na_zemi(hl: Node, c: Dictionary, cil: Vector2, bez: Array[RID]) -> Vector3:
@@ -116,6 +128,7 @@ func _ready() -> void:
 	info = JSON.parse_string(FileAccess.get_file_as_string("res://data/mapa.json"))
 	cfg = JSON.parse_string(FileAccess.get_file_as_string("res://data/mapa_body.json"))
 	mista = nacti_mista(cfg)
+	zajimava = nacti_zajimava(cfg)
 	_tex = load("res://textury/ui/mapa.png") if ResourceLoader.exists("res://textury/ui/mapa.png") else null
 	_fb = load("res://fonty/GrenzeGotisch-Bold.ttf"); _fm = load("res://fonty/GrenzeGotisch-Medium.ttf")
 	for m: Dictionary in mista:
@@ -225,6 +238,7 @@ func _draw_all() -> void:
 	var r := _map_rect()
 	_c.draw_texture_rect(_tex, r, false)
 	var u := _u(r)
+	_draw_zajimava(r, u)
 	for i in mista.size():   # erb a název místa
 		var m: Dictionary = mista[i]
 		var c := _to_screen(r, m["p"])
@@ -256,6 +270,48 @@ func _draw_all() -> void:
 	Styl.kresli_pecet(_c, cr.get_center(), 27.0)
 	_rects.append([cr, "zavrit", 0])
 	if asking: _draw_ask(s, u)
+
+
+## Značky zajímavých míst inkoustem (kříž, oheň milíře a smolárny, strom brtě, kapka studánky, kladívko a želízko štoly
+## a lomu, kolo mlýna) a název pod značkou na světlém podkladu.
+func _draw_zajimava(r: Rect2, u: float) -> void:
+	var zc: Dictionary = cfg.get("zajimava", {})
+	if zajimava.is_empty(): return
+	var bv: Array = zc["barva"]; var ink := Color(bv[0], bv[1], bv[2])
+	var pk: Array = zc["podklad"]; var bg := Color(pk[0], pk[1], pk[2], pk[3])
+	var a := float(zc["velikost_px"]) * u; var w := maxf(2.0, 2.4 * u)
+	for z: Dictionary in zajimava:
+		var c := _to_screen(r, z["p"])
+		_c.draw_circle(c, a * 1.05, bg)
+		match String(z["tvar"]):
+			"kriz":
+				_c.draw_line(c + Vector2(0, -a), c + Vector2(0, a), ink, w); _c.draw_line(c + Vector2(-a * 0.55, -a * 0.35), c + Vector2(a * 0.55, -a * 0.35), ink, w)
+			"kolo":
+				_c.draw_arc(c, a * 0.8, 0.0, TAU, 20, ink, w)
+				for k in 4: _c.draw_line(c - Vector2.from_angle(k * PI / 4.0) * a * 0.8, c + Vector2.from_angle(k * PI / 4.0) * a * 0.8, ink, w * 0.6)
+			"kladivka":
+				for sg in [-1.0, 1.0]:
+					var d := Vector2(sg * 0.7, 0.7)
+					_c.draw_line(c - d * a, c + d * a, ink, w)
+					var hl := c - d * a; var kol := Vector2(-d.y, d.x) * a * 0.35
+					_c.draw_line(hl - kol, hl + kol, ink, w * 1.6)
+			"ohen":
+				_c.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -a), c + Vector2(a * 0.6, a * 0.2), c + Vector2(a * 0.35, a * 0.8), c + Vector2(-a * 0.35, a * 0.8), c + Vector2(-a * 0.6, a * 0.2)]), ink)
+			"kapka":
+				_c.draw_circle(c + Vector2(0, a * 0.25), a * 0.55, ink)
+				_c.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -a), c + Vector2(a * 0.5, a * 0.1), c + Vector2(-a * 0.5, a * 0.1)]), ink)
+			"strom":
+				_c.draw_line(c + Vector2(0, a), c + Vector2(0, 0), ink, w); _c.draw_circle(c + Vector2(0, -a * 0.3), a * 0.6, ink)
+			_:
+				_c.draw_circle(c, a * 0.45, ink)
+		var fs := float(zc["pismo_px"]) * u; var od := float(zc["popisek_pod_px"]) * u
+		var tw := _fm.get_string_size(String(z["nazev"]), HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs)).x * 0.5 + fs * 1.4
+		var kam := Vector2(0, a + od + fs)   # popisek pod značkou, u shluků podle dat jinam (zajimava.popisky)
+		match String((zc.get("popisky", {}) as Dictionary).get(z["id"], "pod")):
+			"nad": kam = Vector2(0, -a - od)
+			"vpravo": kam = Vector2(a + od + tw, fs * 0.35)
+			"vlevo": kam = Vector2(-a - od - tw, fs * 0.35)
+		_text(c + kam, String(z["nazev"]), int(fs), ink, bg, _fm)
 
 
 ## Jízda po mapě: ujetá část trasy plnou čarou, zbytek čárkovaně, figurka (zrcadlí se podle směru), hodina dne, Zastavit.

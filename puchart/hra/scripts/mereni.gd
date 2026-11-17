@@ -24,6 +24,7 @@ var varianty: Array = []
 var i_var := -1
 var _skryte: Array = []
 var _slunce: DirectionalLight3D
+var _louka_un := false
 var _hra_3d := 0.75
 var vykreslovani := ""   # renderer · ovladač · GPU · API (vykreslovani.gd popis)
 var _vyk_id := ""
@@ -34,6 +35,11 @@ func zacni(s: Node3D, kamera: Camera3D) -> void:
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mereni.json"))
 	trasa = cfg["useky"]; verze = cfg.get("verze", "") + " / Godot " + Engine.get_version_info()["string"]
 	varianty = cfg.get("varianty", [])
+	var jen := OS.get_environment("PUCHART_MERENI_JEN")   # PC vývoj: jen vybrané úseky a jejich varianty (např. "les"), méně času a paměti
+	if jen != "":
+		var js := jen.split(",")
+		trasa = trasa.filter(func(u: Dictionary) -> bool: return String(u["jmeno"]) in js)
+		varianty = varianty.filter(func(v: Dictionary) -> bool: return String(v.get("usek", "")) in js)
 	var vk := get_node_or_null("/root/Vykreslovani")   # vykreslování do výsledku (Compatibility / Vulkan – stejná trasa v obou, vykreslovani.gd)
 	_vyk_id = String(vk.bezici()["id"]) if vk and not vk.cfg.is_empty() else RenderingServer.get_current_rendering_method()
 	vykreslovani = vk.popis() if vk and not vk.cfg.is_empty() else "%s (%s) · %s" % [RenderingServer.get_current_rendering_method(), RenderingServer.get_current_rendering_driver_name(), RenderingServer.get_video_adapter_name()]
@@ -96,6 +102,8 @@ func _dalsi_varianta() -> void:
 	for n in _skryte: (n as Node3D).visible = true
 	_skryte.clear()
 	if _slunce: _slunce.shadow_enabled = true
+	var lou0 := get_tree().current_scene.get_node_or_null("Louka")   # varianta trava_unshaded: zpět na výchozí (louka.json unshaded)
+	if lou0 and lou0.has_method("nastav_unshaded") and _louka_un: lou0.nastav_unshaded(lou0._un_vychozi()); _louka_un = false
 	var poc0 := get_tree().current_scene.get_node_or_null("Pocasi")
 	if poc0: poc0.vynuceno = -1.0   # po variantě s deštěm a po konci měření zase podle rozvrhu
 	get_viewport().scaling_3d_scale = float(skaly[0])
@@ -112,6 +120,9 @@ func _dalsi_varianta() -> void:
 			if not l.is_empty(): _slunce = l[0]
 		if _slunce: _slunce.shadow_enabled = false
 	if v.has("scale"): get_viewport().scaling_3d_scale = float(v["scale"])
+	if v.has("trava_unshaded"):   # tráva bez stínového průchodu / stínovaná (louka.gd nastav_unshaded, Havran varianta louka_un)
+		var lou := koren.get_node_or_null("Louka")
+		if lou and lou.has_method("nastav_unshaded"): lou.nastav_unshaded(bool(v["trava_unshaded"])); _louka_un = true
 	var poc := koren.get_node_or_null("Pocasi")   # varianta s deštěm (pocasi.gd, Míša 12. 11.: „nezasekat tablet“)
 	if poc: poc.vynuceno = float(v.get("dest", -1.0))
 	for k in trasa.size():

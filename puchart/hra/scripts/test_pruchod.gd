@@ -907,6 +907,45 @@ func _test_zajimava() -> void:
 	vysledek["zajimava_mista"] = "OK" if spatne.is_empty() else "CHYBA: %s" % "; ".join(spatne)
 	print("PRUCHOD zajimava_mista ", vysledek["zajimava_mista"], " (míst %d, dílů na terénu %d, nabídek studánky %d)" % [d["mista"].size(), n, ns])
 
+## dvere_mist (Míša 17. 11.: „do mlýna se nedá dostat, nemá funkční dveře“; pravidlo „chyba v prvku, který mají i jiné stavby,
+## se opravuje všude“): každé křídlo *_Dvere_* ve stavbách vsi, míst a zajímavých míst (Mista, Ves, Zajimava) je díl dvere.gd
+## (tlačítko, kolize zavřeného křídla); u vstupu mlýna zavřené dveře nepustí dovnitř a otevřené ano.
+func _test_dvere_mist() -> void:
+	var dv: Node = _dvere(); var spatne: Array = []; var n := 0
+	var reg := {}
+	for g in dv.dily:
+		for e: Dictionary in dv.dily[g]: reg[e["uzel"]] = g
+	for k in ["Mista", "Ves", "Zajimava"]:
+		var kk := hlavni.get_node_or_null(k)
+		if kk == null: continue
+		for u in kk.find_children("*_Dvere_*", "MeshInstance3D", true, false):
+			if String(u.name).begins_with("Schod_"): continue   # stupeň před dveřmi (Schod_<Dům>_Dvere_*), ne křídlo
+			n += 1
+			if not reg.has(u): spatne.append("%s/%s bez funkce" % [k, String(u.get_path()).get_file()])
+	var vs: Node3D = null
+	var zj := hlavni.get_node_or_null("Zajimava")
+	if zj: vs = zj.find_child("Mlyn_Dvere_Vstup", true, false) as Node3D
+	if vs == null or not reg.has(vs): spatne.append("mlýn: dveře Mlyn_Dvere_Vstup nejsou funkční")
+	else:
+		var ml := zj.find_child("Mlyn", true, false) as Node3D
+		var g: String = reg[vs]
+		var ven := ml.global_transform * Vector3(5.2, 0.0, 0.25); var dov := ml.global_transform * Vector3(1.6, 0.3, 0.25)
+		var prosla := func() -> bool:
+			hrac.velocity = Vector3.ZERO; hlavni.svet.kolize_ihned(ven); hrac.position = Vector3(ven.x, hlavni.svet.vyska(ven.x, ven.z) + 0.3, ven.z)
+			await get_tree().create_timer(0.4).timeout
+			hrac.autopilot = Vector3(dov.x, 0, dov.z)
+			for i in 240: await get_tree().physics_frame
+			hrac.autopilot = Vector3.INF
+			return Vector2(hrac.position.x - dov.x, hrac.position.z - dov.z).length() < 0.8
+		dv.prepni(g); await get_tree().create_timer(1.5).timeout   # zavřít
+		var zavrena: bool = await prosla.call()
+		dv.prepni(g); await get_tree().create_timer(1.5).timeout   # otevřít
+		var otevrena: bool = await prosla.call()
+		print("PRUCHOD dvere_mist mlýn %s: zavřenými prošla %s, otevřenými %s" % [g, zavrena, otevrena])
+		if zavrena or not otevrena: spatne.append("mlýn %s: zavřenými prošla %s, otevřenými %s" % [g, zavrena, otevrena])
+	vysledek["dvere_mist"] = "OK" if spatne.is_empty() and n > 0 else "CHYBA: %s" % ("; ".join(spatne) if not spatne.is_empty() else "žádné dveře")
+	print("PRUCHOD dvere_mist ", vysledek["dvere_mist"], " (křídel %d)" % n)
+
 func _chyba(t: String) -> void:
 	for i in hrac.get_slide_collision_count():
 		var c := hrac.get_slide_collision(i)
@@ -931,6 +970,7 @@ func _konec() -> void:
 	if jen == "" or "studna" in jen: await _test_studna()
 	if jen == "" or "kovadlina" in jen: await _test_kovadlina()
 	if jen == "" or "zajimava" in jen: await _test_zajimava()
+	if jen == "" or "dvere" in jen: await _test_dvere_mist()
 	hrac.autopilot = Vector3.INF
 	var f := FileAccess.open(OS.get_environment("PUCHART_VYSTUP") if OS.has_environment("PUCHART_VYSTUP") else "user://pruchod.json", FileAccess.WRITE); f.store_string(JSON.stringify(vysledek, " "))
 	var ok := vysledek.values().all(func(v): return v == "OK")

@@ -768,6 +768,18 @@
      }
     ],
     "podlaha_m": 0.43,
+    "pavlace": [
+     {
+      "oblast": [
+       10.05,
+       22.35,
+       -3.88,
+       -2.05
+      ],
+      "y": 2.85,
+      "pozn": "pochozí plocha pavlače křídla (podlaha M_Podbiti y 2,85; vnější hrana z −3,9, stěna z −1,9…−2,2); test smysl:pavlac_zabradli: po obvodu po 0,2 m musí být do 0,35 m ven kolize zábradlí nebo stěny ve výšce 0,3–0,9 m nad podlahou, nebo navazující pochozí plocha (podesta, podlaha za dveřmi) do 0,5 m pod úrovní (Míša 17. 11., snímky 09, 10)"
+     }
+    ],
     "stromy": {
      "druh": "jablon",
      "pocet": 2,

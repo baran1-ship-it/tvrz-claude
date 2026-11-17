@@ -314,12 +314,12 @@
    "topeni": "Topeniste_Kuchynske_Siroke_BezOdtahu",
    "prefix": "HradA_Kuchyne",
    "poloha": [
-    -4.958,
+    -4.166,
     39.12,
-    3.574
+    3.462
    ],
    "yaw_deg": -171.95,
-   "proc": "černá kuchyně paláce A: záda topeniště na líci jižního čela (u 0,554), osa paláce v 0, obsluha k severu (+d); místo ohniště a dýmníku z puchart_hrad.py (hrad_puchart.json vybaveni.topeni_generator false)",
+   "proc": "černá kuchyně paláce A: záda topeniště na líci jižního čela (u 0,554), obsluha k severu (+d); místo ohniště a dýmníku z puchart_hrad.py (hrad_puchart.json vybaveni.topeni_generator false). Míša 17. 11. (snímek 01): zadní stěna a dýmník (š 3,22 m) stály na ose paláce přes okénko přízemí v jižním čele (Okno6, světlík x −6,5…−6,1 s okenicemi otevřenými naplocho k líci) – holá hliněná deska trčela před oknem; posunuto o 0,8 m podél čela k východu (v 0,8): od okenic 0,25 m, od východního líce 0,49 m",
    "jistota": "NAVRH",
    "zdroj": "krby.json hradA_kuchyne; paprsky KOLIZE puchart.glb 15. 11. (líc čela u 0,554, podlaha 39,12, strop 42,36)"
   },

@@ -176,8 +176,13 @@
    "teren": [{"typ": "mlyn"}],
    "dily": [{"model": "mlyn", "poloha": [0, 0, 0]}],
    "mlyn": {
-    "vynechat": ["Mlyn_Teren", "Mlyn_Nahon", "Mlyn_Vantrok", "Mlyn_Lednice", "Mlyn_Lavka", "Mlyn_Kol_KoryKoz"],
-    "vynechat_pozn": "Míša 16. 11.: bez náhonu, žlabu na kozách (Mlyn_Nahon, kolize Mlyn_Kol_KoryKoz), vantroku, odtoku (Mlyn_Lednice) a lávky přes náhon (Mlyn_Lavka); dílový terén Havrana (Mlyn_Teren) se nepoužije",
+    "vynechat": ["Mlyn_Teren", "Mlyn_Nahon", "Mlyn_Vantrok", "Mlyn_Lednice", "Mlyn_Lavka", "Mlyn_Kol_KoryKoz", "Mlyn_Dvur", "Mlyn_Cesta"],
+    "vynechat_pozn": "Míša 16. 11.: bez náhonu, žlabu na kozách (Mlyn_Nahon, kolize Mlyn_Kol_KoryKoz), vantroku, odtoku (Mlyn_Lednice) a lávky přes náhon (Mlyn_Lavka); dílový terén Havrana (Mlyn_Teren) se nepoužije; Míša 17. 11. (docs/screens/misa_17_11/17.jpg, 18.jpg – přeškrtnuto): bez výbavy dvora Mlyn_Dvur (hromada pytlů z plochých plachet, polorozpadlý plot, hnůj, kameny) a bez plotu z klád podél cesty modelu Mlyn_Cesta (v keřích na svahu jako „žebřík“) – Havran voda.json mlyn.dil vynechat_uzly Mlyn_Dvur; zábor a přístup (souřadnice cesty modelu) zůstávají",
+    "trasy_mistni": {
+     "dvur": [[5.5, 0.25, null], [3.7, 0.25, null, 0.4], [2.4, 0.25, 0.3], [0.0, 0.25, 0.3], [-0.7, 0.15, 0.3], [-0.7, -1.7, 0.3], [-0.3, -4.3, 0.3], [2.6, -4.4, 0.3], [3.7, -4.4, null, 0.4], [5.6, -4.4, null]],
+     "lavka": [[-9.24, 0.15, null], [-5.24, 0.44, null], [-3.6, 0.27, null, 0.4], [-2.6, 0.25, 0.3], [-2.0, 0.15, 0.3], [-0.7, 0.15, 0.3], [-0.7, -1.7, 0.3]],
+     "pozn": "Míša 17. 11.: „do mlýna se nedá dostat, nemá funkční dveře“ – trasy průchodu dovnitř (test pruchod:zajimava_mlyn_dvur, pruchod:zajimava_mlyn_lavka): [x, z místně, výška nad počátkem modelu (podlaha 0,3 = Mlyn_Interier) nebo null = terén, tolerance]; dvůr → dveře Mlyn_Dvere_Vstup (otvor z −0,25…0,74 mezi Mlyn_Kol_StenaR0/R1) → síň → dveře Mlyn_Dvere_Mlynice (x −1,17…−0,23) → mlýnice mezi palečním kolem a schody → dveře Mlyn_Dvere_MlyniceVen (z −5,03…−3,78) ven; od lávky (voda_hra.json lavky mlyn) dveřmi Mlyn_Dvere_Dvur (z −0,18…0,68) do síně a mlýnice. Dveře funkční přes pravidla/svet/pohyb_mista.json zajimava (dvere.gd)"
+    },
     "zabor": [[-3.6, 11.0, -7.5, 7.5], [3.0, 10.6, -16.4, -7.5]],
     "bez_porostu_kolo": [-6.2, -3.4, -5.8, -1.0],
     "bez_porostu_pozn": "Míša 16. 11. (snímek mista_mlyn_kolo_16_11: „kolo stojí v trávě“): pod kolem a kolem něj bez porostu (pudorysy → stavby_vegetace.py; koryto toku zůstane korytem)",

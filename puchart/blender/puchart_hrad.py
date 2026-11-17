@@ -43,6 +43,15 @@ def _box_kol(self, m, size, mat, uvo=None, rnd=None, collide=False):
 Part.box = _box_kol
 
 _DBG = os.environ.get("PUCHART_DBG"); _DBGL = []   # ladění kolizí: PUCHART_DBG="x,z,y" vypíše kolizní kvádry do 2 m
+BUDOVY_K = []   # obrysy budov a věží po vnější líc zdí [(střed, d, s, půl délky, půl hloubky, y0, y1, jméno, tloušťka zdí)] – ochoz do nich nevede (ochoz2, Míša 17. 11.)
+OCHOZY_K = []   # postavené desky ochozů [(roh0..roh3 xz, y, úsek)] → hra/data/ochozy_kontrola.json (test smyslu ochoz_mimo_budovy)
+def v_budove(q, y, okraj=0.01):
+    """Bod q (xz) ve výšce y uvnitř obrysu budovy nebo věže z BUDOVY_K (po vnější líc zdí) → jméno, jinak None."""
+    for c_, d_, s_, hd_, hs_, y0_, y1_, jm_, _tz in BUDOVY_K:
+        if y0_ - 0.05 <= y <= y1_ + 0.05:
+            r_ = hz(q - c_)
+            if abs(r_.dot(d_)) < hd_ - okraj and abs(r_.dot(s_)) < hs_ - okraj: return jm_
+    return None
 POCH = []; ZABR = []; ZAB_REC = []; ZAB_VYSTUP = []   # pochozí plochy (plošiny, pavlače, podlahy) a zábradlí – hlídač volných hran (Míša 4. 11.)
 STAVBY = []   # záznamy staveb pro test smyslu (hra/data/stavby_kontrola.json): vstupy budov, kozy mostů
 NABEHY = []   # nájezdy na prahy [x, z, y, spad, délka, kdo] → hra/data/nabehy.json (test smyslu nabeh_vyska)
@@ -302,12 +311,38 @@ def naroze(P, poly, t, koruna, parapet=0.0, vynechat=()):   # zídka na pilíři
         if parapet > 0:
             P.prism([q + UP * koruna for q in body], UP * parapet, "zdivo")
 
-def ochoz2(P, a, b, t, koruna, vn, s0=None, s1=None, mezery=(), kryty=False, sirka=0.9, r0=None, r1=None, lehka=False, pod=(0, 0)):
+def ochoz2(P, a, b, t, koruna, vn, s0=None, s1=None, mezery=(), kryty=False, sirka=0.9, r0=None, r1=None, lehka=False, pod=(0, 0), _bez_budov=False):
     """Pavlač ochozu vyložená do nádvoří na krakorcích (Havran gallery) v úrovni koruny: prkna, kolizní deska, krakorce,
     zábradlí se sloupky po 1,5 m a kolizí. r0/r1 = konce zábradlí (v rozích průsečík se zábradlím sousední zdi – souvislé,
     Míša 30. 10.: zábradlí na ochozech), mezery = sjezdy schodišť a lávky."""
     L = (b - a).length; d = (b - a) / L
     s0 = -t / 2 if s0 is None else s0; s1 = L + t / 2 if s1 is None else s1
+    if not _bez_budov:   # Míša 17. 11. (snímek 06): pavlač hradby vedla skrz zeď do paláce B (krakorce, prkna a zábradlí v síni) –
+        # deska ochozu končí na vnějším líci budovy / věže (BUDOVY_K), zbytek úseku se staví po kusech mimo ni
+        def _uvnitr(u):   # celá šířka desky v obrysu: u šikmého líce deska dojde až ke zdi (konec zapuštěný ve zdivu, ne škvíra), do místnosti ne
+            return all(v_budove(a + d * u + vn * o_, koruna, okraj=0.1) for o_ in (t / 2 + 0.03, t / 2 + sirka / 2, t / 2 + sirka - 0.03))
+        us_ = [s0 + k_ * 0.05 for k_ in range(int((s1 - s0) / 0.05) + 1)] + [s1]
+        st_ = [_uvnitr(u) for u in us_]
+        if any(st_):
+            def _hranice(u0, u1):   # přechod venku/uvnitř mezi u0 a u1 na 1 mm
+                v0 = _uvnitr(u0)
+                for _ in range(8):
+                    um = (u0 + u1) / 2
+                    if _uvnitr(um) == v0: u0 = um
+                    else: u1 = um
+                return u0 if not v0 else u1
+            kusy_ = []; zac_ = None
+            for k_, (u, vv) in enumerate(zip(us_, st_)):
+                if not vv and zac_ is None: zac_ = s0 if k_ == 0 else _hranice(us_[k_ - 1], u)
+                if vv and zac_ is not None: kusy_.append((zac_, _hranice(us_[k_ - 1], u))); zac_ = None
+            if zac_ is not None: kusy_.append((zac_, s1))
+            for k0_, k1_ in kusy_:
+                if k1_ - k0_ < 0.3: continue
+                z0_, z1_ = abs(k0_ - s0) < 1e-6, abs(k1_ - s1) < 1e-6
+                ochoz2(P, a, b, t, koruna, vn, k0_, k1_, mezery=mezery, kryty=kryty, sirka=sirka, r0=r0 if z0_ else None, r1=r1 if z1_ else None,
+                       lehka=lehka, pod=(pod[0] if z0_ else 0, pod[1] if z1_ else 0), _bez_budov=True)
+            return
+    OCHOZY_K.append(([[round(q_.x, 2), round(q_.z, 2)] for q_ in (a + d * s0 + vn * (t / 2), a + d * s1 + vn * (t / 2), a + d * s1 + vn * (t / 2 + sirka), a + d * s0 + vn * (t / 2 + sirka))], round(koruna, 2)))
     roh0 = r0 is not None; r1_dan = r1 is not None   # roh se sousední pavlačí: krakorec v rohu staví sousední úsek (svůj konec r1) – ne dva v sobě
     r0 = s0 if r0 is None else r0; r1 = s1 if r1 is None else r1
     if s1 - s0 < 0.3: return
@@ -679,6 +714,7 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(),
     d = hz(d).normalized(); s = d.cross(UP).normalized()
     rohy = [c + d * (w / 2) * i + s * (dp / 2) * j for i, j in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
     lo = min(ter(p.x, p.z) for p in rohy + [c]) - 2.0
+    BUDOVY_K.append((c.copy(), d.copy(), s.copy(), w / 2, dp / 2, lo, ytop, "vez_%d_%d" % (round(c.x), round(c.z)), tw))
     for i_, j_ in ((-1, -1), (1, -1), (1, 1), (-1, 1)):   # nárožní kameny (Míša 9. 11.)
         R_ = c + d * (w / 2) * i_ + s * (dp / 2) * j_
         H.narozi(P, R_, (-d * i_, s * j_), (-s * j_, d * i_), ter(R_.x, R_.z) - 0.2, ytop - 0.05)
@@ -1118,6 +1154,9 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
     uprostřed strany k nádvoří (nebo vstup z dat), podlaha uvnitř, kolize stěn s mezerou dveří, náběh z terénu, světlo
     a vybavení podle vnitrek; jinak plná kolize půdorysu (starší chování). podl zadaná = pod budovou je sklep."""
     A_, B_ = V(a), V(b); d_ = (B_ - A_).normalized(); s_ = d_.cross(UP).normalized()
+    t_k = 1.1 if typ == "palac" else 0.5   # zdi na ose obrysu (hrady.budova): vnější líc o t/2 dál
+    y_k = podl if podl is not None else H.ter_rozsah([(q.x, q.z) for q in (A_ + s_ * hloubka / 2, A_ - s_ * hloubka / 2, B_ + s_ * hloubka / 2, B_ - s_ * hloubka / 2)])[0]
+    BUDOVY_K.append(((A_ + B_) / 2, d_, s_, (B_ - A_).length / 2 + t_k / 2, hloubka / 2 + t_k / 2, y_k - 1.0, y_k + 0.3 + hk + hd + 0.5, "budova_%s_%d_%d" % (typ, round((A_.x + B_.x) / 2), round((A_.z + B_.z) / 2)), t_k))
     BUDOVY.append([[round(q.x, 2), round(q.z, 2)] for q in (A_ - s_ * hloubka / 2, B_ - s_ * hloubka / 2, B_ + s_ * hloubka / 2, A_ + s_ * hloubka / 2)])
     H.OTVORY_PODLAH[:] = []
     if k_bodu is not None:
@@ -1339,6 +1378,12 @@ def schody_palace_seg(p0, p1, bd, PI):
     uvnitř jen strmé schody do podkroví u dřevěné příčky → žádné."""
     return []
 
+def bez_nahody(f, *a, **k):
+    """Díl postavený bez posunu náhody (lib.R, kit.RND): ostatní díly hradu se nehnou (chvění j u spojů – hlídač spojů, chyby.md 350)."""
+    s1_, s2_ = R.getstate(), kit.RND.getstate()
+    try: return f(*a, **k)
+    finally: R.setstate(s1_); kit.RND.setstate(s2_)
+
 def _pricka(P, W, d, s, u, v0, v1, y0, y1, dvere_v=None, sirka_dv=0.9):
     """Dřevěná prkenná příčka napříč budovou (Libštejn: dřevěné příčky v paláci) s dveřmi, kolize."""
     useky = [(v0, v1)] if dvere_v is None else [(v0, dvere_v - sirka_dv / 2), (dvere_v + sirka_dv / 2, v1)]
@@ -1466,7 +1511,20 @@ def palac_A(P, p0, p1, bd, PI):
                     mk_ = M(k0_ + n_ * 0.6 + e_ * a_ + UP * yk_, basis=frame(UP, n_))
                     P.lathe(mk_, [(0.1, 0.0), (0.105, 0.03), (0.085, 0.035)], 10, "kvadr_okno", cap_top=False)
                     P.lathe(mk_, [(0.08, 0.0), (0.07, 0.03)], 10, "tma", cap_bot=False)
-    P.box(M(W(DS["patro_pricky"][0]["u"] + 0.08, kv_, F1) + UP * 0.6, basis=frame(d)), (0.55, 0.5, 0.03), "tma")   # topeniště ze síně
+    # ústí topeniště ze síně (Míša 17. 11., snímek 03: „Uhasit oheň“ u černého kvádru, z dřevěné příčky trčela čela přikládacího tunelu
+    # kamen – tunel modelu končí v líci příčky, tmavá deska ho kryla jen zčásti): v dřevěné příčce kamenné ostění (tesané kvádry jako
+    # ostění oken, Žebrák – přikládací otvor 60 × 60 cm v kamenném rámu) kolem otvoru, ostění kryje čela tunelu, v otvoru tma
+    UK_ = DS["kamna"].get("usti", {}); u_k = DS["patro_pricky"][0]["u"] + 0.06   # líc příčky do síně
+    ow_, oy0_, oy1_ = UK_.get("otvor_sirka_m", 0.4), UK_.get("otvor_y_m", [0.33, 0.8])[0], UK_.get("otvor_y_m", [0.33, 0.8])[1]
+    rw_, rt_, rv_ = UK_.get("ramec_m", 0.25), UK_.get("ramec_hloubka_m", 0.15), UK_.get("ramec_vystup_m", 0.04)
+    uc_ = u_k + rv_ - rt_ / 2   # rám od líce příčky dovnitř (zapuštěný v příčce) a rv_ před líc
+    def usti_():
+        for v0_, v1_, y0_, y1_ in ((-ow_ / 2 - rw_, -ow_ / 2, oy0_ - 0.15, oy1_ + 0.28), (ow_ / 2, ow_ / 2 + rw_, oy0_ - 0.15, oy1_ + 0.28),
+                                   (-ow_ / 2, ow_ / 2, oy0_ - 0.15, oy0_), (-ow_ / 2, ow_ / 2, oy1_, oy1_ + 0.28)):
+            kit.stone(P, M(W(uc_, kv_ + (v0_ + v1_) / 2, F1 + (y0_ + y1_) / 2), basis=frame(d)), (v1_ - v0_, y1_ - y0_, rt_), "kvadr_okno", cham=0.02, rough=0.0)
+        P.box(M(W(u_k + 0.006, kv_, F1 + (oy0_ + oy1_) / 2), basis=frame(d)), (ow_ + 0.02, oy1_ - oy0_ + 0.02, 0.01), "tma")   # tma v otvoru (topeniště za ním)
+    bez_nahody(usti_)
+    Part("_zahodit").box(M(W(DS["patro_pricky"][0]["u"] + 0.08, kv_, F1) + UP * 0.6, basis=frame(d)), (0.55, 0.5, 0.03), "tma")   # náhoda jako dřívější deska: další díly hradu se nehnou
     H.ZNACKY.append(("HradA_Ohen_Kamna", W(DS["patro_pricky"][0]["u"] + 0.35, kv_, F1) + UP * 0.3))   # topeniště kamen ze síně (ohne.json druh kamna: světlo z ústí, bez plamene)
     _stul(P, W(2.3, 0.6, F1), d, 2.2)
     _truhla(P, W(1.0, vh_ + 0.45, F1), d)
@@ -1603,12 +1661,13 @@ def postav_A(P):
             PI = A["palac_interier"]; vs = PI["vstup"]
             H.BEZ_OKEN[:] = schody_palace_seg(p0, p1, bd, PI)
             H.OKAP_STRANY.clear(); H.OKAP_STRANY[0] = PI["dispozice"]["pavlac"].get("okap_nad_m", 0.3)   # strana k nádvoří: okap končí nad stříškou pavlače
+            H.OKNA_OD.clear(); H.OKNA_OD.update({int(k_): v_ for k_, v_ in PI.get("okna_od", {}).get("strany", {}).items()})   # okénko světnice mimo kamna (Míša 17. 11.)
             budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"], podl=SK["podlaha_palace_y"],
                      otvory=[(0, sj["u_dvere"] + g["tl"] / 2, sj["dvere"][0], SK["podlaha_y"], SK["podlaha_y"] + sj["dvere"][1]),
                              (vs["strana"], vs["od_m"], vs["sirka"], SK["podlaha_palace_y"], SK["podlaha_palace_y"] + vs["vyska"])] +
                             [(lambda WH: (0, dp_["u"], WH[0], PI["patra_y"][1], PI["patra_y"][1] + WH[1]))(portaly.otvor(PI["dispozice"]["dvere_sirka"], PI["dispozice"]["dvere_vyska"], "segment")) for dp_ in PI["dispozice"]["dvere_pavlac"]],
                      vstup=(vs["strana"], vs["od_m"], vs["sirka"], vs["vyska"]), plna_kolize=False, patra=PI["patra_y"][:2])
-            H.OKAP_STRANY.clear()
+            H.OKAP_STRANY.clear(); H.OKNA_OD.clear()
             palac_A(P, p0, p1, bd, PI)
         else:
             H.BEZ_OKEN[:] = []
@@ -1972,6 +2031,17 @@ def postav_B(P):
         iv = usek_v_palaci(a, b)
         if iv: mz.append((iv[0] - 1.0, iv[1] + 1.0))   # ochoz nevede palácem
         ochoz2(P, a, b, t, kor, vn, mezery=mz, r0=r0, r1=r1, lehka=True)   # prkna na pokos v rozích (Míša 4. 11.: B pořád křížem)
+    for i0_, i1_ in B["ochoz"].get("trasy_k_budove", []):   # Míša 17. 11. (snímek 04): pavlač kolem rohu až k líci paláce
+        n_ = len(U); L0_ = U[i0_][2]; L1_ = U[i1_][2]
+        if (i0_ + 1) % n_ == i1_: rh_ = roh(U, i0_); ss_ = [L1_ * k_ / 200 for k_ in range(201)]          # i1 pokračuje za rohem od s = 0
+        else: rh_ = roh(U, i1_); ss_ = [L1_ * (1 - k_ / 200) for k_ in range(201)]                         # i1 vede do rohu (s = L)
+        kon_ = None
+        for s_ in ss_:
+            if v_budove(pochozi(U, i1_, s_), kor): break
+            kon_ = s_
+        if kon_ is None: continue
+        sm_ = 1.0 if ss_[1] > ss_[0] else -1.0
+        TR["B_ochoz_k_budove_%d_%d" % (i0_, i1_)] = [bod(pochozi(U, i0_, L0_ / 2), kor), bod(rh_, kor), bod(pochozi(U, i1_, kon_ - sm_ * 0.6), kor)]
     a, b, L, d, vn = U[so["usek"]]; yd, yh = B["dolni_y"], B["horni_y"]; zz = Vector((0, 0, 1))
     if sts is not None:
         TR["B_vstup"] = [bod(zac - (G - zac).normalized() * 8.0), bod(zac - (G - zac).normalized() * 1.2), bod(zac, m["nastup_y"]), bod(zac.lerp(G, 0.5)), bod(G - vnG * (t / 2), yd), bod(G, yd),
@@ -2139,7 +2209,7 @@ def kontrola_okenic(cols):
     print("OKENICE skupin %d, upraveno/odstraněno %d: %s" % (len({e["group"] for e in okn}), len(OKENICE_LOG), OKENICE_LOG), flush=True)
 
 def stavba(suf):
-    H.TRAMY.clear(); POCH.clear(); ZABR.clear(); SCHODY.clear(); BUDOVY.clear(); STUPNE.clear(); portaly.ZAZNAM.clear()
+    H.TRAMY.clear(); POCH.clear(); ZABR.clear(); SCHODY.clear(); BUDOVY.clear(); BUDOVY_K.clear(); OCHOZY_K.clear(); STUPNE.clear(); portaly.ZAZNAM.clear()
     if _DBG and suf == "_daleko":
         x_, z_, y_ = map(float, _DBG.split(",")); q_ = Vector((x_, y_, z_))
         for c_, sz_, kdo in _DBGL:
@@ -2164,6 +2234,7 @@ def stavba(suf):
     json.dump({"popis": "díry v terénu (studna) – evidence pro hlídače; otvor v síti terénu dělá teren_dlazdice.dira z hrad_puchart.json", "diry": H.DIRY},
               open(os.path.join(K, "hra/data/diry_terenu.json"), "w"), ensure_ascii=False, indent=1)
     if suf == "": hrany_a_zabradli([PA, PB])
+    R.seed(2093)   # chvění zábradlí nezávislé na počtu dílů před ním (17. 11.: delší/kratší ochoz paláce B posunul náhodu a přenesl spoj schodů A)
     zabradli_stavba()   # až po doplnění zábradlí na volné hrany – i ta se napojí na ostatní (společné sloupky)
     if suf == "":
         os.makedirs(os.path.join(K, "build"), exist_ok=True)
@@ -2214,6 +2285,10 @@ def stavba(suf):
                   open(os.path.join(K, "build/portaly.json"), "w"), ensure_ascii=False, indent=0)
         json.dump({"popis": "niky oken paláců (hrady.okno_palace): střed niky (x, y 0, z), směr ven, podél zdi, šířka, hloubka, y0–y1 – test smyslu krb_okna (topení nesmí zasahovat do niky)",
                    "niky": H.NIKY}, open(os.path.join(K, "hra/data/okna_niky.json"), "w"), ensure_ascii=False)
+        json.dump({"popis": "desky ochozů (ochoz2: rohy xz, výška) a obrysy budov a věží po vnější líc (BUDOVY_K: střed, d, s, půl délky, půl hloubky, y0, y1, jméno) – test smyslu ochoz_mimo_budovy (Míša 17. 11.: ochoz vedl skrz zeď do paláce B)",
+                   "ochozy": OCHOZY_K, "budovy": [{"c": [round(c_.x, 3), round(c_.z, 3)], "d": [round(d_.x, 4), round(d_.z, 4)], "s": [round(s_.x, 4), round(s_.z, 4)],
+                                                  "pul_d": round(hd_, 3), "pul_s": round(hs_, 3), "y0": round(y0_, 2), "y1": round(y1_, 2), "jm": jm_, "zed": round(tz_, 2)} for c_, d_, s_, hd_, hs_, y0_, y1_, jm_, tz_ in BUDOVY_K]},
+                  open(os.path.join(K, "hra/data/ochozy_kontrola.json"), "w"), ensure_ascii=False)
         json.dump({"popis": "záznamy staveb pro test smyslu (blender/puchart_hrad.py)", "stavby": STAVBY}, open(os.path.join(K, "hra/data/stavby_kontrola.json"), "w"), ensure_ascii=False)
         # denní světlo z oken: jedno na shluk oken do 4 m (≈ místnost), bez stínů (rozhodnutí 9. 11.: „světlo z oken“)
         shl_ = []

@@ -362,7 +362,14 @@
    "stupen_y": 38.8,
    "podkrovi": true,
    "pozn_podkrovi": "Míša 5. 11.: podkroví přístupné – strmé schody podél štítové zdi do středu pod hřeben, u okapů bedněné kolenní stěny",
-   "dispozice": {
+   "okna_od": {
+     "strany": {"2": [2.5, 5.9, 10.1]},
+     "popis": "pevné polohy okének v hradbě v patře paláce A (hrady.budova OKNA_OD, od rohu strany: strana 2 = západní strana v hradbě od severního rohu, u = 12,5 − od) místo kroku 3,4 m od 2,5 (2,5; 5,9; 9,3)",
+     "pozn_17_11": "okénko světnice na u 3,2 (od 9,3) stálo 0,2 m vedle kachlových kamen (Kamna_Hradni_Nadobkova, u 3,55–4,95): otevřená okenice by narazila do kamen, kamna zasahovala do záboru okna; test smysl:krb_okna teď hlídá i světlíky bez niky (Míša 17. 11., snímek 01: topeniště kuchyně před okénkem přízemí) – okénko posunuto na u 2,4 (od 10,1), od kamen 0,8 m",
+     "zdroj": "docs/reference/okna_palace.md; Žebrák, Radyně – kamna v koutě u příčky, okno světnice mimo kamna (krby.json hradA_kamna)",
+     "jistota": "NAVRH"
+    },
+    "dispozice": {
     "pozn": "Míša 5. 11.: „musí se tam dát bydlet, každá místnost svou funkci, ne jen schody“, „někdy je schodiště zvenku s ochozem“; u = od jižního čela (osy zdi) k severnímu, vnitřní líc 0,55–11,95",
     "patro_pricky": [
      {
@@ -427,7 +434,18 @@
     "kamna": {
      "u": 4.3,
      "strana": "hradba",
-     "pozn": "kachlová kamna v rohu světnice u příčky, topeniště otvorem ze síně (Žebrák 60×60 cm)"
+     "pozn": "kachlová kamna v rohu světnice u příčky, topeniště otvorem ze síně (Žebrák 60×60 cm)",
+     "usti": {
+      "otvor_sirka_m": 0.4,
+      "otvor_y_m": [0.33, 0.8],
+      "ramec_m": 0.25,
+      "ramec_hloubka_m": 0.15,
+      "ramec_vystup_m": 0.04,
+      "popis": "ústí topeniště ze síně v dřevěné příčce: kamenné ostění (tesané kvádry kvadr_okno) kolem otvoru, v otvoru tma; otvor = světlost přikládacího tunelu Kamna_Hradni_Nadobkova (±0,19 m, 0,33–0,80 m nad podlahou), rám kryje čela zdí tunelu (±0,33 m, do 0,94 m), která končí v líci příčky (topeni.json hradA_kamna)",
+      "zdroj": "Žebrák, Radyně – kamna přikládaná ze síně otvorem v kamenném rámu (krby.json hradA_kamna, NAVOD_PEC.md hradní kamna); rozměry tunelu z LOD0 modelu (Blender bbox 17. 11.)",
+      "pozn_17_11": "Míša 17. 11. (snímek 03, „Uhasit oheň“): černý kvádr 0,55 × 0,5 m s oranžovými plátky – čela tunelu modelu v rovině líce příčky (prolínání) kolem tmavé desky; teď rám před lícem",
+      "jistota": "REKONSTRUKCE"
+     }
     },
     "podkrovi_schody": {
      "u_steny": 8.9,
@@ -725,21 +743,10 @@
    "jistota": "NAVRH (přední nádvoří podél západní hradby)"
   },
   "ochoz": {
-   "useky": [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14
-   ],
+   "useky": [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14],
+   "pozn_17_11": "Míša 17. 11. (snímek 04, x 49 z 154; „úprava některých ochozů, dle mého malování musí být pochopitelné“): pavlač úseku 9 končila v rohu se zábradlím napříč (X na kresbě), za ním koruna úseku 8 – kamenný „stupeň“ vedoucí k jižní zdi paláce, kam se nedalo vstoupit. Výška koruny = výška pavlače (14,0, paprsky KOLIZE 17. 11.), schody proto nejsou potřeba: úsek 8 dostal pavlač (zábradlí souvisle kolem rohu 9/8), končí na vnějším líci paláce (ochoz2 + BUDOVY_K, test smysl:ochoz_mimo_budovy, trasa B_ochoz_k_budove_9_8). Dveře do patra paláce tu nejsou: za zdí je vnitřní schodiště a jeho otvor v podlaze (x 50,8–57,2) – stejně jako úsek 6 (Míša 14. 11.) končí ochoz u paláce.",
+   "trasy_k_budove": [[9, 8]],
+   "trasy_k_budove_pozn": "trasa testu průchodu [úsek s pavlačí, sousední úsek končící u budovy]: z poloviny prvního přes roh až 0,6 m před líc budovy (blender/puchart_hrad.py postav_B)",
    "pozn_5_11": "úseky 6–8 kolem paláce bez pavlače (krakorce vyložené dovnitř by vedly palácem – test průchodu 5. 11.)",
    "pozn_14_11": "Míša 14. 11. (foto x 51 z 140, dvorek mezi věží a palácem): „tady mi dodělej ochoz a zábradlí“ – úsek 6 (V hradba) s ochozem od rohu s úsekem 5 k paláci; v délce paláce mezera (usek_v_palaci), konec u paláce se zábradlím"
   },
