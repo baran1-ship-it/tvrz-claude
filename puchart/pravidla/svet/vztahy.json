@@ -872,8 +872,7 @@
    "testy_puchart": [
     "pruchod:povrch_kolize",
     "pruchod:vse",
-    "smysl:teren_shoda",
-    "pruchod:dosah"
+    "smysl:teren_shoda"
    ]
   },
   "teren|kun": {
