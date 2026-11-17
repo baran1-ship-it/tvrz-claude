@@ -164,3 +164,26 @@ Možná použité (jméno souboru nebo složka se v kódu/datech vyskytuje, cest
 - 2048 px a víc: 28 textur, 129.9 MB: `textury/maska_koleje.png`, `modely/stavby_h/jablon_3_jablon_color.png`, `modely/stavby_h/jablon_1_jablon_color.png`, `modely/stavby_h/jablon_2_jablon_color.png`, `textury/impostory/lipa_a.png`, `textury/impostory/jilm_a.png`, `textury/impostory/borovice_a.png`, `textury/impostory/dub_a.png`, `textury/impostory/habr_a.png`, `textury/impostory/vrba_a.png`, `textury/impostory/briza_a.png`, `textury/impostory/jedle_a.png` …
 - bez VRAM komprese nad 0,5 MB (na GPU rozbalené RGBA/RGB): 39 textur, 77.3 MB: `textury/maska_koleje.png` (L8), `obrazky/intro.jpg` (RGB8), `obrazky/erb_kunstat.png` (RGBA8), `textury/ui/list.png` (RGBA8), `textury/maska_vysek.png` (RGBA8), `textury/maska_cesty.png` (RGB8), `textury/ui/mapa.png` (RGB8), `modely/rostliny/trava_vysoka_1_trava1k_color.png` (RGBA8), `modely/rostliny/kapradi_1_kapradiP_color.png` (RGBA8), `modely/rostliny/ostruzina_1_ostruzinaP_color.png` (RGBA8), `modely/rostliny/kopriva_1_koprivaP_color.png` (RGBA8), `modely/rostliny/hloh_2_hloh_color.png` (RGBA8)
 - použité bez mipmap nad 0,25 MB (ve 3D šum a víc čtení paměti v dálce): 11: `textury/maska_koleje.png`, `obrazky/intro.jpg`, `textury/ui/list.png`, `textury/maska_vysek.png`, `textury/maska_cesty.png`, `textury/ui/mapa.png`, `data/stanoviste.png`, `data/kryt.png`, `data/kamenitost.png`, `textury/ui/pruh.png`, `textury/ui/pergamen.png`
+
+## Provedeno 17. 11. odpoledne (T1–T4; T5 nepoužité jen seznam, nic nesmazáno)
+| # | co | jak (u zdroje) | VRAM nástroj (celý projekt, tablet ETC2) | ve hře PC, scéna ves (odhad textury_vram.gd) |
+|---|---|---|---|---|
+| T1 | sdílené textury staveb | `nastroje/stromy_sdilene_textury.py` (dřív jen stromy) volá konec `nastroje/stavby_z_havrana.sh`: obrázky z glb podle obsahu jednou do `modely/stavby_h/tex/<hash>`, glb odkazují uri, vytažené kopie Godotu smazány; import `import_velikost.py` (VRAM, normály ETC2_RGB8 jako dosud) | stavby_h 325,7 → 142,8 MB (604 obrázků → 263) | stavby_h 300 → 122 MB |
+| T2 | maska kolejí | `import_velikost.py` podle `rozpocty.json textury_vram.maska_koleje`: VRAM komprese + mipmapy (Godot z L8 dělá ETC2_RGB8, 4000² zůstává) | 15,3 → 10,2 MB | (odhad hry počítá 4/3 i bez mipmap: 20,3 → 10,2) |
+| T3 | barvy rostlin | `import_velikost.py` (`rostliny_barva_vram`): RGBA8 → ETC2_RGBA8 | rostliny 55,3 → 27,8 MB | 42 → 17 MB |
+| T4 | jabloně 2048 → 1024 | `rozpocty.json textury_vram.stavby_max_px` (v T1 navíc 3 kopie → 1) | v T1 | v T1 |
+| T4 | kovadlina 2048 → 1024 | `rozpocty.json textury_vram.kovadlina_max_px` | předměty 173,8 → 161,8 MB | ve snímku není (osazuje ji funkce.gd až v procházce) |
+| T4 | impostory 2048 → 1024 | zkoušeno (`stromy_modely.json impostor.barva_max_px`) – **ZAMÍTNUTO**: les z výšky viditelně rozmazaný (`docs/screens/textury_vram_17_11_impostory.jpg`: před / 1024 / zpět 2048) | 0 | 0 |
+
+**Celkem:** nástroj 787,3 → 559,8 MB (−228 MB); ve hře (PC llvmpipe, snímek vsi −20,−190 → −90,−240) Godot textury
+568 → 360 MB, **VRAM celkem 774 → 567 MB (−207 MB)**. Tablet NEOVERENO (Míša – výsledek měření).
+
+Snímky před/po (prohlédnuté): `docs/screens/textury_vram_17_11_stavby.jpg` (ves, krčma, hájovna, kovárna, jabloň – bez
+rozdílu), `textury_vram_17_11_detail.jpg` (kapradí a listí zblízka – okraje ETC2 alfy nezubatí; listí jabloně, špalek
+kovadliny, koleje vozové cesty). Koleje: chyba vzdálenosti od osy po ETC2 p95 0,16 m, snímek zblízka bez rozdílu.
+Hlídači `--rychle` prošli.
+
+Pozor do budoucna: nástroje, které mění vložené textury staveb (`domy_vzhled.py omitka_diry`), musí běžet před sdílením
+(pořadí v `stavby_z_havrana.sh`); po samostatném spuštění úpravy glb znovu `stromy_sdilene_textury.py hra/modely/stavby_h`.
+Zbývá: duplicity `modely/predmety_h` (Havran, 43× / 126× stejná textura, „možná“ – nahrávají se v pískovišti) stejným
+nástrojem; maska kolejí znaménkovou vzdáleností 1 m (3,8 MB) při příští stavbě cesty.py (NAVRH).
