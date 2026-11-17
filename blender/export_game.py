@@ -272,7 +272,7 @@ def main():
         mg = C @ mw @ CI
         # zadna rostlina na stavbe rybnika v2 (dlazba prelivu, zdi vypusti) - jedna brana pro vsechny generatory vegetace
         # (Misa 17. 11. r. 2, 03: trava skrz dlazbu; test smyslu preliv_rostliny)
-        if kraj.ryb2_stavba(mg[0][3], mg[2][3], 0.0):
+        if kraj.ryb2_stavba(mg[0][3], mg[2][3], kraj.RYB2_BEZ_ROSTLIN_M):
             gone.append(ob.name)
             na_stavbe += 1
             continue

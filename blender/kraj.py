@@ -896,6 +896,7 @@ def ryb2_vypust_zdi(ryb):
     return out
 
 
+RYB2_BEZ_ROSTLIN_M = _VODA_J["rybnik_lhota"]["preliv"]["bez_rostlin_m"]   # odstup rostlin od staveb rybnika v2
 ZED_VYPUSTI_M = 0.45      # tloustka zdi cela a kridel (zed() v ryb2_predmety, vychozi tl)
 
 

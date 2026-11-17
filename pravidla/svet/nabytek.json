@@ -1064,7 +1064,7 @@
   "_za_dvermi_m": "cesta do jizby (test dvere_domu i rozmístění pece a lůžka): rovně dveřmi tolik m za příčku síně, pak ke středu jizby"
  },
  "schody_vstupu": {
-  "popis": "Míša 17. 11. r. 14 (snímek 21, krčma: práh na podezdívce 0,3–0,5 m nad zemí bez schodu – „u všech budov, co mají tak vysoko dveře, dej schody“): jedno pravidlo pro každý vstup budovy (dveře a vrata z dat pohyb: tvrz, ves, krčma, kovárna, mlýn, kostel, lom…). Vstup budovy = dveře, za nimiž je podlaha (kolize mimo terén do stupen_max_m pod prahem) a před nimiž terén. Výška prahu nad terénem (paprsek mereni_m před rovinou dveří) nad stupen_max_m → kamenné stupně z otesaných kvádrů katalogu (model), počet výšek ceil(výška / stupen_max_m), stupňů o jeden méně (poslední výška je práh), každý stupeň od líce podezdívky (paprsek vodorovně) do_zdi_m do zdi a hloubka_m dál ven, šířka dveří + 2× presah_m, spodek zapust_m pod terén. Nad vstup_do_m není vstup ze země (seník, podávací otvor) – vypíše se, nestaví. Krok stavby po budovách a zámku terénu, před vegetací (svet._schody_vstupu); obrys stupňů je pudorys stavby pro louku a rozsev (_uvnitr). Test test_svet schody_vstupu.",
+  "popis": "Míša 17. 11. r. 14 (snímek 21, krčma: práh na podezdívce 0,3–0,5 m nad zemí bez schodu – „u všech budov, co mají tak vysoko dveře, dej schody“): jedno pravidlo pro každý vstup budovy (dveře a vrata z dat pohyb: tvrz, ves, krčma, kovárna, mlýn, kostel, lom…). Vstup budovy = dveře, za nimiž je hned podlaha (kolize mimo terén nejvýš stupen_max_m pod prahem) a před nimiž je do mereni_do_m terén nebo dlážděné nádvoří (paprsky dolů od mereni_m po hloubka_m). Výška prahu nad prvním terénem; je-li před prahem nejdřív stupeň modelu (domy vsi Dum1/Dum2/Rychta, mlýn), schody má model a hra nestaví. Jinak výška nad stupen_max_m → kamenné stupně z otesaných kvádrů katalogu (model), počet výšek ceil(výška / stupen_max_m), stupňů o jeden méně (poslední výška je práh), každý stupeň od líce podezdívky (paprsek vodorovně) do_zdi_m do zdi a hloubka_m dál ven, šířka dveří + 2× presah_m, spodek zapust_m pod terén. Nad vstup_do_m není vstup ze země (seník, podávací otvor) – vypíše se, nestaví. Krok stavby po budovách a zámku terénu, před vegetací (svet._schody_vstupu); obrys stupňů je pudorys stavby pro louku a rozsev (_uvnitr). Test test_svet schody_vstupu.",
   "zdroj": "blender/vesnice.py door(): staré chalupy vsi už měly kamenné stupně od prahu na terén (stupeň ≤ 0,19 m, hloubka 0,36 m); Warhorse KM-A-52 schod 0,20 m (hrac.json _schod_m); KCD2 Troskovice/Kuttenberg – před srubem s podezdívkou kamenný blok nebo dva. Model: katalog předmětů kvadr_hruby_2 (Otesaný kvádr, blender/vlastni.py, žula) – hledáno v katalogu (schod/stupen/prah/kvadr) a modely.json; hotový kamenný stupeň v katalogu ani u Kenney/Quaternius (modulární schody jen hradní/fantasy) nesedí, kvádr ano.",
   "model": "kvadr_hruby_2",
   "stupen_max_m": 0.2,
@@ -1073,6 +1073,7 @@
   "do_zdi_m": 0.12,
   "zapust_m": 0.15,
   "mereni_m": 0.5,
+  "mereni_do_m": 2.0,
   "vstup_do_m": 1.5,
   "dosah_m": 80.0
  }

@@ -11412,7 +11412,11 @@ static func _je_teren(h: Dictionary) -> bool:
 	if co == null or not (co is Node):
 		return false
 	var nd := co as Node
-	return String(nd.name).to_lower().contains("teren") or (nd.get_parent() != null and String(nd.get_parent().name).to_lower().contains("teren"))
+	# zem venku: teren (Teren*, dily Rybnik_Teren, Teren_zemljanky) a dlazene nadvori tvrze (Nadvori)
+	for jm: String in [String(nd.name).to_lower(), String(nd.get_parent().name).to_lower() if nd.get_parent() else ""]:
+		if jm.contains("teren") or jm.contains("nadvori"):
+			return true
+	return false
 
 
 func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
@@ -11426,6 +11430,7 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 	var do_zdi := float(Pravidla.cti("nabytek", "schody_vstupu", "do_zdi_m"))
 	var zapust := float(Pravidla.cti("nabytek", "schody_vstupu", "zapust_m"))
 	var mer := float(Pravidla.cti("nabytek", "schody_vstupu", "mereni_m"))
+	var mer_do := float(Pravidla.cti("nabytek", "schody_vstupu", "mereni_do_m"))
 	var vmax := float(Pravidla.cti("nabytek", "schody_vstupu", "vstup_do_m"))
 	var dosah := float(Pravidla.cti("nabytek", "schody_vstupu", "dosah_m"))
 	var ps: PackedScene = load("res://modely/predmety/%s.glb" % String(Pravidla.cti("nabytek", "schody_vstupu", "model")))
@@ -11493,31 +11498,55 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 		var c := bb.get_center()
 		var prah := bb.position.y
 		c.y = prah
+		# strany dveri: na kazde paprsky dolu od mereni_m po hloubka_m az do mereni_do_m - prvni zasah (podlaha / stupen
+		# modelu / teren) a prvni zasah terenu (zem venku). Vstup budovy: na jedne strane do mereni_do_m teren, na druhe
+		# hned za prahem podlaha nejvys stupen_max_m pod prahem (ne branka v plotu, ne zemljanka, ne dvere na pavlac).
 		var strany: Array = []
 		for s: float in [1.0, -1.0]:
-			strany.append(dolu.call(c + n * s * mer, 0.3, vmax + 1.0))
+			var prvni_h: Dictionary = {}
+			var zem: Dictionary = {}
+			var d := mer
+			while d <= mer_do + 0.001 and zem.is_empty():
+				var h: Dictionary = dolu.call(c + n * s * d, 0.3, vmax + 1.0)
+				if prvni_h.is_empty():
+					prvni_h = h
+					if h.is_empty():
+						break
+				if not h.is_empty() and _je_teren(h):
+					zem = h
+					zem["d"] = d
+				d += hl
+			strany.append([prvni_h, zem])
 		var ven := 0.0
 		var g := 0.0
+		var model := false
 		for i in 2:
-			var h: Dictionary = strany[i]
-			var o: Dictionary = strany[1 - i]
-			if h.is_empty() or not _je_teren(h):
+			var zem: Dictionary = strany[i][1]
+			var o: Dictionary = strany[1 - i][0]
+			if zem.is_empty():
 				continue
 			if o.is_empty() or _je_teren(o) or float((o["position"] as Vector3).y) < prah - smax:
 				continue
 			ven = 1.0 if i == 0 else -1.0
-			g = float((h["position"] as Vector3).y)
+			g = float((zem["position"] as Vector3).y)
+			model = not _je_teren(strany[i][0])          # pred prahem nejdriv stupen modelu (domy vsi, mlyn)
 		if OS.has_environment("TVRZ_SCHODY_LADENI"):
 			var pp: Array = []
-			for hh: Dictionary in strany:
-				pp.append("-" if hh.is_empty() else "%s %.2f" % [String((hh["collider"] as Node).get_path()).right(60), float((hh["position"] as Vector3).y) - prah])
+			for st2: Array in strany:
+				for hh: Dictionary in st2:
+					pp.append("-" if hh.is_empty() else "%s %.2f" % [String((hh["collider"] as Node).get_path()).right(40), float((hh["position"] as Vector3).y) - prah])
 			print("SCHODY_LADENI %s c %s n %s sirka %.2f prah %.2f: %s" % [nm, str(c.snapped(Vector3.ONE * 0.1)), str(n.snapped(Vector3.ONE * 0.01)), sirka, prah, str(pp)])
 		if ven == 0.0:
-			continue                                    # vnitrni dvere, branka v plotu, dvere na pavlac
+			continue                                    # vnitrni dvere, branka v plotu, zemljanka, dvere na pavlac
 		n *= ven
 		var vyska := prah - g
 		var zaznam := {"dvere": nm, "p": c, "n": n, "prah_y": prah, "teren_y": g, "vyska": vyska, "sirka": sirka, "stupnu": 0}
 		vstupy_mereni.append(zaznam)
+		if model:
+			# vstup se stupni modelu (domy vsi Dum1/Dum2/Rychta Kol_Schod, mlyn): nestavi se, profil hlida test
+			zaznam["model"] = true
+			zaznam["hloubka_m"] = float((strany[0 if ven > 0.0 else 1][1] as Dictionary)["d"])
+			continue
 		if vyska <= smax:
 			continue
 		if vyska > vmax:
@@ -11535,10 +11564,12 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 		var w := sirka + 2.0 * presah
 		for it in 2:
 			# teren pred patou nejnizsiho stupne po cele sirce (nejnizsi bod - posledni vyska nesmi byt vyssi nez stupen)
-			for ss: float in [-0.5, 0.0, 0.5]:
-				var hp: Dictionary = dolu.call(c + n * (zed + (nv - 1) * hl + hl * 0.5) + t * ss * w, 0.3, vmax + 1.0)
-				if not hp.is_empty() and _je_teren(hp):
-					g = minf(g, float((hp["position"] as Vector3).y))
+			# (pul a cely stupen pred patou - teren od domu klesa, test 17. 11.: skok 0,23 m u krcmy)
+			for dd: float in [0.5, 1.0]:
+				for ss: float in [-0.5, 0.0, 0.5]:
+					var hp: Dictionary = dolu.call(c + n * (zed + (nv - 1 + dd) * hl) + t * ss * w, 0.3, vmax + 1.0)
+					if not hp.is_empty() and _je_teren(hp):
+						g = minf(g, float((hp["position"] as Vector3).y))
 			vyska = prah - g
 			nv = ceili(vyska / smax)
 		var vys1 := vyska / nv
@@ -11580,8 +11611,8 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 		var xf := Transform3D(Basis(t, Vector3.UP, n), c)
 		_schody_obrys.append([xf.affine_inverse(), AABB(Vector3(-w * 0.5, -50.0, zac), Vector3(w, 100.0, zed + (nv - 1) * hl - zac))])
 	for z: Dictionary in vstupy_mereni:
-		print("schody vstupu: %-28s (%.1f, %.1f) prah %.2f teren %.2f vyska %.2f stupnu %d" % [z["dvere"], (z["p"] as Vector3).x, (z["p"] as Vector3).z,
-				z["prah_y"], z["teren_y"], z["vyska"], z["stupnu"]])
+		print("schody vstupu: %-28s (%.1f, %.1f) prah %.2f teren %.2f vyska %.2f stupnu %d%s" % [z["dvere"], (z["p"] as Vector3).x, (z["p"] as Vector3).z,
+				z["prah_y"], z["teren_y"], z["vyska"], z["stupnu"], " (stupne modelu)" if z.get("model", false) else ""])
 	print("schody vstupu: %d vstupu budov, se schody %d, kvadru %d, %d ms" % [vstupy_mereni.size(), schody_vstupu.size(), nbloku, Time.get_ticks_msec() - t0])
 
 
@@ -13701,7 +13732,6 @@ func _ryb_vzhled(mi: MeshInstance3D, si: int) -> void:
 	# = pruhledny). Automaticke LOD importu (tvrz.glb generate_lods) rovnou plochu zjednodusi skoro na obrys - zbyde barva
 	# kraje 0 = cela hladina pruhledna, i zblizka (chyba roviny = 0 -> nejhrubsi stupen vzdy). Do 16. 11. LOD zahodil
 	# prepis nadrz.hloubka_hladiny (nova ArrayMesh); po vyrazeni z nadrzi (16. 11. r. 6) zustala sit z importu s LOD.
-	mi.mesh = _bez_lod(mi.mesh)
 	var vz: Dictionary = Pravidla.cti("prostredi", "rybnik_lhota_vzhled")
 	var mt := mi.get_active_material(si) as ShaderMaterial
 	if vz.is_empty() or mt == null:
@@ -13710,8 +13740,20 @@ func _ryb_vzhled(mi: MeshInstance3D, si: int) -> void:
 	sm.set_shader_parameter("okrehek", float(vz["okrehek"]))
 	sm.set_shader_parameter("kalnost", float(vz["kalnost"]))
 	sm.set_shader_parameter("deep", Color(float(vz["deep"][0]), float(vz["deep"][1]), float(vz["deep"][2])))
-	mi.set_surface_override_material(si, sm)
+	nastav_vodu(mi, si, sm)
 	vodni.append(sm)
+
+
+## Jedno pravidlo pro kazdy povrch s vodou (voda.gdshader, hloubka_vrcholu): sit bez automatickych LOD importu (Misa
+## 17. 11. r. 1 - rybnik; test hladiny_lod nasel totez u kade a koryt pro kone). Material pak jako override.
+static var _bez_lod_cache := {}         # puvodni sit -> sit bez LOD (instance predmetu sdileji sit)
+
+
+static func nastav_vodu(mi: MeshInstance3D, si: int, mat: Material) -> void:
+	var sm := mat as ShaderMaterial
+	if sm and sm.shader and sm.shader.resource_path.ends_with("voda.gdshader") and bool(sm.get_shader_parameter("hloubka_vrcholu")):
+		mi.mesh = _bez_lod(mi.mesh)
+	mi.set_surface_override_material(si, mat)
 
 
 ## Sit bez automatickych LOD importu (hladina s udaji v barve vrcholu): povrchy, materialy a jmena stejne. Uz bez LOD = beze zmeny.
@@ -13719,12 +13761,15 @@ static func _bez_lod(me: Mesh) -> Mesh:
 	var am := me as ArrayMesh
 	if am == null or am.has_meta("bez_lod"):
 		return me
+	if _bez_lod_cache.has(am):
+		return _bez_lod_cache[am]
 	var nove := ArrayMesh.new()
 	for s in am.get_surface_count():
 		nove.add_surface_from_arrays(am.surface_get_primitive_type(s), am.surface_get_arrays(s))
 		nove.surface_set_material(s, am.surface_get_material(s))
 		nove.surface_set_name(s, am.surface_get_name(s))
 	nove.set_meta("bez_lod", true)
+	_bez_lod_cache[am] = nove
 	return nove
 
 

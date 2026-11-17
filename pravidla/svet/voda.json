@@ -1633,6 +1633,8 @@
   "preliv": {
    "dlazba": {"rada_m": 0.5, "kamen_sirka_m": 0.45, "spara_m": 0.02, "tloustka_m": 0.18, "nad_dnem_m": 0.03, "presah_m": 0.6, "obruba_sirka_m": 0.3, "obruba_vyska_m": 0.45, "obruba_nad_m": 0.15},
    "_dlazba": "Míša 16. 11. r. 5 (snímek 06: dlažba přelivu jako rozsypané kvádry – kameny s náhodným natočením ±8° a délkou, vodorovné na svahu = schody): souvislé koryto – řady napříč po rada_m (vazba na přeskáčku), kámen nakloněný podle spádu dna (kraj.ryb2_preliv_dno), horní plocha nad_dnem_m nad dnem, spára spara_m; obruba z kvádrů podél osy po obou stranách, obruba_nad_m nad terénem. Rozměry podle kamenných skluzů rybníků (lomový kámen 0,4–0,5 m; NEOVĚŘENO zdrojem). Hledáno hotové: Poly Haven (modular_wooden_pier – mořské molo, ne skluz), Kenney/Quaternius (bez kamenného skluzu) – stavba z kvádrů kit.stone.",
+   "bez_rostlin_m": 2.0,
+   "_bez_rostlin_m": "Míša 17. 11. r. 2 (po_03: tráva na dolním konci dlažby): rostlina (měkká – tráva, keř…) do 2 m od dlažby přelivu / zdi výpusti způsobí, že hra kvádr dlažby vyřadí jako kolizi rostliny (svet._collisions: kvádr do 2 m s měkkou rostlinou v buňkách ±1 m) → krytí louky dlažbu nevidí. Brána rostlin v export_game a test smyslu preliv_rostliny berou tento odstup.",
    "posun_m": 3.8,
    "_posun_m": "Míša 17. 11. r. 2 (snímek 03 x 501 z 881: „kvádry nesedí na sebe“): při 2,8 křídlo čela výpusti (kridlo_m 1,6 pod 45°) procházelo obrubou a dlažbou přelivu (test smyslu preliv_vypust: 25 bodů osy zdi v dlažbě); od 3,7 bez kolize, 3,8 = rezerva 0,1 m. Konec přelivu se tím posune o 1 m po proudu (t1 = t_čela + posun − čelo/2).",
    "sirka_m": 1.6,
@@ -6168,7 +6170,8 @@
   "mlyn/dil/zdroj",
   "prikop/hladina_y",
   "mlyn/dil/odpad_za_dilem_m", "rybnik_lhota/pozerak/lavka_kuly_po_m", "rybnik_lhota/pozerak/kul_zapust_m", "rybnik_lhota/preliv/dlazba",
-  "rybnik_lhota/vypust/kridlo_m"
+  "rybnik_lhota/vypust/kridlo_m",
+  "rybnik_lhota/preliv/bez_rostlin_m"
  ],
  "prikop": {
   "hladina_y": -2.0,

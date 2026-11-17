@@ -11137,7 +11137,7 @@ func _sklep_vstup() -> void:
 
 ## Misa 17. 11. r. 14 (snimek 21: dvere krcmy na podezdivce bez schodu, „u vsech budov“): kazdy vstup budovy (svet
 ## vstupy_mereni: dvere s podlahou za prahem a terenem pred nim) s prahem vys nez nabytek.json schody_vstupu stupen_max_m
-## nad terenem ma stupne; fyzicky profil pred dvermi (paprsky dolu na kolize po 0,08 m od roviny dveri az za patu
+## nad terenem ma stupne (nase nebo modelu); fyzicky profil pred dvermi (paprsky dolu na kolize po 0,08 m od roviny dveri az za patu
 ## stupnu) nema skok vetsi nez stupen_max_m + tolerance - dojde se po nem nahoru i dolu (hrac schod 0,45, postavy 0,28).
 func _schody_vstupu() -> void:
 	var smax := float(Pravidla.cti("nabytek", "schody_vstupu", "stupen_max_m"))
@@ -11149,15 +11149,15 @@ func _schody_vstupu() -> void:
 	var nad := 0
 	for z: Dictionary in sv.vstupy_mereni:
 		var vy := float(z["vyska"])
-		print("SCHODY_VSTUPU %-30s (%.1f, %.1f) prah %.2f teren %.2f vyska %.2f stupnu %d" % [z["dvere"], (z["p"] as Vector3).x, (z["p"] as Vector3).z,
-				z["prah_y"], z["teren_y"], vy, z["stupnu"]])
+		print("SCHODY_VSTUPU %-30s (%.1f, %.1f) prah %.2f teren %.2f vyska %.2f stupnu %d%s" % [z["dvere"], (z["p"] as Vector3).x, (z["p"] as Vector3).z,
+				z["prah_y"], z["teren_y"], vy, z["stupnu"], " (stupne modelu)" if z.get("model", false) else ""])
 		if vy <= smax:
 			continue
 		if z.get("vysoko", false):
 			vysoko.append(String(z["dvere"]))
 			continue
 		nad += 1
-		if int(z["stupnu"]) < 1:
+		if int(z["stupnu"]) < 1 and not z.get("model", false):
 			spatne.append("%s bez schodu (%.2f m)" % [z["dvere"], vy])
 			continue
 		var c: Vector3 = z["p"]

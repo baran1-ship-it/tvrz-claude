@@ -3116,5 +3116,10 @@ func _site_v(spec: String) -> void:
 			var m := (g as MeshInstance3D).mesh
 			info = "povrchu %d barva_vrch %s mat0 %s" % [m.get_surface_count(), m.get_surface_count() > 0 and (m.surface_get_format(0) & Mesh.ARRAY_FORMAT_COLOR) != 0,
 					(g as MeshInstance3D).get_active_material(0)]
+		if OS.has_environment("TVRZ_STREDNI_UN") and String(g.name).ends_with("_Stredni"):
+			var um := StandardMaterial3D.new()
+			um.vertex_color_use_as_albedo = true
+			um.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			g.material_override = um
 		print("SITE_V %s [%s] ovr %s vis %.0f-%.0f vrstvy %d stin %d %s" % [g.get_path(), g.get_class(), g.material_override,
 				g.visibility_range_begin, g.visibility_range_end, g.layers, g.cast_shadow, info])

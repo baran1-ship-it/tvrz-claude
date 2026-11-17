@@ -1064,7 +1064,7 @@ for ryb in kraj.RYBNIKY:
             _na = []
             for _k, _v in json.load(open(_sj))["rostliny"].items():
                 for _t in _v:
-                    if kraj.ryb2_stavba(float(_t[3]), float(_t[11]), 0.0):
+                    if kraj.ryb2_stavba(float(_t[3]), float(_t[11]), kraj.RYB2_BEZ_ROSTLIN_M):
                         _na.append("%s (%.1f, %.1f)" % (_k, _t[3], _t[11]))
             if _na:
                 chyba("preliv_rostliny", "rybnik", "%d rostlin na dlazbe prelivu / zdi vypusti %s" % (len(_na), _na[:5]))

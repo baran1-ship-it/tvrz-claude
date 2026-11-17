@@ -142,7 +142,7 @@ func spawn(rec: Dictionary) -> void:
 			# i "koryto_voda" (napajedlo): vlastni material s drsnosti 0,08 = zrcadlo, na tabletu bily pruh (radce 13:20)
 			var mn := String(sm.resource_name) if sm else ""
 			if sm and (mn.begins_with("voda") or mn.contains("_voda")) and main.svet:
-				mi.set_surface_override_material(si, main.svet.material("voda"))
+				main.svet.nastav_vodu(mi, si, main.svet.material("voda"))
 			# latka praporu a vlajek (Misa 5. 11. „vlajky staticke“): material latky = jmeno modelu -> vlani ve vertex shaderu
 			elif sm and mn.begins_with(id):
 				var lm := _latka_mat(id, sm)
