@@ -549,7 +549,7 @@ func _misto(c: Dictionary, kde: String) -> Array:
 					var hz := get_viewport().get_world_3d().direct_space_state.intersect_ray(rq)
 					var zem_s := "%.2f %s" % [(hz["position"] as Vector3).y, (hz["collider"] as Node).name] if not hz.is_empty() else "zadna kolize"
 					kde_vsech.append("(%.1f, %.1f) %s y %.2f zem %s volnych bunek do 2 m %d" % [float(r2["p"][0]), float(r2["p"][2]), _mistnost_u(Vector3(float(r2["p"][0]), float(r2["p"][1]), float(r2["p"][2]))), float(r2["p"][1]), zem_s, volnych])
-			push_warning("lide: misto %s - predmet %s v %s nenalezen (kusy %s)" % [kde, z["u_predmetu"], z.get("mistnost", ""), str(kde_vsech)])
+			push_warning("lide: misto %s - predmet %s v %s nenalezen (kusy %s) strany %s" % [kde, z["u_predmetu"], z.get("mistnost", ""), str(kde_vsech), str(_u_pred_dbg)])
 			return [Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z), INF]   # stat na miste, ne k (0,0); nepamatovat
 	elif z.has("u_steny") and main.svet != null and is_inside_tree():
 		# Misa 10. 11. (KCD: hostinsky opreny o zed u pultu): nejblizsi stena (kolize) od bodu do hledat_m paprsky ve
@@ -1539,7 +1539,11 @@ func _mistnost_u(p: Vector3) -> String:
 ## Misto u predmetu (vybaveni sveta ri): stred strany kvadru z katalogu + u_predmetu.od_m, celem k predmetu. strana
 ## "dlouha" = nejdriv delsi strany (zahon), "cela" = kratsi (celo stolu, lavice jsou podel). Bunka mrizky volna, cil bez
 ## jine postavy (rozestup); rezervovat = misto obsazeno pro c (_uvolni). Vrati [Vector2, yaw] nebo [].
+var _u_pred_dbg: Array = []
+
+
 func _u_predmetu(c: Dictionary, ri: int, strana: String, rezervovat: bool) -> Array:
+	_u_pred_dbg.clear()
 	var r: Dictionary = main.svet.data["vybaveni"][ri]
 	var rz: Array = (katalog().get(String(r["id"]), {}) as Dictionary).get("rozmer", [])
 	if rz.size() < 3:
@@ -1564,8 +1568,10 @@ func _u_predmetu(c: Dictionary, ri: int, strana: String, rezervovat: bool) -> Ar
 		if rezervovat and _cil_obsazen(c, q, float(P["rozestup"]["misto_m"])):
 			continue                                  # (pevne misto z _misto se pamatuje - bez zavislosti na ostatnich)
 		if _na_sedicim(c, q):
+			_u_pred_dbg.append("sedici %s" % str(q))
 			continue
 		if is_nan(_nav_bunka(_nav_ij(q), float(r["p"][1]))):
+			_u_pred_dbg.append("bunka %s" % str(q))
 			continue
 		if rezervovat:
 			_obsazeno[klic] = c["id"]
