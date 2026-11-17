@@ -82,6 +82,8 @@ je Blender skripty → glb → Godot, s pravidly v datech.
 4. **Audit textur ve VRAM a sdílená knihovna + malé masky** (NOSTALGIC TRAIN). Nejdřív jen výpis 30 největších textur a
    duplicit (malá práce), pak pravidlo v datech (střední). Cílí na paměť: 619 MB textur a pád po ~44 min. Že pád dělají
    textury, je NEOVĚŘENO.
+   **17. 11. audit hotov** (`tools/textury_vram.py`, předání „audit textur ve VRAM“, ř. 18): 879 MB ETC2 horní mez, duplicity
+   190 MB (předměty, rostliny, kovárna = krčma); sdílená knihovna u dílů už běží (`dily_tex`), další kovárna (připraveno).
 5. **HLOD vzdálené vsi a tvrze** (Godot visibility ranges + sloučený blok z Blenderu; Vilaayath Budha). Větší práce. Méně
    volání kreslení v dálce a možná i konec „černých domů“, ale až po rozboru bodu 5 a po K4. Pořadí: rozbor → měření →
    prototyp jednoho bloku.

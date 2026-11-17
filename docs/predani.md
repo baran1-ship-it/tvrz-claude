@@ -1620,3 +1620,26 @@ Hotovo v kódu a datech (testy u každého):
 - **Stav 17. 11. odpoledne (snímky `build/m17/pred_*` × `po_*`):** rybník s vodou OK, razítka pryč, přeliv bez křížení.
   Otevřené: čáry na hranách pásem terénu dál ve hře (Blender je už čistý → příčina v úpravách terénu ve hře, viz tabulka
   ř. 6); tráva na dolním konci dlažby přelivu; `hladiny_lod` hlásí LOD u vody v kádi a korytech pro koně; `cesta_skoky` 789.
+
+### 17. 11. – audit textur ve VRAM (ř. 18 `misa_17_11_chyby.md`, Puchart 15e69d0) – ROZPRACOVÁNO, přerušeno limitem
+- **Nástroj:** `python3 tools/textury_vram.py [--json build/x.json]` – čte hlavičky výsledných `.ctex` (tablet ETC2, po
+  `textury_tablet.py`), spočte bajty ve VRAM, duplicity podle obsahu `.ctex` (i rozbalené kopie bez zdroje), výstup
+  `build/textury_vram.md/.json`. Nic nemění, ~15 s.
+- **Naměřeno (import v kontejneru, horní mez = vše importované; ve hře jen nahrané):** 2 956 textur, **879,2 MB** ETC2
+  (ETC2_RGB8 626,5, ETC2_RGBA8 200,0, RG11 44,3). Bez VRAM komprese jen 3 (8,3 MB): `reka_dist/flow` (datové, musí
+  zůstat) a `cesta_atlas_disp` (jen CPU). **Barvy rostlin už jsou ETC2_RGBA8** (`limity_textur.py` dává mode 2 všem) –
+  Puchartův krok T3 u nás není co dělat; velké masky nejsou (vše ≤ 1024 po `textury_tablet.py`). Impostory nesahat (1024).
+- **Duplicity (stejná data ve VRAM pod více cestami): 241 skupin, 189,9 MB navíc:** předměty 61,4 (357 starých předmětů
+  má v kontejneru jen `.import`, glb chybí; např. `*_tram_diff_2k` 93 kopií), rostliny 49,3 (glb z exportu: 367 vložených
+  obrázků, 255 různých – skály `_daleko/_daleko2`, jabloně), **kovárna 41,3** (všech 69 rozbalených textur má stejná data
+  jako `dily_tex` krčmy), mlýn↔větrák ~11, koně 8,7 (výstroj), `modely/nove` 4,0.
+- **Kovárna – připraveno, NEPROVEDENO:** glb z Disku `kovarna.zip` (id 148Da9sHyjzBWpZO8qnjslZSLliEFsKzn; jména obrázků
+  sedí s rozbalenými kopiemi) – zkouška nanečisto `preved` do dočasné složky: 69 → 45 různých, 36 už v `dily_tex`,
+  9 nových. Postup: glb do `modely/kovarna`, přidat do `kvalita.json textury_dilu.slozky_dilu`, `textury_predmetu.py
+  dily`, `--import`, `textury_tablet.py`, snímek kovárny, vydat `--jen z_kovarna` (vydani.py přibalí `dily_tex` sám).
+  **Pozor:** kovárnu do `slozky_dilu` NEDÁVAT bez glb – úklid smaže `.import` rozbalených textur bez zdroje. Nové soubory v
+  `dily_tex` změní otisk → před vydáním `export.sh --jen-po` (otisk už teď nesedí: `modely/ves/domy_stredni.glb` od jiného
+  pomocníka). Odhad úspory ~41 MB ETC2 (NEOVĚŘENO ve hře).
+- **Návrhy (potřebují zdroje / export):** rostliny = krok exportu podle `textury_predmetu` s vlastní složkou a limity
+  podle druhu (nutný plný export – rostliny jsou v otisku); staré předměty jen přestavbou glb; mlýn+větrák vlastní
+  složka se stropem 512. Snímky před/po a měření VRAM na PC NEPROVEDENY (limit), tablet NEOVĚŘENO.
