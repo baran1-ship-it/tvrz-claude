@@ -1056,6 +1056,19 @@ for ryb in kraj.RYBNIKY:
             chyba("preliv_vypust", "rybnik", "dlazba prelivu (osa a %.2f, +-%.2f m) zasahuje do zdi vypusti v %d bodech %s" % (
                 ap_, sir_, len(kolize_pv), kolize_pv[:4]))
         print("SMYSL preliv: osa a %.2f m, pas +-%.2f, t %.2f..%.2f; kolize se zdi vypusti %d" % (ap_, sir_, ta_, tb_, len(kolize_pv)))
+        # preliv_rostliny (Misa 17. 11. r. 2: „trava roste skrz dlazbu“): v exportu (--po, modely/svet.json rostliny)
+        # zadna rostlina na dlazbe prelivu ani na zdi vypusti (kraj.ryb2_stavba) - hra by kvadry dlazby u mekke rostliny
+        # vyradila jako kolize rostlin a kryti louky by dlazbu nevidelo
+        _sj = os.path.join(ROOT, "modely", "svet.json")
+        if "--po" in sys.argv and os.path.exists(_sj):
+            _na = []
+            for _k, _v in json.load(open(_sj))["rostliny"].items():
+                for _t in _v:
+                    if kraj.ryb2_stavba(float(_t[3]), float(_t[11]), 0.0):
+                        _na.append("%s (%.1f, %.1f)" % (_k, _t[3], _t[11]))
+            if _na:
+                chyba("preliv_rostliny", "rybnik", "%d rostlin na dlazbe prelivu / zdi vypusti %s" % (len(_na), _na[:5]))
+            print("SMYSL preliv_rostliny: %d" % len(_na))
     print("SMYSL rybnik v2: vtok %.0f st. od kolmice, skok %.3f m; hladina %d troj., okraj %d hran, tvrdych %d; nad brehem %d, bez vody %d; odtok %.2f m od cela" % (
         uhel(vt["smer"], nrm), skok, len(tr_), len(kr_), len(tvrde), len(nad_brehem), len(bez_vody), dv))
 

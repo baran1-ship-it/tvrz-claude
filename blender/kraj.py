@@ -458,7 +458,38 @@ def stavba_near(x, z, extra=0.0):
     for id_, cx, cz, yaw, r in STAVBY + MISTA:
         if math.hypot(x - cx, z - cz) < r + extra:
             return True
+    if ryb2_stavba(x, z, extra):
+        return True
     return ruina_near(x, z, min(extra, 2.0))
+
+
+def ryb2_stavba(x, z, extra=0.0):
+    """Bod na stavbe rybnika v2 (dlazba prelivu s obrubou, zdi cela a kridel vypusti) nebo do extra od ni. Misa 17. 11.
+    r. 2 (03: trava skrz dlazbu): vegetace (_wild, skalky...) prelivu nevidela - divoka trava, kapradi a ker na dlazbe,
+    a hra pak kvadry dlazby u „mekke rostliny“ vyradila jako kolize rostlin (svet._collisions)."""
+    for ryb in RYBNIKY:
+        pr = ryb.get("preliv")
+        if "obrys" not in ryb or not pr or "dlazba" not in pr:
+            continue
+        g = ryb2(ryb)
+        hz, dl = ryb["hraz"], pr["dlazba"]
+        bx0, bx1, bz0, bz1 = g["bb"]
+        if not (bx0 - 20.0 - extra < x < bx1 + 20.0 + extra and bz0 - 20.0 - extra < z < bz1 + 20.0 + extra):
+            continue
+        ap, t0, t1, _y0, _y1 = ryb2_preliv(ryb)
+        dx, dz = x - hz["stred"][0], z - hz["stred"][1]
+        a = dx * g["u"][0] + dz * g["u"][1]
+        t = dx * g["n"][0] + dz * g["n"][1]
+        da = max(0.0, abs(a - ap) - pr["sirka_m"] / 2.0 - dl["obruba_sirka_m"])
+        dt = max(0.0, t0 - dl["presah_m"] - t, t - t1 - dl["presah_m"])
+        if math.hypot(da, dt) <= extra:
+            return True
+        for (pa, pb) in ryb2_vypust_zdi(ryb):
+            L = math.hypot(pb[0] - pa[0], pb[1] - pa[1]) or 1.0
+            f = max(0.0, min(1.0, ((x - pa[0]) * (pb[0] - pa[0]) + (z - pa[1]) * (pb[1] - pa[1])) / (L * L)))
+            if math.hypot(x - pa[0] - (pb[0] - pa[0]) * f, z - pa[1] - (pb[1] - pa[1]) * f) <= ZED_VYPUSTI_M / 2.0 + extra:
+                return True
+    return False
 
 
 def ruina_near(x, z, extra=0.0):
