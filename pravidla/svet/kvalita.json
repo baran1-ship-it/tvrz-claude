@@ -208,11 +208,12 @@
   "slozky_dilu": [
    "modely/ruiny_ves",
    "modely/krcma",
-   "modely/kostel"
+   "modely/kostel",
+   "modely/kovarna"
   ],
   "mez_px": 2048,
   "size_limit_importu": 1024,
-  "_vynechane": "16. 11.: modely/ves vynechana - tools/zesvetli_ves.py upravuje rozbalene textury domy_*_diff.jpg a domy.glb ma 72 obrazku, vsechny ruzne (nic k usetreni). modely/kovarna a modely/mlyn: v kontejneru jen .import (glb chybi) - kovarna 69 textur, jen 45 ruznych .ctex (ETC2 48 -> ~31 MB), mlyn 97 -> 62 (17 -> ~11 MB); pridat do slozky_dilu, az budou zdroje (export z Disku).",
+  "_vynechane": "16. 11.: modely/ves vynechana - tools/zesvetli_ves.py upravuje rozbalene textury domy_*_diff.jpg a domy.glb ma 72 obrazku, vsechny ruzne (nic k usetreni). modely/kovarna a modely/mlyn: v kontejneru jen .import (glb chybi) - kovarna 69 textur, jen 45 ruznych .ctex (ETC2 48 -> ~31 MB), mlyn 97 -> 62 (17 -> ~11 MB); pridat do slozky_dilu, az budou zdroje (export z Disku). 17. 11. (audit tools/textury_vram.py): kovarna pridana - glb z Disku kovarna.zip (id 148Da9sHyjzBWpZO8qnjslZSLliEFsKzn, jmena obrazku = rozbalene kopie v kontejneru); 69 obrazku -> 45 ruznych, 36 z nich uz v dily_tex (krcma), 9 novych; vsech 69 rozbalenych .ctex melo stejna data jako dily_tex/krcma. mlyn a vetrak NE: 159 dvojic stejnych textur mezi sebou (~11 MB), ale limity_textur.py jim dava strop 512 a dily_tex ma 1024 - spolecna slozka by je zvetsila; resit vlastni slozkou se stropem 512, az budou glb (mlyn-1.zip, vetrny_mlyn.zip na Disku).",
   "popis": "Sdilene textury dilu (Misa 16. 11. mereni 0.999999: zamrznuti po 2. kole trasy, VRAM 1145 MB, textury 822 MB; tools/textury_predmetu.py dily, krok exportu). Modely dilu z Disku (ruiny_ves 18 glb, krcma, kostel) nesly vlozene obrazky a Godot kazdou kopii rozbalil zvlast (<model>_<obrazek>.*): ruiny_ves 168 textur jen 28 ruznych, krcma 83/56, kostel 46/38. Obrazky se vyjmou do JEDNE spolecne slozky podle md5 (normalova mapa zvlast <md5>_n, import normal_map=1), v glb zustane uri; stejna textura v krcme, kostele i Doubrave je jeden zdroj = jedna textura v pameti. Balik: kazdy z_<dil> (tools/vydani.py) nese i textury ze spolecne slozky, na ktere jeho glb odkazuji (stejne jmeno = stejny obsah, prekryti baliku nevadi) - tablet se starymi baliky dostane s novym z_<dil> vzdy uplnou sadu. mez_px a size_limit_importu jako u predmetu (strop tabletu 1024, tools/textury_tablet.py)."
  },
  "snimky_vychozi_mobil": 1,
