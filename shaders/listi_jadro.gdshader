@@ -43,8 +43,14 @@ void vertex() {
 
 void fragment() {
 	vec4 t = texture(barva, UV);
-	ALBEDO = t.rgb * tint.rgb * v_tint * mix(0.5, 1.0, v_ao);
+	// Misa 17. 11. r. 3 (listi zespodu cerne obdelniky): karta jadra je bez alfy, pruhledna mista textury maji RGB 0
+	// -> zespodu / zevnitr koruny cerny ctverec. Pruhledna mista = prumerna barva listu (nejmensi mip, deleno alfou =
+	// bez cerneho pozadi), tj. husty vnitrek koruny misto cerne.
+	vec4 pr = textureLod(barva, UV, 12.0);
+	vec3 prum = pr.rgb / max(pr.a, 0.05);
+	vec3 c = mix(prum * 0.8, t.rgb, smoothstep(0.0, prah, t.a));
+	ALBEDO = c * tint.rgb * v_tint * mix(0.5, 1.0, v_ao);
 	// zadni strana: svetlo prosvita (karty proti slunci nejsou cerne)
-	BACKLIGHT = t.rgb * 0.5;
+	BACKLIGHT = c * 0.5;
 	ROUGHNESS = 0.85;
 }

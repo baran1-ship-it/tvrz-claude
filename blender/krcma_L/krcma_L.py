@@ -314,15 +314,30 @@ for x in (-7.4, -5.4, -3.4):                                                   #
 T(DV, (-7.7, YARD_Y1 - 0.3, 2.95), (-3.1, YARD_Y1 - 0.3, 2.95), 0.16, 0.18, key="tram", wane=0.5)
 clad(DV, (0, YARD_Y1 - 0.2, 0), (1, 0, 0), (0, 1, 0), -7.7, -3.1, 0.0, lambda u: 2.9, battens=False)
 for x in (-7.4, -3.4): clad(DV, (x + (-0.12 if x < -5 else 0.12), 0, 0), (0, 1, 0), (-1 if x < -5 else 1, 0, 0), 10.3, YARD_Y1 - 0.3, 0.0, lambda u: 2.30 + (u - 10.2) * 0.364 - 0.05, battens=False)
-# vích (znamení krčmy) a lavice před domem
-p = Vector((0.65, Y0 - 0.13, 2.65)); o = Vector((0, -1, 0.35)).normalized()
-pole(DV, p, p + o * 1.1, 0.03, key="tram", bend=0.01, seg=6)
-cvi = p + o * 1.1 - Vector((0, 0, 0.3))
-bm = bmesh.new(); bmesh.ops.create_icosphere(bm, subdivisions=2, radius=0.3)
-for v in bm.verts: v.co.z *= 1.35; v.co *= random.uniform(0.85, 1.15)
-for f in bm.faces: DV.face([cvi + v.co for v in f.verts], [(v.co.x + 0.5, v.co.z + 0.5) for v in f.verts], "slama")
-bm.free()
-pole(DV, p + o * 1.1, cvi + Vector((0, 0, 0.35)), 0.008, key="provaz", bend=0.0, seg=4, bark=0.0)
+# štít krčmy (Míša 17. 11. ř. 4: věchet „bochník“ pryč, pěkná cedule) – kovaná konzola ze zdi, dubová deska na dvou
+# řetízcích kolmo ke stěně (čitelná z cesty podél průčelí), na obou stranách vypálený džbán. Hotový model nenalezen
+# (Disk, Poly Haven, Quaternius/Kenney, CC0 weby 17. 11.) – postaveno z materiálů krčmy.
+CX, CY, CZ = 0.65, Y0, 2.85
+I3 = Matrix.Identity(3)
+box(DV, (CX, CY - 0.025, CZ - 0.2), (0.07, 0.03, 0.5), I3, "zelezo")                       # nástěnná deska konzoly
+cone(DV, (CX, CY - 0.02, CZ), (CX, CY - 1.08, CZ), 0.016, 0.014, "zelezo", seg=6)           # rameno
+cone(DV, (CX, CY - 0.02, CZ - 0.4), (CX, CY - 0.62, CZ), 0.012, 0.012, "zelezo", seg=6)      # vzpěra
+cone(DV, (CX, CY - 1.08, CZ), (CX, CY - 1.1, CZ + 0.06), 0.014, 0.01, "zelezo", seg=6)       # zahnutý konec
+for yy in (CY - 0.37, CY - 0.93):                                                            # řetízky
+    cone(DV, (CX, yy, CZ - 0.01), (CX, yy, CZ - 0.25), 0.006, 0.006, "zelezo", seg=4)
+SY, SZ = CY - 0.65, CZ - 0.52                                                                # střed desky
+box(DV, (CX, SY, SZ), (0.045, 0.74, 0.54), I3, "dub")
+box(DV, (CX, SY, SZ + 0.29), (0.06, 0.78, 0.05), I3, "dub")                                  # horní lišta
+for sx in (-1, 1):                                                                           # džbán na obou stranách
+    x = CX + sx * 0.025
+    box(DV, (x, SY + 0.02, SZ - 0.02), (0.006, 0.17, 0.22), I3, "malta_c")                   # tělo
+    box(DV, (x, SY + 0.02, SZ + 0.115), (0.006, 0.21, 0.035), I3, "malta_c")                 # víčko
+    box(DV, (x, SY + 0.02, SZ - 0.145), (0.006, 0.21, 0.03), I3, "malta_c")                  # pata
+    box(DV, (x, SY - 0.1, SZ + 0.04), (0.006, 0.07, 0.025), I3, "malta_c")                   # ucho nahoře
+    box(DV, (x, SY - 0.1, SZ - 0.07), (0.006, 0.07, 0.025), I3, "malta_c")                   # ucho dole
+    box(DV, (x, SY - 0.125, SZ - 0.015), (0.006, 0.025, 0.12), I3, "malta_c")                # ucho svisle
+    for dy in (-0.27, 0.29):                                                                 # rámeček – rohové čárky
+        box(DV, (x, SY + dy, SZ), (0.006, 0.02, 0.42), I3, "malta_c")
 dvur = DV.build(smooth_angle=35, merge=False)
 for (nm, hs, sg) in (("KrcmaL_Vrata_L", 0, 1), ("KrcmaL_Vrata_P", 1, -1)):
     half = (GX1 - GX0) / 2
