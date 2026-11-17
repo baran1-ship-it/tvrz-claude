@@ -1846,6 +1846,7 @@ def postav_A(P):
     TR["A_vstup"] = [bod(C + nA * (vb["t_m"] + (1.5 if mv_ else 5.5)), yp if mv_ else None), bod(C + nA * vb["t_m"], yp), bod(C + nA * (vb["t_m"] - 4.0), yp), bod(C + nA * 13), bod(C + nA * 0.95, br["prah_y"]),
                      bod(C - nA * 3), bod(dvur), bod(V((6.5, 5.0)))]   # dvůr (mimo studnu) (palác a šíje jsou teď u Z zdi)
     a, b, L, d, vn = U[sch["usek"]]
+    if A.get("trasa_prikop"): TR["A_prikop_vez_most"] = [list(b_) for b_ in A["trasa_prikop"]["body"]]   # Míša 17. 11.: od brány věží vedle mostu do příkopu (chyby.md 392)
     TR["A_ochoz"] = [bod(dvur), bod(st + d * 1.4 + vn * 2.2), bod(st + d * 1.2), bod(st), bod(e1, ym), bod(e1 - d * 1.4, ym), bod(e2, kor), bod(pod, kor),
                      bod(pochozi(U, sch["usek"], s_top - 0.8), kor)] + [bod(roh(U, k_), kor) for k_ in A.get("ochoz_rohy", [3, 2, 1, 0])]
     sv = dE.cross(UP).normalized()

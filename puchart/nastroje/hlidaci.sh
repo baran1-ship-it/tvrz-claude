@@ -41,7 +41,7 @@ if [ "$1" != "--rychle" ]; then
   _PSC=$!
   # + mřížka dosažitelnosti (pruchod:dosah, plán 17. 11. B1): díry a únik ze světa = CHYBA, uvíznutí / ostrovy / dveře bez dosahu
   # výpis; mapa build/dosah.png, nálezy build/dosah.json (pravidla kontroly_hra.json dosah)
-  (cd $K/hra && PUCHART_TEST=pruchod PUCHART_VYSTUP=$K/build/pruchod.json PUCHART_DOSAH=$K/build/dosah.json timeout 5400 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | tee $K/build/hlidaci_beh_godot.log | grep -E "^PRUCHOD|^DOSAH (mřížka|uvíznutí [0-9])" | cut -c1-200 | tee -a $S)
+  (cd $K/hra && PUCHART_TEST=pruchod PUCHART_VYSTUP=$K/build/pruchod.json PUCHART_DOSAH=$K/build/dosah.json timeout 5400 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | tee $K/build/hlidaci_beh_godot.log | grep -E "^PRUCHOD|^DOSAH (mřížka|uvíznutí [0-9]|cíle)" | cut -c1-200 | tee -a $S)
   # všechny trasy z dat i pevné testy musí mít výsledek OK (audit 15. 11.: chybějící trasa dřív prošla)
   python3 - "$K" <<'PY' | tee -a $S || rc=1
 import json, sys
