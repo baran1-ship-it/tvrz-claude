@@ -178,7 +178,13 @@
    "u_predmetu": "kovadlina_spalek",
    "poradi": 0,
    "strana": "dlouha",
-   "_p": "Misa 14. 11. „kamenik tluce kladivem na ceste“ (-21, 903): drive pevne (126,5, 931) 2 m od paty steny v leseni - mrizka chuze cestu nenasla (log 4x), nouze ho nechala pracovat, kde stal. Ted u spalku s kovadlinou pod 1. pristreskem (svet._lom_vybaveni, venku = mistnost \"\")."
+   "_p": "Misa 14. 11. „kamenik tluce kladivem na ceste“ (-21, 903): drive pevne (126,5, 931) 2 m od paty steny v leseni - mrizka chuze cestu nenasla (log 4x), nouze ho nechala pracovat, kde stal. Ted u spalku s kovadlinou pod 1. pristreskem (svet._lom_vybaveni, venku = mistnost \"\").",
+   "blizko": [
+    130.0,
+    927.0
+   ],
+   "blizko_r_m": 40.0,
+   "_blizko": "17. 11. (test lide_chovani: misto vzalo kovadlinu u vsi (433,8; 836,4) - prvni venkovni podle x): jen kusy do blizko_r_m od bodu lomu, nejblizsi napred"
   },
   "nadvori_studna": {
    "p": [

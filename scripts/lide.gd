@@ -523,6 +523,12 @@ func _misto(c: Dictionary, kde: String) -> Array:
 		for ri in vb.size():
 			var r: Dictionary = vb[ri]
 			if String(r["id"]) == String(z["u_predmetu"]) and _mistnost_u(Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))) == String(z.get("mistnost", "")):
+				if z.has("blizko"):
+					# misto v oblasti (postavy.json blizko, blizko_r_m): jen kusy u bodu, serazene podle vzdalenosti
+					var dd := Vector2(float(r["p"][0]), float(r["p"][2])).distance_to(Vector2(float(z["blizko"][0]), float(z["blizko"][1])))
+					if dd <= float(z["blizko_r_m"]):
+						kusy.append([dd, 0.0, ri])
+					continue
 				kusy.append([float(r["p"][0]), float(r["p"][2]), ri])
 		kusy.sort()
 		if kusy.size() > int(z["poradi"]):
