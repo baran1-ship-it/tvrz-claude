@@ -128,6 +128,11 @@ func _varianta(zap: bool) -> void:
 		var lt: Node = main.get_node_or_null("Louka")
 		if lt:
 			lt.nastav_les_bez_travy(zap)
+	elif v == "bez_obzoru":                    # Misa 17. 11. r. 13: les za okrajem mapy (Obzor_les, 76 550 impostoru) - cena
+		var ob: Node = main.find_child("Obzor_les", true, false)
+		if ob:
+			(ob as Node3D).visible = not zap
+			print("TRASA bez_obzoru: Obzor_les %s" % ("skryt" if zap else "zpet"))
 	elif v == "les_bez_korun":                 # r. 86/88: stromy jen kmeny (listi pryc, impostory skryte) - cena korun
 		_bez_korun(zap)
 	elif v == "auto":                          # automaticka kvalita zapnuta (overeni smycky, zmeny stupne v tabulce)
@@ -380,6 +385,8 @@ func _jm(v: String) -> String:
 		return "les-koruny"
 	if v == "bez_houstin":
 		return "bez houštin"
+	if v == "bez_obzoru":
+		return "bez obzoru"
 	if v == "bez_svetel":
 		return "bez světel"
 	if v == "svetla_bez_stinu":

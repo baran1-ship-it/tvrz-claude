@@ -258,6 +258,7 @@
   "postavy_stoji",
   "bez_animace",
   "bez_houstin",
+  "bez_obzoru",
   ""
  ],
  "samo_na_tabletu": false,
@@ -324,5 +325,5 @@
   "modif_pripojene"
  ],
  "_varianty_16_11b": "16. 11. sceny (houstina, clony vsi, pole za vsi): bez_houstin pridana pred posledni vse - cena houstiny na useku ves-vjezd, les, kun-les-mimo proti vse ve stejnem behu. NEOVERENO NA ZARIZENI.",
- "_varianty_17_11": "17. 11. (měření 0.9999991): teren_dlazdice vyřazena (dlaždice zapnuty = totéž co „vše“); les_bez_korun, rostliny, stavby a dohled_kratsi změřeny 0.9999991/0.999999 → pryč, trasa kratší (pád po ~44 min, 60 úseků). Nově izolace postav ve vsi (ves-dvory 44 → 27 ms bez postav, skripty jen 4 ms): postavy_skryte (logika běží, nekreslí se), postavy_stoji (kreslí se, nechodí), bez_animace. bez_houstin kvůli novým houštinám (ř. 8)."
+ "_varianty_17_11": "17. 11. (měření 0.9999991): teren_dlazdice vyřazena (dlaždice zapnuty = totéž co „vše“); les_bez_korun, rostliny, stavby a dohled_kratsi změřeny 0.9999991/0.999999 → pryč, trasa kratší (pád po ~44 min, 60 úseků). Nově izolace postav ve vsi (ves-dvory 44 → 27 ms bez postav, skripty jen 4 ms): postavy_skryte (logika běží, nekreslí se), postavy_stoji (kreslí se, nechodí), bez_animace. bez_houstin kvůli novým houštinám (ř. 8). | bez_obzoru (Míša 17. 11. ř. 13: „mrak stromů za koncem mapy nevadí, pokud nežere“): skryje Obzor_les (76 550 impostorů za okrajem mapy) – cena lesa za mapou."
 }

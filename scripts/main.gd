@@ -620,6 +620,8 @@ func _build() -> void:
 		get_node("Louka").rozsev_vse()
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_MERENI"):
+		if OS.has_environment("TVRZ_SITE_V"):
+			_site_v(OS.get_environment("TVRZ_SITE_V"))
 		await _mereni(OS.get_environment("TVRZ_MERENI"))
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_TRASA"):
@@ -3090,3 +3092,24 @@ func _trasa_sama() -> void:
 		f.store_string("spustena")
 		f.close()
 	_on_menu_action("set:trasa", null)
+
+
+## Ladeni (Misa 17. 11. r. 5 cerne domy): TVRZ_SITE_V="x,z,r" vypise vsechny viditelne site, jejichz obal zasahuje
+## do sloupce kolem (x, z) - jmeno, material, rozsah viditelnosti, vrstvy, stin, format barev vrcholu.
+func _site_v(spec: String) -> void:
+	var v := spec.split_floats(",")
+	var c := Vector2(v[0], v[1])
+	for n: Node in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
+		var g := n as GeometryInstance3D
+		if not g.is_visible_in_tree():
+			continue
+		var ab := g.global_transform * g.get_aabb()
+		if c.x < ab.position.x - v[2] or c.x > ab.end.x + v[2] or c.y < ab.position.z - v[2] or c.y > ab.end.z + v[2]:
+			continue
+		var info := ""
+		if g is MeshInstance3D and (g as MeshInstance3D).mesh:
+			var m := (g as MeshInstance3D).mesh
+			info = "povrchu %d barva_vrch %s mat0 %s" % [m.get_surface_count(), m.get_surface_count() > 0 and (m.surface_get_format(0) & Mesh.ARRAY_FORMAT_COLOR) != 0,
+					(g as MeshInstance3D).get_active_material(0)]
+		print("SITE_V %s [%s] ovr %s vis %.0f-%.0f vrstvy %d stin %d %s" % [g.get_path(), g.get_class(), g.material_override,
+				g.visibility_range_begin, g.visibility_range_end, g.layers, g.cast_shadow, info])
