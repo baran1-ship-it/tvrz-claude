@@ -10256,6 +10256,16 @@ func _vybaveni_mimo_cest() -> void:
 		_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
 	for it: Dictionary in data["vybaveni"]:
 		var p0 := Vector2(float(it["p"][0]), float(it["p"][2]))
+		# stupne pred dvermi (Misa 17. 11. r. 14): volne stojici predmet (skladba dvora) na stupnich se nepolozi - stupne
+		# jsou novejsi zaznam nez skladba; predmety u zdi se posouvaji nize
+		if not it.has("podel_zdi"):
+			var na_st := false
+			for so: Array in _schody_obrys:
+				na_st = na_st or (so[1] as AABB).grow(0.3).has_point((so[0] as Transform3D) * Vector3(p0.x, 0.0, p0.y))
+			if na_st:
+				print("vybaveni: %s na stupnich pred dvermi %s - nepolozeno" % [it["id"], p0])
+				pryc += 1
+				continue
 		# jen predmety u zdi domu (hranice dreva): stoly na placku hostince, vybaveni lomu a zahony s ploty jsou
 		# skladby - posun po jednom je rozbil (zkouska 28. 10.: 11 vynechano, zahony bez plutku); jejich stret s osou
 		# cesty je chyba dat (osa k_hostinci pres placek, cesta od lomu pres pracoviste), ne predmetu
