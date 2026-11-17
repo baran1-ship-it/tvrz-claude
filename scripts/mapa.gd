@@ -467,9 +467,35 @@ func trasa(od: Vector2, do_: Vector2) -> PackedVector2Array:
 		var a := g.get_closest_point(od)
 		var b := g.get_closest_point(do_)
 		if od.distance_to(do_) > od.distance_to(g.get_point_position(a)) + do_.distance_to(g.get_point_position(b)):
-			p.append_array(g.get_point_path(a, b))
+			var cesta := g.get_point_path(a, b)
+			# Misa 17. 11. („sem tam utika do lesa misto cesty“): cil v jine casti site (osy cest nenapojene) -> A* prazdne
+			# a figurka sla vzdusnou carou lesem. Ted po siti k bodu nejblize cili, ktery je z a dosazitelny.
+			if cesta.is_empty():
+				var b2 := _nejblizsi_dosazitelny(g, a, do_)
+				cesta = g.get_point_path(a, b2)
+				print("mapa: cil mimo cast site hrace (bod %d), jede k %s" % [b, g.get_point_position(b2)])
+			p.append_array(cesta)
 	p.append(do_)
 	return p
+
+
+## Bod site dosazitelny z a (pruchod do sirky po spojich), ktery je nejblize cili.
+static func _nejblizsi_dosazitelny(g: AStar2D, a: int, cil: Vector2) -> int:
+	var videno := {a: true}
+	var fronta: Array[int] = [a]
+	var nej := a
+	var dmin := g.get_point_position(a).distance_squared_to(cil)
+	while not fronta.is_empty():
+		var q: int = fronta.pop_back()
+		var d := g.get_point_position(q).distance_squared_to(cil)
+		if d < dmin:
+			dmin = d
+			nej = q
+		for s: int in g.get_point_connections(q):
+			if not videno.has(s):
+				videno[s] = true
+				fronta.append(s)
+	return nej
 
 
 static func _delka(p: PackedVector2Array) -> float:

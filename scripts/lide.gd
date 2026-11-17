@@ -387,7 +387,21 @@ func _graf() -> void:
 			prev = n
 			posl = q
 			n += 1
-	print("lide: sit chuze %d bodu" % n)
+	# Misa 17. 11. (mapa: figurka „utika do lesa“): pocet oddelenych casti site - nenapojene osy cest = cesta lesem
+	var cast := {}
+	var casti := 0
+	for i in n:
+		if cast.has(i):
+			continue
+		casti += 1
+		var fr: Array[int] = [i]
+		cast[i] = casti
+		while not fr.is_empty():
+			for sq: int in _g.get_point_connections(fr.pop_back()):
+				if not cast.has(sq):
+					cast[sq] = casti
+					fr.append(sq)
+	print("lide: sit chuze %d bodu, %d oddelenych casti" % [n, casti])
 
 
 ## Spojka mezi dvema osami cest bez zdi (Misa 0.992 „zase sel pres zed“; test vztahy_hra zed|postava): osa cesty

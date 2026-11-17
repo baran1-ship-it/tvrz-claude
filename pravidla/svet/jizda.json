@@ -6,8 +6,9 @@
   "mapa_m_za_s": 140.0,
   "min_s": 3.0,
   "max_s": 14.0,
-  "figurka_px": 64,
-  "figurka_zdroj": "game-icons.net (CC BY 3.0): skoll/mounted-knight (na koni), delapouite/pikeman (pěšky) – obarveno u Pucharta (nastroje/mapa_figurka.py)"
+  "figurka_px": 40,
+  "figurka_zdroj": "game-icons.net (CC BY 3.0): skoll/mounted-knight (na koni), delapouite/pikeman (pěšky) – obarveno u Pucharta (nastroje/mapa_figurka.py)",
+  "_figurka_17_11": "Míša 17. 11. „zmenši panáčka na mapě“: 64 → 40."
  },
  "popis": "Jizda na koni a telo hrace v prvni osobe (Misa 27. 10. noc: podle KCD2, na tabletu, bez sekani). Cte scripts/kun.gd a scripts/telo.gd; v kodu zadna vlastni cisla. Jednotky: m, m/s, rad/s, s. zapojeno_do_hry: true od 0.98 (Misa 28. 10. „chci tam i ruce a kone“ - fyzicka kontrola na tabletu); false = jen ve zkousce TVRZ_JIZDA.",
  "kun": {
