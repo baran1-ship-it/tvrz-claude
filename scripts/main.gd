@@ -1958,7 +1958,7 @@ func open_map() -> void:
 
 
 ## Rychle cestovani z mapy: zatmit, presunout hrace, posunout herni cas o dobu chuze, rozednit.
-func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> void:
+func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String, mapa: Node = null) -> void:
 	var cl := CanvasLayer.new()
 	cl.layer = 30
 	cl.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -1972,10 +1972,13 @@ func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> 
 	get_tree().create_timer(float(Pravidla.cti("hrac", "cestovani_pojistka_s")), true).timeout.connect(func() -> void:
 		if is_instance_valid(cl):
 			get_tree().paused = false
+			if mapa and is_instance_valid(mapa):
+				mapa.close()
 			cl.queue_free())
 	get_tree().paused = true
 	var tw := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	tw.tween_property(fade, "color:a", 1.0, 0.7)
+	# z mapy (mapa != null): bez zatmeni - mapa s figurkou v cili kryje nacitani a zavre se az nad hotovym okolim
+	tw.tween_property(fade, "color:a", 0.0 if mapa else 1.0, 0.7)
 	await tw.finished
 	if player.seated:
 		player.stand_up()
@@ -2059,6 +2062,8 @@ func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> 
 		var r_ok := float(Pravidla.cti("hrac", "cestovani_okoli_m"))
 		while Time.get_ticks_msec() < t_end and not louka.okoli_hotove(r_ok):
 			await get_tree().process_frame
+	if mapa and is_instance_valid(mapa):
+		mapa.close()
 	var tw2 := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tw2.tween_property(fade, "color:a", 0.0, 0.9)
 	await tw2.finished

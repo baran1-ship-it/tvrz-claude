@@ -109,6 +109,9 @@ func _process(delta: float) -> void:
 func _process_vlastni(delta: float) -> void:
 	if main == null or main.player == null:
 		return
+	if open and bool(_jizda.get("stoji", false)):
+		_c.queue_redraw()                         # figurka stoji v cili, scena se nacita pod mapou (main.fast_travel)
+		return
 	if open and not _jizda.is_empty():
 		_jizda["s"] = minf(float(_jizda["s"]) + float(_jizda["rychlost_m_s"]) * delta, float(_jizda["L"]))
 		_c.queue_redraw()
@@ -308,6 +311,9 @@ func _draw_jizda(r: Rect2, u: float, s: Vector2) -> void:
 	_text(Vector2(s.x * 0.5, 64 * u), "%s  ·  %02d:%02d  ·  %d min %s" % [String(_jizda["nazev"]), int(hod), int(fmod(hod, 1.0) * 60.0), min_,
 			"jízdy" if bool(_jizda["kun"]) else "chůze"], int(28 * u), INK, Color(1, 1, 1, 0.92), _fb)
 	var br := Rect2(Vector2(s.x * 0.5 - 130 * u, s.y - 96 * u), Vector2(260 * u, 64 * u))
+	if bool(_jizda.get("stoji", false)):
+		_text(br.get_center() + Vector2(0, 12 * u), "Na místě…", int(34 * u), INK, Color(1, 1, 1, 0.92), _fb)
+		return
 	Styl.kresli_tlacitko(_c, br, 0, true, br.size.y / 76.0)
 	_text(br.get_center() + Vector2(0, 12 * u), "Zastavit", int(34 * u), Styl.RED, Color(0, 0, 0, 0), _fb)
 	_rects.append([br, "zastavit", 0])
@@ -363,7 +369,7 @@ func _input(event: InputEvent) -> void:
 			stop = true
 		if event is InputEventScreenTouch or event is InputEventMouseButton or event is InputEventJoypadButton or event is InputEventKey:
 			get_viewport().set_input_as_handled()
-		if stop:
+		if stop and not bool(_jizda.get("stoji", false)):
 			_dorazit(false)
 		return
 	if event is InputEventJoypadButton and event.pressed:
@@ -548,9 +554,11 @@ func _dorazit(v_cili: bool) -> void:
 		cil = Vector3(c2.x, 0.0, c2.y)
 		pohled = Vector3(p2.x, 2.0, p2.y)
 		nazev = "cesta"
-	_jizda = {}
-	close()
-	main.fast_travel(cil, pohled, hodin, nazev)
+	# Misa 17. 11. („panacek dojde a pak cerna obrazovka, nez se scena nacte - mela by byt mapa a hned scena“): figurka
+	# zustane stat v cili, mapa zustava otevrena, dokud main.fast_travel nepostavi okoli; pak ji zavre (bez zatmeni)
+	_jizda["s"] = sj
+	_jizda["stoji"] = true
+	main.fast_travel(cil, pohled, hodin, nazev, self)
 
 
 func _ask() -> void:
