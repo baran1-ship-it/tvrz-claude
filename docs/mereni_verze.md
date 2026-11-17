@@ -548,3 +548,6 @@ Paměť: **VRAM 1145 MB (textury 822, buffery 322)**, halda 1645 MB (max 1738), 
   PODEZŘENÍ: nové díly z Disku (kostel 30 MB glb, Doubrava, krčma L, domy vsi) s texturami mimo tabletové zmenšení.
 - Špičky 1. průjezdu (vše): skály 2 374 ms, louka 1 453, tvrz-cesta 493 (halda 1734 MB) – skripty 4–6, kreslení jako okolí.
   PODEZŘENÍ: první vykreslení + tlak paměti (halda u stropu). misa_16_11_chyby.md ř. 7.
+
+## 0.9999992 (commit ed2beec, vydáno 17. 11. 20:42)
+Změny: domy vsi zdálky hnědé (barvy vrcholu středního stupně do sRGB), voda bez automatického LOD (rybník, káď, koryta), schody ke vstupům (7), štít krčmy, jádro koruny bez černých čtverců, mapa (figurka menší a bez uskakování, mapa kryje načítání), keře zdálky (impostory do 400 m) a impostory stromů do 2 500 m, +4 tis. keřů na okrajích lesů a u pěšin, dlaždice terénu znovu upečené; švy terénu ve hře vypnuty (+34 s načtení). Varianty trasy: bez_postav, postavy_skryte, postavy_stoji, bez_animace, bez_houstin, bez_obzoru. Výkon NEOVĚŘENO NA ZAŘÍZENÍ (čeká na měřicí trasu).
