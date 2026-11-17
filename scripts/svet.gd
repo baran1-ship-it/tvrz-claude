@@ -1804,9 +1804,12 @@ func _koryto_terenu(root: Node3D) -> void:
 	_krok_cas("koryto: _koryta_naposled")
 	# pruchody: nejdriv jemnejsi sit na ridsi hranu, pak body ridsi site, ktere jemnejsi nema (deleni cest u obou siti
 	# nemusi byt vnorene) na uz srovnanou jemnejsi - spolecna lomena cara
-	for _p in 3:
-		if _svy_terenu(root) == 0:
-			break
+	# kontrola pred vydanim 17. 11.: 3 pruchody = +33-34 s ke kazdemu nacteni sveta na PC (bez cache), na tablet nelze
+	# -> vypnuto pravidlem (pasma.teren_svy.ve_hre), sev se ma srovnat v exportu (Blender kraj.tiles), ne ve hre
+	if bool(pasma().get("teren_svy", {}).get("ve_hre", false)):
+		for _p in int(pasma()["teren_svy"]["pruchodu"]):
+			if _svy_terenu(root) == 0:
+				break
 	_lem_normaly(root)
 	_krok_cas("koryto: _svy_terenu")
 	# mrizka vysek (2 m) pro rostliny a louku

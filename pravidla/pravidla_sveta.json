@@ -2037,6 +2037,11 @@
     "balvan_"
    ],
    "_nesedat_obsahuje": "klice obsahujici tyto casti se v datech neposazuji (mech lezi na kamenech a zdech - _mech_na_zem; rock_moss_set; skaly a balvany samy); nezavisla kontrola 15. 11."
+  },
+  "teren_svy": {
+   "ve_hre": false,
+   "pruchodu": 3,
+   "_popis": "Míša 17. 11. ř. 6 (čáry na hranách terénu): svet._svy_terenu srovná společné hrany sítí terénu ve hře (hřbet u mostu x 275 zmizel), ale kontrola před vydáním 17. 11. naměřila +33–34 s k načtení světa na PC při každém startu (bez cache) → ve_hre false, dokud se šev nesrovná v exportu (blender/kraj.py tiles) nebo se výsledek neuloží do cache."
   }
  }
 }
