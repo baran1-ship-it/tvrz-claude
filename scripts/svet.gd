@@ -11531,15 +11531,17 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 			zed = clampf(((hz["position"] as Vector3) - c).dot(n), 0.0, 1.0)
 		# pocet vysek z terenu u paty nejnizsiho stupne (dvakrat: s vic stupni pata dal od zdi)
 		var nv := ceili(vyska / smax)
+		var t := Vector3.UP.cross(n).normalized()
+		var w := sirka + 2.0 * presah
 		for it in 2:
-			var hp: Dictionary = dolu.call(c + n * (zed + (nv - 1) * hl + hl * 0.5), 0.3, vmax + 1.0)
-			if not hp.is_empty():
-				g = minf(g, float((hp["position"] as Vector3).y))
+			# teren pred patou nejnizsiho stupne po cele sirce (nejnizsi bod - posledni vyska nesmi byt vyssi nez stupen)
+			for ss: float in [-0.5, 0.0, 0.5]:
+				var hp: Dictionary = dolu.call(c + n * (zed + (nv - 1) * hl + hl * 0.5) + t * ss * w, 0.3, vmax + 1.0)
+				if not hp.is_empty() and _je_teren(hp):
+					g = minf(g, float((hp["position"] as Vector3).y))
 			vyska = prah - g
 			nv = ceili(vyska / smax)
 		var vys1 := vyska / nv
-		var t := Vector3.UP.cross(n).normalized()
-		var w := sirka + 2.0 * presah
 		var zac := zed - do_zdi
 		for k in range(1, nv):
 			var vrch := prah - k * vys1
