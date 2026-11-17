@@ -349,15 +349,15 @@
    0.05
   ],
   "zdroj_hluboka": "pipeta (medián) misa_real_03_perej_listi_breh.jpg výřez x 10–120, y 520–600 (klidná tůň pod peřejí, sRGB)",
-  "cirost_m": 0.5,
+  "cirost_m": 0.3,
   "zdroj_cirost": "hloubka, na které voda pohltí 63 % pohledu na dno (1 − exp(−h/c)); v real_01 je dno vidět i uprostřed toku (~0,3–0,4 m) – NEOVERENO, laděno snímkem; Havran reka cirost 0,35",
   "hloubka_barvy_m": 0.5,
   "zdroj_hloubka_barvy": "od mělké k tůňové barvě (1 − exp(−h/x)) – NEOVERENO, snímek",
   "fresnel_f0": 0.02,
   "zdroj_fresnel": "Schlick: F0 = ((n−1)/(n+1))², voda n ≈ 1,33 → 0,02 (https://en.wikipedia.org/wiki/Schlick%27s_approximation); krytí = max(hloubka, Fresnel) – shora průhledná, do dálky zrcadlí (kcd1_oficial_potok_valouny_pruhlednost.jpg)",
-  "drsnost_klid": 0.3,
+  "drsnost_klid": 0.15,
   "drsnost_pena": 0.5,
-  "specular": 0.05,
+  "specular": 0.3,
   "zdroj_drsnost": "snímek 13. 11. (docs/screens/potok13_*): s drsností 0,08 a specular 0,35 odrážela hladina jen oblohu (Compatibility bez SSR) – šedobílá deska; odraz lesa je proto barva odraz × Fresnel, lesk jen slunce. Hodnoty NEOVERENO, laděno snímkem",
   "mokry_pas_m": 0.3,
   "zdroj_mokry_pas": "mokrý tmavší pás nad čárou vody (výška nad hladinou): KCD snímky 0,2–0,5 m (odhad z fotky, README_jak_se_stavi.md §2.2), Havran voda_toky.md 0,2–0,4 m (NAVRH); na plochém brodu vychází vodorovně 2–4 m jako bahno u mlýna (kcd1_melcina_mlyn_mokre_bahno.jpg)",
@@ -409,6 +409,7 @@
    1.05,
    0.9
   ],
-  "zdroj_15_11": "Míša 15. 11. (foto x −49,8 z 120,2): „voda je dost bílá i některé kameny“ – pěna 0,72 → 0,44 (světlé čárky za kameny jen naznačené), jas kamenů koryta (drobné 1,75 → 1,05, balvany 1,25 → 0,9; dřív v kódu hlavni.gd _kameny_koryta)"
+  "zdroj_15_11": "Míša 15. 11. (foto x −49,8 z 120,2): „voda je dost bílá i některé kameny“ – pěna 0,72 → 0,44 (světlé čárky za kameny jen naznačené), jas kamenů koryta (drobné 1,75 → 1,05, balvany 1,25 → 0,9; dřív v kódu hlavni.gd _kameny_koryta)",
+  "kryti_min": 0.45
  }
 }
