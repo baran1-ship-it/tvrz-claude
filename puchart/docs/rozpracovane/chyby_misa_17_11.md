@@ -12,7 +12,7 @@ Výklad červených čar je můj (Claude) – kde si nejsem jistý, je to napsan
 | 3 | 03 | -6.6 -0.9 y44.3 | bez čar; „Uhasit oheň“ – černý kvádr s oranžovými plátky (krb/nika rozbitá geometrie) | A hrad |
 | 4 | 04 | 49.3 154.3 y15.6 | ochoz: dokreslené schody od ochozu na vyšší kamenný stupeň, X na konci zábradlí – chybí výstup, zábradlí brání | A hrad |
 | 5 | 05 | 45.1 140.1 y12.0 | bez čar; nádvoří – vlevo plovoucí kusy zdi (rozbitá zeď?), kámen uprostřed trávy – prověřit | A hrad |
-| 6 | 06 | 56.2 148.9 y12.9 | spodek ochozu/podlahy úplně černý | A hrad |
+| 6 | 06 | 56.2 148.9 y12.9 | venkovní ochoz (podlaha, krakorce) prostupuje zdí dovnitř místnosti – zevnitř vidět jeho černý spodek (upřesnila Míša) | A hrad |
 | 7 | 07 | -8.4 9.7 y47.2 | klikyhák přes zeď, která protíná okno – zeď navíc / zeď přes okno (po posunu oken B?) | A hrad |
 | 8 | 08 | -76.9 95.8 y-30.8 | bez čar; podlaha pavlače téměř černá (tmavomodrá) | B ves |
 | 9 | 09 | -76.7 95.9 y-30.8 | chybí zábradlí u vyústění schodů | B ves |
