@@ -1257,6 +1257,12 @@ func rozsev_vse() -> void:
 	f.store_buffer(out)
 	f.close()
 	print("ROZSEV kryti: %d bunek se zakrytim, %.1f kB, %.0f s" % [bunek, out.size() / 1024.0, (Time.get_ticks_msec() - t0) / 1000.0])
+	# otisk exportu, ze ktereho kryti vzniklo (Misa 17. 11. r. 2: kryti z 15. 11. po exportu 16. 11. = trava skrz novou
+	# dlazbu prelivu) - test kryti_otisk
+	var ot = JSON.parse_string(FileAccess.get_file_as_string("res://build/export_otisk.json")) if FileAccess.file_exists("res://build/export_otisk.json") else null
+	var fo := FileAccess.open(ROZSEV + "kryti_otisk.txt", FileAccess.WRITE)
+	fo.store_string(String(ot.get("otisk", "")) if ot is Dictionary else "")
+	fo.close()
 
 
 func _nacti_kryti() -> void:

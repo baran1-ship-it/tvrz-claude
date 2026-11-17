@@ -1580,3 +1580,36 @@ Hotovo v kódu a datech (testy u každého):
   načtou až po návštěvě lomu; v plné sadě OK. PODEZŘENÍ, ne potvrzeno.
 - Dva běhy Godot foto najednou = nedostatek paměti (zabité oba). Foto vždy po jednom.
 - Restart kontejneru v noci: soubory (build/, klíč) přežily, jen běžící úlohy zmizely – pustit znovu.
+
+## Vegetace v dálce 17. 11. (tabulka misa_17_11_chyby r. 8)
+- **Impostory keřů**: `blender/impostory.py DRUHY_KERE` (shrub_02, bez_cerny) → `obrazky/impostory/kere.json` + atlasy; hra
+  `svet._imp_ker` (NE `_imp_druh` – ten by keřům dal kmen a kolizi v `_kmeny`). Začínají na konci 3D keře (tablet 40 m),
+  končí `les_podrost.json dalka.kere_do_m`; `kere_do_m: 0` = návrat (bez impostorů keřů). Uzly `ker_imp_*` (diag „puda“,
+  varianta trasy `bez_houstin` je skryje). Nové PNG potřebují `godot --headless --import` (beh cmd) – `.import` nejsou v gitu.
+- **Dosah impostorů stromů** `dalka.stromy_do_m` (dřív `IMP_DOHLED` 900 v kódu: uvnitř mapy za 900 m holé kopce, za mapou
+  obzor do 2 500 m). Impostor mimo pásmo (blízko pod plným modelem, za dosahem) se ve vertex shaderu stáhne do bodu.
+- **Pozor na natvrdo psané klíče rostlin**: `_kere_podel_pesin` a okraj `_nove_lesy` sázely `ker_husty_0` / `sipek_*`, které
+  v datech nejsou → 0 keřů (log „keru na okraji 0“, řádek „kere podel pesin“ chyběl). Skladba teď v `houstina.pesiny`
+  a `houstina.okraj_novych_lesu` (+ `plast.druhy`). Nový generátor vždy přes `_hou_druhy` a ověřit počet v logu.
+- **Snímek PŘED při sdíleném stromu**: Godot čte skripty a pravidla až při startu běhu ve frontě – stav PŘED se dělá
+  daty (návratové hodnoty), změny PO se aplikují až po řádku „impostor:“ v logu běhu PŘED (Pravidla se pak už necachují znovu).
+- **Meze (plochy.json podil_honu 0,45 → 0,6) zkusmo vrácené**: test smyslu pak hlásil `houstina_voda` 1 (bez_cerny_2 břehu
+  (245,8; 979,8)) – jiné pořadí náhody v `kraj.houstiny_breh` odhalí, že generátor břehu a test smyslu nepočítají holý břeh
+  stejně. Před zvýšením mezí opravit generátor břehu (PODEZŘENÍ, nerozebráno).
+
+
+## Míša 17. 11. ř. 1, 2, 6, 7 – rybník bez vody, přeliv, švy terénu, razítka v cestě (pomocník 17. 11.)
+- **Hladina s údaji v barvě vrcholu nikdy přes automatické LOD importu** (`tvrz.glb` `generate_lods=true`): rovná plocha má
+  chybu zjednodušení 0 → Godot kreslí nejhrubší stupeň i zblízka, zbyde obrys s barvou kraje (hloubka 0 = průhledná) →
+  „rybník bez vody“ na PC i tabletu. Kdo vyřazuje hladinu z přepisu (`nadrz.hloubka_hladiny` dělal novou ArrayMesh), musí
+  LOD zahodit sám (`svet._bez_lod`). Test `hladiny_lod`.
+- **Hrana jemného pásma terénu k hrubému** (Teren_ves 2 m, Teren_most 1 m × Teren_okoli 5 m): vrchol na hraně má výšku
+  hrubé hrany a body hrubé mřížky jsou i v jemné síti (`kraj._hrana_hrube`, `_hruba_hrana_y`, lem po téže čáře) –
+  T-spoj dával schody až 0,46 m a tmavé čáry lemu. Ve hře `_cesta_povrch` počítá hranu na okraji sítě plným profilem.
+  Test `teren_svy` (pasmo `test.teren_svy_m`). Neřešeno: hrana pásma tvrze `Teren` (fort.terrain, 1 m) × okolí – test ji
+  měří, oprava stejným pravidlem v `fort.terrain`, když ukáže švy.
+- **Napojený konec osy cesty** (`_cesty_napoj`, až za středovou čáru jiné cesty) – `cesta_lat` dává uvnitř povrchu přednost
+  nejširší cestě (`CESTA_PREDNOST`), jinak údaje vrcholů skáčou mezi osami (razítka). Test `cesta_skoky`.
+- **Krytí louky (`kryti.bin`) po každém exportu** je teď krok 18 `tools/export.sh`; otisk exportu v `modely/louka/kryti_otisk.txt`,
+  test `kryti_otisk`. Předměty, pod kterými nemá růst tráva, potřebují kolizi (`kit.stone` ji nemá – dlažba přelivu `P.cols`).
+- Přeliv × výpust: test smyslu `preliv_vypust`, délka křídla v záznamu `vypust.kridlo_m`.

@@ -1633,7 +1633,8 @@
   "preliv": {
    "dlazba": {"rada_m": 0.5, "kamen_sirka_m": 0.45, "spara_m": 0.02, "tloustka_m": 0.18, "nad_dnem_m": 0.03, "presah_m": 0.6, "obruba_sirka_m": 0.3, "obruba_vyska_m": 0.45, "obruba_nad_m": 0.15},
    "_dlazba": "Míša 16. 11. r. 5 (snímek 06: dlažba přelivu jako rozsypané kvádry – kameny s náhodným natočením ±8° a délkou, vodorovné na svahu = schody): souvislé koryto – řady napříč po rada_m (vazba na přeskáčku), kámen nakloněný podle spádu dna (kraj.ryb2_preliv_dno), horní plocha nad_dnem_m nad dnem, spára spara_m; obruba z kvádrů podél osy po obou stranách, obruba_nad_m nad terénem. Rozměry podle kamenných skluzů rybníků (lomový kámen 0,4–0,5 m; NEOVĚŘENO zdrojem). Hledáno hotové: Poly Haven (modular_wooden_pier – mořské molo, ne skluz), Kenney/Quaternius (bez kamenného skluzu) – stavba z kvádrů kit.stone.",
-   "posun_m": 2.8,
+   "posun_m": 3.8,
+   "_posun_m": "Míša 17. 11. r. 2 (snímek 03 x 501 z 881: „kvádry nesedí na sebe“): při 2,8 křídlo čela výpusti (kridlo_m 1,6 pod 45°) procházelo obrubou a dlažbou přelivu (test smyslu preliv_vypust: 25 bodů osy zdi v dlažbě); od 3,7 bez kolize, 3,8 = rezerva 0,1 m. Konec přelivu se tím posune o 1 m po proudu (t1 = t_čela + posun − čelo/2).",
    "sirka_m": 1.6,
    "nabeh_m": 1.2,
    "koruna_nad_hladinou_m": 0.35,

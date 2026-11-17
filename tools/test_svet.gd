@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "hladiny_lod", "teren_svy", "sklep_vstup", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400", "houby_na_zemi", "clona_vsi", "houstina_volno"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "hladiny_lod", "teren_svy", "kryti_otisk", "cesta_skoky", "sklep_vstup", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400", "houby_na_zemi", "clona_vsi", "houstina_volno"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -10911,6 +10911,53 @@ func _teren_svy() -> void:
 		ok = ok and int(lem[k][0]) == 0
 		txt.append("lem %s trci %d vrch., nejvic %.3f u (%.1f, %.1f)" % [k, lem[k][0], lem[k][1], lem[k][2].x, lem[k][2].y])
 	_vysledek("teren_svy", ok and n_vz > 0, "hran %d, vzorku %d; %s" % [hrany.size(), n_vz, "; ".join(txt)])
+
+
+## Misa 17. 11. r. 7 (09 x 315 z 681: obdelnikova „razitka“ v hline cesty): napojeny konec osy vede do povrchu jine cesty;
+## udaje vrcholu (svet.cesta_lat: osa, lat, s, okraj) nesmi uvnitr povrchu cesty skakat mezi osami. Mrizka 0,5 m do 12 m
+## kolem koncu vsech os: dvojice sousednich bodu, oba hluboko na ceste (|lat| / okraj < svet.CESTA_PREDNOST), s jinou
+## osou = skok. Limit 0.
+func _cesta_skoky() -> void:
+	var n := 0
+	var sk := 0
+	var kde: Array = []
+	var bod := func(x: float, z: float) -> Array:
+		var l: Array = sv.cesta_lat(x, z)
+		if l.is_empty():
+			return []
+		var ok: float = sv.cesta_ok(float(l[1]), float(l[3]), 1.0 if float(l[0]) >= 0.0 else -1.0)
+		return [int(l[6]), absf(float(l[0])) / maxf(ok, 0.1)]
+	for o: Dictionary in sv.cesty_osy:
+		var pp: PackedVector2Array = o["p"]
+		if pp.size() < 2:
+			continue
+		for e: Vector2 in [pp[0], pp[pp.size() - 1]]:
+			for j in 48:
+				for i in 48:
+					var x := e.x - 12.0 + i * 0.5
+					var z := e.y - 12.0 + j * 0.5
+					var a: Array = bod.call(x, z)
+					if a.is_empty() or float(a[1]) >= sv.CESTA_PREDNOST:
+						continue
+					for d: Vector2 in [Vector2(0.5, 0.0), Vector2(0.0, 0.5)]:
+						var b: Array = bod.call(x + d.x, z + d.y)
+						if b.is_empty() or float(b[1]) >= sv.CESTA_PREDNOST:
+							continue
+						n += 1
+						if int(a[0]) != int(b[0]):
+							sk += 1
+							if kde.size() < 6:
+								kde.append(Vector2(snappedf(x, 0.5), snappedf(z, 0.5)))
+	_vysledek("cesta_skoky", sk == 0 and n > 0, "dvojic hluboko na ceste %d, skok osy %d %s" % [n, sk, str(kde)])
+
+
+## Misa 17. 11. r. 2 (03: trava skrz dlazbu prelivu): kryti louky shora (modely/louka/kryti.bin) musi byt spocitane z
+## tehoz exportu jako svet - rozsev zapise otisk exportu do kryti_otisk.txt (tools/export.sh krok 18).
+func _kryti_otisk() -> void:
+	var ot = JSON.parse_string(FileAccess.get_file_as_string("res://build/export_otisk.json")) if FileAccess.file_exists("res://build/export_otisk.json") else null
+	var e := String(ot.get("otisk", "")) if ot is Dictionary else ""
+	var k := FileAccess.get_file_as_string("res://modely/louka/kryti_otisk.txt").strip_edges() if FileAccess.file_exists("res://modely/louka/kryti_otisk.txt") else ""
+	_vysledek("kryti_otisk", e != "" and k == e, "otisk exportu %s, kryti louky z exportu %s" % [e.left(12), k.left(12) if k != "" else "NEZNAMO (kryti_otisk.txt chybi - kryti.bin starsi nez zapis otisku)"])
 
 
 func _hladiny_lod() -> void:

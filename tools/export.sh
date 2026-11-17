@@ -5,7 +5,7 @@
 #   rc 2 test smyslu pred exportem | 3 Blender (rc nebo chybi build/export_hotov.json z tohoto svet.json)
 #   rc 4 test smyslu po exportu   | 5 malo mista | 6 poskozeny obrazek | 7 pyflakes | 8 import Godotu
 #   rc 9 krok stavby nad mez       | 10 limity textur | 11 textury pro tablet | 12 predpeceni potoka | 13 zapis otisku
-#   rc 17 sdilene textury dilu (tools/textury_predmetu.py dily)
+#   rc 17 sdilene textury dilu (tools/textury_predmetu.py dily) | 18 kryti louky (TVRZ_ROZSEV)
 # --jen-po: jen brany po exportu a dokonceni nad hotovym exportem (Blender se nespousti).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -68,5 +68,9 @@ krok 11 "datove textury bezztratove po predpeceni" python3 tools/datove_textury_
 krok 8 "import Godotu po predpeceni" bash -c "godot --headless --path . --import > build/beh/export_import2.log 2>&1"
 krok 11 "datove textury bezztratove po predpeceni (kontrola)" python3 tools/kontrola_datovych_textur.py
 krok 13 "zapis otisku exportu" python3 tools/otisk_exportu.py zapis
+# Misa 17. 11. r. 2 (03: trava skrz dlazbu prelivu): kryti louky shora (modely/louka/kryti.bin) z tohoto exportu - pravidlo
+# „po kazdem exportu se stavbami znovu“ (9. 11.) nikdo nepoustel: export 16. 11. 19:37, kryti.bin z 15. 11. 15:57. Rozsev
+# zapise otisk exportu do modely/louka/kryti_otisk.txt, test hry kryti_otisk ho porovna s build/export_otisk.json.
+krok 18 "kryti louky z tohoto exportu (build/pregeneruj_kryti.log)" bash -c "bash tools/pregeneruj.sh kryti && grep -q '^ROZSEV kryti' build/pregeneruj_kryti.log"
 stav OK 0
 echo "EXPORT OK"

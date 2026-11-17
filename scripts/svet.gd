@@ -8207,6 +8207,13 @@ func cesta_lat(x: float, z: float) -> Array:
 	var q := Vector2(x, z)
 	# bunka 4 m uz obsahuje vsechny useky do 16 m (okraj mrizky) - sousedni bunky netreba (0.89: 9x mene prace,
 	# stavba cest v terenu 94 s)
+	# Misa 17. 11. r. 7 (09 x 315 z 681: obdelnikova „razitka“ v hline): napojeny konec osy (_cesty_napoj) vede az za
+	# stredovou caru jine cesty - uvnitr jejiho povrchu byla nejblizsi strida jedna a druha osa a udaje vrcholu (lat, s,
+	# okraj, koleje) skakaly mezi sousednimi vrcholy -> pruhy a obrysy po trojuhelnicich. Bod hluboko v povrchu nektere
+	# cesty (|lat| <= CESTA_PREDNOST x okraj) bere udaje te nejsirsi z nich (hlavni cesta ma prednost); jinak nejblizsi osa.
+	var pred: Array = []
+	var pw := -INF
+	var pd := INF
 	for dx in range(0, 1):
 		for dz in range(0, 1):
 			for e: Array in _cesty_mriz.get(c, []):
@@ -8220,16 +8227,27 @@ func cesta_lat(x: float, z: float) -> Array:
 				var ab := b - a
 				var t := clampf((q - a).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
 				var d := q.distance_to(a + ab * t)
-				if d < bd:
-					bd = d
+				var ws: PackedFloat32Array = o["w"]
+				var w := lerpf(ws[i], ws[i + 1], t)
+				var sx := float(o["s0"]) + (float(i) + t) * 0.8
+				var sg := 1.0 if ab.cross(q - a) >= 0.0 else -1.0
+				# cesta_ok <= w * 1,24 + 0,25 (_vln v -1..1) - dal se okraj nepocita (cesta_lat vola louka z vlaken)
+				var uvnitr := d <= CESTA_PREDNOST * (w * 1.24 + 0.25) and d <= CESTA_PREDNOST * cesta_ok(w, sx, sg)
+				var lepsi_pred := uvnitr and (w > pw + 1e-3 or (absf(w - pw) <= 1e-3 and d < pd))
+				if d < bd or lepsi_pred:
 					var ys: PackedFloat32Array = o["y"]
-					var ws: PackedFloat32Array = o["w"]
 					var op: Array = o["op"]
 					var dls: PackedFloat32Array = o.get("dl", PackedFloat32Array())
-					best = [d * (1.0 if ab.cross(q - a) >= 0.0 else -1.0), lerpf(ws[i], ws[i + 1], t), lerpf(ys[i], ys[i + 1], t),
-							float(o["s0"]) + (float(i) + t) * 0.8, (op[i] as Vector4).lerp(op[i + 1], t),
+					var r := [d * sg, w, lerpf(ys[i], ys[i + 1], t), sx, (op[i] as Vector4).lerp(op[i + 1], t),
 							lerpf(dls[i], dls[i + 1], t) if dls.size() > i + 1 else 0.0, int(e[0])]
-	return best
+					if d < bd:
+						bd = d
+						best = r
+					if lepsi_pred:
+						pw = w
+						pd = d
+						pred = r
+	return pred if not pred.is_empty() else best
 
 
 ## Trava na ceste (louka, vlakno): (pravdepodobnost trsu, vyska povrchu) nebo x < 0.
@@ -8699,6 +8717,10 @@ func _cesty_cache_cesta() -> String:
 	return "user://cache/cesty_%s_%s_%d.bin" % [String(j.get("commit", "")), String(j.get("manifest", "")), CESTA_VERZE]
 
 
+## Hloubka v povrchu cesty (|lat| / okraj), kde ma jeji osa prednost pred jinou blizsi osou (cesta_lat). Okraj hliny
+## v zem.gdshader zacina na |lat| / okraj 0,88 (rd) - do te meze je bod celou plochou na ceste, prepnuti os tam
+## nezmeni masku cesty.
+const CESTA_PREDNOST := 0.88
 const CESTA_VERZE := 3                   # zvysit pri zmene vypoctu cest v terenu (zneplatni ulozene)
 const ZAMEK_VERZE := 1                   # zvysit pri zmene _zamek_terenu
 
