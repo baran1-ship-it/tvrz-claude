@@ -11790,6 +11790,7 @@ func _schody_vstupu(root: Node3D, parent: Node3D) -> void:
 			kol.add_child(cs)
 			cs.global_transform = Transform3D(Basis(t, Vector3.UP, n), stred)
 			nbloku += 1
+		print("schody vstupu: %s od y %.2f (prah %.2f) zed %.2f teren %.2f vysek %d po %.3f" % [nm, prah, float(zaznam["prah_y"]), zed, g, nv, vys1])
 		zaznam["stupnu"] = nv - 1
 		zaznam["vyska"] = vyska
 		zaznam["vyska_stupne"] = vys1

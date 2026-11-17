@@ -11168,6 +11168,7 @@ func _schody_vstupu() -> void:
 			var y0 := float(z["prah_y"])
 			var d := 0.1
 			var nejvic := 0.0
+			var prof: Array = []
 			while d < dl:
 				var q := c + n * d + t * bok * float(z["sirka"])
 				var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(q + Vector3(0, 0.3, 0), q - Vector3(0, 3.0, 0)))
@@ -11175,9 +11176,11 @@ func _schody_vstupu() -> void:
 					break
 				var y1 := float((h["position"] as Vector3).y)
 				nejvic = maxf(nejvic, y0 - y1)
+				prof.append("%.2f:%.2f %s" % [d, y1 - float(z["prah_y"]), String((h["collider"] as Node).name).left(14)])
 				y0 = y1
 				d += 0.08
 			if nejvic > smax + tol:
+				print("SCHODY_VSTUPU profil %s bok %.2f: %s" % [z["dvere"], bok, str(prof)])
 				spatne.append("%s skok %.2f m (bok %.2f)" % [z["dvere"], nejvic, bok])
 				break
 	if not vysoko.is_empty():
