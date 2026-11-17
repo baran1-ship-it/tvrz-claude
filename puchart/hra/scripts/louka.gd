@@ -35,6 +35,66 @@ func postav(s: Node3D, kamera: Camera3D) -> void:
 	m.set_shader_parameter("hust_konec", float(cfg["hust_do_m"]))
 
 	if str(cfg.get("rezim", "bunky")) == "mrizka": _mrizka_postav()
+	nastav_unshaded(_un_vychozi())
+
+## ---- TRÁVA UNSHADED (louka.json unshaded; Havran scripts/louka.gd _stebla_shader/_svetlo_travy, modely.json trava_unshaded):
+## v Compatibility dostane každý osvětlený materiál při stínovaném slunci druhý průchod (gles3 rasterizer_scene_gles3.cpp
+## uses_additive_lighting; render_mode shadows_disabled ho nevypne) – Havran tablet: ~60 % ceny trávy (louka p50 28 → 21 ms).
+## Unshaded tráva ho nemá; světlo (okolí + slunce × (1 − stin_korun × zápoj)) počítá _svetlo_travy z denní doby.
+var _un := false
+var _shader_un: Shader
+var _un_t := 0.0
+func _un_vychozi() -> bool:
+	var e := OS.get_environment("PUCHART_TRAVA_UNSHADED")   # PC: A/B a kalibrace barvy (1 / 0)
+	if e != "": return e == "1"
+	var u: Dictionary = cfg.get("unshaded", {})
+	return bool(u.get("tablet", false)) if OS.has_feature("mobile") else bool(u.get("pc", false))
+
+func _materialy() -> Array:
+	var a := []
+	for m in vsechny_site(): a.append((m as Mesh).surface_get_material(0))
+	return a
+
+func nastav_unshaded(on: bool) -> void:   # také varianta měřicí trasy (mereni.json "trava_unshaded")
+	_un = on
+	var sh0: Shader = load("res://shaders/stebla.gdshader")
+	if on and _shader_un == null:
+		_shader_un = Shader.new(); _shader_un.code = sh0.code.replace("vertex_lighting,", "unshaded,")
+	var kr_t: Texture2D = load("res://data/kryt.png") if ResourceLoader.exists("res://data/kryt.png") else null
+	for mat: ShaderMaterial in _materialy():
+		mat.shader = _shader_un if on else sh0
+		if on and kr_t:
+			mat.set_shader_parameter("kryt", kr_t)
+			mat.set_shader_parameter("stan_info", Vector4(float(sj["x0_hra"]), float(sj["z0_hra"]), float(sj["krok_m"]), st.get_width()))
+		if not on:
+			mat.set_shader_parameter("svetlo", Vector3.ONE); mat.set_shader_parameter("slunce", Vector3.ZERO); mat.set_shader_parameter("stin_korun", 0.0)
+	_un_t = 0.0
+	print("LOUKA tráva unshaded %s (materiálů %d)" % [on, _materialy().size()])
+
+func _svetlo_travy(dt: float) -> void:
+	_un_t -= dt
+	if not _un or _un_t > 0.0: return
+	_un_t = 0.5
+	var den: Node = get_tree().current_scene.get("den") if get_tree().current_scene else null
+	if den == null or den.get("slunce") == null: return
+	var sun: DirectionalLight3D = den.slunce; var env: Environment = den.env; var sky: ShaderMaterial = den.obloha
+	var u: Dictionary = cfg["unshaded"]
+	# Havran _svetlo_travy: slunce = barva (lin.) × energie × Lambert s obalem (diffuse_lambert_wrap, normála nahoru);
+	# okolí = obloha (horizont → zenit, váha obloha_zenit) × energie oblohy × ambient × podíl oblohy + barva okolí × (1 − podíl)
+	var s := sun.global_transform.basis.z.normalized()
+	var el := maxf(s.y, 0.0); var ob := float(u["obal"])
+	var sl := sun.light_color.srgb_to_linear() * sun.light_energy * ((el + ob) / ((1.0 + ob) * (1.0 + ob)) if el > 0.0 and sun.visible else 0.0)
+	var zen: Color = (sky.get_shader_parameter("zenith") as Color).srgb_to_linear()
+	var hor: Color = (sky.get_shader_parameter("horizon") as Color).srgb_to_linear()
+	var sp := env.ambient_light_sky_contribution
+	var ok := hor.lerp(zen, float(u["obloha_zenit"])) * float(sky.get_shader_parameter("energy")) * env.ambient_light_energy * sp \
+			+ env.ambient_light_color.srgb_to_linear() * env.ambient_light_energy * (1.0 - sp)
+	var ks: Array = u["slunce_x"]; var ko: Array = u["okoli_x"]
+	var vs := Vector3(sl.r * float(ks[0]), sl.g * float(ks[1]), sl.b * float(ks[2]))
+	var vo := Vector3(ok.r * float(ko[0]), ok.g * float(ko[1]), ok.b * float(ko[2]))
+	for mat: ShaderMaterial in _materialy():
+		mat.set_shader_parameter("svetlo", vo); mat.set_shader_parameter("slunce", vs); mat.set_shader_parameter("stin_korun", float(u["stin_korun"]))
+	if OS.get_environment("PUCHART_TRAVA_LADENI") != "": print("LOUKA světlo unshaded okolí ", vo, " slunce ", vs, " el ", el)
 
 ## ---- MŘÍŽKA kolem kamery (louka.json mrizka; stebla.gdshader mrizka) – žádný rozsev na CPU ani vlákna
 var _prst: Array = []   # [MultiMeshInstance3D, krok]
@@ -111,6 +171,7 @@ func _trida(x: float, z: float) -> String:
 
 func _process(_d: float) -> void:
 	if cam == null or _trs == null: return
+	_svetlo_travy(_d)
 	if not _prst.is_empty(): _mrizka_tick(); return
 	var B := float(cfg["bunka_m"]); var R := float(cfg["dosah_m"]); var p := cam.global_position
 	var c0 := Vector2i(int(floor(p.x / B)), int(floor(p.z / B))); var n := int(ceil(R / B))
@@ -143,10 +204,10 @@ func _rozsej(k: Vector2i) -> void:
 		while x < B:
 			var px := x0 + x + rng.randf_range(-0.45, 0.45) * krok; var pz := z0 + z + rng.randf_range(-0.45, 0.45) * krok
 			var tr := _trida(px, pz); var h := float(tridy.get(tr, 0.0))
-			if h > 0.0 and _kr != null and (tr.begins_with("les") or tr == "luh"):   # Havran louka.gd: pod korunami −90 %, světliny plné
+			if h > 0.0 and _kr != null:   # zápoj korun (kryt.png, Havran les_podrost.json trava): pod zápojem ≈ 0, světliny jako louka; samotný strom v louce zápoj nemá
 				var kc := clampi(int((px - float(sj["x0_hra"])) / float(sj["krok_m"])), 0, _kr.get_width() - 1)
 				var kz := clampi(int((pz - float(sj["z0_hra"])) / float(sj["krok_m"])), 0, _kr.get_height() - 1)
-				h *= 1.0 - float(LS_.get("ubytek", 0.9)) * smoothstep(float(LS_.get("kryt_od", 0.6)), float(LS_.get("kryt_do", 1.0)), _kr.get_pixel(kc, kz).r)
+				h *= 1.0 - float(LS_.get("ubytek", 0.985)) * smoothstep(float(LS_.get("kryt_od", 0.3)), float(LS_.get("kryt_do", 0.8)), _kr.get_pixel(kc, kz).r)
 			if h > 0.0 and rng.randf() < h:
 				var pod: Array = druhy.get(tr, druhy["_"]); var u := rng.randf(); var druh := 0; var acc := 0.0
 				for di in pod.size():

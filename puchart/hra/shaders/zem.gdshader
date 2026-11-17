@@ -22,6 +22,10 @@ vec3 atl(sampler2D t, vec2 uv, int k) {   // Havran zem.gdshader atl(): výřez 
 	vec2 o = vec2(float(k % 2), float(k / 2)) * 0.5;
 	return textureGrad(t, o + f * 0.5, dFdx(uv) * 0.5, dFdy(uv) * 0.5).rgb;
 }
+// zápoj korun (hra/data/kryt.png, nastroje/kryt_korun.py; louka.json les.puda – Havran svet.gd _puda_zapoj, 17. 11.): pod zapojenými
+// korunami lesní opad i mimo masku lesa, v lese na světle (světlina, mezera mezi korunami) travní drn – vzorkovač navíc, celkem 9 (Adreno ≤ 13)
+uniform sampler2D zapoj : filter_linear, repeat_disable;
+uniform vec4 zapoj_puda = vec4(0.3, 0.8, 1.0, 0.0);   // kryt_od, kryt_do, opad ve světle (× maska G), opad v plném zápoji (min)
 uniform vec4 maska_rect = vec4(-1172.0, -1107.0, 2000.0, 2000.0); // x0, z0, šířka, výška (svet.json vysek.hra)
 uniform float velikost_m[6];          // pudy.json velikost_m
 uniform vec3 kalibrace_travy = vec3(0.62, 0.70, 0.52);   // leafy_grass je v létě přesvícená do žluta (snímek 03 – chyba #6)
@@ -73,6 +77,12 @@ void fragment() {
 	// rozbití opakování: dva měřítka šumu míchají odstín a posouvají hranice vrstev
 	float n1 = texture(sum, xz / 23.0).r;
 	float n2 = texture(sum, xz / 211.0).r;
+	if (all(greaterThanEqual(muv, vec2(0.0))) && all(lessThanEqual(muv, vec2(1.0)))) {
+		float zp = smoothstep(zapoj_puda.x, zapoj_puda.y, texture(zapoj, muv).r);
+		float g0 = m.g;
+		m.g = max(m.g * mix(zapoj_puda.z, 1.0, zp), min(zapoj_puda.w * zp, m.r + m.g));   // opad: světlina méně, zápoj aspoň w (bere z louky R)
+		m.r = max(m.r + g0 - m.g, 0.0);
+	}
 	float zbytek = clamp(1.0 - m.r - m.g - m.b - m.a, 0.0, 1.0);
 	vec3 w_tr = vec3(0.0);
 	vec3 a = vec3(0.0); vec3 nn = vec3(0.0);

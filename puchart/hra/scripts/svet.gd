@@ -82,6 +82,11 @@ func _material() -> ShaderMaterial:
 		m.set_shader_parameter("cesta_atlas", true)
 	if ResourceLoader.exists("res://textury/maska_koleje.png"):
 		m.set_shader_parameter("maska_koleje", load("res://textury/maska_koleje.png"))
+	if ResourceLoader.exists("res://data/kryt.png"):   # lesní půda podle zápoje korun (louka.json les.puda, Havran svet.gd _puda_zapoj)
+		var ls: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/louka.json")).get("les", {})
+		var pd: Dictionary = ls.get("puda", {})
+		m.set_shader_parameter("zapoj", load("res://data/kryt.png"))
+		m.set_shader_parameter("zapoj_puda", Vector4(float(ls.get("kryt_od", 0.3)), float(ls.get("kryt_do", 0.8)), float(pd.get("svetlina_opad", 1.0)), float(pd.get("zapoj_opad", 0.0))))
 	var pu: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/pudy.json"))
 	var vel := PackedFloat32Array()
 	for v in pu["vrstvy"]:

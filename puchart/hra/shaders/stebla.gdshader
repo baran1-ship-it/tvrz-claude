@@ -29,6 +29,11 @@ uniform bool shora_mizi = false;    // kupy: svisle karty shora = tmave "hvezdic
 uniform float jas = 1.0;
 // tablet (radce 20:45 krok 2b): varianta shaderu "unshaded" (louka.gd) - svetlo z teto barvy (slunce + obloha z denni doby)
 uniform vec3 svetlo = vec3(1.0);            // normala nahoru (vertex) rozsvitila louku o ~60 % (dalka 0,42): louka.gd 0,85         // drn-vejir: vlastni atlas uz v barve louky - bez prebarveni grass_pack a bez tmave paty
+// tráva unshaded (louka.json unshaded; Havran modely.json trava_unshaded, 17. 11.): svetlo = okolí, slunce = přímé světlo,
+// stin_korun = o kolik slunce ubere zápoj korun (kryt.png) – jedno čtení textury ve vrcholu; ve stínované variantě slunce = 0
+uniform vec3 slunce = vec3(0.0);
+uniform float stin_korun = 0.0;
+varying float sl_k;
 uniform float hust_konec = 1e6;
 uniform float hust_do = 130.0;
 
@@ -164,6 +169,11 @@ void vertex() {
 		VERTEX = pata + vec3(cos(a) * v.x + sin(a) * v.z, v.y, -sin(a) * v.x + cos(a) * v.z);
 		ic = vec4(rezim == 0 && druh > 3.5 && druh < 4.5 ? 0.1 : fract(hs * 7.31) * 0.15, fract(hs * 13.7 + 0.29), (bun + 0.5) / (sloupce * radky), 1.0);
 	}
+	sl_k = 1.0;
+	if (stin_korun > 0.0) {   // zápoj korun v patě trsu (stejná mřížka jako stanoviště)
+		vec3 wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		sl_k = 1.0 - stin_korun * texture(kryt, (wp.xz - stan_info.xy) / (stan_info.z * stan_info.w)).r;
+	}
 	float i = floor(clamp(ic.b, 0.0, 0.999) * sloupce * radky);
 	bunka = vec2(mod(i, sloupce) / sloupce, floor(i / sloupce) / radky);
 	// poloha vrcholu ve svete: v rendereru compatibility je transformace instance MultiMeshe uz ve VERTEX
@@ -230,7 +240,7 @@ void fragment() {
 	// tmava pata jen blizko: za 40 m je trs maly a pata by zabarvila celou louku (radce 13:50: pasmo 60-100 m tmavsi)
 	float blizko = 1.0 - smoothstep(30.0, 40.0, d_kam);
 	barva *= vejir ? 0.75 : mix(1.0, mix(0.75, 1.0, sqrt(clamp(vyska, 0.0, 1.0))), blizko);      // 0,55 = tmavy pruh = dira
-	ALBEDO = barva * jas * svetlo;
+	ALBEDO = barva * jas * (svetlo + slunce * sl_k);
 	// obe strany karty svetle jako louka: Godot u rubu otaci normalu, tak ji vratit a priklonit nahoru
 	vec3 n = FRONT_FACING ? NORMAL : -NORMAL;
 	NORMAL = normalize(mix(n, (VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz, 0.7));

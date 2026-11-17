@@ -18,12 +18,12 @@
   "les_okraj": 0.9,
   "nadvori": 0.15,
   "breh": 1.0,
-  "les_bucina": 0.5,
-  "les_bucina_kysela": 0.5,
-  "les_sut": 0.5,
-  "les_dubohabrina": 0.5,
-  "les_doubrava": 0.5,
-  "luh": 0.5,
+  "les_bucina": 0.9,
+  "les_bucina_kysela": 0.9,
+  "les_sut": 0.9,
+  "les_dubohabrina": 0.9,
+  "les_doubrava": 0.9,
+  "luh": 0.9,
   "koryto_kamenite": 0.0,
   "pole": 0.75,
   "zemedelstvi": 0.75
@@ -93,18 +93,70 @@
   "pozn_rozpocet": "4. 11.: hlídač scén B p95 2,104 M > 2,1 M s prstenci 24/42/62 a 3/3/2 kartami → 20/38/56, 3/2/2"
  },
  "les": {
-  "popis": "Havran louka.gd: v lese tráva podle krytí korun (kryt.png, nastroje/kryt_korun.py) – pod korunami −90 %, na světlinách zůstává; tridy les_* = hustota na světlině",
-  "koruna_k": 0.2,
+  "popis": "Tráva pod korunami podle zápoje (17. 11., převzato z Havrana: les_podrost.json trava, svet.gd _koruny_stin/zapoj_v; Míša 17. 11.: „Havran má velkou hustotu trávy, ale pod stromy v lese ne, a už mu i FPS vychází“): kryt.png = zápoj korun VŠECH stromů (nastroje/kryt_korun.py, poloměr koruny z modelu × měřítko les.gd) × zápoj okolí. Násobek trávy = lerp(1, 1 − ubytek, smoothstep(kryt_od, kryt_do, zápoj)) ve všech třídách (samotný strom v louce zápoj nemá – okolí). Pod zápojem lesní půda (zem.gdshader, puda) a řídký podrost (byliny.gd kapradí, mech, byliny; tráva bylin také podle zápoje).",
+  "zdroj": "Havran pravidla/svet/les_podrost.json (trava, puda) a scripts/svet.gd (FETCH claude/new-session-0dtk58 d53fa65); KCD docs/reference/les/kcd_les_svetlo_havran_9_11.png (pod zapojenými korunami holá hrabanka, tráva jen ve světle) a kcd2_louka_les_havran.jpg (louka a okraj lesa hustá tráva)",
+  "koruna_z_modelu": "poloměr koruny = průměr polovin šířky x a z glb modelu (Havran tools/koruny_rozmery.py) × měřítko stromu podle les.gd; 17. 11. naměřeno koruna/výška 0,23–0,6 (buk 0,32–0,35, dub 0,44–0,6) – dřív koruna_k 0,2 → koruny 1,6× užší a tráva pod nimi",
+  "koruna_k": 0.3,
+  "_koruna_k": "jen záloha, když glb modelu chybí (poloměr = koruna_k × výška varianty)",
   "koruna_min_m": 1.5,
-  "rozmazani_m": 2.0,
-  "kryt_od": 0.6,
-  "kryt_do": 1.0,
-  "ubytek": 0.9,
-  "dosah_m": 18.0
+  "prechod_m": 3.0,
+  "_prechod_m": "Havran: krytí před násobením 2× rozmazat čtvercem ±prechod_m/2 – tráva řídne plynule od kraje korun (lesA 10. 11.: ostrá hrana koruny = hrana trávy). Havran 6 m; Puchart 17. 11. 3 m (koruny užší, sousední strom medián 4,5 m): s 6 m mělo 19 % bodů plného zápoje trávu nad prahem (test trava_zapoj, mez 10 %), s 3 m 9 %",
+  "okoli_m": 8.0,
+  "okoli_od": 0.35,
+  "okoli_do": 0.6,
+  "_okoli": "Havran: zápoj okolí = krytí 2× rozmazané čtvercem ±okoli_m/2; pod okoli_od samotný strom, skupina nebo řídký háj (tráva zůstává), od okoli_do zapojený les. Havran 0,55–0,9; Puchart 17. 11. 0,35–0,6: les Puchartu (stromy.bin z DMP, koruny z modelů) má krytí korunami v lese průměrně 0,59 (59 % plochy > 0,5) – s Havranovými 0,55–0,9 by byl celý les „řídký háj“ (zápoj v lese průměr 0,39); samotný strom v louce má okolí pod 0,3",
+  "kryt_od": 0.3,
+  "kryt_do": 0.7,
+  "_kryt": "Havran zapoj_od/zapoj_do 0,3/0,8: pod kryt_od světlo (světlina, mezera, okraj – tráva jako louka), od kryt_do plný zápoj, mezi plynule (smoothstep). Puchart 17. 11. kryt_do 0,7: s 0,8 test trava_zapoj 12,3 % bodů plného zápoje s trávou (mez 10 %), s 0,7 4,8 %",
+  "ubytek": 0.985,
+  "_ubytek": "Havran v_zapoji 0,015: v plném zápoji 1,5 % hustoty – pod prahem rozsevu, žádná tráva louky; dřív 0,9 jen pro třídy les_*/luh",
+  "bylin_trava": true,
+  "_bylin_trava": "byliny.gd: druhy trava a vysoka (trsy trava_sada) také × násobek zápoje; kapradí, mech, ostružiník, pařezy beze změny = řídký podrost",
+  "puda": {
+   "svetlina_opad": 0.35,
+   "_svetlina_opad": "zem.gdshader: v lese (maska G) na světle (zápoj < kryt_od) zůstane jen tolik opadu, zbytek travní drn (KCD: světliny zelené)",
+   "zapoj_opad": 1.0,
+   "_zapoj_opad": "pod plným zápojem (kryt_do) aspoň tolik lesního opadu i mimo masku lesa (Havran _puda_zapoj: R+G ≥ les_od..les_do)"
+  },
+  "dosah_m": 18.0,
+  "_dosah_m": "jen režim mřížka (stebla.gdshader les_kryt.w)"
  },
  "pozn_les_4_11": "Míša 4. 11.: „v lese má být řídká ale ne jak ji máš ty, svahy plné jako v realitě, podívej se jak to dělá Havran“",
  "pozn_vykon_4_11": "měření tabletu 4. 11. (5096468): les p95 55,6 ms při 100 % (dřív 27,2 bez trávy v lese) → tráva v lese jen do 18 m a hustota světlin 0,55",
  "pozn_breh_4_11": "Míša 4. 11.: „břehy jsou v reálném světě plné zeleně“ – tráva na břehu plně, na kamenitém prahu koryta 0,6",
  "pozn_5_11": "Míša 5. 11.: „tráva se třepotá při pohybu, i dál, podívej se jak to dělá Havran“ – zpět Havranovy buňky pevné ve světě (mřížka s kamerou se posouvala), dosah 82 m jako Havran tablet (hust_do 80), les podle krytí korun na CPU – dosah zpět 66/60 m (hlídač scén B 2,12 M > 2,1 M)",
- "pozn_pole_10_11": "Míša 10. 11.: „louka bez trávy“ – údolní niva je ve stanovištích pole (2,4 %), třída chyběla v tabulce = 0 trávy. Trojpolní hospodaření 14. st.: třetina polí úhor, zarostlý trávou a plevelem → pole/zemědělství 0,75 (druhy jako louka)."
+ "pozn_pole_10_11": "Míša 10. 11.: „louka bez trávy“ – údolní niva je ve stanovištích pole (2,4 %), třída chyběla v tabulce = 0 trávy. Trojpolní hospodaření 14. st.: třetina polí úhor, zarostlý trávou a plevelem → pole/zemědělství 0,75 (druhy jako louka).",
+ "pozn_les_17_11": "Míša 17. 11. (Havran): třídy les_* = hustota na SVĚTLE 0,9 jako les_paseka/les_okraj (Havran: na světlinách tráva podle louky; KCD kcd2_louka_les) – dřív 0,5 všude v lese a pod korunami jen −90 %; pod zápojem teď ≈ 0.",
+ "unshaded": {
+  "popis": "Tráva bez stínového průchodu slunce (17. 11., Havran modely.json trava_unshaded + scripts/louka.gd _svetlo_travy): v Compatibility každý osvětlený materiál při stínovaném slunci kreslí druhý průchod; Havran tablet 0.9999 (4. 11.): louka p50 28 → 21 ms, p95 86 → 53, 0.99992: unshaded p50 ≈ bez trávy. Puchart tablet 17. 11.: les p50 35,2 / bez trávy 22,9 ms. Tráva pak nedostane stín stromů – ten nahrazuje stin_korun × zápoj (kryt.png). Na PC zůstává stínovaná (PUCHART_TRAVA_UNSHADED=1/0 pro A/B).",
+  "zdroj": "Havran pravidla/svet/modely.json _trava_unshaded (měření 0.9999, 0.99992, 0.99993; kalibrace f162–f165), docs/mereni_verze.md",
+  "tablet": true,
+  "pc": false,
+  "obal": 0.9,
+  "obloha_zenit": 0.78,
+  "slunce_x": [
+   1.5,
+   1.48,
+   2.78
+  ],
+  "okoli_x": [
+   12.17,
+   11.2,
+   7.72
+  ],
+  "_kalibrace": "Havran kalibrace PC (odpoledne, el 22°) proti stínované trávě – Puchart má touž oblohu (sky.gdshader Havrana) a ACES white 1,6; ověřeno snímkem dvojice PC 17. 11. (docs/screens/trava_havran_17_11_un_*), jiné denní doby a tablet NEOVERENO",
+  "stin_korun": 0.6,
+  "_stin_korun": "o kolik slunce na trávě ubere zápoj korun (0..1); tráva pod plným zápojem skoro není, jde o mezery a kraje korun. NAVRH, NEOVERENO proti stínované trávě; cena 1 čtení textury ve vrcholu (Havran 3 čtení ≈ +7 ms les tablet 0.99993 – PODEZŘENÍ)"
+ },
+ "test": {
+  "popis": "test smyslu trava_zapoj (Havran les_podrost.json test): body plného zápoje = v lese, krytí korunou ≥ 0,9 (koruny z modelů nezávisle na kryt.png: kruh poloměru koruny) a průměr krytí ±okoli_m/2 ≥ okoli_do; hustota trávy louky = tridy × násobek zápoje (louka.gd _rozsej)",
+  "max_hustota": 0.04,
+  "max_podil_travy": 0.1,
+  "prah": 0.02,
+  "_prah": "hustota, od které louka zaseje trs (rng < hustota na bod 0,5 m) – podíl bodů nad prahem",
+  "louka_min": 0.75,
+  "_louka_min": "louka_kosena + pastvina: průměrná hustota (podíl bodů krok_m s trsem) aspoň tolik – na louce hustá tráva (KCD kcd2_louka_les)",
+  "svetlina_min": 0.6,
+  "_svetlina_min": "v lese na světle (krytí korunou 0 v okolí ±3 m): průměrná hustota aspoň tolik – světliny, paseky a okraje zarostlé (Havran: tráva podle louky)"
+ }
 }

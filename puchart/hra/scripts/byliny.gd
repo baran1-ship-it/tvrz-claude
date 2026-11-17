@@ -22,6 +22,12 @@ func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json") -> v
 	sj = JSON.parse_string(FileAccess.get_file_as_string("res://data/stanoviste.json"))
 	st = load("res://data/stanoviste.png").get_image()
 	if ResourceLoader.exists("res://data/kamenitost.png"): km_img = load("res://data/kamenitost.png").get_image()   # kde je kamenito (stavby_vegetace.py)
+	# zápoj korun (byliny.json zapoj, pravidlo louka.json les – Havran les_podrost.json): tráva bylin pod zápojem ≈ 0, podrost zůstává
+	if cfg.has("zapoj") and ResourceLoader.exists("res://data/kryt.png"):
+		_zap = load("res://data/kryt.png").get_image()
+		if _zap.is_compressed(): _zap.decompress()
+		_zap_les = JSON.parse_string(FileAccess.get_file_as_string("res://data/louka.json")).get("les", {})
+		_zap_druhy = cfg["zapoj"].get("druhy", [])
 	if cfg.get("trava_sada", true) and ResourceLoader.exists("res://modely/rostliny/trava_sada.glb"):
 		var sada: Node = load("res://modely/rostliny/trava_sada.glb").instantiate()
 		var trava := []; var vysoka := []
@@ -60,6 +66,12 @@ func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json") -> v
 			for v in pz: bb = bb.expand(v)
 			_stavby.append([bb, pz])
 	aktualizuj(1000)
+
+var _zap: Image = null; var _zap_les := {}; var _zap_druhy: Array = []
+func _zapoj_nas(x: float, z: float) -> float:   # násobek hustoty podle zápoje (louka.json les: kryt_od..kryt_do, ubytek)
+	var c := clampi(int((x - float(sj["x0_hra"])) / float(sj["krok_m"])), 0, _zap.get_width() - 1)
+	var r := clampi(int((z - float(sj["z0_hra"])) / float(sj["krok_m"])), 0, _zap.get_height() - 1)
+	return 1.0 - float(_zap_les.get("ubytek", 0.985)) * smoothstep(float(_zap_les.get("kryt_od", 0.3)), float(_zap_les.get("kryt_do", 0.8)), _zap.get_pixel(c, r).r)
 
 var _pas := {}   # "i,j" -> skvrny [x0, z0, x1, z1, nx, nz, šířka, zdroj]
 
@@ -239,6 +251,7 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 				var pk: Dictionary = cfg["podle_kamenitosti"]   # u hradů přidává, v lese jen přeskupuje (průměr ×0,95 – rozpočet scén)
 				var nas_k: float = float(pk["nasobek"]) if tr in pk.get("tridy", []) else float(pk.get("les", {}).get("nasobek", 1.0))
 				nk = _kamenitost(x, z) * nas_k
+			if _zap != null and druh in _zap_druhy: nk *= _zapoj_nas(x, z)
 			if rng.randf() < float(h[druh]) * nas * nk / na_m2:
 				var mr: Array = cfg.get("meritko_druh", {}).get(druh, cfg.get("meritko", [0.8, 1.3]))
 				var s := rng.randf_range(float(mr[0]), float(mr[1]))
