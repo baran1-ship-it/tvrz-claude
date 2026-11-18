@@ -239,22 +239,22 @@
  "vzhled_13_11": {
   "popis": "Vzhled vody a břehu podle Míšiny předlohy (docs/reference/potoky/misa_real_01–04, „takhle by měly vypadat všechny toky“) a rešerše docs/reference/potoky/README_jak_se_stavi.md kroky 1–3: hladina bez hrany (voda.py: síť přes celou plochu s hloubkou > 0 + řada za čárou vody, krytí kraje v barvě vrcholu), krytí podle hloubky (Beer–Lambert) a úhlu (Fresnel, Schlick), mokrý pás a tmavší dno pod vodou (barva vrcholu BREH A, zem.gdshader). Čte blender/voda.py, hra/scripts/hlavni.gd (shader vody), hra/scripts/svet.gd (terén).",
   "melka": [
-   0.15,
-   0.16,
-   0.11
+   0.313,
+   0.283,
+   0.221
   ],
   "zdroj_melka": "pipeta (medián) misa_real_01_potok_trava_kameny.jpg výřez x 150–280, y 300–360 (mělká voda s valouny, sRGB)",
   "hluboka": [
-   0.09,
-   0.085,
-   0.05
+   0.128,
+   0.168,
+   0.147
   ],
   "zdroj_hluboka": "pipeta (medián) misa_real_03_perej_listi_breh.jpg výřez x 10–120, y 520–600 (klidná tůň pod peřejí, sRGB)",
   "cirost_m": 0.3,
   "zdroj_cirost": "hloubka, na které voda pohltí 63 % pohledu na dno (1 − exp(−h/c)); v real_01 je dno vidět i uprostřed toku (~0,3–0,4 m) – NEOVERENO, laděno snímkem; Havran reka cirost 0,35",
-  "hloubka_barvy_m": 0.5,
+  "hloubka_barvy_m": 0.2,
   "zdroj_hloubka_barvy": "od mělké k tůňové barvě (1 − exp(−h/x)) – NEOVERENO, snímek",
-  "fresnel_f0": 0.02,
+  "fresnel_f0": 0.03,
   "zdroj_fresnel": "Schlick: F0 = ((n−1)/(n+1))², voda n ≈ 1,33 → 0,02 (https://en.wikipedia.org/wiki/Schlick%27s_approximation); krytí = max(hloubka, Fresnel) – shora průhledná, do dálky zrcadlí (kcd1_oficial_potok_valouny_pruhlednost.jpg)",
   "drsnost_klid": 0.15,
   "drsnost_pena": 0.5,
@@ -312,6 +312,14 @@
    1.05,
    0.9
   ],
-  "zdroj_15_11": "Míša 15. 11. (foto x −49,8 z 120,2): „voda je dost bílá i některé kameny“ – pěna 0,72 → 0,44 (světlé čárky za kameny jen naznačené), jas kamenů koryta (drobné 1,75 → 1,05, balvany 1,25 → 0,9; dřív v kódu hlavni.gd _kameny_koryta)"
+  "zdroj_15_11": "Míša 15. 11. (foto x −49,8 z 120,2): „voda je dost bílá i některé kameny“ – pěna 0,72 → 0,44 (světlé čárky za kameny jen naznačené), jas kamenů koryta (drobné 1,75 → 1,05, balvany 1,25 → 0,9; dřív v kódu hlavni.gd _kameny_koryta)",
+  "melka_17_11": [0.15, 0.16, 0.11],
+  "hluboka_17_11": [0.09, 0.085, 0.05],
+  "obloha": [0.68, 0.75, 0.84],
+  "odraz_sila": 0.8,
+  "les_vyska": 0.35,
+  "mezery_sila": 0.45,
+  "mezery_pocet": 9.0,
+  "zdroj_18_11": "Hvozd 18. 11. (Míšin les v prohlížeči, předloha snímek Hvozd 18. 11., návod docs/rozpracovane/voda_hvozd_navod.md): odraz okolí bez textury – voda.gdshader počítá světový odražený vektor z vlnité normály (n1+n2, Rw.y = |y|): u obzoru pás lesa (odraz) s mezerami mezi kmeny/korunami (pena_tex jako 1D šum podle atan2(Rw.z, Rw.x), mezery_pocet, mezery_sila), nad les_vyska obloha (obloha = prostredi.json mlha_barva), odraz × odraz_sila 0,8, Fresnel Schlick z vlnité normály s f0 0,03 (Hvozd); tělo vody tmavé jako Hvozd: kraj hnědý lineárně (0,08; 0,065; 0,04) → melka sRGB (0,313; 0,283; 0,221), střed černozelený lineárně (0,015; 0,024; 0,019) → hluboka sRGB (0,128; 0,168; 0,147); dřívější melka/hluboka v melka_17_11/hluboka_17_11; přechod kraj → střed lineárně h / hloubka_barvy_m 0,5 → 0,2 m (naše toky jsou mělké 0,14–0,4 m – s 1 − exp(−h/0,5) zůstala hladina celá v barvě kraje, šedohnědá; teď střed toku černozelený jako Hvozd); krytí (kryti_min 0,45) beze změny (Míša 17. 11.: „nemáš vodu v potoce“). Snímky docs/screens/voda_18_11_*.png, tablet NEOVERENO"
  }
 }

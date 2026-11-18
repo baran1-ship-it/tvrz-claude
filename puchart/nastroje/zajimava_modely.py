@@ -118,6 +118,14 @@ def podezdivka_stitu(pb, t):
         if not ok.any(): continue
         I = I[ok]; u, inv = np.unique(I, return_inverse=True); I2 = inv.reshape(-1, 3)
         Xs, Ns, UVs = X[u], Nn[u], UV[u]
+        # Míša 18. 11. (misa_18_11_lom_chyse_2.jpg: „struktura na prd“): kameny vzoru mají UV promítnuté z boku zídky – horní
+        # plochy kamenů (normála nahoru) jsou v UV slité do pruhů (anizotropie > 3 u 97 %). V boční zídce je kryje stěna, pod
+        # štítem jsou vidět → plochy s |n.y| > uv_shora_ny dostanou vlastní vrcholy a UV promítnuté shora v měřítku zídky (uv_na_m).
+        V3 = Xs[I2]; nrm = np.cross(V3[:, 1] - V3[:, 0], V3[:, 2] - V3[:, 0]); nrm /= np.maximum(np.linalg.norm(nrm, axis=1, keepdims=True), 1e-9)
+        hore = np.abs(nrm[:, 1]) > P_["uv_shora_ny"]
+        It = I2[hore].ravel(); I2 = np.r_[I2[~hore].ravel(), len(Xs) + np.arange(len(It))].reshape(-1, 3)
+        UVt = np.c_[Xs[It, 2], Xs[It, 0]] * P_["uv_na_m"]   # shora: u podél zídky, v napříč (jako bok)
+        Xs = np.r_[Xs, Xs[It]]; Ns = np.r_[Ns, Ns[It]]; UVs = np.r_[UVs, UVt]
         for sm in (1, -1):   # přední štít (+z): x' = −z, z' = (x − xc) + zg (otočení +90°); zadní: x' = z, z' = −(x − xc) − zg
             Xn = np.c_[-sm * Xs[:, 2], Xs[:, 1], sm * ((Xs[:, 0] - xc) + zg)]
             Nr = np.c_[-sm * Ns[:, 2], Ns[:, 1], sm * Ns[:, 0]]
@@ -125,7 +133,7 @@ def podezdivka_stitu(pb, t):
     tl = P_["tl_m"]; ya = t["prah_y"]; S = P_["stupen"]
     kol = [kvadr(-xc + tl / 2, xc - tl / 2, -0.2, ya, sm * zg - tl / 2, sm * zg + tl / 2)[0] for sm in (1, -1)]
     zs0 = zg + tl / 2; ys = (ya + 0.02) / 2   # stupeň před dveřmi v polovině výšky prahu (pod hrac.json schod_m)
-    st = kvadr(-S["sirka_m"] / 2, S["sirka_m"] / 2, -0.1, ys, zs0, zs0 + S["hloubka_m"], uv_m=0.5)
+    st = kvadr(-S["sirka_m"] / 2, S["sirka_m"] / 2, -0.1, ys, zs0, zs0 + S["hloubka_m"], uv_m=1.0 / P_["uv_na_m"])   # měřítko kamenů zídky (dřív 0,5 m → 3× drobnější)
     casti.append((pb.material(P_["materialy"][0]),) + st); kol.append(kvadr(-S["sirka_m"] / 2, S["sirka_m"] / 2, -0.2, ys, zs0, zs0 + S["hloubka_m"])[0])
     pb.pridej_sit("Zemljanka_Podezdivka", casti, kolize=kol)
 
