@@ -2848,7 +2848,8 @@
     {
      "od": 18.5,
      "cinnost": "hovor",
-     "kde": "nadvori_studna"
+     "kde": "tvrz_kuchyne_dvor",
+     "_18_11": "Misa 18. 11. (r. 3: lide na tvrzi vsichni u brany): vecerni hovor ne u studny (2,7 m od brany, v 18-20 h tam stalo 5-6 z 9), ale u tvrz_kuchyne_dvor; test lide_rozmisteni"
     },
     {
      "od": 19.5,
@@ -3007,7 +3008,8 @@
     {
      "od": 18.5,
      "cinnost": "hovor",
-     "kde": "nadvori_studna"
+     "kde": "nadvori_kovarna",
+     "_18_11": "Misa 18. 11. (r. 3: lide na tvrzi vsichni u brany): vecerni hovor ne u studny (2,7 m od brany, v 18-20 h tam stalo 5-6 z 9), ale u nadvori_kovarna; test lide_rozmisteni"
     },
     {
      "od": 20.5,
@@ -3761,7 +3763,8 @@
     {
      "od": 18.0,
      "cinnost": "hovor",
-     "kde": "nadvori_studna"
+     "kde": "nadvori_palac",
+     "_18_11": "Misa 18. 11. (r. 3: lide na tvrzi vsichni u brany): vecerni hovor ne u studny (2,7 m od brany, v 18-20 h tam stalo 5-6 z 9), ale u nadvori_palac; test lide_rozmisteni"
     },
     {
      "od": 19.0,
@@ -3871,7 +3874,8 @@
     {
      "od": 18.0,
      "cinnost": "hovor",
-     "kde": "nadvori_studna"
+     "kde": "nadvori_staje",
+     "_18_11": "Misa 18. 11. (r. 3: lide na tvrzi vsichni u brany): vecerni hovor ne u studny (2,7 m od brany, v 18-20 h tam stalo 5-6 z 9), ale u nadvori_staje; test lide_rozmisteni"
     },
     {
      "od": 20.0,

@@ -8029,6 +8029,10 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 				truhla += 1 if kl == "Truhla_Otevri" else 0
 		if vse_k > 0 and float(truhla) / vse_k > float(ohp["truhla_podil_max"]):
 			ch.call("%s: truhla %d z %d klipu obchuzky" % [kc, truhla, vse_k])
+		for kk: String in ruzne:
+			var mz: Array = lide.call("_misto", ll[0], kk)
+			if (mz[0] as Vector2) == Vector2.ZERO or float(mz[1]) == INF and not (P["mista"].get(kk, {}) as Dictionary).has("p"):
+				ch.call("%s: misto %s nenalezeno" % [kc, kk])
 	# Misa 18. 11. (r. 5: otevirani bedny v hospode zrusit): cinnosti na mistech hostince a krcmy bez klipu bez_klipu
 	for rk: String in P["role"]:
 		for bl: Dictionary in P["role"][rk]["rozvrh"]:
@@ -8040,10 +8044,6 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 				for kb: String in ohp["bez_klipu"]:
 					if vsech.contains(kb):
 						ch.call("%s %s@%s: klip %s v hospode" % [rk, mo["cinnost"], mo["kde"], kb])
-		for kk: String in ruzne:
-			var mz: Array = lide.call("_misto", ll[0], kk)
-			if (mz[0] as Vector2) == Vector2.ZERO or float(mz[1]) == INF and not (P["mista"].get(kk, {}) as Dictionary).has("p"):
-				ch.call("%s: misto %s nenalezeno" % [kc, kk])
 	# Misa 14. 11. (hospodsky se opira o vzduch, tram je dal za nim): kazde misto u_steny - za zady do od_m + rezerva
 	# pevna plocha (ne dvere Pohyb_*), paprsek ve vysce u_steny.vyska_m
 	var us9: Dictionary = Pravidla.cti("postavy", "u_steny")
@@ -11247,6 +11247,7 @@ func _lide_rozmisteni() -> void:
 		c["blok"] = -1
 		c.erase("ceka")
 		c.erase("daleko")
+		c.erase("umisten")
 		c["cesta"] = PackedVector2Array()
 		c["na_miste"] = false
 		c["cn"] = {}

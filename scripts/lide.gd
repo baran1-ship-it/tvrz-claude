@@ -2362,9 +2362,17 @@ func _process_vlastni(dt: float) -> void:
 			# z domu (skryta u dveri) vychazi dvermi - ne objeveni v poli (postavy_plan 1.6)
 			var doma := bool((c["cn"] as Dictionary).get("skryty", false)) and bool(c["na_miste"])
 			var _tp := Time.get_ticks_usec()
-			_novy_blok(c, bi, blizko and (u.visible or doma) and u.position != Vector3.ZERO)
+			# Misa 18. 11. (r. 3 a 4: na zacatku hry vsichni u brany, pak rada ~20 lidi po ceste od tvrze): postava bez
+			# prvniho bloku stala viditelne v pocatku (0, 0) = nadvori tvrze, vyska terenu ji posunula z Vector3.ZERO,
+			# takze az na ni prisla rada (zmena_bloku_snimek), sla viditelne pesky. Prvni blok = vzdy LOD na misto.
+			var poprve := not c.has("umisten")
+			_novy_blok(c, bi, blizko and (u.visible or doma) and u.position != Vector3.ZERO and not poprve)
+			c["umisten"] = true
 			if _profil and Time.get_ticks_usec() - _tp > 1000:
 				print("LIDE_PROFIL novy_blok %s %s %.1f ms" % [c["id"], (c["role"]["rozvrh"][bi] as Dictionary).get("cinnost", "?"), (Time.get_ticks_usec() - _tp) / 1000.0])
+		if not c.has("umisten"):
+			u.visible = false                     # ceka na prvni blok (rozpocet zmen) - nestat v pocatku sveta
+			continue
 		if c.has("ceka"):
 			ceka_n += 1
 			if blizko and not bool(c.get("ve_fronte", false)):

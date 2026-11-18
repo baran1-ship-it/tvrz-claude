@@ -1654,3 +1654,16 @@ Hotovo v kódu a datech (testy u každého):
 - Past: mřížka průchodů `v_pruchodu` (`_pruchody`) se plní při prvním dotazu – kdo se ptá dřív, než přibudou dveře
   domů, dostane starou mřížku. `_nabytek_venku` a dřevo u domů ji teď znovu staví.
 - Zbývá: předmět 1,9 m před dveřmi chléva domu 6 na stupních (test hlásí), snímky kostel/mlýn NEOVĚŘENO.
+
+## Míša 18. 11. ř. 2–5 – lavice tvrze, lidé u brány, řada na cestě, truhla v hospodě (pomocník 18. 11.)
+- **Lidé na začátku hry v počátku světa:** postava bez prvního bloku (`graf.zmena_bloku_snimek` 1 = jedna změna za snímek)
+  stála viditelně v (0, 0) = nádvoří tvrze; výška terénu ji posunula z `Vector3.ZERO`, takže když na ni přišla řada,
+  `_novy_blok` ji vzal jako viditelnou a šla pěšky → všichni u brány a pak řada ~20 lidí po cestě na jih. Oprava
+  `lide.gd`: příznak `umisten` – první blok vždy LOD na místo, do té doby skrytá. Test `lide_rozmisteni` (den po
+  čtvrthodinách od začátku hry, hráč na tvrzi; data `postavy.json rozmisteni_test`). Test, který resetuje postavy
+  „jako po načtení“, musí smazat i `umisten`.
+- **Poučení (pád běhu):** kontrolu vloženou doprostřed smyčky testu (`for kc` v `lide_chovani`) rozbilo odsazení zbytku
+  smyčky → Parse Error, `beh.sh` nespustil nic. Nový blok vkládat až za konec smyčky a před během projít okolní řádky.
+- Lavice nádvoří jen jako záznam `u_zdi` (`nabytek.json _venku_tvrz`, test `tvrz_lavice`: záznam s `p` na nádvoří
+  a cokoli nad sedákem = chyba). Hostinec a krčma bez Truhla_* (`obsluha_hostinec_pravidla.bez_klipu`, činnost
+  `vareni_hostinec`, test `lide_chovani`).
