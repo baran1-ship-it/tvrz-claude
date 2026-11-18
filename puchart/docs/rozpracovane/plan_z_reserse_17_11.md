@@ -101,3 +101,10 @@ tapetou“ → zuby cimbuří, nároží, ostění a koruny jsou holé kvádry s
 natažená). Oprava F2: zub cimbuří = skládaný z kamenů (2–4 řady nepravidelných kvádrů s maltovou spárou, sražené/otlučené
 hrany, krycí deska nebo kameny na vrchu), nároží z velkých tesaných kvádrů střídavě na vazbu – geometrie v Blenderu
 (blender/puchart_hrad.py ve společné funkci pro všechna cimbuří a nároží obou hradů), ne textura na kostce.
+Míša 18. 11. upřesnila: „ne na cimbuří, ale na obou hradech, podzemích a vnitřních prostorách – všude je tapeta“ →
+F platí pro VŠECHNO zdivo obou hradů: vnější zdi, cimbuří, nároží, paláce, věže, sklepy a podzemí, schodiště, klenby,
+vnitřní stěny místností. Postup: (1) klidné zdivo podle předloh (měřítko, kontrast, barva) všude, (2) omítka uvnitř
+obytných místností a na palácích (vápenná, místy opadaná), sklepy/podzemí režné zdivo z lomového kamene, (3) skutečná
+geometrie kamenů tam, kde je kámen vidět zblízka (nároží, ostění, cimbuří, klenební pasy, schody, paty zdí),
+(4) žádná promítnutá textura natažená na šikmých/zakřivených plochách (klenby, schodiště). Kontrola: snímky ze stejných
+míst jako misa_18_11_zdivo_*.jpg vedle předloh docs/reference/zdivo_kcd_18_11/.
