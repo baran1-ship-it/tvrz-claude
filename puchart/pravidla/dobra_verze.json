@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "7837c55",
+ "commit": "8b18ef7",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -139,7 +139,13 @@
    "dymnik_kuchyne": true,
    "cesty_souvislost": true,
    "modely_textury_odkazy": true,
-   "nahled_bez_kolize": true
+   "nahled_bez_kolize": true,
+   "hrad_nadvori_bez_travy": true,
+   "zdivo_matne": true,
+   "zemljanka_luzka": true,
+   "podezdivka_uv": true,
+   "naradi_oprene": true,
+   "nadvori_A_rovne": true
   },
   "pruchod": {
    "A_branka_patro": true,
@@ -274,26 +280,26 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1053995,
-    "troj_max": 1079906,
-    "kresleni_p95": 372,
-    "kresleni_m_median": 477.0
+    "troj_p95": 1052644,
+    "troj_max": 1077872,
+    "kresleni_p95": 373,
+    "kresleni_m_median": 478.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1607125,
-    "troj_max": 1838307,
+    "troj_p95": 1607215,
+    "troj_max": 1834875,
     "kresleni_p95": 876,
-    "kresleni_m_median": 712.0
+    "kresleni_m_median": 716.0
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1571874,
-    "troj_max": 1761728,
-    "kresleni_p95": 1062,
+    "troj_p95": 1568374,
+    "troj_max": 1760196,
+    "kresleni_p95": 1060,
     "kresleni_m_median": 1757.0
    },
-   "zmena_median": 34.66,
+   "zmena_median": 34.44,
    "doskoky": [],
    "ve_zdi": 2
   },
