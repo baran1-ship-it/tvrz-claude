@@ -96,3 +96,8 @@ skutečný reliéf v geometrii – (1) zblízka (LOD0, do ~25 m) síť zdi zjemn
 nepravidelných kamenů (ne ostrý kvádr), vypadlé kameny a otlučené hrany, (3) patka zdi s většími kameny, (4) dál LOD1
 dnešní rovná síť s texturou; rozpočet troj. hlídat (jen blízké úseky), měřit tablet. Vzor: Havran stavebnice + KCD fotky
 zdí (docs/reference/kcd_vzhled, kcd2), skutečné zdi Potštátska (docs/reference).
+Míša 18. 11. (misa_cimburi_kostky.jpg, zakroužkované zuby cimbuří): „tohle je všude – vezmu kostku a potáhnu ji kamennou
+tapetou“ → zuby cimbuří, nároží, ostění a koruny jsou holé kvádry s promítnutou texturou (na horní ploše a bocích
+natažená). Oprava F2: zub cimbuří = skládaný z kamenů (2–4 řady nepravidelných kvádrů s maltovou spárou, sražené/otlučené
+hrany, krycí deska nebo kameny na vrchu), nároží z velkých tesaných kvádrů střídavě na vazbu – geometrie v Blenderu
+(blender/puchart_hrad.py ve společné funkci pro všechna cimbuří a nároží obou hradů), ne textura na kostce.
