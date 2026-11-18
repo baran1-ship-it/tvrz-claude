@@ -43,28 +43,8 @@
  },
  "karty": [
   {
-   "id": "k01",
-   "obrazek": "res://obrazky/nacitani/folio.jpg",
-   "zdroj": "bible_vaclava",
-   "ini": "B",
-   "text": "oje se chřestu, nechoď v les.",
-   "preklad": "Kdo se bojí šustotu, ať nechodí do lesa.",
-   "folio": "42r",
-   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r"
-  },
-  {
-   "id": "k02",
-   "obrazek": "res://obrazky/nacitani/kral.jpg",
-   "zdroj": "bible_vaclava",
-   "ini": "K",
-   "text": "tož moc má, ten právo.",
-   "preklad": "Kdo má moc, ten má i právo.",
-   "folio": "44r",
-   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v"
-  },
-  {
-   "id": "k03",
-   "obrazek": "res://obrazky/nacitani/genesis.jpg",
+   "id": "p_babel",
+   "obrazek": "res://obrazky/nacitani/babel.jpg",
    "zdroj": "bible_vaclava",
    "ini": "N",
    "text": "e jeden den Praha ustavena.",
@@ -73,8 +53,28 @@
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v"
   },
   {
-   "id": "k04",
-   "obrazek": "res://obrazky/nacitani/folio.jpg",
+   "id": "p_kral_vaclav",
+   "obrazek": "res://obrazky/nacitani/kral_vaclav.jpg",
+   "zdroj": "bible_vaclava",
+   "ini": "K",
+   "text": "tož moc má, ten právo.",
+   "preklad": "Kdo má moc, ten má i právo.",
+   "folio": "44r",
+   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v"
+  },
+  {
+   "id": "p_kral",
+   "obrazek": "res://obrazky/nacitani/kral.jpg",
+   "zdroj": "bible_vaclava",
+   "ini": "K",
+   "text": "to chce brzo pánem býti, bude dlúho panoší.",
+   "preklad": "Kdo chce být brzy pánem, bude dlouho panošem.",
+   "folio": "43v",
+   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v"
+  },
+  {
+   "id": "p_hrad",
+   "obrazek": "res://obrazky/nacitani/hrad.jpg",
    "zdroj": "bible_vaclava",
    "ini": "N",
    "text": "ehraď sě plotem, ale hraď sě přátely.",
@@ -83,14 +83,84 @@
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r"
   },
   {
-   "id": "k05",
-   "obrazek": "res://obrazky/nacitani/kral.jpg",
+   "id": "p_lazebnice",
+   "obrazek": "res://obrazky/nacitani/lazebnice.jpg",
    "zdroj": "bible_vaclava",
-   "ini": "K",
-   "text": "to chce brzo pánem býti, bude dlúho panoší.",
-   "preklad": "Kdo chce být brzy pánem, bude dlouho panošem.",
-   "folio": "43v",
+   "ini": "V",
+   "text": " kostele se modliti a v lázně zdrávo jest se mýti.",
+   "preklad": "V kostele se modlit a v lázni je zdravé se umýt.",
+   "folio": "45v",
+   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/45v"
+  },
+  {
+   "id": "p_geneze",
+   "obrazek": "res://obrazky/nacitani/geneze.jpg",
+   "zdroj": "bible_vaclava",
+   "ini": "D",
+   "text": "en za dnem, a léto za létem.",
+   "preklad": "Den za dnem a rok za rokem.",
+   "folio": "43r",
+   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r"
+  },
+  {
+   "id": "p_vinice",
+   "obrazek": "res://obrazky/nacitani/vinice.jpg",
+   "zdroj": "velislavova",
+   "ini": "N",
+   "text": "eb ten li víno pie, ješto je kopá?",
+   "preklad": "Copak víno pije ten, kdo vinici kope?",
+   "folio": "44r",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v"
+  },
+  {
+   "id": "p_ludmila_cesta",
+   "obrazek": "res://obrazky/nacitani/ludmila_cesta.jpg",
+   "zdroj": "velislavova",
+   "ini": "O",
+   "text": "kolo dále, upřímo blíže.",
+   "preklad": "Oklikou je to dál, rovně blíž.",
+   "folio": "42v",
+   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r"
+  },
+  {
+   "id": "p_drahomira",
+   "obrazek": "res://obrazky/nacitani/drahomira.jpg",
+   "zdroj": "velislavova",
+   "ini": "K",
+   "text": "opáš družci hrob, sám se veň vložíš.",
+   "preklad": "Kopeš druhovi hrob, sám do něj ulehneš.",
+   "folio": "44r",
+   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v"
+  },
+  {
+   "id": "p_krest",
+   "obrazek": "res://obrazky/nacitani/krest.jpg",
+   "zdroj": "velislavova",
+   "ini": "S",
+   "text": "tarý hřiech činí novú hanbu.",
+   "preklad": "Starý hřích dělá novou hanbu.",
+   "folio": "42r",
+   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r"
+  },
+  {
+   "id": "p_orba",
+   "obrazek": "res://obrazky/nacitani/orba.jpg",
+   "zdroj": "velislavova",
+   "ini": "V",
+   "text": "ěkem vlkem orati nebudeš, an rohuov nemá.",
+   "preklad": "Vlkem nikdy orat nebudeš, nemá rohy.",
+   "folio": "44r",
+   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v"
+  },
+  {
+   "id": "k01",
+   "obrazek": "res://obrazky/nacitani/folio.jpg",
+   "zdroj": "bible_vaclava",
+   "ini": "B",
+   "text": "oje se chřestu, nechoď v les.",
+   "preklad": "Kdo se bojí šustotu, ať nechodí do lesa.",
+   "folio": "42r",
+   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r"
   },
   {
    "id": "k06",
@@ -123,16 +193,6 @@
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v"
   },
   {
-   "id": "k09",
-   "obrazek": "res://obrazky/nacitani/genesis.jpg",
-   "zdroj": "bible_vaclava",
-   "ini": "S",
-   "text": "tarý hřiech činí novú hanbu.",
-   "preklad": "Starý hřích dělá novou hanbu.",
-   "folio": "42r",
-   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r"
-  },
-  {
    "id": "k10",
    "obrazek": "res://obrazky/nacitani/folio.jpg",
    "zdroj": "bible_vaclava",
@@ -150,16 +210,6 @@
    "text": "tož muož umlčeti, ten nezahyne.",
    "preklad": "Kdo umí mlčet, nezahyne.",
    "folio": "43r",
-   "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r"
-  },
-  {
-   "id": "k12",
-   "obrazek": "res://obrazky/nacitani/genesis.jpg",
-   "zdroj": "bible_vaclava",
-   "ini": "O",
-   "text": "kolo dále, upřímo blíže.",
-   "preklad": "Oklikou je to dál, rovně blíž.",
-   "folio": "42v",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r"
   }
  ],
@@ -190,10 +240,90 @@
    "puvod": "https://commons.wikimedia.org/wiki/File:Bible_vaclav.jpg",
    "licence": "volné dílo (public domain)",
    "poznamka": "výřez sloupce iniciály z předlohy 17. 11."
+  },
+  {
+   "soubor": "res://obrazky/nacitani/babel.jpg",
+   "popis": "Načítací obrazovka – stavba babylonské věže s jeřábem",
+   "dilo": "Bible Václava IV., kolem 1390–1400",
+   "commons": "File:Wenceslas Bible crane.jpg",
+   "puvod": "https://commons.wikimedia.org/wiki/File:Wenceslas_Bible_crane.jpg",
+   "licence": "Public domain (volné dílo)"
+  },
+  {
+   "soubor": "res://obrazky/nacitani/kral_vaclav.jpg",
+   "popis": "Načítací obrazovka – Václav IV. v iniciále (výřez krále)",
+   "dilo": "Bible Václava IV., kolem 1390–1400",
+   "commons": "File:Wenzelsbibel 12.jpg",
+   "puvod": "https://commons.wikimedia.org/wiki/File:Wenzelsbibel_12.jpg",
+   "licence": "Public domain (volné dílo)"
+  },
+  {
+   "soubor": "res://obrazky/nacitani/hrad.jpg",
+   "popis": "Načítací obrazovka – opevněné sídlo (výřez hradby)",
+   "dilo": "Bible Václava IV., kolem 1390–1400",
+   "commons": "File:Bible Václava IV.jpg",
+   "puvod": "https://commons.wikimedia.org/wiki/File:Bible_Václava_IV.jpg",
+   "licence": "Public domain (volné dílo)"
+  },
+  {
+   "soubor": "res://obrazky/nacitani/lazebnice.jpg",
+   "popis": "Načítací obrazovka – lazebnice s věníkem a vědrem",
+   "dilo": "Bible Václava IV., kolem 1390–1400",
+   "commons": "File:Lazebnice s věníkem a vědrem, Bible Václava IV.jpg",
+   "puvod": "https://commons.wikimedia.org/wiki/File:Lazebnice_s_věníkem_a_vědrem,_Bible_Václava_IV.jpg",
+   "licence": "Public domain (volné dílo)"
+  },
+  {
+   "soubor": "res://obrazky/nacitani/geneze.jpg",
+   "popis": "Načítací obrazovka – dny stvoření (už ve hře: genesis.jpg)",
+   "dilo": "Bible Václava IV., kolem 1390–1400",
+   "commons": "File:Bible vaclav.jpg",
+   "puvod": "https://commons.wikimedia.org/wiki/File:Bible_vaclav.jpg",
+   "licence": "Public domain (volné dílo)"
+  },
+  {
+   "soubor": "res://obrazky/nacitani/vinice.jpg",
+   "popis": "Načítací obrazovka – sv. Václav na vinici",
+   "dilo": "Velislavova bible, kolem 1340",
+   "commons": "File:Vinice bible.jpg",
+   "puvod": "https://commons.wikimedia.org/wiki/File:Vinice_bible.jpg",
+   "licence": "Public domain (volné dílo)"
+  },
+  {
+   "soubor": "res://obrazky/nacitani/ludmila_cesta.jpg",
+   "popis": "Načítací obrazovka – Ludmila odchází z Prahy (cesta)",
+   "dilo": "Velislavova bible, kolem 1340",
+   "commons": "File:Escape of Saint Ludmila.jpg",
+   "puvod": "https://commons.wikimedia.org/wiki/File:Escape_of_Saint_Ludmila.jpg",
+   "licence": "Public domain (volné dílo)"
+  },
+  {
+   "soubor": "res://obrazky/nacitani/drahomira.jpg",
+   "popis": "Načítací obrazovka – Drahomíra dává pokyn k vraždě Ludmily",
+   "dilo": "Velislavova bible, kolem 1340",
+   "commons": "File:Drahomira Ludmila.jpg",
+   "puvod": "https://commons.wikimedia.org/wiki/File:Drahomira_Ludmila.jpg",
+   "licence": "Public domain (volné dílo)"
+  },
+  {
+   "soubor": "res://obrazky/nacitani/krest.jpg",
+   "popis": "Načítací obrazovka – křest knížete Bořivoje",
+   "dilo": "Velislavova bible, kolem 1340",
+   "commons": "File:Baptism of the bohemian duke borivoj.jpg",
+   "puvod": "https://commons.wikimedia.org/wiki/File:Baptism_of_the_bohemian_duke_borivoj.jpg",
+   "licence": "Public domain (volné dílo)"
+  },
+  {
+   "soubor": "res://obrazky/nacitani/orba.jpg",
+   "popis": "Načítací obrazovka – rolník při práci (orba – OVĚŘIT na obrázku)",
+   "dilo": "Velislavova bible, kolem 1340",
+   "commons": "File:Život středověkého rolníka.2.jpg",
+   "puvod": "https://commons.wikimedia.org/wiki/File:Život_středověkého_rolníka.2.jpg",
+   "licence": "Public domain (volné dílo)"
   }
  ],
  "obrazky_stav": "ceka_na_commons",
- "obrazky_stav_popis": "17. 11.: upload.wikimedia.org vracel z tohoto prostředí trvale 429 (Too Many Requests, Retry-After 600) – nové výřezy nestaženy. Zatím 12 karet z předlohy (3 obrázky z archivu). Plán 1:1 v karty_plan; stažení a výřez: python3 nastroje/iluminace.py. Dokud obrazky_stav = ceka_na_commons, test hlásí opakované obrázky jen jako UPOZORNENI.",
+ "obrazky_stav_popis": "18. 11.: 11 karet s vlastním obrázkem (Míša stáhla z Commons); zbylé karty (vlci, les) zatím se starými 3 iluminacemi – chybí obrázek hudebnice a vlčí/lesní motivy",
  "karty_plan": [
   {
    "id": "babel",
@@ -205,9 +335,14 @@
    "preklad": "Ani Praha nebyla postavena za jeden den.",
    "folio": "44r",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v",
-   "vyrez": null,
+   "vyrez": [
+    0.02,
+    0.02,
+    0.98,
+    0.95
+   ],
    "obrazek": "res://obrazky/nacitani/babel.jpg",
-   "stav": "NEOVERENO – obrázek nestažen, výřez a shodu obsahu ověřit okem"
+   "stav": "obrázek od Míši 18. 11. (Commons, volné dílo), výřez ověřen okem"
   },
   {
    "id": "kral_vaclav",
@@ -219,9 +354,14 @@
    "preklad": "Kdo má moc, ten má i právo.",
    "folio": "44r",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v",
-   "vyrez": null,
+   "vyrez": [
+    0.16,
+    0.19,
+    0.46,
+    0.43
+   ],
    "obrazek": "res://obrazky/nacitani/kral_vaclav.jpg",
-   "stav": "NEOVERENO – obrázek nestažen, výřez a shodu obsahu ověřit okem"
+   "stav": "obrázek od Míši 18. 11. (Commons, volné dílo), výřez ověřen okem"
   },
   {
    "id": "kral",
@@ -233,9 +373,14 @@
    "preklad": "Kdo chce být brzy pánem, bude dlouho panošem.",
    "folio": "43v",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v",
-   "vyrez": null,
+   "vyrez": [
+    0,
+    0,
+    1,
+    1
+   ],
    "obrazek": "res://obrazky/nacitani/kral.jpg",
-   "stav": "obrázek ve hře"
+   "stav": "obrázek od Míši 18. 11. (Commons, volné dílo), výřez ověřen okem"
   },
   {
    "id": "hrad",
@@ -247,9 +392,14 @@
    "preklad": "Nechraň se plotem, ale přáteli.",
    "folio": "42r",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r",
-   "vyrez": null,
+   "vyrez": [
+    0,
+    0,
+    1,
+    1
+   ],
    "obrazek": "res://obrazky/nacitani/hrad.jpg",
-   "stav": "NEOVERENO – obrázek nestažen, výřez a shodu obsahu ověřit okem"
+   "stav": "obrázek od Míši 18. 11. (Commons, volné dílo), výřez ověřen okem"
   },
   {
    "id": "lazebnice",
@@ -261,9 +411,14 @@
    "preklad": "V kostele se modlit a v lázni je zdravé se umýt.",
    "folio": "45v",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/45v",
-   "vyrez": null,
+   "vyrez": [
+    0,
+    0,
+    1,
+    1
+   ],
    "obrazek": "res://obrazky/nacitani/lazebnice.jpg",
-   "stav": "NEOVERENO – obrázek nestažen, výřez a shodu obsahu ověřit okem"
+   "stav": "obrázek od Míši 18. 11. (Commons, volné dílo), výřez ověřen okem"
   },
   {
    "id": "geneze",
@@ -275,9 +430,14 @@
    "preklad": "Den za dnem a rok za rokem.",
    "folio": "43r",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r",
-   "vyrez": null,
+   "vyrez": [
+    0.05,
+    0.03,
+    0.62,
+    0.5
+   ],
    "obrazek": "res://obrazky/nacitani/geneze.jpg",
-   "stav": "obrázek ve hře"
+   "stav": "obrázek od Míši 18. 11. (Commons, volné dílo), výřez ověřen okem"
   },
   {
    "id": "hudebnice",
@@ -303,9 +463,14 @@
    "preklad": "Copak víno pije ten, kdo vinici kope?",
    "folio": "44r",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v",
-   "vyrez": null,
+   "vyrez": [
+    0,
+    0,
+    1,
+    1
+   ],
    "obrazek": "res://obrazky/nacitani/vinice.jpg",
-   "stav": "NEOVERENO – obrázek nestažen, výřez a shodu obsahu ověřit okem"
+   "stav": "obrázek od Míši 18. 11. (Commons, volné dílo), výřez ověřen okem"
   },
   {
    "id": "ludmila_cesta",
@@ -317,9 +482,14 @@
    "preklad": "Oklikou je to dál, rovně blíž.",
    "folio": "42v",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r",
-   "vyrez": null,
+   "vyrez": [
+    0,
+    0.05,
+    1,
+    1
+   ],
    "obrazek": "res://obrazky/nacitani/ludmila_cesta.jpg",
-   "stav": "NEOVERENO – obrázek nestažen, výřez a shodu obsahu ověřit okem"
+   "stav": "obrázek od Míši 18. 11. (Commons, volné dílo), výřez ověřen okem"
   },
   {
    "id": "drahomira",
@@ -331,9 +501,14 @@
    "preklad": "Kopeš druhovi hrob, sám do něj ulehneš.",
    "folio": "44r",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v",
-   "vyrez": null,
+   "vyrez": [
+    0,
+    0,
+    1,
+    1
+   ],
    "obrazek": "res://obrazky/nacitani/drahomira.jpg",
-   "stav": "NEOVERENO – obrázek nestažen, výřez a shodu obsahu ověřit okem"
+   "stav": "obrázek od Míši 18. 11. (Commons, volné dílo), výřez ověřen okem"
   },
   {
    "id": "krest",
@@ -345,9 +520,14 @@
    "preklad": "Starý hřích dělá novou hanbu.",
    "folio": "42r",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/42r",
-   "vyrez": null,
+   "vyrez": [
+    0,
+    0,
+    1,
+    1
+   ],
    "obrazek": "res://obrazky/nacitani/krest.jpg",
-   "stav": "NEOVERENO – obrázek nestažen, výřez a shodu obsahu ověřit okem"
+   "stav": "obrázek od Míši 18. 11. (Commons, volné dílo), výřez ověřen okem"
   },
   {
    "id": "orba",
@@ -359,10 +539,18 @@
    "preklad": "Vlkem nikdy orat nebudeš, nemá rohy.",
    "folio": "44r",
    "odkaz": "https://vokabular.ujc.cas.cz/moduly/edicni/edice/6d79cb4b-4ad9-442e-a6a6-130152ac20d2/plny-text/s-aparatem/folio/43v",
-   "vyrez": null,
+   "vyrez": [
+    0,
+    0,
+    1,
+    1
+   ],
    "obrazek": "res://obrazky/nacitani/orba.jpg",
-   "stav": "NEOVERENO – obrázek nestažen, výřez a shodu obsahu ověřit okem"
+   "stav": "obrázek od Míši 18. 11. (Commons, volné dílo), výřez ověřen okem"
   }
  ],
- "karty_plan_vlci_a_les": "Vlčí pořekadla (Dotud vlk nosí…, Co vlk osiehne…, Sobě vlk otronos…) a lesní (Boje se chřestu…, Snadno v pustém lesě…) zatím bez obrázku s vlkem/lesem v PD souborech kategorií Commons (Bible of Wenceslaus IV., Velislai biblia picta) – hledat po stažení (fol. 182r, 185r, Vel7, Wenzelsbibel03, Stvoření světa)."
+ "karty_plan_vlci_a_les": "Vlčí pořekadla (Dotud vlk nosí…, Co vlk osiehne…, Sobě vlk otronos…) a lesní (Boje se chřestu…, Snadno v pustém lesě…) zatím bez obrázku s vlkem/lesem v PD souborech kategorií Commons (Bible of Wenceslaus IV., Velislai biblia picta) – hledat po stažení (fol. 182r, 185r, Vel7, Wenzelsbibel03, Stvoření světa).",
+ "uvod_bez_karty": true,
+ "uvod_cas_min_s": 2.0,
+ "uvod_popis": "Míša 18. 11.: „načítání před načtením menu – nechci tam tyhle karty, ty půjdou až od menu k načtení hry.“ Start aplikace = tmavá obrazovka s názvem a místem + linka průběhu (min. uvod_cas_min_s); karty s pořekadly jen při vstupu do hry z nabídky (prechod)."
 }

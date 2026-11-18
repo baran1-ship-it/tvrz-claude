@@ -60,16 +60,25 @@ func _run() -> void:
 	var v_cerne := [-1.0]
 	nac.v_cerne.connect(func() -> void: v_cerne[0] = nac.cas)
 	nac.aktivni = true
+	# start aplikace (před nabídkou): jen název a linka, žádná karta (Míša 18. 11.)
 	nac.zacni()
 	await snimku(3)
+	ok(nac.uvod and nac._uvod_uzel.visible and not nac._karta_uzel.visible, "start aplikace bez karty s pořekadlem")
+	nac.hotovo()
+	while nac.bezi and nac.cas < 20.0: await process_frame
+	await cekej(1.0)
+	v_cerne[0] = -1.0
+	# vstup do hry z nabídky: karta
+	nac.prechod()
+	await snimku(3)
+	ok(not nac.uvod and nac._karta_uzel.visible, "vstup do hry z nabídky ukáže kartu")
 	var k: Dictionary = nac.karta
 	ok(nac.visible and nac.bezi, "karta je na obrazovce")
 	ok(nac._citat.text == String(k["text"]) and nac._iniciala.text == String(k["ini"]) and nac._preklad.text == String(k["preklad"]), "pořekadlo z dat")
 	ok(nac._misto.text == String(data["texty"]["misto"]) and nac._stav.text == String(data["texty"]["stav"]), "texty obrazovky z dat")
 	ok(nac._popisek.text == String(data["popisky_zdroje"][k["zdroj"]]), "popisek zdroje z dat")
 	ok(nac._obraz.texture != null, "obrázek karty načten")
-	await cekej(0.3)
-	nac.hotovo()   # načteno hned – karta musí zůstat
+	await cekej(0.3)   # prechod() hlásí hotovo hned – karta musí zůstat
 	while v_cerne[0] < 0.0 and nac.cas < 20.0: await process_frame
 	var mc: float = nac.min_cas()
 	ok(v_cerne[0] >= mc + nac.prolnuti() - 0.12, "karta vidět nejméně %.0f s + prolnutí (do černé v %.2f s)" % [mc, v_cerne[0]])   # tolerance ~3 snímky: prolnutí běží tweenem, nac.cas sčítá delta – pod zátěží hlídačů (17. 11.: 10,62 s) se rozejdou o pár snímků

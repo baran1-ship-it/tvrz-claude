@@ -44,6 +44,8 @@ var _preklad: Label
 var _kdo: RichTextLabel
 var _stav: Label
 var _linka: Control
+var _uvod_uzel: Control    # start aplikace (před nabídkou): jen název a linka, bez karty (Míša 18. 11.)
+var uvod := false          # právě běží úvodní načítání
 
 
 func _ready() -> void:
@@ -65,6 +67,7 @@ func t(k: String) -> String:
 
 
 func min_cas() -> float:
+	if uvod: return float(cfg.get("uvod_cas_min_s", 2.0))
 	return float(cfg.get("cas_min_s", 10.0))
 
 
@@ -174,6 +177,22 @@ func _postav() -> void:
 	_stav.position = Vector2(0, -2)
 	dole.add_child(_stav)
 
+	# úvod při startu aplikace: jen název hry a místo uprostřed (karty s pořekadly až mezi nabídkou a hrou – Míša 18. 11.)
+	_uvod_uzel = VBoxContainer.new()
+	_uvod_uzel.set_anchors_preset(Control.PRESET_CENTER)
+	_uvod_uzel.grow_horizontal = Control.GROW_DIRECTION_BOTH; _uvod_uzel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_uvod_uzel.alignment = BoxContainer.ALIGNMENT_CENTER
+	_uvod_uzel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var h: Dictionary = cfg.get("hlavicka", {})
+	var tn := Styl.bfb_label(String(h.get("nazev", "")), "titul", 96, Color("#d9c9a3"), 0)
+	tn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_uvod_uzel.add_child(tn)
+	var tm := Styl.bfb_label(String(h.get("misto", "")), "sc", 22, Color(Styl.BFB_GOLD_NAC, 0.85), 6)
+	tm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_uvod_uzel.add_child(tm)
+	_uvod_uzel.visible = false
+	_koren.add_child(_uvod_uzel)
+
 	_clona = ColorRect.new(); _clona.color = Color.BLACK; _clona.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_clona.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_koren.add_child(_clona)
@@ -227,7 +246,7 @@ func nastav_kartu(i := -1) -> void:
 ## Zobrazí kartu (prolnutí z černé) a načte vláknem zdroje ze seznamu „predem“; vrátí se, až jsou načtené
 ## (a karta je celá vidět). Pak hlavni.gd staví svět z mezipaměti a nakonec zavolá hotovo().
 func zacni() -> void:
-	_ukaz()
+	_ukaz(bool(cfg.get("uvod_bez_karty", true)))
 	_cekani.clear()
 	for p: String in cfg.get("predem", []):
 		if ResourceLoader.exists(p) and ResourceLoader.load_threaded_request(p, "", true) == OK:
@@ -253,8 +272,11 @@ func prechod() -> void:
 	await v_cerne
 
 
-func _ukaz() -> void:
-	nastav_kartu()
+func _ukaz(jen_uvod := false) -> void:
+	uvod = jen_uvod
+	if not uvod: nastav_kartu()
+	_karta_uzel.visible = not uvod
+	_uvod_uzel.visible = uvod
 	visible = true
 	bezi = true
 	_hotovo = false
