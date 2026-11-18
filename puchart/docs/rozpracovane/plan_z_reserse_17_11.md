@@ -69,3 +69,7 @@ krajiny jako v KCD“. Snímky: docs/screens/misa_18_11_prazdna_dalka_1.jpg (x 1
 | E4 | Každý druh (tráva, byliny, keře, kameny, stromy na pase) minimálně 3 modely/varianty – audit + doplnit | katalog modelů, test smyslu |
 | E5 | Okraje cest: lem trávy a bylin až k vyjetým kolejím (podle KCD fotek) | cesty, byliny |
 Měřit na tabletu (rozpočet troj. 2,1 M; dnes v lese 2,35 M), snímky před/po ze stejných míst jako Míša.
+Stav 18. 11.: Míša „Havran už to má celkem vychytané“ → postup: nejdřív převzít Havranovo řešení plné krajiny
+(louka/drn, střední pás, pole za vsí, terén v dálce, pozvolné objevení – větev claude/new-session-0dtk58, jeho
+mereni_verze.md), vlastní jen co Havran nemá. ODLOŽENO – Míša dá vědět, kdy začít (limit). Rozdělaný začátek
+pomocníka uložen v `git stash` „plna_krajina_rozpracovano_18_11“ (neověřeno, klidně zahodit).
