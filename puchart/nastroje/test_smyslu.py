@@ -1456,6 +1456,7 @@ TEST("zdivo_matne", not _c396, "; ".join(_c396) if _c396 else "zdivo matné, bez
 
 # 396 (Míša 18. 11., chýše u lomu bez lůžek): každá zemljanka má rohože, dvě značky spánku pro houně (zajimava.gd) a obě leží
 # v otvoru terénu (build/zajimava_teren.json diry) – houně ani rohož nesmí zakrýt terén; model houně od modeláře existuje
+_zt96 = json.load(open(K + "/build/zajimava_teren.json")) if os.path.exists(K + "/build/zajimava_teren.json") else {"diry": []}
 _c396 = []; _n396 = 0; _ZE96 = json.load(open(K + "/pravidla/svet/zajimava_mista.json"))["modely"]["zemljanky"]
 if not os.path.exists(K + "/hra/" + _ZE96["houne"]["model"].replace("res://", "")): _c396.append("chybí model houně %s" % _ZE96["houne"]["model"])
 for _m in json.load(open(D + "zajimava_mista.json"))["mista"]:
@@ -1466,7 +1467,7 @@ for _m in json.load(open(D + "zajimava_mista.json"))["mista"]:
         _cs, _sn = math.cos(_q["yaw"]), math.sin(_q["yaw"])
         for _k, (_a, _y, _b) in _sp.items():
             _xs, _zs = _q["x"] + _a * _cs + _b * _sn, _q["z"] - _a * _sn + _b * _cs
-            if not any(_v_poly(_xs, _zs, d_["poly"]) for d_ in _zt["diry"]): _c396.append("%s %s: lůžko mimo otvor terénu" % (_m["id"], _k))
+            if not any(_v_poly(_xs, _zs, d_["poly"]) for d_ in _zt96["diry"]): _c396.append("%s %s: lůžko mimo otvor terénu" % (_m["id"], _k))
             elif float(ter(_xs, _zs)) - (_q["y"] + _y) > 0.05: _c396.append("%s %s: terén %.2f m nad lůžkem" % (_m["id"], _k, float(ter(_xs, _zs)) - _q["y"] - _y))
 TEST("zemljanka_luzka", _n396 > 0 and not _c396, "; ".join(_c396) if _c396 else "%d zemljanek: rohože a 2 houně v otvoru terénu" % _n396)
 
@@ -1476,12 +1477,12 @@ for _jt, _t in _ZE96["typy"].items():
     if not _t.get("podezdivka_stitu"): continue
     _gp = K + "/hra/modely/stavby_h/%s.glb" % _jt
     if not os.path.exists(_gp): _c397.append("%s: chybí model" % _jt); continue
-    _r = _gs.nacti(_gp); _jj, _bb = _r[0], _r[1]; _an = []
+    import glb_sit as _gs97; _r = _gs97.nacti(_gp); _jj, _bb = _r[0], _r[1]; _an = []
     for _nd in _jj["nodes"]:
         if _nd.get("name") != "Zemljanka_Podezdivka" or "mesh" not in _nd: continue
         for _pr in _jj["meshes"][_nd["mesh"]]["primitives"]:
-            _X = _gs.cti(_jj, _bb, _pr["attributes"]["POSITION"]).astype(float); _U = _gs.cti(_jj, _bb, _pr["attributes"]["TEXCOORD_0"]).astype(float)
-            _I = _gs.cti(_jj, _bb, _pr["indices"]).reshape(-1, 3); _e1 = _X[_I[:, 1]] - _X[_I[:, 0]]; _e2 = _X[_I[:, 2]] - _X[_I[:, 0]]
+            _X = _gs97.cti(_jj, _bb, _pr["attributes"]["POSITION"]).astype(float); _U = _gs97.cti(_jj, _bb, _pr["attributes"]["TEXCOORD_0"]).astype(float)
+            _I = _gs97.cti(_jj, _bb, _pr["indices"]).reshape(-1, 3); _e1 = _X[_I[:, 1]] - _X[_I[:, 0]]; _e2 = _X[_I[:, 2]] - _X[_I[:, 0]]
             _nr = np.cross(_e1, _e2); _ar = np.linalg.norm(_nr, axis=1); _ok = _ar > 1e-6; _e1, _e2, _nr = _e1[_ok], _e2[_ok], _nr[_ok] / _ar[_ok, None]
             _ex = _e1 / np.linalg.norm(_e1, axis=1, keepdims=True); _ey = np.cross(_nr, _ex)
             _P2 = np.stack([np.c_[(_e1 * _ex).sum(1), (_e1 * _ey).sum(1)], np.c_[(_e2 * _ex).sum(1), (_e2 * _ey).sum(1)]], 1)
