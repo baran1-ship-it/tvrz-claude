@@ -14,9 +14,9 @@
   "predhradi": 0.55,
   "pata_zdi_vne": 0.6,
   "pata_zdi_lic": 0.5,
-  "kout_zdi": 0.45,
+  "kout_zdi": 0.0,
   "les_okraj": 0.9,
-  "nadvori": 0.15,
+  "nadvori": 0.0,
   "breh": 1.0,
   "les_bucina": 0.9,
   "les_bucina_kysela": 0.9,
@@ -26,7 +26,9 @@
   "luh": 0.9,
   "koryto_kamenite": 0.0,
   "pole": 0.75,
-  "zemedelstvi": 0.75
+  "zemedelstvi": 0.75,
+  "nadvori_slap": 0.0,
+  "pata_zdi_uvnitr": 0.0
  },
  "druhy": {
   "pozn": "druh = buňka atlasu + výška (stebla.gdshader): 0 nízká 0,36 m, 1 nízká 0,5, 2 střední 0,6, 3 vysoká 0,82, 4 suchá 0,6; podíly na sečené louce (pastva nižší)",
@@ -158,5 +160,6 @@
   "_louka_min": "louka_kosena + pastvina: průměrná hustota (podíl bodů krok_m s trsem) aspoň tolik – na louce hustá tráva (KCD kcd2_louka_les)",
   "svetlina_min": 0.6,
   "_svetlina_min": "v lese na světle (krytí korunou 0 v okolí ±3 m): průměrná hustota aspoň tolik – světliny, paseky a okraje zarostlé (Havran: tráva podle louky)"
- }
+ },
+ "pozn_hrady_18_11": "Míša 18. 11.: „na obou hradech je všude na nádvořích a v zákoutích tráva, ale ta by tam být neměla“ – nádvoří, vyšlapané plochy, pata zdí uvnitř a kouty zdí bez trávy (udusaná hlína, dlažba)."
 }

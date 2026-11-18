@@ -86,6 +86,11 @@ st[vne] = SJ["tridy"].index("pata_zdi_vne"); st[uvn] = SJ["tridy"].index("pata_z
 if "pata_zdi_lic" not in SJ["tridy"]: SJ["tridy"].append("pata_zdi_lic")
 st[okraj & (vne | uvn | ko)] = SJ["tridy"].index("pata_zdi_lic")   # buňka zasahující do zdi: byliny až k líci, keře ne (kere_mimo_stavby)
 st[nadvori & slap] = SJ["tridy"].index("nadvori_slap")
+# Míša 18. 11.: „na obou hradech je všude na nádvořích a v zákoutích tráva, ale ta by tam být neměla“ – líc zdi a kouty
+# uvnitř hradeb (polygon nádvoří + 2 buňky do zdi) patří nádvoří bez trávy (louka/byliny nadvori 0), vně zůstává pata zdi
+_vnitrek = binary_dilation(np.array(mn).astype(bool), iterations=2)
+_lic_i = SJ["tridy"].index("pata_zdi_lic")
+st[_vnitrek & np.isin(st, [_lic_i, SJ["tridy"].index("kout_zdi"), SJ["tridy"].index("pata_zdi_uvnitr")])] = SJ["tridy"].index("nadvori")
 # trasy průchodu i mimo hradby (přístup k mostům a branám, pěšiny): vyšlapáno, bez keřů (Míša 4. 11. / hlídač scén: strom na pěšině k mostu B)
 st[slap & ~nadvori & ~stavba & ~chran] = SJ["tridy"].index("nadvori_slap")
 # povrch (KCD2 ref_kcd2_dvur_zed: nádvoří = udusaná hlína, tráva jen u zdí a v koutech; KCD1 18_brana_zvenku: k bráně

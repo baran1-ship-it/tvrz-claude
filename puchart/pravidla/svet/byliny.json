@@ -1,6 +1,13 @@
 {
  "popis": "Byliny u hráče (Havran louka.gd v malém): trsy podle třídy stanoviště 1393, buňky 10 m do dosah_m, deterministicky (stejné místo = stejná tráva). Hustoty jsou NAVRH pro tablet: KCD má 6+/m², tablet ~2,5/m² do 30 m (odhad 140 k troj., NEOVERENO).",
- "zapoj": {"druhy": ["trava", "vysoka"], "popis": "17. 11. (Havran les_podrost.json, Míša 17. 11.): trsy trávy bylin × násobek zápoje korun (hra/data/kryt.png, pravidlo pravidla/svet/louka.json les) – pod zapojenými korunami žádná tráva; kapradí, mech, ostružiník, pařezy beze změny = řídký podrost (KCD docs/reference/les/kcd_les_svetlo_havran_9_11.png)"}, "dosah_m": 32,
+ "zapoj": {
+  "druhy": [
+   "trava",
+   "vysoka"
+  ],
+  "popis": "17. 11. (Havran les_podrost.json, Míša 17. 11.): trsy trávy bylin × násobek zápoje korun (hra/data/kryt.png, pravidlo pravidla/svet/louka.json les) – pod zapojenými korunami žádná tráva; kapradí, mech, ostružiník, pařezy beze změny = řídký podrost (KCD docs/reference/les/kcd_les_svetlo_havran_9_11.png)"
+ },
+ "dosah_m": 32,
  "bunka_m": 10,
  "tridy": {
   "louka_kosena": {
@@ -364,5 +371,6 @@
  "pozn_stavba_okraj_14_11": "Míša 14. 11.: „pořád je tráva v hájovně“ – kopřiva a tráva rostly 0,1–0,2 m za stěnou srubu a listy prostrčily dovnitř; půdorys mista_stavby (o ~0,36 m větší než zdi) zvětšený o 0,1 m: rostliny ≥ 0,45 m od zdi (záporná hodnota = zvětšení)",
  "pozn_houstiny_17_11": "Míša 16. 11. (houštiny jako Havran): podrost do pasu levnými druhy (kapradí 80–120 troj., ostružiník 0,7 tis.) – KCD les = kmeny + podrost do výšky pasu (Havran les_podrost.json houstina.patro, kcd_sada2_12–19); vnější lem pláště kapradí (Havran plast podil_lemu 0,35 × 1–3 kapradí na 2,5 m); paseka ostružiník a kapradí (zarůstající mýtina). Pařez do kontroly parez_max 0,001 (Míša 13. 11. „není tam těch klád moc?“ – kmeny beze změny; Havranova hromada klestí každý 5. strom: model chybí, nepřevzato). Shluky: šum měl frekvenci 0,01 → vlna 100 × vlna_m (4,8 km), opraveno v byliny.gd (shluky_frekvence 1). Dřív: {\"les_okraj\": {\"trava\": 1.0, \"vysoka\": 0.5, \"ostruzina\": 0.15, \"kopriva\": 0.06, \"kapradi\": 0.04}, \"les_paseka\": {\"trava\": 1.5, \"vysoka\": 0.8, \"kapradi\": 0.2, \"ostruzina\": 0.2, \"parez\": 0.008, \"kopriva\": 0.04, \"spalek\": 0.001}, \"les_bucina\": {\"kapradi\": 0.08, \"mech\": 0.1, \"parez\": 0.00072, \"kmen\": 0.001, \"kamen\": 0.01, \"trava\": 0.12, \"ostruzina\": 0.02}, \"les_bucina_kysela\": {\"kapradi\": 0.1, \"mech\": 0.12, \"parez\": 0.00072, \"kmen\": 0.001, \"kamen\": 0.01}, \"les_dubohabrina\": {\"trava\": 0.5, \"kapradi\": 0.06, \"ostruzina\": 0.05, \"mech\": 0.04, \"parez\": 0.00048, \"kmen\": 0.0006}}",
  "shluky_frekvence": 1.0,
- "_shluky_frekvence": "frekvence šumu shluků (byliny.gd _sum); souřadnice se dělí vlna_m → vlna ≈ vlna_m. Do 17. 11. výchozí 0,01 (vlna 4,8 km, shluky nefungovaly)"
+ "_shluky_frekvence": "frekvence šumu shluků (byliny.gd _sum); souřadnice se dělí vlna_m → vlna ≈ vlna_m. Do 17. 11. výchozí 0,01 (vlna 4,8 km, shluky nefungovaly)",
+ "pozn_hrady_18_11": "Míša 18. 11.: na nádvořích a v koutech hradů žádná tráva ani byliny – zůstávají jen kameny a mech."
 }

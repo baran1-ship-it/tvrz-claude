@@ -1440,6 +1440,15 @@ if 'find_children("*", "CollisionObject3D", true, false)' not in _pg:
     _c394.append("predmety.gd: náhled vypíná kolizi jen u kořene – vnořená StaticBody (lůžka) zůstávají")
 TEST("nahled_bez_kolize", not _c394, "; ".join(_c394) if _c394 else "náhled pokládání bez kolize i ve vnořených tělech")
 
+# 395 (Míša 18. 11.): na nádvořích a v koutech hradů žádná tráva ani byliny
+_c395 = []
+_lk = json.load(open(K + "/hra/data/louka.json")); _bl = json.load(open(K + "/hra/data/byliny.json"))
+for _t in ("nadvori", "nadvori_slap", "pata_zdi_uvnitr", "kout_zdi"):
+    if float(_lk["tridy"].get(_t, 0.0)) > 0.0: _c395.append("louka %s=%s" % (_t, _lk["tridy"][_t]))
+    for _k in ("trava", "vysoka", "kopriva", "ostruzina", "kapradi"):
+        if float(_bl.get(_t, {}).get(_k, 0.0)) > 0.0: _c395.append("byliny %s.%s" % (_t, _k))
+TEST("hrad_nadvori_bez_travy", not _c395, "; ".join(_c395) if _c395 else "nádvoří a kouty hradů bez trávy a bylin")
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)
