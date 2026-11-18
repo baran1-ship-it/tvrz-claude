@@ -1454,7 +1454,7 @@ _zs = open(K + "/hra/shaders/zdivo.gdshader", encoding="utf-8").read()
 _c396 = [] if ("uniform int kroky = 0;" in _zs and "SPECULAR = 0.3;" not in _zs) else ["zdivo.gdshader: parallax zapnutý nebo lesk kamene 0,3"]
 TEST("zdivo_matne", not _c396, "; ".join(_c396) if _c396 else "zdivo matné, bez parallaxu")
 
-# 396 (Míša 18. 11., chýše u lomu bez lůžek): každá zemljanka má rohože, dvě značky spánku pro houně (zajimava.gd) a obě leží
+# 397 (Míša 18. 11., chýše u lomu bez lůžek): každá zemljanka má rohože, dvě značky spánku pro houně (zajimava.gd) a obě leží
 # v otvoru terénu (build/zajimava_teren.json diry) – houně ani rohož nesmí zakrýt terén; model houně od modeláře existuje
 _zt96 = json.load(open(K + "/build/zajimava_teren.json")) if os.path.exists(K + "/build/zajimava_teren.json") else {"diry": []}
 _c396 = []; _n396 = 0; _ZE96 = json.load(open(K + "/pravidla/svet/zajimava_mista.json"))["modely"]["zemljanky"]
@@ -1471,7 +1471,7 @@ for _m in json.load(open(D + "zajimava_mista.json"))["mista"]:
             elif float(ter(_xs, _zs)) - (_q["y"] + _y) > 0.05: _c396.append("%s %s: terén %.2f m nad lůžkem" % (_m["id"], _k, float(ter(_xs, _zs)) - _q["y"] - _y))
 TEST("zemljanka_luzka", _n396 > 0 and not _c396, "; ".join(_c396) if _c396 else "%d zemljanek: rohože a 2 houně v otvoru terénu" % _n396)
 
-# 397 (Míša 18. 11., podezdívka štítů „rozmazaná“): síť Zemljanka_Podezdivka bez slitých UV (Jacobián UV/3D anizotropie > 3)
+# 398 (Míša 18. 11., podezdívka štítů „rozmazaná“): síť Zemljanka_Podezdivka bez slitých UV (Jacobián UV/3D anizotropie > 3)
 _c397 = []
 for _jt, _t in _ZE96["typy"].items():
     if not _t.get("podezdivka_stitu"): continue
@@ -1493,7 +1493,7 @@ for _jt, _t in _ZE96["typy"].items():
     if _f > 0.05: _c397.append("%s: %.0f %% ploch podezdívky se slitým UV" % (_jt, _f * 100))
 TEST("podezdivka_uv", not _c397, "; ".join(_c397) if _c397 else "podezdívka štítů: UV bez pruhů (anizotropie > 3 pod 5 %)")
 
-# 398 (Míša 18. 11., krumpáč svisle u skály): dlouhé nářadí míst (katalog kat naradi, výška > 0,8 m) neleží ani nestojí svisle
+# 399 (Míša 18. 11., krumpáč svisle u skály): dlouhé nářadí míst (katalog kat naradi, výška > 0,8 m) neleží ani nestojí svisle
 # volně – je opřené (naklon 10–35°) patou na terénu
 _c398 = []; _n398 = 0; _KP = json.load(open(K + "/hra/modely/predmety_h.json"))
 for _m in json.load(open(D + "zajimava_mista.json"))["mista"]:
@@ -1505,7 +1505,7 @@ for _m in json.load(open(D + "zajimava_mista.json"))["mista"]:
         elif abs(float(ter(_q["x"], _q["z"])) - _q["y"]) > 0.1: _c398.append("%s %s: pata %.2f m od terénu" % (_m["id"], _q["predmet"], _q["y"] - float(ter(_q["x"], _q["z"]))))
 TEST("naradi_oprene", not _c398, "; ".join(_c398) if _c398 else "%d kusů dlouhého nářadí opřeno patou na zemi" % _n398)
 
-# 399 (Míša 18. 11., nádvoří A: hrbol u věžičky – „srovnat do roviny s okolním dvorem“): v plošině A_nadvori_jih (1 m od kraje)
+# 400 (Míša 18. 11., nádvoří A: hrbol u věžičky – „srovnat do roviny s okolním dvorem“): v plošině A_nadvori_jih (1 m od kraje)
 # převýšení terénu nejvýš kontroly.json nadvori_prevyseni_m
 _c399 = []
 for _q in json.load(open(K + "/pravidla/svet/hrad_puchart.json"))["teren"]["plosiny"]:
