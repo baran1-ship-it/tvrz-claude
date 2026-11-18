@@ -1031,6 +1031,7 @@
     "y": 32.6,
     "prechod_m": 3.0
    },
+   {"id": "A_nadvori_jih", "polygon": [[0.0, 10.5], [9.0, 10.5], [9.0, 19.3], [0.0, 19.3]], "y": 37.9, "prechod_m": 3.0, "zdroj": "Míša 18. 11. (docs/screens/misa_18_11_nadvori_A_val_1.jpg z x 3,8 z 6,0 směr 172°, _2.jpg z x 5,5 z −12,6 směr 260°: červená čára – „srovnat do roviny s okolním dvorem“): nádvoří A bylo v DMR vyklenuté (hřbet S–J v x 0–6 až 39,1 m, ke kraji dvora 37,3–37,9 – zbytek sutě, ne dvůr 1393); hřbet u věžičky srovnán na úroveň plošiny A_vezicka_vstup / prahu brány (37,8–37,9); jižní část dvora mezi palácem a J hradbou, navazuje na A_vezicka_vstup (x 9–15)", "jistota": "NAVRH (úprava dvora)", "kontrola_rovna": true, "kontrola_body": [[2.0, 13.0], [5.0, 13.0], [7.5, 13.0], [2.0, 17.5], [5.0, 17.5], [7.5, 17.5]]},
    {
     "id": "A_vezicka_vstup",
     "polygon": [

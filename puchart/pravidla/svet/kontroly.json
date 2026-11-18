@@ -1,5 +1,7 @@
 {
  "popis": "Pravidla hlídačů Puchartu (převod vrstev z Havrana docs/havran/pipeline.md; Míša 2. 11.: „ať neopakujeme chyby z Havrana“). Každá chyba nalezená člověkem = pravidlo zde + kontrola v nastroje/test_smyslu.py. Selhání blokuje vydání (nastroje/export_apk.sh).",
+ "nadvori_prevyseni_m": 0.25,
+ "nadvori_prevyseni_zdroj": "Míša 18. 11. (misa_18_11_nadvori_A_val_1.jpg: hrbol na nádvoří A „srovnat do roviny s okolním dvorem“): v plošině A_nadvori_jih (1 m od kraje) nejvýš 0,25 m převýšení – test smysl:nadvori_A_rovne",
  "geometrie": {
   "soubory": [
    "hra/modely/hrady/puchart.glb",

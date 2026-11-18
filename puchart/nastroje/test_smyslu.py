@@ -1454,6 +1454,68 @@ _zs = open(K + "/hra/shaders/zdivo.gdshader", encoding="utf-8").read()
 _c396 = [] if ("uniform int kroky = 0;" in _zs and "SPECULAR = 0.3;" not in _zs) else ["zdivo.gdshader: parallax zapnutý nebo lesk kamene 0,3"]
 TEST("zdivo_matne", not _c396, "; ".join(_c396) if _c396 else "zdivo matné, bez parallaxu")
 
+# 396 (Míša 18. 11., chýše u lomu bez lůžek): každá zemljanka má rohože, dvě značky spánku pro houně (zajimava.gd) a obě leží
+# v otvoru terénu (build/zajimava_teren.json diry) – houně ani rohož nesmí zakrýt terén; model houně od modeláře existuje
+_c396 = []; _n396 = 0; _ZE96 = json.load(open(K + "/pravidla/svet/zajimava_mista.json"))["modely"]["zemljanky"]
+if not os.path.exists(K + "/hra/" + _ZE96["houne"]["model"].replace("res://", "")): _c396.append("chybí model houně %s" % _ZE96["houne"]["model"])
+for _m in json.load(open(D + "zajimava_mista.json"))["mista"]:
+    for _q in _m["dily"]:
+        if not _q.get("zemljanka"): continue
+        _n396 += 1; _sp = _zmo[_q["model"]].get("spani", {})
+        if sorted(_sp) != ["Zemljanka_Spani_L", "Zemljanka_Spani_P"]: _c396.append("%s %s: značky spánku %s" % (_m["id"], _q["model"], sorted(_sp))); continue
+        _cs, _sn = math.cos(_q["yaw"]), math.sin(_q["yaw"])
+        for _k, (_a, _y, _b) in _sp.items():
+            _xs, _zs = _q["x"] + _a * _cs + _b * _sn, _q["z"] - _a * _sn + _b * _cs
+            if not any(_v_poly(_xs, _zs, d_["poly"]) for d_ in _zt["diry"]): _c396.append("%s %s: lůžko mimo otvor terénu" % (_m["id"], _k))
+            elif float(ter(_xs, _zs)) - (_q["y"] + _y) > 0.05: _c396.append("%s %s: terén %.2f m nad lůžkem" % (_m["id"], _k, float(ter(_xs, _zs)) - _q["y"] - _y))
+TEST("zemljanka_luzka", _n396 > 0 and not _c396, "; ".join(_c396) if _c396 else "%d zemljanek: rohože a 2 houně v otvoru terénu" % _n396)
+
+# 397 (Míša 18. 11., podezdívka štítů „rozmazaná“): síť Zemljanka_Podezdivka bez slitých UV (Jacobián UV/3D anizotropie > 3)
+_c397 = []
+for _jt, _t in _ZE96["typy"].items():
+    if not _t.get("podezdivka_stitu"): continue
+    _gp = K + "/hra/modely/stavby_h/%s.glb" % _jt
+    if not os.path.exists(_gp): _c397.append("%s: chybí model" % _jt); continue
+    _r = _gs.nacti(_gp); _jj, _bb = _r[0], _r[1]; _an = []
+    for _nd in _jj["nodes"]:
+        if _nd.get("name") != "Zemljanka_Podezdivka" or "mesh" not in _nd: continue
+        for _pr in _jj["meshes"][_nd["mesh"]]["primitives"]:
+            _X = _gs.cti(_jj, _bb, _pr["attributes"]["POSITION"]).astype(float); _U = _gs.cti(_jj, _bb, _pr["attributes"]["TEXCOORD_0"]).astype(float)
+            _I = _gs.cti(_jj, _bb, _pr["indices"]).reshape(-1, 3); _e1 = _X[_I[:, 1]] - _X[_I[:, 0]]; _e2 = _X[_I[:, 2]] - _X[_I[:, 0]]
+            _nr = np.cross(_e1, _e2); _ar = np.linalg.norm(_nr, axis=1); _ok = _ar > 1e-6; _e1, _e2, _nr = _e1[_ok], _e2[_ok], _nr[_ok] / _ar[_ok, None]
+            _ex = _e1 / np.linalg.norm(_e1, axis=1, keepdims=True); _ey = np.cross(_nr, _ex)
+            _P2 = np.stack([np.c_[(_e1 * _ex).sum(1), (_e1 * _ey).sum(1)], np.c_[(_e2 * _ex).sum(1), (_e2 * _ey).sum(1)]], 1)
+            _U2 = np.stack([(_U[_I[:, 1]] - _U[_I[:, 0]])[_ok], (_U[_I[:, 2]] - _U[_I[:, 0]])[_ok]], 1)
+            _sv = np.linalg.svd(np.linalg.solve(_P2, _U2), compute_uv=False); _an.append(_sv[:, 0] / np.maximum(_sv[:, 1], 1e-9))
+    if not _an: _c397.append("%s: bez sítě Zemljanka_Podezdivka" % _jt); continue
+    _f = float((np.concatenate(_an) > 3).mean())
+    if _f > 0.05: _c397.append("%s: %.0f %% ploch podezdívky se slitým UV" % (_jt, _f * 100))
+TEST("podezdivka_uv", not _c397, "; ".join(_c397) if _c397 else "podezdívka štítů: UV bez pruhů (anizotropie > 3 pod 5 %)")
+
+# 398 (Míša 18. 11., krumpáč svisle u skály): dlouhé nářadí míst (katalog kat naradi, výška > 0,8 m) neleží ani nestojí svisle
+# volně – je opřené (naklon 10–35°) patou na terénu
+_c398 = []; _n398 = 0; _KP = json.load(open(K + "/hra/modely/predmety_h.json"))
+for _m in json.load(open(D + "zajimava_mista.json"))["mista"]:
+    for _q in _m["dily"]:
+        _kp = _KP.get(_q.get("predmet", ""), {})
+        if _kp.get("kat") != "naradi" or float(_kp.get("rozmer", [0, 0, 0])[1]) < 0.8: continue
+        _n398 += 1; _nk = abs(math.degrees(float(_q.get("naklon", 0.0))))
+        if not 10.0 <= _nk <= 35.0: _c398.append("%s %s: stojí svisle (náklon %.0f°)" % (_m["id"], _q["predmet"], _nk))
+        elif abs(float(ter(_q["x"], _q["z"])) - _q["y"]) > 0.1: _c398.append("%s %s: pata %.2f m od terénu" % (_m["id"], _q["predmet"], _q["y"] - float(ter(_q["x"], _q["z"]))))
+TEST("naradi_oprene", not _c398, "; ".join(_c398) if _c398 else "%d kusů dlouhého nářadí opřeno patou na zemi" % _n398)
+
+# 399 (Míša 18. 11., nádvoří A: hrbol u věžičky – „srovnat do roviny s okolním dvorem“): v plošině A_nadvori_jih (1 m od kraje)
+# převýšení terénu nejvýš kontroly.json nadvori_prevyseni_m
+_c399 = []
+for _q in json.load(open(K + "/pravidla/svet/hrad_puchart.json"))["teren"]["plosiny"]:
+    if _q["id"] != "A_nadvori_jih": continue
+    _pg = np.array(_q["polygon"], float); _xx, _zz = np.meshgrid(np.arange(_pg[:, 0].min() + 1, _pg[:, 0].max() - 0.99, 0.5), np.arange(_pg[:, 1].min() + 1, _pg[:, 1].max() - 0.99, 0.5))
+    _h = ter(_xx.ravel(), _zz.ravel()); _dv = float(_h.max() - _h.min())
+    if _dv > KC.get("nadvori_prevyseni_m", 0.25): _c399.append("A_nadvori_jih: převýšení %.2f m (%.2f–%.2f)" % (_dv, _h.min(), _h.max()))
+    break
+else: _c399.append("plošina A_nadvori_jih chybí")
+TEST("nadvori_A_rovne", not _c399, "; ".join(_c399) if _c399 else "nádvoří A u věžičky srovnané (převýšení pod %.2f m)" % KC.get("nadvori_prevyseni_m", 0.25))
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)
