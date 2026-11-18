@@ -554,3 +554,10 @@ Změny: domy vsi zdálky hnědé (barvy vrcholu středního stupně do sRGB), vo
 
 ## 0.9999993 (vydáno 17. 11.)
 Proti 0.9999992 jen kód: předměty dvora se nepokládají na stupně před dveřmi (plůtek domu 6, test schody_vstupu OK). Balíky beze změny. Výkon NEOVĚŘENO NA ZAŘÍZENÍ.
+
+## 0.9999993 – Měřicí trasa 18. 11. 03:07 (tablet 25097RP43G, 3D 75 %, 135/135 úseků, BEZ pádu)
+p50/p95 ms „vše“: tvrz-cesta 28/43, louka 24/28, les 28/34, skaly 36/46, kun-les 26/36, ves 30/36, mlyn 17/20, ves-vjezd 30/40, ves-dvory 31/37, krcma-kovarna 25/35, hostinec 23/27 (max 330), vez-vyhled 24/29.
+„vše znovu“ (konec trasy): ves-vjezd 43/53 (>40 ms 180×), louka 39/49 – drift během trasy (podezření teplo/paměť).
+Varianty proti „vše“ (p50): bez postav ves-vjezd 34, ves-dvory 28, krcma-kovarna 21 (−4); postavy skryté/stojí/bez animace bez jasného rozdílu (šum ±5 ms) → postavy už nejsou hlavní cena. bez houštin / bez obzoru: bez jasného rozdílu.
+Paměť: VRAM 1099 MB (textury 701, buffery 398), halda 1795 MB. Špičky: hostinec 330/3250 ms (mereni), zahřátí krčma-kovárna 3782 ms, les 555 ms, kůň-louka 488 ms.
+Proti 0.9999991: tvrz-cesta 47 → 28 ms, ves-dvory 44 → 31, ves 36 → 30, pád po 44 min se NEOPAKOVAL (trasa celá).

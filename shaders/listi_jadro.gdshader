@@ -46,9 +46,12 @@ void fragment() {
 	// Misa 17. 11. r. 3 (listi zespodu cerne obdelniky): karta jadra je bez alfy, pruhledna mista textury maji RGB 0
 	// -> zespodu / zevnitr koruny cerny ctverec. Pruhledna mista = prumerna barva listu (nejmensi mip, deleno alfou =
 	// bez cerneho pozadi), tj. husty vnitrek koruny misto cerne.
+	// Misa 18. 11. (strom ve vsi zluty, 03-05): deleni alfou nejmensiho mipu (na tabletu alfa skoro 0) prepalilo barvu do
+	// zluta -> jen odstin prumeru listu (normovany na nejsilnejsi kanal) v pevnem tmavem jasu vnitrku koruny
 	vec4 pr = textureLod(barva, UV, 12.0);
-	vec3 prum = pr.rgb / max(pr.a, 0.05);
-	vec3 c = mix(prum * 0.8, t.rgb, smoothstep(0.0, prah, t.a));
+	float pm = max(pr.r, max(pr.g, pr.b));
+	vec3 prum = pm > 0.01 ? pr.rgb / pm * 0.3 : vec3(0.1, 0.16, 0.06);   // mip bez barvy (cerne pozadi) -> tmave zelena
+	vec3 c = mix(prum, t.rgb, smoothstep(0.0, prah, t.a));
 	ALBEDO = c * tint.rgb * v_tint * mix(0.5, 1.0, v_ao);
 	// zadni strana: svetlo prosvita (karty proti slunci nejsou cerne)
 	BACKLIGHT = c * 0.5;
