@@ -56,3 +56,16 @@ Zdroj: artefakt Hvozd (three.js r128). Rozbor a návod: `docs/rozpracovane/voda_
 | D1 | Odraz z panoramatické fotky lesa (equirect, CC0 Poly Haven) podle odraženého vektoru + Fresnel | `hra/shaders/voda.gdshader`, `voda_hra.json` |
 | D2 | Tmavé tělo vody (okraj hnědý → střed černozelený), dvojí posouvající se normálová mapa, pěna u kraje ze šumu | `voda.gdshader` |
 | D3 | Přízemní mlha: průsvitné obláčky podél potoků (billboardy, bez zápisu hloubky) | nový krok vody / `voda_hra.json mlha` |
+
+## E. Plná krajina jako KCD (Míša 18. 11., priorita po obnově limitu)
+Míša: „vše běží slušně, ale mrzí mě ty obrazy před sebou – je to prázdné a roste to před očima; máme mít vše zastoupené
+minimálně třemi modely a minimálně bych měl v dálce vidět nějakou výplň, ne holé cesty a kopce; chci obraz plné
+krajiny jako v KCD“. Snímky: docs/screens/misa_18_11_prazdna_dalka_1.jpg (x 131 z 276), _2.jpg (x 126 z 38). Tablet: 30 FPS, p75 34 ms, automatika 0/4.
+| č. | co | kde u nás |
+|---|---|---|
+| E1 | Střední pás 20–150 m: levné trsy trávy/bylin/keřů (karty, 1 materiál, impostor trsu) – svahy a okraje cest nejsou holé | louka.gd, byliny.gd, kere.gd, nový pás „dálka“ |
+| E2 | Dálka nad 150 m: travní drn a porost v barvě a struktuře terénu (zem.gdshader – makro textura porostu, šrafa stébel, barevný šum) | zem.gdshader, stanoviště |
+| E3 | Pozvolné objevování (dither/prolnutí podle vzdálenosti, delší pásma) místo „roste před očima“ | stebla.gdshader, byliny, keře |
+| E4 | Každý druh (tráva, byliny, keře, kameny, stromy na pase) minimálně 3 modely/varianty – audit + doplnit | katalog modelů, test smyslu |
+| E5 | Okraje cest: lem trávy a bylin až k vyjetým kolejím (podle KCD fotek) | cesty, byliny |
+Měřit na tabletu (rozpočet troj. 2,1 M; dnes v lese 2,35 M), snímky před/po ze stejných míst jako Míša.
