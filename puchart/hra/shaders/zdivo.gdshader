@@ -21,7 +21,7 @@ uniform vec3 tint = vec3(0.86, 0.78, 0.62);
 uniform vec3 kamen_tint = vec3(0.8, 0.78, 0.75);
 uniform float spina = 1.0;
 uniform float hloubka = 0.08;
-uniform int kroky = 7;
+uniform int kroky = 0;   // Míša 18. 11.: „kámen zdi má chybu textury“ – parallax (POM) při šikmém pohledu rozmazával/natahoval kámen; vypnuto (i výkon)
 uniform vec2 h_rozsah = vec2(0.42, 0.95);
 
 varying vec3 wp;
@@ -125,13 +125,13 @@ void fragment() {
 	col = mix(col, col * vec3(0.84, 0.88, 0.72), smoothstep(0.62, 0.8, noise(uv / 5.5 + 1.9)) * 0.4);   // lišejník
 	col = mix(col, vec3(0.15, 0.18, 0.08), smoothstep(0.35, 0.8, n.y) * smoothstep(0.5, 0.75, noise(wp.xz * 0.8)) * 0.6);   // mech na koruně
 	ALBEDO = col * mix(0.6, 1.0, ao);
-	ROUGHNESS = mix(0.9, texture(omitka_r, uo).r, pm);
-	SPECULAR = 0.3;
+	ROUGHNESS = mix(1.0, texture(omitka_r, uo).r, pm);
+	SPECULAR = mix(0.08, 0.2, pm);   // Míša 18. 11.: „moc se leskne, přitom by to měl být kámen“ – matný kámen (dřív 0,3)
 	AO = min(mix(mix(0.35, 1.0, smoothstep(0.0, 0.45, h)), 1.0, pm * 0.7), ao);
 	AO_LIGHT_AFFECT = 0.0;   // 13. 11.: přímé světlo (louče, okna) netlumit zapečeným stíněním
 	vec3 nk = (texture(kamen_n, uk + o1).rgb * hv.x + texture(kamen_n, uk + o2).rgb * hv.y + texture(kamen_n, uk + o3).rgb * hv.z) * 2.0 - 1.0;
 	vec3 no = texture(omitka_n, uo).rgb * 2.0 - 1.0;
-	vec3 tn = normalize(mix(nk * vec3(2.2, 2.2, 1.0), no * vec3(0.6, 0.6, 1.0), pm));
+	vec3 tn = normalize(mix(nk * vec3(1.4, 1.4, 1.0), no * vec3(0.6, 0.6, 1.0), pm));
 	NORMAL = normalize((VIEW_MATRIX * vec4(normalize(t * tn.x + b * tn.y + n * tn.z), 0.0)).xyz);
 	ALBEDO *= mix(1.0, 0.66, mokro); ROUGHNESS = mix(ROUGHNESS, 0.45, mokro); SPECULAR = mix(SPECULAR, 0.4, mokro);   // mokro (pocasi.gd)
 }

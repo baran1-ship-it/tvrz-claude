@@ -1449,6 +1449,11 @@ for _t in ("nadvori", "nadvori_slap", "pata_zdi_uvnitr", "kout_zdi"):
         if float(_bl.get(_t, {}).get(_k, 0.0)) > 0.0: _c395.append("byliny %s.%s" % (_t, _k))
 TEST("hrad_nadvori_bez_travy", not _c395, "; ".join(_c395) if _c395 else "nádvoří a kouty hradů bez trávy a bylin")
 
+# 396 (Míša 18. 11.): kámen zdí matný a bez parallaxu (lesk, rozmazaná textura)
+_zs = open(K + "/hra/shaders/zdivo.gdshader", encoding="utf-8").read()
+_c396 = [] if ("uniform int kroky = 0;" in _zs and "SPECULAR = 0.3;" not in _zs) else ["zdivo.gdshader: parallax zapnutý nebo lesk kamene 0,3"]
+TEST("zdivo_matne", not _c396, "; ".join(_c396) if _c396 else "zdivo matné, bez parallaxu")
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)
