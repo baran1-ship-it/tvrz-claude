@@ -767,7 +767,7 @@ for s_ in _SV:
     for px, pz, nx, nz, w in s_["vstupy"]:
         sx, sz = -nz, nx
         q = w / 2 + _VY["pred_okraj_m"] - 0.05
-        t = _VY["pred_vstupem_m"] - 0.05
+        t = vesnice.pred_vstupem(w) - 0.05             # dvere pred_vstupem_m, vrata a pracovni misto pred_vraty_m (18. 11. r. 7)
         for a, b in ((t / 2, 0.0), (t, q), (t, -q), (0.1, q), (0.1, -q)):
             mx, mz = px + nx * a + sx * b, pz + nz * a + sz * b
             if kraj.placek(*vesnice.svet_bod(s_, mx, mz)) < _HL["pred_vstupem"] - 0.01:

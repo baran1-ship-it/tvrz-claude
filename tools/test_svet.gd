@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "hladiny_lod", "teren_svy", "kryti_otisk", "cesta_skoky", "sklep_vstup", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400", "houby_na_zemi", "clona_vsi", "houstina_volno", "schody_vstupu"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "hladiny_lod", "teren_svy", "kryti_otisk", "cesta_skoky", "sklep_vstup", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400", "houby_na_zemi", "clona_vsi", "houstina_volno", "schody_vstupu", "lide_rozmisteni"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -8029,6 +8029,17 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 				truhla += 1 if kl == "Truhla_Otevri" else 0
 		if vse_k > 0 and float(truhla) / vse_k > float(ohp["truhla_podil_max"]):
 			ch.call("%s: truhla %d z %d klipu obchuzky" % [kc, truhla, vse_k])
+	# Misa 18. 11. (r. 5: otevirani bedny v hospode zrusit): cinnosti na mistech hostince a krcmy bez klipu bez_klipu
+	for rk: String in P["role"]:
+		for bl: Dictionary in P["role"][rk]["rozvrh"]:
+			for mo: Dictionary in [bl] + (bl.get("moznosti", []) as Array):
+				if not (ohp["bez_klipu_mista"] as Array).any(func(pf: String) -> bool: return String(mo["kde"]).begins_with(pf)):
+					continue
+				var cb: Dictionary = P["cinnosti"][mo["cinnost"]]
+				var vsech: String = str(cb.get("klipy", [])) + str(cb.get("sceny", [])) + str(cb.get("obchuzka_klipy", {}))
+				for kb: String in ohp["bez_klipu"]:
+					if vsech.contains(kb):
+						ch.call("%s %s@%s: klip %s v hospode" % [rk, mo["cinnost"], mo["kde"], kb])
 		for kk: String in ruzne:
 			var mz: Array = lide.call("_misto", ll[0], kk)
 			if (mz[0] as Vector2) == Vector2.ZERO or float(mz[1]) == INF and not (P["mista"].get(kk, {}) as Dictionary).has("p"):
@@ -9101,6 +9112,23 @@ func _tvrz_lavice() -> void:
 					chyby.append("lavice u (%.2f, %.2f): zada %.2f od lice %.2f" % [float(v["p"][0]), float(v["p"][2]), zada, ix])
 	if nasel == 0:
 		chyby.append("lavice u vychodni hradby chybi")
+	# Misa 18. 11. (snimek 01: lavice pod schody na hradbu, „mela byt u zdi“): kazda venkovni lavice na nadvori je
+	# zaznam u_zdi a nad sedakem (0,6 .. 3 m) neni nic (rameno schodu, podesta, ochoz)
+	var izl := float(hr["vnitrni_lic"][1])
+	var wxl := -(ix + float(hr["rozsireni_zapad_m"]))
+	for r: Dictionary in Pravidla.cti("nabytek", "venku"):
+		if r.has("p") and float(r["p"][0]) > wxl and float(r["p"][0]) < ix and absf(float(r["p"][1])) < izl:
+			chyby.append("lavice na nadvori bez u_zdi (p %s)" % str(r["p"]))
+	var spl := get_tree().root.get_world_3d().direct_space_state
+	for v: Dictionary in sv.data["vybaveni"]:
+		if not bool(v.get("venku", false)):
+			continue
+		var q := Vector3(float(v["p"][0]), float(v["p"][1]), float(v["p"][2]))
+		if q.x <= wxl or q.x >= ix or absf(q.z) >= izl:
+			continue
+		var nad := spl.intersect_ray(PhysicsRayQueryParameters3D.create(q + Vector3(0, 0.6, 0), q + Vector3(0, 3.0, 0)))
+		if not nad.is_empty():
+			chyby.append("lavice (%.1f, %.1f) pod %s" % [q.x, q.z, str((nad["collider"] as Node).name)])
 	_vysledek("tvrz_lavice", chyby.is_empty(), "%d chyb %s" % [chyby.size(), str(chyby)])
 
 
@@ -11191,3 +11219,73 @@ func _schody_vstupu() -> void:
 		print("SCHODY_VSTUPU nad vstup_do_m (neni vstup ze zeme, bez schodu): ", vysoko)
 	_vysledek("schody_vstupu", sv.vstupy_mereni.size() > 0 and spatne.is_empty(), "vstupu budov %d, nad %.2f m %d, se schody %d, vysoko %d, spatne %s" % [
 			sv.vstupy_mereni.size(), smax, nad, sv.schody_vstupu.size(), vysoko.size(), str(spatne.slice(0, 6))])
+
+
+## Misa 18. 11. (r. 3 a 4: lide na tvrzi vsichni u brany, rada ~20 lidi jde od tvrze po ceste na jih): hrac na tvrzi,
+## postavy od zacatku hry (poloha 0, blok -1 jako po nacteni), den po ctvrthodinach (postavy.json rozmisteni_test).
+## Na kazdem kroku: kolik viditelnych postav je na nadvori, kolik z nich do u_brany_m od brany, kolik jde po ceste
+## od tvrze (mimo nadvori v pasu cesty, v pohybu). Chyba = podil u brany nad u_brany_podil_max nebo rada nad rada_max.
+func _lide_rozmisteni() -> void:
+	var lide: Node = main.get_node_or_null("World/Lide")
+	if lide == null:
+		lide = get_tree().root.find_child("Lide", true, false)
+	if lide == null:
+		_vysledek("lide_rozmisteni", false, "uzel Lide nenalezen")
+		return
+	var rt: Dictionary = Pravidla.cti("postavy", "rozmisteni_test")
+	var ll: Array = lide.get("_lide")
+	var hr: Dictionary = Pravidla.cti("lokace", "tvrz_hradby")
+	var ix := float(hr["vnitrni_lic"][0])
+	var iz := float(hr["vnitrni_lic"][1])
+	var wx := -(ix + float(hr["rozsireni_zapad_m"]))
+	var brana := Vector2(float(P_mista_p("nadvori_brana")[0]), float(P_mista_p("nadvori_brana")[1]))
+	var hp: Array = rt["hrac"]
+	await main.fast_travel(Vector3(float(hp[0]), 0.0, float(hp[1])), Vector3(float(hp[0]), 1.6, float(hp[1]) + 10.0), 0.0, "test")
+	for _i in 60:
+		await get_tree().physics_frame
+	for c: Dictionary in ll:
+		c["blok"] = -1
+		c.erase("ceka")
+		c.erase("daleko")
+		c["cesta"] = PackedVector2Array()
+		c["na_miste"] = false
+		c["cn"] = {}
+		(c["uzel"] as Node3D).position = Vector3.ZERO
+		(c["uzel"] as Node3D).visible = false
+	var chyby: Array = []
+	var radky: Array = []
+	var h := float(rt["od_h"])
+	var pas: Array = rt["cesta_pas"]
+	while h <= float(rt["do_h"]) + 0.001:
+		main.day.hour = h
+		for _f in int(rt["snimku_krok"]):
+			lide.call("_process_vlastni", 1.0 / 30.0)
+		var na_nadvori := 0
+		var u_brany: Array = []
+		var rada: Array = []
+		var kde := {}
+		for c: Dictionary in ll:
+			var u: Node3D = c["uzel"]
+			if not u.visible:
+				continue
+			var q := Vector2(u.position.x, u.position.z)
+			if q.x > wx and q.x < ix and q.y > -iz and q.y < iz:
+				na_nadvori += 1
+				kde[String(c.get("kde_ted", "?"))] = int(kde.get(String(c.get("kde_ted", "?")), 0)) + 1
+				if q.distance_to(brana) < float(rt["u_brany_m"]):
+					u_brany.append("%s(%s %s)" % [c["id"], c.get("kde_ted", "?"), q.round()])
+			elif q.x > float(pas[0]) and q.x < float(pas[1]) and q.y > float(pas[2]) and q.y < float(pas[3]) and not bool(c["na_miste"]):
+				rada.append("%s->%s" % [c["id"], c.get("kde_ted", "?")])
+		var t := "%.2f h: nadvori %d, u brany %d %s, na ceste od tvrze %d %s, mista %s" % [h, na_nadvori, u_brany.size(), str(u_brany), rada.size(), str(rada), str(kde)]
+		print("LIDE ROZMISTENI ", t)
+		if na_nadvori >= int(rt["min_na_nadvori"]) and float(u_brany.size()) / na_nadvori > float(rt["u_brany_podil_max"]):
+			chyby.append(t)
+		if rada.size() > int(rt["rada_max"]):
+			chyby.append(t)
+		radky.append("%.2f:%d/%d/%d" % [h, na_nadvori, u_brany.size(), rada.size()])
+		h += float(rt["krok_h"])
+	_vysledek("lide_rozmisteni", chyby.is_empty(), "%d chyb %s; hodina:nadvori/u brany/na ceste %s" % [chyby.size(), str(chyby.slice(0, 3)), " ".join(radky)])
+
+
+func P_mista_p(k: String) -> Array:
+	return (Pravidla.cti("postavy", "mista") as Dictionary)[k]["p"]

@@ -898,12 +898,11 @@
   },
   {
    "id": "lavice_selska",
-   "p": [
-    8.0,
-    7.0
-   ],
    "natoceni_st": 90.0,
-   "popis": "nadvori tvrze u palace"
+   "popis": "nadvori tvrze u vychodni hradby jizne od prvni lavice (Misa 18. 11. snimek 01 x 5 z 3: lavice z p [8, 7] u palace stala pod schody na hradbu - od_mist_m od tvrz_ubytovna_zeny (8,2/8) ji hledani odsunulo pod rameno schodu; lavice na nadvori jen u zdi, test tvrz_lavice)",
+   "u_zdi": "vychod",
+   "z": 2.0,
+   "od_zdi_m": 0.17
   },
   {
    "id": "lavice_selska",
@@ -1078,5 +1077,6 @@
   "vstup_do_m": 1.5,
   "dosah_m": 80.0,
   "_pas_chuze_podil": "pás chůze dveřmi ± podíl šířky dveří od osy: stupeň modelu (domy vsi Kol_Schod, mlýn) platí, jen když v celém pásu klesá od prahu (mlýnice 17. 11.: stupeň modelu užší, po straně z podlahy rovnou na terén 0,31 m); v témže pásu test schody_vstupu měří profil (žádný skok nad stupen_max_m)"
- }
+ },
+ "_venku_tvrz": "Misa 18. 11. (lavice ma byt u zdi): kazda venkovni lavice na nadvori tvrze (uvnitr tvrz_hradby vnitrni_lic) je zaznam u_zdi a nad sedakem nic (schody, ochoz) - test tvrz_lavice"
 }

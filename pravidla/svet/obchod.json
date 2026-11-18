@@ -63,6 +63,7 @@
    "obchoduje_pri": [
     "obsluha_hostinec",
     "vareni",
+    "vareni_hostinec",
     "uklid_hostinec",
     "rano",
     "hovor"
@@ -96,6 +97,7 @@
     "obsluha_krcma",
     "uklid_krcma",
     "vareni",
+    "vareni_hostinec",
     "rano",
     "odpocinek"
    ],

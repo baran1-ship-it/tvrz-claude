@@ -1444,7 +1444,7 @@ def _mriz_vyslapano():
     global _VY_MRIZ
     if _VY_MRIZ is None:
         VY = _lokace()["ves"]["vyslapano"]
-        dos = VY["okap_m"] + VY["pred_vstupem_m"] + VY["prechod_m"] + VY["sum_m"] + 1.0
+        dos = VY["okap_m"] + max(VY["pred_vstupem_m"], VY["pred_vraty_m"]) + VY["prechod_m"] + VY["sum_m"] + 1.0
         _VY_MRIZ = {}
         for i, s in enumerate(stavby_vsi()):
             bx = list(s["boxy"]) + ([s["obdelnik"][:4]] if s["obdelnik"] else [])
@@ -1465,6 +1465,14 @@ def _mriz_vyslapano():
 
 def _box_d(mx, mz, x0, x1, z0, z1):
     return math.hypot(max(x0 - mx, mx - x1, 0.0), max(z0 - mz, mz - z1, 0.0))
+
+
+def pred_vstupem(w):
+    """Hloubka vyslapane plochy pred vstupem sirky w (lokace.json ves.vyslapano): dvere pred_vstupem_m; vrata, otevrena
+    strana a pracovni misto (sirka >= vrata_od_m: kovarna, vrata stodoly a krcmy, kulna) pred_vraty_m - tam se pracuje,
+    stoji vuz a kun (Misa 18. 11. r. 7 „pred kovarnou travy moc“). Jedno pravidlo pro vsechny stavby vsi."""
+    VY = _lokace()["ves"]["vyslapano"]
+    return VY["pred_vraty_m"] if w >= VY["vrata_od_m"] else VY["pred_vstupem_m"]
 
 
 def vyslapano(x, z):
@@ -1496,7 +1504,7 @@ def vyslapano(x, z):
         for px, pz, nx, nzz, w in s["vstupy"]:
             t = (mx - px) * nx + (mz - pz) * nzz
             q = abs(-(mx - px) * nzz + (mz - pz) * nx)
-            d = math.hypot(max(-t, t - VY["pred_vstupem_m"], 0.0), max(q - w / 2.0 - VY["pred_okraj_m"], 0.0))
+            d = math.hypot(max(-t, t - pred_vstupem(w), 0.0), max(q - w / 2.0 - VY["pred_okraj_m"], 0.0))
             m = max(m, HL["pred_vstupem"] * (1.0 - kraj.smooth(0.0, VY["prechod_m"], d + nz)))
         if s["obdelnik"]:
             x0, x1, z0, z1, hl = s["obdelnik"]

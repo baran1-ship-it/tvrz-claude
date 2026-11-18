@@ -5476,6 +5476,138 @@ func _okraj_novych_lesu() -> void:
 	print("okraj novych lesu: keru %d" % n)
 
 
+## Scena bodu pro rozmisteni (les_podrost.json houstina.rozmisteni, Misa 18. 11. r. 6): clona (pas kompozice.clony),
+## ves (pasma.rozmisteni.ves_dosah_m od stare navsi), les (zapoj >= houstina.plast.les_kraj[0]), jinak louka.
+func scena_bod(x: float, z: float) -> String:
+	var pr: Dictionary = pasma()["rozmisteni"]
+	for c: Dictionary in (Pravidla.cti("lokace", "kompozice") as Dictionary).get("clony", []):
+		var osa: Array = c["osa"]
+		for i in osa.size() - 1:
+			var a := Vector2(float(osa[i][0]), float(osa[i][1]))
+			var b := Vector2(float(osa[i + 1][0]), float(osa[i + 1][1]))
+			if Geometry2D.get_closest_point_to_segment(Vector2(x, z), a, b).distance_to(Vector2(x, z)) < float(c["sirka_m"]) * 0.5:
+				return "clona"
+	var vs: Array = Pravidla.cti("lokace", "ves")["stred_stare_navsi"]
+	if Vector2(x - float(vs[0]), z - float(vs[1])).length() < float(pr["ves_dosah_m"]):
+		return "ves"
+	if not _st_ch.is_empty() and _les(x, z) >= float(Pravidla.cti("les_podrost", "houstina", "plast")["les_kraj"][0]):
+		return "les"
+	return "louka"
+
+
+## Rozmisteni kerů a kopřiv podle sceny (Misa 18. 11. r. 6 a 8: „sceny maji byt chytre, ne ze se vsechno nahrne na
+## jedno misto“; kopřivy pod ploty jen par jako v KCD): po poslednim sazeni (Blender i hra) jedno pravidlo pro vsechny
+## generatory - strop keřů na bunku a rozestup podle sceny, kopřivy v ridkych shlucich. Poradi podle hashe polohy
+## (rovnomerne proredeni cele plochy). Nic nepridava; cisla les_podrost.json houstina.rozmisteni a pasma.rozmisteni.
+func _rozmisteni() -> void:
+	var r: Dictionary = data["rostliny"]
+	var hr: Dictionary = Pravidla.cti("les_podrost", "houstina", "rozmisteni")
+	var pr: Dictionary = pasma()["rozmisteni"]
+	var B := float(pr["bunka_m"])
+	var kop: Dictionary = hr["kopriva"]
+	var kere: Array = []                                 # [hash, klic, index]
+	var kopr: Array = []
+	for key: String in r.keys():
+		if key.contains("_daleko"):
+			continue
+		var je_kop := false
+		for s: String in kop["druhy"]:
+			je_kop = je_kop or key.contains(s)
+		var sk := skupina(key)
+		if sk != "ker" and not je_kop:
+			continue
+		var a: Array = r[key]
+		for i in a.size():
+			var t: Array = a[i]
+			var h := hash(Vector2i(roundi(float(t[3]) * 10.0), roundi(float(t[11]) * 10.0)))
+			(kopr if je_kop else kere).append([h, key, i])
+	var sc_cache := {}
+	var scena := func(x: float, z: float) -> String:
+		var c := Vector2i(floori(x / 2.0), floori(z / 2.0))
+		if not sc_cache.has(c):
+			sc_cache[c] = scena_bod(c.x * 2.0 + 1.0, c.y * 2.0 + 1.0)
+		return sc_cache[c]
+	var pryc := {}                                      # klic -> {index: true}
+	var po_scenach := {}
+	# 1) kere: strop na bunku a rozestup podle sceny
+	kere.sort_custom(func(p: Array, q: Array) -> bool: return int(p[0]) < int(q[0]))
+	var bunky := {}                                     # Vector2i -> pocet
+	var body := {}                                      # Vector2i (bunka rozestupu 2 m) -> [Vector2]
+	for e: Array in kere:
+		var t: Array = r[e[1]][e[2]]
+		var p := Vector2(float(t[3]), float(t[11]))
+		var s: String = scena.call(p.x, p.y)
+		var zs: Dictionary = (hr["sceny"] as Dictionary).get(s, {})
+		if zs.is_empty():
+			continue
+		var pc: Array = po_scenach.get(s, [0, 0])
+		pc[0] += 1
+		po_scenach[s] = pc
+		var bc := Vector2i(floori(p.x / B), floori(p.y / B))
+		var ok := int(bunky.get(bc, 0)) < int(zs["strop"])
+		var roz := float((pr["rozestup_ker_m"] as Dictionary).get(s, 0.0))
+		if ok and roz > 0.0:
+			var n := ceili(roz / 2.0)
+			var gc := Vector2i(floori(p.x / 2.0), floori(p.y / 2.0))
+			for dx in range(-n, n + 1):
+				for dz in range(-n, n + 1):
+					for q: Vector2 in body.get(gc + Vector2i(dx, dz), []):
+						if q.distance_to(p) < roz:
+							ok = false
+		if not ok:
+			if not pryc.has(e[1]):
+				pryc[e[1]] = {}
+			pryc[e[1]][e[2]] = true
+			continue
+		pc[1] += 1
+		bunky[bc] = int(bunky.get(bc, 0)) + 1
+		var gk := Vector2i(floori(p.x / 2.0), floori(p.y / 2.0))
+		if not body.has(gk):
+			body[gk] = []
+		(body[gk] as Array).append(p)
+	# 2) kopřivy: ridke shluky (shluk_max kusu do kopriva_shluk_m, shluky aspon kopriva_rozestup_m od sebe)
+	kopr.sort_custom(func(p: Array, q: Array) -> bool: return int(p[0]) < int(q[0]))
+	var shluky: Array = []                              # [Vector2, pocet, scena]
+	var ks := float(pr["kopriva_shluk_m"])
+	var nk := [0, 0]
+	for e: Array in kopr:
+		var t: Array = r[e[1]][e[2]]
+		var p := Vector2(float(t[3]), float(t[11]))
+		var s: String = scena.call(p.x, p.y)
+		var zs: Dictionary = (kop["sceny"] as Dictionary).get(s, {})
+		if zs.is_empty():
+			continue
+		nk[0] += 1
+		var roz := float((pr["kopriva_rozestup_m"] as Dictionary)[s])
+		var ok := false
+		var volno := true
+		for sh: Array in shluky:
+			var d := (sh[0] as Vector2).distance_to(p)
+			if d < ks and int(sh[1]) < int(zs["shluk_max"]):
+				sh[1] = int(sh[1]) + 1
+				ok = true
+				break
+			if d < roz:
+				volno = false
+		if not ok and volno and float(posmod(int(e[0]), 1000)) / 1000.0 < float(zs["podil"]):
+			shluky.append([p, 1, s])
+			ok = true
+		if ok:
+			nk[1] += 1
+			continue
+		if not pryc.has(e[1]):
+			pryc[e[1]] = {}
+		pryc[e[1]][e[2]] = true
+	for key: String in pryc:
+		var zust: Array = []
+		var a: Array = r[key]
+		for i in a.size():
+			if not (pryc[key] as Dictionary).has(i):
+				zust.append(a[i])
+		r[key] = zust
+	print("rozmisteni (houstina.rozmisteni): kere po scenach [pred, po] %s; kopřivy ve scenach s pravidlem %d -> %d (%d shluku)" % [str(po_scenach), nk[0], nk[1], shluky.size()])
+
+
 ## Lesni plast (Misa 0.64: "kraje lesu vsude jsou plne keru, dle reality"): prechod les - louka je v prirode pas
 ## 5-15 m - zevne bylinny lem (kopriva, vysoka bylina), pak husty kerovy plast (sipek, bez, liska/husty ker), uvnitr
 ## mlade stromy. Pro VSECHNY okraje lesa (i z Blenderu): kraj = misto bez zapoje (< 0,35), ale do 8 m zapoj > 0,6.
@@ -15319,7 +15451,9 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_trziste_cisti()
 	_cesty_kere()
 	_ves_kompozice()
-	# _byliny_rozsev()                 # byliny z vetve assets: zastaveno (radce 18:00), zapnout po vykonu
+	# rozmisteni kerů a kopřiv podle sceny (houstina.rozmisteni, Misa 18. 11. r. 6 a 8) - po vsech sazenich vegetace
+	_rozmisteni()
+	# _byliny_rozsev()                # byliny z vetve assets: zastaveno (radce 18:00), zapnout po vykonu
 	# krok 9: predmety u zdi mimo cesty a pesiny (vybaveni domu se klade pri stavbe vsi, pred odvozenymi pesinami ke
 	# dverim - test zasazeni: hranice dreva na pesine domu 4)
 	_vybaveni_mimo_cest()

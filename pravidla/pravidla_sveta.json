@@ -1942,6 +1942,21 @@
    "teren_svy_m": 0.02,
    "_teren_svy_m": "Míša 17. 11. r. 6 (08, 10, 11: tmavé čáry a schod přes cesty na styku sítí terénu): test hry teren_svy – na otevřené hraně každé sítě Teren* (ne obzor, cesta) výška sousední sítě v tomtéž bodě nesmí lišit o víc než teren_svy_m a horní hrana svislého lemu (Teren_lem, lem Teren_most/okoli) nesmí trčet nad povrch o víc než totéž. Práh 0,02 m = tloušťka čáry na snímku 08 (cm; NEOVĚŘENO měřením viditelnosti)."
   },
+  "rozmisteni": {
+   "popis": "Odstupy rozmístění keřů a kopřiv podle scény (les_podrost.json houstina.rozmisteni, svet._rozmisteni; Míša 18. 11. ř. 6 a 8): bunka_m = buňka stropu keřů; ves_dosah_m = scéna ves do této vzdálenosti od ves.stred_stare_navsi (130 m = svet.divokost SEC_VES − 150 m kosy); rozestup_ker_m = nejmenší vzdálenost dvou keřů ve scéně (ves 5 m: keř jednotlivě, clona 2,6 m: pás, les 1,2 m: hustý plášť jako dosud); kopriva_shluk_m = poloměr shluku kopřiv, kopriva_rozestup_m = nejmenší vzdálenost shluků ve scéně.",
+   "bunka_m": 16.0,
+   "ves_dosah_m": 130.0,
+   "rozestup_ker_m": {
+    "clona": 2.6,
+    "ves": 5.0,
+    "louka": 3.0,
+    "les": 1.2
+   },
+   "kopriva_shluk_m": 1.5,
+   "kopriva_rozestup_m": {
+    "ves": 12.0
+   }
+  },
   "skupiny": {
    "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",
    "strom": [

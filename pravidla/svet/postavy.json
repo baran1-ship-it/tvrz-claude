@@ -1024,6 +1024,34 @@
    ],
    "_13_11": "Misa 13. 11. (kucharky chlastaji v kuchyni a pleji v peci): pryc Napiti s korbelem a Hleda_Loop (predklon k zemi = pleti); prace u stolu a kotliku (Interact, PickUp_Table, truhla)"
   },
+  "vareni_hostinec": {
+   "klipy": [
+    "Interact",
+    "PickUp_Table",
+    "Idle_Talking_Loop"
+   ],
+   "obmena_s": [
+    6.0,
+    14.0
+   ],
+   "soustredeni": 0.7,
+   "sceny": [
+    [
+     "PickUp_Table",
+     "Interact",
+     "PickUp_Table"
+    ],
+    [
+     "Interact",
+     "Idle_Talking_Loop",
+     "PickUp_Table"
+    ]
+   ],
+   "vysky": [
+    "pas"
+   ],
+   "_p": "Misa 18. 11. (r. 5: „animace otevirani bedny v hospode zrusit“ - hlavni, co tam lide delaji): vareni obsluhy hostince a krcmy bez truhly - u krbu/pultu Interact (michani, prilozeni), PickUp_Table (nadobi), mezi tim povida (Idle_Talking_Loop); vareni s truhlou zustava kuchyni tvrze. Hoste sedi, piji a vykladaji (hospoda). Pravidlo obsluha_hostinec_pravidla bez_klipu, test lide_chovani"
+  },
   "kovani": {
    "klipy": [
     "Prace_Kovar_Buseni_Loop"
@@ -1553,7 +1581,7 @@
     "krcma_obsluha": [
      "PickUp_Table",
      "PickUp_Table",
-     "Truhla_Otevri"
+     "Idle_Talking_Loop"
     ],
     "krcma_senk": [
      "PickUp_Table",
@@ -1594,7 +1622,8 @@
     "pas",
     "opreni"
    ],
-   "_13_11b": "Misa 13. 11. (hostinsky s hostinskou pleji travu u krbu): Hleda_Loop (predklon k zemi) pryc - u stolu/pultu PickUp_Table, jinde Interact; hlida test lide_chovani (klipy_k_zemi)"
+   "_13_11b": "Misa 13. 11. (hostinsky s hostinskou pleji travu u krbu): Hleda_Loop (predklon k zemi) pryc - u stolu/pultu PickUp_Table, jinde Interact; hlida test lide_chovani (klipy_k_zemi)",
+   "_18_11": "Misa 18. 11. (r. 5): u pultu krcmy Truhla_Otevri pryc (truhla tam neni, Misa: zrusit) - PickUp_Table a povidani"
   },
   "volno": {
    "klipy": [
@@ -3354,7 +3383,7 @@
     },
     {
      "od": 6.0,
-     "cinnost": "vareni",
+     "cinnost": "vareni_hostinec",
      "kde": "hostinec_krb"
     },
     {
@@ -3365,12 +3394,12 @@
     },
     {
      "od": 7.0,
-     "cinnost": "vareni",
+     "cinnost": "vareni_hostinec",
      "kde": "hostinec_krb"
     },
     {
      "od": 8.0,
-     "cinnost": "vareni",
+     "cinnost": "vareni_hostinec",
      "kde": "hostinec_krb",
      "moznosti": [
       {
@@ -3380,7 +3409,7 @@
        "jen_kdyz": "hoste_hostinec"
       },
       {
-       "cinnost": "vareni",
+       "cinnost": "vareni_hostinec",
        "kde": "hostinec_krb",
        "vaha": 1.0
       },
@@ -3427,7 +3456,7 @@
     },
     {
      "od": 13.0,
-     "cinnost": "vareni",
+     "cinnost": "vareni_hostinec",
      "kde": "hostinec_krb",
      "moznosti": [
       {
@@ -3437,7 +3466,7 @@
        "jen_kdyz": "hoste_hostinec"
       },
       {
-       "cinnost": "vareni",
+       "cinnost": "vareni_hostinec",
        "kde": "hostinec_krb",
        "vaha": 1.0
       },
@@ -3461,7 +3490,7 @@
     },
     {
      "od": 17.0,
-     "cinnost": "vareni",
+     "cinnost": "vareni_hostinec",
      "kde": "hostinec_krb",
      "moznosti": [
       {
@@ -3471,7 +3500,7 @@
        "jen_kdyz": "hoste_hostinec"
       },
       {
-       "cinnost": "vareni",
+       "cinnost": "vareni_hostinec",
        "kde": "hostinec_krb",
        "vaha": 1.0
       },
@@ -3937,7 +3966,7 @@
        "jen_kdyz_ne": "hoste_krcma"
       },
       {
-       "cinnost": "vareni",
+       "cinnost": "vareni_hostinec",
        "kde": "krcma_obsluha",
        "vaha": 1.0
       }
@@ -3988,7 +4017,7 @@
        "jen_kdyz_ne": "hoste_krcma"
       },
       {
-       "cinnost": "vareni",
+       "cinnost": "vareni_hostinec",
        "kde": "krcma_obsluha",
        "vaha": 1.0
       }
@@ -4107,7 +4136,7 @@
        "vaha": 1.5
       },
       {
-       "cinnost": "vareni",
+       "cinnost": "vareni_hostinec",
        "kde": "hostinec_obsluha_2",
        "vaha": 1.0
       }
@@ -4153,7 +4182,7 @@
        "vaha": 1.5
       },
       {
-       "cinnost": "vareni",
+       "cinnost": "vareni_hostinec",
        "kde": "hostinec_obsluha_2",
        "vaha": 1.0
       }
@@ -6530,7 +6559,8 @@
    "obsluha_senkyrka",
    "uklid_hostinec",
    "uklid_krcma",
-   "vareni"
+   "vareni",
+   "vareni_hostinec"
   ],
   "volno_min_sedi": 3,
   "_volno": "test: aspon volno_min_sedi bloku/moznosti s cinnosti volno mimo hostince najde sedak (venkovni lavice nabytek.json u_domu a venku, svet.gd _nabytek_venku)"
@@ -6883,6 +6913,36 @@
    "obsluha_senkyrka"
   ],
   "truhla_podil_max": 0.2,
-  "_pozn": "Míša 14. 11.: obsluha hostince obchází ≥ 5 různých míst včetně kuchyně, Truhla_Otevri nejvýš 20 % klipů obchůzky (test lide_chovani)"
+  "_pozn": "Míša 14. 11.: obsluha hostince obchází ≥ 5 různých míst včetně kuchyně, Truhla_Otevri nejvýš 20 % klipů obchůzky (test lide_chovani)",
+  "bez_klipu": [
+   "Truhla_Otevri",
+   "Truhla_Zavri"
+  ],
+  "bez_klipu_mista": [
+   "hostinec",
+   "krcma"
+  ],
+  "_bez_klipu": "Misa 18. 11. (r. 5): zadna cinnost na mistech hostince a krcmy (kde zacina bez_klipu_mista, rozvrh i moznosti) nesmi mit klip z bez_klipu v klipy, sceny ani obchuzka_klipy (test lide_chovani)"
+ },
+ "rozmisteni_test": {
+  "hrac": [
+   5.0,
+   3.0
+  ],
+  "od_h": 6.0,
+  "do_h": 20.0,
+  "krok_h": 0.25,
+  "snimku_krok": 240,
+  "u_brany_m": 4.0,
+  "u_brany_podil_max": 0.4,
+  "min_na_nadvori": 4,
+  "cesta_pas": [
+   -25.0,
+   30.0,
+   16.0,
+   160.0
+  ],
+  "rada_max": 4,
+  "_popis": "Misa 18. 11. (misa_18_11_chyby r. 3 a 4): test lide_rozmisteni - hrac na tvrzi (hrac x z), postavy od zacatku hry, den od_h..do_h po krok_h (snimku_krok snimku 1/30 s); chyba = na nadvori aspon min_na_nadvori a podil do u_brany_m od nadvori_brana nad u_brany_podil_max, nebo vic nez rada_max postav v pohybu v pasu cesty od tvrze cesta_pas [x0, x1, z0, z1]"
  }
 }
