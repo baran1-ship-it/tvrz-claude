@@ -756,8 +756,12 @@ func begin_place(id: String, from_inv: bool) -> void:
 	_from_inv = from_inv
 	_ghost = Node3D.new()
 	_ghost_m = scene(id).instantiate()
-	if _ghost_m is CollisionObject3D:   # předmět s vlastní fyzikou (nádobí): náhled nesmí zachytit paprsek pokládání ani hráče
-		(_ghost_m as CollisionObject3D).collision_layer = 0; (_ghost_m as CollisionObject3D).collision_mask = 0
+	# náhled nesmí mít žádnou kolizi – ani kořen (nádobí), ani vnořená těla modelu (lůžka 17. 11. mají StaticBody
+	# v potomcích): jinak paprsek pokládání trefí vlastní náhled (předmět skáče nahoru-dolů) a kontrola místa
+	# najde sama sebe (bliká zelená/červená) – Míša 18. 11.
+	for co in ([_ghost_m] + _ghost_m.find_children("*", "CollisionObject3D", true, false)):
+		if co is CollisionObject3D:
+			(co as CollisionObject3D).collision_layer = 0; (co as CollisionObject3D).collision_mask = 0
 	_ghost.add_child(_ghost_m)
 	root.add_child(_ghost)
 	_gorient = 0

@@ -1433,7 +1433,15 @@ for _f in _g31.glob(K + "/hra/modely/**/*.glb", recursive=True):
         elif not os.path.exists(_q + ".import"): _c31.append("%s → %s bez importu" % (os.path.relpath(_f, K + "/hra"), _u))
 TEST("modely_textury_odkazy", not _c31, "; ".join(_c31[:8]) if _c31 else "%d glb, %d odkazů na sdílené textury – všechny existují a jsou importované" % (_n31, _u31))
 
+# 394 (Míša 18. 11.): náhled pokládání v pískovišti nesmí mít kolizi ani ve vnořených tělech (postele skákaly, obrys blikal)
+_c394 = []
+_pg = open(K + "/hra/scripts/predmety.gd", encoding="utf-8").read()
+if 'find_children("*", "CollisionObject3D", true, false)' not in _pg:
+    _c394.append("predmety.gd: náhled vypíná kolizi jen u kořene – vnořená StaticBody (lůžka) zůstávají")
+TEST("nahled_bez_kolize", not _c394, "; ".join(_c394) if _c394 else "náhled pokládání bez kolize i ve vnořených tělech")
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)
 sys.exit(1 if chyb else 0)
+
