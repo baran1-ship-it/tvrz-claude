@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "a9930dd",
+ "commit": "7837c55",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -138,7 +138,8 @@
    "mapa_znaky": true,
    "dymnik_kuchyne": true,
    "cesty_souvislost": true,
-   "modely_textury_odkazy": true
+   "modely_textury_odkazy": true,
+   "nahled_bez_kolize": true
   },
   "pruchod": {
    "A_branka_patro": true,
@@ -273,26 +274,26 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1054471,
+    "troj_p95": 1053995,
     "troj_max": 1079906,
-    "kresleni_p95": 373,
-    "kresleni_m_median": 478.0
+    "kresleni_p95": 372,
+    "kresleni_m_median": 477.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1607161,
-    "troj_max": 1838981,
-    "kresleni_p95": 878,
-    "kresleni_m_median": 716.5
+    "troj_p95": 1607125,
+    "troj_max": 1838307,
+    "kresleni_p95": 876,
+    "kresleni_m_median": 712.0
    },
    "C": {
     "snimku": 44,
     "troj_p95": 1571874,
     "troj_max": 1761728,
-    "kresleni_p95": 1061,
-    "kresleni_m_median": 1762.5
+    "kresleni_p95": 1062,
+    "kresleni_m_median": 1757.0
    },
-   "zmena_median": 34.34,
+   "zmena_median": 34.66,
    "doskoky": [],
    "ve_zdi": 2
   },
