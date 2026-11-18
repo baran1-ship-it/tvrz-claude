@@ -42,6 +42,10 @@ a měřením; tablet měří Míša.
 - **Design podle fotek KCD** (Míša 13. 11., pravidlo): vzhled vsi, staveb, cest, trávy, plotů, brodů… se navrhuje podle
   fotek KCD; závazná předloha vsi `docs/reference/kcd_ves_predloha/` (hlína kde se chodí, tráva u paty zdí a plotů, ploty
   napojené na stavby). Ve hře funkční vše, co jde (dveře, vrata, vrátka, předměty) – Míša 13. 11.
+- **Kámen musí být kámen a dřevo dřevo – ne tapeta** (Míša 18. 11., pravidlo): zblízka má kámen i dřevo skutečný tvar v geometrii
+  (jednotlivé kameny a kvádry se spárami, otlučené hrany, trámy a prkna s hranami a spoji) – ne kostka potažená texturou;
+  z dálky smí být zjednodušená síť s texturou, aby se šetřila grafika (podle potřeby, LOD). Platí pro všechny stavby, interiéry
+  i podzemí (plán F v docs/rozpracovane/plan_z_reserse_17_11.md, předloha docs/reference/zdivo_kcd_18_11/).
 - **Chyba v prvku, který mají i jiné stavby, se opravuje všude** (Míša 10. 11., pravidlo): zábradlí, schody, okna, dveře,
   ochozy, střechy… – oprava ve společné funkci nebo kontrola na všech stavbách obou hradů (a test, který to hlídá všude).
 - **Než se něco vytvoří, hledat hotové:** modely Havrana (`modely/nove`, větev assets, Míšin Disk „Modely“), Poly Haven,
