@@ -30,3 +30,10 @@ Výklad červených čar je můj (Claude) – kde si nejsem jistý, je to napsan
 | 21 | text | mapa | důl a další zajímavá místa nejsou na mapě – přidat značky | C voda |
 
 Měření (mereni_compat.jpg, mereni_vulkan.jpg): Compatibility lepší ve všem, zůstáváme. Limit 30 FPS ve hře už je.
+
+## Míša 18. 11. – lom (chýše u lomu, x 62 z 399)
+| č. | snímek | co |
+|---|---|---|
+| 22 | misa_18_11_lom_chyse_1.jpg | chýše u lomu nemá lůžka (houně/postele) |
+| 23 | misa_18_11_lom_chyse_2.jpg | kamenná podezdívka štítů (17. 11.) má rozmazanou/nataženou texturu – „struktura na prd“ |
+| 24 | misa_18_11_lom_krumpac.jpg | krumpáč stojí svisle u skály – nesmysl; uložit do bedny nebo opřít o chýši (přemýšlet jako člověk) |
