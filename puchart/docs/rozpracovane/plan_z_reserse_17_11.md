@@ -83,3 +83,10 @@ cesty, vsi, okolí hradů, lesy, okraje, louky, pole, břehy). Snímky misa_18_1
 pokryje celou mapu (síť bodů po celém výseku + trasy, ne jen 4 místa).
 Předloha pro E (Míša 18. 11., znovu): docs/reference/lod_trava_video/ – karty blízko + impostor buňky v dálce
 s ditherovým přechodem (41k troj. místo 83k), stromy LOD0–3 + impostor s časovaným prolnutím. Plus Havranovy zkušenosti.
+
+## F. Zdivo hradů – skutečný kámen (Míša 18. 11.: „není to reálné a nevím co s tím“, snímky docs/screens/misa_18_11_zdivo_*.jpg)
+Příčiny: procedurální zdivo.gdshader (hex míchání výřezů + parallax) – rozmazané/natažené kameny na šikmých a zakřivených
+plochách (klenba, schodiště, zdi u louče), plastový lesk. 18. 11.: parallax vypnut, kámen matný (chyba 396).
+Další krok: skutečná skenovaná textura zdiva (Poly Haven castle_wall_slates / lomové zdivo z břidlice podle gc_18 a fotek
+Potštátu), krabicová projekce s plynulým přechodem mezi stranami (bez natažení na šikmých plochách), měřítko kamene 20–40 cm,
+spáry s maltou, bez procedurálních skvrn; srovnat snímky vedle fotek skutečných zdí (docs/reference).
