@@ -6947,6 +6947,6 @@
    160.0
   ],
   "rada_max": 4,
-  "_popis": "Misa 18. 11. (misa_18_11_chyby r. 3 a 4): test lide_rozmisteni - hrac na tvrzi (hrac x z), postavy od zacatku hry, den od_h..do_h po krok_h (snimku_krok snimku 1/30 s); chyba = na nadvori aspon min_na_nadvori a podil do u_brany_m od nadvori_brana nad u_brany_podil_max, nebo vic nez rada_max postav v pohybu v pasu cesty od tvrze cesta_pas [x0, x1, z0, z1]"
+  "_popis": "Misa 18. 11. (misa_18_11_chyby r. 3 a 4): test lide_rozmisteni - hrac na tvrzi (hrac x z), postavy od zacatku hry, den od_h..do_h po krok_h (snimku_krok snimku 1/30 s); chyba = na nadvori aspon min_na_nadvori a podil do u_brany_m od nadvori_brana nad u_brany_podil_max, nebo vic nez rada_max postav v pohybu v pasu cesty od tvrze cesta_pas [x0, x1, z0, z1] (u brany se pocitaji jen postavy na miste, ne prochazejici; 18. 11. 20:00 paze sel kolem studny do ubytovny)"
  }
 }

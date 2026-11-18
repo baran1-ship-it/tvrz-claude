@@ -11273,7 +11273,7 @@ func _lide_rozmisteni() -> void:
 			if q.x > wx and q.x < ix and q.y > -iz and q.y < iz:
 				na_nadvori += 1
 				kde[String(c.get("kde_ted", "?"))] = int(kde.get(String(c.get("kde_ted", "?")), 0)) + 1
-				if q.distance_to(brana) < float(rt["u_brany_m"]):
+				if q.distance_to(brana) < float(rt["u_brany_m"]) and bool(c["na_miste"]):   # stoji u brany (ne prochazi)
 					u_brany.append("%s(%s %s)" % [c["id"], c.get("kde_ted", "?"), q.round()])
 			elif q.x > float(pas[0]) and q.x < float(pas[1]) and q.y > float(pas[2]) and q.y < float(pas[3]) and not bool(c["na_miste"]):
 				rada.append("%s->%s" % [c["id"], c.get("kde_ted", "?")])
