@@ -48,3 +48,11 @@ World Partition, DLSS, FFT oceán, průhledné prolínání dosahů. Terrain3D t
 
 ## Pořadí
 A1, A2, A3, B1, B2 (malé až střední, hned) → B3, B4 → C2, C3, C4 (krása u nohou, podle referencí) → A4, C1, C5, C6 → C7 se zvěří.
+
+## D. Voda a mlha podle Míšina lesa „Hvozd“ (18. 11., odloženo do obnovy týdenního limitu)
+Zdroj: artefakt Hvozd (three.js r128). Rozbor a návod: `docs/rozpracovane/voda_hvozd_navod.md`.
+| č. | co | kde u nás |
+|---|---|---|
+| D1 | Odraz z panoramatické fotky lesa (equirect, CC0 Poly Haven) podle odraženého vektoru + Fresnel | `hra/shaders/voda.gdshader`, `voda_hra.json` |
+| D2 | Tmavé tělo vody (okraj hnědý → střed černozelený), dvojí posouvající se normálová mapa, pěna u kraje ze šumu | `voda.gdshader` |
+| D3 | Přízemní mlha: průsvitné obláčky podél potoků (billboardy, bez zápisu hloubky) | nový krok vody / `voda_hra.json mlha` |
