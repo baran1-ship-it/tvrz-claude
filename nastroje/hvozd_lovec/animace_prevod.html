@@ -1,0 +1,52 @@
+<!doctype html><html><body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+// sestaví animace pro novou postavu (kostra UE/Quaternius): klipy UAL přímo, luk převedený ze staré postavy podle směrů kostí
+const L=new THREE.GLTFLoader(),load=u=>new Promise(r=>L.load(u,r));
+const V=THREE.Vector3,Q=THREE.Quaternion;
+function bones(root){const m={};root.traverse(o=>{if(o.isBone)m[o.name]=o});return m}
+const wpos=o=>o.getWorldPosition(new V()),wq=o=>o.getWorldQuaternion(new Q());
+function setWorldQ(b,q){const pq=wq(b.parent).invert();b.quaternion.copy(pq.multiply(q));b.updateMatrixWorld(true)}
+const FPS=30,r4=a=>Array.from(a,v=>Math.round(v*1e4)/1e4);
+function clipJSON(clip,name,keep){const c=clip.clone();c.name=name;c.tracks=c.tracks.filter(t=>keep(t.name));for(const t of c.tracks){t.times=new Float32Array(r4(t.times));t.values=new Float32Array(r4(t.values))}return THREE.AnimationClip.toJSON(c)}
+window.run=async()=>{
+  const T=await load('ubc/lovec.glb'),U1=await load('ual1.glb'),U2=await load('ual2.glb'),OLD=await load('a/muz/muz.gltf.json'),OA=await load('a/anim.gltf.json');
+  const tb=bones(T.scene),names=Object.keys(tb);
+  const keep=n=>{const[b,p]=n.split('.');if(!tb[b]||b==='root')return false;if(p==='position')return b==='pelvis';if(p==='scale')return false;return true};
+  const out=[];const pick=(lib,src,dst)=>{const c=lib.animations.find(a=>a.name===src);if(!c)throw src;out.push(clipJSON(c,dst,keep))};
+  pick(U1,'Idle_Loop','stani');pick(U1,'Walk_Loop','chuze');pick(U1,'Jog_Fwd_Loop','beh');pick(U1,'Crouch_Idle_Loop','skrceni');pick(U1,'Crouch_Fwd_Loop','skrceni_chuze');
+  pick(U2,'Farm_Harvest','zvednout_ze_zeme');pick(U1,'Idle_Torch_Loop','louc_stani');pick(U2,'Consume','jidlo_piti');pick(U1,'Death01','smrt');pick(U1,'Hit_Chest','zasah');
+  pick(U2,'TreeChopping_Loop','kaceni');pick(U1,'Sword_Idle','mec_stani');pick(U1,'Sword_Attack','mec_utok');pick(U2,'OverhandThrow','hod');pick(U1,'PickUp_Table','zvednout_stul');pick(U1,'Fixing_Kneeling','klecet');
+  // ---- převod luku: stará kostra → nová, zarovnání směrů kostí (a u ruky i příčné osy) ----
+  const ob=bones(OLD.scene);ob.Head=ob.head;
+  const CH={pelvis:'spine_01',spine_01:'spine_02',spine_02:'spine_03',spine_03:'neck_01',neck_01:'Head'};
+  for(const s of'lr'){CH['clavicle_'+s]='upperarm_'+s;CH['upperarm_'+s]='lowerarm_'+s;CH['lowerarm_'+s]='hand_'+s;CH['thigh_'+s]='calf_'+s;CH['calf_'+s]='foot_'+s;
+    for(const f of['index','middle','ring','pinky','thumb'])for(const j of[1,2])CH[`${f}_0${j}_${s}`]=`${f}_0${j+1}_${s}`}
+  // pořadí od kořene
+  const order=[];T.scene.traverse(o=>{if(o.isBone)order.push(o.name)});
+  const rest={};for(const n of names)rest[n]=tb[n].quaternion.clone();
+  const oMix=new THREE.AnimationMixer(OLD.scene);
+  // otočení staré postavy vůči nové (podle směru špiček)
+  OLD.scene.updateMatrixWorld(true);T.scene.updateMatrixWorld(true);
+  const fwd=(B)=>{const a=wpos(B.foot_l).add(wpos(B.foot_r)),b=wpos(B.ball_l).add(wpos(B.ball_r));const d=b.sub(a);d.y=0;return d.normalize()};
+  const yawFix=new Q().setFromUnitVectors(fwd(ob),fwd(tb));
+  const dirO=(a,b)=>wpos(ob[b]).sub(wpos(ob[a])).applyQuaternion(yawFix).normalize();
+  for(const src of['luk_napnout','luk_mirit','luk_vystrel']){const clip=OA.animations.find(a=>a.name===src);const n=Math.max(2,Math.round(clip.duration*FPS)+1);const vals={};for(const b of names)vals[b]=[];const times=[];
+    const act=oMix.clipAction(clip);act.reset().play();
+    for(let i=0;i<n;i++){const t=Math.min(clip.duration,i/FPS);times.push(t);oMix.setTime(t);OLD.scene.updateMatrixWorld(true);
+      for(const b of names)tb[b].quaternion.copy(rest[b]);T.scene.updateMatrixWorld(true);
+      for(const b of order){const c=CH[b];if(c&&ob[b]&&ob[c]&&tb[c]){const dt=wpos(tb[c]).sub(wpos(tb[b])).normalize(),ds=dirO(b,c);const r=new Q().setFromUnitVectors(dt,ds);setWorldQ(tb[b],r.multiply(wq(tb[b])))}
+        if(/^hand_/.test(b)){const s=b.slice(-1),lat=(B,a,c)=>wpos(B[a]).sub(wpos(B[c]));
+          // druhá osa: příčná linie kloubů (ukazováček − malíček)
+          const fT=wpos(tb['middle_01_'+s]).sub(wpos(tb[b])).normalize(),fS=wpos(ob['middle_01_'+s]).sub(wpos(ob[b])).applyQuaternion(yawFix).normalize();
+          setWorldQ(tb[b],new Q().setFromUnitVectors(fT,fS).multiply(wq(tb[b])));
+          const lT=lat(tb,'index_01_'+s,'pinky_01_'+s),lS=lat(ob,'index_01_'+s,'pinky_01_'+s).applyQuaternion(yawFix);const ax=fS;lT.addScaledVector(ax,-lT.dot(ax)).normalize();lS.addScaledVector(ax,-lS.dot(ax)).normalize();
+          setWorldQ(tb[b],new Q().setFromUnitVectors(lT,lS).multiply(wq(tb[b])))}}
+      for(const b of names){const q=tb[b].quaternion;vals[b].push(q.x,q.y,q.z,q.w)}}
+    act.stop();
+    const tracks=names.filter(b=>b!=='root').map(b=>new THREE.QuaternionKeyframeTrack(b+'.quaternion',times,vals[b]));out.push(clipJSON(new THREE.AnimationClip(src,clip.duration,tracks),src,keep))}
+  for(const b of names)tb[b].quaternion.copy(rest[b]);
+  return JSON.stringify(out)}
+window.ready=1;
+</script></body></html>
