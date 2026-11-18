@@ -73,3 +73,8 @@ Stav 18. 11.: Míša „Havran už to má celkem vychytané“ → postup: nejd�
 (louka/drn, střední pás, pole za vsí, terén v dálce, pozvolné objevení – větev claude/new-session-0dtk58, jeho
 mereni_verze.md), vlastní jen co Havran nemá. ODLOŽENO – Míša dá vědět, kdy začít (limit). Pomocník zastaven
 dřív, než cokoli změnil – začne se od nuly.
+Míša 18. 11. (zadání pro E): „určitě si to dobře promysli tu zeleň, ale inspiruj se od Havrana; my to máme celkově
+vychytanější, takže nechci něco přehlédnout, ať to má řád a smysl a je to hezké.“ → Havran = inspirace, ne kopie.
+Postup: 1) rozbor nejdřív (dokument: co kde roste a proč – stanoviště, světlo, vlhkost, pastva, sešlap u cest a vsí,
+okraje lesa; pásy vzdálenosti a co se v kterém kreslí; čím se liší od Havrana a co z něj vezmeme) → Míša schválí;
+2) teprve pak stavba, po krocích se snímky ze stejných míst jako misa_18_11_prazdna_dalka_*; 3) měření tabletu.
