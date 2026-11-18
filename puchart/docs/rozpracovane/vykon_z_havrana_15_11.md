@@ -85,3 +85,15 @@ Zbývá: tablet změřit (les, varianty stínovaná/unshaded) a porovnat barvu u
 (kalibrace jen PC odpoledne); unshaded tráva nemá stín samotných stromů na louce (zápoj okolí = 0 – snímek _un_okraj: chybí stín
 koruny vlevo) – když bude vadit, stin_korun z čistého krytí místo zápoje; louka krok 0,5 m (Havran 0,36 + drn) – hustší jen po
 měření tabletu (rozpočet scén 2,1 M troj.).
+
+## Měření tabletu 18. 11. (a9930dd, Compatibility 75 %, snímek docs/screens/misa_18_11_mereni_compat.jpg)
+| úsek | 17. 11. (24f5ac0) p50/p95, záseky | 18. 11. (a9930dd) p50/p95, záseky |
+|---|---|---|
+| hrad | 13,4 / 20,0, 0 | 13,9 / 20,2, 0 |
+| les | 35,2 / 51,6, 187 | 34,7 / 44,8, 161 (les znovu 30,3 / 39,5, 36) |
+| voda | 27,7 / 49,1, 84 | 27,7 / 40,0, 55 |
+| výhled | 26,7 / 30,3, 0 | 23,9 / 29,4, 0 |
+| les bez trávy | 22,9 / 33,7 | 25,9 / 36,8 |
+| les tráva stínovaná / unshaded | – | 31,1 / 43,3, 73 · 30,2 / 39,1, 36 |
+VRAM 859 → 707 MB (Godot textury 444 MB). Zásoba MM: znovu použito 37 926, nových 19 574. Les na prvním úseku
+horší než „les znovu“ (náběh/načítání) – reálně ~30 ms p50, p95 ~40 ms. Unshaded tráva p95 −4 ms, poloviční záseky.
