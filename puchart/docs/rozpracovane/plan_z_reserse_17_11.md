@@ -81,3 +81,5 @@ okraje lesa; pásy vzdálenosti a co se v kterém kreslí; čím se liší od Ha
 Míša 18. 11.: „nejsou to jen místa z fotek, ale celá mapa“ → E platí pro CELÝ svět (všechna stanoviště, všechny
 cesty, vsi, okolí hradů, lesy, okraje, louky, pole, břehy). Snímky misa_18_11 jsou jen ukázky; kontrola pak
 pokryje celou mapu (síť bodů po celém výseku + trasy, ne jen 4 místa).
+Předloha pro E (Míša 18. 11., znovu): docs/reference/lod_trava_video/ – karty blízko + impostor buňky v dálce
+s ditherovým přechodem (41k troj. místo 83k), stromy LOD0–3 + impostor s časovaným prolnutím. Plus Havranovy zkušenosti.
