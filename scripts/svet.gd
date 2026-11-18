@@ -1302,6 +1302,7 @@ func reka_predpecena() -> bool:
 func _reka(parent: Node3D) -> void:
 	# pady kaskady: samostatne zaclony + trist z koryto.pady (scripts/pad_vody.gd, Misa 15. 11. r. 4)
 	PadVody.postav(parent, koryto)
+	load("res://scripts/mlha_vody.gd").postav(parent, self)     # mlha nad toky (Misa 18. 11., voda.json mlha_vody)
 	if not reka_predpecena():
 		if FileAccess.file_exists("res://modely/reka/reka.res"):
 			print("reka: predpeceny potok nesedi na export (reka_otisk) - hladina Reka_voda z exportu")
@@ -1309,6 +1310,7 @@ func _reka(parent: Node3D) -> void:
 	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://modely/reka/reka.json"))
 	var m := ShaderMaterial.new()
 	m.shader = load("res://shaders/reka.gdshader")
+	voda_odraz(m)
 	m.set_shader_parameter("normal_bump_texture", load("res://modely/reka/water1_normal_bump.png"))
 	m.set_shader_parameter("i_texture_foam_noise", load("res://modely/reka/foam_noise.png"))
 	m.set_shader_parameter("i_flowmap", load("res://modely/reka/reka_flow.png"))
@@ -5477,7 +5479,7 @@ func _okraj_novych_lesu() -> void:
 
 
 ## Scena bodu pro rozmisteni (les_podrost.json houstina.rozmisteni, Misa 18. 11. r. 6): clona (pas kompozice.clony),
-## ves (pasma.rozmisteni.ves_dosah_m od stare navsi), les (zapoj >= houstina.plast.les_kraj[0]), jinak louka.
+## ves (pasma.rozmisteni.ves_dosah_m od stare navsi), les (zapoj >= houstina.plast.les_kraj[0] do dosah_lesa_m), jinak louka.
 func scena_bod(x: float, z: float) -> String:
 	var pr: Dictionary = pasma()["rozmisteni"]
 	for c: Dictionary in (Pravidla.cti("lokace", "kompozice") as Dictionary).get("clony", []):
@@ -5490,8 +5492,16 @@ func scena_bod(x: float, z: float) -> String:
 	var vs: Array = Pravidla.cti("lokace", "ves")["stred_stare_navsi"]
 	if Vector2(x - float(vs[0]), z - float(vs[1])).length() < float(pr["ves_dosah_m"]):
 		return "ves"
-	if not _st_ch.is_empty() and _les(x, z) >= float(Pravidla.cti("les_podrost", "houstina", "plast")["les_kraj"][0]):
-		return "les"
+	if _st_ch.is_empty():
+		return "louka"
+	# les i jeho plast: zapoj v bode nebo do houstina.plast.dosah_lesa_m (jako _lesni_plast - plast lezi mimo zapoj;
+	# 18. 11. bez okoli 38 485 keru plaste jako louka a strop je proredil na 17 896)
+	var hp: Dictionary = Pravidla.cti("les_podrost", "houstina", "plast")
+	var lk := float(hp["les_kraj"][0])
+	var dl := float(hp["dosah_lesa_m"])
+	for o: Vector2 in [Vector2.ZERO, Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1), Vector2(0.7, 0.7), Vector2(-0.7, 0.7), Vector2(0.7, -0.7), Vector2(-0.7, -0.7)]:
+		if _les(x + o.x * dl, z + o.y * dl) >= lk:
+			return "les"
 	return "louka"
 
 
@@ -14174,6 +14184,22 @@ static func voda_odraz(m: ShaderMaterial) -> void:
 	m.set_shader_parameter("obzor_okoli_st", float(o["obzor_okoli_st"]))
 	m.set_shader_parameter("obzor_prechod_st", float(o["obzor_prechod_st"]))
 	m.set_shader_parameter("odraz_okoli", Color(float(c[0]), float(c[1]), float(c[2])))
+	# vzhled Hvozd (Misa 18. 11.; voda.json vzhled_hvozd): panorama lesa v odrazu, telo, alfa, vlnky, pena - voda i reka
+	var h: Dictionary = Pravidla.cti("voda", "vzhled_hvozd")
+	var v3 := func(a: Array) -> Color: return Color(float(a[0]), float(a[1]), float(a[2]))
+	var vl: Dictionary = h["vlnky"]
+	var pn: Dictionary = h["pena"]
+	for k: Array in [["panorama", load(String(h["panorama"]))], ["f0", float(h["fresnel_f0"])], ["f_mocnina", float(h["fresnel_mocnina"])],
+			["odraz_nasobek", float(h["odraz_nasobek"])], ["odraz_tonovani", float(h["odraz_tonovani"])],
+			["telo_kraj", v3.call(h["telo_kraj"])], ["telo_stred", v3.call(h["telo_stred"])], ["stred_hloubka", float(h["stred_hloubka_m"])],
+			["alfa", Vector2(float(h["alfa_kraj"]), float(h["alfa_stred"]))], ["vl_uv_m", float(vl["uv_m"])],
+			["vl_meritko", Vector2(float(vl["meritko"][0]), float(vl["meritko"][1]))], ["vl_rychlost", Vector2(float(vl["rychlost"][0]), float(vl["rychlost"][1]))],
+			["vl_vaha", Vector2(float(vl["vaha"][0]), float(vl["vaha"][1]))], ["vl_sklon", float(vl["sklon"])],
+			["pena_mr", Vector2(float(pn["meritko"]), float(pn["rychlost"]))], ["pena_prah", Vector2(float(pn["prah"][0]), float(pn["prah"][1]))],
+			["pena_sila", Vector2(float(pn["kraj"]), float(pn["stred"]))], ["pena_barva", v3.call(pn["barva"])]]:
+		m.set_shader_parameter(k[0], k[1])
+	if m.shader and m.shader.resource_path.ends_with("reka.gdshader"):
+		m.set_shader_parameter("stred_hloubka", float(h["stred_hloubka_reka_m"]))
 
 
 func hladina(x: float, z: float) -> float:

@@ -133,6 +133,11 @@ func _varianta(zap: bool) -> void:
 		if ob:
 			(ob as Node3D).visible = not zap
 			print("TRASA bez_obzoru: Obzor_les %s" % ("skryt" if zap else "zpet"))
+	elif v == "bez_mlhy_vody":                 # 18. 11. (voda Hvozd): billboardy mlhy nad toky skryte - cena prekresleni
+		var mv: Node = main.find_child("Mlha_vody", true, false)
+		if mv:
+			(mv as Node3D).visible = not zap
+			print("TRASA bez_mlhy_vody: Mlha_vody %s" % ("skryta" if zap else "zpet"))
 	elif v == "les_bez_korun":                 # r. 86/88: stromy jen kmeny (listi pryc, impostory skryte) - cena korun
 		_bez_korun(zap)
 	elif v == "auto":                          # automaticka kvalita zapnuta (overeni smycky, zmeny stupne v tabulce)

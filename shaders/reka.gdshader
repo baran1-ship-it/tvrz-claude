@@ -119,6 +119,20 @@ varying float hloubka;
 varying vec3 wpos;
 // kameny v toku (0.60, Misa: voda kolem kamenu se ma cerit): x, z, polomer, uhel proudu - 12 nejblizsich (svet.kameny_toku_k)
 uniform vec4 kam[12];
+// vzhled Hvozd (voda.json vzhled_hvozd, svet._reka)
+uniform sampler2D panorama : source_color, filter_linear_mipmap, repeat_enable;
+global uniform vec3 voda_svetlo;
+uniform float f0 = 0.03;
+uniform float f_mocnina = 5.0;
+uniform float odraz_nasobek = 0.8;
+uniform float odraz_tonovani = 0.35;
+uniform vec3 telo_kraj : source_color = vec3(0.08, 0.065, 0.04);
+uniform vec3 telo_stred : source_color = vec3(0.015, 0.024, 0.019);
+uniform float stred_hloubka = 1.0;
+uniform vec2 alfa = vec2(0.2, 0.92);
+uniform vec2 pena_mr = vec2(0.35, 0.6);
+uniform vec2 pena_prah = vec2(0.62, 0.8);
+uniform vec2 pena_sila = vec2(0.55, 0.12);
 
 void vertex() {
 	hloubka = COLOR.r * 4.0;
@@ -242,14 +256,33 @@ void fragment() {
 	float pad_bila = clamp(steepness_map * pena_padu, 0.0, 1.0) * clamp(0.35 + 0.9 * pruh * pruh2 + 0.3 * pruh, 0.0, 1.0);
 	water_norFBM += kk.xy * 0.12;
 
-	float t = smoothstep(0.0, hloubka_barvy, hloubka);
-	vec3 barva = mix(melka, hluboka, t);
-	ALBEDO = mix(barva, foam_color.rgb, combined_foam * foam_color.a);
-	ALPHA = clamp(smoothstep(0.0, cirost, hloubka) * 0.92 + combined_foam, 0.0, 1.0);
-	// pad kaskady: bila voda plnou barvou (pena_padu x strmost, rozbita sumem) - pres slabou penu proudu
-	ALBEDO = mix(ALBEDO, vec3(0.93, 0.95, 0.93), pad_bila);
+	// 18. 11. (Misa: voda jako v lese Hvozd, voda.json vzhled_hvozd): telo hnede u kraje -> cernozelene uprostred (hloubka z
+	// vrcholu), pena ze sumu po proudu silnejsi u kraje, odraz panoramy mlhaveho lesa fresnelem v EMISSION x voda_svetlo
+	float stred = smoothstep(0.0, stred_hloubka, hloubka);
+	vec3 barva = mix(telo_kraj, telo_stred, stred);
+	float ps = texture(i_texture_foam_noise, vec2(UV.x * pena_mr.x * 2.5, UV.y * pena_mr.x - TIME * pena_mr.y)).r;
+	combined_foam = max(combined_foam, smoothstep(pena_prah.x, pena_prah.y, ps) * mix(pena_sila.x, pena_sila.y, stred));
+	// normala hladiny ve svete z normalove mapy (jako NORMAL_MAP: tecna, binormala) - pro odraz
+	vec2 nts = (water_norFBM - 0.5) * 2.0 * normal_scale * 0.5;
+	vec3 nv = normalize(NORMAL + TANGENT * nts.x + BINORMAL * nts.y);
+	vec3 wn = normalize((INV_VIEW_MATRIX * vec4(nv, 0.0)).xyz);
+	vec3 V = normalize(CAMERA_POSITION_WORLD - wpos);
+	vec3 R = reflect(-V, wn);
+	R.y = abs(R.y);
+	vec2 puv = vec2(atan(R.z, R.x) / (2.0 * PI) + 0.5, 0.5 - asin(clamp(R.y, -1.0, 1.0)) / PI);
+	vec2 dx = dFdx(puv), dy = dFdy(puv);
+	vec2 dx2 = dFdx(fract(puv + vec2(0.5, 0.0))), dy2 = dFdy(fract(puv + vec2(0.5, 0.0)));
+	if (abs(dx2.x) < abs(dx.x)) { dx.x = dx2.x; }
+	if (abs(dy2.x) < abs(dy.x)) { dy.x = dy2.x; }
+	vec3 refl = textureGrad(panorama, puv, dx, dy).rgb;
+	float fres = f0 + (1.0 - f0) * pow(1.0 - max(dot(V, wn), 0.0), f_mocnina);
+	vec3 svetlo = mix(vec3(dot(voda_svetlo, vec3(0.3333))), voda_svetlo, odraz_tonovani);
+	float bila = clamp(combined_foam * foam_color.a + pad_bila, 0.0, 1.0);
+	ALBEDO = mix(mix(barva * (1.0 - fres), foam_color.rgb, combined_foam * foam_color.a), vec3(0.93, 0.95, 0.93), pad_bila);
+	EMISSION = refl * odraz_nasobek * fres * svetlo * (1.0 - bila);
+	ALPHA = clamp(smoothstep(0.0, cirost * 0.3, hloubka) * mix(mix(alfa.x, alfa.y, stred), 1.0, fres) + combined_foam, 0.0, 1.0);
 	ALPHA = max(ALPHA, pad_bila);
-	SPECULAR = mix(0.25, 0.04, pad_bila);            // pena je drsna - pad nezrcadli oblohu
+	SPECULAR = mix(0.15, 0.04, pad_bila);            // odlesk slunce; oblohu z enginu nahrazuje panorama
 	ROUGHNESS = mix(roughness, 0.9, pad_bila);
 	NORMAL_MAP = vec3(water_norFBM, 0);
 	NORMAL_MAP_DEPTH = normal_scale;

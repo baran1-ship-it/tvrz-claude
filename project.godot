@@ -61,3 +61,10 @@ occlusion_culling/use_occlusion_culling=true
 
 file_logging/enable_file_logging=true
 
+
+[shader_globals]
+
+voda_svetlo={
+"type": "vec3",
+"value": Vector3(1, 1, 1)
+}

@@ -613,11 +613,8 @@
    "_p": "okraj lesů ze šumu (svet.gd _nove_lesy, Míša 0.64 „vstupy do lesů a lemy cest jsou především keře, hustě“): na bodě mřížky v pásu okraje kusu keřů ze skladby houstina.plast.druhy rozptýlených ± rozptyl_m; do 17. 11. natvrdo ker_husty a šípek, které v datech nejsou (log „keru na okraji 0“)."
   },
   "rozmisteni": {
-   "popis": "Míša 18. 11. (tabulka misa_18_11_chyby.md ř. 6, snímek 05 x 411 z 784: „udělal jsi tam les, ale další část obce je prázdná – scény mají být chytré, ne že se všechno nahrne na jedno místo“): rozmístění keřů (pasma.skupiny.ker) ze VŠECH generátorů (Blender clony, zeleň ulice a ohrad, meze, břeh, remízky; hra plášť lesa, okraj nových lesů, keře u pěšin, kompozice vsi) jedním pravidlem až po posledním sázení (svet._rozmisteni, před krokem 9). Scéna podle polohy: clona = pás clony lokace.json kompozice.clony (osa ± sirka_m/2), ves = do pasma.rozmisteni.ves_dosah_m od ves.stred_stare_navsi, les = zápoj svet._les ≥ houstina.plast.les_kraj[0] (les a jeho plášť), jinak louka. V každé buňce pasma.rozmisteni.bunka_m nejvýš strop keřů scény a mezi keři aspoň pasma.rozmisteni.rozestup_ker_m scény; pořadí probírání podle hashe polohy (rovnoměrně, ne kdo dřív přišel), takže hromada se proředí na celé ploše a jinde nic nepřibude. KCD (sceny_kcd_15_11.md, ref_kcd2_ves_plot_cesta, bejcek_03/05): ve vsi keře jednotlivě u plotů a v koutech, hustý pás jen jako clona vjezdu, v plášti lesa hustě.",
+   "popis": "Míša 18. 11. (tabulka misa_18_11_chyby.md ř. 6, snímek 05 x 411 z 784: „udělal jsi tam les, ale další část obce je prázdná – scény mají být chytré, ne že se všechno nahrne na jedno místo“): rozmístění keřů (pasma.skupiny.ker) ze VŠECH generátorů (Blender clony, zeleň ulice a ohrad, meze, břeh, remízky; hra plášť lesa, okraj nových lesů, keře u pěšin, kompozice vsi) jedním pravidlem až po posledním sázení (svet._rozmisteni, před krokem 9). Scéna podle polohy: clona = pás clony lokace.json kompozice.clony (osa ± sirka_m/2), ves = do pasma.rozmisteni.ves_dosah_m od ves.stred_stare_navsi, les = zápoj svet._les ≥ houstina.plast.les_kraj[0] v bodě nebo do houstina.plast.dosah_lesa_m (les a jeho plášť), jinak louka. V každé buňce pasma.rozmisteni.bunka_m nejvýš strop keřů scény a mezi keři aspoň pasma.rozmisteni.rozestup_ker_m scény; pořadí probírání podle hashe polohy (rovnoměrně, ne kdo dřív přišel), takže hromada se proředí na celé ploše a jinde nic nepřibude. KCD (sceny_kcd_15_11.md, ref_kcd2_ves_plot_cesta, bejcek_03/05): ve vsi keře jednotlivě u plotů a v koutech, hustý pás jen jako clona vjezdu, v plášti lesa hustě.",
    "sceny": {
-    "clona": {
-     "strop": 10
-    },
     "ves": {
      "strop": 3
     },
@@ -628,7 +625,7 @@
      "strop": 24
     }
    },
-   "_sceny": "strop = nejvýš keřů v buňce bunka_m × bunka_m (16 m: 256 m²) podle scény; scéna bez záznamu se neomezuje. Před 18. 11. naměřeno ze svet.json v buňkách 20 m kolem vjezdu: clona vjezd_houstina_sv 27–34 keřů, ostatní ves 1–5.",
+   "_sceny": "strop = nejvýš keřů v buňce bunka_m × bunka_m (16 m: 256 m²) podle scény; scéna bez záznamu se neomezuje. Před 18. 11. naměřeno ze svet.json v buňkách 20 m kolem vjezdu: clona vjezd_houstina_sv 27–34 keřů, ostatní ves 1–5. Clona (kompozice.clony) je záměrný pás s vlastní hustotou v záznamu (rozestup_m) – stropu nepodléhá: 18. 11. se stropem 10/14 test clona_vsi 48 % (16. 11.) → 41/42 %.",
    "kopriva": {
     "druhy": [
      "nettle"

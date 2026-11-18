@@ -13,6 +13,7 @@ const CREDITS := [
 	"Hudba (opengameart.org): RandomMind a christislord, CC0; yubatake, CC BY 4.0; marcelofg55, CC BY 3.0; Kevin MacLeod (incompetech.com), CC BY 4.0",
 	"Zvuky prostředí, zvířat a předmětů (opengameart.org): gregor-quendel, kurt, thimras, pagdev, qubodup, isaiah658, haeldb, alys, zeroisnotnull, pauliuw, lukerustltd, CC BY; rubberduck, kenney, bart, artisticdude, owlishmedia, medicinestorm, vishwajai, themightyglider, laleksic, tinyworlds, kresiek-the-furry, ignasd, macro a další, CC0 (úplný seznam v zvuky/seznam.txt)",
 	"Textury, rostliny, předměty a HDRI: Poly Haven, CC0",
+	"Odraz lesa na hladině vody: HDRI „Misty Pines“, Greg Zaal (Poly Haven), CC0",
 	"Zvuky: Kenney (kenney.nl), CC0",
 	"Kroky: congusbongus (z nahrávek swuing, EminYILDIRIM a Ali_6868, freesound.org) a lamoot (Yo Frankie!, Blender Foundation), CC BY 3.0; qubodup, rubberduck, TinyWorlds, Fantozzi, mikeask, peludo, macro, CC0",
 	"Figury v erbech a na mapě: game-icons.net – Lorc, Delapouite a Skoll, CC BY 3.0",

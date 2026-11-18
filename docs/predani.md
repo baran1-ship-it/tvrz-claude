@@ -419,6 +419,7 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   znovu, balík z_ves ho bere sám. Atlas přes smart_project nefunguje (tisíce šindelů = černý atlas). Vzdálenosti
   `pravidla/svet/modely.json ves_domy_lod`. Spouštět přes `/opt/bl/bin/python` (bpy modul), ne `blender -b -P`
   (tam chybí cesta k `vlastni`); totéž `blender/predmety.py build …`.
+- **Rozpracovaný skript jiného pomocníka blokuje všechny běhy (18. 11.):** `beh.sh` před testy a focením kontroluje každý `.gd` novější než `build/beh/.kontrola` – rozepsaný `tools/test_svet.gd` (vložený blok rozdělil smyčku, `ruzne`/`kc` mimo rozsah) shodil cizí běhy dvakrát („CHYBA v tools/test_svet.gd, nic nespusteno“). Úpravu `.gd` dopsat celou najednou (jedno Edit), hned po ní `godot --headless --check-only -s <soubor>`; cizí soubor neopravovat, počkat na pozadí, až se dá přeložit (smyčka s `--check-only`, pak běh).
 - **Fronta Godotu (2. 11.):** víc samostatně zařazených `tools/beh.sh` čeká na zámek nejvýš 30 min. Export zařazený za
   dvě focení spadl na „zamek obsazeny“. Navazující kroky dávat do jednoho řetězu (`build/beh/retez_*.sh`) za sebou,
   ne jako samostatné úlohy, a export nikdy nezařazovat za víc než jeden běh.
@@ -1667,3 +1668,13 @@ Hotovo v kódu a datech (testy u každého):
 - Lavice nádvoří jen jako záznam `u_zdi` (`nabytek.json _venku_tvrz`, test `tvrz_lavice`: záznam s `p` na nádvoří
   a cokoli nad sedákem = chyba). Hostinec a krčma bez Truhla_* (`obsluha_hostinec_pravidla.bez_klipu`, činnost
   `vareni_hostinec`, test `lide_chovani`).
+
+## Voda „Hvozd“ (Míša 18. 11., tabulka misa_18_11_chyby ř. 10)
+- Vzhled vody jen z dat `pravidla/svet/voda.json` `vzhled_hvozd` (fresnel, odraz, tělo kraj/střed, alfa, vlnky, pěna) a `mlha_vody`;
+  `svet.voda_odraz` je nastaví každému materiálu voda.gdshader i reka.gdshader. Odraz = panorama `obrazky/voda_odraz_les.jpg`
+  (Poly Haven misty_pines, CC0) v EMISSION × globální `voda_svetlo` (project.godot `[shader_globals]`, nastavuje `daylight._apply`).
+  Nový globální parametr vždy deklarovat v project.godot – za běhu přidaný nemusí existovat při kompilaci shaderu.
+- Mlha nad toky: `scripts/mlha_vody.gd` (bez class_name – nový class_name potřebuje `--import`; svet je RefCounted, ne Node),
+  uzel `Mlha_vody`; měřicí trasa varianta `bez_mlhy_vody`. NEOVĚŘENO NA ZAŘÍZENÍ.
+- **Poučení (pád běhu):** foto před změnou spadlo na kontrole skriptu (`Pravidla` bez `const Pravidla := preload(...)` ve skriptu
+  bez autoloadu) a pak na typu argumentu (svet.gd je RefCounted) – nový skript se statickou funkcí: preload Pravidla a typ RefCounted.

@@ -313,6 +313,8 @@ func _apply(p: Dictionary) -> void:
 	# 13. 11. (mereni_oblohy.gd: zmena parametru oblohy = prepocet radiance mapy, PC 24 ms proti 7 ms): obloha jen pri
 	# znatelne zmene (kvalita.json obloha_prah), ne kazdych 0,25 s
 	var hz: Color = p["horizon"]
+	# odraz lesa na vode a mlha nad toky (voda.json vzhled_hvozd, Misa 18. 11.): svetlo obzoru, v noci tma
+	RenderingServer.global_shader_parameter_set("voda_svetlo", Vector3(hz.r, hz.g, hz.b) * float(p["sky_e"]))
 	var nove := {"zenith": p["zenith"], "horizon": hz, "sun_tint": p["tint"], "sun_glow": float(p["glow"]),
 			"cloud_lit": p["c_lit"], "cloud_dark": p["c_dark"], "stars": float(p["stars"]), "energy": float(p["sky_e"]),
 			"ground": Color(hz.r * 0.32, hz.g * 0.31, hz.b * 0.3)}

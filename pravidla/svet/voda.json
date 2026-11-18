@@ -1442,9 +1442,9 @@
   "udoli_zlom_m": 40.0,
   "pulsirka_vody_m": 4.8,
   "dosah_m": 50.0,
-  "predloha": "Misa 16:35 / radce 18:20: Bystrice 2x dnesni sirky = ~9,6 m vody (pulsirka 4,8 +-50 %), odpovida hornimu toku Sazavy (Zdar - H. Brod 8-10 m, raft.cz; prutok 1,0-3,4 m3/s, cs.wikipedia). Tvar udoli ze Sazavy u Rataji-Talmberka (meandry v uzke nive, strme zalesnene strane se skalnimi vychozy, mlyny na nahonech, brody v melkych rozsirenich). Hloubka 0,6 m +-33 %, v brodu a peřeji melci a sirsi (kraj.perej), kameny v perejich.",
+  "predloha": "Misa 16:35 / radce 18:20: Bystrice 2x dnesni sirky = ~9,6 m vody (pulsirka 4,8 +-50 %), odpovida hornimu toku Sazavy (Zdar - H. Brod 8-10 m, raft.cz; prutok 1,0-3,4 m3/s, cs.wikipedia). Tvar udoli ze Sazavy u Rataji-Talmberka (meandry v uzke nive, strme zalesnene strane se skalnimi vychozy, mlyny na nahonech, brody v melkych rozsirenich). Hloubka 0,6 m +-33 %, v brodu a pe\u0159eji melci a sirsi (kraj.perej), kameny v perejich.",
   "raz_toku": {
-   "popis": "Misa 14. 11. (0.999997, potok z kopce (281,1126) 'perina vody v trave, zahloubit, pereje az vodopad, hodne kameni'): raz toku podle sklonu osy (prumer sklon_okno_m po proudu i proti). Hladina na peřeji a kaskade nikdy nad puvodnim terenem: hladina <= nejnizsi teren u osy - zahloubeni_m (koryto se zarizne, breh nikdy nesype nasep). balvanu_na_m = balvany v korytu navic (vycnivaji, pena v shaderu kolem kamenu). Prahy sklonu: Montgomery & Buffington 1997 (step-pool nad 3-4 %, kaskada nad 8-10 %); zahloubeni a hustota = odhad, overit snimkem. Rozbor docs/rozpracovane/potok_strmy.md.",
+   "popis": "Misa 14. 11. (0.999997, potok z kopce (281,1126) 'perina vody v trave, zahloubit, pereje az vodopad, hodne kameni'): raz toku podle sklonu osy (prumer sklon_okno_m po proudu i proti). Hladina na pe\u0159eji a kaskade nikdy nad puvodnim terenem: hladina <= nejnizsi teren u osy - zahloubeni_m (koryto se zarizne, breh nikdy nesype nasep). balvanu_na_m = balvany v korytu navic (vycnivaji, pena v shaderu kolem kamenu). Prahy sklonu: Montgomery & Buffington 1997 (step-pool nad 3-4 %, kaskada nad 8-10 %); zahloubeni a hustota = odhad, overit snimkem. Rozbor docs/rozpracovane/potok_strmy.md.",
    "sklon_okno_m": 7.5,
    "breh_prolinani_m": 3.0,
    "breh_prolinani_popis": "15. 11. (test breh: breh pod hladinou na hornim konci kaskady): vyska brehu v bode = nejvyssi z razu primych sousedu na ose a do tolika m podel osy, pak plynule (2. kolo: jen metry = 62 bodu pod hladinou, ridka osa klidneho useku) mezi body; vic = nasyp vedle klidne vody (koryto se zarizne, nesype)",
@@ -1492,7 +1492,10 @@
        "_popis": "Misa 15. 11. r. 4 (kaskada = ploche leskle plechy, prorusta trava a kameny; snimky 08-10): pad kazdeho stupne (koryto.schody) je samostatna zakrivena zaclona stavena ve hre (scripts/pad_vody.gd, shaders/pad.gdshader), ne usek pasu reky. Pas Waterways (modely/reka/reka.res, predpeceny v baliku z_reka) se pri nacteni ve stope padu zbavi trojuhelniku s |normala.y| < zahodit_normala_y (prepecovat neni treba). Zaclona: od bodu k tunou (okap = horni hladina, plna sirka pasu) se zuzi na sirka_podil x pul sirky vody; previs_m pred patou (u bodu k+1) se lomi parabolou x ~ sqrt(pad) (volny pad, vodorovna tecna na hrane); vypoukle_m napric dopredu. Barva vrcholu R pena (pena_hore -> 1 u paty od pena_od), A okraj (okraj_podil sirky), G 1 = padajici cast. Rese: Uncharted GDC 2012 (vodopad = pruhy textury po padu + mlha u paty), Jedi Fallen Order (simonschreibt.de: zakrivena zaclona, posuvne vzorky, karty mlhy), 80.lv stylizovany vodopad; potok_pereje_resers.md body 1-7. Cisla [O] odhad, overit snimkem.",
        "sirka_podil": 0.7,
        "previs_m": 0.25,
-       "previs_min_max_m": [0.15, 0.3],
+       "previs_min_max_m": [
+        0.15,
+        0.3
+       ],
        "vypoukle_m": 0.08,
        "rozsireni_dole": 0.15,
        "pod_hladinu_m": 0.06,
@@ -1519,11 +1522,22 @@
         "viditelnost_m": 45.0
        },
        "shader": {
-        "voda": [0.15, 0.18, 0.13],
-        "pena": [0.6, 0.63, 0.58],
+        "voda": [
+         0.15,
+         0.18,
+         0.13
+        ],
+        "pena": [
+         0.6,
+         0.63,
+         0.58
+        ],
         "rychlost_m_s": 1.8,
         "rychlost_okap_m_s": 0.45,
-        "meritko_pruhu": [1.5, 0.3],
+        "meritko_pruhu": [
+         1.5,
+         0.3
+        ],
         "prolinani_hore_m": 0.5,
         "pruhlednost": 0.82,
         "okap_kryti": 0.45
@@ -1533,7 +1547,7 @@
      "breh_nad_m": 0.8
     }
    ],
-   "_schody": "Misa 14. 11. noc (snimek kaskady s krouzkem: „schody? to nemyslis vazne“, cikcak cara): kaskada = skalni soutesku s klikatou proudnici, ne terasy pres celou sirku (resers docs/rozpracovane/potok_kaskada_resers2.md: Montgomery & Buffington 1997 kaskada nad 0,065, Finnegan 2005 sirka ~0,37x, Chin 0,43-2,4 sirky, Zimmermann & Church 2001 nepravidelne, Abrahams 1995). sirka_podil = sirka vody kaskady / bezna; rozestup_sirek = nahodny rozestup stupnu [min, max] x sirka kaskady; vychylka_podil = proudnice od osy, strana se stridá na kazdem stupni (tune posunuta k prepadu); hrana stupne = rada balvanu sikmo (natoceni_hrany_st od kolmice, stridave); balvanu_na_m v korytu (30-50 % plochy nad vodou). Tune = nejnizsi hladina useku (teren se jen zarizne). Hodnoty [O] odhad, overit snimkem.",
+   "_schody": "Misa 14. 11. noc (snimek kaskady s krouzkem: \u201eschody? to nemyslis vazne\u201c, cikcak cara): kaskada = skalni soutesku s klikatou proudnici, ne terasy pres celou sirku (resers docs/rozpracovane/potok_kaskada_resers2.md: Montgomery & Buffington 1997 kaskada nad 0,065, Finnegan 2005 sirka ~0,37x, Chin 0,43-2,4 sirky, Zimmermann & Church 2001 nepravidelne, Abrahams 1995). sirka_podil = sirka vody kaskady / bezna; rozestup_sirek = nahodny rozestup stupnu [min, max] x sirka kaskady; vychylka_podil = proudnice od osy, strana se strid\u00e1 na kazdem stupni (tune posunuta k prepadu); hrana stupne = rada balvanu sikmo (natoceni_hrany_st od kolmice, stridave); balvanu_na_m v korytu (30-50 % plochy nad vodou). Tune = nejnizsi hladina useku (teren se jen zarizne). Hodnoty [O] odhad, overit snimkem.",
    "_breh_nad_m": "vyska brehu nad hladinou u kraje vody (koryto.strop/podlaha): klidny a pereje 0,05 (drive natvrdo), kaskada 0,8 - skalni stena souteska (resers potok_kaskada_resers2.md); sit vody Waterways je v zakrutu o kus sirsi - nizky breh ji ukazal jako desku nad travou"
   }
  },
@@ -1547,7 +1561,7 @@
   "pas_napojeni_m": 6.0,
   "_ctverec_dilu": "natoceni, pulsirka_dilu_m, pas_napojeni_m: ctverec drivejsiho dilu rybnik.glb uz jen pro konec pesiny k rybniku (svet.gd _pesiny/_vo_data) - dil se nevklada (v2).",
   "verze": 2,
-  "popis": "Navesni rybnik Lhota v2 (Misa 15. 11. r. 13: „nechces si udelat komplet novy model? nechám na tobe“): cely rybnik z tohoto zaznamu, stavi jen Blender (kraj.ryb2_*), hra nic nemeni. Poradi: teren (dno pod obrysem, breh, hraz s prelivem, zatoka vtoku, tune vypusti) -> hladina = vrstevnice skutecneho terenu v hladina_y na mrizce hladina_mrizka_m, okraj pruhledny (hloubka 0), na vtoku rez kolmo navazany na pas pritoku bez prekryvu -> vegetace -> predmety (pozerak, celo vypusti s troubou, preliv, kameny, lavka) k vypocitanemu kraji. Odvozena mista (obrys, vtok bod/smer, vypust celo, pozerak, lavka, osy pritoku a odtoku u rybnika) pocita tools/krok_b/rybnik_v2.py z cisel tady. Testy smyslu rybnik_vtok, voda_bez_hrany, vypust; hra ryb_napojeni, voda_v_korytu.",
+  "popis": "Navesni rybnik Lhota v2 (Misa 15. 11. r. 13: \u201enechces si udelat komplet novy model? nech\u00e1m na tobe\u201c): cely rybnik z tohoto zaznamu, stavi jen Blender (kraj.ryb2_*), hra nic nemeni. Poradi: teren (dno pod obrysem, breh, hraz s prelivem, zatoka vtoku, tune vypusti) -> hladina = vrstevnice skutecneho terenu v hladina_y na mrizce hladina_mrizka_m, okraj pruhledny (hloubka 0), na vtoku rez kolmo navazany na pas pritoku bez prekryvu -> vegetace -> predmety (pozerak, celo vypusti s troubou, preliv, kameny, lavka) k vypocitanemu kraji. Odvozena mista (obrys, vtok bod/smer, vypust celo, pozerak, lavka, osy pritoku a odtoku u rybnika) pocita tools/krok_b/rybnik_v2.py z cisel tady. Testy smyslu rybnik_vtok, voda_bez_hrany, vypust; hra ryb_napojeni, voda_v_korytu.",
   "hladina_y": 3.35,
   "hloubka_m": 1.2,
   "dno_svah_m": 4.8,
@@ -1595,7 +1609,7 @@
   "pozerak": {
    "lavka_kuly_po_m": 1.0,
    "kul_zapust_m": 0.5,
-   "_lavka_kuly": "Míša 16. 11. r. 5 (snímek 06: lávka na korunu „na jednom sloupku“): pod prkny lávky z koruny na požerák páry kůlů (dub, 0,12 m) do svahu hráze po lavka_kuly_po_m, zapuštěné kul_zapust_m, s příčkou; odhad podle dřevěných lávek k požerákům (NEOVĚŘENO zdrojem).",
+   "_lavka_kuly": "M\u00ed\u0161a 16. 11. r. 5 (sn\u00edmek 06: l\u00e1vka na korunu \u201ena jednom sloupku\u201c): pod prkny l\u00e1vky z koruny na po\u017eer\u00e1k p\u00e1ry k\u016fl\u016f (dub, 0,12 m) do svahu hr\u00e1ze po lavka_kuly_po_m, zapu\u0161t\u011bn\u00e9 kul_zapust_m, s p\u0159\u00ed\u010dkou; odhad podle d\u0159ev\u011bn\u00fdch l\u00e1vek k po\u017eer\u00e1k\u016fm (NEOV\u011a\u0158ENO zdrojem).",
    "od_vodni_cary_m": 0.6,
    "sirka_m": 0.7,
    "nad_korunou_m": 0.3,
@@ -1611,7 +1625,7 @@
    "zacatek_m": 0.5,
    "celo_sirka_m": 2.4,
    "kridlo_m": 1.6,
-   "_kridlo_m": "délka křídla čela 45° (dřív číslo v kraj.ryb2_predmety); test smyslu preliv_vypust: přeliv s obrubou nesmí zasahovat do zdi čela ani křídel",
+   "_kridlo_m": "d\u00e9lka k\u0159\u00eddla \u010dela 45\u00b0 (d\u0159\u00edv \u010d\u00edslo v kraj.ryb2_predmety); test smyslu preliv_vypust: p\u0159eliv s obrubou nesm\u00ed zasahovat do zdi \u010dela ani k\u0159\u00eddel",
    "tune_polomer_m": 1.0,
    "tune_hloubka_m": 0.5,
    "trouba_prumer_m": 0.3,
@@ -1631,12 +1645,22 @@
    ]
   },
   "preliv": {
-   "dlazba": {"rada_m": 0.5, "kamen_sirka_m": 0.45, "spara_m": 0.02, "tloustka_m": 0.18, "nad_dnem_m": 0.03, "presah_m": 0.6, "obruba_sirka_m": 0.3, "obruba_vyska_m": 0.45, "obruba_nad_m": 0.15},
-   "_dlazba": "Míša 16. 11. r. 5 (snímek 06: dlažba přelivu jako rozsypané kvádry – kameny s náhodným natočením ±8° a délkou, vodorovné na svahu = schody): souvislé koryto – řady napříč po rada_m (vazba na přeskáčku), kámen nakloněný podle spádu dna (kraj.ryb2_preliv_dno), horní plocha nad_dnem_m nad dnem, spára spara_m; obruba z kvádrů podél osy po obou stranách, obruba_nad_m nad terénem. Rozměry podle kamenných skluzů rybníků (lomový kámen 0,4–0,5 m; NEOVĚŘENO zdrojem). Hledáno hotové: Poly Haven (modular_wooden_pier – mořské molo, ne skluz), Kenney/Quaternius (bez kamenného skluzu) – stavba z kvádrů kit.stone.",
+   "dlazba": {
+    "rada_m": 0.5,
+    "kamen_sirka_m": 0.45,
+    "spara_m": 0.02,
+    "tloustka_m": 0.18,
+    "nad_dnem_m": 0.03,
+    "presah_m": 0.6,
+    "obruba_sirka_m": 0.3,
+    "obruba_vyska_m": 0.45,
+    "obruba_nad_m": 0.15
+   },
+   "_dlazba": "M\u00ed\u0161a 16. 11. r. 5 (sn\u00edmek 06: dla\u017eba p\u0159elivu jako rozsypan\u00e9 kv\u00e1dry \u2013 kameny s n\u00e1hodn\u00fdm nato\u010den\u00edm \u00b18\u00b0 a d\u00e9lkou, vodorovn\u00e9 na svahu = schody): souvisl\u00e9 koryto \u2013 \u0159ady nap\u0159\u00ed\u010d po rada_m (vazba na p\u0159esk\u00e1\u010dku), k\u00e1men naklon\u011bn\u00fd podle sp\u00e1du dna (kraj.ryb2_preliv_dno), horn\u00ed plocha nad_dnem_m nad dnem, sp\u00e1ra spara_m; obruba z kv\u00e1dr\u016f pod\u00e9l osy po obou stran\u00e1ch, obruba_nad_m nad ter\u00e9nem. Rozm\u011bry podle kamenn\u00fdch skluz\u016f rybn\u00edk\u016f (lomov\u00fd k\u00e1men 0,4\u20130,5 m; NEOV\u011a\u0158ENO zdrojem). Hled\u00e1no hotov\u00e9: Poly Haven (modular_wooden_pier \u2013 mo\u0159sk\u00e9 molo, ne skluz), Kenney/Quaternius (bez kamenn\u00e9ho skluzu) \u2013 stavba z kv\u00e1dr\u016f kit.stone.",
    "bez_rostlin_m": 2.0,
-   "_bez_rostlin_m": "Míša 17. 11. r. 2 (po_03: tráva na dolním konci dlažby): rostlina (měkká – tráva, keř…) do 2 m od dlažby přelivu / zdi výpusti způsobí, že hra kvádr dlažby vyřadí jako kolizi rostliny (svet._collisions: kvádr do 2 m s měkkou rostlinou v buňkách ±1 m) → krytí louky dlažbu nevidí. Brána rostlin v export_game a test smyslu preliv_rostliny berou tento odstup.",
+   "_bez_rostlin_m": "M\u00ed\u0161a 17. 11. r. 2 (po_03: tr\u00e1va na doln\u00edm konci dla\u017eby): rostlina (m\u011bkk\u00e1 \u2013 tr\u00e1va, ke\u0159\u2026) do 2 m od dla\u017eby p\u0159elivu / zdi v\u00fdpusti zp\u016fsob\u00ed, \u017ee hra kv\u00e1dr dla\u017eby vy\u0159ad\u00ed jako kolizi rostliny (svet._collisions: kv\u00e1dr do 2 m s m\u011bkkou rostlinou v bu\u0148k\u00e1ch \u00b11 m) \u2192 kryt\u00ed louky dla\u017ebu nevid\u00ed. Br\u00e1na rostlin v export_game a test smyslu preliv_rostliny berou tento odstup.",
    "posun_m": 3.8,
-   "_posun_m": "Míša 17. 11. r. 2 (snímek 03 x 501 z 881: „kvádry nesedí na sebe“): při 2,8 křídlo čela výpusti (kridlo_m 1,6 pod 45°) procházelo obrubou a dlažbou přelivu (test smyslu preliv_vypust: 25 bodů osy zdi v dlažbě); od 3,7 bez kolize, 3,8 = rezerva 0,1 m. Konec přelivu se tím posune o 1 m po proudu (t1 = t_čela + posun − čelo/2).",
+   "_posun_m": "M\u00ed\u0161a 17. 11. r. 2 (sn\u00edmek 03 x 501 z 881: \u201ekv\u00e1dry nesed\u00ed na sebe\u201c): p\u0159i 2,8 k\u0159\u00eddlo \u010dela v\u00fdpusti (kridlo_m 1,6 pod 45\u00b0) proch\u00e1zelo obrubou a dla\u017ebou p\u0159elivu (test smyslu preliv_vypust: 25 bod\u016f osy zdi v dla\u017eb\u011b); od 3,7 bez kolize, 3,8 = rezerva 0,1 m. Konec p\u0159elivu se t\u00edm posune o 1 m po proudu (t1 = t_\u010dela + posun \u2212 \u010delo/2).",
    "sirka_m": 1.6,
    "nabeh_m": 1.2,
    "koruna_nad_hladinou_m": 0.35,
@@ -1660,7 +1684,7 @@
   },
   "kameny_na_m": 0.3,
   "_kameny": "kameny na kraji vody (vypocitany obrys hladiny) kameny_na_m na metr, na navodnim svahu hraze dlazba; ne v usti vtoku a u lavky.",
-  "_historie": "Do 15. 11. dil modely/rybnik/rybnik.glb (0.76) a potom „jeden zdroj“ 12. 11. (polomer_m + okraj_vlny, hladina vejirem) - 7 oprav vzdy jedne vrstvy (docs/predani.md). v2 nahrazuje okraj_vlny, voda_polomer_m, tok_konec_polomer_m, breh, dil.",
+  "_historie": "Do 15. 11. dil modely/rybnik/rybnik.glb (0.76) a potom \u201ejeden zdroj\u201c 12. 11. (polomer_m + okraj_vlny, hladina vejirem) - 7 oprav vzdy jedne vrstvy (docs/predani.md). v2 nahrazuje okraj_vlny, voda_polomer_m, tok_konec_polomer_m, breh, dil.",
   "obrys": [
    [
     538.19,
@@ -1968,8 +1992,8 @@
     2.1
    ]
   ],
-  "_okraj_vlny": "Misa 0.99 „kruhovy cerny rybnik“: polomer brehu podle smeru r(a) = polomer_m * (1 + sum amp*sin(n*a + faze)) - lesni rybnicek nepravidelny (zalivy, poloostruvky), stejne v Blenderu (kraj.ryb_polomer) i hre (svet.gd _ryb_polomer)",
-  "_hladina": "Misa 0.992 „rybnik za tvrzi levituje“: rybnik na svahu klesajicim k J a JZ, teren na obvodu (R+2 m) v uhlech 95-205 st. az o 2 m pod puvodni hladinou -5,9 -> hladina -7,0 (nejnizsi breh mimo hraz -6,6 m, uhel 80 st.) a hraz 32 m pres celou nizkou stranu (stred na uhlu 150 st.); horni breh zarizly do svahu. Overeno obvodem fort.land po 20 st. Export 0.993: pri -7,0 zarez horniho brehu 4,2 m > zarez_max (protokol stavby, (-140, -188)) -> -6,4 (zarez 3,6 m); nizky breh 95-205 st. drzi hraz, zbytek pravidlo brehu (kraj.voda_tvar)."
+  "_okraj_vlny": "Misa 0.99 \u201ekruhovy cerny rybnik\u201c: polomer brehu podle smeru r(a) = polomer_m * (1 + sum amp*sin(n*a + faze)) - lesni rybnicek nepravidelny (zalivy, poloostruvky), stejne v Blenderu (kraj.ryb_polomer) i hre (svet.gd _ryb_polomer)",
+  "_hladina": "Misa 0.992 \u201erybnik za tvrzi levituje\u201c: rybnik na svahu klesajicim k J a JZ, teren na obvodu (R+2 m) v uhlech 95-205 st. az o 2 m pod puvodni hladinou -5,9 -> hladina -7,0 (nejnizsi breh mimo hraz -6,6 m, uhel 80 st.) a hraz 32 m pres celou nizkou stranu (stred na uhlu 150 st.); horni breh zarizly do svahu. Overeno obvodem fort.land po 20 st. Export 0.993: pri -7,0 zarez horniho brehu 4,2 m > zarez_max (protokol stavby, (-140, -188)) -> -6,4 (zarez 3,6 m); nizky breh 95-205 st. drzi hraz, zbytek pravidlo brehu (kraj.voda_tvar)."
  },
  "toky": [
   {
@@ -5944,7 +5968,7 @@
   ],
   "dil": {
    "pad_vody": {
-    "popis": "dopad vody z vantroku na korecky kola (tools/krok_b/mlyn_voda.json vantrok.pad_vody: odkud a kam): proud po parabole volneho padu s rychlosti vody ve zlabu rychlost_m_s (vantrok svrchniho kola ~1 m/s), segmentu useku; ve hre viditelny jen pri spustenem kole (stavidlo). Misa 0.98: na kolo neteče voda",
+    "popis": "dopad vody z vantroku na korecky kola (tools/krok_b/mlyn_voda.json vantrok.pad_vody: odkud a kam): proud po parabole volneho padu s rychlosti vody ve zlabu rychlost_m_s (vantrok svrchniho kola ~1 m/s), segmentu useku; ve hre viditelny jen pri spustenem kole (stavidlo). Misa 0.98: na kolo nete\u010de voda",
     "rychlost_m_s": 1.0,
     "segmentu": 8
    },
@@ -5986,8 +6010,8 @@
     "rozjezd_s": 4.0,
     "mleti_s": 6.0,
     "bezi_na_zacatku": true,
-    "_bezi_na_zacatku": "Misa 0.99 „z vantroku na kolo netece“: mlyn ve vsi ve dne mele - voda pusta od zacatku, stavidlem se zavira",
-    "popis": "Misa 28. 10. „rad bych spustil kolo a mleti“: paka stavidla ve mlynici (model, souradnice dilu) pousti vodu na kolo - kolo a cevnik se rozjedou za rozjezd_s; mleti u kamene (moucnice) jen kdyz kolo bezi: pytel obili z brasny -> po mleti_s pytel mouky. Mlynar pousti vodu pakou ze mlynice (stavidlo na konci vantroku)."
+    "_bezi_na_zacatku": "Misa 0.99 \u201ez vantroku na kolo netece\u201c: mlyn ve vsi ve dne mele - voda pusta od zacatku, stavidlem se zavira",
+    "popis": "Misa 28. 10. \u201erad bych spustil kolo a mleti\u201c: paka stavidla ve mlynici (model, souradnice dilu) pousti vodu na kolo - kolo a cevnik se rozjedou za rozjezd_s; mleti u kamene (moucnice) jen kdyz kolo bezi: pytel obili z brasny -> po mleti_s pytel mouky. Mlynar pousti vodu pakou ze mlynice (stavidlo na konci vantroku)."
    },
    "odpad_za_dilem_m": 60.0,
    "_odpad": "odpad_za_dilem_m: na tolika metrech toku za vystupem dilu musi byt teren nad hladinou odpadu nejvys toky_tvar.zarez_max_m (tools/krok_b/mlyn_misto.py) - kolo potrebuje spad v udoli, ne prikop (28. 10. protokol Blenderu: zarez 4,7 m pod dilem u (316, 924)).",
@@ -6050,12 +6074,12 @@
    "na_teren_dilu": [
     "Mlyn_Cesta"
    ],
-   "_na_teren_dilu": "site dilu, jejichz souvisle kusy jdou na teren dilu (pravidla_sveta pasma.dil_na_teren; Misa 0.99993 r. 56: obruba cesty Mlyn_Cesta zapadla pod teren modelu - „kuly lezi na zemi“)",
-   "_zebrik": "zebrik na pudu mlyna (mistne v dilu): [pata, vrchol, nastup, sestup]. Misa 0.99993 (24-25) „dva zebriky v mlyne, proc“: model ma vlastni zebrik v sini (Mlyn_Interier: bocnice x 0,80..2,33, y 0,30..3,20, z 0,78..0,85 a 1,16..1,23 - z podlahy pres otvor v povale Mlyn_Kol_Puda24/25: x -0,2..0,95, z 0,6..1,29, povala y 2,64) a hra k nemu stavela druhy katalogovy u x 0,37. Zaznam = zebrik modelu (rozbor 9. 11.): pata u bocnic dole, vrchol na hrane otvoru x 0,95, nastup pred patou, sestup na pude za otvorem (Puda24). zebrik_v_modelu: hra jen zapise pouziti, zebrik nestavi. Test zebriky_jeden (tools/test_stavby.gd).",
+   "_na_teren_dilu": "site dilu, jejichz souvisle kusy jdou na teren dilu (pravidla_sveta pasma.dil_na_teren; Misa 0.99993 r. 56: obruba cesty Mlyn_Cesta zapadla pod teren modelu - \u201ekuly lezi na zemi\u201c)",
+   "_zebrik": "zebrik na pudu mlyna (mistne v dilu): [pata, vrchol, nastup, sestup]. Misa 0.99993 (24-25) \u201edva zebriky v mlyne, proc\u201c: model ma vlastni zebrik v sini (Mlyn_Interier: bocnice x 0,80..2,33, y 0,30..3,20, z 0,78..0,85 a 1,16..1,23 - z podlahy pres otvor v povale Mlyn_Kol_Puda24/25: x -0,2..0,95, z 0,6..1,29, povala y 2,64) a hra k nemu stavela druhy katalogovy u x 0,37. Zaznam = zebrik modelu (rozbor 9. 11.): pata u bocnic dole, vrchol na hrane otvoru x 0,95, nastup pred patou, sestup na pude za otvorem (Puda24). zebrik_v_modelu: hra jen zapise pouziti, zebrik nestavi. Test zebriky_jeden (tools/test_stavby.gd).",
    "potok_hladina_m": 0.25,
-   "_potok_hladina_m": "hladina toku v dilu mlyna nad dnem koryta modelu (mlyn_voda.json potok_v_dilu, pozn. „hladina cca +0,25 m“); osa toku v dilu = body koryta dilu (toky_meandry) - Misa 0.994 „u mlyna sede desky, voda pod dnem“",
+   "_potok_hladina_m": "hladina toku v dilu mlyna nad dnem koryta modelu (mlyn_voda.json potok_v_dilu, pozn. \u201ehladina cca +0,25 m\u201c); osa toku v dilu = body koryta dilu (toky_meandry) - Misa 0.994 \u201eu mlyna sede desky, voda pod dnem\u201c",
    "potok_napojeni_m": 6.0,
-   "_potok_napojeni_m": "osa toku sveta do potok_napojeni_m od kraju koryta dilu nahrazena obloukem s tecnou koryta dilu (toky_meandry; Misa 0.994 „napojeni do T“ za mlynem)",
+   "_potok_napojeni_m": "osa toku sveta do potok_napojeni_m od kraju koryta dilu nahrazena obloukem s tecnou koryta dilu (toky_meandry; Misa 0.994 \u201enapojeni do T\u201c za mlynem)",
    "potok_breh_rezerva_m": 0.08,
    "_potok_breh_rezerva_m": "hladina toku v dilu nejvys tolik pod nizsim brehem koryta dilu (sirka/2 + 0,5 m napric) - voda nepretece pres melky okraj koryta modelu u hrany dilu",
    "lednice_napojeni": {
@@ -6083,7 +6107,7 @@
     18.0,
     15.0
    ],
-   "_teren_obdelnik": "lokalni obdelnik terenu dilu [x0, z0, x1, z1] (tools/krok_b/mlyn_teren.json). Misa 0.9991/0.9992 „blok travniku ve vzduchu“ (6. pokus, test dil_okraj: schod az 2,2 m): dolina potoka (kraj.voda_tvar, svet.koryto_toku_y) se kopala az po hranu dilu PO napojeni terenu na dil (mlyn_pad) - v pasu pasma.dil.napojeni_m od hrany se dolina zeslabuje k nule u hrany (koryto a breh toku zustavaji, voda navaze), teren sveta u hrany = teren dilu.",
+   "_teren_obdelnik": "lokalni obdelnik terenu dilu [x0, z0, x1, z1] (tools/krok_b/mlyn_teren.json). Misa 0.9991/0.9992 \u201eblok travniku ve vzduchu\u201c (6. pokus, test dil_okraj: schod az 2,2 m): dolina potoka (kraj.voda_tvar, svet.koryto_toku_y) se kopala az po hranu dilu PO napojeni terenu na dil (mlyn_pad) - v pasu pasma.dil.napojeni_m od hrany se dolina zeslabuje k nule u hrany (koryto a breh toku zustavaji, voda navaze), teren sveta u hrany = teren dilu.",
    "lednice_blok": {
     "model": "res://modely/mlyn/lednice_blok.glb",
     "sit_modelu": "Mlyn_Lednice-col",
@@ -6092,7 +6116,7 @@
     "tloustka_vychozi_m": 0.4,
     "pod_rimsou_m": 0.01,
     "zaklad_m": 0.3,
-    "duvod": "Misa 12. 11. (lednice jako ohnuty papir): steny lednice v modelu jen vnitrni lic + rimsa; zaznam = plne hranoly sten (tools/krok_b/lednice_blok.py), tloustka = sirka rimsy modelu, zaklad 0,3 m pod dnem (rešerše: kamenem vyzděný odpadní kanál - Historic England IHA Mills; Chapelizod, rubble-faced tailrace); hra je pridava do dilu mlyna s materialem modelu",
+    "duvod": "Misa 12. 11. (lednice jako ohnuty papir): steny lednice v modelu jen vnitrni lic + rimsa; zaznam = plne hranoly sten (tools/krok_b/lednice_blok.py), tloustka = sirka rimsy modelu, zaklad 0,3 m pod dnem (re\u0161er\u0161e: kamenem vyzd\u011bn\u00fd odpadn\u00ed kan\u00e1l - Historic England IHA Mills; Chapelizod, rubble-faced tailrace); hra je pridava do dilu mlyna s materialem modelu",
     "sit_hry": "Mlyn_Lednice",
     "_sit_hry": "jmeno uzlu ve hre (Godot pri importu odrizne -col; 12. 11. lednice bila - material nenalezen)"
    },
@@ -6100,11 +6124,11 @@
     2.4,
     -3.65
    ],
-   "_schody_nastup": "Míša 15. 11. (schody ve mlýnici „když jsem šel dolů, uvěznilo mě to tam“): Mlyn_Kol_Schody x 0,51–2,64, z −3,15…−2,35 modelu, pata (x 2,64) 0,46 m od stěny Kol_StenaR1 (x 3,10), u +z kámen Mlyn_Kol_Kamen → bod nástupu za patou ležel v kapse, kam se kapsle 0,56 m nevejde. Nástup/sestup dole na volné podlaze vedle paty na −z straně (před dveřmi MlyniceVen, z −5,06…−3,79). [x, z] v rámci modelu, výška = pata. Test schody (test_stavby)."
+   "_schody_nastup": "M\u00ed\u0161a 15. 11. (schody ve ml\u00fdnici \u201ekdy\u017e jsem \u0161el dol\u016f, uv\u011bznilo m\u011b to tam\u201c): Mlyn_Kol_Schody x 0,51\u20132,64, z \u22123,15\u2026\u22122,35 modelu, pata (x 2,64) 0,46 m od st\u011bny Kol_StenaR1 (x 3,10), u +z k\u00e1men Mlyn_Kol_Kamen \u2192 bod n\u00e1stupu za patou le\u017eel v kapse, kam se kapsle 0,56 m nevejde. N\u00e1stup/sestup dole na voln\u00e9 podlaze vedle paty na \u2212z stran\u011b (p\u0159ed dve\u0159mi MlyniceVen, z \u22125,06\u2026\u22123,79). [x, z] v r\u00e1mci modelu, v\u00fd\u0161ka = pata. Test schody (test_stavby)."
   }
  },
  "toky_tvar": {
-  "popis": "koryto a dolina malych toku: breh vysky hloubka+breh_m do sirka/2+breh_sirka_m, pak svah doliny. pas_jemny_m: polosirka jemneho terenu 1 m od kraje vody malych toku a rybniku (v siti 5 m/2 m koryto 1-1,5 m neexistuje - hladina zahrabana v trave, Misa 28. 10.). breh_hlina_m: pas hole hliny a sterku od kraje vody (u Bystrice vymlete brehy 2-3 m; maly potok 0,5-1 m - odhad z fotek potoku v nive, stav: odhad). kameny_na_m: kamenu na metr toku v korytu a na brezich (Bystrice v tuni ridce ~0,1/0,7 m, v perejich vic; maly potok s kamenitym dnem ~1/m - odhad z fotek, stav: odhad) jemny_krok_m: krok jemneho terenu u vody (0,5 m; po 1 m byl okraj koryta 1-1,5 m zubaty po bunkach, Misa 0.98). Osy toku (osa_xzy) vyhlazeny Catmull-Rom po 1 m z puvodnich bodu po 6 m (ostre lomy 70 st., Misa 0.98); hladina linearne mezi puvodnimi body (jen klesa). nasyp_svah: breh maleho toku nikdy niz nez hladina + breh_m (do sirka/2 + breh_sirka_m), dal klesa svahem nasyp_svah (dy/dx) - na svahu spodni breh jako nasep, voda nevytece (Misa 0.98 „voda ve svahu“, test voda_v_korytu pres_breh). brod_hloubka_m: maly tok pres cestu na zaznamu prechodu druh brod (cesty.json) - koryto melke, cesta do vody (radce 17:40: krizeni jen se zaznamem). zarez_max_m: planovac toku (tools/krok_b) - teren nad hladinou nejvic o tolik; zarez se v cene trasy trestá kvadraticky (tok drzi udolnici). Hluboky usek je dolina se svahy toky_tvar.svah (3,5 m = udoli ~28 m siroke), ne kanal. Odtok Lhota kolem vsi potrebuje ~3,3 m (pres ves 2,0 m) - 28. 10. dolina_m: svah doliny maleho toku (svah) sahá jen do sirka/2 + breh_sirka_m + dolina_m od osy, pak za dolina_nabeh_m plynule puvodni teren (28. 10. protokol stavby Blenderu: dolina bez dosahu urizla kopec 56 m od lhota_potok o 15 m - umela sikma rovina, Misa „rovina, ktera neni prirozena“).",
+  "popis": "koryto a dolina malych toku: breh vysky hloubka+breh_m do sirka/2+breh_sirka_m, pak svah doliny. pas_jemny_m: polosirka jemneho terenu 1 m od kraje vody malych toku a rybniku (v siti 5 m/2 m koryto 1-1,5 m neexistuje - hladina zahrabana v trave, Misa 28. 10.). breh_hlina_m: pas hole hliny a sterku od kraje vody (u Bystrice vymlete brehy 2-3 m; maly potok 0,5-1 m - odhad z fotek potoku v nive, stav: odhad). kameny_na_m: kamenu na metr toku v korytu a na brezich (Bystrice v tuni ridce ~0,1/0,7 m, v perejich vic; maly potok s kamenitym dnem ~1/m - odhad z fotek, stav: odhad) jemny_krok_m: krok jemneho terenu u vody (0,5 m; po 1 m byl okraj koryta 1-1,5 m zubaty po bunkach, Misa 0.98). Osy toku (osa_xzy) vyhlazeny Catmull-Rom po 1 m z puvodnich bodu po 6 m (ostre lomy 70 st., Misa 0.98); hladina linearne mezi puvodnimi body (jen klesa). nasyp_svah: breh maleho toku nikdy niz nez hladina + breh_m (do sirka/2 + breh_sirka_m), dal klesa svahem nasyp_svah (dy/dx) - na svahu spodni breh jako nasep, voda nevytece (Misa 0.98 \u201evoda ve svahu\u201c, test voda_v_korytu pres_breh). brod_hloubka_m: maly tok pres cestu na zaznamu prechodu druh brod (cesty.json) - koryto melke, cesta do vody (radce 17:40: krizeni jen se zaznamem). zarez_max_m: planovac toku (tools/krok_b) - teren nad hladinou nejvic o tolik; zarez se v cene trasy trest\u00e1 kvadraticky (tok drzi udolnici). Hluboky usek je dolina se svahy toky_tvar.svah (3,5 m = udoli ~28 m siroke), ne kanal. Odtok Lhota kolem vsi potrebuje ~3,3 m (pres ves 2,0 m) - 28. 10. dolina_m: svah doliny maleho toku (svah) sah\u00e1 jen do sirka/2 + breh_sirka_m + dolina_m od osy, pak za dolina_nabeh_m plynule puvodni teren (28. 10. protokol stavby Blenderu: dolina bez dosahu urizla kopec 56 m od lhota_potok o 15 m - umela sikma rovina, Misa \u201erovina, ktera neni prirozena\u201c).",
   "breh_m": 0.3,
   "breh_sirka_m": 1.6,
   "breh_sirka_vnejsi_m": 1.1,
@@ -6113,7 +6137,7 @@
   "hladina_presah_m": 0.5,
   "breh_nad_hladinou_min_m": 0.3,
   "breh_max_st": 35.0,
-  "_profil_099": "Misa 0.99 „kanal vykopany bagrem“ (reserse_potok_1osoba_kun.md, MENDELU, BEHI, Leopold-Wolman): svah brehu (hloubka + breh_m = 0,65 m) pres breh_sirka_m 1,6 m = 22 st. na rovnem useku, vnejsi breh oblouku 1,1 m = 31 st., vnitrni 2,6 m = 14 st. (lavice); plne v oblouku polomeru oblouk_polomer_m a mensim, mezi linearne podle krivosti. Dno miskovite (u kraje vody o 35 % melci). hladina_presah_m: pas hladiny siri pod breh - cara vody je prusecik s terenem (driv hrana pasu = zuby po bunkach). breh_nad_hladinou_min_m: planovac tools/krok_b/toky_hladina.py snizi hladinu toku tak, aby teren na obou brezich byl aspon o tolik nad ni (zarez do svahu misto nasypu - nasyp jen pojistka u pevne hladiny nadrze, test smyslu toky_nasyp). breh_max_st: test - svah brehu maleho toku nikde strmeji (vyska < 1 m vyjimka podemleti nema)",
+  "_profil_099": "Misa 0.99 \u201ekanal vykopany bagrem\u201c (reserse_potok_1osoba_kun.md, MENDELU, BEHI, Leopold-Wolman): svah brehu (hloubka + breh_m = 0,65 m) pres breh_sirka_m 1,6 m = 22 st. na rovnem useku, vnejsi breh oblouku 1,1 m = 31 st., vnitrni 2,6 m = 14 st. (lavice); plne v oblouku polomeru oblouk_polomer_m a mensim, mezi linearne podle krivosti. Dno miskovite (u kraje vody o 35 % melci). hladina_presah_m: pas hladiny siri pod breh - cara vody je prusecik s terenem (driv hrana pasu = zuby po bunkach). breh_nad_hladinou_min_m: planovac tools/krok_b/toky_hladina.py snizi hladinu toku tak, aby teren na obou brezich byl aspon o tolik nad ni (zarez do svahu misto nasypu - nasyp jen pojistka u pevne hladiny nadrze, test smyslu toky_nasyp). breh_max_st: test - svah brehu maleho toku nikde strmeji (vyska < 1 m vyjimka podemleti nema)",
   "svah": 0.25,
   "pas_jemny_m": 5.0,
   "kameny_na_m": 0.9,
@@ -6131,7 +6155,7 @@
     1.3
    ]
   },
-  "_pramen": "pramen potoku (Misa 0.991; reserse: pramen = vyvěrající voda pod kameny/skalkou, studánka): na prvnim bodu osy toku skalka z balvanu v pulkruhu proti proudu",
+  "_pramen": "pramen potoku (Misa 0.991; reserse: pramen = vyv\u011braj\u00edc\u00ed voda pod kameny/skalkou, stud\u00e1nka): na prvnim bodu osy toku skalka z balvanu v pulkruhu proti proudu",
   "meandry": {
    "vlna_sirek": 11.0,
    "nahodnost": 0.25,
@@ -6140,7 +6164,7 @@
    "sklon_do": 0.08,
    "nabeh_m": 8.0,
    "polomer_min_sirek": 1.8,
-   "_": "tools/krok_b/toky_meandry.py (Misa 0.992 „potok jak vybagrovany, prirozene zatacky a meandry“): vlna = vlna_sirek x sirka (reserse 10-14, ~11), odklon od udolnice az odklon_st (sinusovka ve smeru toku: krivolakost ~1/J0 = 1,28, polomer ~2,3 sirky), vlna se meni o +-nahodnost po pul vlnach; na sklonu hladiny nad sklon_od se meandr zmensuje, nad sklon_do primy tok; k brodum, mostum, dilu mlyna, rybnikum a koncum nabeh_m; polomer zatacky aspon polomer_min_sirek x sirka (Williams 1986: modus 2-3).",
+   "_": "tools/krok_b/toky_meandry.py (Misa 0.992 \u201epotok jak vybagrovany, prirozene zatacky a meandry\u201c): vlna = vlna_sirek x sirka (reserse 10-14, ~11), odklon od udolnice az odklon_st (sinusovka ve smeru toku: krivolakost ~1/J0 = 1,28, polomer ~2,3 sirky), vlna se meni o +-nahodnost po pul vlnach; na sklonu hladiny nad sklon_od se meandr zmensuje, nad sklon_do primy tok; k brodum, mostum, dilu mlyna, rybnikum a koncum nabeh_m; polomer zatacky aspon polomer_min_sirek x sirka (Williams 1986: modus 2-3).",
    "odklon_st": 70.0,
    "krivolakost_max": 1.5,
    "_krivolakost_max": "tok s krivolakosti puvodni osy od krivolakost_max se nevlni (uz meandruje; vlny navic na svahu = zarez pres zarez_max_m, tvrz_potok 0.993)"
@@ -6169,13 +6193,16 @@
   "mlyn/dil/s_toku",
   "mlyn/dil/zdroj",
   "prikop/hladina_y",
-  "mlyn/dil/odpad_za_dilem_m", "rybnik_lhota/pozerak/lavka_kuly_po_m", "rybnik_lhota/pozerak/kul_zapust_m", "rybnik_lhota/preliv/dlazba",
+  "mlyn/dil/odpad_za_dilem_m",
+  "rybnik_lhota/pozerak/lavka_kuly_po_m",
+  "rybnik_lhota/pozerak/kul_zapust_m",
+  "rybnik_lhota/preliv/dlazba",
   "rybnik_lhota/vypust/kridlo_m",
   "rybnik_lhota/preliv/bez_rostlin_m"
  ],
  "prikop": {
   "hladina_y": -2.0,
-  "popis": "Hladina vody v prikopu tvrze (Blender veg.WATER_Y: hladina, rakos, brehy; hra voda_y ze svet.json). Misa 28. 10. „v prikopu malo vody, klidne zvedni hladinu“: drive -2,75 (voda ~5 m z 11 m sirky, bahnite svahy). Nejnizsi hreben valu kolem prikopu -1,6 m (u (-21, -16), vypocet po obvodu z fort.land) - hladina 0,4 m pod nim, at voda nepretece ven; mokry prikop vetsiny tvrzi plny do 1 m pod okraj.",
+  "popis": "Hladina vody v prikopu tvrze (Blender veg.WATER_Y: hladina, rakos, brehy; hra voda_y ze svet.json). Misa 28. 10. \u201ev prikopu malo vody, klidne zvedni hladinu\u201c: drive -2,75 (voda ~5 m z 11 m sirky, bahnite svahy). Nejnizsi hreben valu kolem prikopu -1,6 m (u (-21, -16), vypocet po obvodu z fort.land) - hladina 0,4 m pod nim, at voda nepretece ven; mokry prikop vetsiny tvrzi plny do 1 m pod okraj.",
   "bahno_nad_hladinou_m": 0.15,
   "popis_bahno": "bahnity breh (bez travy) do bahno_nad_hladinou_m nad hladinou (blender/fort.py): pod vodou nesmi byt travnaty svah (Misa 0.98)",
   "okrehek": 0.25,
@@ -6185,8 +6212,102 @@
    0.075,
    0.05
   ],
-  "popis_vzhled": "vzhled hladiny prikopu ve hre (Misa 28. 10.: „rozhodni podle sebe“ k otazce okrehek a svetla voda): okrehek 0,25 (drive 1 - jasne zelene skvrny), kalnost 0,93 a tmavsi hloubka - stojata kalna voda prikopu, dno u brehu nepresvita jako bahno"
+  "popis_vzhled": "vzhled hladiny prikopu ve hre (Misa 28. 10.: \u201erozhodni podle sebe\u201c k otazce okrehek a svetla voda): okrehek 0,25 (drive 1 - jasne zelene skvrny), kalnost 0,93 a tmavsi hloubka - stojata kalna voda prikopu, dno u brehu nepresvita jako bahno"
  },
  "stojata_melko_m": 0.3,
- "_stojata_melko_m": "stojata voda (prikop, rybniky): do teto hloubky prosvita dno, hloubeji krycí (shaders/voda.gdshader melko_m). Drive 1,2 m: na mirnem brehu prikopu siroky pruh skoro pruhledne vody - Misa 0.992/0.994 „v prikopu chybi voda“"
+ "_stojata_melko_m": "stojata voda (prikop, rybniky): do teto hloubky prosvita dno, hloubeji kryc\u00ed (shaders/voda.gdshader melko_m). Drive 1,2 m: na mirnem brehu prikopu siroky pruh skoro pruhledne vody - Misa 0.992/0.994 \u201ev prikopu chybi voda\u201c",
+ "vzhled_hvozd": {
+  "_zdroj": "Hvozd 18. 11. (Misa: voda jako v prohlizecovem lese Hvozd). Odraz = panorama mlhaveho lesa (equirect), fresnel Schlick, tmave telo hnede u kraje -> cernozelene uprostred, dve cteni normalove mapy, pena ze sumu po proudu, mlha nad toky. Bez kopie obrazovky a bez druheho vykresleni sceny (tablet).",
+  "panorama": "res://obrazky/voda_odraz_les.jpg",
+  "panorama_zdroj": "Poly Haven misty_pines (Greg Zaal), CC0 - tonemapped JPG 8192x4096 -> 2048x1024, import VRAM (ETC2 na tabletu)",
+  "fresnel_f0": 0.03,
+  "fresnel_mocnina": 5.0,
+  "odraz_nasobek": 0.8,
+  "_odraz_svetlo": "odraz jde do EMISSION (Compatibility nema SSR) x globalni voda_svetlo (daylight.gd: barva obzoru x energie oblohy, project.godot shader_globals), aby v noci nesvitil; tonovani 0 = jen jas obzoru, 1 = cela barva obzoru",
+  "odraz_tonovani": 0.35,
+  "telo_kraj": [
+   0.08,
+   0.065,
+   0.04
+  ],
+  "telo_stred": [
+   0.015,
+   0.024,
+   0.019
+  ],
+  "stred_hloubka_m": 1.0,
+  "_stred_hloubka_m": "hloubka (barva vrcholu, hloubka_vrcholu / reka COLOR.r*4), od ktere je telo plne cernozelene a alfa_stred; maly tok: osa pasu",
+  "alfa_kraj": 0.2,
+  "alfa_stred": 0.92,
+  "vlnky": {
+   "uv_m": 4.0,
+   "meritko": [
+    0.8,
+    1.9
+   ],
+   "rychlost": [
+    0.45,
+    0.8
+   ],
+   "vaha": [
+    0.55,
+    0.45
+   ],
+   "sklon": 0.6,
+   "_popis": "jedna normalova mapa ctena dvakrat: (u*meritko - t*rychlost, v*meritko), u = po proudu / po vetru v metrech / uv_m"
+  },
+  "pena": {
+   "meritko": 0.35,
+   "rychlost": 0.6,
+   "prah": [
+    0.62,
+    0.8
+   ],
+   "kraj": 0.55,
+   "stred": 0.12,
+   "barva": [
+    0.55,
+    0.57,
+    0.52
+   ]
+  },
+  "stred_hloubka_reka_m": 0.4,
+  "_stred_hloubka_reka_m": "Bystrice (reka.gdshader) je hluboka nejvys ~0,6 m (potok.hloubka_vody_m): se stred_hloubka_m 1,0 zustala cela v alfa kraje 0,2 = jen prosvitajici sterk (snimek build/m18v/po_byst12.png)"
+ },
+ "mlha_vody": {
+  "_zdroj": "Hvozd 18. 11.: pruhledne billboardy pri zemi nad toky (MultiMesh, unshaded, bez zapisu hloubky). Prekresleni na tabletu = riziko: varianta merici trasy bez_mlhy_vody. NEOVERENO NA ZARIZENI.",
+  "sirka_m": [
+   7.0,
+   13.0
+  ],
+  "vyska_m": [
+   2.0,
+   3.4
+  ],
+  "nad_terenem_m": [
+   0.5,
+   1.3
+  ],
+  "kryti": [
+   0.25,
+   0.5
+  ],
+  "barva": [
+   0.78,
+   0.8,
+   0.76
+  ],
+  "rozestup_m": 11.0,
+  "bok_m": 2.0,
+  "dosah_m": 60.0,
+  "kus_m": 40.0,
+  "blizko_zmizi_m": [
+   2.0,
+   6.0
+  ],
+  "max_billboardu": 600,
+  "seed": 1811,
+  "potok_bystrice": true,
+  "toky": true
+ }
 }
