@@ -34,7 +34,8 @@ func _ready() -> void:
 
 func _xf(di: Dictionary) -> Transform3D:
 	var s := float(di.get("meritko", 1.0))
-	return Transform3D(Basis(Vector3.UP, float(di["yaw"])).scaled(Vector3(s, s, s)), Vector3(float(di["x"]), float(di["y"]), float(di["z"])))
+	var ba := Basis(Vector3.UP, float(di["yaw"])) * Basis(Vector3.RIGHT, float(di.get("naklon", 0.0)))   # naklon: nářadí opřené o stěnu (zajimava_mista.py opreny_u_dveri)
+	return Transform3D(ba.scaled(Vector3(s, s, s)), Vector3(float(di["x"]), float(di["y"]), float(di["z"])))
 
 
 func _dil(u: Node3D, di: Dictionary, m: Dictionary) -> Node3D:

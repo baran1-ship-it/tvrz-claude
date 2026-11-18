@@ -354,6 +354,13 @@ for m in Z["mista"]:
     # ---- díly
     for di in m["dily"]:
         d = dict(di); lx, ly, lz = d.get("poloha", [0, 0, 0]); yaw = o["yaw"] + math.radians(d.get("yaw_st", 0))
+        if d.get("opreny_u_dveri"):   # nářadí opřené šikmo o štít zemljanky vedle dveří (Míša 18. 11., chyba 24: krumpáč stál svisle u skály)
+            zm = next(q for q in zaz["dily"] if q.get("zemljanka")); od = d["opreny_u_dveri"]
+            L_ = float(json.load(open(K + "/hra/modely/predmety_h.json"))[d["predmet"]]["rozmer"][1]); th = math.radians(od["naklon_st"])
+            zp_ = od["stena_z_m"] + L_ * math.sin(th) + od["tl_m"] / 2   # pata: hlava se dotkne štítu v L·cos θ nad zemí
+            wx, wz = rot(zm["yaw"], od["bokem_m"], zp_); px, pz = zm["x"] + wx, zm["z"] + wz
+            zaz["dily"].append({"predmet": d["predmet"], "x": px, "y": vys(px, pz), "z": pz, "yaw": zm["yaw"], "naklon": -th})
+            continue
         if d.get("v_zemljance") or d.get("pred_dvermi_m") is not None:
             zm = next(q for q in zaz["dily"] if q.get("zemljanka"))
             if d.get("v_zemljance"):

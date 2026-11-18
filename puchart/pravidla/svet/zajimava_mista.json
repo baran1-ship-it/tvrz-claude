@@ -155,9 +155,9 @@
     {"predmet": "kvadr_hruby_1", "poloha": [3.0, 0, 0.6], "yaw_st": 10},
     {"predmet": "kvadr_hruby_2", "poloha": [3.2, 0, 1.6], "yaw_st": -6},
     {"predmet": "kvadr_hruby_1", "poloha": [3.1, 0.55, 1.1], "yaw_st": 3, "pozn": "kvádry stranou od cesty do lomu (test pruchod:zajimava_lom – postava uvízla o kvádr)"},
-    {"predmet": "krumpac", "poloha": [-2.6, 0, -5.8], "yaw_st": 30},
     {"model": "zemljanka_prkna", "poloha": [-8.5, 0, 4.5], "yaw_st": 90, "zemljanka": true, "mimo_zarez": true},
-    {"predmet": "truhla", "v_zemljance": true}
+    {"predmet": "truhla", "v_zemljance": true},
+    {"predmet": "krumpac", "opreny_u_dveri": {"bokem_m": -1.1, "stena_z_m": 2.4, "naklon_st": 22, "tl_m": 0.07}, "pozn": "Míša 18. 11. (chyba 24, misa_18_11_lom_krumpac.jpg: „krumpáč stojí svisle u skály – nesmysl; opřít o chýši“): opřený šikmo o přední štít zemljanky vlevo od dveří (dveře x −0,48…0,4, stupeň x ±0,5) – hlava (příčně, x ±0,28) se dotkne prken štítu (stena_z_m 2,4 > líc štítu 2,35) ve výšce L·cos 22° ≈ 1,03 m nad podezdívkou (0,55 m, líc 2,55 – násada v 0,55 m ve z 2,61), pata na terénu (výška terénu v patě); délka L z katalogu predmety_h.json rozmer; NAVRH (člověk opře nářadí u dveří pod přesahem střechy)"}
    ]
   },
   {
