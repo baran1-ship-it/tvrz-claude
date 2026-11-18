@@ -14191,7 +14191,7 @@ static func voda_odraz(m: ShaderMaterial) -> void:
 	var pn: Dictionary = h["pena"]
 	for k: Array in [["panorama", load(String(h["panorama"]))], ["f0", float(h["fresnel_f0"])], ["f_mocnina", float(h["fresnel_mocnina"])],
 			["odraz_nasobek", float(h["odraz_nasobek"])], ["odraz_tonovani", float(h["odraz_tonovani"])],
-			["telo_kraj", v3.call(h["telo_kraj"])], ["telo_stred", v3.call(h["telo_stred"])], ["stred_hloubka", float(h["stred_hloubka_m"])],
+			["telo_kraj", v3.call(h["telo_kraj"])], ["telo_stred", v3.call(h["telo_stred"])], ["stred_hloubka", float(h["stred_hloubka_m"])], ["maly_tok_stred", float(h["maly_tok_stred"])],
 			["alfa", Vector2(float(h["alfa_kraj"]), float(h["alfa_stred"]))], ["vl_uv_m", float(vl["uv_m"])],
 			["vl_meritko", Vector2(float(vl["meritko"][0]), float(vl["meritko"][1]))], ["vl_rychlost", Vector2(float(vl["rychlost"][0]), float(vl["rychlost"][1]))],
 			["vl_vaha", Vector2(float(vl["vaha"][0]), float(vl["vaha"][1]))], ["vl_sklon", float(vl["sklon"])],

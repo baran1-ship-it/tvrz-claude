@@ -27,6 +27,7 @@ uniform float odraz_tonovani = 0.35;
 uniform vec3 telo_kraj : source_color = vec3(0.08, 0.065, 0.04);
 uniform vec3 telo_stred : source_color = vec3(0.015, 0.024, 0.019);
 uniform float stred_hloubka = 1.0;
+uniform float maly_tok_stred = 0.45;            // maly tok: kolik ze stredu (melka voda, dno prosvita)
 uniform vec2 alfa = vec2(0.2, 0.92);              // kraj, stred
 uniform float vl_uv_m = 4.0;
 uniform vec2 vl_meritko = vec2(0.8, 1.9);
@@ -83,7 +84,8 @@ void fragment() {
 	vec2 g = sm * nxy.x + bok * nxy.y;               // sklon hladiny ve svete (x, z)
 	// okraj -> stred (0 = kraj, 1 = stred): hloubka z barvy vrcholu, maly tok napric pasu
 	float kraj_p = min(UV.x, 1.0 - UV.x);
-	float stred = maly_tok ? smoothstep(0.08, 0.5, kraj_p) : smoothstep(0.0, stred_hloubka, v_hl);
+	// Misa 0.991 „asfalt“ / 18. 11. kontrola: maly tok je melky - stred jen do maly_tok_stred (voda.json), jinak cerny pas
+	float stred = maly_tok ? smoothstep(0.08, 0.5, kraj_p) * maly_tok_stred : smoothstep(0.0, stred_hloubka, v_hl);
 	// pena ze sumu po proudu, u kraje silnejsi (potok: navic kolem kamenu a v perejich z barvy vrcholu)
 	float s = texture(sum, vec2(u * pena_mr.x - t * pena_mr.y, v * pena_mr.x * 2.5)).r;
 	float pena = smoothstep(pena_prah.x, pena_prah.y, s) * mix(pena_sila.x, pena_sila.y, stred);
