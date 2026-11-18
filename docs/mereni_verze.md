@@ -564,3 +564,8 @@ Proti 0.9999991: tvrz-cesta 47 → 28 ms, ves-dvory 44 → 31, ves 36 → 30, p�
 
 ## 0.9999994 (vydáno 18. 11.)
 Změny: strom bez žlutých ploch (jádro koruny), postavy rozmístěné hned na místě (tvrz, řada od tvrze), lavice tvrze u zdi, hostinec bez truhly, houštiny pravidlem rozmístění (ves 549 → 225), kopřivy ve vsi 741 → 124, vyšlapáno 6 m před vraty a otevřenými stranami (export světa), voda podle Hvozdu (odraz lesa, fresnel, tmavé tělo, vlnky, pěna, mlha nad toky – varianta trasy bez_mlhy_vody), malé toky mělké, pevných 30 FPS na tabletu (jednorázový přepis volby). Výkon NEOVĚŘENO NA ZAŘÍZENÍ.
+
+## 0.9999994 – Měřicí trasa 18. 11. 12:05 (tablet, pevných 30 FPS, 135/135 úseků, bez pádu)
+S pevnými 30 FPS je p50 všude 33 ms (strop) → porovnávat p95 a počet snímků > 40 ms. „vše“ p95: tvrz-cesta 37, les 49, kůň-louka-tráva 65, ves 36, ves-vjezd 37, ves-dvory 39, hostinec 37. Proti 0.9999993 ves-vjezd >40 ms 16 → 12, na konci trasy („vše znovu“) 180 → 5 – drift zmizel (30 FPS = méně tepla, PODEZŘENÍ).
+Varianty: bez mlhy vody / bez obzoru / bez houštin / postavy – bez jasného rozdílu (p95 ±5) → mlha nad toky a les za mapou nic zásadního nestojí.
+Špičky: ves-dvory 1796 ms, hostinec 3029 ms (bez_houstin, skripty 0, fyzika 0 = mimo skripty – podezření načítání/GC), tvrz-cesta 505, ves-vjezd 529, kůň-louka 523. Paměť: VRAM 1091 MB (textury 693), halda 1774 MB.
