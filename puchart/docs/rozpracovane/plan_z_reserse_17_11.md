@@ -78,3 +78,6 @@ vychytanější, takže nechci něco přehlédnout, ať to má řád a smysl a j
 Postup: 1) rozbor nejdřív (dokument: co kde roste a proč – stanoviště, světlo, vlhkost, pastva, sešlap u cest a vsí,
 okraje lesa; pásy vzdálenosti a co se v kterém kreslí; čím se liší od Havrana a co z něj vezmeme) → Míša schválí;
 2) teprve pak stavba, po krocích se snímky ze stejných míst jako misa_18_11_prazdna_dalka_*; 3) měření tabletu.
+Míša 18. 11.: „nejsou to jen místa z fotek, ale celá mapa“ → E platí pro CELÝ svět (všechna stanoviště, všechny
+cesty, vsi, okolí hradů, lesy, okraje, louky, pole, břehy). Snímky misa_18_11 jsou jen ukázky; kontrola pak
+pokryje celou mapu (síť bodů po celém výseku + trasy, ne jen 4 místa).
