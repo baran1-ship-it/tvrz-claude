@@ -561,3 +561,6 @@ p50/p95 ms „vše“: tvrz-cesta 28/43, louka 24/28, les 28/34, skaly 36/46, ku
 Varianty proti „vše“ (p50): bez postav ves-vjezd 34, ves-dvory 28, krcma-kovarna 21 (−4); postavy skryté/stojí/bez animace bez jasného rozdílu (šum ±5 ms) → postavy už nejsou hlavní cena. bez houštin / bez obzoru: bez jasného rozdílu.
 Paměť: VRAM 1099 MB (textury 701, buffery 398), halda 1795 MB. Špičky: hostinec 330/3250 ms (mereni), zahřátí krčma-kovárna 3782 ms, les 555 ms, kůň-louka 488 ms.
 Proti 0.9999991: tvrz-cesta 47 → 28 ms, ves-dvory 44 → 31, ves 36 → 30, pád po 44 min se NEOPAKOVAL (trasa celá).
+
+## 0.9999994 (vydáno 18. 11.)
+Změny: strom bez žlutých ploch (jádro koruny), postavy rozmístěné hned na místě (tvrz, řada od tvrze), lavice tvrze u zdi, hostinec bez truhly, houštiny pravidlem rozmístění (ves 549 → 225), kopřivy ve vsi 741 → 124, vyšlapáno 6 m před vraty a otevřenými stranami (export světa), voda podle Hvozdu (odraz lesa, fresnel, tmavé tělo, vlnky, pěna, mlha nad toky – varianta trasy bez_mlhy_vody), malé toky mělké, pevných 30 FPS na tabletu (jednorázový přepis volby). Výkon NEOVĚŘENO NA ZAŘÍZENÍ.
