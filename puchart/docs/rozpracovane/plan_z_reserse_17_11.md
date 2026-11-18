@@ -90,3 +90,9 @@ plochách (klenba, schodiště, zdi u louče), plastový lesk. 18. 11.: parallax
 Další krok: skutečná skenovaná textura zdiva (Poly Haven castle_wall_slates / lomové zdivo z břidlice podle gc_18 a fotek
 Potštátu), krabicová projekce s plynulým přechodem mezi stranami (bez natažení na šikmých plochách), měřítko kamene 20–40 cm,
 spáry s maltou, bez procedurálních skvrn; srovnat snímky vedle fotek skutečných zdí (docs/reference).
+Míša 18. 11. doplnila: „je to furt tapeta, to je vono“ → textura sama nestačí, zeď je rovná deska s obrázkem. Řešení jako KCD:
+skutečný reliéf v geometrii – (1) zblízka (LOD0, do ~25 m) síť zdi zjemněná a vysunutá podle výškové mapy kamenů v Blenderu
+(kameny vystupují 2–5 cm, spáry zapadlé), (2) nepravidelné hrany: nároží, ostění, cimbuří a koruna z jednotlivých
+nepravidelných kamenů (ne ostrý kvádr), vypadlé kameny a otlučené hrany, (3) patka zdi s většími kameny, (4) dál LOD1
+dnešní rovná síť s texturou; rozpočet troj. hlídat (jen blízké úseky), měřit tablet. Vzor: Havran stavebnice + KCD fotky
+zdí (docs/reference/kcd_vzhled, kcd2), skutečné zdi Potštátska (docs/reference).
