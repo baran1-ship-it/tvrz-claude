@@ -152,6 +152,13 @@ func _ready() -> void:
 	msaa_on = bool(_cfg.get_value("hra", "msaa", not OS.has_feature("mobile")))
 	fyzika_i = int(_cfg.get_value("hra", "fyzika", 1))
 	snimky_i = int(_cfg.get_value("hra", "snimky", int(Pravidla.cti("kvalita", "snimky_vychozi_mobil")) if OS.has_feature("mobile") else 0))
+	# Misa 18. 11. („zafixuj 30 FPS, at setrime procesor“): ulozena volba z drivejska (volne) se jednou prepise na vychozi
+	# tabletu - kvalita.json snimky_reset_verze; hrac ji pak muze v Nastaveni zmenit znovu
+	var srv := int(Pravidla.cti("kvalita", "snimky_reset_verze"))
+	if OS.has_feature("mobile") and int(_cfg.get_value("hra", "snimky_reset", 0)) < srv:
+		snimky_i = int(Pravidla.cti("kvalita", "snimky_vychozi_mobil"))
+		_cfg.set_value("hra", "snimky", snimky_i)
+		_cfg.set_value("hra", "snimky_reset", srv)
 	plne_3d = bool(_cfg.get_value("hra", "plne_3d", false))
 	trava_uspora = bool(_cfg.get_value("hra", "trava_uspora", false))
 	trava_gpu = bool(_cfg.get_value("hra", "trava_gpu", bool(Pravidla.cti("trava_gpu", "zapnuto"))))

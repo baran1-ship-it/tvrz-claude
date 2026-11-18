@@ -218,5 +218,7 @@
  "snimky_vychozi_mobil": 1,
  "_snimky_13_11": "Misa 13. 11. (Puchart: pevnych 30 FPS, p95 36 ms, jede plynule; Havran volne 20-45 FPS = nerovnomerne snimky): na tabletu vychozi volba Snimky = pevnych 30 (main.snimky_i 1); hrac ji muze v Nastaveni zmenit, ulozena volba ma prednost",
  "obloha_prah": 0.004,
- "_obloha_prah": "13. 11.: parametry oblohy (barvy, záře, hvězdy, mraky) se přenastaví jen při změně větší než prah - každá změna = přepočet radiance mapy (tools/mereni_oblohy.gd PC: změna každý snímek 24 ms proti 7 ms); daylight je měnil každých 0,25 s. Puchart (bez sekání) totéž s prahem 0,004"
+ "_obloha_prah": "13. 11.: parametry oblohy (barvy, záře, hvězdy, mraky) se přenastaví jen při změně větší než prah - každá změna = přepočet radiance mapy (tools/mereni_oblohy.gd PC: změna každý snímek 24 ms proti 7 ms); daylight je měnil každých 0,25 s. Puchart (bez sekání) totéž s prahem 0,004",
+ "snimky_reset_verze": 1,
+ "_snimky_18_11": "Míša 18. 11. „zafixuj 30 FPS, ať šetříme procesor“: uložená volba Snímky (Míša měla volně) se na tabletu jednou přepíše na snimky_vychozi_mobil (pevně 30); zvýšením snimky_reset_verze se přepíše znovu."
 }
