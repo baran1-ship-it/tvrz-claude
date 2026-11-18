@@ -108,3 +108,4 @@ obytných místností a na palácích (vápenná, místy opadaná), sklepy/podze
 geometrie kamenů tam, kde je kámen vidět zblízka (nároží, ostění, cimbuří, klenební pasy, schody, paty zdí),
 (4) žádná promítnutá textura natažená na šikmých/zakřivených plochách (klenby, schodiště). Kontrola: snímky ze stejných
 míst jako misa_18_11_zdivo_*.jpg vedle předloh docs/reference/zdivo_kcd_18_11/.
+Míša 18. 11.: „…nejenom“ (hrady) → F platí pro všechny stavby na mapě: ves, krčma, kovárna, hájovna, mlýn, chýše a zemljanky, studny, podezdívky, zídky, mosty, pece a krby – všude, kde je kámen nebo omítka.
