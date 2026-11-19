@@ -41,7 +41,24 @@ if [ "$1" != "--rychle" ]; then
   _PSC=$!
   # + mřížka dosažitelnosti (pruchod:dosah, plán 17. 11. B1): díry a únik ze světa = CHYBA, uvíznutí / ostrovy / dveře bez dosahu
   # výpis; mapa build/dosah.png, nálezy build/dosah.json (pravidla kontroly_hra.json dosah)
-  (cd $K/hra && PUCHART_TEST=pruchod PUCHART_VYSTUP=$K/build/pruchod.json PUCHART_DOSAH=$K/build/dosah.json timeout 5400 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | tee $K/build/hlidaci_beh_godot.log | grep -E "^PRUCHOD|^DOSAH (mřížka|uvíznutí [0-9]|cíle)" | cut -c1-200 | tee -a $S)
+  # skupiny tras podle vstupů (Míša 19. 11.: „když upravujeme jen hrad, tak není třeba procházet celý svět“): skupina se
+  # nezměněným otiskem a posledním výsledkem OK se převezme, ostatní běží souběžně po PUCHART_SOUBEH procesech; výsledek
+  # každé skupiny se zapíše hned (restart kontejneru = další běh převezme hotové). Pravidla pravidla/svet/hlidaci_skupiny.json,
+  # otisky build/hlidaci_otisky.json, HLIDACI_VSE=1 vynutí vše. Mřížka dosažitelnosti (dosah) je ve skupině svet.
+  python3 $K/nastroje/hlidaci_skupiny.py plan $K | tee -a $S
+  _skupina() {   # $1 skupina, $2 trasy (čárkami), $3 pevné testy pro PUCHART_JEN
+    local _o=$K/build/pruchod_skupiny/$1
+    (cd $K/hra && PUCHART_TEST=pruchod PUCHART_TRASA="$2" PUCHART_JEN="$3" PUCHART_VYSTUP=$_o.vystup.json PUCHART_DOSAH=$K/build/dosah.json \
+      timeout 5400 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 > $_o.log 2>&1)
+    python3 $K/nastroje/hlidaci_skupiny.py zapis $K $1 $_o.vystup.json
+  }
+  export -f _skupina; export K G
+  _SOUBEH=${PUCHART_SOUBEH:-$(python3 -c "import json;print(json.load(open('$K/pravidla/svet/hlidaci_skupiny.json'))['souběh'])")}
+  xargs -r -d '\n' -n1 -P $_SOUBEH bash -c 'IFS=$'"'"'\t'"'"' read -r a b c <<< "$1"; _skupina "$a" "$b" "$c"' _ < $K/build/pruchod_skupiny/_plan.tsv | tee -a $S
+  : > $K/build/hlidaci_beh_godot.log
+  for _l in $K/build/pruchod_skupiny/*.log; do [ -e "$_l" ] || continue; cat $_l >> $K/build/hlidaci_beh_godot.log
+    grep -E "^PRUCHOD|^DOSAH (mřížka|uvíznutí [0-9]|cíle)" $_l | grep -v "^PRUCHOD VYSLEDEK" | cut -c1-200 | tee -a $S; done
+  python3 $K/nastroje/hlidaci_skupiny.py sluc $K | tee -a $S
   # všechny trasy z dat i pevné testy musí mít výsledek OK (audit 15. 11.: chybějící trasa dřív prošla)
   python3 - "$K" <<'PY' | tee -a $S || rc=1
 import json, sys
@@ -51,6 +68,10 @@ for f in ("pruchody.json", "pruchody_mista.json"):
     try: oc |= set(json.load(open(K + "/hra/data/" + f))["trasy"].keys())
     except Exception: pass
 oc |= {"strom_kolize", "povrch_kolize", "vrata_funkce", "mapa_cestovani", "zebrik_lezeni", "dosah"}
+for f in ("pruchody_topeni.json", "pruchody_voda.json", "pruchody_zajimava.json"):   # 19. 11.: i ostatní stavitelé
+    try: oc |= set(json.load(open(K + "/hra/data/" + f))["trasy"].keys())
+    except Exception: pass
+oc |= set(json.load(open(K + "/pravidla/svet/hlidaci_skupiny.json"))["testy_jen"])   # všechny pevné testy
 chybi = sorted(oc - set(d)); spatne = sorted(k for k, v in d.items() if v != "OK")
 print("PRUCHOD_UPLNOST tras %d, chybí %d %s, chybných %d %s" % (len(d), len(chybi), chybi[:6], len(spatne), spatne[:6]))
 sys.exit(1 if chybi or spatne else 0)
