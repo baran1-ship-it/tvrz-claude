@@ -1517,6 +1517,10 @@ for _q in json.load(open(K + "/pravidla/svet/hrad_puchart.json"))["teren"]["plos
 else: _c399.append("plošina A_nadvori_jih chybí")
 TEST("nadvori_A_rovne", not _c399, "; ".join(_c399) if _c399 else "nádvoří A u věžičky srovnané (převýšení pod %.2f m)" % KC.get("nadvori_prevyseni_m", 0.25))
 
+# 401 (Míša 19. 11.): louče osvětlují prostor místnosti
+_sv401 = json.load(open(K + "/hra/data/prostredi.json"))["atmosfera"]["svitidla"]
+TEST("svitidla_sila", float(_sv401["energie_nasobek"]) >= 2.5 and float(_sv401["dosah_nasobek"]) >= 2.0, "svítidla energie %s, dosah %s" % (_sv401["energie_nasobek"], _sv401["dosah_nasobek"]))
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)
