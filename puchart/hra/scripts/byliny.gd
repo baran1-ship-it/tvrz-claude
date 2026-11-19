@@ -88,14 +88,28 @@ func _fade(m: Mesh, od: float, do_: float) -> Mesh:
 			sm.set_shader_parameter("prah", maxf((mat as BaseMaterial3D).alpha_scissor_threshold, 0.3))
 			sm.set_shader_parameter("stred", Vector3(bb.get_center().x, bb.position.y + bb.size.y * 0.5, bb.get_center().z))
 			sm.set_shader_parameter("vyska", maxf(bb.end.y, 0.5)); sm.set_shader_parameter("sila_vetru", 0.6); sm.set_shader_parameter("objem", 0.5)
-			sm.set_shader_parameter("zanik", Vector2(do_, od))
+			sm.set_shader_parameter("zanik", Vector2(do_, od)); sm.set_shader_parameter("zanik_inst", true)
 			mm.surface_set_material(i, sm); continue
 		if mat is BaseMaterial3D:
-			var c: BaseMaterial3D = mat.duplicate()
-			c.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
-			c.distance_fade_min_distance = do_; c.distance_fade_max_distance = od   # min > max = mizí s dálkou
-			mm.surface_set_material(i, c)
+			mm.surface_set_material(i, _zanik_inst(mat as BaseMaterial3D, do_, od))   # dřív distance_fade PIXEL_DITHER = šachovnice
 	return mm
+
+## Míša 19. 11. (plán E1 krok 1, „mizející rostliny jako šachovnice“): místo ditheringu mizí celé rostliny – každá instance má
+## práh z hashe své pozice a ke konci dosahu se srazí k patě (shaders/bylina.gdshader). Parametr "zanik" jako listi.gdshader
+## (regulator.gd ho násobí). Bez průhlednosti: alfa jen nůžkami.
+var _bylina_sh: Shader
+func _zanik_inst(mat: BaseMaterial3D, do_: float, od: float) -> ShaderMaterial:
+	if _bylina_sh == null: _bylina_sh = load("res://shaders/bylina.gdshader")
+	var sm := ShaderMaterial.new(); sm.shader = _bylina_sh
+	if mat.albedo_texture: sm.set_shader_parameter("barva", mat.albedo_texture); sm.set_shader_parameter("ma_barvu", true)
+	sm.set_shader_parameter("tint", mat.albedo_color); sm.set_shader_parameter("barva_vrcholu", mat.vertex_color_use_as_albedo)
+	if mat.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
+		sm.set_shader_parameter("prah", mat.alpha_scissor_threshold if mat.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR else 0.5)
+	if mat.normal_enabled and mat.normal_texture: sm.set_shader_parameter("normaly", mat.normal_texture); sm.set_shader_parameter("ma_normaly", true)
+	sm.set_shader_parameter("drsnost", mat.roughness)
+	sm.set_shader_parameter("uv_meritko", mat.uv1_scale); sm.set_shader_parameter("uv_posun", mat.uv1_offset)
+	sm.set_shader_parameter("zanik", Vector2(do_, od))
+	return sm
 
 func vsechny_site() -> Array:
 	var a := []

@@ -209,9 +209,10 @@
  },
  "pozn_parezy": "3. 11. (Míša: les plný pařezů a pokácených stromů): pařezy jen na pasekách (stopa těžby), v lese ~1 na 1000 m², padlé kmeny ~1 na 1000 m² (suť 2×)",
  "zanik_m": [
-  26,
-  32
+  22,
+  40
  ],
+ "pozn_zanik_19_11": "Míša 19. 11. (plán E1 krok 1, „mizející rostliny jako šachovnice“, byliny rozházené tečky): zanik_m 26–32 → 22–40 (pod dosah_m 44) – rostliny mizí po celých instancích (práh z hashe pozice, zmenšení k patě, byliny.gd _zanik_inst, listi.gdshader zanik_inst), ne ditheringem; pozvolné řídnutí přes 18 m místo skoku. Trojúhelníky beze změny (instance do dosah_m se kreslí i dřív). Zdroj: Míša 19. 11., plán E1 krok 1.",
  "predstih_m": 14,
  "vlozit_za_snimek": 1,
  "pozn_predstih": "3. 11. (Míša: tráva vyrůstá před očima; Havran louka.gd): buňky se počítají ve vlákně do dosah + predstih, vidět jen do dosahu s rozpouštěním zanik_m",

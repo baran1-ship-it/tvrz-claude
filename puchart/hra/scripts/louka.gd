@@ -32,7 +32,7 @@ func postav(s: Node3D, kamera: Camera3D) -> void:
 	var m := _trs.surface_get_material(0) as ShaderMaterial
 	m.set_shader_parameter("z_custom", true)
 	m.set_shader_parameter("hust_od", float(cfg["hust_od_m"])); m.set_shader_parameter("hust_do", float(cfg["hust_do_m"]))
-	m.set_shader_parameter("hust_konec", float(cfg["hust_do_m"]))
+	m.set_shader_parameter("hust_konec", float(cfg["hust_do_m"])); m.set_shader_parameter("hust_zbytek", float(cfg.get("hust_zbytek", 0.0)))
 
 	if str(cfg.get("rezim", "bunky")) == "mrizka": _mrizka_postav()
 	nastav_unshaded(_un_vychozi())
@@ -137,7 +137,7 @@ func _mrizka_postav() -> void:
 		m.set_shader_parameter("stan_info", Vector4(float(sj["x0_hra"]), float(sj["z0_hra"]), float(sj["krok_m"]), st.get_width()))
 		m.set_shader_parameter("krok_m", krok)
 		m.set_shader_parameter("hust_od", float(cfg["hust_od_m"])); m.set_shader_parameter("hust_do", float(cfg["hust_do_m"]))
-		m.set_shader_parameter("hust_konec", float(cfg["hust_do_m"]))
+		m.set_shader_parameter("hust_konec", float(cfg["hust_do_m"])); m.set_shader_parameter("hust_zbytek", float(cfg.get("hust_zbytek", 0.0)))
 		var n := int(ceil(do_ / krok)); var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D; mm.use_custom_data = true; mm.mesh = mesh
 		var body := []

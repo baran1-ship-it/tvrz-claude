@@ -15,6 +15,7 @@ uniform float sila_vetru = 1.0;
 uniform float objem = 0.65;                    // 0 = normaly karet, 1 = koule kolem stredu
 uniform vec2 vitr_smer = vec2(0.8, 0.6);
 uniform vec2 zanik = vec2(0.0);
+uniform bool zanik_inst = false;   // byliny.gd keře: zanik po instancích (zmenšení k patě), jinak dithering (les.gd)
 // LOD po stromech (Míša 10. 11.: „blikání stromů, pořád se nějaký strom mění a mizí“ – dřív se přepínala celá buňka 24 m):
 // lod_mez = (vzdálenost přepnutí, šířka prolnutí, režim 0 vše / 1 = jen blíž než mez (LOD0) / 2 = jen dál (LOD1)).
 // Vzdálenost od kamery hráče (kamera_hrace, i ve stínovém průchodu) k patě stromu; mimo pásmo se strom
@@ -56,6 +57,11 @@ void vertex() {
 		bool pryc = lod_mez.z < 1.5 ? v_lod >= 1.0 : (v_lod <= 0.0 || v_far <= 0.0);
 		if (pryc) { VERTEX = vec3(0.0); }
 	}
+	if (zanik_inst && zanik.x != zanik.y) {   // Puchart (Míša 19. 11., plán E1 krok 1): mizení po rostlinách – práh z hashe pozice instance, rostlina se ke konci dosahu srazí k patě (ne šachovnice ditheru)
+		float vz = clamp((length(wp - INV_VIEW_MATRIX[3].xyz) - zanik.x) / (zanik.y - zanik.x), 0.0, 1.0);
+		float hz = fract(sin(dot(wp.xz, vec2(12.9898, 78.233))) * 43758.5453);
+		VERTEX *= clamp((vz - hz * 0.8) / 0.2, 0.0, 1.0);
+	}
 	float h = clamp(VERTEX.y / max(vyska, 1.0), 0.0, 1.0);
 	float faze = wp.x * 0.13 + wp.z * 0.11;
 	// kyvani koruny (pomale, poryvy), roste s vyskou kvadraticky - kmen u zeme stoji
@@ -90,9 +96,8 @@ void fragment() {
 		if (lod_mez.z < 1.5) { if (b < v_lod) discard; }
 		else { if (b >= v_lod || b >= v_far) discard; }
 	}
-	if (zanik.x != zanik.y) {   // stejné jako distance_fade PIXEL_DITHER u StandardMaterial (přechod LOD bez odskočení)
-		float dd = length(VERTEX);
-		float f = clamp((dd - zanik.x) / (zanik.y - zanik.x), 0.0, 1.0);
+	if (!zanik_inst && zanik.x != zanik.y) {   // stejné jako distance_fade PIXEL_DITHER (les.gd); keře bylin po instancích ve vertex() (Míša 19. 11.: šachovnice)
+		float f = clamp((length(VERTEX) - zanik.x) / (zanik.y - zanik.x), 0.0, 1.0);
 		if (f < bayer4(FRAGCOORD.xy)) discard;
 	}
 	vec4 t = texture(barva, UV);

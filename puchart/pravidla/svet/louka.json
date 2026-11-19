@@ -6,6 +6,9 @@
  "dosah_m": 96,
  "hust_od_m": 14,
  "hust_do_m": 85,
+ "hust_zbytek": 0.35,
+ "pozn_zbytek_19_11": "Míša 19. 11. (svah pod hradem 30–80 m řídký, docs/screens/misa_19_11_svah_ridky.png): od hust_od do hust_do ubývá jen na hust_zbytek (stebla.gdshader), dřív 0 = louka 50–85 m skoro holá. NAVRH, tablet NEOVERENO.",
+ "zdroj_zbytek": "Míša 19. 11., plán E1 krok 1 (docs/rozpracovane/plan_z_reserse_17_11.md)",
  "nove_za_snimek": 1,
  "tridy": {
   "louka_kosena": 1.0,

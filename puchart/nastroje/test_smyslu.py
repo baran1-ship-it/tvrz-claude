@@ -1592,6 +1592,22 @@ for _st in _sk:
         if _Pg406([tuple(_a), tuple(_b), tuple(_b + _n * (_w + _ob406)), tuple(_a + _n * (_w + _ob406))]).buffer(0.0).intersection(_P).area > 0.01:
             _c406.append("%s: pruh u paty %s (%.1f, %.1f) do půdorysu" % (_st["id"], _q[7], _q[0], _q[1]))
 TEST("staj_bez_porostu", bool(_sk) and not _c406, "; ".join(_c406[:5]) if _c406 else "stáj bez porostu: %d stájí, buňky bez trávy, žádný pruh u paty do půdorysu" % len(_sk))
+# Míša 19. 11. (plán E1 krok 1): byliny a keře mizí po instancích (ne dithering = šachovnice), louka v dálce neubývá na 0
+_c191 = []
+_by191 = open(os.path.join(K, "hra/scripts/byliny.gd"), encoding="utf-8").read()
+if "DISTANCE_FADE_PIXEL_DITHER" in _by191: _c191.append("byliny.gd: distance_fade PIXEL_DITHER")
+if "zanik_inst" not in _by191: _c191.append("byliny.gd: keře bez zanik_inst")
+_bsh191 = open(os.path.join(K, "hra/shaders/bylina.gdshader"), encoding="utf-8").read()
+if "bayer" in _bsh191 or "discard" in _bsh191 or "VERTEX *=" not in _bsh191: _c191.append("bylina.gdshader: ne zmenšení instance")
+_zk191 = json.load(open(os.path.join(K, "pravidla/svet/byliny.json"), encoding="utf-8"))
+_bdo191 = float(_zk191.get("dosah_m", 0)); _z191 = _zk191.get("zanik_m", [0, 0])
+if not (_z191[1] - _z191[0] >= 12 and _z191[1] <= _bdo191): _c191.append("byliny zanik_m %s: pásmo < 12 m nebo za dosahem %s" % (_z191, _bdo191))
+_lk191 = json.load(open(os.path.join(K, "pravidla/svet/louka.json"), encoding="utf-8"))
+if not 0.25 <= float(_lk191.get("hust_zbytek", 0)) <= 0.6: _c191.append("louka hust_zbytek %s mimo 0,25–0,6" % _lk191.get("hust_zbytek"))
+if '"hust_zbytek"' not in open(os.path.join(K, "hra/scripts/louka.gd"), encoding="utf-8").read(): _c191.append("louka.gd nepředá hust_zbytek")
+for _f191 in ("byliny.json", "louka.json"):
+    if json.load(open(os.path.join(K, "hra/data", _f191), encoding="utf-8")) != json.load(open(os.path.join(K, "pravidla/svet", _f191), encoding="utf-8")): _c191.append("hra/data/%s není kopie" % _f191)
+TEST("ridnuti_bez_sachovnice", not _c191, "; ".join(_c191) if _c191 else "byliny zanik %s po instancích, louka hust_zbytek %s" % (_z191, _lk191.get("hust_zbytek")))
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)
