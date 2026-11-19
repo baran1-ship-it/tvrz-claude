@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "50df0b0",
+ "commit": "fa09307",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -152,6 +152,12 @@
    "zdivo_klidne": true
   },
   "pruchod": {
+   "cesta_mezi_hrady": true,
+   "dosah": true,
+   "mapa_cestovani": true,
+   "nevylezt": true,
+   "povrch_kolize": true,
+   "strom_kolize": true,
    "A_branka_patro": true,
    "A_most_vnejsi": true,
    "A_ochoz": true,
@@ -168,6 +174,8 @@
    "A_vezicka_prizemi": true,
    "A_vstup": true,
    "A_vstup_ven": true,
+   "budova_palac_-3_14": true,
+   "vrata_funkce": true,
    "B_ochoz_k_budove_9_8": true,
    "B_ochoz_vez": true,
    "B_stit_prizemi": true,
@@ -175,10 +183,7 @@
    "B_vez_nahoru": true,
    "B_vstup": true,
    "B_vstup_ven": true,
-   "budova_palac_-3_14": true,
    "budova_palac_54_147": true,
-   "cesta_mezi_hrady": true,
-   "dosah": true,
    "dum_hajovna_Hajovna": true,
    "dum_krcma_KrcmaL": true,
    "dum_predhradi_Dum1_10": true,
@@ -208,23 +213,14 @@
    "kovadlina_osazena": true,
    "kovarna_mech": true,
    "lavice_sezeni": true,
-   "lavka_mlyn": true,
-   "lavka_most_440_1": true,
-   "lavka_most_440_2": true,
-   "lavka_most_440_3": true,
-   "lavka_most_440_4": true,
-   "lavka_most_440_5": true,
-   "lavka_most_440_6": true,
    "luzka": true,
-   "mapa_cestovani": true,
-   "nevylezt": true,
    "pavlac_krcma_KrcmaL": true,
-   "povrch_kolize": true,
    "puda_hajovna_Hajovna": true,
    "puda_krcma_KrcmaL": true,
    "spanek": true,
-   "strom_kolize": true,
    "studna_vedro": true,
+   "zebrik_lezeni": true,
+   "zlab_voda": true,
    "topeni_hajovna_Hajovna_10": true,
    "topeni_krcma_KrcmaL_9": true,
    "topeni_predhradi_Dum1_1": true,
@@ -260,7 +256,6 @@
    "ven_predhradi_Dum2_7": true,
    "ven_predhradi_Rychta_8": true,
    "ven_predhradi_Rychta_9": true,
-   "vrata_funkce": true,
    "zajimava_bozi_muka": true,
    "zajimava_brte": true,
    "zajimava_kriz_rozcesti": true,
@@ -278,32 +273,37 @@
    "zajimava_studanka_pesina": true,
    "zajimava_uhlir": true,
    "zajimava_uhlir_zemljanka": true,
-   "zebrik_lezeni": true,
-   "zlab_voda": true
+   "lavka_mlyn": true,
+   "lavka_most_440_1": true,
+   "lavka_most_440_2": true,
+   "lavka_most_440_3": true,
+   "lavka_most_440_4": true,
+   "lavka_most_440_5": true,
+   "lavka_most_440_6": true
   },
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1063593,
-    "troj_max": 1089862,
-    "kresleni_p95": 372,
-    "kresleni_m_median": 477.0
+    "troj_p95": 1163187,
+    "troj_max": 1204917,
+    "kresleni_p95": 382,
+    "kresleni_m_median": 478.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1608421,
-    "troj_max": 1858555,
-    "kresleni_p95": 878,
-    "kresleni_m_median": 715.0
+    "troj_p95": 1659716,
+    "troj_max": 1946595,
+    "kresleni_p95": 881,
+    "kresleni_m_median": 718.0
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1591951,
-    "troj_max": 1783916,
-    "kresleni_p95": 1062,
-    "kresleni_m_median": 1761.0
+    "troj_p95": 1682128,
+    "troj_max": 1888880,
+    "kresleni_p95": 1064,
+    "kresleni_m_median": 1760.0
    },
-   "zmena_median": 34.25,
+   "zmena_median": 33.89,
    "doskoky": [],
    "ve_zdi": 2
   },
