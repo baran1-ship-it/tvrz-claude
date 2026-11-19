@@ -3,9 +3,9 @@
  "zdroj": "Havran louka.gd (KROK 0.36, HUST_OD 20, tablet hust_do 80), KCD2: na 1 m² není vidět půda",
  "krok_m": 0.5,
  "bunka_m": 32,
- "dosah_m": 66,
+ "dosah_m": 96,
  "hust_od_m": 14,
- "hust_do_m": 60,
+ "hust_do_m": 85,
  "nove_za_snimek": 1,
  "tridy": {
   "louka_kosena": 1.0,
@@ -161,5 +161,6 @@
   "svetlina_min": 0.6,
   "_svetlina_min": "v lese na světle (krytí korunou 0 v okolí ±3 m): průměrná hustota aspoň tolik – světliny, paseky a okraje zarostlé (Havran: tráva podle louky)"
  },
- "pozn_hrady_18_11": "Míša 18. 11.: „na obou hradech je všude na nádvořích a v zákoutích tráva, ale ta by tam být neměla“ – nádvoří, vyšlapané plochy, pata zdí uvnitř a kouty zdí bez trávy (udusaná hlína, dlažba)."
+ "pozn_hrady_18_11": "Míša 18. 11.: „na obou hradech je všude na nádvořích a v zákoutích tráva, ale ta by tam být neměla“ – nádvoří, vyšlapané plochy, pata zdí uvnitř a kouty zdí bez trávy (udusaná hlína, dlažba).",
+ "pozn_plnost_19_11": "Míša 19. 11. (plán E3, „roste to před očima“): dosah a pozvolné řídnutí dál – předtím {'dosah_m': 66, 'hust_do_m': 60}; automatika detailu (regulator.gd) ubírá trávu a keře jako první, když tablet nestíhá. Tablet NEOVERENO."
 }
