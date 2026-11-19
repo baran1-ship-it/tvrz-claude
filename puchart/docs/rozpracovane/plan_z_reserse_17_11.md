@@ -121,3 +121,7 @@ Míša 19. 11. (misa_19_11_svah_ridky.png, kroužek na svahu pod hradem z x 131 
 rozházené jednotlivé byliny jako tečky, mezi nimi hladký terén, mizející rostliny jako šachovnice (dither přechodu).
 → E1 (střední pás: husté levné trsy/impostor buňky 20–150 m podle předlohy lod_trava_video) je nutný; samotná textura
 terénu (E2) a delší dosah (E3) nestačí. Dither přechodu nahradit plynulým (alfa/řídnutí hustoty), ne šachovnicí.
+Míša 19. 11. (misa_19_11_krajnice_holé.png, x 131 z 276 po E1 kroku 1): svah pořád řídký (byliny jako ostrůvky) a OBĚ
+KRAJNICE CESTY HOLÉ – pás 2–5 m vedle vyjetých kolejí je jen plochá textura trávníku bez trsů. → E5 (lem trávy a bylin až
+ke kolejím) první na řadě: zjistit, proč louka/byliny vynechávají pás u cesty (třída stanoviště „cesta“ širší než koleje?
+maska cest v louka.gd/byliny.gd?) a zúžit vyloučení jen na vyjeté koleje; pak E1 (husté trsy na svahu).
