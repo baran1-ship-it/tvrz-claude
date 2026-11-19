@@ -144,7 +144,11 @@
   "pole_orane": {
    "trava": 0.05
   },
-  "_pole_orane": "orané lány za humny (mista.json usedlosti.povrch): hlína, jen ojedinělé trsy na hroudách (KCD2 ref_kcd2_ves_shora hnědé pruhy)"
+  "_pole_orane": "orané lány za humny (mista.json usedlosti.povrch): hlína, jen ojedinělé trsy na hroudách (KCD2 ref_kcd2_ves_shora hnědé pruhy)",
+  "cesta_krajnice": {
+   "trava": 1.4,
+   "vysoka": 0.15
+  }
  },
  "pozn": "29. 10.: 2,6/m² bylo z 1,7 m řídké (snímek t_trava) -> 5/m² na louce",
  "modely": {
@@ -374,5 +378,6 @@
  "shluky_frekvence": 1.0,
  "_shluky_frekvence": "frekvence šumu shluků (byliny.gd _sum); souřadnice se dělí vlna_m → vlna ≈ vlna_m. Do 17. 11. výchozí 0,01 (vlna 4,8 km, shluky nefungovaly)",
  "pozn_hrady_18_11": "Míša 18. 11.: na nádvořích a v koutech hradů žádná tráva ani byliny – zůstávají jen kameny a mech.",
- "pozn_plnost_19_11": "Míša 19. 11. (plán E3, „roste to před očima“): dosah a pozvolné řídnutí dál – předtím {'dosah_m': 32}; automatika detailu (regulator.gd) ubírá trávu a keře jako první, když tablet nestíhá. Tablet NEOVERENO."
+ "pozn_plnost_19_11": "Míša 19. 11. (plán E3, „roste to před očima“): dosah a pozvolné řídnutí dál – předtím {'dosah_m': 32}; automatika detailu (regulator.gd) ubírá trávu a keře jako první, když tablet nestíhá. Tablet NEOVERENO.",
+ "pozn_krajnice_19_11": "Míša 19. 11.: krajnice cest – v třídě stanoviště cesta mimo hlínu masky cest (textury/maska_cesty.png) rostou byliny jako na pastvině (cesta_krajnice), byliny.gd."
 }

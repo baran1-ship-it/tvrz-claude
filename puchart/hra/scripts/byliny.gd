@@ -21,6 +21,8 @@ func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json") -> v
 	_sum.frequency = float(cfg.get("shluky_frekvence", 1.0))
 	sj = JSON.parse_string(FileAccess.get_file_as_string("res://data/stanoviste.json"))
 	st = load("res://data/stanoviste.png").get_image()
+	sj_c = sj; _st_w = st.get_width(); _st_h = st.get_height()
+	if ResourceLoader.exists("res://textury/maska_cesty.png"): _mc = (load("res://textury/maska_cesty.png") as Texture2D).get_image()
 	if ResourceLoader.exists("res://data/kamenitost.png"): km_img = load("res://data/kamenitost.png").get_image()   # kde je kamenito (stavby_vegetace.py)
 	# zápoj korun (byliny.json zapoj, pravidlo louka.json les – Havran les_podrost.json): tráva bylin pod zápojem ≈ 0, podrost zůstává
 	if cfg.has("zapoj") and ResourceLoader.exists("res://data/kryt.png"):
@@ -116,6 +118,7 @@ func vsechny_site() -> Array:
 	for k in meshe: a.append_array(meshe[k])
 	return a
 
+var _mc: Image = null; var sj_c: Dictionary = {}; var _st_w := 1; var _st_h := 1   # maska cest – krajnice (Míša 19. 11.)
 func _trida(x: float, z: float) -> String:
 	var c := int((x - float(sj["x0_hra"])) / float(sj["krok_m"])); var r := int((z - float(sj["z0_hra"])) / float(sj["krok_m"]))
 	if c < 0 or r < 0 or c >= st.get_width() or r >= st.get_height(): return ""
@@ -250,9 +253,15 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 	for t in vzorku:
 		var x := (i + rng.randf()) * B; var z := (j + rng.randf()) * B
 		var tr := _trida(x, z)
+		var nas := 1.0
+		if tr == "cesta" and _mc != null and tridy.has("cesta_krajnice"):   # Míša 19. 11.: krajnice zarostlé, holá jen hlína z masky cest
+			var mcx := clampi(int((x - float(sj_c["x0_hra"])) / float(sj_c["krok_m"]) * _mc.get_width() / _st_w), 0, _mc.get_width() - 1)
+			var mcz := clampi(int((z - float(sj_c["z0_hra"])) / float(sj_c["krok_m"]) * _mc.get_height() / _st_h), 0, _mc.get_height() - 1)
+			var pc := _mc.get_pixel(mcx, mcz); nas = 1.0 - smoothstep(0.08, 0.35, pc.r + pc.g)
+			if nas <= 0.01: continue
+			tr = "cesta_krajnice"
 		if not tridy.has(tr): continue
 		var h: Dictionary = tridy[tr]
-		var nas := 1.0
 		var sht: Dictionary = cfg.get("shluky_tridy", {}).get(tr, sh)   # houštiny po třídách (Havran les_podrost.json houstina: plášť souvislý, břeh v pásech s mezerami)
 		if not sht.is_empty():   # shluky: hustota × šum (světliny a hustá místa, ne rovnoměrný posyp)
 			var u := clampf(_sum.get_noise_2d(x / float(sht["vlna_m"]), z / float(sht["vlna_m"])) * 0.5 + 0.5, 0.0, 1.0)
