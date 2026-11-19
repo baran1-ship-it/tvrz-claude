@@ -4,6 +4,7 @@
 # Volá export_apk.sh před stavbou APK; rc ≠ 0 = nevydávat. Výsledky build/*.json, souhrn build/hlidaci.txt.
 #   bash nastroje/hlidaci.sh            celá sada (před vydáním)
 #   bash nastroje/hlidaci.sh --rychle   jen data (geometrie, smysl, matice bez průchodu) – při každé změně
+#   HLIDACI_VSE=1 bash nastroje/hlidaci.sh   vše znovu (bez převzetí otisků: skupiny průchodu a glb geometrie – pravidla/svet/hlidaci_skupiny.json)
 set -o pipefail
 unset PUCHART_JEN PUCHART_TRASA PUCHART_SKRYJ PUCHART_DEST PUCHART_SKRIPT PUCHART_FOTO   # ladicí proměnné by tiše zúžily testy (audit 15. 11.)
 K=$(cd "$(dirname "$0")/.." && pwd); G=${GODOT:-/opt/godot47/Godot_v4.7.2-stable_linux.x86_64}

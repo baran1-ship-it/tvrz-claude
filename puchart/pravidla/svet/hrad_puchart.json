@@ -1,5 +1,6 @@
 {
  "popis": "Dvojhradí Puchart podle dochovaných zdrojů a kreseb (Míša 30. 10.: „udělej to vše přesně podle dochovaných zdrojů a maleb“, „zruš palisádu“). Nahrazuje variantu 6 z hrady_navrhy.json. Souřadnice hra [x, z], výšky y hry (m n. m. − pocatek.H).",
+ "pozn_hlidaci": "změna tohoto souboru spouští v hlídačích jen trasy hradů (skupiny hrad_A, hrad_B v pravidla/svet/hlidaci_skupiny.json; Míša 19. 11.)",
  "zdroje": {
   "GC80T08": "geocaching.com GC80T08 „Pověsti o hradu Puchart“ (Hlavacek Team): půdorys v současnosti, kresebné rekonstrukce celku, předního hradu a zadního hradu ve verzi se štítovou zdí; obrázky jen odkazem (autorské), viz docs/hrady_zdroje.md",
   "atlas": "archeologickyatlas.cz Kyžlířov – Pustý zámek: plán podle Tomášek a kol. 2015; „Zadní hrad … lichoběžníkovitého tvaru … skalní průrva s hranolovou věží a hlavní objekt – palác“",
