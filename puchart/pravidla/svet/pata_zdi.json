@@ -26,8 +26,29 @@
  },
  "slap_sirka_m": 2.5,
  "vyslapane_plochy": [
-  {"id": "A_branka_schody", "poly": [[9.8, -44.5], [14.2, -44.5], [14.2, -27.0], [9.8, -27.0]], "pozn_14_11b": "Míša 14. 11. (2. foto): „ještě tady je tráva“ – trs u paty věže branky za koncem plochy (−39) → plocha až k věži (−44,5)",
-   "zdroj": "Míša 14. 11. (foto x 11,7 z −29,7 u schodů na ochoz u vstupní branky): „vedle schodů by neměla růst tráva, chodí se tam, udělej tam udusanou hlínu, sem tam kamínek“ – pata schodů A_schody_vychod_pata a cesta k průchodu branky; KCD1 18_brana_zvenku (k bráně vyšlapaná hlína)"}
+  {
+   "id": "A_branka_schody",
+   "poly": [
+    [
+     9.8,
+     -44.5
+    ],
+    [
+     14.2,
+     -44.5
+    ],
+    [
+     14.2,
+     -27.0
+    ],
+    [
+     9.8,
+     -27.0
+    ]
+   ],
+   "pozn_14_11b": "Míša 14. 11. (2. foto): „ještě tady je tráva“ – trs u paty věže branky za koncem plochy (−39) → plocha až k věži (−44,5)",
+   "zdroj": "Míša 14. 11. (foto x 11,7 z −29,7 u schodů na ochoz u vstupní branky): „vedle schodů by neměla růst tráva, chodí se tam, udělej tam udusanou hlínu, sem tam kamínek“ – pata schodů A_schody_vychod_pata a cesta k průchodu branky; KCD1 18_brana_zvenku (k bráně vyšlapaná hlína)"
+  }
  ],
  "nesahat": [
   "cesta",
@@ -107,6 +128,8 @@
    "ves_stavby": true,
    "hrad_zdi": true,
    "hrad_budovy": true
-  }
+  },
+  "okraj_budov_m": 0.3,
+  "_okraj_budov_m": "Míša 19. 11. (stáj hradu A: trsy trávy prorůstaly podlahou, mezera 0,7 m mezi hradbou a bokem stáje): pruh u paty i s přesahem trsů o okraj_budov_m dál od hrany nesmí sáhnout do jiné budovy (stavby_pudorysy.json, stavby_clony.json) – jinak se vynechá; test smyslu staj_bez_porostu"
  }
 }

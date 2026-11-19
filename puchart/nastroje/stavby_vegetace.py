@@ -164,6 +164,13 @@ if os.path.exists(D + "mista_stavby.json"):
 Image.fromarray((np.clip(mk, 0, 1) * 255).astype(np.uint8), "RGB").save(_mc); open(_hz, "w").write(_h(_mc))
 pas = ~stavba & (d_zed <= V["sirka_m"][1]) & ~chran & ~slap & ~nadvori
 print("pata zdí: vně %d buněk (%.0f %% pásu – skvrny), uvnitř %d, kouty %d, vyšlapáno %d" % (vne.sum(), 100 * vne.sum() / max(1, pas.sum()), uvn.sum(), ko.sum(), (nadvori & slap).sum()))
+# Míša 19. 11. (stáj A: trsy trávy prorůstaly podlahou): půdorys budovy (stavby_pudorysy.json, i stáj z puchart_hrad.py STAJ)
+# = „stavba“ v KAŽDÉ buňce, které se dotkne (rastr po 0,5 m) – okrajová buňka jinak mohla skončit jako pata zdí / nádvoří s trávou
+if os.path.exists(D + "stavby_pudorysy.json"):
+    _j = 4; _pb = Image.new("L", (st.shape[1] * _j, st.shape[0] * _j), 0); _db = ImageDraw.Draw(_pb)
+    for q in json.load(open(D + "stavby_pudorysy.json"))["budovy"]: _db.polygon([(pix(r)[0] * _j, pix(r)[1] * _j) for r in q], fill=1, outline=1)
+    _pb = np.array(_pb).reshape(st.shape[0], _j, st.shape[1], _j).max(axis=(1, 3)).astype(bool) & ~_koryto0
+    st[_pb & (stavba_jadro | ~chran)] = SJ["tridy"].index("stavba")   # cesty, voda, skály u mostů nesahat
 Image.fromarray(st).save(D + "stanoviste.png"); json.dump(SJ, open(D + "stanoviste.json", "w"), ensure_ascii=False, indent=1)
 bez = binary_dilation(stavba | nadvori | predhradi, iterations=max(1, int(KC["okraj_m"] / ks))) | binary_dilation(slap, iterations=1)   # ani strom na trase průchodu
 A = np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5)
@@ -271,6 +278,10 @@ for a_, b_, strany, zdroj in hrany:
             p0 = a_ + d_ * t_ + n_ * PP["od_hrany_m"]; p1 = a_ + d_ * (t_ + l_) + n_ * PP["od_hrany_m"]
             vz = [p0 + n_ * w_ * 0.5, (p0 + p1) / 2 + n_ * w_ * 0.5, p1 + n_ * w_ * 0.5, (p0 + p1) / 2 + n_ * w_]
             ok_ = l_ >= 0.4
+            # Míša 19. 11. (stáj A: trsy prorůstaly podlahou): pruh i s přesahem trsů (okraj_budov_m) nesmí sáhnout do jiné budovy
+            # – úzká mezera mezi hradbou a bokem stáje / stáj a zeď věžičky; vzdálené rohy pruhu se kontrolují jen proti budovám
+            _ob = PP.get("okraj_budov_m", 0.0)
+            if ok_ and _ob > 0 and any(BUDp.contains(_Pt(*(q_ + n_ * (w_ + _ob)))) for q_ in (p0, (p0 + p1) / 2, p1)): ok_ = False
             for q_ in vz:
                 if not ok_: break
                 rc = _cell(q_)

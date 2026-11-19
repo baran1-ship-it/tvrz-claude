@@ -1569,6 +1569,29 @@ for _q in ("uniform float kamen_m = 3.2;", "uniform float kontrast = 0.55;", "un
     if _q not in _zs405: _c405.append("zdivo.gdshader: chybí " + _q)
 TEST("zdivo_klidne", not _c405, "; ".join(_c405) if _c405 else "zdivo klidné: kámen 3,2 m, kontrast 0,55, sytost 0,3, anizotropie")
 
+# 406 (Míša 19. 11.: v podlaze stáje hradu A prorůstají trsy trávy): půdorys stáje (staj_kontrola.json rohy) bez porostu – každá
+# buňka stanovišť, které se dotkne, má nulovou trávu louky i bylin (trava, vysoka), a žádný pruh u paty (pata_pas.json, i s přesahem
+# trsů okraj_budov_m) do půdorysu nezasahuje (stavby_vegetace.py: půdorysy = stavba v každé dotčené buňce, pruh nesmí do jiné budovy)
+from shapely.geometry import Polygon as _Pg406
+_c406 = []; _SJ406 = json.load(open(D + "stanoviste.json")); _st406 = np.array(Image.open(D + "stanoviste.png")); _st406 = _st406[..., 0] if _st406.ndim == 3 else _st406
+_LT406 = json.load(open(D + "louka.json"))["tridy"]; _BT406 = json.load(open(D + "byliny.json"))["tridy"]
+_ob406 = json.load(open(K + "/pravidla/svet/pata_zdi.json"))["pas_u_paty"].get("okraj_budov_m", 0.0)
+_pp406 = [q for v in json.load(open(D + "pata_pas.json"))["bunky"].values() for q in v]
+_ks406, _x406, _z406 = _SJ406["krok_m"], _SJ406["x0_hra"], _SJ406["z0_hra"]
+for _st in _sk:
+    _P = _Pg406(_st["rohy"]); _bx = _P.bounds
+    for _r in range(int((_bx[1] - _z406) // _ks406), int((_bx[3] - _z406) // _ks406) + 1):
+        for _c in range(int((_bx[0] - _x406) // _ks406), int((_bx[2] - _x406) // _ks406) + 1):
+            _cl = _Pg406([(_x406 + _c * _ks406, _z406 + _r * _ks406), (_x406 + (_c + 1) * _ks406, _z406 + _r * _ks406), (_x406 + (_c + 1) * _ks406, _z406 + (_r + 1) * _ks406), (_x406 + _c * _ks406, _z406 + (_r + 1) * _ks406)])
+            if _cl.intersection(_P).area < 0.01: continue
+            _tr = _SJ406["tridy"][int(_st406[_r, _c])]; _bt = _BT406.get(_tr, {})
+            if float(_LT406.get(_tr) or 0) > 0 or float(_bt.get("trava", 0)) + float(_bt.get("vysoka", 0)) > 0:
+                _c406.append("%s: buňka (%.0f, %.0f) třída %s s trávou" % (_st["id"], _x406 + _c * _ks406, _z406 + _r * _ks406, _tr))
+    for _q in _pp406:
+        _a, _b, _n = np.array(_q[0:2]), np.array(_q[2:4]), np.array(_q[4:6]); _w = _q[6]
+        if _Pg406([tuple(_a), tuple(_b), tuple(_b + _n * (_w + _ob406)), tuple(_a + _n * (_w + _ob406))]).buffer(0.0).intersection(_P).area > 0.01:
+            _c406.append("%s: pruh u paty %s (%.1f, %.1f) do půdorysu" % (_st["id"], _q[7], _q[0], _q[1]))
+TEST("staj_bez_porostu", bool(_sk) and not _c406, "; ".join(_c406[:5]) if _c406 else "stáj bez porostu: %d stájí, buňky bez trávy, žádný pruh u paty do půdorysu" % len(_sk))
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

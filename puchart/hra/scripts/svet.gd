@@ -87,6 +87,11 @@ func _material() -> ShaderMaterial:
 		var pd: Dictionary = ls.get("puda", {})
 		m.set_shader_parameter("zapoj", load("res://data/kryt.png"))
 		m.set_shader_parameter("zapoj_puda", Vector4(float(ls.get("kryt_od", 0.3)), float(ls.get("kryt_do", 0.8)), float(pd.get("svetlina_opad", 1.0)), float(pd.get("zapoj_opad", 0.0))))
+	var po: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/louka.json")).get("porost_dalka", {})
+	for k in po:   # porost v dálce (louka.json porost_dalka, plán E2)
+		var v = po[k]
+		if not k.begins_with("porost_") or not v is Array: continue
+		m.set_shader_parameter(k, Vector2(v[0], v[1]) if v.size() == 2 else (Vector3(v[0], v[1], v[2]) if v.size() == 3 else Vector4(v[0], v[1], v[2], v[3])))
 	var pu: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/pudy.json"))
 	var vel := PackedFloat32Array()
 	for v in pu["vrstvy"]:

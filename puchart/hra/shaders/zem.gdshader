@@ -38,6 +38,16 @@ uniform vec2 opad_zelen_podil = vec2(0.0);  // byliny a mech ve skvrnách (šum 
 uniform float dal_do_m = 450.0;
 uniform float hlina_odbarveni = 0.45;   // pudy.json hlina
 uniform float hlina_jas = 1.25;
+// porost v dálce (louka.json porost_dalka; Míša 18.–19. 11., plán E2): za koncem trsů (dosah 96 m) louka a svah nejsou hladká
+// plocha – tmavší trsy/skvrny, šrafa stébel (fotka trávy ve větším měřítku) a barevný šum zelená/žlutozelená/suchá; jen kde roste
+// tráva (maska R po zápoji, bez cest). Bez nového vzorkovače (šum a pole půd, Havran zem.gdshader louka_dal/makro skvrny).
+uniform vec2 porost_vzd = vec2(60.0, 110.0);      // přechod od..do m od kamery
+uniform vec4 porost_trsy = vec4(3.1, 1.3, 0.55, 0.75);   // měřítko trsů m, jemnější m, práh, síla
+uniform vec3 porost_trs_barva = vec3(0.62, 0.74, 0.52);  // násobek barvy v trsu (tmavší sytě zelená)
+uniform vec2 porost_srafa = vec2(5.0, 0.55);      // měřítko fotky trávy × velikost_m, síla
+uniform vec4 porost_barvy = vec4(37.0, 61.0, 0.5, 0.6);  // měřítko žlutozelené m, suché m, podíl žlutozelené, suché
+uniform vec3 porost_zluta = vec3(1.12, 1.08, 0.78);
+uniform vec3 porost_sucha = vec3(1.18, 1.0, 0.68);
 uniform vec3 hlina_ton = vec3(1.0);
 
 varying vec3 svet_poz;
@@ -100,6 +110,7 @@ void fragment() {
 	nn = vrstva_n(0, xz) * r + vrstva_n(1, xz) * g + skn * m.b + vrstva_n(3, xz) * m.a + vrstva_n(4, xz) * zbytek;
 	float suma = r + g + m.b + m.a + zbytek;
 	a /= max(suma, 0.001); nn /= max(suma, 0.001);
+	float w_por = r / max(suma, 0.001);   // podíl travního drnu (louka, pastvina, okraj, paseka, břeh – maska R po zápoji)
 	// cesty přes všechno: hlína / pěšina, kde je zářez, vystupuje drobová skála (šedá, deskovitá)
 	vec3 mc = vec3(0.0);
 	if (all(greaterThanEqual(muv, vec2(0.0))) && all(lessThanEqual(muv, vec2(1.0)))) mc = texture(maska_cesty, muv).rgb;
@@ -149,6 +160,7 @@ void fragment() {
 		ca = mix(ca, sk * vec3(0.78, 0.8, 0.84), sk_w); cn = mix(cn, skn, sk_w);
 		cn = mix(cn, vec3(0.5, 0.5, 1.0), nn_kol * 0.4);   // koleje utlačené, hladší (Havran)
 		a = mix(a, ca, wc); nn = mix(nn, cn, wc);
+		w_por *= 1.0 - wc;   // cesty bez porostu
 	}
 	a *= mix(0.82, 1.12, n2);
 	// dálka: barva porostu místo fotky půdy (les z dálky = koruny, ne opad)
@@ -156,6 +168,17 @@ void fragment() {
 	float t = smoothstep(dal_od_m, dal_do_m, d);
 	vec3 dal = mix(barva_louky_dal, barva_lesa_dal, clamp(g + m.b * 0.3, 0.0, 1.0)) * mix(0.85, 1.1, n2);
 	ALBEDO = mix(a, dal, t);
+	float pp = smoothstep(porost_vzd.x, porost_vzd.y, d) * smoothstep(0.15, 0.6, w_por);
+	{   // porost v dálce (plán E2); bez větvení – mipmapy šumu potřebují derivace
+		float tk = texture(sum, xz / porost_trsy.x + 0.43).r * 0.6 + texture(sum, ROT * xz / porost_trsy.y + 0.17).r * 0.4;
+		vec3 pm = mix(vec3(1.0), porost_trs_barva, smoothstep(porost_trsy.z, porost_trsy.z + 0.2, tk) * porost_trsy.w);
+		float sl = dot(texture(pudy_a, vec3(ROT * xz / (velikost_m[0] * porost_srafa.x), 0.0)).rgb, vec3(0.3, 0.55, 0.15));
+		float sp = dot(textureLod(pudy_a, vec3(0.5, 0.5, 0.0), 20.0).rgb, vec3(0.3, 0.55, 0.15));
+		pm *= mix(1.0, clamp(sl / max(sp, 0.01), 0.5, 1.5), porost_srafa.y);
+		pm *= mix(vec3(1.0), porost_zluta, smoothstep(0.5, 0.75, texture(sum, xz / porost_barvy.x + 0.29).r) * porost_barvy.z);
+		pm *= mix(vec3(1.0), porost_sucha, smoothstep(0.6, 0.8, texture(sum, ROT * xz / porost_barvy.y + 0.61).r) * porost_barvy.w);
+		ALBEDO *= mix(vec3(1.0), pm, pp);
+	}
 	// síť nemá tečny: normálu fotky přidat ve světě (osa u = +x, v = -z; OpenGL normály), v dálce vypnout
 	vec3 tn = (nn * 2.0 - 1.0) * (1.0 - t);
 	vec3 wn = normalize(svet_nor + vec3(tn.x, 0.0, -tn.y) * 0.8);

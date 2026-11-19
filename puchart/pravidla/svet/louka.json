@@ -162,5 +162,50 @@
   "_svetlina_min": "v lese na světle (krytí korunou 0 v okolí ±3 m): průměrná hustota aspoň tolik – světliny, paseky a okraje zarostlé (Havran: tráva podle louky)"
  },
  "pozn_hrady_18_11": "Míša 18. 11.: „na obou hradech je všude na nádvořích a v zákoutích tráva, ale ta by tam být neměla“ – nádvoří, vyšlapané plochy, pata zdí uvnitř a kouty zdí bez trávy (udusaná hlína, dlažba).",
- "pozn_plnost_19_11": "Míša 19. 11. (plán E3, „roste to před očima“): dosah a pozvolné řídnutí dál – předtím {'dosah_m': 66, 'hust_do_m': 60}; automatika detailu (regulator.gd) ubírá trávu a keře jako první, když tablet nestíhá. Tablet NEOVERENO."
+ "pozn_plnost_19_11": "Míša 19. 11. (plán E3, „roste to před očima“): dosah a pozvolné řídnutí dál – předtím {'dosah_m': 66, 'hust_do_m': 60}; automatika detailu (regulator.gd) ubírá trávu a keře jako první, když tablet nestíhá. Tablet NEOVERENO.",
+ "porost_dalka": {
+  "popis": "Porost v dálce (zem.gdshader porost_*): za koncem trsů (dosah_m 96, hust_do_m 85) terén louky, pastviny, okraje, paseky a břehu (maska R po zápoji korun, bez cest, nádvoří, skal a lesního opadu) dostane tmavší trsy/skvrny, šrafu stébel (fotka trávy pudy vrstva 0 ve větším měřítku) a barevný šum zelená/žlutozelená/suchá – žádná hladká plocha. Bez nového vzorkovače.",
+  "zdroj": "Míša 18.–19. 11., plán E2 (docs/rozpracovane/plan_z_reserse_17_11.md; „v dálce chci vidět výplň, ne holé cesty a kopce, obraz plné krajiny jako v KCD“, snímky docs/screens/misa_18_11_prazdna_dalka_1..4.jpg); Havran shaders/zem.gdshader (louka_dal ×4 měřítko od 40–140 m, makro skvrny 20–50 m)",
+  "porost_vzd": [
+   60.0,
+   110.0
+  ],
+  "_porost_vzd": "přechod m od kamery: od 60 m (trsy ještě husté) plně od 110 m (za dosahem trsů)",
+  "porost_trsy": [
+   3.1,
+   1.3,
+   0.55,
+   0.75
+  ],
+  "_porost_trsy": "měřítko trsů m, jemnější měřítko m, práh šumu, síla ztmavení",
+  "porost_trs_barva": [
+   0.62,
+   0.74,
+   0.52
+  ],
+  "_porost_trs_barva": "násobek barvy v trsu – tmavší, sytější zelená (stín mezi stébly)",
+  "porost_srafa": [
+   5.0,
+   0.55
+  ],
+  "_porost_srafa": "šrafa stébel: fotka trávy v měřítku velikost_m × 5, síla jasové modulace",
+  "porost_barvy": [
+   37.0,
+   61.0,
+   0.5,
+   0.6
+  ],
+  "_porost_barvy": "měřítko žlutozelených skvrn m, suchých m, podíl žlutozelené, podíl suché",
+  "porost_zluta": [
+   1.12,
+   1.08,
+   0.78
+  ],
+  "porost_sucha": [
+   1.18,
+   1.0,
+   0.68
+  ],
+  "tablet": "NEOVERENO (vzhled i výkon kontroluje Míša na tabletu)"
+ }
 }
