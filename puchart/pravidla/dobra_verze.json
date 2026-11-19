@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "8b18ef7",
+ "commit": "fda59f1",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -145,7 +145,10 @@
    "zemljanka_luzka": true,
    "podezdivka_uv": true,
    "naradi_oprene": true,
-   "nadvori_A_rovne": true
+   "nadvori_A_rovne": true,
+   "svitidla_sila": true,
+   "staj_A": true,
+   "voda_neni_bila": true
   },
   "pruchod": {
    "A_branka_patro": true,
@@ -280,26 +283,26 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1052644,
-    "troj_max": 1077872,
+    "troj_p95": 1064547,
+    "troj_max": 1090574,
     "kresleni_p95": 373,
     "kresleni_m_median": 478.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1607215,
-    "troj_max": 1834875,
-    "kresleni_p95": 876,
-    "kresleni_m_median": 716.0
+    "troj_p95": 1606786,
+    "troj_max": 1858811,
+    "kresleni_p95": 877,
+    "kresleni_m_median": 713.5
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1568374,
-    "troj_max": 1760196,
-    "kresleni_p95": 1060,
-    "kresleni_m_median": 1757.0
+    "troj_p95": 1593472,
+    "troj_max": 1783916,
+    "kresleni_p95": 1061,
+    "kresleni_m_median": 1762.5
    },
-   "zmena_median": 34.44,
+   "zmena_median": 34.42,
    "doskoky": [],
    "ve_zdi": 2
   },
