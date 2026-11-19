@@ -1563,6 +1563,12 @@ if _jm > _KV.get("melka_jas_max", 0.28): _c404.append("melka jas %.2f > %.2f" % 
 if float(_vz404.get("pena_kamen_sila", 1.0)) > _KV.get("pena_kamen_max", 0.6): _c404.append("pena_kamen_sila %.2f" % _vz404.get("pena_kamen_sila", 1.0))
 if "pena_kamen_sila" not in open(K + "/hra/shaders/voda.gdshader", encoding="utf-8").read() or '"pena_kamen_sila"' not in open(K + "/hra/scripts/hlavni.gd", encoding="utf-8").read(): _c404.append("voda.gdshader/hlavni.gd nečte pena_kamen_sila")
 TEST("voda_neni_bila", not _c404, "; ".join(_c404) if _c404 else "voda: krytí mělčiny %.2f, jas těla %.2f, pěna za kameny %.2f" % (_vz404["kryti_min"], _jm, _vz404.get("pena_kamen_sila", 1.0)))
+# 405 (Míša 19. 11., „kámen jako tapeta“): zdivo klidné – drobný kámen, nízký kontrast a sytost, anizotropní filtrování
+_c405 = []; _zs405 = open(K + "/hra/shaders/zdivo.gdshader", encoding="utf-8").read()
+for _q in ("uniform float kamen_m = 3.2;", "uniform float kontrast = 0.55;", "uniform float sytost = 0.3;", "kamen_a : source_color, filter_linear_mipmap_anisotropic"):
+    if _q not in _zs405: _c405.append("zdivo.gdshader: chybí " + _q)
+TEST("zdivo_klidne", not _c405, "; ".join(_c405) if _c405 else "zdivo klidné: kámen 3,2 m, kontrast 0,55, sytost 0,3, anizotropie")
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

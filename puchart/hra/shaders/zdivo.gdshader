@@ -7,14 +7,17 @@
 shader_type spatial;
 render_mode cull_disabled;
 
-uniform sampler2D kamen_a : source_color, filter_linear_mipmap, repeat_enable;
-uniform sampler2D kamen_n : hint_normal, filter_linear_mipmap, repeat_enable;
+uniform sampler2D kamen_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D kamen_n : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D kamen_r : hint_default_white, filter_linear_mipmap, repeat_enable;
-uniform sampler2D kamen_h : hint_default_white, filter_linear_mipmap, repeat_enable;
-uniform sampler2D omitka_a : source_color, filter_linear_mipmap, repeat_enable;
-uniform sampler2D omitka_n : hint_normal, filter_linear_mipmap, repeat_enable;
+uniform sampler2D kamen_h : hint_default_white, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D omitka_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D omitka_n : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D omitka_r : hint_default_white, filter_linear_mipmap, repeat_enable;
-uniform float kamen_m = 4.2;   // velikost dlaždice kamene: desky břidlice 20–40 cm (gc_18), dřív 2,5 m = kameny 8–15 cm, z dálky šum
+uniform float kamen_m = 3.2;   // velikost dlaždice kamene: 19. 11. (plán F, předloha KCD zdivo_kcd_18_11) drobné lomové kameny 15–35 cm
+// a víc pixelů na metr zblízka (1024 px / 3,2 m); dřív 4,2 m = velké desky, zblízka rozmazané; 2,5 m = 8–15 cm, z dálky šum
+uniform float kontrast = 0.55;   // 19. 11. (Míša: „tapeta“, kontrastní mramor): kámen stažený k průměru
+uniform float sytost = 0.3;   // 19. 11.: zbytek sytosti kamene – studená šedá, žádné oranžovo-hnědé
 uniform float omitka_m = 2.0;
 uniform float kryti = 0.5;
 uniform vec3 tint = vec3(0.86, 0.78, 0.62);
@@ -41,8 +44,10 @@ float sum(vec2 p) { return noise(p * 2.5) * 0.6 + noise(p * 6.0 + 3.7) * 0.4; } 
 // Teď svislá plocha bere osu X nebo Z podle převažující složky normály (na diagonále rozhoduje šum – nepravidelné
 // skvrny místo čtverců), vodorovná XZ. Posun podle vzdálenosti roviny (také skákal po buňkách) zrušen.
 void projekce(vec3 p, vec3 n, out vec2 uv, out vec3 t, out vec3 b) {
-	if (abs(n.y) > 0.7) { t = vec3(1.0, 0.0, 0.0); b = vec3(0.0, 0.0, 1.0); uv = p.xz; return; }
-	float wx = n.x * n.x; float wz = n.z * n.z;
+	float wx = n.x * n.x; float wz = n.z * n.z; float wy = n.y * n.y;
+	// 19. 11. krabicová projekce: vodorovná, když n.y převažuje (dřív až nad 0,7 – svah 45–60° bral boční projekci nataženou až 1,7×);
+	// hranice os nepravidelná podle šumu (plynulý nepravidelný přechod místo rovné švy), natažení max. √2 na 45°
+	if (wy / (wx + wy + wz + 1e-5) + (noise(p.xz * 0.35 + p.y * 0.17 + 5.3) - 0.5) * 0.2 > 0.5) { t = vec3(1.0, 0.0, 0.0); b = vec3(0.0, 0.0, 1.0); uv = p.xz; return; }
 	float vyber = wx / (wx + wz + 1e-5) + (noise(p.xz * 0.35 + p.y * 0.21) - 0.5) * 0.35;
 	b = vec3(0.0, 1.0, 0.0);
 	if (vyber > 0.5) { float sg = n.x >= 0.0 ? 1.0 : -1.0; t = vec3(0.0, 0.0, -sg); uv = vec2(-sg * p.z, p.y); }
@@ -105,33 +110,37 @@ void fragment() {
 	float cover = big + (kryti - 0.5) * 0.22 + 0.15 - lowz * 0.24 + (detail - 0.5) * 0.05;
 	float level = smoothstep(0.40, 0.56, cover);
 	float pm = smoothstep(h - 0.08, h + 0.02, level * 1.15 - 0.05);
-	float joint = 1.0 - smoothstep(0.12, 0.42, h);   // malta ve spárách výrazná – kameny čitelné i z dálky
+	float joint = 1.0 - smoothstep(0.1, 0.3, h);   // malta ve spárách výrazná – kameny čitelné i z dálky
 	pm = max(pm, joint * 0.85 * (1.0 - level * 0.3));
 	vec3 ka = (texture(kamen_a, uk + o1).rgb * hv.x + texture(kamen_a, uk + o2).rgb * hv.y + texture(kamen_a, uk + o3).rgb * hv.z) * kamen_tint;
-	ka *= mix(0.4, 1.1, smoothstep(0.0, 0.6, h));   // líc kamene světlejší, hrany do spáry tmavé
-	ka *= 0.86 + 0.28 * noise(uv / 9.0 + 4.7);   // velká barevná variace kamene
+	// 19. 11. (plán F, Míša: „kámen vypadá blbě s tou tapetou“): klidný kámen jako KCD – desaturace a kontrast stažený k průměru
+	float kl = dot(ka, vec3(0.3, 0.59, 0.11));
+	ka = mix(vec3(kl), ka, sytost);
+	ka = mix(vec3(0.62) * kamen_tint, ka * 1.3, kontrast) * vec3(1.0, 0.98, 0.94);   // světlá studená šedá s lehce teplým nádechem (KCD 02, 04)
+	ka *= mix(0.78, 1.04, smoothstep(0.0, 0.5, h));   // hrany do spáry jen lehce tmavší (dřív 0,4 – černé spáry, mramor)
+	ka *= 0.96 + 0.08 * noise(uv / 9.0 + 4.7);   // velká variace kamene ztlumená (dřív ±14 %)
 	vec3 oa = texture(omitka_a, uo).rgb;
 	float og = dot(oa, vec3(0.3, 0.59, 0.11));
-	oa = mix(oa, vec3(og), 0.75) * mix(tint, vec3(0.93, 0.9, 0.84), 0.6);
+	oa = mix(oa, vec3(og), 0.85) * mix(tint, vec3(0.9, 0.89, 0.86), 0.7);
 	float tone = sum(uv * 0.012 + 0.3);
-	oa = mix(oa, oa * vec3(0.72, 0.68, 0.6), smoothstep(0.3, 0.7, tone) * 0.5);
+	oa = mix(oa, oa * vec3(0.72, 0.68, 0.6), smoothstep(0.3, 0.7, tone) * 0.15);
 	float streak = sum(vec2(uv.x * 0.15, wp.y * 0.01));
-	oa = mix(oa, oa * vec3(0.62, 0.6, 0.55), smoothstep(0.55, 0.75, streak) * 0.3 * spina);
-	float damp = (1.0 - smoothstep(0.35, 0.8, ao + big * 0.25)) * 0.5 * spina;
+	oa = mix(oa, oa * vec3(0.62, 0.6, 0.55), smoothstep(0.55, 0.75, streak) * 0.12 * spina);
+	float damp = (1.0 - smoothstep(0.35, 0.8, ao + big * 0.25)) * 0.25 * spina;
 	oa = mix(oa, oa * vec3(0.35, 0.32, 0.26), damp);
 	float rim = smoothstep(0.0, 0.5, pm) * (1.0 - smoothstep(0.5, 1.0, pm)) * level;
 	vec3 col = mix(ka, oa, pm);
-	col *= 1.0 - rim * 0.35;
-	col = mix(col, col * vec3(0.84, 0.88, 0.72), smoothstep(0.62, 0.8, noise(uv / 5.5 + 1.9)) * 0.4);   // lišejník
+	col *= 1.0 - rim * 0.12;
+	col = mix(col, col * vec3(0.84, 0.88, 0.72), smoothstep(0.62, 0.8, noise(uv / 5.5 + 1.9)) * 0.12);   // lišejník (19. 11. ztlumený – skvrny)
 	col = mix(col, vec3(0.15, 0.18, 0.08), smoothstep(0.35, 0.8, n.y) * smoothstep(0.5, 0.75, noise(wp.xz * 0.8)) * 0.6);   // mech na koruně
 	ALBEDO = col * mix(0.6, 1.0, ao);
 	ROUGHNESS = mix(1.0, texture(omitka_r, uo).r, pm);
 	SPECULAR = mix(0.08, 0.2, pm);   // Míša 18. 11.: „moc se leskne, přitom by to měl být kámen“ – matný kámen (dřív 0,3)
-	AO = min(mix(mix(0.35, 1.0, smoothstep(0.0, 0.45, h)), 1.0, pm * 0.7), ao);
+	AO = min(mix(mix(0.7, 1.0, smoothstep(0.0, 0.45, h)), 1.0, pm * 0.7), ao);
 	AO_LIGHT_AFFECT = 0.0;   // 13. 11.: přímé světlo (louče, okna) netlumit zapečeným stíněním
 	vec3 nk = (texture(kamen_n, uk + o1).rgb * hv.x + texture(kamen_n, uk + o2).rgb * hv.y + texture(kamen_n, uk + o3).rgb * hv.z) * 2.0 - 1.0;
 	vec3 no = texture(omitka_n, uo).rgb * 2.0 - 1.0;
-	vec3 tn = normalize(mix(nk * vec3(1.4, 1.4, 1.0), no * vec3(0.6, 0.6, 1.0), pm));
+	vec3 tn = normalize(mix(nk * vec3(0.8, 0.8, 1.0), no * vec3(0.6, 0.6, 1.0), pm));
 	NORMAL = normalize((VIEW_MATRIX * vec4(normalize(t * tn.x + b * tn.y + n * tn.z), 0.0)).xyz);
 	ALBEDO *= mix(1.0, 0.66, mokro); ROUGHNESS = mix(ROUGHNESS, 0.45, mokro); SPECULAR = mix(SPECULAR, 0.4, mokro);   // mokro (pocasi.gd)
 }
