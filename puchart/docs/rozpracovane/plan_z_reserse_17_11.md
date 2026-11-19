@@ -117,3 +117,7 @@ Míša 18. 11.: „…nejenom“ (hrady) → F platí pro všechny stavby na map
 | G2 | misa_19_11_voda_1/2.jpg (x −76 z 124, x −47 z 121) | voda „bílá, nic moc, skoro vyschla“ – mělký potok vypadá jako bílý štěrk/prázdné koryto; tmavší, méně průhledná hladina, víc vody v korytě (hloubka/výška hladiny) |
 | G3 | misa_19_11_nadvori_A_srovnat.jpg (x 5,9 z −11,7, směr 269°) | kroužek = místo ke srovnání do roviny (Z kout nádvoří A u hradby pod ochozem) – plošina v hrad_puchart.json teren.plosiny |
 | G4 | misa_19_11_staj_misto.jpg (x 5,4 z 4,5, směr 204°) | sem umístit STÁJ z Havrana (model z větve claude/new-session-0dtk58), u hradby JZ nádvoří A pod ochozem |
+Míša 19. 11. (misa_19_11_svah_ridky.png, kroužek na svahu pod hradem z x 131 z 276): i po E2/E3 svah 30–80 m řídký –
+rozházené jednotlivé byliny jako tečky, mezi nimi hladký terén, mizející rostliny jako šachovnice (dither přechodu).
+→ E1 (střední pás: husté levné trsy/impostor buňky 20–150 m podle předlohy lod_trava_video) je nutný; samotná textura
+terénu (E2) a delší dosah (E3) nestačí. Dither přechodu nahradit plynulým (alfa/řídnutí hustoty), ne šachovnicí.
