@@ -42,6 +42,9 @@ a měřením; tablet měří Míša.
 - **Design podle fotek KCD** (Míša 13. 11., pravidlo): vzhled vsi, staveb, cest, trávy, plotů, brodů… se navrhuje podle
   fotek KCD; závazná předloha vsi `docs/reference/kcd_ves_predloha/` (hlína kde se chodí, tráva u paty zdí a plotů, ploty
   napojené na stavby). Ve hře funkční vše, co jde (dveře, vrata, vrátka, předměty) – Míša 13. 11.
+- **Snímky šetřit** (Míša 19. 11., pravidlo): jeden kontrolní snímek jen tam, kde hrozí špatné umístění nebo prostup
+  (nová/posunutá stavba, předmět, terén u zdí); žádné série před/po. Barvy, světlo, voda, hustota trávy a výkon bez
+  snímku – vzhled kontroluje Míša na tabletu (posílá snímky s polohou). Víc snímků jen na Míšino přání.
 - **Kámen musí být kámen a dřevo dřevo – ne tapeta** (Míša 18. 11., pravidlo): zblízka má kámen i dřevo skutečný tvar v geometrii
   (jednotlivé kameny a kvádry se spárami, otlučené hrany, trámy a prkna s hranami a spoji) – ne kostka potažená texturou;
   z dálky smí být zjednodušená síť s texturou, aby se šetřila grafika (podle potřeby, LOD). Platí pro všechny stavby, interiéry
