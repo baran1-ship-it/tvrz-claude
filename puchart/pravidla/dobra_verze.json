@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "fa09307",
+ "commit": "1da1bc0",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -149,7 +149,8 @@
    "svitidla_sila": true,
    "staj_A": true,
    "voda_neni_bila": true,
-   "zdivo_klidne": true
+   "zdivo_klidne": true,
+   "staj_bez_porostu": true
   },
   "pruchod": {
    "cesta_mezi_hrady": true,
@@ -284,26 +285,26 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1163187,
-    "troj_max": 1204917,
-    "kresleni_p95": 382,
-    "kresleni_m_median": 478.0
+    "troj_p95": 1162698,
+    "troj_max": 1204921,
+    "kresleni_p95": 381,
+    "kresleni_m_median": 477.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1659716,
-    "troj_max": 1946595,
+    "troj_p95": 1671955,
+    "troj_max": 1947391,
     "kresleni_p95": 881,
-    "kresleni_m_median": 718.0
+    "kresleni_m_median": 716.0
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1682128,
-    "troj_max": 1888880,
+    "troj_p95": 1682132,
+    "troj_max": 1888884,
     "kresleni_p95": 1064,
-    "kresleni_m_median": 1760.0
+    "kresleni_m_median": 1761.5
    },
-   "zmena_median": 33.89,
+   "zmena_median": 35.35,
    "doskoky": [],
    "ve_zdi": 2
   },
