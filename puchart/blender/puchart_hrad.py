@@ -1576,6 +1576,84 @@ def palac_A(P, p0, p1, bd, PI):
     TR["A_palac_sin_svetnice"] = [bod(W(6.3, 0.9), F1), bod(W(5.6, DS["patro_pricky"][0]["dvere_v"]), F1), bod(W(4.2, DS["patro_pricky"][0]["dvere_v"]), F1)]
 
 # ------------------------------------------------------------------ přední hrad
+def staj(P, St, U, t):
+    """Stáj pod hradbou – PŘEVZATO Z HAVRANA (blender/hospodar.py stable(), větev claude/new-session-0dtk58; Míša 19. 11.:
+    „stáj z Havrana“ u hradby JZ části nádvoří A pod ochozem, docs/screens/misa_19_11_staj_misto.jpg). Havran ji stavěl
+    kódem (ne glb) – převzato jako kód: zadní stěna = líc hradby, sloupy čela na kamenných patkách se zavětrováním,
+    boční stěny a přepážky stání ze svislých prken (nahoře volné k větrání), u zdi korýtko z fošen a žebřinové jesle,
+    kruh na uvázání ve zdi, prkenná podlaha, pultová šindelová střecha svažitá od hradby s krokvemi a pozednicí.
+    Bez výbavy (sláma, seno – Míša 12. 11.: výbavu si rozmisťuje sama, seno do jeslí je v pískovišti). Místní souřadnice
+    Havrana: x od zdi do dvora (vn), y nahoru, z podél zdi (e = vn × UP); data hrad_puchart.json A.staj."""
+    a, b, L, d, vn = U[St["usek"]]
+    e = vn.cross(UP).normalized()
+    p0 = a + d * St["od_m"] + vn * (t / 2); p1 = a + d * St["do_m"] + vn * (t / 2)
+    O = p0 if (p1 - p0).dot(e) > 0 else p1
+    delka = abs(St["do_m"] - St["od_m"]); hl = St["hloubka_m"]; nbox = int(St["boxu"]); bw = delka / nbox
+    y0 = H.ter_rozsah([((O + vn * u + e * s).x, (O + vn * u + e * s).z) for u in (0.0, hl) for s in (0.0, delka)])[1]
+    Rm = Matrix((tuple(vn), tuple(UP), tuple(e))).transposed()   # sloupce: místní x, y, z → svět
+    def W(x, y, z): return O + vn * x + UP * (y0 + y) + e * z
+    def MB(c, rot=None): return M(W(*c), basis=Rm @ rot if rot is not None else Rm)
+    def bbL(lo_, hi_, mat, grain="auto", collide=False):   # P.bb v místních souřadnicích (Havran bb: vlákna podél delší osy)
+        lo = [min(lo_[i], hi_[i]) for i in range(3)]; hi = [max(lo_[i], hi_[i]) for i in range(3)]
+        sx, sy, sz = (hi[i] - lo[i] for i in range(3)); c = [(lo[i] + hi[i]) / 2 for i in range(3)]
+        g = ("x" if sx > sz else "z") if grain == "auto" else grain
+        if g == "x": P.box(MB(c, Matrix.Rotation(math.pi / 2, 3, "Y")), (sz, sy, sx), mat, collide=collide)
+        elif g == "y": P.box(MB(c, Matrix.Rotation(-math.pi / 2, 3, "X")), (sx, sz, sy), mat, collide=collide)
+        else: P.box(MB(c), (sx, sy, sz), mat, collide=collide)
+    def kol_(c, size): P.cols.append((MB(c), tuple(size)))
+    xb, xf = 0.0, hl
+    z0 = 0.0; z1 = delka
+    y_hi, y_lo = St["vyska_u_zdi_m"], St["vyska_okap_m"]
+    zs = [z0 + bw * i for i in range(nbox + 1)]
+    for z in zs:   # sloupy čela na patkách, pásky k vaznici
+        P.beam(W(xf, -0.05, z), W(xf, y_lo - 0.14, z), 0.2, 0.2, "dub_ven", j=0.3)   # čep do vaznice zespodu (Havran 0,22 = šíře vaznice → čelo trčelo, kontrola_spoju)
+        P.lathe(MB((xf, -0.02, z)), [(0.2, 0), (0.18, 0.12), (0.0, 0.12)], 8, "kvadr_sedy", phase=math.pi / 8)
+        kol_((xf, 1.3, z), (0.22, 2.6, 0.22))
+        if z < z1 - 0.01: P.beam(W(xf, y_lo - 0.85, z + 0.02), W(xf, y_lo - 0.1, z + 0.75), 0.1, 0.1, "dub_ven", j=0.2)   # pásek: čepy do sloupu a vaznice (konce v ose)
+        if z > z0 + 0.01: P.beam(W(xf, y_lo - 0.85, z - 0.02), W(xf, y_lo - 0.1, z - 0.75), 0.1, 0.1, "dub_ven", j=0.2)
+    P.beam(W(xf, y_lo - 0.08, z0 - 0.3), W(xf, y_lo - 0.08, z1 + 0.3), 0.26, 0.24, "dub_ven", j=0.2)   # vaznice
+    for z in zs:   # boční stěny a přepážky ze svislých prken
+        k = 0.0
+        while k < xf - xb - 0.15:
+            w = 0.22 + lib.jit(0.03); x = xb + 0.1 + k
+            ht = (y_lo - 0.3 + (y_hi - y_lo) * (1 - (x - xb) / (xf - xb)) * 0.6) if z in (z0, z1) else St["vyska_prepazky_m"]
+            kit.plank(P, W(x + w / 2, 0.0, z), W(x + w / 2, ht, z), w - 0.01, 0.05, "prkna_ven", up=tuple(e), wear=0.5, seg_len=0.5)
+            k += w
+        kol_(((xb + xf) / 2, 0.9, z), (xf - xb, 1.8, 0.1))
+    for i in range(nbox):   # korýtko z fošen, žebřinové jesle, kruh na uvázání
+        zc = z0 + bw * (i + 0.5); zl, zr = zc - bw / 2 + 0.3, zc + bw / 2 - 0.3
+        for zz in (zl + 0.1, zr - 0.1):
+            P.beam(W(xb + 0.55, 0.0, zz), W(xb + 0.55, 0.62, zz), 0.1, 0.1, "dub", j=0.6)
+        bbL((xb + 0.1, 0.55, zl), (xb + 0.7, 0.6, zr), "prkno")
+        bbL((xb + 0.66, 0.6, zl), (xb + 0.71, 0.82, zr), "prkno", grain="z")
+        bbL((xb + 0.1, 0.6, zl), (xb + 0.15, 0.82, zr), "prkno", grain="z")
+        kol_((xb + 0.4, 0.4, zc), (0.65, 0.8, zr - zl))
+        top_x, bot_x = xb + 0.85, xb + 0.12
+        P.beam(W(top_x, 2.05, zl), W(top_x, 2.05, zr), 0.1, 0.1, "dub", j=0.4)
+        P.beam(W(bot_x, 1.0, zl), W(bot_x, 1.0, zr), 0.1, 0.1, "dub", j=0.4)
+        for zz in (zl, zr):
+            P.beam(W(bot_x, 0.95, zz), W(top_x, 2.1, zz), 0.08, 0.08, "dub", j=0.4)
+        z = zl + 0.12
+        while z < zr - 0.05:
+            P.rod(W(bot_x, 1.0, z), W(top_x, 2.05, z), 0.022, 6, "dub")
+            z += 0.13
+        c = Vector((xb + 0.04, 1.45, zc + min(0.9, bw / 2 - 0.2)))
+        P.rod(W(c.x - 0.04, c.y, c.z), W(c.x + 0.04, c.y, c.z), 0.012, 5, "zelezo")
+        pts = [W(c.x + 0.05, c.y - 0.06 + 0.06 * math.cos(q), c.z + 0.06 * math.sin(q)) for q in [jj / 10 * 2 * math.pi for jj in range(11)]]
+        for q0, q1 in zip(pts, pts[1:]): P.rod(q0, q1, 0.009, 5, "zelezo")
+    bbL((xb, -0.2, z0), (xf, 0.02, z1), "prkna_ven", collide=True)   # podlaha
+    # střecha: pultová, vysoko u hradby, okap do dvora; krokve a vaznice u zdi
+    lib.shingle_roof(P, W(xf + 0.5, y_lo + 0.2, z1 + 0.4), W(xf + 0.5, y_lo + 0.2, z0 - 0.4), W(xb, y_hi, z0 - 0.4), W(xb, y_hi, z1 + 0.4), ridge=False)
+    sk_ = (y_hi - 0.15 - (y_lo + 0.08)) / (xf - xb - 0.1)   # krokev osedlaná na vaznici (Havran: procházela jí – křížení)
+    for z in zs + [z0 + bw * (i + 0.5) for i in range(nbox)]:
+        P.beam(W(xb + 0.1, y_hi - 0.15, z), W(xf + 0.45, y_lo + 0.08 - sk_ * 0.45, z), 0.12, 0.16, "dub", j=0.3)
+    P.beam(W(xb + 0.15, y_hi - 0.2, z0 - 0.3), W(xb + 0.15, y_hi - 0.2, z1 + 0.3), 0.2, 0.2, "dub", j=0.5)
+    STAJ.append({"id": St.get("id", "staj"), "podlaha_y": round(y0 + 0.02, 3), "rohy": [[round(q.x, 3), round(q.z, 3)] for q in (W(xb, 0, z0), W(xf, 0, z0), W(xf, 0, z1), W(xb, 0, z1))],
+                 "vyska_u_zdi_y": round(y0 + y_hi, 3), "okap_y": round(y0 + y_lo, 3), "cela_smer": [round(vn.x, 3), round(vn.z, 3)]})
+    BUDOVY.append(STAJ[-1]["rohy"])   # půdorys bez porostu (stavby_vegetace: tráva prorůstala podlahou stáje – snímek 19. 11.)
+STAJ = []   # postavené stáje → hra/data/staj_kontrola.json (test smyslu staj_A)
+
+
 def postav_A(P):
     j = A["jadro"]; t = A["kurtina_tloustka"]; kor = A["koruna_y"]; br = A["brana"]
     H.HRADBY[:] = [(j[i], j[(i + 1) % len(j)], kor) for i in range(len(j))]
@@ -1699,6 +1777,7 @@ def postav_A(P):
         if i == ri - 1 or "usek%d_do_m" % i in oz: r1 = None
         ochoz2(P, a, b, t, kor, vn, s0, s1, mezery=[mez] if i == sch["usek"] else (), r0=r0, r1=r1, lehka=True, sirka=sw_)   # prkna na pokos v rozích (Míša 10. 11.: křížení desek na ochozu A – kit.deck v rohu přes sebe)
     H.studna(P, *A["studna"])
+    if A.get("staj"): staj(P, A["staj"], U, t)   # stáj z Havrana pod J hradbou (Míša 19. 11.)
     # hradba po hřebeni valu, vnější branka, předbraní a most
     vb = A["vnejsi_brana"]; O = C + nA * vb["t_m"]
     jadro_stred = Vector((float(np.mean([q[0] for q in A["jadro"]])), 0, float(np.mean([q[1] for q in A["jadro"]]))))
@@ -2216,7 +2295,7 @@ def stavba(suf):
         for c_, sz_, kdo in _DBGL:
             if (c_ - q_).length < 2.0 + max(sz_) / 2: print("DBGKOL", [round(v, 2) for v in (c_.x, c_.z, c_.y)], [round(v, 2) for v in sz_], kdo)
     import bpy
-    SV.clear(); TR.clear(); STAVBY.clear(); lib.MOVABLE.clear(); H.NIKY.clear()
+    SV.clear(); TR.clear(); STAVBY.clear(); STAJ.clear(); lib.MOVABLE.clear(); H.NIKY.clear()
     for o in list(bpy.data.objects): bpy.data.objects.remove(o)
     ZAB_REC.clear()
     PA = Part("hrad_A"); postav_A(PA)
@@ -2290,6 +2369,7 @@ def stavba(suf):
                    "ochozy": OCHOZY_K, "budovy": [{"c": [round(c_.x, 3), round(c_.z, 3)], "d": [round(d_.x, 4), round(d_.z, 4)], "s": [round(s_.x, 4), round(s_.z, 4)],
                                                   "pul_d": round(hd_, 3), "pul_s": round(hs_, 3), "y0": round(y0_, 2), "y1": round(y1_, 2), "jm": jm_, "zed": round(tz_, 2)} for c_, d_, s_, hd_, hs_, y0_, y1_, jm_, tz_ in BUDOVY_K]},
                   open(os.path.join(K, "hra/data/ochozy_kontrola.json"), "w"), ensure_ascii=False)
+        json.dump({"popis": "stáje hradu (staj(): podlaha, rohy půdorysu xz, výška u zdi a okapu) – test smyslu staj_A (Míša 19. 11.)", "staje": STAJ}, open(os.path.join(K, "hra/data/staj_kontrola.json"), "w"), ensure_ascii=False)
         json.dump({"popis": "záznamy staveb pro test smyslu (blender/puchart_hrad.py)", "stavby": STAVBY}, open(os.path.join(K, "hra/data/stavby_kontrola.json"), "w"), ensure_ascii=False)
         # denní světlo z oken: jedno na shluk oken do 4 m (≈ místnost), bez stínů (rozhodnutí 9. 11.: „světlo z oken“)
         shl_ = []

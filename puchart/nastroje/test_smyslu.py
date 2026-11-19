@@ -1505,22 +1505,64 @@ for _m in json.load(open(D + "zajimava_mista.json"))["mista"]:
         elif abs(float(ter(_q["x"], _q["z"])) - _q["y"]) > 0.1: _c398.append("%s %s: pata %.2f m od terénu" % (_m["id"], _q["predmet"], _q["y"] - float(ter(_q["x"], _q["z"]))))
 TEST("naradi_oprene", not _c398, "; ".join(_c398) if _c398 else "%d kusů dlouhého nářadí opřeno patou na zemi" % _n398)
 
-# 400 (Míša 18. 11., nádvoří A: hrbol u věžičky – „srovnat do roviny s okolním dvorem“): v plošině A_nadvori_jih (1 m od kraje)
-# převýšení terénu nejvýš kontroly.json nadvori_prevyseni_m
-_c399 = []
-for _q in json.load(open(K + "/pravidla/svet/hrad_puchart.json"))["teren"]["plosiny"]:
-    if _q["id"] != "A_nadvori_jih": continue
+# 400 (Míša 18. 11., nádvoří A: hrbol u věžičky – „srovnat do roviny s okolním dvorem“) a 402 (Míša 19. 11., SZ kout nádvoří A
+# u paty hradby pod ochozem – svah k nároží): v plošinách A_nadvori_jih a A_nadvori_sz (1 m od kraje) převýšení terénu nejvýš
+# kontroly.json nadvori_prevyseni_m
+_c399 = []; _pl399 = {_q["id"]: _q for _q in json.load(open(K + "/pravidla/svet/hrad_puchart.json"))["teren"]["plosiny"]}
+for _id in ("A_nadvori_jih", "A_nadvori_sz"):
+    _q = _pl399.get(_id)
+    if _q is None: _c399.append("plošina %s chybí" % _id); continue
     _pg = np.array(_q["polygon"], float); _xx, _zz = np.meshgrid(np.arange(_pg[:, 0].min() + 1, _pg[:, 0].max() - 0.99, 0.5), np.arange(_pg[:, 1].min() + 1, _pg[:, 1].max() - 0.99, 0.5))
-    _h = ter(_xx.ravel(), _zz.ravel()); _dv = float(_h.max() - _h.min())
-    if _dv > KC.get("nadvori_prevyseni_m", 0.25): _c399.append("A_nadvori_jih: převýšení %.2f m (%.2f–%.2f)" % (_dv, _h.min(), _h.max()))
-    break
-else: _c399.append("plošina A_nadvori_jih chybí")
-TEST("nadvori_A_rovne", not _c399, "; ".join(_c399) if _c399 else "nádvoří A u věžičky srovnané (převýšení pod %.2f m)" % KC.get("nadvori_prevyseni_m", 0.25))
+    _P2 = np.c_[_xx.ravel(), _zz.ravel()]; _dk = np.full(len(_P2), 1e9)   # body uvnitř polygonu aspoň 1 m od kraje (SZ kout je šikmý)
+    for _a, _b in zip(_pg, np.roll(_pg, -1, 0)):
+        _t = np.clip(((_P2 - _a) @ (_b - _a)) / max(float((_b - _a) @ (_b - _a)), 1e-9), 0, 1); _dk = np.minimum(_dk, np.linalg.norm(_P2 - (_a + _t[:, None] * (_b - _a)), axis=1))
+    _in = _Path(_pg).contains_points(_P2) & (_dk >= 1.0)
+    _h = ter(_xx.ravel()[_in], _zz.ravel()[_in]); _dv = float(_h.max() - _h.min())
+    if _dv > KC.get("nadvori_prevyseni_m", 0.25): _c399.append("%s: převýšení %.2f m (%.2f–%.2f)" % (_id, _dv, _h.min(), _h.max()))
+TEST("nadvori_A_rovne", not _c399, "; ".join(_c399) if _c399 else "nádvoří A u věžičky a v SZ koutě srovnané (převýšení pod %.2f m)" % KC.get("nadvori_prevyseni_m", 0.25))
 
 # 401 (Míša 19. 11.): louče osvětlují prostor místnosti
 _sv401 = json.load(open(K + "/hra/data/prostredi.json"))["atmosfera"]["svitidla"]
 TEST("svitidla_sila", float(_sv401["energie_nasobek"]) >= 2.5 and float(_sv401["dosah_nasobek"]) >= 2.0, "svítidla energie %s, dosah %s" % (_sv401["energie_nasobek"], _sv401["dosah_nasobek"]))
 
+# 403 (Míša 19. 11., docs/screens/misa_19_11_staj_misto.jpg: stáj z Havrana u J hradby nádvoří A pod ochozem): stáj postavená
+# (hra/data/staj_kontrola.json z blender/puchart_hrad.py staj), zády na vnitřním líci hradby, podlaha na terénu (nic nevisí),
+# střecha pod ochozem (koruna − 1,5 m), půdorys mimo budovy a věže (BUDOVY_K) a mimo dveře přízemí věžičky
+_c403 = []; _sk = json.load(open(D + "staj_kontrola.json")).get("staje", []) if os.path.exists(D + "staj_kontrola.json") else []
+_HA = json.load(open(K + "/pravidla/svet/hrad_puchart.json"))["A"]
+if not _sk: _c403.append("stáj nádvoří A chybí (A.staj)")
+_bk = json.load(open(D + "ochozy_kontrola.json")).get("budovy", []) if os.path.exists(D + "ochozy_kontrola.json") else []
+for _st in _sk:
+    _r = np.array(_st["rohy"], float)   # [zeď z0, čelo z0, čelo z1, zeď z1]
+    _j = np.array(_HA["jadro"], float); _a5, _b5 = _j[_HA["staj"]["usek"]], _j[(_HA["staj"]["usek"] + 1) % len(_j)]
+    _nz = np.array([-(_b5 - _a5)[1], (_b5 - _a5)[0]]) / np.linalg.norm(_b5 - _a5)
+    for _q in (_r[0], _r[3]):
+        _dz = abs(float((_q - _a5) @ _nz)) - _HA["kurtina_tloustka"] / 2
+        if abs(_dz) > 0.1: _c403.append("%s: záda %.2f m od líce hradby" % (_st["id"], _dz))
+    for _q in _r:
+        _dy = _st["podlaha_y"] - float(ter(_q[0], _q[1]))
+        if _dy > 0.3 or _dy < -0.1: _c403.append("%s: podlaha %+.2f m nad terénem v (%.1f, %.1f)" % (_st["id"], _dy, _q[0], _q[1]))
+    if _st["vyska_u_zdi_y"] > _HA["koruna_y"] - 1.5: _c403.append("%s: střecha u zdi %.2f nad koruna − 1,5 (ochoz)" % (_st["id"], _st["vyska_u_zdi_y"]))
+    _uu, _vv = np.meshgrid(np.linspace(0.05, 0.95, 10), np.linspace(0.05, 0.95, 10)); _uu = _uu.ravel(); _vv = _vv.ravel()
+    _pts = _r[0] + _uu[:, None] * (_r[1] - _r[0]) + _vv[:, None] * (_r[3] - _r[0])
+    for _b in _bk:
+        _c = np.array(_b["c"]); _dd = np.array(_b["d"]); _ss = np.array(_b["s"])
+        _vb = (np.abs((_pts - _c) @ _dd) < _b["pul_d"]) & (np.abs((_pts - _c) @ _ss) < _b["pul_s"])
+        if _vb.any(): _c403.append("%s: zasahuje do %s" % (_st["id"], _b["jm"]))
+    _vz = _HA["vezicka"]; _rc = _j[_vz["roh"]]; _cen = _j.mean(0)   # dveře přízemí věžičky: před nimi 2,5 m volno
+    if _vz.get("prizemi"):
+        _dvr = _rc + (_cen - _rc) / np.linalg.norm(_cen - _rc) * (_vz["rozmer"] / 2 + 1.0)
+        if (np.linalg.norm(_pts - _dvr, axis=1) < 2.0).any(): _c403.append("%s: u dveří přízemí věžičky" % _st["id"])
+TEST("staj_A", not _c403, "; ".join(_c403[:5]) if _c403 else "stáj nádvoří A: %d, zády k hradbě, podlaha na terénu, mimo budovy" % len(_sk))
+# 404 (Míša 19. 11., docs/screens/misa_19_11_voda_1/2.jpg: „voda je bílá, nic moc, skoro vyschla“ – mělký potok jako bílý štěrk):
+# hladina kryje i na mělčině (kryti_min), tělo vody tmavé (jas melka), pěna za kameny tlumená a shader ji čte z dat
+_c404 = []; _vz404 = json.load(open(D + "voda_hra.json"))["vzhled_13_11"]; _KV = KC.get("voda_vzhled", {})
+if float(_vz404.get("kryti_min", 0)) < _KV.get("kryti_min_min", 0.65): _c404.append("kryti_min %.2f < %.2f" % (_vz404.get("kryti_min", 0), _KV.get("kryti_min_min", 0.65)))
+_jm = 0.2126 * _vz404["melka"][0] + 0.7152 * _vz404["melka"][1] + 0.0722 * _vz404["melka"][2]
+if _jm > _KV.get("melka_jas_max", 0.28): _c404.append("melka jas %.2f > %.2f" % (_jm, _KV.get("melka_jas_max", 0.28)))
+if float(_vz404.get("pena_kamen_sila", 1.0)) > _KV.get("pena_kamen_max", 0.6): _c404.append("pena_kamen_sila %.2f" % _vz404.get("pena_kamen_sila", 1.0))
+if "pena_kamen_sila" not in open(K + "/hra/shaders/voda.gdshader", encoding="utf-8").read() or '"pena_kamen_sila"' not in open(K + "/hra/scripts/hlavni.gd", encoding="utf-8").read(): _c404.append("voda.gdshader/hlavni.gd nečte pena_kamen_sila")
+TEST("voda_neni_bila", not _c404, "; ".join(_c404) if _c404 else "voda: krytí mělčiny %.2f, jas těla %.2f, pěna za kameny %.2f" % (_vz404["kryti_min"], _jm, _vz404.get("pena_kamen_sila", 1.0)))
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

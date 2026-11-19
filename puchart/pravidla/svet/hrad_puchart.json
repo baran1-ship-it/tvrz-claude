@@ -140,6 +140,7 @@
    3.0,
    3.0
   ],
+  "staj": {"id": "A_staj", "usek": 5, "od_m": 6.0, "do_m": 13.0, "hloubka_m": 4.2, "boxu": 3, "vyska_u_zdi_m": 4.0, "vyska_okap_m": 2.45, "vyska_prepazky_m": 1.6, "zdroj": "Míša 19. 11. (docs/screens/misa_19_11_staj_misto.jpg z x 5,4 z 4,5 směr 204°, označený úsek „STÁJ“): stáj z Havrana – blender/hospodar.py stable() větve claude/new-session-0dtk58 (dřevěná stáj pod hradbou: stání u zdi s korýtkem a žebřinovými jesličkami, kruh na uvázání, čelo do dvora na sloupech, pultová šindelová střecha od hradby); Havran ji stavěl kódem, ne glb – převzato jako kód (blender/puchart_hrad.py staj), čísla Havrana (hloubka 4,6 → 4,2, výška u zdi 4,4 → 4,0 kvůli krakorcům ochozu, 3 stání po 3,1 → 2,33 m na 7 m mezi věžičkou a budovou A_sz)", "jistota": "REKONSTRUKCE (stáje u hradeb běžné; KCD kcd1/09_konirna_zevnitr_seno.jpg jako vzhled)", "pozn": "úsek 5 = J hradba z=20 (od JV nároží s věžičkou): s 6,0–13,0 m → x 8,0–1,0; zádí na vnitřním líci hradby, čelo do dvora; od věžičky (dveře přízemí na S straně, x ~11) a od budovy A_sz (x ≤ 0,5) volno; schody na ochoz jsou u V zdi (x ~11,4)"},
   "vnejsi_brana": {
    "t_m": 29.5,
    "rozmer": [
@@ -1032,6 +1033,7 @@
     "prechod_m": 3.0
    },
    {"id": "A_nadvori_jih", "polygon": [[0.0, 10.5], [9.0, 10.5], [9.0, 19.3], [0.0, 19.3]], "y": 37.9, "prechod_m": 3.0, "zdroj": "Míša 18. 11. (docs/screens/misa_18_11_nadvori_A_val_1.jpg z x 3,8 z 6,0 směr 172°, _2.jpg z x 5,5 z −12,6 směr 260°: červená čára – „srovnat do roviny s okolním dvorem“): nádvoří A bylo v DMR vyklenuté (hřbet S–J v x 0–6 až 39,1 m, ke kraji dvora 37,3–37,9 – zbytek sutě, ne dvůr 1393); hřbet u věžičky srovnán na úroveň plošiny A_vezicka_vstup / prahu brány (37,8–37,9); jižní část dvora mezi palácem a J hradbou, navazuje na A_vezicka_vstup (x 9–15)", "jistota": "NAVRH (úprava dvora)", "kontrola_rovna": true, "kontrola_body": [[2.0, 13.0], [5.0, 13.0], [7.5, 13.0], [2.0, 17.5], [5.0, 17.5], [7.5, 17.5]]},
+   {"id": "A_nadvori_sz", "polygon": [[-6.0, -15.3], [4.0, -15.3], [4.0, -10.2], [-9.9, -10.2], [-10.6, -10.9]], "y": 38.7, "prechod_m": 2.0, "zdroj": "Míša 19. 11. (docs/screens/misa_19_11_nadvori_A_srovnat.jpg z x 5,9 z −11,7 směr 269°, kroužek: srovnat): v SZ koutě nádvoří A u paty hradby pod ochozem terén z DMR spadal k nároží (38,7 u brány → 34,8 v rohu, svah sutě, ne dvůr 1393) – srovnáno na úroveň okolního dvora (38,6–38,9 u brány a před palácem); polygon po osu S a SZ hradby (teren_dlazdice vyhlazuje σ 1,5 m – s polygonem jen po vnitřní líc zůstal u paty zdi pokles 0,5–0,8 m; přechod 2 m sahá nejvýš 1,1 m za vnější líc; s přechodem 1,5 m byl svah u SZ nároží tak strmý, že síť dlaždic 2 m a kolize 1 m se rozešly o 0,16 m – test teren_shoda), mimo rampu brány (x ≥ 4,5, teren.brany se staví po plošinách), šíji sklepa a jámu u S zdi paláce (z ≥ −8,9, jámy po plošinách) a schody paláce", "jistota": "NAVRH (úprava dvora)", "kontrola_rovna": true, "kontrola_body": [[-4.0, -13.8], [0.0, -13.8], [2.0, -13.0], [-6.5, -11.2], [-2.0, -11.2], [2.0, -11.2]]},
    {
     "id": "A_vezicka_vstup",
     "polygon": [

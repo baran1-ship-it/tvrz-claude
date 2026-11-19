@@ -238,17 +238,9 @@
  },
  "vzhled_13_11": {
   "popis": "Vzhled vody a břehu podle Míšiny předlohy (docs/reference/potoky/misa_real_01–04, „takhle by měly vypadat všechny toky“) a rešerše docs/reference/potoky/README_jak_se_stavi.md kroky 1–3: hladina bez hrany (voda.py: síť přes celou plochu s hloubkou > 0 + řada za čárou vody, krytí kraje v barvě vrcholu), krytí podle hloubky (Beer–Lambert) a úhlu (Fresnel, Schlick), mokrý pás a tmavší dno pod vodou (barva vrcholu BREH A, zem.gdshader). Čte blender/voda.py, hra/scripts/hlavni.gd (shader vody), hra/scripts/svet.gd (terén).",
-  "melka": [
-   0.313,
-   0.283,
-   0.221
-  ],
+  "melka": [0.23, 0.24, 0.165],
   "zdroj_melka": "pipeta (medián) misa_real_01_potok_trava_kameny.jpg výřez x 150–280, y 300–360 (mělká voda s valouny, sRGB)",
-  "hluboka": [
-   0.128,
-   0.168,
-   0.147
-  ],
+  "hluboka": [0.1, 0.12, 0.09],
   "zdroj_hluboka": "pipeta (medián) misa_real_03_perej_listi_breh.jpg výřez x 10–120, y 520–600 (klidná tůň pod peřejí, sRGB)",
   "cirost_m": 0.3,
   "zdroj_cirost": "hloubka, na které voda pohltí 63 % pohledu na dno (1 − exp(−h/c)); v real_01 je dno vidět i uprostřed toku (~0,3–0,4 m) – NEOVERENO, laděno snímkem; Havran reka cirost 0,35",
@@ -256,9 +248,9 @@
   "zdroj_hloubka_barvy": "od mělké k tůňové barvě (1 − exp(−h/x)) – NEOVERENO, snímek",
   "fresnel_f0": 0.03,
   "zdroj_fresnel": "Schlick: F0 = ((n−1)/(n+1))², voda n ≈ 1,33 → 0,02 (https://en.wikipedia.org/wiki/Schlick%27s_approximation); krytí = max(hloubka, Fresnel) – shora průhledná, do dálky zrcadlí (kcd1_oficial_potok_valouny_pruhlednost.jpg)",
-  "drsnost_klid": 0.15,
+  "drsnost_klid": 0.2,
   "drsnost_pena": 0.5,
-  "specular": 0.3,
+  "specular": 0.2,
   "zdroj_drsnost": "snímek 13. 11. (docs/screens/potok13_*): s drsností 0,08 a specular 0,35 odrážela hladina jen oblohu (Compatibility bez SSR) – šedobílá deska; odraz lesa je proto barva odraz × Fresnel, lesk jen slunce. Hodnoty NEOVERENO, laděno snímkem",
   "mokry_pas_m": 0.3,
   "zdroj_mokry_pas": "mokrý tmavší pás nad čárou vody (výška nad hladinou): KCD snímky 0,2–0,5 m (odhad z fotky, README_jak_se_stavi.md §2.2), Havran voda_toky.md 0,2–0,4 m (NAVRH); na plochém brodu vychází vodorovně 2–4 m jako bahno u mlýna (kcd1_melcina_mlyn_mokre_bahno.jpg)",
@@ -281,7 +273,7 @@
   ],
   "zdroj_odraz": "pipeta (medián) misa_real_01_potok_trava_kameny.jpg výřez x 330–420, y 230–270 (vzdálenější hladina zrcadlící keře); KCD kcd1_lesni_potok_kameny_mech.jpg: hladina tmavá, zrcadlí koruny",
   "kraj_m": 0.08,
-  "kryti_min": 0.45,
+  "kryti_min": 0.7, "pena_kamen_sila": 0.5, "predchozi_19_11": {"kryti_min": 0.45, "melka": [0.313, 0.283, 0.221], "hluboka": [0.128, 0.168, 0.147], "obloha": [0.52, 0.58, 0.64], "odraz_sila": 0.7, "specular": 0.3, "drsnost_klid": 0.15, "pena_barva": [0.44, 0.46, 0.42]}, "zdroj_19_11": "Míša 19. 11. (tablet, docs/screens/misa_19_11_voda_1.jpg x −76 z 124 směr 283°, _2.jpg x −47 z 121 směr 104°): „voda je bílá, nic moc, skoro vyschla“ – mělký potok se četl jako bílý štěrk / prázdné koryto: průsvitná hladina (kryti_min 0,45) nad světlým dnem, světlá barva těla melka 0,31, šikmý odraz oblohy 0,68–0,84 × 0,8 a lesk slunce (specular 0,3, drsnost 0,15) + světlé čárky pěny za kameny i na klidné mělčině. Teď: krytí i na mělčině nejméně 0,7, tělo vody tmavé olivové (tmavá hladina v proudnici misa_real_01 a KCD kcd1_lesni_potok_kameny_mech.jpg – hladina tmavá, zrcadlí koruny), odraz oblohy ve vodě tlumený (obloha 0,52–0,64, odraz_sila 0,7), lesk slunce menší (specular 0,2, drsnost 0,2), pěna za kameny mimo peřeje poloviční (pena_kamen_sila 0,5 – voda.gdshader) a tmavší (pena_barva 0,34). Hladina v korytě (voda.py, hloubka_m) beze změny. Snímky před/po docs/screens/voda_19_11_{pred,po}_{1,2}.jpg; laděno snímkem PC (1. pokus melka 0,17 / obloha 0,42 / odraz 0,55: koryto černé jako asfalt bez lesku – nečetlo se jako voda), tablet NEOVERENO",
   "zdroj_17_11": "Míša 17. 11. (tablet, docs/screens/misa_17_11/13.jpg a 19.jpg: „nemáš vodu v potoce“, mlýnské kolo na suchu): voda na tabletu je, snímek PC z týchž poloh vypadá stejně (docs/screens/voda_17_11_pred_*.png) – příčina není export ani Adreno, ale vzhled: shora krytí jen 1 − exp(−h/0,5) (mělčina 0,1 m → 18 %), Fresnel 2 %, specular 0,05 s drsností 0,3 → průsvitná tmavá hladina na ztmaveném dně = prázdné koryto. Předloha misa_real_01: hladinu čte lesk oblohy a vlnky i tam, kde je vidět dno. Proto kryti_min 0,45 (krytí hladiny i na mělčině, kraj u čáry vody dál do ztracena kraj_m), čirost 0,3 m (Havran reka 0,35), specular 0,3 a drsnost 0,15 (lesk vlnek; 13. 11. bílá deska byla 0,35/0,08 + pěna všude 8 %). Ověřeno snímky docs/screens/voda_17_11_po_*.png, tablet NEOVERENO",
   "zdroj_kraj": "krytí u čáry vody doroste na prvních 8 cm hloubky (hrana vody se nečte jako čára – README_jak_se_stavi.md §2.2 d) – NEOVERENO, snímek",
   "pena_kamen_polomer": 0.8,
@@ -291,11 +283,7 @@
   "pena_kamen_min_hloubka_m": 0.08,
   "zdroj_pena_kamen_hloubka": "pěna jen u kamenů v proudu (hloubka u kamene nad 8 cm) – kameny na mělkém kraji vody pěnu nedělají (misa_real_01: světlé čárky za kameny v proudnici, kraj klidný); NEOVERENO",
   "pena_zaklad": 0.0,
-  "pena_barva": [
-   0.44,
-   0.46,
-   0.42
-  ],
+  "pena_barva": [0.34, 0.36, 0.32],
   "pozn_bila_13_11": "Míša 13. 11. (tablet): „voda je nějaká bílá“ – pěna měla všude základ 8 % (bílý film) a hladká hladina (drsnost 0,15, specular 0,12) dávala na tabletu mléčný odlesk; pěna jen na peřejích a za kameny, drsnost 0,3, specular 0,05, pěna tlumenější (0,72)",
   "melka_pipeta": [
    0.384,
@@ -315,8 +303,8 @@
   "zdroj_15_11": "Míša 15. 11. (foto x −49,8 z 120,2): „voda je dost bílá i některé kameny“ – pěna 0,72 → 0,44 (světlé čárky za kameny jen naznačené), jas kamenů koryta (drobné 1,75 → 1,05, balvany 1,25 → 0,9; dřív v kódu hlavni.gd _kameny_koryta)",
   "melka_17_11": [0.15, 0.16, 0.11],
   "hluboka_17_11": [0.09, 0.085, 0.05],
-  "obloha": [0.68, 0.75, 0.84],
-  "odraz_sila": 0.8,
+  "obloha": [0.42, 0.47, 0.52],
+  "odraz_sila": 0.55,
   "les_vyska": 0.35,
   "mezery_sila": 0.45,
   "mezery_pocet": 9.0,

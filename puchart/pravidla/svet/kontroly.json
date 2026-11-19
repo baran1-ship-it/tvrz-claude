@@ -1,6 +1,7 @@
 {
  "popis": "Pravidla hlídačů Puchartu (převod vrstev z Havrana docs/havran/pipeline.md; Míša 2. 11.: „ať neopakujeme chyby z Havrana“). Každá chyba nalezená člověkem = pravidlo zde + kontrola v nastroje/test_smyslu.py. Selhání blokuje vydání (nastroje/export_apk.sh).",
  "nadvori_prevyseni_m": 0.25,
+ "voda_vzhled": {"kryti_min_min": 0.65, "melka_jas_max": 0.28, "pena_kamen_max": 0.6, "zdroj": "Míša 19. 11. (docs/screens/misa_19_11_voda_1/2.jpg): „voda je bílá, nic moc, skoro vyschla“ – průsvitná světlá hladina (krytí 0,45, jas těla 0,29) se četla jako bílý štěrk; test smyslu voda_neni_bila (docs/chyby.md 404)"},
  "nadvori_prevyseni_zdroj": "Míša 18. 11. (misa_18_11_nadvori_A_val_1.jpg: hrbol na nádvoří A „srovnat do roviny s okolním dvorem“): v plošině A_nadvori_jih (1 m od kraje) nejvýš 0,25 m převýšení – test smysl:nadvori_A_rovne",
  "geometrie": {
   "soubory": [

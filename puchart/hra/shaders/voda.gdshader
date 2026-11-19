@@ -34,6 +34,7 @@ uniform float rychlost = 0.45;        // m/s
 uniform float meritko = 2.2;          // m na dlaždici vln
 uniform float pena_sklon = 0.03;      // sklon hladiny, od kterého je peřej
 uniform float pena_zaklad = 0.0;     // pěna mimo peřeje (13. 11.: 0,08 dělal bílý film)
+uniform float pena_kamen_sila = 0.5;  // pěna za kameny (voda_hra.json vzhled_13_11 pena_kamen_sila; Míša 19. 11.: „voda je bílá“ – čárky za kameny na mělčině bělily potok)
 uniform vec3 pena_barva : source_color = vec3(0.72, 0.74, 0.70);
 varying float sklon;
 varying vec3 wpos;
@@ -65,7 +66,7 @@ void fragment() {
 	float perej = smoothstep(pena_sklon, pena_sklon * 3.0, sklon);
 	float pena = smoothstep(0.55, 0.85, sum * 0.6 + sum2 * 0.4) * (perej * 0.8 + pena_zaklad);
 	float pk = 1.0 - COLOR.r;   // pěna za kamenem, který láme hladinu (blender/voda.py, misa_real_01: světlé čárky a vrásky za kameny)
-	pena = max(pena, pk * smoothstep(0.25, 0.65, sum * 0.6 + sum2 * 0.4 + pk * 0.15));
+	pena = max(pena, pk * pena_kamen_sila * smoothstep(0.25, 0.65, sum * 0.6 + sum2 * 0.4 + pk * 0.15));
 	float nmd = 0.35 + pk * 0.5;
 	NORMAL_MAP_DEPTH = nmd;   // vrásky za kamenem
 	// vlnitá normála ve světě (tečný prostor → pohled → svět) a odražený pohled

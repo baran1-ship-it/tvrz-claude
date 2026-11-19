@@ -31,3 +31,8 @@ patro ×1,5 (Havran ×2,3 – keře jsou na tabletu drahé), podrost kapradí a 
 **Nepřevzato:** hromady klestí (model chybí), více padlých kmenů (Míša 13. 11. „není tam těch klád moc?“), meze na polích
 a clony vjezdu vsi (Puchart nemá pole za vsí v tom tvaru – po schválení snímků), modely ker_husty/shrub_02 (Havran je nemá
 v repu, jsou na Disku – Puchart má vlastní lísku, hloh, trnku, bez, šípek 4–14 tis. troj.).
+
+**19. 11. – stáj (Míša: „stáj z Havrana“ u J hradby nádvoří A):** Havran nemá stáj jako glb (ani v `modely/nove`, větvi
+`assets` ani v datových balících) – staví ji kódem `blender/hospodar.py stable()` (dřevěná stáj pod hradbou, vlastní
+model Odkazu Havrana, bez cizí licence). Převzato jako kód `blender/puchart_hrad.py staj()` z dat `hrad_puchart.json A.staj`
+(bez slámy a sena – výbava je na Míše); materiály Puchartu (hrady.py TEX: dub, prkna_ven, šindel – Poly Haven CC0).
