@@ -15,12 +15,19 @@ D = os.path.join(K, "build/pruchod_skupiny")
 _md5 = {}
 
 
+try: _kes = json.load(open(os.path.join(K, "build/hlidaci_md5.json")))   # (velikost, mtime) → md5, ať se 1,7 GB modelů nečte pokaždé
+except Exception: _kes = {}
+
+
 def md5(cesta):
     if cesta not in _md5:
+        st = os.stat(os.path.join(K, cesta)); kl = [st.st_size, st.st_mtime_ns]
+        if cesta in _kes and _kes[cesta][:2] == kl:
+            _md5[cesta] = _kes[cesta][2]; return _md5[cesta]
         h = hashlib.md5()
         with open(os.path.join(K, cesta), "rb") as f:
             for b in iter(lambda: f.read(1 << 22), b""): h.update(b)
-        _md5[cesta] = h.hexdigest()
+        _md5[cesta] = h.hexdigest(); _kes[cesta] = kl + [_md5[cesta]]
     return _md5[cesta]
 
 
@@ -90,7 +97,8 @@ if cmd == "plan":
     with otisky() as d: pr = dict(d.get("pruchod", {}))
     json.dump({"otisky": o, "trasy": roz}, open(D + "/_plan.json", "w"))
     radky = []
-    for s, v in P["skupiny"].items():
+    trv = {s: z.get("trvani_s", 0) for s, z in pr.items()}
+    for s, v in sorted(P["skupiny"].items(), key=lambda i: -(trv.get(i[0]) or len(roz[i[0]]) + 5 * len(i[1]["testy"]))):
         z = pr.get(s)
         if not vse and z and z.get("otisk") == o[s]:
             json.dump(z["vysledek"], open("%s/%s.json" % (D, s), "w"), ensure_ascii=False)
@@ -99,9 +107,10 @@ if cmd == "plan":
         jen = ",".join(P["testy_jen"][t] for t in v["testy"]) or "-"   # „-“ = žádný pevný test (PUCHART_JEN neprázdné → jen trasy)
         radky.append("%s\t%s\t%s" % (s, ",".join(roz[s]), jen))
         print("PRUCHOD_SKUPINA %s spustit: %d tras, testy %s (%s)" % (s, len(roz[s]), v["testy"], "HLIDACI_VSE" if vse else "otisk změněn" if z else "bez úspěšného běhu"))
+    json.dump(_kes, open(os.path.join(K, "build/hlidaci_md5.json"), "w"))
     open(D + "/_plan.tsv", "w").write("".join(r + "\n" for r in radky))
 elif cmd == "zapis":
-    s, f = sys.argv[3], sys.argv[4]
+    s, f = sys.argv[3], sys.argv[4]; t = int(sys.argv[5]) if len(sys.argv) > 5 else 0
     pl = json.load(open(D + "/_plan.json"))
     try: v = json.load(open(f))
     except Exception: v = {}
@@ -111,9 +120,9 @@ elif cmd == "zapis":
     ok = all(x == "OK" for x in v.values())
     with otisky() as d:
         pr = d.setdefault("pruchod", {})
-        if ok: pr[s] = {"otisk": pl["otisky"][s], "cas": time.strftime("%d. %m. %H:%M"), "commit": commit(), "vysledek": v}
+        if ok: pr[s] = {"otisk": pl["otisky"][s], "cas": time.strftime("%d. %m. %H:%M"), "commit": commit(), "trvani_s": t, "vysledek": v}
         else: pr.pop(s, None)
-    print("PRUCHOD_SKUPINA %s %s (%d výsledků%s)" % (s, "OK" if ok else "CHYBA", len(v), ", otisk uložen" if ok else ""))
+    print("PRUCHOD_SKUPINA %s %s (%d výsledků, %d s%s)" % (s, "OK" if ok else "CHYBA", len(v), t, ", otisk uložen" if ok else ""))
 elif cmd == "sluc":
     v = {}
     for s in P["skupiny"]:

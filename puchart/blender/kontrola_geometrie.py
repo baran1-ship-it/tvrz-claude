@@ -13,11 +13,38 @@ from scipy.sparse.csgraph import connected_components
 K = H.K
 KC = json.load(open(os.path.join(K, "pravidla/svet/kontroly.json")))["geometrie"]
 vysl = {"popis": "ostrovy sítí bez opory (visí) a celé pod terénem – blender/kontrola_geometrie.py", "soubory": {}}
+# jen glb se změněným otiskem (Míša 19. 11., pravidla/svet/hlidaci_skupiny.json geometrie): otisk = glb + pravidla geometrie
+# + skript (+ výšky terénu u modelů na terénu); nezměněné se převezmou z build/hlidaci_otisky.json, HLIDACI_VSE=1 vše
+import hashlib, fcntl, time
+HG = json.load(open(os.path.join(K, "pravidla/svet/hlidaci_skupiny.json")))["geometrie"]
+OT = os.path.join(K, "build/hlidaci_otisky.json")
+def _md5(c):
+    h = hashlib.md5()
+    with open(os.path.join(K, c), "rb") as f:
+        for b in iter(lambda: f.read(1 << 22), b""): h.update(b)
+    return h.hexdigest()
+_spol = json.dumps(KC, sort_keys=True) + "".join(_md5(c) for c in HG["spolecne"])
+_ter = "".join(_md5(c) for c in HG["teren"] if os.path.exists(os.path.join(K, c)))
+def _ulozit(soubor, otisk, v):   # hned po každém glb (odolnost proti restartu), se zámkem (průchod zapisuje do téhož souboru)
+    with open(OT + ".lock", "w") as z:
+        fcntl.flock(z, fcntl.LOCK_EX)
+        try: d = json.load(open(OT))
+        except Exception: d = {}
+        d.setdefault("geometrie", {})[soubor] = {"otisk": otisk, "cas": time.strftime("%d. %m. %H:%M"), "vysledek": v}
+        json.dump(d, open(OT + ".tmp", "w"), ensure_ascii=False, indent=1); os.replace(OT + ".tmp", OT)
+try: _pred = json.load(open(OT)).get("geometrie", {})
+except Exception: _pred = {}
 for soubor in KC["soubory"]:
     rovina = isinstance(soubor, dict) and soubor.get("teren") == "rovina"   # stavby vsi (audit 15. 11.: ves se nekontrolovala):
     soubor = soubor["cesta"] if isinstance(soubor, dict) else soubor        # počátek modelu je na terénu → terén = rovina y 0
     cesta = os.path.join(K, soubor)
     if not os.path.exists(cesta): continue
+    _otisk = hashlib.md5((_spol + _md5(soubor) + ("" if rovina else _ter)).encode()).hexdigest()
+    _z = _pred.get(soubor)
+    if os.environ.get("HLIDACI_VSE") != "1" and _z and _z.get("otisk") == _otisk:
+        vysl["soubory"][soubor] = _z["vysledek"]
+        print("GEOMETRIE", soubor, "převzato z běhu", _z.get("cas", "?"), "ostrovů", _z["vysledek"].get("ostrovu"), "visí", _z["vysledek"].get("visi_pocet"))
+        continue
     for o in list(bpy.data.objects): bpy.data.objects.remove(o)
     bpy.ops.import_scene.gltf(filepath=cesta)
     V, F, jm = [], [], []
@@ -140,5 +167,6 @@ for soubor in KC["soubory"]:
                   "nad_terenem_m": round(float(min_nad[i]), 2)} for i in visi[:200]], "visi_pocet": int(len(visi)),
         "pod_terenem": [{"stred": [round(float(c), 2) for c in (lo[i] + hi[i]) / 2]} for i in pod_t[:50]], "pod_terenem_pocet": int(len(pod_t))}
     print("GEOMETRIE", soubor, "ostrovů", nc, "visí", len(visi), "pod terénem", len(pod_t))
+    _ulozit(soubor, _otisk, vysl["soubory"][soubor])
 vysl["hotovo"] = True   # hlidaci.sh ověří, že výpočet doběhl (audit 15. 11.: Blender spadl na konci a prošlo to)
 json.dump(vysl, open(os.path.join(K, "build/kontrola_geometrie.json"), "w"), ensure_ascii=False, indent=1)

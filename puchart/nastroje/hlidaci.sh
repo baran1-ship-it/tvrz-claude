@@ -15,7 +15,7 @@ for _r in vysek vysek_sit; do
 done
 # staré výsledky pryč (QA 2. 11.: když Godot/Blender spadne, nesmí projít výsledky minulého běhu)
 rm -f $K/build/kontrola_geometrie.json $K/build/test_smyslu.json $K/build/hlidaci_beh_godot.log $K/build/hlidaci_otisk
-[ "$1" != "--rychle" ] && rm -f $K/build/pruchod.json $K/build/sceny.json $K/build/kontrola_scen.json $K/build/dosah.json $K/build/dosah.png
+[ "$1" != "--rychle" ] && rm -f $K/build/pruchod.json $K/build/sceny.json $K/build/kontrola_scen.json
 # trvání kroků (rada 9. 11.: měřit čekací doby, ať je vidět, co má smysl pouštět souběžně) → build/hlidaci_casy.txt
 _T0=$(date +%s); _KROK=""; : > $K/build/hlidaci_casy.txt
 krok() { _T=$(date +%s); [ -n "$_KROK" ] && echo "$_KROK $((_T - _T0)) s" >> $K/build/hlidaci_casy.txt; _KROK="$1"; _T0=$_T; echo "== $1" | tee -a $S; }
@@ -47,10 +47,10 @@ if [ "$1" != "--rychle" ]; then
   # otisky build/hlidaci_otisky.json, HLIDACI_VSE=1 vynutí vše. Mřížka dosažitelnosti (dosah) je ve skupině svet.
   python3 $K/nastroje/hlidaci_skupiny.py plan $K | tee -a $S
   _skupina() {   # $1 skupina, $2 trasy (čárkami), $3 pevné testy pro PUCHART_JEN
-    local _o=$K/build/pruchod_skupiny/$1
+    local _o=$K/build/pruchod_skupiny/$1 _t=$(date +%s)
     (cd $K/hra && PUCHART_TEST=pruchod PUCHART_TRASA="$2" PUCHART_JEN="$3" PUCHART_VYSTUP=$_o.vystup.json PUCHART_DOSAH=$K/build/dosah.json \
       timeout 5400 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 > $_o.log 2>&1)
-    python3 $K/nastroje/hlidaci_skupiny.py zapis $K $1 $_o.vystup.json
+    python3 $K/nastroje/hlidaci_skupiny.py zapis $K $1 $_o.vystup.json $(( $(date +%s) - _t ))
   }
   export -f _skupina; export K G
   _SOUBEH=${PUCHART_SOUBEH:-$(python3 -c "import json;print(json.load(open('$K/pravidla/svet/hlidaci_skupiny.json'))['souběh'])")}
