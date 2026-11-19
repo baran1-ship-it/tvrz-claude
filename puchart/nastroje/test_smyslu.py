@@ -1608,6 +1608,11 @@ if '"hust_zbytek"' not in open(os.path.join(K, "hra/scripts/louka.gd"), encoding
 for _f191 in ("byliny.json", "louka.json"):
     if json.load(open(os.path.join(K, "hra/data", _f191), encoding="utf-8")) != json.load(open(os.path.join(K, "pravidla/svet", _f191), encoding="utf-8")): _c191.append("hra/data/%s není kopie" % _f191)
 TEST("ridnuti_bez_sachovnice", not _c191, "; ".join(_c191) if _c191 else "byliny zanik %s po instancích, louka hust_zbytek %s" % (_z191, _lk191.get("hust_zbytek")))
+# krajnice cest (Míša 19. 11.): tráva v třídě cesta mimo hlínu masky
+_lk_k = json.load(open(K + "/hra/data/louka.json"))["tridy"].get("cesta_krajnice", 0.0)
+_lg_k = open(K + "/hra/scripts/louka.gd", encoding="utf-8").read()
+TEST("krajnice_trava", float(_lk_k) > 0.5 and "maska_cesty" in _lg_k, "cesta_krajnice %s, louka.gd čte masku cest: %s" % (_lk_k, "maska_cesty" in _lg_k))
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

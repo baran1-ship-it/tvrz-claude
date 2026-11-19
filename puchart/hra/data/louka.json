@@ -31,7 +31,8 @@
   "pole": 0.75,
   "zemedelstvi": 0.75,
   "nadvori_slap": 0.0,
-  "pata_zdi_uvnitr": 0.0
+  "pata_zdi_uvnitr": 0.0,
+  "cesta_krajnice": 0.85
  },
  "druhy": {
   "pozn": "druh = buňka atlasu + výška (stebla.gdshader): 0 nízká 0,36 m, 1 nízká 0,5, 2 střední 0,6, 3 vysoká 0,82, 4 suchá 0,6; podíly na sečené louce (pastva nižší)",
@@ -210,5 +211,6 @@
    0.68
   ],
   "tablet": "NEOVERENO (vzhled i výkon kontroluje Míša na tabletu)"
- }
+ },
+ "pozn_krajnice_19_11": "Míša 19. 11. (misa_19_11_krajnice_holé.png): krajnice cest holé – třída stanoviště cesta má ~10 m, vyjetá hlína ~4 m; tráva v třídě cesta s hustotou cesta_krajnice tam, kde maska cest (textury/maska_cesty.png R+G) nemá hlínu (louka.gd)."
 }

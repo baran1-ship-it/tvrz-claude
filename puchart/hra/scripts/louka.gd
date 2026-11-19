@@ -24,6 +24,7 @@ func postav(s: Node3D, kamera: Camera3D) -> void:
 	cfg = JSON.parse_string(FileAccess.get_file_as_string("res://data/louka.json"))
 	sj = JSON.parse_string(FileAccess.get_file_as_string("res://data/stanoviste.json"))
 	st = load("res://data/stanoviste.png").get_image()
+	if ResourceLoader.exists("res://textury/maska_cesty.png"): _mc = (load("res://textury/maska_cesty.png") as Texture2D).get_image()
 	_trs = _karta_mesh(3, ATLAS_POMER, 1.0)
 	LS_ = cfg.get("les", {})
 	if ResourceLoader.exists("res://data/kryt.png"):
@@ -165,6 +166,7 @@ func _mrizka_tick() -> void:
 
 func vsechny_site() -> Array: return [_trs] + _prst.map(func(q): return (q[0] as MultiMeshInstance3D).multimesh.mesh)
 
+var _mc: Image = null   # maska cest (hlína R/G) – krajnice cest
 func _trida(x: float, z: float) -> String:
 	var c := int((x - float(sj["x0_hra"])) / float(sj["krok_m"])); var r := int((z - float(sj["z0_hra"])) / float(sj["krok_m"]))
 	if c < 0 or r < 0 or c >= st.get_width() or r >= st.get_height(): return ""
@@ -205,6 +207,10 @@ func _rozsej(k: Vector2i) -> void:
 		while x < B:
 			var px := x0 + x + rng.randf_range(-0.45, 0.45) * krok; var pz := z0 + z + rng.randf_range(-0.45, 0.45) * krok
 			var tr := _trida(px, pz); var h := float(tridy.get(tr, 0.0))
+			if tr == "cesta" and _mc != null:   # Míša 19. 11.: třída cesta je širší než vyjetá hlína – krajnice zarostlé, holá jen hlína z masky cest
+				var mcx := clampi(int((px - float(sj["x0_hra"])) / float(sj["krok_m"]) * _mc.get_width() / st.get_width()), 0, _mc.get_width() - 1)
+				var mcz := clampi(int((pz - float(sj["z0_hra"])) / float(sj["krok_m"]) * _mc.get_height() / st.get_height()), 0, _mc.get_height() - 1)
+				var pc := _mc.get_pixel(mcx, mcz); h = float(tridy.get("cesta_krajnice", 0.0)) * (1.0 - smoothstep(0.08, 0.35, pc.r + pc.g))
 			if h > 0.0 and _kr != null:   # zápoj korun (kryt.png, Havran les_podrost.json trava): pod zápojem ≈ 0, světliny jako louka; samotný strom v louce zápoj nemá
 				var kc := clampi(int((px - float(sj["x0_hra"])) / float(sj["krok_m"])), 0, _kr.get_width() - 1)
 				var kz := clampi(int((pz - float(sj["z0_hra"])) / float(sj["krok_m"])), 0, _kr.get_height() - 1)
