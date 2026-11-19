@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "fda59f1",
+ "commit": "50df0b0",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -148,7 +148,8 @@
    "nadvori_A_rovne": true,
    "svitidla_sila": true,
    "staj_A": true,
-   "voda_neni_bila": true
+   "voda_neni_bila": true,
+   "zdivo_klidne": true
   },
   "pruchod": {
    "A_branka_patro": true,
@@ -283,26 +284,26 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1064547,
-    "troj_max": 1090574,
-    "kresleni_p95": 373,
-    "kresleni_m_median": 478.0
+    "troj_p95": 1063593,
+    "troj_max": 1089862,
+    "kresleni_p95": 372,
+    "kresleni_m_median": 477.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1606786,
-    "troj_max": 1858811,
-    "kresleni_p95": 877,
-    "kresleni_m_median": 713.5
+    "troj_p95": 1608421,
+    "troj_max": 1858555,
+    "kresleni_p95": 878,
+    "kresleni_m_median": 715.0
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1593472,
+    "troj_p95": 1591951,
     "troj_max": 1783916,
-    "kresleni_p95": 1061,
-    "kresleni_m_median": 1762.5
+    "kresleni_p95": 1062,
+    "kresleni_m_median": 1761.0
    },
-   "zmena_median": 34.42,
+   "zmena_median": 34.25,
    "doskoky": [],
    "ve_zdi": 2
   },
