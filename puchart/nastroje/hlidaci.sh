@@ -34,6 +34,10 @@ krok geometrie; /opt/bl/bin/python $K/blender/kontrola_geometrie.py $K 2>&1 | gr
 python3 -c "import json,sys;sys.exit(0 if json.load(open('$K/build/kontrola_geometrie.json')).get('hotovo') else 1)" 2>/dev/null || { rc=1; echo "GEOMETRIE CHYBA: výpočet nedoběhl do konce (hotovo chybí)" | tee -a $S; }
 krok spoje; python3 $K/nastroje/kontrola_spoju.py $K 2>&1 | grep SPOJE | tee -a $S; [ ${PIPESTATUS[0]} -eq 0 ] || rc=1
 krok "test smyslu"; python3 $K/nastroje/test_smyslu.py $K | grep -E "CHYBA|TEST_SMYSLU" | tee -a $S || rc=1
+# Míša 20. 11. (ucinnost_hlidacu_19_11.md): plané poplachy z rozdělané přestavby (pata_pas, plosiny_rovne padaly na mezistavu,
+# když pomocník zrovna přestavoval terén) – hlídači počkají, dokud běží přestavba světa (max 30 min)
+for _i in $(seq 1 180); do pgrep -f "postav_vse.sh|teren_upravy.py|stavby_vegetace.py|puchart_hrad.py|cesty.py|teren_dlazdice.py" >/dev/null || break; [ $_i = 1 ] && echo "čekám na dokončení přestavby světa…"; sleep 10; done
+
 if [ "$1" != "--rychle" ]; then
   # průchod a scény souběžně (Havran 9. 11.: jeden headless Godot ≈ 1,1 jádra a 2,5 GB, stroj 4 jádra / 15 GB; import
   # se tu nedělá – oba jen čtou importovaná data)

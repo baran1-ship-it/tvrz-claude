@@ -147,10 +147,10 @@ void fragment() {
 				float n_s = texture(sum, xz * 0.031).r;                       // pomalý šum podél cesty
 				float roz = 0.68 + (n_s - 0.5) * 0.18;                        // polovina rozchodu (kolísá)
 				float kol = (1.0 - smoothstep(0.12, 0.30, abs(dk - roz))) * smoothstep(0.55, 0.75, texture(sum, xz * 0.013 + 3.3).r + n1 * 0.15);   // koleje jen na ~40 % délky (Havran _cesty_opotrebeni)
-				float hrb = (1.0 - smoothstep(0.18, 0.42, dk)) * smoothstep(0.45, 0.7, texture(sum, xz * 0.09 + 3.1).r);
+				float hrb = (1.0 - smoothstep(0.26, 0.5, dk)) * smoothstep(0.25, 0.5, texture(sum, xz * 0.09 + 3.1).r);   // Míša 20. 11.: pruh trávy mezi kolejemi širší a souvislejší (KCD polní cesty)
 				vec3 trava = vrstva2(0, xz, n1) * kalibrace_travy;
 				ca = mix(ca, ca * vec3(0.72, 0.7, 0.68), kol * 0.6);            // koleje o málo tmavší (Havran: „koleje ani skvrny nemají být tmavé fleky“)
-				ca = mix(ca, mix(ca, trava, 0.75), hrb * mc.r);                 // travnatý hřbet
+				ca = mix(ca, mix(ca, trava, 0.92), hrb * mc.r);                 // travnatý hřbet
 				float kraj = smoothstep(1.0, 1.7, dk) * (1.0 - smoothstep(1.9, 2.4, dk));
 				ca = mix(ca, mix(ca, sk * 0.9, 0.35), kraj * smoothstep(0.55, 0.8, n2));   // kamínky na krajích
 				nn_kol = kol;
