@@ -135,3 +135,5 @@ maska cest v louka.gd/byliny.gd?) a zúžit vyloučení jen na vyjeté koleje; p
 | H4 | misa_20_11_vykon (svah s hradem) | černé skvrny na svahu pod hradem (stíny/impostory?) – prověřit |
 | H5 | misa_20_11_staj_tma.jpg (x 8,4 z 16 – i s loučí) | stáj uvnitř skoro černá i s hořící loučí – zjistit příčinu (stáj bere „interiér se stropem“ → světlo jen z otvorů? tmavé dřevo prkna_ven/dub? louč nesvítí na dřevo stáje?) – zesvětlení pod_strechou 1,6 nepomohlo a přesvětlilo místnosti → vráceno |
 | H6 | misa_20_11_svy.jpg (x 8,2 z 24,3) | svislé tmavé švy / rýhy na zdech a nároží (spáry mezi díly zdí – úkol #25) + kámen pořád „tapeta“ (plán F) |
+
+H5 rozbor 20. 11.: hlavni.gd pozná „uvnitř“ paprskem 25 m nahoru (interier.paprsek_nahoru_m); ve stáji trefí kolizi ochozu nad ní (~8 m) → hra ji bere jako uzavřenou místnost se stropem (světlo jen z otvorů) → černo. Oprava: strop jen do výšky místnosti (např. ≤ 5 m nad hráčem) nebo stáj vyjmout z kolize stropu; pozor na vysoké síně hradu – ověřit.
