@@ -137,3 +137,14 @@ maska cest v louka.gd/byliny.gd?) a zúžit vyloučení jen na vyjeté koleje; p
 | H6 | misa_20_11_svy.jpg (x 8,2 z 24,3) | svislé tmavé švy / rýhy na zdech a nároží (spáry mezi díly zdí – úkol #25) + kámen pořád „tapeta“ (plán F) |
 
 H5 rozbor 20. 11.: hlavni.gd pozná „uvnitř“ paprskem 25 m nahoru (interier.paprsek_nahoru_m); ve stáji trefí kolizi ochozu nad ní (~8 m) → hra ji bere jako uzavřenou místnost se stropem (světlo jen z otvorů) → černo. Oprava: strop jen do výšky místnosti (např. ≤ 5 m nad hráčem) nebo stáj vyjmout z kolize stropu; pozor na vysoké síně hradu – ověřit.
+H5 návrh (promyšleno 20. 11., Míša: „stáj nemá přední díl – světlo dovnitř, stín dělá jen střecha“):
+- Dnes: 1 paprsek nahoru 25 m → zásah = „uvnitř“ (0/1). Chyba principu: neřeší, zda je prostor ze stran otevřený, a bere
+  i cizí kolize vysoko nad hlavou (ochoz nad stájí, krakorce, koruna zdi).
+- Nově „otevřenost oblohy“ jako podíl: z hlavy hráče 9 paprsků do polokoule (1 nahoru + 8 šikmo 35° nad vodorovnou ve 8
+  směrech), délka ~12 m. uvnitr = podíl zablokovaných (plynule 0–1, vyhlazeno v čase). Stáj/přístřešek/pavlač: zablokovaný
+  jen paprsek nahoru a strany ke zdi, k otevřené straně volné → uvnitr ~0,3–0,5 → venkovní světlo mírně tlumené střechou.
+  Místnost se stropem a okny: všechny zablokované → 1 (jako dnes). Vysoká síň: zablokované (strop i stěny) → 1 (správně).
+- Stín střechy sám dělá stínová mapa slunce (do 40 m) – světlo „zvenku“ pod střechou nemá být dál tlumeno; pod_strechou
+  nastavení pak sjednotit s novým podílem (méně zvláštních případů).
+- Cena: 9 paprsků každých 10 snímků (dnes 1) – zanedbatelné; data: interier.otevrenost {paprsku, uhel_st, delka_m}.
+- Kontrola: stáj (x 8 z 16), pavlač krčmy, přístřešek kovárny, síň paláce A, sklep, půda – podíl vypsat v panelu FPS.
