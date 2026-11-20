@@ -125,3 +125,11 @@ Míša 19. 11. (misa_19_11_krajnice_holé.png, x 131 z 276 po E1 kroku 1): svah 
 KRAJNICE CESTY HOLÉ – pás 2–5 m vedle vyjetých kolejí je jen plochá textura trávníku bez trsů. → E5 (lem trávy a bylin až
 ke kolejím) první na řadě: zjistit, proč louka/byliny vynechávají pás u cesty (třída stanoviště „cesta“ širší než koleje?
 maska cest v louka.gd/byliny.gd?) a zúžit vyloučení jen na vyjeté koleje; pak E1 (husté trsy na svahu).
+
+## H. Míša 20. 11. (APK 166e19d)
+| č. | snímek | co |
+|---|---|---|
+| H1 | misa_20_11_voda.jpg (x 136,9 z 155,9) | voda „není pěkná a měla by být“ – tmavá plochá s bílými šmouhami vln, bez odrazu; plán D (Hvozd) dotáhnout pořádně |
+| H2 | misa_20_11_dira.jpg (x 127,1 z 30,3 směr 4°) | díra v povrchu terénu u přechodu cesty přes potok (brod) – terén nad korytem nenavazuje |
+| H3 | misa_20_11_vykon.jpg + ostatní | výkon: troj. 2,27–2,70 M (rozpočet 2,1 M), p95 až 63 ms, záseky 171–416, automatika stupeň 2/4 – rozšíření trávy 19. 11. (dosah 96 m, hust_zbytek 0,35, krajnice) je na tabletu drahé → nahradit plánem E1 (buňky), zatím vrátit dosah/hustotu |
+| H4 | misa_20_11_vykon (svah s hradem) | černé skvrny na svahu pod hradem (stíny/impostory?) – prověřit |
