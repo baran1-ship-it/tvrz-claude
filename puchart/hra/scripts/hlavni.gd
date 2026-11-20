@@ -399,10 +399,23 @@ func _atmosfera(d: float) -> void:
 		if not it.is_empty() and _strechy_cfg.is_empty() and FileAccess.file_exists("res://data/pocasi.json"):
 			_strechy_cfg = (JSON.parse_string(FileAccess.get_file_as_string("res://data/pocasi.json")) as Dictionary).get("strechy", {"materialy": ["sindel"]})
 		if not it.is_empty(): preload("res://scripts/strechy.gd").zajisti(self, _strechy_cfg)
-		_uvnitr_cil = 1.0 if not it.is_empty() and get_world_3d().direct_space_state.intersect_ray(q).size() > 0 else 0.0
+		# Míša 20. 11. (stáj pod ochozem černá i s loučí): jeden paprsek nahoru bral za „místnost“ i otevřenou stáj pod ochozem.
+		# Nově otevřenost: když je nad hlavou něco, ještě 8 šikmých paprsků do stran (interier.otevrenost) – uvnitř jen když je
+		# zavřeno i do stran; otevřený přístřešek = venkovní světlo, stín dělá střecha (stínová mapa slunce)
+		var nad_ := not it.is_empty() and get_world_3d().direct_space_state.intersect_ray(q).size() > 0
+		_uvnitr_cil = 0.0; var _pristresek := false
+		if nad_:
+			var ot_: Dictionary = it.get("otevrenost", {"uhel_st": 35.0, "delka_m": 10.0, "prah": 0.75})
+			var zav_ := 0; var el_ := deg_to_rad(float(ot_.get("uhel_st", 35.0))); var L2_ := float(ot_.get("delka_m", 10.0))
+			for k_ in 8:
+				var az_ := TAU * float(k_) / 8.0
+				var qs_ := PhysicsRayQueryParameters3D.create(p, p + Vector3(cos(az_) * cos(el_), sin(el_), sin(az_) * cos(el_)) * L2_)
+				if get_world_3d().direct_space_state.intersect_ray(qs_).size() > 0: zav_ += 1
+			if float(zav_) / 8.0 >= float(ot_.get("prah", 0.75)): _uvnitr_cil = 1.0
+			else: _pristresek = true
 		# jen krytina bez stropu nad hlavou (půda, pavlač, přesah střechy): světlo zůstává venkovní (otevřené strany), ale bez modré
 		# z oblohy a bez jejího odrazu (Míša 17. 11., snímky 08 a 12) – prostredi.json interier.pod_strechou
-		_strecha_cil = 1.0 if not it.is_empty() and _uvnitr_cil < 0.5 and preload("res://scripts/strechy.gd").nad(p, float(it.get("paprsek_nahoru_m", 25.0))) else 0.0
+		_strecha_cil = 1.0 if not it.is_empty() and _uvnitr_cil < 0.5 and (_pristresek or preload("res://scripts/strechy.gd").nad(p, float(it.get("paprsek_nahoru_m", 25.0)))) else 0.0
 		if _uvnitr_cil > 0.5 and it.has("otvory_paprsky"):   # kolik je vidět ven (okna, dveře) – světlo jen přes otvory (Míša 13. 11.)
 			var n_ := int(it["otvory_paprsky"]); var ven_ := 0; var zd: Array = it["otvory_zdvih_st"]; var L_ := float(it["otvory_delka_m"])
 			for k_ in n_:

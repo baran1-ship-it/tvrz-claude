@@ -87,7 +87,13 @@
     0,
     22
    ],
-   "pozn_13_11": "Míša 13. 11.: „v budovách bude reálné světlo – když nebude mít okno, tak žádné, a kde je okno, tak jen přes to okno“. Uvnitř (strop nad kamerou) okolní světlo podle otvorů: 16 paprsků do stran a mírně vzhůru (otvory_zdvih_st), podíl těch, které uniknou ven (okno, dveře) → ambient od ambient_tma (bez otvoru – tma, jen louče) po ambient_okno (√podílu); bez přidané expozice. Slunce svítí okny dál přímo (stíny)."
+   "pozn_13_11": "Míša 13. 11.: „v budovách bude reálné světlo – když nebude mít okno, tak žádné, a kde je okno, tak jen přes to okno“. Uvnitř (strop nad kamerou) okolní světlo podle otvorů: 16 paprsků do stran a mírně vzhůru (otvory_zdvih_st), podíl těch, které uniknou ven (okno, dveře) → ambient od ambient_tma (bez otvoru – tma, jen louče) po ambient_okno (√podílu); bez přidané expozice. Slunce svítí okny dál přímo (stíny).",
+   "otevrenost": {
+    "uhel_st": 35.0,
+    "delka_m": 10.0,
+    "prah": 0.75,
+    "zdroj": "Míša 20. 11.: stáj bez předního dílu – světlo zvenku, stín dělá jen střecha; uvnitř jen když je zavřeno i do stran (≥ 6 z 8 šikmých paprsků)"
+   }
   },
   "venku": {
    "ambient": 0.6,
