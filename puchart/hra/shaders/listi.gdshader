@@ -60,7 +60,7 @@ void vertex() {
 	if (zanik_inst && zanik.x != zanik.y) {   // Puchart (Míša 19. 11., plán E1 krok 1): mizení po rostlinách – práh z hashe pozice instance, rostlina se ke konci dosahu srazí k patě (ne šachovnice ditheru)
 		float vz = clamp((length(wp - INV_VIEW_MATRIX[3].xyz) - zanik.x) / (zanik.y - zanik.x), 0.0, 1.0);
 		float hz = fract(sin(dot(wp.xz, vec2(12.9898, 78.233))) * 43758.5453);
-		VERTEX *= clamp((vz - hz * 0.8) / 0.2, 0.0, 1.0);
+		VERTEX *= step(hz * 0.8, vz);   // Míša 20. 11.: „před očima mi lezou stromy a keře ze země“ – žádné zvětšování od paty, rostlina se objeví celá v náhodné vzdálenosti pásma
 	}
 	float h = clamp(VERTEX.y / max(vyska, 1.0), 0.0, 1.0);
 	float faze = wp.x * 0.13 + wp.z * 0.11;
