@@ -1613,6 +1613,13 @@ _lk_k = json.load(open(K + "/hra/data/louka.json"))["tridy"].get("cesta_krajnice
 _lg_k = open(K + "/hra/scripts/louka.gd", encoding="utf-8").read()
 TEST("krajnice_trava", float(_lk_k) > 0.5 and "maska_cesty" in _lg_k, "cesta_krajnice %s, louka.gd čte masku cest: %s" % (_lk_k, "maska_cesty" in _lg_k))
 
+# pás trsů u paty zdí ne uvnitř hradeb (Míša 20. 11.)
+from shapely.geometry import Polygon as _PolyT, Point as _PtT
+_HPt = json.load(open(K + "/pravidla/svet/hrad_puchart.json")); _NV = _PolyT(_HPt["A"]["jadro"]).union(_PolyT(_HPt["B"]["hradba"]))
+_pp = json.load(open(K + "/hra/data/pata_pas.json"))["bunky"]
+_vnitr = sum(1 for v in _pp.values() for q in v if _NV.contains(_PtT(q[0], q[1])))
+TEST("pata_pas_mimo_nadvori", _vnitr == 0, "trsů pásu u paty uvnitř hradeb: %d" % _vnitr)
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

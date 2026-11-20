@@ -106,7 +106,9 @@
    "dosah_nasobek": 2.2,
    "pozn": "Míša 13. 11.: „světla loučí, svícnů a ostatních svítících zařízení potřebuji naopak zvětšit, osvětlují jen na oko“ – násobí energii a dosah plamenů (predmety.gd SVETLA, louče hradu hlavni.gd _svicny); NEOVERENO na tabletu (víc světel přes pixely = výkon)",
    "pozn_19_11": "Míša 19. 11. (misa_19_11_louc_tma.jpg, hrad A x 10,7 z 16,7): „louč by měla osvětlovat víc ten prostor“ – 1,8/1,6 → 2,6/2,2 (útlum 1,4 zůstává: světlo dál do místnosti, ne přepal u louče). Tablet NEOVERENO (výkon)."
-  }
+  },
+  "pod_strechou_obloha": 1.6,
+  "pod_strechou_pozn_20_11": "Míša 20. 11.: „není ta stáj moc tmavá?“ – pod krytinou bez stropu (stáj, přístřešky) víc okolního světla 1,0 → 1,6"
  },
  "predehrati": {
   "zapojeno": true,

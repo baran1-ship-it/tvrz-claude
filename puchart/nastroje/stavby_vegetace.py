@@ -280,12 +280,14 @@ for a_, b_, strany, zdroj in hrany:
             ok_ = l_ >= 0.4
             # Míša 19. 11. (stáj A: trsy prorůstaly podlahou): pruh i s přesahem trsů (okraj_budov_m) nesmí sáhnout do jiné budovy
             # – úzká mezera mezi hradbou a bokem stáje / stáj a zeď věžičky; vzdálené rohy pruhu se kontrolují jen proti budovám
+            from shapely.geometry import Polygon as _PolyN; _NADVp = _PolyN(HP["A"]["jadro"]).union(_PolyN(HP["B"]["hradba"]))   # uvnitř hradeb (i buňky „stavba“ u zdi)
+            _nadv_i = [SJ["tridy"].index(t_) for t_ in ("nadvori", "nadvori_slap") if t_ in SJ["tridy"]]   # Míša 20. 11.: „pořád máš trávu na dvoře“ – pás trsů u paty zdí ne na nádvoří
             _ob = PP.get("okraj_budov_m", 0.0)
             if ok_ and _ob > 0 and any(BUDp.contains(_Pt(*(q_ + n_ * (w_ + _ob)))) for q_ in (p0, (p0 + p1) / 2, p1)): ok_ = False
             for q_ in vz:
                 if not ok_: break
                 rc = _cell(q_)
-                if rc is None or st[rc] in _vyn or st[rc] in _uzr or slap[rc] or pas_c[rc] or BUDp.contains(_Pt(*q_)) or NOGOp.contains(_Pt(*q_)): ok_ = False
+                if rc is None or st[rc] in _vyn or st[rc] in _uzr or st[rc] in _nadv_i or slap[rc] or pas_c[rc] or BUDp.contains(_Pt(*q_)) or NOGOp.contains(_Pt(*q_)) or _NADVp.contains(_Pt(*q_)): ok_ = False
             if ok_:
                 m_ = (p0 + p1) / 2; k_ = "%d,%d" % (int(np.floor(m_[0] / B_)), int(np.floor(m_[1] / B_)))
                 skvrny.setdefault(k_, []).append([round(float(p0[0]), 2), round(float(p0[1]), 2), round(float(p1[0]), 2), round(float(p1[1]), 2), round(float(n_[0]), 3), round(float(n_[1]), 3), round(float(w_), 2), zdroj])
