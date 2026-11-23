@@ -163,5 +163,53 @@
   "albedo_px": 512,
   "normala_px": 256,
   "zdroj": "nastroje/predmety_z_havrana.sh (Havran 0.59: 2k textury předmětů = záseky a pád): albedo 512, ostatní 256; atlas prken 1024 – jedno prkno 0,32 m má mít aspoň 128 px na šířku (drevo_tex.py)"
+ },
+ "sindel_kusy": {
+  "zapnuto": true,
+  "rada_m": 0.15,
+  "rada_pozn": "řada šindele = řada textury sindel (nastroje/sindel_tex.py: 10 řad na dlaždici 1,5 m) – geometrické řady sedí na namalované, spáry mezi šindeli dává textura",
+  "usek_m": [
+   0.3,
+   0.9
+  ],
+  "tloustka_m": [
+   0.016,
+   0.03
+  ],
+  "posun_cela_m": 0.008,
+  "ton": [
+   0.8,
+   1.0
+  ],
+  "do_m": 35.0,
+  "popis": "Plán F + C4 (Míša 18. 11.: „dřevo je dřevo – ne tapeta“): střecha stodol a kůlen nebyla jen deska s fotkou šindele – nad deskou řady šindelů v geometrii (LOD0, uzel <Uzel>_Sindel, ves.gd do do_m): každá řada je pilovitý stupeň (čelo řady zvednuté o tloušťku, k hřebeni zapadá pod další řadu), řada je rozdělená na úseky různé délky a tloušťky s posunutým čelem (ruční kladení), každý úsek jiný výřez textury (posun po délce, jiná řada) a barevný tón v barvě vrcholů (C4 proti opakování). Z dálky zůstává deska s texturou (obal od stredni_do_m).",
+  "zdroj": "docs/reference/kcd_ves_predloha/05_mlyn_potok_breh.jpg (střecha s řadami a mechem), docs/reference/kcd_vzhled/misa_kcd_*.jpg (šindelové střechy vsi – řady s vystouplými čely), Havran sindel_tex.py (7 řad na metr, šindel 8–16 cm)"
+ },
+ "opotrebeni": {
+  "modely": [
+   "stodola"
+  ],
+  "pokus_pozn": "Plán C1 – pokus na jedné stavbě vsi (velká stodola, 4 ve vsi): masky opotřebení zapečené do barvy vrcholů (COLOR_0 × albedo, 0 vzorkovačů navíc). Mech na severní straně závisí na natočení stavby ve vsi → 4 varianty těla a šindele v jednom glb (uzly *_C1_0..3 = mech k místní +x, −x, +z, −z hry, sdílené materiály), ves.gd ponechá tu, jejíž strana míří na sever (−z světa), predmety.gd variantu 3.",
+  "vlhko_do_m": 0.7,
+  "vlhko_ztmaveni": 0.38,
+  "spina_do_m": 0.45,
+  "spina_barva": [
+   0.72,
+   0.6,
+   0.47
+  ],
+  "spina_sila": 0.65,
+  "stekance_ztmaveni": 0.16,
+  "stekance_podil": 0.3,
+  "mech_do_m": 1.3,
+  "mech_barva": [
+   0.5,
+   0.62,
+   0.3
+  ],
+  "mech_sila": 0.75,
+  "mech_strecha_sila": 0.55,
+  "sum_m": 0.6,
+  "zdroj": "docs/reference/kcd_ves_predloha/04_dvur_remeslo_hlina.jpg (zešedlé dřevo, tmavší a zablácená pata kůlů a beden u země), 05_mlyn_potok_breh.jpg (mech na střeše a u paty stavení u vody), kcd_ves_predloha/README.md („opotřebení ukazuje používání, ne plošný rozpad“ – CLAUDE.md KCD jako měřítko)"
  }
 }

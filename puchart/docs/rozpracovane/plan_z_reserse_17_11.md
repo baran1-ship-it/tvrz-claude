@@ -158,3 +158,12 @@ smysl:voda_odraz_hvozd): odraz z panoramy lesa (Poly Haven Niederwihl Forest CC0
 černozelené, dvě vrstvy vln, pěna u kraje a na peřejích, krytí 0,2 → 0,7 → 0,92. D3 (přízemní mlha) neuděláno. Tablet NEOVERENO.
 Zbývá (stará chyba, nezhoršeno): na okraji jemného pásu BREH u brodů 0,3–0,5 m schod mezi BREH a sítí dlaždic (BREH napříč
 v brodu jen 5 bodů na 4–20 m – chorda nad zářezem); vidět jako tmavý lem vpravo na kontrola_23_11_brod_dira.jpg.
+
+**Stav 23. 11. (F ves, C4, A4, C1, B3; PC, tablet NEOVERENO):** F mimo hrady – audit všech glb vsi (deskové plochy s texturou dřeva):
+stěny, vrata, ploty, štíty a podbití domů/krčmy/hájovny/kovárny/mlýna už jsou z prken v geometrii; tapeta zbyla na střechách
+stodol a kůlen a stříškách krytých vrat → šindel v geometrii (řady s čely, LOD0 do 35 m, dál deska; chyby.md 421). C4: proutěné
+díly plotu otočené/výškově různé, šindel po úsecích jiný výřez a tón (422); zídky ve vsi nejsou. C1: pokus na velké stodole –
+vlhko, špína, stékance, mech k severu v barvě vrcholů, 4 varianty podle natočení (423). A4: kůra LOD1 decimovaná v Blenderu
+(blender/stromy_lod_kmen.py, 172,7 → 80,1 tis. troj.), les x 136,9 z 155,9: 2,005 → 1,929 M (sever), 1,796 → 1,646 M (východ)
+(424). B3: `nastroje/foto_tri_svetla.sh "x,z,y,cx,cz,cy" prefix [hodiny]` – jeden start, snímky ráno/poledne/soumrak/noc
+s loučí v ruce (hlavni.gd PUCHART_FOTO_CASY), 4 snímky ~1,5 min. Mosty a lávky (blender/voda.py) nekontrolovány – soubor krajiny.

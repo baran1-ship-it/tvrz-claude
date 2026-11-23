@@ -45,6 +45,7 @@ done
 python3 $K/nastroje/pole_textur.py $K
 mkdir -p $K/hra/modely/stromy && for m in $(python3 -c "import json;print(' '.join(json.load(open('$K/pravidla/svet/stromy_modely.json'))['varianty']))"); do cp -n $K/../modely/nove/${m}_*.glb $K/hra/modely/stromy/ 2>/dev/null || true; done
 python3 $K/nastroje/stromy_lod.py $K/hra/modely/stromy 0.3 1.45
+[ -x /opt/bl/bin/python ] && /opt/bl/bin/python $K/blender/stromy_lod_kmen.py $K   # kůra LOD1 decimovaná v Blenderu (plán A4, stromy_modely.json lod1_kmen)
 cp $K/pravidla/svet/stromy_modely.json $K/hra/data/
 python3 $K/nastroje/cesty_graf.py $K   # síť cest pro rychlé cestování po mapě (Míša 14. 11.)
 python3 $K/nastroje/mapa.py $K   # pergamenová mapa z dat (cesty, pěšiny, potoky) – 14. 11.: mapa ze 30. 10. neměla lesní cesty a pěšiny

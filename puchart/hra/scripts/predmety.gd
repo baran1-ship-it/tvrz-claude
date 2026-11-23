@@ -130,6 +130,8 @@ func spawn(rec: Dictionary) -> void:
 		n.scale = Vector3.ONE * float(rec["sc"])         # pevne vybaveni (lomova stena z fotoskenu)
 	var m: Node3D = scene(id).instantiate()
 	n.add_child(m)
+	for u in m.find_children("*_C1_*", "", true, false):   # stodola s opotřebením C1: jen varianta 3 (mech k −z = sever při yaw 0)
+		if not String(u.name).ends_with("_C1_3"): u.get_parent().remove_child(u); u.free()
 	# voda v nadobach (kad, vedro): stejna ziva hladina jako kad na kaleni v kovarne
 	for gi in m.find_children("*", "MeshInstance3D", true, false):
 		var mi := gi as MeshInstance3D

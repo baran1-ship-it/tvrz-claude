@@ -162,5 +162,15 @@
   "skok_m": 20.0,
   "popis": "Časované prolnutí stupňů stromu (LOD0 → LOD1 v lod0_m, LOD1 → impostor v blizko_m − prechod_m/2): shader (listi, kura, impostor.gdshader lod_casove) porovná vzdálenost stromu od kamery teď a před cas_s (les.gd _kamera_pred) – překročil-li strom mez v posledních cas_s, prolne se ditheringem 0→1 za cas_s, jinak je celý v jednom stupni. Dřív doplňkový dithering po celém pásmu lod_prolnuti_m / prechod_m = stromy v pásmu kreslené 2× po celou dobu, co tam hráč stojí. Bez kopie obrazovky, žádný vzorkovač navíc (uniform kamera_pred). skok_m: pohyb kamery za snímek nad tolik = teleport, historie znovu. zapnuto false (nebo PUCHART_LOD_PASMO=1) = dřívější pásmo (A/B).",
   "zdroj": "video Míši 16. 11. (LOD stromů a trávy: timed fade 0,25 s místo pásma podle vzdálenosti), Havran docs/rozpracovane/rozbor_gpu_15_11.md K13 (fadeTime 0,25 s, předloha docs/reference/lod_casovane_prolinani/); docs/rozpracovane/vykon_z_havrana_15_11.md „Video Míši 16. 11.“. Úspora NEOVERENO na tabletu (měřicí trasa, úsek les)."
+ },
+ "lod1_kmen": {
+  "podil": 0.3,
+  "min_troj": 300,
+  "popis": "Plán A4 (rešerše 17. 11.: Halcyon flora.mjs, Havran K13): LOD1 stromu = méně karet listí (nastroje/stromy_lod.py: 30 % karet ×1,45) + kůra v Blenderu (blender/stromy_lod_kmen.py) jako SpeedTree: nejtenčí větvičky (poloměr pod vetvicky_r_m) pryč nejvýš do vetvicky_max_podil z úspory k podílu, kmen a silné větve (≥ decimovat_od_troj) decimované collapse na dec_podil, jen když zůstane délka kusu; malé trubky větví beze změny (collapse je maže celé). LOD2 = impostor _daleko (1 karta), beze změny. Automatické LOD Godotu vypnuté (import meshes/generate_lods=false).",
+  "zdroj": "docs/rozpracovane/plan_z_reserse_17_11.md A4; měřeno v lese x 136,9 z 155,9 (FOTO troj)",
+  "vetvicky_r_m": 0.03,
+  "vetvicky_max_podil": 0.6,
+  "decimovat_od_troj": 120,
+  "dec_podil": 0.45
  }
 }

@@ -1633,7 +1633,9 @@
   "dosah_pozn_12_11": "hlídač scén 12. 11.: stodoly a kůlny v plném detailu do 450 m přetáhly rozpočet trojúhelníků (scény 300–800 m od vsi 2,1–2,4 M) → 180 m (tablet 120 m), dokud střední stupeň kreslí černě",
   "obal_do_m": 900.0,
   "obal_pozn": "Míša 14. 11.: „bílá strašně razí a chybí tam něco okolo – ploty, stromy, keře, nemusí se vykreslovat, ale alespoň hmota by tam být měla“, „jde o všechny stavby“. KCD/HLOD: stavba z dálky nemizí, kreslí se hrubým tvarem se skutečnými texturami. Hrubé stupně (domy _Daleko, LOD1 celků a kovárny, obal stodol a kůlen) do obal_do_m = strom_daleko_do_m (stavby mizí spolu s lesem)",
-  "ploty_pozn_14_11": "Míša 14. 11.: „chybí tam něco okolo – ploty… alespoň hmota“: ploty celé vsi mají dohromady ~42 tis. trojúhelníků (měřeno 14. 11.) → 140 m tablet (dřív 80), 200 m PC (dřív 140)"
+  "ploty_pozn_14_11": "Míša 14. 11.: „chybí tam něco okolo – ploty… alespoň hmota“: ploty celé vsi mají dohromady ~42 tis. trojúhelníků (měřeno 14. 11.) → 140 m tablet (dřív 80), 200 m PC (dřív 140)",
+  "sindel_do_m": 35.0,
+  "sindel_pozn": "šindel stodol a kůlen v geometrii (uzly *_Sindel, stodoly.json sindel_kusy) jen zblízka, dál deska s texturou"
  },
  "ploty_pravidla": {
   "zdroj": "Havran vesnice.py picket_fence (sloupky po 2 m, 2 žerdě, latě 5,5–10 cm, výška 1,15 m, 4 % chybí, špice/šikmo/rovně), rail_fence (kůly po 2,8 m, 2–3 žerdě s kůrou, výška 1,1 m, 5 % spadlá), roofed_gate (sloupy 24 cm, 2,7 m, stříška šindel, křídla z prken 1,75 m), wicket (branka 0,9 m, 7 latí 1,05 m); proutěný = předmět plutek (2,07 m díl). KCD1 ves_1 (laťový + krytá vrata), ves_4 (proutěný), KCD2 ref_kcd2_zahrada_plot (proutí a kůly)",

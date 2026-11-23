@@ -1696,6 +1696,87 @@ for _f231 in ("louka.json", "kere.json", "byliny.json", "rozpocty.json"):
     if json.load(open(os.path.join(K, "hra/data", _f231), encoding="utf-8")) != json.load(open(os.path.join(K, "pravidla/svet", _f231), encoding="utf-8")): _c231.append("hra/data/%s není kopie" % _f231)
 TEST("stredni_pas_travy", not _c231, "; ".join(_c231) if _c231 else "pás %s–%s m (min hustota 40–100 m %.2f), jemné trsy do %s m (konec %s), keře/byliny dosah = zánik" % (_P231["od_m"], _P231["do_m"], _m231, _lk231["dosah_m"], _lk231["konec_m"]))
 
+# plán F + C4 + C1 + A4 + B3 (rešerše 17. 11., Míša 18. 11. „dřevo je dřevo – ne tapeta“; chyby.md 421–424): šindel stodol
+# a kůlen v geometrii (řady s čely, úseky s tónem v barvě vrcholů, jen zblízka), krytá vrata vsi taky; proutěné díly plotu
+# v řadě různě (otočení, výška, vychýlení); opotřebení stodoly v barvě vrcholů (pata tmavší, mech k severu, 4 varianty);
+# LOD1 stromů s decimovanou kůrou; nástroj snímků ve více světlech (B3)
+sys.path.insert(0, os.path.join(K, "nastroje"))
+from glb_sit import nacti as _n417, cti as _ct417
+_c417 = []; _c418 = []; _c419 = []; _c420 = []
+_SD417 = json.load(open(os.path.join(K, "pravidla/svet/stodoly.json"), encoding="utf-8"))
+_LV417 = json.load(open(os.path.join(K, "hra/data/mista_stavby.json"), encoding="utf-8"))["lod_ves"]
+_ves417 = open(os.path.join(K, "hra/scripts/ves.gd"), encoding="utf-8").read()
+def _barvy417(j, b, p):
+    a = j["accessors"][p["attributes"]["COLOR_0"]]; c = _ct417(j, b, p["attributes"]["COLOR_0"]).astype(float)
+    return c / (65535.0 if a["componentType"] == 5123 else (255.0 if a["componentType"] == 5121 else 1.0))
+for _m417 in ("stodola", "stodola_mala", "kolna"):
+    _p417 = os.path.join(K, "hra/modely/predmety_h/%s.glb" % _m417)
+    if not os.path.exists(_p417): _c417.append("%s.glb chybí" % _m417); continue
+    _j, _b, _ = _n417(_p417); _tri = 0
+    for _nd in _j["nodes"]:
+        if "mesh" not in _nd or "_Sindel" not in _nd.get("name", ""): continue
+        for _pr in _j["meshes"][_nd["mesh"]]["primitives"]:
+            _tri += _j["accessors"][_pr["indices"]]["count"] // 3 if "indices" in _pr else 0
+            if "COLOR_0" not in _pr["attributes"]: _c417.append("%s %s bez barvy vrcholů (C4 tón)" % (_m417, _nd["name"])); continue
+            _cc = _barvy417(_j, _b, _pr)
+            if _cc[:, :3].min() < 0.3: _c417.append("%s %s barva vrcholů %.2f (přetečení → černé šindele)" % (_m417, _nd["name"], _cc[:, :3].min()))
+    if _tri < 1000: _c417.append("%s: šindel v geometrii jen %d troj." % (_m417, _tri))
+if not _SD417.get("sindel_kusy", {}).get("zdroj"): _c417.append("stodoly.json sindel_kusy bez zdroje")
+if not float(_LV417.get("sindel_do_m", 999)) < float(_LV417["podrobny_do_m"]) + 10: _c417.append("šindel v geometrii do %s m (má být jen zblízka)" % _LV417.get("sindel_do_m"))
+if "_sindel_rady(sit" not in _ves417: _c417.append("krytá vrata vsi bez šindele v geometrii (ves.gd _sindel_rady)")
+TEST("drevo_sindel_geometrie", not _c417, "; ".join(_c417) if _c417 else "stodoly, kůlny a krytá vrata: řady šindele v geometrii do %s m, tón úseků v barvě vrcholů" % _LV417.get("sindel_do_m"))
+# C4: proutěný plot z dílů plutek – sousední díly nesmí být stejné (otočení / výška / vychýlení z polohy dílu)
+if not re.search(r"otoc := Basis\(Vector3\.UP, PI\) if hv % 2", _ves417) or "Basis.from_scale(Vector3(sk, vy, 1.0)) * otoc" not in _ves417:
+    _c418.append("ves.gd: díly plutek bez variant (otočení, výška)")
+TEST("c4_plot_varianty", not _c418, "; ".join(_c418) if _c418 else "proutěné díly: otočení 180°, výška ±7 %, vychýlení ±2,5°; laťový a žerďový plot náhodné latě/kůly")
+# C1: opotřebení stodoly – 4 varianty mechu, pata tmavší než horní část stěny, mech jen na straně k severu varianty
+_O419 = _SD417.get("opotrebeni", {})
+if not _O419.get("zdroj"): _c419.append("stodoly.json opotrebeni bez zdroje")
+for _m419 in _O419.get("modely", []):
+    _j, _b, _ = _n417(os.path.join(K, "hra/modely/predmety_h/%s.glb" % _m419))
+    _v419 = [n for n in _j["nodes"] if n.get("name", "").startswith(_m419 + "_C1_")]
+    if len(_v419) != 4: _c419.append("%s: %d variant C1 (má být 4)" % (_m419, len(_v419))); continue
+    for _k419, _nd in enumerate(_v419):
+        _pr = [p for p in _j["meshes"][_nd["mesh"]]["primitives"] if _j["materials"][p["material"]]["name"].startswith("prkno_stodoly")][0]
+        _P = _ct417(_j, _b, _pr["attributes"]["POSITION"]).astype(float); _N = _ct417(_j, _b, _pr["attributes"]["NORMAL"]).astype(float)
+        _cc = _barvy417(_j, _b, _pr)[:, :3]
+        _y0 = _P[:, 1].min()
+        _dole = _cc[_P[:, 1] < _y0 + 0.3].mean(); _nahore = _cc[_P[:, 1] > _y0 + 2.0].mean()
+        if not _dole < _nahore - 0.05: _c419.append("%s varianta %d: pata %.2f není tmavší než stěna %.2f" % (_m419, _k419, _dole, _nahore))
+        _sm = [(1, 0), (-1, 0), (0, 1), (0, -1)][_k419]   # místní +x, −x, +z, −z hry
+        _sev = (_N[:, 0] * _sm[0] + _N[:, 2] * _sm[1] > 0.7) & (_P[:, 1] < _y0 + 0.8)
+        _jih = (_N[:, 0] * _sm[0] + _N[:, 2] * _sm[1] < -0.7) & (_P[:, 1] < _y0 + 0.8)
+        if _sev.sum() and _jih.sum():
+            _zel = lambda m_: float((_cc[m_, 1] - _cc[m_, 2]).mean())
+            if not _zel(_sev) > _zel(_jih) + 0.02: _c419.append("%s varianta %d: mech není na severní straně (%.3f vs %.3f)" % (_m419, _k419, _zel(_sev), _zel(_jih)))
+if "_varianta_c1(n" not in _ves417: _c419.append("ves.gd nevybírá variantu mechu podle natočení")
+TEST("c1_opotrebeni_stodola", not _c419, "; ".join(_c419) if _c419 else "stodola: vlhko/špína u paty, stékance, mech k severu (4 varianty, 0 vzorkovačů navíc)")
+# A4: LOD1 stromů – kůra decimovaná (ne víc než podíl × LOD0, min_troj), obrys kůry stejný jako LOD0
+_L420 = json.load(open(os.path.join(K, "pravidla/svet/stromy_modely.json"), encoding="utf-8")).get("lod1_kmen", {})
+_s0 = _s1 = 0
+for _f420 in sorted(_gl.glob(os.path.join(K, "hra/modely/stromy/*_lod1.glb"))):
+    _f0 = _f420.replace("_lod1.glb", ".glb")
+    if not os.path.exists(_f0) or not _L420: continue
+    _ja, _ba, _ = _n417(_f0); _jb, _bb, _ = _n417(_f420)
+    for _mi, _m in enumerate(_jb["meshes"]):
+        for _pi, _pr in enumerate(_m["primitives"]):
+            _mt = _jb["materials"][_pr["material"]]
+            if _mt.get("alphaMode") in ("MASK", "BLEND") or "list" in _mt.get("name", "").lower() or "jehl" in _mt.get("name", "").lower(): continue
+            _p0 = _ja["meshes"][_mi]["primitives"][_pi]
+            _t0 = _ja["accessors"][_p0["indices"]]["count"] // 3; _t1 = _jb["accessors"][_pr["indices"]]["count"] // 3
+            _s0 += _t0; _s1 += _t1
+            if _t1 > 0.8 * _t0 and _t1 > float(_L420["min_troj"]) * 1.35:   # každý strom aspoň o 20 % (malé stromy mají jen trubky větví)
+                _c420.append("%s kůra %d → %d" % (os.path.basename(_f420), _t0, _t1))
+            _a0 = _ja["accessors"][_p0["attributes"]["POSITION"]]; _a1 = _jb["accessors"][_pr["attributes"]["POSITION"]]
+            if max(abs(x - y) for x, y in zip(_a0["max"] + _a0["min"], _a1["max"] + _a1["min"])) > 0.08 * max(1.0, max(_a0["max"]) - min(_a0["min"])):
+                _c420.append("%s obrys kůry se změnil" % os.path.basename(_f420))
+if _s0 and _s1 > 0.55 * _s0: _c420.append("kůra LOD1 celkem %d → %d (> 55 %%)" % (_s0, _s1))
+TEST("stromy_lod1_kmen", not _c420 and _s0 > 0, "; ".join(_c420[:6]) if _c420 else "kůra LOD1 %d → %d troj. (všechny stromy)" % (_s0, _s1))
+# B3: snímky ve více světlech z jednoho startu
+_h421 = open(os.path.join(K, "hra/scripts/hlavni.gd"), encoding="utf-8").read()
+TEST("foto_vice_svetel", os.path.exists(os.path.join(K, "nastroje/foto_tri_svetla.sh")) and "PUCHART_FOTO_CASY" in _h421 and "FotoLouc" in _h421,
+     "nastroje/foto_tri_svetla.sh + hlavni.gd PUCHART_FOTO_CASY (ráno, poledne, soumrak, noc s loučí)")
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

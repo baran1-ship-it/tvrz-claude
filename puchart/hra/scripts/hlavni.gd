@@ -19,6 +19,8 @@ var mat_voda: ShaderMaterial = null   # materiál hladiny potoků (shaders/voda.
 var zebriky: Array = []   # žebříky ve světě {pata, vrchol, nastup, sestup, nazev} (_celek ze záznamu zebrik; zebriky.gd, hrac.chyt_zebrik)
 var _foto := ""
 var _snimek := 0
+var _foto_i := 0            # pořadí snímku při PUCHART_FOTO_CASY (víc denních dob z jednoho startu)
+var _foto_louc: OmniLight3D = null   # louč v ruce na nočním snímku
 var _mereni: Array = []
 var _env: Environment
 var _fog_zakl: Array = []
@@ -520,10 +522,31 @@ func _process(_d: float) -> void:
 		return
 	_snimek += 1
 	if _snimek == 40:
+	if _snimek == 35 and den and OS.get_environment("PUCHART_FOTO_CASY") != "" and OS.get_environment("PUCHART_FOTO_LOUC") != "0":
+		if _foto_louc == null:
+			var sv_: Dictionary = _pr.get("atmosfera", {}).get("svitidla", {})
+			_foto_louc = OmniLight3D.new(); _foto_louc.name = "FotoLouc"
+			_foto_louc.position = Vector3(0.32, -0.42, -0.62) + Vector3(0, 0.56, 0)   # louč v ruce (predmety.gd SVETLA louc: poloha v ruce + plamen)
+			_foto_louc.light_color = Color(1.0, 0.68, 0.38); _foto_louc.omni_attenuation = 0.7
+			_foto_louc.light_energy = 1.8 * float(sv_.get("energie_nasobek", 1.0)); _foto_louc.omni_range = 9.0 * float(sv_.get("dosah_nasobek", 1.0))
+			get_viewport().get_camera_3d().add_child(_foto_louc)
+		_foto_louc.visible = den.is_night()
 		var c := _foto.split(";")
-		get_viewport().get_texture().get_image().save_png(c[1])
-		print("FOTO ", c[1], " kresleni ", RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
-			" troj ", RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME))
+		# víc denních dob z jednoho startu (plán B3, nastroje/foto_tri_svetla.sh): PUCHART_FOTO_CASY="7,12,19.6,23" →
+		# <soubor bez .png>_<hodina>.png; v noci louč v ruce (PUCHART_FOTO_LOUC, světlo jako predmety.gd SVETLA louc × svitidla)
+		var casy := OS.get_environment("PUCHART_FOTO_CASY").split_floats(",", false)
+		var soubor := c[1]
+		if casy.size() > 0 and _foto_i < casy.size():
+			soubor = "%s_%s.png" % [c[1].trim_suffix(".png"), String.num(casy[_foto_i]).replace(".", "_")]
+		get_viewport().get_texture().get_image().save_png(soubor)
+		print("FOTO ", soubor, " kresleni ", RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+			" troj ", RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
+			(" hodina %.1f" % den.hour) if den else "")
+		_foto_i += 1
+		if casy.size() > 0 and _foto_i < casy.size() and den:
+			den.set_hour(casy[_foto_i], 0.01)
+			_snimek = 40 - int(OS.get_environment("PUCHART_FOTO_PAUZA") if OS.get_environment("PUCHART_FOTO_PAUZA") != "" else "12")
+			return
 		get_tree().quit()
 
 var _pr: Dictionary = {}

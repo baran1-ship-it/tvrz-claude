@@ -36,10 +36,11 @@ Y = Vector((0, 1, 0))
 class Sit:
     """Plochy s UV a materiálem; tag plochy: strecha (hlídač ji bere jako šindel), hrebenac (smí ležet na střeše)."""
     def __init__(s):
-        s.v, s.f, s.uv, s.m, s.tag = [], [], [], [], []
+        s.v, s.f, s.uv, s.m, s.tag, s.ton = [], [], [], [], [], []
 
-    def plocha(s, pts, uvs, mat, tag=""):
+    def plocha(s, pts, uvs, mat, tag="", ton=None):
         i0 = len(s.v)
+        s.ton.append(ton)
         s.v.extend(Vector(p) for p in pts)
         s.f.append(tuple(range(i0, i0 + len(pts))))
         s.uv.append([tuple(u) for u in uvs])
@@ -178,6 +179,55 @@ def strecha(S, a, b, c, d, R, tl=0.06):
         S.plocha(pts, [(u / vel, v / vel) for u, v in uv], "sindel", "strecha")
 
 
+def _plocha_n(S, pts, uvs, mat, tag, nn, ton):
+    """Plocha s normálou ve směru nn (pořadí vrcholů otočí)."""
+    if (pts[1] - pts[0]).cross(pts[2] - pts[0]).dot(nn) < 0: pts = pts[::-1]; uvs = uvs[::-1]
+    S.plocha(pts, uvs, mat, tag, ton)
+
+
+def sindel_rady(SN, a, b, c, d, R, tl=0.06):
+    """Šindel v geometrii nad deskou strecha() (stodoly.json sindel_kusy; Míša 18. 11. „dřevo je dřevo – ne tapeta“, C4):
+    řady po rada_m od okapu (a-b) k hřebeni (d-c) sedí na řadách textury sindel; řada = pilovitý stupeň – čelo zvednuté
+    o tloušťku šindele, k hřebeni zapadá pod čelo další řady; řada rozdělená na úseky různé délky, tloušťky a posunu čela,
+    každý úsek jiný výřez textury (posun po délce, jiná řada) a tón v barvě vrcholů. Plochy s tagem strecha (hlídač)."""
+    P = C["sindel_kusy"]; vel = C["materialy"]["sindel"][1]
+    a, b, c, d = Vector(a), Vector(b), Vector(c), Vector(d)
+    nv = (b - a).cross(d - a).normalized() * tl          # deska: vrcholy a, a − nv (strecha)
+    if a.z > d.z: a, b, c, d = d, c, b, a                # okap = nižší hrana (pultová kůlna: a-b je vpředu nahoře)
+    eu = b - a; sirka = eu.length; eu.normalize()
+    es = d - a; spad = es.length; es.normalize()
+    nn = eu.cross(es).normalized()
+    if nn.z < 0: nn = -nn
+    vrch = max(0.0, (-nv).dot(nn))                        # horní líc desky nad rovinou a..d
+    p = P["rada_m"]; eps = 0.003
+    Q = lambda u, s_, z: a + eu * u + es * s_ + nn * (vrch + z)
+    nrad = int(math.ceil(spad / p - 1e-6))
+    tri = 0
+    for k in range(nrad):
+        s1 = min((k + 1) * p, spad)
+        u0 = 0.0
+        while u0 < sirka - 1e-4:
+            L = R.uniform(*P["usek_m"])
+            u1 = sirka if sirka - (u0 + L) < 0.2 else u0 + L
+            h = R.uniform(*P["tloustka_m"])
+            s0 = k * p + (R.uniform(-P["posun_cela_m"], P["posun_cela_m"]) if k > 0 else 0.0)
+            t_ = R.uniform(*P["ton"]); ton = (t_, t_ * R.uniform(0.97, 1.01), t_ * R.uniform(0.92, 1.0))
+            du = R.uniform(0, vel); dv = R.randrange(10) * p     # jiný výřez: posun po délce, jiná řada textury (C4)
+            uv = lambda u, s_: ((u + du) / vel, (s_ + dv) / vel)
+            # vrch úseku: od čela (zvednuté o h) k hřebeni na desku
+            _plocha_n(SN, [Q(u0, s0, h), Q(u1, s0, h), Q(u1, s1, eps), Q(u0, s1, eps)],
+                      [uv(u0, s0), uv(u1, s0), uv(u1, s1), uv(u0, s1)], "sindel", "strecha", nn, ton)
+            # čelo (k okapu)
+            _plocha_n(SN, [Q(u0, s0, 0), Q(u1, s0, 0), Q(u1, s0, h), Q(u0, s0, h)],
+                      [uv(u0, s0), uv(u1, s0), uv(u1, s0 + 0.02), uv(u0, s0 + 0.02)], "sindel", "strecha", -es, ton)
+            # boky úseku (schod mezi úseky a u štítu)
+            for uu, sm in ((u0, -eu), (u1, eu)):
+                _plocha_n(SN, [Q(uu, s0, 0), Q(uu, s0, h), Q(uu, s1, eps)],
+                          [uv(uu, s0), uv(uu, s0 + 0.02), uv(uu, s1)], "sindel", "strecha", sm, ton)
+            tri += 6; u0 = u1
+    return tri
+
+
 def hlidac_strechy(jm, site):
     """Havran _hlidac_strechy (Míša 0.9998 „vrata od stodoly ve střeše“): žádný vrchol jiného dílu nesmí být NAD střechou –
     paprsek dolů z vrcholu (a z bodů po hranách) nesmí jako první trefit horní plochu šindele (normála nahoru). Uvnitř desky střechy je dovoleno,
@@ -229,7 +279,7 @@ def stodola(m, R):
     # přesahem střechy (snímek 14. 11.; Havran 0.9998 „vrata od stodoly ve střeše“); nad vraty nadpraží a prkna
     z_ok_ = Hw + dz_s - P_["presah_okap_m"] * t
     z_nad = min(Hw - pzw - P_["vrata_pod_pozednici_m"] - 0.02, z_ok_ - P_["vrata_pod_okapem_m"])
-    S = Sit(); KOL = Sit()
+    S = Sit(); KOL = Sit(); SN = Sit()
     # kamenná podezdívka pod prahem (Havran: zapuštěná pod nulu modelu); vpředu jen mimo průjezd vrat
     hz = z0 + zap; cz = (z0 - zap) / 2
     box(S, (0, D, cz), (L + sp, sp, hz), "kamen", "kamen", R)
@@ -330,6 +380,7 @@ def stodola(m, R):
         c = (L / 2 + ps, D / 2, hreben); d = (-L / 2 - ps, D / 2, hreben)
         if s < 0: a, b = b, a; c, d = d, c
         strecha(S, a, b, c, d, R)
+        if C["sindel_kusy"]["zapnuto"]: sindel_rady(SN, a, b, c, d, R)
     for s in (-1, 1):
         r = s * math.radians(m["sklon_deg"])
         ey = Vector((0, math.cos(r), math.sin(r))); ez = Vector((0, -math.sin(r), math.cos(r)))
@@ -343,7 +394,7 @@ def stodola(m, R):
         box(KOL, ((xa + xb) / 2, -0.05, hk / 2), (xb - xa, 0.3, hk), "zelezo", "k", R)
     box(KOL, (0, -0.05, (z_nad + hk) / 2), (vw, 0.3, hk - z_nad), "zelezo", "k", R)
     box(KOL, (0, D / 2, Hw + (hreben - Hw) / 2), (L, D * 0.6, hreben - Hw), "zelezo", "k", R)
-    return S, kridla, KOL
+    return S, kridla, KOL, SN
 
 
 # ------------------------------------------------------------------ kůlna (Havran vlastni.kolna)
@@ -355,7 +406,7 @@ def kolna(m, R):
     z0 = P_["z0_m"]; tr = P_["tram_m"]
     vys = lambda y: Hp + (Hz - Hp) * (y / D)
     xs = [-L / 2 + i * L / 3 for i in range(4)]
-    S = Sit(); KOL = Sit()
+    S = Sit(); KOL = Sit(); SN = Sit()
     box(S, (0, D + 0.1, (z0 - zap) / 2), (L + 0.2 + sp, sp, z0 + zap), "kamen", "kamen", R)
     for x in (-L / 2 - 0.1, L / 2 + 0.1):
         box(S, (x, D / 2 + 0.05, (z0 - zap) / 2), (sp, D + 0.1 - sp, z0 + zap), "kamen", "kamen", R)
@@ -386,6 +437,7 @@ def kolna(m, R):
     c = (-L / 2 - 0.35, D + pe, Hz + 0.3 + pe * spd)
     d = (L / 2 + 0.35, D + pe, Hz + 0.3 + pe * spd)
     strecha(S, a, b, c, d, R)
+    if C["sindel_kusy"]["zapnuto"]: sindel_rady(SN, a, b, c, d, R)
     # kolize (Havran): zadní a boční stěny, sloupy vpředu (do kůlny se dá vejít), střecha
     box(KOL, (0, D + 0.1, (z0 + Hz) / 2), (L + 0.3, 0.2, Hz), "zelezo", "k", R)
     for x in (-L / 2 - 0.1, L / 2 + 0.1):
@@ -393,7 +445,7 @@ def kolna(m, R):
     for x in xs[1:-1]:
         box(KOL, (x, 0.0, Hp / 2), (0.2, 0.2, Hp), "zelezo", "k", R)
     box(KOL, (0, D / 2, (Hp + Hz) / 2 + 0.35), (L + 0.6, D + 0.8, 0.25), "zelezo", "k", R)
-    return S, [], KOL
+    return S, [], KOL, SN
 
 
 # ------------------------------------------------------------------ materiály (fotky jako hrad, zmenšené – textury)
@@ -435,7 +487,8 @@ def material(k):
     return m
 
 
-def objekt(S, jm, posun, s_uv=True):
+def objekt(S, jm, posun, s_uv=True, barva=None):
+    """barva(p, n, ton) -> (r, g, b) lineárně (barva vrcholů, COLOR_0 × albedo v Godotu) nebo None = bez barvy vrcholů."""
     me = bpy.data.meshes.new(jm)
     me.from_pydata([tuple(v - posun) for v in S.v], [], S.f)
     if s_uv:
@@ -445,16 +498,92 @@ def objekt(S, jm, posun, s_uv=True):
         klice = sorted(set(S.m))
         for k in klice: me.materials.append(material(k))
         me.polygons.foreach_set("material_index", [klice.index(k) for k in S.m])
+    if barva is not None:
+        col = me.color_attributes.new("Col", "FLOAT_COLOR", "CORNER"); data = []
+        for f, ton in zip(S.f, S.ton):
+            pts = [S.v[i] for i in f]
+            n = (pts[1] - pts[0]).cross(pts[2] - pts[0])
+            n = n.normalized() if n.length > 1e-12 else UP
+            for q in pts: data += [*(min(1.0, max(0.0, x)) for x in barva(q, n, ton)), 1.0]   # > 1 exportér přetočí (ushort) → černá
+        col.data.foreach_set("color", data); me.color_attributes.active_color = col
+        # exportér glTF (Blender 4.2) bral u sítě se smíšenými 3- a 4-úhelníky barvu rohů posunutě (čtvrtina vrcholů
+        # šindele černá/modrá – snímek 23. 11.) → triangulovat (bmesh zachová data rohů)
+        import bmesh
+        bm = bmesh.new(); bm.from_mesh(me); bmesh.ops.triangulate(bm, faces=bm.faces[:]); bm.to_mesh(me); bm.free()
     me.validate(); me.update()
     o = bpy.data.objects.new(jm, me); bpy.context.scene.collection.objects.link(o)
     return o
 
 
-def export(objs, cesta, s_mat=True):
+# ------------------------------------------------------------------ opotřebení do barvy vrcholů (plán C1, stodoly.json opotrebeni)
+def _hash3(i, j, k, sd):
+    h = (i * 73856093) ^ (j * 19349663) ^ (k * 83492791) ^ (sd * 2654435761)
+    h = (h ^ (h >> 13)) * 1274126177 & 0xFFFFFFFF
+    return (h & 0xFFFF) / 65535.0
+
+
+def sum3(p, vel, sd=0):
+    """Hodnotový šum 0–1 (trilineárně v mřížce vel m) – skvrny opotřebení bez textury."""
+    x, y, z = p.x / vel, p.y / vel, p.z / vel
+    i, j, k = math.floor(x), math.floor(y), math.floor(z); fx, fy, fz = x - i, y - j, z - k
+    s_ = lambda t: t * t * (3 - 2 * t)
+    fx, fy, fz = s_(fx), s_(fy), s_(fz)
+    v = 0.0
+    for di in (0, 1):
+        for dj in (0, 1):
+            for dk in (0, 1):
+                w = (fx if di else 1 - fx) * (fy if dj else 1 - fy) * (fz if dk else 1 - fz)
+                v += w * _hash3(i + di, j + dj, k + dk, sd)
+    return v
+
+
+def _hlad(a, b, x):
+    t = max(0.0, min(1.0, (x - a) / (b - a))); return t * t * (3 - 2 * t)
+
+
+def barva_opotrebeni(sever, z0, strecha=False):
+    """Masky C1: vlhko u paty (ztmavení do vlhko_do_m), ušpinění od odstřiku (hnědý tón do spina_do_m) a stékance
+    (svislé pruhy), mech na straně k severu (sever = vodorovný vektor v souřadnicích modelu); na střeše mech jen na
+    severní ploše; ton = barevný posun šindele (C4). Výška od z0 (terén u paty modelu)."""
+    O = C["opotrebeni"]; vs = O["sum_m"]
+    sv = Vector((sever[0], sever[1], 0.0))
+    def f(p, n, ton):
+        r = g = b = 1.0
+        if ton: r, g, b = ton
+        h = p.z - z0
+        sm = sum3(p, vs, 1); sm2 = sum3(p, vs * 0.35, 2)
+        if not strecha:
+            w = (1 - _hlad(0.0, O["vlhko_do_m"] * (0.75 + 0.5 * sm), h)) * O["vlhko_ztmaveni"]
+            r, g, b = r * (1 - w), g * (1 - w), b * (1 - w)
+            ws = (1 - _hlad(0.0, O["spina_do_m"] * (0.6 + 0.8 * sm2), h)) * O["spina_sila"]
+            sc = O["spina_barva"]
+            r, g, b = r * (1 - ws + ws * sc[0]), g * (1 - ws + ws * sc[1]), b * (1 - ws + ws * sc[2])
+            if abs(n.z) < 0.3:   # stékance na svislých plochách: úzké pruhy podle polohy podél stěny
+                u = p.x * abs(n.y) + p.y * abs(n.x)
+                pr = sum3(Vector((u * 6.0, 0.0, 0.0)), 1.0, 3)
+                if pr > 1 - O["stekance_podil"]:
+                    k_ = O["stekance_ztmaveni"] * _hlad(1 - O["stekance_podil"], 1.0, pr) * (0.5 + 0.5 * sum3(p, 0.3, 4))
+                    r, g, b = r * (1 - k_), g * (1 - k_), b * (1 - k_)
+        k_s = max(0.0, n.dot(sv)) if not strecha else (1.0 if Vector((n.x, n.y, 0)).dot(sv) > 0.15 else 0.0)
+        if k_s > 0:
+            if strecha: wm = k_s * O["mech_strecha_sila"] * _hlad(0.45, 0.75, sum3(p, vs * 1.5, 5))
+            else: wm = k_s ** 0.6 * O["mech_sila"] * (1 - _hlad(0.0, O["mech_do_m"], h)) * _hlad(0.3, 0.7, sum3(p, vs * 0.6, 6))
+            mc = O["mech_barva"]
+            r, g, b = r * (1 - wm + wm * mc[0]), g * (1 - wm + wm * mc[1]), b * (1 - wm + wm * mc[2])
+        return (r, g, b)
+    return f
+
+
+# varianty mechu (uzly *_C1_k): mech k místní ose hry +x, −x, +z, −z = v Blenderu (+x, −x, −y, +y) (export_yup: y Blenderu = −z hry)
+SEVER_VAR = ((1, 0), (-1, 0), (0, -1), (0, 1))
+
+
+def export(objs, cesta, s_mat=True, barvy=False):
     bpy.ops.object.select_all(action="DESELECT")
     for o in objs: o.select_set(True)
     bpy.ops.export_scene.gltf(filepath=cesta, export_format="GLB", use_selection=True, export_yup=True, export_apply=True,
-                              export_image_format="JPEG", export_materials="EXPORT" if s_mat else "NONE")
+                              export_image_format="JPEG", export_materials="EXPORT" if s_mat else "NONE",
+                              export_vertex_color="ACTIVE" if barvy else "MATERIAL")
 
 
 def _aabb(vs):
@@ -465,8 +594,8 @@ def _aabb(vs):
 def postav(mid):
     m = C["modely"][mid]; R = random.Random(m["seed"])
     for o in list(bpy.data.objects): bpy.data.objects.remove(o)
-    S, kridla, KOL = (stodola if m["druh"] == "stodola" else kolna)(m, R)
-    hlidac_strechy(mid, [S] + [k[1] for k in kridla])
+    S, kridla, KOL, SN = (stodola if m["druh"] == "stodola" else kolna)(m, R)
+    hlidac_strechy(mid, [S, SN] + [k[1] for k in kridla])
     if kridla:   # i otevřená vrata (pohyb_mista.json stodoly: ven o uhel_deg) nesmí projít střechou
         uh = math.radians(json.load(open(os.path.join(K, "pravidla/svet/pohyb_mista.json")))["stodoly"]["uhel_deg"])
         otev = []
@@ -480,7 +609,7 @@ def postav(mid):
                     pts.append(pant + Vector((d_.x * cr - d_.y * sr, d_.x * sr + d_.y * cr, d_.z)))
                 O_.plocha(pts, [(0, 0)] * len(pts), "zelezo", tg)
             otev.append(O_)
-        hlidac_strechy(mid + " (vrata otevřená)", [S] + otev)
+        hlidac_strechy(mid + " (vrata otevřená)", [S, SN] + otev)
     # viditelný model vystředěný na pivot kolize z katalogu (predmety_h.json dily.kolize.pivot = střed obalu Havrana):
     # hra: kolize (souřadnice Blenderu) + pivot = model
     vse = S.v + [v for k in kridla for v in k[1].v]
@@ -493,16 +622,28 @@ def postav(mid):
             print("PIVOT %s katalog %.3f, střed obalu %.3f" % (mid, pv[2], py))
             py = pv[2]
     posun = Vector((0.0, py, 0.0))
-    obs = [objekt(S, mid, posun)]
+    c1 = mid in C["opotrebeni"]["modely"]
+    ma_sn = bool(SN.f)
+    ton = (lambda p, n, t: t if t else (1.0, 1.0, 1.0))
+    z0 = 0.0   # terén u paty = 0 modelu (podezdívka je zapuštěná pod nulu)
+    obs = []
+    if c1:   # C1: 4 varianty těla a šindele podle strany k severu (ves.gd ponechá jednu)
+        for k_, sv in enumerate(SEVER_VAR):
+            obs.append(objekt(S, "%s_C1_%d" % (mid, k_), posun, barva=barva_opotrebeni(sv, z0)))
+            if ma_sn: obs.append(objekt(SN, "%s_Sindel_C1_%d" % (m["uzel"], k_), posun, barva=barva_opotrebeni(sv, z0, strecha=True)))
+    else:
+        obs.append(objekt(S, mid, posun, barva=ton if ma_sn else None))   # bílá: celý glb s barvou vrcholů (sdílený materiál šindele)
+        if ma_sn: obs.append(objekt(SN, "%s_Sindel" % m["uzel"], posun, barva=ton))
     for strana, Kr, pant in kridla:
-        o = objekt(Kr, "%s_Dvere_%s" % (m["uzel"], strana), pant)
+        o = objekt(Kr, "%s_Dvere_%s" % (m["uzel"], strana), pant, barva=barva_opotrebeni((0, 0), z0) if c1 else (ton if ma_sn else None))
         o.location = pant - posun
         obs.append(o)
     ko = objekt(KOL, mid + "_kolize", Vector(), s_uv=False)
-    export(obs, os.path.join(OUT, mid + ".glb"))
+    export(obs, os.path.join(OUT, mid + ".glb"), barvy=c1 or ma_sn)
     export([ko], os.path.join(OUT, mid + "_kolize.glb"), s_mat=False)
     lo, hi = _aabb([v - posun for v in vse])
     tri = sum(len(f) - 2 for f in S.f) + sum(len(f) - 2 for k in kridla for f in k[1].f)
+    print("STODOLY %s: šindel v geometrii troj %d (LOD0, uzel %s_Sindel%s)" % (mid, sum(len(f) - 2 for f in SN.f), m["uzel"], "_C1_0..3" if c1 else ""))
     print("STODOLY %s: troj %d, křídel %d, obal hry x %.3f..%.3f y %.3f..%.3f z %.3f..%.3f" % (
         mid, tri, len(kridla), lo[0], hi[0], lo[2], hi[2], -hi[1], -lo[1]), flush=True)
 

@@ -1322,6 +1322,8 @@
    "stin_drobne_od_m": 1.0,
    "bunka_m": 25.0,
    "ploty_pozn": "KCD2 ref_kcd2_ves_shora: ploty jsou z výšky vidět přes celou ves (~150 m); tablet kratší",
+   "sindel_do_m": 35.0,
+   "sindel_pozn": "šindel stodol a kůlen v geometrii (uzly *_Sindel, stodoly.json sindel_kusy) jen zblízka, dál deska s texturou",
    "stredni_zapnuto": false,
    "stredni_pozn": "12. 11.: střední stupeň stodol/kůlen (stavby_h *_stredni.glb, barva vrcholů) se kreslí černě (snímky docs/screens/ves_kcd_*; s jednobarevným materiálem osvětlený) – příčina NEOVERENA, stejné černé domy z dálky v _mista. Podrobný model má stejně trojúhelníků (stodola 17,8 tis.), střední šetří jen volání kreslení → vypnuto, podrobný do stredni_do_m.",
    "dosah_pozn_12_11": "hlídač scén 12. 11.: stodoly a kůlny v plném detailu do 450 m přetáhly rozpočet trojúhelníků (scény 300–800 m od vsi 2,1–2,4 M) → 180 m (tablet 120 m), dokud střední stupeň kreslí černě",

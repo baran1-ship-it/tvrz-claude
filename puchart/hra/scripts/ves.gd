@@ -118,6 +118,10 @@ func _hospodarske() -> void:
 		for g in n.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_end = blizko if ma_st else st_do
 			(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if ma_st else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		_varianta_c1(n, float(h["yaw"]))
+		for g in n.find_children("*_Sindel*", "GeometryInstance3D", true, false):   # šindel v geometrii jen zblízka (LOD0, stodoly.json sindel_kusy)
+			(g as GeometryInstance3D).visibility_range_end = float(lod.get("sindel_do_m", 35.0)); (g as GeometryInstance3D).visibility_range_end_margin = 3.0
+			(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF   # stín dává deska střechy
 		for sk_ in (d["modely"]["hospodarske"] as Dictionary).get(mid + "_skryt", []):   # části modelu, které se nekreslí (kovárna: dlažba, podlaha)
 			var u_ := n.find_child(String(sk_), true, false)
 			if u_: u_.queue_free()
@@ -164,6 +168,19 @@ func _hospodarske() -> void:
 			kb.add_child(cs)
 		if kb.get_child_count() > 0: n.add_child(kb)
 		else: kb.free()
+
+
+## Opotřebení C1 (stodoly.json opotrebeni): model má 4 varianty těla a šindele (uzly *_C1_0..3, mech k místní +x, −x, +z,
+## −z); ponechá se ta, jejíž strana míří nejblíž k severu světa (−z), ostatní se uvolní (sdílené materiály, 0 vzorkovačů navíc)
+static func _varianta_c1(n: Node3D, yaw: float) -> void:
+	var uzly := n.find_children("*_C1_*", "", true, false)
+	if uzly.is_empty(): return
+	var ln := Basis(Vector3.UP, yaw).inverse() * Vector3(0, 0, -1)
+	var smery := [Vector3.RIGHT, Vector3.LEFT, Vector3.BACK, Vector3.FORWARD]
+	var k := 0
+	for i in 4: if ln.dot(smery[i]) > ln.dot(smery[k]): k = i
+	for u in uzly:
+		if not String(u.name).ends_with("_C1_%d" % k): u.get_parent().remove_child(u); u.free()
 
 
 ## Hrubý obal stavby pro dálku (mista.json modely.hospodarske.obal; KCD/HLOD – zjednodušený tvar se skutečnou texturou):
@@ -483,6 +500,7 @@ func _brana(sit: Sit, e: Dictionary, pr: Dictionary, uzel: Node3D) -> void:
 	for q: Vector3 in [a, b]:
 		sit.kvadr("tram", q + Vector3(0, (hs - 0.4) / 2, 0), dn, Vector3.UP, nrm, Vector3(0.24 if kryta else 0.2, hs + 0.4, 0.24 if kryta else 0.2))
 	if kryta:
+		var rng_s := RandomNumberGenerator.new(); rng_s.seed = int(absf(a.x) * 37.0 + absf(a.z) * 11.0)
 		# práh nahoře přes oba sloupy a stříška ze šindele na obě strany
 		var ta := a + Vector3(0, hs + 0.05, 0) - dn * 0.4; var tb := b + Vector3(0, hs + 0.05, 0) + dn * 0.4
 		sit.kvadr("tram", (ta + tb) / 2, dn, Vector3.UP, nrm, Vector3(w + 0.8, 0.22, 0.22))
@@ -492,6 +510,8 @@ func _brana(sit: Sit, e: Dictionary, pr: Dictionary, uzel: Node3D) -> void:
 			var c := (hr + ok) / 2; var dl := hr.distance_to(ok)
 			var yv := (hr - ok).normalized(); var zv := dn.cross(yv).normalized() * (1.0 if su > 0 else -1.0)
 			sit.kvadr("sindel", c + zv * 0.03, dn, yv, zv, Vector3(w + 0.95, dl + 0.12, 0.05))
+			# šindel v geometrii nad deskou (stodoly.json sindel_kusy, Míša 18. 11. „dřevo je dřevo“): řady s čely, úseky (C4)
+			_sindel_rady(sit, c + zv * 0.055 - yv * (dl + 0.12) / 2 - dn * (w + 0.95) / 2, dn, yv, zv, w + 0.95, dl + 0.12, rng_s)
 	# dvě křídla z prken (5 prken, svlaky nahoře a dole, vzpěra) – každé na svém pantu u sloupu
 	var hk := float(vp["kridla_m"]); var wl := w / 2 - 0.14
 	var kresli_v := func(ls: Sit, x_: Vector3, n_: Vector3) -> void:
@@ -507,6 +527,32 @@ func _brana(sit: Sit, e: Dictionary, pr: Dictionary, uzel: Node3D) -> void:
 	for side: float in [-1.0, 1.0]:
 		var hp := (a + dn * 0.13) if side < 0 else (b - dn * 0.13)
 		_kridlo(uzel, "Pohyb_ves_vrata_%d_%s" % [ib, "l" if side < 0 else "p"], "ves_vrata_%d" % ib, hp, dn * (-side), nrm, dovnitr, wl, hk, (a + b) / 2 + Vector3(0, 1.0, 0), kresli_v)
+
+
+## Řady šindele na stříšce (jako blender/stodoly.py sindel_rady): od okapu o (roh), podél x šířky w, po spádu y délky l
+## (okap → hřeben), z = normála ven; řada po 0,15 m = pilovitý stupeň (čelo zvednuté o tloušťku), úseky 0,3–0,9 m různé
+## tloušťky a posunu čela, každý úsek jiný výřez textury (C4 proti opakování)
+func _sindel_rady(sit: Sit, o: Vector3, x: Vector3, y: Vector3, z: Vector3, w: float, l: float, rng: RandomNumberGenerator) -> void:
+	var p := 0.15; var vm: float = _mat["sindel"][1] if _mat.has("sindel") else 1.5
+	var t := sit.s("sindel"); var nr := ceili(l / p - 0.001)
+	var Q := func(u: float, s_: float, h: float) -> Vector3: return o + x * u + y * s_ + z * h
+	var tri := func(a: Vector3, b: Vector3, c: Vector3, n: Vector3, uv: Vector2) -> void:
+		var pts := [a, b, c] if n.dot((b - a).cross(c - a)) > 0 else [a, c, b]
+		for q: Vector3 in pts:
+			t.set_normal(n); t.set_uv(uv + Vector2(q.dot(x), q.dot(y)) / vm); t.add_vertex(q - sit.o)
+	for k in nr:
+		var s1 := minf((k + 1) * p, l); var u0 := 0.0
+		while u0 < w - 0.001:
+			var L := rng.randf_range(0.3, 0.9)
+			var u1 := w if w - (u0 + L) < 0.2 else u0 + L
+			var h := rng.randf_range(0.016, 0.03); var s0 := k * p + (rng.randf_range(-0.008, 0.008) if k > 0 else 0.0)
+			var uv := Vector2(rng.randf(), rng.randf())
+			var A: Vector3 = Q.call(u0, s0, h); var B: Vector3 = Q.call(u1, s0, h); var Cc: Vector3 = Q.call(u1, s1, 0.003); var D: Vector3 = Q.call(u0, s1, 0.003)
+			tri.call(A, B, Cc, z, uv); tri.call(A, Cc, D, z, uv)
+			var A0: Vector3 = Q.call(u0, s0, 0.0); var B0: Vector3 = Q.call(u1, s0, 0.0)
+			tri.call(A0, B0, B, -y, uv); tri.call(A0, B, A, -y, uv)
+			tri.call(A0, A, D, -x, uv); tri.call(B0, B, Cc, x, uv)
+			u0 = u1
 
 
 ## křídlo jako uzel s pantem v hp: místní osa x podél křídla (od pantu), geometrie z kresli(Sit, x, nrm) v místních
@@ -713,8 +759,13 @@ func _drobne() -> void:
 		for i in n:
 			var p0 := _y_na(body, L * i / n); var p1 := _y_na(body, L * (i + 1) / n)
 			var yaw := atan2(-(p1.z - p0.z), p1.x - p0.x); var sklon := atan2(p1.y - p0.y, Vector2(p1.x - p0.x, p1.z - p0.z).length())
-			var bas := Basis(Vector3.UP, yaw) * Basis(Vector3.BACK, sklon) * Basis.from_scale(Vector3(sk, 1.0, 1.0))
-			vrstvy["ploty"].pridej(Transform3D(bas, (p0 + p1) / 2 - Vector3(0, 0.04, 0)) * (smp[1] as Transform3D), mid_p)
+			# C4 proti opakování (plán z rešerše 17. 11., A Taste of Home): stejný díl v řadě jinak – otočený o 180° (druhá
+			# strana výpletu ven), jiná výška ±7 %, mírné vychýlení z řady ±2,5° a zapuštění (stálé podle polohy dílu)
+			var hv := absi(hash(Vector2i(roundi(p0.x * 10.0), roundi(p0.z * 10.0))))
+			var otoc := Basis(Vector3.UP, PI) if hv % 2 == 1 else Basis()
+			var vy := 0.93 + float((hv / 2) % 15) / 100.0; var vych := deg_to_rad(float((hv / 30) % 51) / 10.0 - 2.5)
+			var bas := Basis(Vector3.UP, yaw + vych) * Basis(Vector3.BACK, sklon) * Basis.from_scale(Vector3(sk, vy, 1.0)) * otoc
+			vrstvy["ploty"].pridej(Transform3D(bas, (p0 + p1) / 2 - Vector3(0, 0.04 + float((hv / 1530) % 5) / 100.0, 0)) * (smp[1] as Transform3D), mid_p)
 
 
 ## ------------------------------------------------------------------ stromy (jabloně, lípy)
