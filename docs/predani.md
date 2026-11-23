@@ -1720,3 +1720,9 @@ Hotovo v kódu a datech (testy u každého):
   zvážit odstranění (nemají už co dělat). Vlastní LOD citlivých sítí = stupně z Blenderu (`_Stredni`, `_Daleko`, `lod1`) a dlaždice terénu.
 - **Pozor na běžící skript:** `export.sh` se čte průběžně a celý `if … fi` je načtený najednou → za běhu exportu nic nevkládat
   PŘED aktuální místo (posun bajtů rozbije běžící export); nové kroky jen za `fi`, nebo až po doběhnutí.
+
+### 23. 11. – poučení: snímky se neukládaly (pomocník D18)
+- Sonda louče vložená do `main._mereni` (náhrada textu skriptem s `old` končícím řádkem `if parts.size() > 2:`) ten řádek
+  pohltila – `save_png` skončil v bloku `if louc` a od commitu f8106c4 do 21ab08e se ukládal jen snímek interiéru s loučí;
+  běh přitom hlásil OK (řádky MERENI v logu). **Náhrada textu: `old` končit na celém bloku, který se vrací v `new` celý;
+  po běhu foto vždy ověřit, že soubory existují (`ls`), ne jen řádek BEH OK.** Snímky foto/svetlo z té doby chybí – pustit znovu.
