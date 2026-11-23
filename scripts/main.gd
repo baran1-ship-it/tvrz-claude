@@ -2870,6 +2870,11 @@ func _mereni(spec: String) -> void:
 					print("SVETLO_LOUC %.1f m energie %.2f dosah %.1f utlum %.2f on %s fade %.2f stin %s vrstvy %d barva %s" % [dd, ll.light_energy,
 							ll.omni_range, ll.omni_attenuation, ld.get("on", "-"), float(ld.get("fade", 1.0)), ll.shadow_enabled, ll.light_cull_mask, ll.light_color])
 			print("SVETLO_LOUC svetel viditelnych %d, v ruce %s" % [n_vid, predmety.held_lit])
+			var hfx: Dictionary = predmety.get("_hand_fx")
+			if not hfx.is_empty():
+				var hl := (hfx["ld"] as Dictionary)["light"] as OmniLight3D
+				print("SVETLO_LOUC v ruce: svetlo %.1f m od kamery, viditelne %s, ruka %s, kamera %s" % [hl.global_position.distance_to(cpo),
+						hl.is_visible_in_tree(), hl.global_position, cpo])
 		if parts.size() > 2:
 			get_viewport().get_texture().get_image().save_png(parts[2])
 		if louc:
