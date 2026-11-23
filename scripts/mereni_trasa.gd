@@ -581,7 +581,7 @@ func _tabulka(plne := true) -> String:
 	# zaseky_rozbor_system.md F2; na PC je v souboru diag). Porovnani verzi: docs/mereni_verze.md „Jak číst tabulku trasy“.
 	var txt := "(ms na snímek; při 30 FPS je p50 vždy 33 – porovnávat p95, p99 a nad30 = %% snímků nad %.1f ms; skr = měřené skripty, cpuR = 0, když zařízení neměří)\nVÝSLEDEK měřicí trasy %s · %s · obrazovka %dx%d, 3D %d %%\n" % [float(cfg.get("nad_ms", 33.4)), Time.get_datetime_string_from_system(),
 			main.diag.sestaveni_text() if main.diag and main.diag.has_method("sestaveni_text") else "", int(vp.x), int(vp.y), roundi(_sc0 * 100)]
-	txt += "varianta   úsek            p50 p95 p99  max nad30%% >40 >100 kresl trojM skr fyz cpuR | nejhorší: ms skr fyz kresl\n"
+	txt += "varianta   úsek            p50 p95 p99  max nad30% >40 >100 kresl trojM skr fyz cpuR | nejhorší: ms skr fyz kresl\n"
 	for r: Dictionary in vysledky:
 		var nj: Dictionary = r["nej"]
 		txt += "%-10s %-15s %3.0f %3.0f %3.0f %4.0f %5.1f %4d %4d %5.0f %5.2f %3.0f %3.0f %4.0f | %4.0f %3.0f %3.0f %4d\n" % [
