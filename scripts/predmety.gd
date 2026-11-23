@@ -712,7 +712,9 @@ func hold(id: String, lit: bool) -> void:
 	_hand = Node3D.new()
 	var telo: Node = main.get("telo")
 	var dr: Dictionary = (Pravidla.cti("jizda", "telo", "drzeni") as Dictionary).get(id, {}) if telo else {}
-	if telo and not dr.is_empty():
+	# 23. 11. (plan_18_11 bod 3, sonda m23d): skryte telo (let, foceni svetlo) zustava jinde - louc v jeho ruce svitila 34 m
+	# od kamery a skryta (interier kovarny cerny) -> bez viditelneho tela svetlo pred kamerou
+	if telo and not dr.is_empty() and (telo as Node3D).is_visible_in_tree():
 		# telo v prvni osobe: predmet v ruce tela (kost ruky), ruka v poze drzeni (telo.drz)
 		var ruka: Node3D = telo.get("ruka_l") if String(telo.get("DRZENI").get(id, ["", "r"])[1]) == "l" else telo.get("ruka_r")
 		var pz: Array = dr["posun"]

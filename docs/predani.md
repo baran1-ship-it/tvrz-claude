@@ -1782,3 +1782,7 @@ Hotovo v kódu a datech (testy u každého):
   spustit `barvy_vrcholu.py kontrola` a `textury_predmetu.py kontrola` hned, ne až v exportu.
 - Naměřeno po převodu (import v kontejneru, `tools/textury_vram.py`): ETC2 879,5 → 817,2 MB, duplicity 189,9 → 100,9 MB (`build/a2_vram_po.json`).
   Snímky `build/a2/kovarna_x.png` (kovárna s texturami beze změny), `build/a2/skala_vez.png` (skály s texturami ze sdílené složky).
+- **Louč „nesvítí“ v kontrole světla (23. 11., sonda `m23d`):** světlo louče v ruce bylo 34 m od kamery a skryté – drželo ho
+  skryté tělo hráče, které při focení/letu zůstalo jinde (`build/beh/m23d.log` SVETLO_LOUC). Interiér kovárny ve `svetlo`
+  byl černý kvůli tomu, ne kvůli síle světla. `predmety.hold`: bez viditelného těla jde louč před kameru. Ověřit snímkem
+  `tools/beh.sh <jm> svetlo … "-12.5,1.7,9.5,-15.5,1.0,11"` (NEOVĚŘENO – snímek po opravě neudělán).
