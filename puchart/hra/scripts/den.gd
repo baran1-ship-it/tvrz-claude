@@ -35,6 +35,8 @@ var _acc := 0.0
 var _sun_d := Vector3.ZERO
 var _rate := 24.0 / 5400.0
 var okna: Array = []       # ShaderMaterial oken (hlavni.gd _okno_mat) – svit dovnitř podle dne
+var vody: Array = []       # ShaderMaterial vody (hlavni.gd) – odraz lesa × barva okolí podle dne (voda.gdshader okoli)
+var _okoli_vody := Color(1, 1, 1)
 var hl: Node = null
 var _okenni = null         # [[OmniLight3D, energie ve dne]]
 
@@ -207,6 +209,9 @@ func _apply(p: Dictionary) -> void:
 	okolni = obl_jas / ref_jas   # síla × tato barva = amb × jas oblohy jako u Havrana (den.json okolni_pozn)
 	svit_oken = clampf(okolni * okolni_e, 0.0, 1.0)
 	for m: ShaderMaterial in okna: m.set_shader_parameter("svit", svit_oken)
+	# odraz lesa ve vodě (voda.gdshader EMISSION): barva mlhy presetu / odpoledne (noc ~5 %), zatažení ztlumí jako okolní světlo
+	_okoli_vody = _pomer(Color(1, 1, 1), p["fog"], _ref["fog"]) * (lerpf(1.0, float(_poc.get("okolni", 1.0)), zatazeni) if not _poc.is_empty() else 1.0)
+	for m: ShaderMaterial in vody: m.set_shader_parameter("okoli", _okoli_vody)
 	# denní světlo z oken (svetla.json den) v noci zhasne – světla označená v hlavni.gd _svetla metou „den_svetlo“
 	if _okenni == null and hl and hl.get_node_or_null("Hrad"):
 		_okenni = []
@@ -228,3 +233,8 @@ func _par_f(jm: String) -> float:   # parametr shaderu oblohy (nenastavený = nu
 func _kryti() -> float:
 	if _poc.is_empty(): return _par_f("cloud_cover")
 	var mk: Array = _poc["mraky_kryti"]; return lerpf(float(mk[0]), float(mk[1]), zatazeni)
+
+
+func pridej_vodu(m: ShaderMaterial) -> void:   # hlavni.gd: materiál vody vznikl po setup – hned aktuální barva okolí
+	if not vody.has(m): vody.append(m)
+	m.set_shader_parameter("okoli", _okoli_vody)

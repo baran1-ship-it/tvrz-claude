@@ -46,6 +46,7 @@ for i_, h_ in enumerate(_HD):
                 if 2 < float(np.hypot(*(q_[k2_] - p_))) < BR_["mezera_cest_m"][1]: _USEKY.append((p_, q_[k2_])); _UVOZ.append(_HT[i_] and _HT[j_])
         if best_ and BR_["mezera_cest_m"][0] < best_[0] < 25: _USEKY.append((p_, best_[1])); _UVOZ.append(_HT[i_] and _HT[best_[2]])
 _UA = np.array([u_[0] for u_ in _USEKY]); _UB = np.array([u_[1] for u_ in _USEKY]); _UV = np.array(_UVOZ, bool)
+_BROD_SMER = {}   # (x, z) brodu -> jednotkový směr cesty přes brod
 _BROD_VOZ = {}   # (x, z) brodu -> vozová cesta (vůz) / jen pěší (US Army tab. 1-3: pěší nájezd do 100 %)
 def _brody_toku(x, z, w):
     """indexy bodů osy toku, kde ji kříží cesta (osa, spojka nebo dvojice konců) a není tam most"""
@@ -62,6 +63,10 @@ def _brody_toku(x, z, w):
         if any(math.hypot(x[i_] - m_[0], z[i_] - m_[1]) < BR_["od_mostu_m"] for m_ in _MOSTY): continue
         if any(abs(i_ - b_) * KO["krok_osy_m"] < 15 for b_ in ven): continue
         ven.append(i_); _BROD_VOZ[(round(float(x[i_]), 3), round(float(z[i_]), 3))] = bool(np.any(hit_ & _UV))
+        # směr cesty přes brod (Míša 20. 11., misa_20_11_dira.jpg: cesta kříží tok šikmo 58°, nájezd kolmo na tok ji minul a cesta
+        # stoupala přes přirozený val břehu 42 % – za hřbetem „díra“ s hladinou): úsečka cesty, přednostně vozová
+        h_ = np.nonzero(hit_ & _UV)[0] if np.any(hit_ & _UV) else np.nonzero(hit_)[0]
+        sd_ = s_[h_[0]] / (np.linalg.norm(s_[h_[0]]) + 1e-9); _BROD_SMER[(round(float(x[i_]), 3), round(float(z[i_]), 3))] = sd_
     return ven
 for ti, t in enumerate(toky):
     b = np.array(t["body"], float)[:, [0, 2]]
@@ -109,7 +114,7 @@ for ti, t in enumerate(toky):
     prof = np.where(dist < pw, hlj - hv * (1 - (dist / pw) ** 2),
            np.where(dist < pw + KO["prah_m"], hlj + KO["prah_nad_hladinou_m"] * (dist - pw) / KO["prah_m"],
                     hlj + KO["prah_nad_hladinou_m"] + (dist - pw - KO["prah_m"]) * KO["sklon_svahu"]))
-    wb = np.zeros_like(dist); dist_b = dist; brody_tvar = []; wbax = np.zeros(len(x)); brehax = np.zeros(len(x))
+    wb = np.zeros_like(dist); wbp = np.zeros_like(dist); dist_b = dist; brody_tvar = []; wbax = np.zeros(len(x)); brehax = np.zeros(len(x))
     if brody_:
         # BROD podle rešerše (docs/reference/brody/README.md, Míša 13. 11.: „příkop s hrbem“): mělká rozlitá plocha – voda
         # rozliti_sirky × šíře koryta, ploché dno hloubka_m pod hladinou, nájezd sklon_najezdu až na původní terén (délka =
@@ -123,29 +128,43 @@ for ti, t in enumerate(toky):
         for b_ in brody_:
             tg_ = np.array([x[min(b_ + 2, len(x) - 1)] - x[max(b_ - 2, 0)], z[min(b_ + 2, len(z) - 1)] - z[max(b_ - 2, 0)]]); tg_ /= np.linalg.norm(tg_) + 1e-9
             nb_ = np.array([-tg_[1], tg_[0]]); rel_ = pc_ - np.array([x[b_], z[b_]])
-            ds_ = np.abs(rel_ @ tg_); ac_ = np.abs(rel_ @ nb_)
-            ds_ = np.where(ac_ < BR_["dosah_m"] + w, ds_, 1e9)
+            # ŠIKMÝ BROD (Míša 20. 11., misa_20_11_dira.jpg; chyby.md): pás brodu je sjednocení pásu kolmo na tok (rozlitá voda,
+            # nájezd napříč) a pásu podél osy cesty – nájezd v ose cesty má sklon sklon_najezdu × cos(úhlu), tedy nejvýš sklon_najezdu.
+            # Úhel nejvýš sikmost_max_st (cesta téměř podél toku by vedla pás po celém břehu).
+            rd_ = np.array(_BROD_SMER.get((round(float(x[b_]), 3), round(float(z[b_]), 3)), nb_), float)
+            if rd_ @ nb_ < 0: rd_ = -rd_
+            cmin_ = math.cos(math.radians(BR_.get("sikmost_max_st", 65.0)))
+            if rd_ @ nb_ < cmin_:   # natočit k kolmici na mez
+                sn_ = np.sign(rd_ @ tg_) or 1.0; rd_ = nb_ * cmin_ + tg_ * sn_ * math.sqrt(1 - cmin_ * cmin_)
+            cv_ = float(rd_ @ nb_); rn_ = np.array([-rd_[1], rd_[0]]); sv_ = abs(float(nb_ @ rn_))
+            ds_ = np.abs(rel_ @ tg_); ac_ = np.abs(rel_ @ nb_); dsr_ = np.abs(rel_ @ rn_)
+            ds_ = np.where(ac_ < BR_["dosah_m"] + w, ds_, 1e9); dsr_ = np.where(ac_ < BR_["dosah_m"] + w, dsr_, 1e9)
             # buňka u jiného oblouku téhož toku (nejbližší bod osy dál po proudu než pás brodu): brod tam jen snižuje, koryto zůstane
-            vl_i = np.abs(s_ax[j] - s_ax[b_]) < BR_["polosirka_m"] + BR_["nabeh_m"] + 2
-            wbi = np.clip(1 - (ds_ - BR_["polosirka_m"]) / BR_["nabeh_m"], 0, 1); wbi = wbi * wbi * (3 - 2 * wbi)
+            L0_ = BR_["polosirka_m"] + BR_["nabeh_m"] + 2
+            vl_i = np.where(dsr_ < ds_, np.abs(s_ax[j] - s_ax[b_] - rel_ @ tg_) < L0_, np.abs(s_ax[j] - s_ax[b_]) < L0_)   # v pásu cesty k bodu osy pod ní
+            wbi = np.clip(1 - (np.minimum(ds_, dsr_) - BR_["polosirka_m"]) / BR_["nabeh_m"], 0, 1); wbi = wbi * wbi * (3 - 2 * wbi)
+            # jemné buňky (síť BREH 1 m) jen v pásu kolmo na tok – tam vede řady voda.py; pás v ose cesty mimo něj kreslí síť
+            # dlaždic 2 m (nájezd 10 % je hladký, jemná síť netřeba; jemné buňky bez BREH = snížená síť = díra, kontrola 20. 11.)
+            wbp_i = np.clip(1 - (ds_ - BR_["polosirka_m"]) / BR_["nabeh_m"], 0, 1); wbp_i = wbp_i * wbp_i * (3 - 2 * wbp_i)
             low_ = _smax(hl[b_] - BR_["hloubka_m"], hl[b_] + sk_ * (ac_ - pwb_), kz_)   # ploché dno → zaoblení → nájezd
             pbi = _smin(low_, Ysm_, kz_)   # nájezd → zaoblení → původní terén (vyhlazený, bez děr a hrbolů)
-            lep_ = wbi > wb; wb = np.where(lep_, wbi, wb); pb = np.where(lep_, pbi, pb); acr_ = np.where(lep_, ac_, acr_); vl_ = np.where(lep_, vl_i, vl_)
+            lep_ = wbi > wb; wb = np.where(lep_, wbi, wb); wbp = np.maximum(wbp, wbp_i); pb = np.where(lep_, pbi, pb); acr_ = np.where(lep_, ac_, acr_); vl_ = np.where(lep_, vl_i, vl_)
             # kde nájezd dosedne na terén (obě strany): do té vzdálenosti jemný pás břehů (voda.py BREH) a jemné buňky
             aa_ = np.arange(0.0, BR_["dosah_m"] + w, 0.5); ko_ = []
-            for sg_ in (1, -1):
+            for sg_ in (1, -1):   # jen kolmo na tok – jemný pás BREH a jemné buňky jsou jen v pásu kolmo (pás cesty kreslí síť 2 m)
                 ter_ = map_coordinates(_YSM, [z[b_] + sg_ * nb_[1] * aa_ - z0, x[b_] + sg_ * nb_[0] * aa_ - x0], order=1, mode="nearest")
                 nad_ = np.nonzero(hl[b_] + sk_ * (aa_ - pwb_) >= ter_ - 0.02)[0]; nad_ = nad_[aa_[nad_] > pwb_]
                 ko_.append(float(aa_[nad_[0]]) if len(nad_) else float(aa_[-1]))
             rext_ = min(max(ko_) + BR_["zaobleni_m"], w / 2 + BR_["dosah_m"] - KO.get("napojeni_m", 4.0))
             dsa_ = np.abs((np.c_[x, z] - np.array([x[b_], z[b_]])) @ tg_)
             wa_ = np.clip(1 - (dsa_ - BR_["polosirka_m"]) / BR_["nabeh_m"], 0, 1); wa_ = wa_ * wa_ * (3 - 2 * wa_)
-            wa_ = np.where(np.abs(s_ax - s_ax[b_]) < BR_["polosirka_m"] + BR_["nabeh_m"] + 2, wa_, 0)   # jen tento úsek toku (ne vedlejší oblouk)
+            wa_ = np.where(np.abs(s_ax - s_ax[b_]) < L0_, wa_, 0)   # jen tento úsek toku (ne vedlejší oblouk)
             brehax = np.where(wa_ > wbax, wa_ * rext_, brehax); wbax = np.maximum(wbax, wa_)
             rx_ = np.where(lep_, rext_, rx_)
             brody_tvar.append({"i": int(b_), "stred": [round(float(x[b_]), 3), round(float(z[b_]), 3)], "tecna": [round(float(tg_[0]), 4), round(float(tg_[1]), 4)],
                                "dosah_breh_m": round(rext_, 2), "najezd_konec_m": [round(v_, 1) for v_ in ko_],
-                               "vozovy": _BROD_VOZ.get((round(float(x[b_]), 3), round(float(z[b_]), 3)), True)})
+                               "vozovy": _BROD_VOZ.get((round(float(x[b_]), 3), round(float(z[b_]), 3)), True),
+                               "smer_cesty": [round(float(rd_[0]), 4), round(float(rd_[1]), 4)]})
         dist_b = dist * (1 - wb) + np.minimum(acr_, dist + 1e3) * wb   # vzdálenost napříč: v brodu po kolmici brodu
         y0b_ = Y0[r0_:r1_, c0_:c1_].ravel()   # běžný profil v náběhu jen jako zářez (svah 0,9 nad terénem by se smíchal do násypu)
         bl_ = np.minimum(prof, y0b_) * (1 - wb) + pb * wb
@@ -169,7 +188,7 @@ for ti, t in enumerate(toky):
     sub_dr[(dd >= pw2 * 0.85) & (dd < pw2 + KO["prah_m"] + KO["breh_m"]) & (sub_dr == 0)] = 2
     if brody_:   # brod: rozlitá voda = kamenité dno; nájezd = jemné buňky (3: kolize a síť podle jemného pásu voda.py BREH,
         # stanoviště beze změny – cesty.py bere jen 1 a 2). O 1 m užší než pás BREH (síť dlaždic se pod ním snižuje).
-        wb2 = wb.reshape(cx.shape); ac2 = acr_.reshape(cx.shape); rx2 = rx_.reshape(cx.shape)
+        wb2 = wbp.reshape(cx.shape); ac2 = acr_.reshape(cx.shape); rx2 = rx_.reshape(cx.shape)   # jen pás kolmo na tok (BREH)
         sub_dr[(wb2 > 0.5) & (ac2 < pwb_ * 0.85) & ok.reshape(cx.shape)] = 1
         sub_dr[(wb2 > 0) & (ac2 < wb2 * rx2 - 1.0) & (sub_dr == 0) & ok.reshape(cx.shape)] = 3
     VODA.append((np.c_[x, z], (w / 2) * (1 + VK["amp"]) + 0.4))

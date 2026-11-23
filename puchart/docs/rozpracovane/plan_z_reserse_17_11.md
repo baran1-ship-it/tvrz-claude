@@ -148,3 +148,11 @@ H5 návrh (promyšleno 20. 11., Míša: „stáj nemá přední díl – světlo
   nastavení pak sjednotit s novým podílem (méně zvláštních případů).
 - Cena: 9 paprsků každých 10 snímků (dnes 1) – zanedbatelné; data: interier.otevrenost {paprsku, uhel_st, delka_m}.
 - Kontrola: stáj (x 8 z 16), pavlač krčmy, přístřešek kovárny, síň paláce A, sklep, půda – podíl vypsat v panelu FPS.
+
+Stav 23. 11. (H1, H2, D1–D2): H2 = šikmý brod, ne otvor v síti – cesta osm_track_1/2 kříží tok 4 pod 58° od kolmice, nájezd
+koryta.py byl jen kolmo na tok, cesta stoupala přes val břehu 42 % a za hřbetem byla vidět hladina. Pás brodu je teď i v ose
+cesty (všech 14 brodů ≤ mezí, smysl:brod_v_ose_cesty, chyby.md 411). H1 + D1–D2 hotové podle Hvozdu (chyby.md 412,
+smysl:voda_odraz_hvozd): odraz z panoramy lesa (Poly Haven Niederwihl Forest CC0) do EMISSION × okolí dne, tělo hnědé →
+černozelené, dvě vrstvy vln, pěna u kraje a na peřejích, krytí 0,2 → 0,7 → 0,92. D3 (přízemní mlha) neuděláno. Tablet NEOVERENO.
+Zbývá (stará chyba, nezhoršeno): na okraji jemného pásu BREH u brodů 0,3–0,5 m schod mezi BREH a sítí dlaždic (BREH napříč
+v brodu jen 5 bodů na 4–20 m – chorda nad zářezem); vidět jako tmavý lem vpravo na kontrola_23_11_brod_dira.jpg.

@@ -20,3 +20,12 @@ os.makedirs(K + "/hra/textury", exist_ok=True)
 Image.fromarray((nm * 255).astype(np.uint8)).save(K + "/hra/textury/voda_normal.png")
 p = tile_noise(128, 5); Image.fromarray((p * 255).astype(np.uint8)).save(K + "/hra/textury/voda_pena.png")
 print("voda_tex: voda_normal.png, voda_pena.png")
+# ODRAZ LESA (Hvozd 18. 11., plán D1; Míša 20. 11. H1: „voda není pěkná“): equirect panorama mlhavého smíšeného lesa z Poly Haven
+# (CC0, voda_hra.json vzhled_13_11 panorama_*), zmenšená na 2048×1024 – voda.gdshader z ní čte odraz podle odraženého vektoru
+import json, urllib.request, io
+_VZ = json.load(open(K + "/pravidla/svet/voda_hra.json"))["vzhled_13_11"]
+_pf = K + "/hra/textury/" + _VZ["panorama_soubor"]
+if not os.path.exists(_pf):
+    _r = urllib.request.urlopen(_VZ["panorama_url"], timeout=300).read()
+    Image.open(io.BytesIO(_r)).convert("RGB").resize(tuple(_VZ["panorama_px"]), Image.LANCZOS).save(_pf, quality=90)
+    print("voda_tex: panorama", _pf)

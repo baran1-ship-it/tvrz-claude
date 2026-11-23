@@ -131,11 +131,15 @@ func _start() -> void:
 		mv.set_shader_parameter("normal_tex", load("res://textury/voda_normal.png")); mv.set_shader_parameter("pena_tex", load("res://textury/voda_pena.png"))
 		if FileAccess.file_exists("res://data/voda_hra.json"):   # vzhled vody z dat (voda_hra.json vzhled_13_11: pipeta misa_real, Fresnel, čirost)
 			var vz: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/voda_hra.json")).get("vzhled_13_11", {})
-			for k in ["melka", "hluboka", "odraz", "cirost_m", "hloubka_barvy_m", "fresnel_f0", "drsnost_klid", "drsnost_pena", "specular", "kraj_m", "kryti_min", "pena_zaklad", "pena_kamen_sila", "pena_barva", "obloha", "odraz_sila", "les_vyska", "mezery_sila", "mezery_pocet"]:
+			for k in ["melka", "hluboka", "hloubka_barvy_m", "fresnel_f0", "drsnost_klid", "drsnost_pena", "specular", "kraj_m", "kryti_min", "pena_kamen_sila", "pena_barva", "odraz_sila",
+					"odraz_lod", "panorama_otoceni", "kryti_kraj", "kryti_stred", "hloubka_kryti_m", "vlny_protazeni", "vlny_sklon", "pena_kraj_hloubka_m", "pena_kraj_sila"]:   # Hvozd 20. 11. (voda.gdshader)
 				if not vz.has(k): continue
 				var v = vz[k]
 				mv.set_shader_parameter(k if k == "kraj_m" else k.trim_suffix("_m"), Color(v[0], v[1], v[2]) if v is Array else float(v))
+			if vz.has("panorama_soubor") and ResourceLoader.exists("res://textury/" + String(vz["panorama_soubor"])):   # odraz lesa (Hvozd, plán D1)
+				mv.set_shader_parameter("panorama", load("res://textury/" + String(vz["panorama_soubor"])))
 		mat_voda = mv
+		if den: den.pridej_vodu(mv)   # odraz × barva okolí podle denní doby (v noci nesvítí)
 		for mi in vo.find_children("*", "MeshInstance3D", true, false):
 			var m := mi as MeshInstance3D
 			if m.name.begins_with("KOLIZE"): m.visible = false; continue
@@ -153,6 +157,7 @@ func _start() -> void:
 					if m.name.begins_with("VODA_DALEKO"):
 						m.visibility_range_begin = _jp_dosah
 						var md := mv.duplicate() as ShaderMaterial; md.set_shader_parameter("zdvih_daleko", 0.006); m.set_surface_override_material(i, md)
+						if den: den.pridej_vodu(md)
 					else: m.visibility_range_end = _jp_dosah
 	Denik.zapis("les")
 	var les := Les.new(); les.name = "Les"

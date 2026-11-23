@@ -1,7 +1,8 @@
 // Potoky (blender/voda.py) podle Havrana (shaders/reka.gdshader – Waterways upravený pro Compatibility): bez kopie obrazovky
 // a hloubkové textury. Hloubka vody z příčného profilu (UV.y 0..1 napříč, uprostřed nejhlubší), barva od mělké hnědozelené
 // po tůňovou, krytí podle hloubky a Fresnelu, u břehu do ztracena (barva vrcholu); vlny = normálová mapa unášená po proudu
-// (UV.x = metry po proudu) ve dvou vrstvách, pěna na peřejích (sklon hladiny) a slabě v proudnici. 2 textury, 5 vzorků (5. = 1D šum mezer lesa v odrazu, Hvozd 18. 11.).
+// (UV.x = metry po proudu) ve dvou vrstvách, pěna jen u kraje a na peřejích. Odraz lesa z equirect panoramy (Hvozd, plán D1,
+// Míša 20. 11. H1) do EMISSION × barva okolí podle denní doby (den.gd okoli – v noci nesvítí). 3 textury, 6 vzorků.
 shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, specular_schlick_ggx;
 uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap, repeat_enable;
@@ -19,22 +20,26 @@ uniform float fresnel_f0 = 0.02;      // voda n ≈ 1,33
 uniform float drsnost_klid = 0.08;
 uniform float drsnost_pena = 0.5;
 uniform float specular = 0.12;
-uniform vec3 odraz : source_color = vec3(0.282, 0.302, 0.149);   // barva odrazu lesa (Compatibility nemá SSR – odraz jen oblohy by byl šedá deska)
-// Hvozd 18. 11. (Míšin les v prohlížeči, docs/rozpracovane/voda_hvozd_navod.md): odraz okolí bez textury a bez kopie obrazovky –
-// světový odražený vektor z vlnité normály (Rw.y = |y|), u obzoru pás lesa (barva odraz, mezery mezi kmeny/korunami jako
-// světlejší svislé pruhy podle úhlu atan2(Rw.z, Rw.x) z pena_tex jako 1D šum), nahoře obloha; Fresnel z vlnité normály.
-uniform vec3 obloha : source_color = vec3(0.68, 0.75, 0.84);   // světlá šedomodrá jako mlha (prostredi.json mlha_barva)
-uniform float odraz_sila = 0.8;     // Hvozd refl·0,8
-uniform float les_vyska = 0.35;     // Rw.y, kde pás lesa přechází v oblohu (sin úhlu nad obzorem)
-uniform float mezery_sila = 0.45;   // jak moc prosvítá obloha mezerami mezi kmeny
-uniform float mezery_pocet = 9.0;   // opakování šumu po obvodu (počet skupin kmenů na 360°)
-uniform float kryti_min = 0.0;      // nejmenší krytí hladiny (voda_hra.json vzhled_13_11 kryti_min; Míša 17. 11.: „nemáš vodu v potoce“ – mělká průsvitná hladina se tmavým dnem se četla jako prázdné koryto)
-uniform float kraj_m = 0.08;         // m hloubky, na kterých krytí u čáry vody doroste
+uniform sampler2D panorama : source_color, filter_linear_mipmap, repeat_enable;   // equirect les (voda_hra.json vzhled_13_11 panorama_*)
+// Hvozd (docs/rozpracovane/voda_hvozd_navod.md): R = reflect(−V, N vlnitá), R.y = |R.y|, u = atan(z, x)/2π + 0,5, v = asin(y)/π;
+// Fresnel Schlick z vlnité normály; tělo tmavé (kraj hnědý → střed černozelený), krytí kraj 0,2 → střed 0,92.
+uniform vec3 okoli = vec3(1.0);                 // barva okolí podle denní doby (den.gd pridej_vodu: mlha preset / odpoledne)
+uniform float odraz_sila = 0.8;       // Hvozd refl·0,8
+uniform float odraz_lod = 1.5;        // mip panoramy (rozmazání odrazu; pevný mip = bez švu na atan)
+uniform float panorama_otoceni = 0.0; // posun u (0..1) – natočení lesa v odrazu
+uniform float kryti_kraj = 0.2;       // Hvozd: krytí u kraje
+uniform float kryti_stred = 0.92;     // Hvozd: krytí uprostřed
+uniform float hloubka_kryti = 0.2;    // m hloubky, na kterých krytí doroste z kraje na střed
+uniform float vlny_protazeni = 2.5;   // Hvozd: vlny protažené po proudu ×2,5
+uniform float vlny_sklon = 0.6;       // Hvozd: sklon normály ×0,6
+uniform float pena_kraj_hloubka = 0.06;   // m: pěna u kraje do této hloubky
+uniform float pena_kraj_sila = 0.6;
+uniform float kryti_min = 0.7;      // krytí mělčiny od hloubky kraj_m (voda_hra.json kryti_min; Míša 17. 11.: „nemáš vodu v potoce“)
+uniform float kraj_m = 0.08;         // m hloubky, na kterých krytí u čáry vody doroste z kryti_kraj na kryti_min
 uniform float rychlost = 0.45;        // m/s
 uniform float meritko = 2.2;          // m na dlaždici vln
 uniform float pena_sklon = 0.03;      // sklon hladiny, od kterého je peřej
-uniform float pena_zaklad = 0.0;     // pěna mimo peřeje (13. 11.: 0,08 dělal bílý film)
-uniform float pena_kamen_sila = 0.5;  // pěna za kameny (voda_hra.json vzhled_13_11 pena_kamen_sila; Míša 19. 11.: „voda je bílá“ – čárky za kameny na mělčině bělily potok)
+uniform float pena_kamen_sila = 0.5;  // pěna za kameny (voda_hra.json vzhled_13_11 pena_kamen_sila)
 uniform vec3 pena_barva : source_color = vec3(0.72, 0.74, 0.70);
 varying float sklon;
 varying vec3 wpos;
@@ -53,40 +58,38 @@ void vertex() {
 }
 
 void fragment() {
-	// skutečná hloubka nad terénem (blender/voda.py UV v). Exportér glTF Blenderu ukládá v' = 1 − v a Godot ho nevrací – dřív
-	// se četlo UV.y přímo: všude „hloubka“ 0,6–1 m → krytí stále 0,55 i na kraji = deska s ostrou hranou (Míša 13. 11.)
+	// skutečná hloubka nad terénem (blender/voda.py UV v). Exportér glTF Blenderu ukládá v' = 1 − v a Godot ho nevrací.
 	float h = 1.0 - UV.y;
-	vec2 p = vec2(UV.x, (wpos.x - wpos.z) * 0.7) / meritko;   // po proudu UV.x (m), napříč světové souřadnice
+	// VLNY (Hvozd): jedna normálová mapa čtená dvakrát (měřítko 1 a 2,3, rychlost 1 a 1,7), sečtené 0,55/0,45, protažené po proudu
+	vec2 p = vec2(UV.x / vlny_protazeni, (wpos.x - wpos.z) * 0.7) / meritko;
 	float rv = rychlost * (0.6 + 0.4 * smoothstep(0.0, hloubka, h));   // na mělčině pomaleji
-	vec3 n1 = texture(normal_tex, p + vec2(-TIME * rv / meritko, 0.0)).xyz;
-	vec3 n2 = texture(normal_tex, p * 2.3 + vec2(-TIME * rv * 1.7 / meritko, 0.37)).xyz;
-	NORMAL_MAP = normalize(n1 * 2.0 - 1.0 + (n2 * 2.0 - 1.0) * 0.6) * 0.5 + 0.5;
+	vec3 n1 = texture(normal_tex, p + vec2(-TIME * rv / (meritko * vlny_protazeni), 0.0)).xyz * 2.0 - 1.0;
+	vec3 n2 = texture(normal_tex, p * 2.3 + vec2(-TIME * rv * 1.7 / (meritko * vlny_protazeni), 0.37)).xyz * 2.0 - 1.0;
+	float pk = 1.0 - COLOR.r;   // pěna za kamenem, který láme hladinu (blender/voda.py)
+	vec3 nt = normalize(vec3((n1.xy * 0.55 + n2.xy * 0.45) * (vlny_sklon + pk * 0.5), 1.0));
+	NORMAL_MAP = nt * 0.5 + 0.5; NORMAL_MAP_DEPTH = 1.0;
+	// PĚNA jen u kraje a na peřejích (Míša 20. 11.: bílé šmouhy po celé ploše) a za kameny, které lámou hladinu
 	float sum = texture(pena_tex, p * 1.7 + vec2(-TIME * rv * 1.2 / meritko, 0.0)).r;
 	float sum2 = texture(pena_tex, p * 3.1 + vec2(-TIME * rv * 2.0 / meritko, 0.5)).r;
+	float sf = sum * 0.6 + sum2 * 0.4;
 	float perej = smoothstep(pena_sklon, pena_sklon * 3.0, sklon);
-	float pena = smoothstep(0.55, 0.85, sum * 0.6 + sum2 * 0.4) * (perej * 0.8 + pena_zaklad);
-	float pk = 1.0 - COLOR.r;   // pěna za kamenem, který láme hladinu (blender/voda.py, misa_real_01: světlé čárky a vrásky za kameny)
-	pena = max(pena, pk * pena_kamen_sila * smoothstep(0.25, 0.65, sum * 0.6 + sum2 * 0.4 + pk * 0.15));
-	float nmd = 0.35 + pk * 0.5;
-	NORMAL_MAP_DEPTH = nmd;   // vrásky za kamenem
-	// vlnitá normála ve světě (tečný prostor → pohled → svět) a odražený pohled
-	vec3 nt = normalize(n1 * 2.0 - 1.0 + (n2 * 2.0 - 1.0) * 0.6);
-	vec3 nvw = normalize(NORMAL + (TANGENT * nt.x + BINORMAL * nt.y) * nmd);
+	float u_kraje = 1.0 - smoothstep(0.0, pena_kraj_hloubka, h);
+	float pena = smoothstep(0.55, 0.85, sf) * max(perej * 0.8, u_kraje * pena_kraj_sila);
+	pena = max(pena, pk * pena_kamen_sila * smoothstep(0.25, 0.65, sf + pk * 0.15));
+	// ODRAZ: světová vlnitá normála a odražený pohled → equirect panorama lesa
+	vec3 nvw = normalize(NORMAL + TANGENT * nt.x + BINORMAL * nt.y);
 	vec3 Nw = normalize((INV_VIEW_MATRIX * vec4(nvw, 0.0)).xyz);
 	vec3 Vw = normalize((INV_VIEW_MATRIX * vec4(VIEW, 0.0)).xyz);
 	vec3 Rw = reflect(-Vw, Nw); Rw.y = abs(Rw.y);
-	float uhel = atan(Rw.z, Rw.x) / 6.28318 + 0.5;
-	float mez = texture(pena_tex, vec2(uhel * mezery_pocet, 0.31)).r;   // 1D šum po obvodu (svislé pruhy – kmeny)
-	float nad = smoothstep(0.02, les_vyska, Rw.y);                       // výš mezi korunami víc oblohy
-	vec3 les = mix(odraz, obloha, smoothstep(0.45, 0.8, mez) * mezery_sila * (0.4 + 0.6 * nad));
-	vec3 refl = mix(les, obloha, smoothstep(les_vyska * 0.8, les_vyska * 1.6, Rw.y)) * odraz_sila;
+	vec2 puv = vec2(atan(Rw.z, Rw.x) / 6.28318 + 0.5 + panorama_otoceni, 0.5 - asin(clamp(Rw.y, 0.0, 1.0)) / 3.14159);
+	vec3 refl = textureLod(panorama, puv, odraz_lod).rgb * odraz_sila * okoli;
 	float frw = fresnel_f0 + (1.0 - fresnel_f0) * pow(1.0 - clamp(dot(Vw, Nw), 0.0, 1.0), 5.0);   // Schlick z vlnité normály
-	float nv = clamp(dot(normalize(NORMAL), normalize(VIEW)), 0.0, 1.0);   // geometrická normála (vlny by krytí rozblikaly)
-	float fr = fresnel_f0 + (1.0 - fresnel_f0) * pow(1.0 - nv, 5.0);      // Schlick
-	float pohl = 1.0 - exp(-h / cirost);
-	vec3 col = mix(melka, hluboka, clamp(h / hloubka_barvy, 0.0, 1.0));   // kraj hnědý → střed černozelený lineárně (Hvozd 18. 11.)
-	ALBEDO = mix(mix(col, refl, frw), pena_barva, pena);   // tmavé tělo, šikmo odraz lesa a oblohy (Hvozd)
-	ROUGHNESS = mix(drsnost_klid, drsnost_pena, pena); METALLIC = 0.0; SPECULAR = specular;   // lesk slunce, ne zrcadlo oblohy
-	float kraj = COLOR.a * smoothstep(0.0, kraj_m, h);   // krajní řada a vrcholy nad vodou: 0 (žádná hrana sítě)
-	ALPHA = clamp(max(max(pohl, fr), kryti_min) + pena * 0.25, 0.0, 1.0) * kraj;
+	vec3 col = mix(melka, hluboka, clamp(h / hloubka_barvy, 0.0, 1.0));   // kraj hnědý → střed černozelený lineárně (Hvozd)
+	ALBEDO = mix(col * (1.0 - frw), pena_barva, pena);
+	EMISSION = refl * frw * (1.0 - pena);   // Compatibility nemá SSR – odraz jako vlastní svit, v noci okoli ≈ 0
+	ROUGHNESS = mix(drsnost_klid, drsnost_pena, pena); METALLIC = 0.0; SPECULAR = specular;   // lesk slunce
+	// krytí podle hloubky (Hvozd): na čáře vody kryti_kraj → do kraj_m mělčina kryti_min (Míša 17. a 19. 11.: voda musí být
+	// vidět i na mělčině) → do hloubka_kryti střed kryti_stred; krajní řada a vrcholy nad vodou COLOR.a = 0 (žádná hrana sítě)
+	float kraj = COLOR.a * smoothstep(0.0, 0.005, h);
+	ALPHA = clamp(max(mix(mix(kryti_kraj, kryti_min, smoothstep(0.0, kraj_m, h)), kryti_stred, smoothstep(kraj_m, max(hloubka_kryti, kraj_m + 0.01), h)), frw) + pena * 0.3, 0.0, 1.0) * kraj;
 }

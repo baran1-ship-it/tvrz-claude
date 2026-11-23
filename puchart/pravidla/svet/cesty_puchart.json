@@ -801,7 +801,7 @@
    "delka_m": 58,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.013,
+   "max_pricny": 0.014,
    "max_uprava_m": 0.18
   },
   {
@@ -3730,7 +3730,7 @@
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.013,
-   "max_uprava_m": 0.4
+   "max_uprava_m": 0.6
   },
   {
    "id": "udoli_440_8",
@@ -5799,7 +5799,7 @@
    ],
    "delka_m": 151,
    "max_rez_m": 0.3,
-   "max_nasyp_m": 0.2,
+   "max_nasyp_m": 0.3,
    "max_pricny": 0.02,
    "max_uprava_m": 1.34,
    "pozn_11_11": "údolní cesta Kouteckého potoka – Míša 11. 11. (vojenská mapa 1:25 000: hlavní cesta údolím od S); OSM track grade2 176022562/1447652676/1447652679"
@@ -6249,7 +6249,7 @@
    "delka_m": 431,
    "max_rez_m": 0.4,
    "max_nasyp_m": 0.3,
-   "max_pricny": 0.029,
+   "max_pricny": 0.031,
    "max_uprava_m": 1.37,
    "pozn_11_11": "údolní cesta Kouteckého potoka – Míša 11. 11. (vojenská mapa 1:25 000: hlavní cesta údolím od S); OSM track grade2 176022562/1447652676/1447652679"
   },
@@ -7206,7 +7206,7 @@
    "delka_m": 63,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.072,
+   "max_pricny": 0.112,
    "max_uprava_m": 0.24
   },
   {
@@ -15279,7 +15279,7 @@
    "delka_m": 28,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.306,
+   "max_pricny": 0.305,
    "max_uprava_m": 0.3
   },
   {
@@ -15348,7 +15348,7 @@
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.247,
-   "max_uprava_m": 0.19
+   "max_uprava_m": 0.21
   },
   {
    "id": "osm_track_30",
@@ -18319,7 +18319,7 @@
    "delka_m": 583,
    "max_rez_m": 0.3,
    "max_nasyp_m": 0.5,
-   "max_pricny": 0.037,
+   "max_pricny": 0.038,
    "max_uprava_m": 1.57,
    "pozn_11_11": "údolní cesta Kouteckého potoka – Míša 11. 11. (vojenská mapa 1:25 000: hlavní cesta údolím od S); OSM track grade2 176022562/1447652676/1447652679"
   },
@@ -18445,7 +18445,7 @@
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.038,
-   "max_uprava_m": 0.86,
+   "max_uprava_m": 1.54,
    "pozn_11_11": "údolní cesta Kouteckého potoka – Míša 11. 11. (vojenská mapa 1:25 000: hlavní cesta údolím od S); OSM track grade2 176022562/1447652676/1447652679"
   },
   {
@@ -18520,8 +18520,8 @@
    ],
    "delka_m": 56,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1,
-   "max_pricny": 0.075,
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.081,
    "max_uprava_m": 0.23
   },
   {
@@ -18889,7 +18889,7 @@
    "delka_m": 63,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.072,
+   "max_pricny": 0.112,
    "max_uprava_m": 0.09
   },
   {
@@ -22161,7 +22161,7 @@
    "delka_m": 58,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.013,
+   "max_pricny": 0.014,
    "max_uprava_m": 0.18,
    "podle_terenu": true
   },
@@ -22218,7 +22218,7 @@
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.013,
-   "max_uprava_m": 0.4,
+   "max_uprava_m": 0.6,
    "podle_terenu": true
   },
   "udoli_440_8": {
@@ -22248,7 +22248,7 @@
   "osm_track_1": {
    "delka_m": 151,
    "max_rez_m": 0.3,
-   "max_nasyp_m": 0.2,
+   "max_nasyp_m": 0.3,
    "max_pricny": 0.02,
    "max_uprava_m": 1.34,
    "podle_terenu": true
@@ -22257,7 +22257,7 @@
    "delka_m": 431,
    "max_rez_m": 0.4,
    "max_nasyp_m": 0.3,
-   "max_pricny": 0.029,
+   "max_pricny": 0.031,
    "max_uprava_m": 1.37,
    "podle_terenu": true
   },
@@ -22313,7 +22313,7 @@
    "delka_m": 63,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.072,
+   "max_pricny": 0.112,
    "max_uprava_m": 0.24,
    "podle_terenu": true
   },
@@ -22465,7 +22465,7 @@
    "delka_m": 28,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.306,
+   "max_pricny": 0.305,
    "max_uprava_m": 0.3,
    "podle_terenu": true
   },
@@ -22474,7 +22474,7 @@
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.247,
-   "max_uprava_m": 0.19,
+   "max_uprava_m": 0.21,
    "podle_terenu": true
   },
   "osm_track_30": {
@@ -22505,7 +22505,7 @@
    "delka_m": 583,
    "max_rez_m": 0.3,
    "max_nasyp_m": 0.5,
-   "max_pricny": 0.037,
+   "max_pricny": 0.038,
    "max_uprava_m": 1.57,
    "podle_terenu": true
   },
@@ -22514,14 +22514,14 @@
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
    "max_pricny": 0.038,
-   "max_uprava_m": 0.86,
+   "max_uprava_m": 1.54,
    "podle_terenu": true
   },
   "zluta_0": {
    "delka_m": 56,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1,
-   "max_pricny": 0.075,
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.081,
    "max_uprava_m": 0.23,
    "podle_terenu": true
   },
@@ -22537,7 +22537,7 @@
    "delka_m": 63,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.072,
+   "max_pricny": 0.112,
    "max_uprava_m": 0.09,
    "podle_terenu": true
   },

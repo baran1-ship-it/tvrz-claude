@@ -1620,6 +1620,49 @@ _pp = json.load(open(K + "/hra/data/pata_pas.json"))["bunky"]
 _vnitr = sum(1 for v in _pp.values() for q in v if _NV.contains(_PtT(q[0], q[1])))
 TEST("pata_pas_mimo_nadvori", _vnitr == 0, "trsů pásu u paty uvnitř hradeb: %d" % _vnitr)
 
+# 411 (Míša 20. 11., docs/screens/misa_20_11_dira.jpg x 127 z 30 směr 4°: „díra“ v ploše cesty u brodu, skrz ni šedá hladina):
+# cesta kříží tok šikmo (58° od kolmice), nájezd brodu jen kolmo na tok ji minul – cesta stoupala přes val břehu 42 % a za hřbetem
+# byla vidět hladina. Profil kolize v OSE CESTY přes každý brod (toky_hladina.json brody_tvar smer_cesty, nastroje/koryta.py)
+# v dosahu nájezdu: sklon na 1 m nejvýš brod_sklon_max (vozová) / brod_sklon_max_pesi (pěší) – platí pro všechny brody
+_c411 = []; _nb411 = 0
+for _k411, _t411 in TH.items():
+    for _bt in _t411.get("brody_tvar", []):
+        _nb411 += 1
+        if "smer_cesty" not in _bt: _c411.append("%s (%.0f, %.0f) bez smer_cesty" % (_k411, _bt["stred"][0], _bt["stred"][1])); continue
+        _c0 = np.array(_bt["stred"], float); _tg = np.array(_bt["tecna"], float); _nb = np.array([-_tg[1], _tg[0]]); _rd = np.array(_bt["smer_cesty"], float)
+        _cv = abs(float(_rd @ _nb)); _L = min(25.0, (max(_bt["najezd_konec_m"]) + 2.0) / max(_cv, 0.2))
+        _tl = np.arange(-_L, _L + 0.01, 1.0); _y = ter(_c0[0] + _tl * _rd[0], _c0[1] + _tl * _rd[1]); _mx = float(np.abs(np.diff(_y)).max())
+        if _mx > KC["voda"].get("brod_sklon_max" if _bt.get("vozovy", True) else "brod_sklon_max_pesi", 0.3):
+            _c411.append("%s (%.0f, %.0f) %.0f°: %.0f %%" % (_k411, _c0[0], _c0[1], math.degrees(math.acos(min(1.0, _cv))), 100 * _mx))
+TEST("brod_v_ose_cesty", not _c411 and _nb411 > 0, "; ".join(_c411[:6]) if _c411 else "%d brodů: nájezd v ose cesty do mezí (i šikmé brody)" % _nb411)
+# 412 (Míša 20. 11., docs/screens/misa_20_11_voda.jpg x 136,9 z 155,9: „voda není pěkná a měla by být“ – tmavá plochá, bílé šmouhy,
+# bez odrazu): voda podle Hvozdu (docs/rozpracovane/voda_hvozd_navod.md) – odraz z equirect panoramy lesa (CC0, VRAM/ETC2) podle
+# odraženého vektoru + Fresnel do EMISSION × barva okolí podle denní doby, dvě vrstvy vln, pěna jen u kraje a na peřejích,
+# krytí kraj 0,2 → střed 0,92; ≤ 13 vzorkovačů, bez kopie obrazovky
+_c412 = []; _vz412 = json.load(open(K + "/pravidla/svet/voda_hra.json"))["vzhled_13_11"]; _vh412 = json.load(open(D + "voda_hra.json"))["vzhled_13_11"]
+_sh412 = open(K + "/hra/shaders/voda.gdshader", encoding="utf-8").read(); _hl412 = open(K + "/hra/scripts/hlavni.gd", encoding="utf-8").read()
+_den412 = open(K + "/hra/scripts/den.gd", encoding="utf-8").read()
+if len(re.findall(r"uniform\s+sampler2D", _sh412)) > 13 or re.search(r"screen_texture|hint_screen_texture|SCREEN_TEXTURE|depth_texture", _sh412): _c412.append("shader: vzorkovače > 13 nebo kopie obrazovky")
+if not re.search(r"uniform\s+sampler2D\s+panorama", _sh412) or not re.search(r"reflect\(", _sh412) or not re.search(r"asin\(", _sh412): _c412.append("shader bez odrazu z panoramy (reflect, equirect)")
+if not re.search(r"EMISSION\s*=.*refl", _sh412) or not re.search(r"refl\s*=.*okoli", _sh412): _c412.append("odraz není v EMISSION × okoli")
+if "pena_zaklad" in _sh412 or "u_kraje" not in _sh412: _c412.append("pěna mimo kraj a peřeje")
+if len(re.findall(r"texture\(normal_tex", _sh412)) < 2: _c412.append("méně než dvě vrstvy vln")
+for _k412 in ("kryti_kraj", "kryti_stred", "panorama_soubor", "odraz_sila"):
+    if _k412 not in _vz412: _c412.append("voda_hra.json bez %s" % _k412)
+    elif _vz412.get(_k412) != _vh412.get(_k412): _c412.append("hra/data/voda_hra.json %s ≠ pravidla" % _k412)
+if abs(float(_vz412.get("kryti_kraj", 0)) - 0.2) > 0.05 or abs(float(_vz412.get("kryti_stred", 0)) - 0.92) > 0.05: _c412.append("krytí kraj/střed není Hvozd 0,2/0,92")
+_pf412 = K + "/hra/textury/" + str(_vz412.get("panorama_soubor", "?"))
+if not os.path.exists(_pf412): _c412.append("chybí panorama %s" % _pf412)
+else:
+    _im412 = Image.open(_pf412)
+    if _im412.size != tuple(_vz412.get("panorama_px", [2048, 1024])) or _im412.size[0] != 2 * _im412.size[1]: _c412.append("panorama %s není equirect %s" % (_im412.size, _vz412.get("panorama_px")))
+    _imp412 = open(_pf412 + ".import").read() if os.path.exists(_pf412 + ".import") else ""
+    if "compress/mode=2" not in _imp412 or "etc2" not in _imp412: _c412.append("panorama není VRAM/ETC2")
+if "CC0" not in str(_vz412.get("panorama_licence", "")) or not os.path.exists(K + "/CREDITS.md") or "niederwihl" not in open(K + "/CREDITS.md", encoding="utf-8").read().lower(): _c412.append("panorama bez licence / CREDITS.md")
+if '"panorama"' not in _hl412 or "pridej_vodu" not in _hl412: _c412.append("hlavni.gd nepředá panoramu / okolí")
+if "func pridej_vodu" not in _den412 or '"okoli"' not in _den412: _c412.append("den.gd nemění okoli vody podle denní doby")
+TEST("voda_odraz_hvozd", not _c412, "; ".join(_c412) if _c412 else "odraz panoramy %s (EMISSION × okolí dne), krytí %.2f → %.2f, %d vzorkovačů" % (_vz412.get("panorama_soubor"), _vz412["kryti_kraj"], _vz412["kryti_stred"], len(re.findall(r"uniform\s+sampler2D", _sh412))))
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

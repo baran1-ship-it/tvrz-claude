@@ -13,6 +13,9 @@ TH = json.load(open(os.path.join(K, "hra/data/toky_hladina.json")))["toky"]
 # dvojice konců cest), pokud už je – krok běží PŘED voda.py (hladinu lámou kameny: voda.py z nich peče pěnu, návrh krok 4)
 TH0 = json.load(open(os.path.join(K, "hra/data/toky_hladina.json")))["toky"]; RZ0 = VH["koryto"].get("brod", {}).get("rozliti_sirky", 1.0)
 BR = [{"stred": b_["stred"], "smer": [-b_["tecna"][1], b_["tecna"][0]], "delka": t_["sirka"] * RZ0 + 4.0} for t_ in TH0.values() for b_ in t_.get("brody_tvar", [])]
+# šikmý brod (chyby.md 20. 11.): pruh volný i v ose cesty – délka napříč vodou po šikmé ose delší o 1/cos úhlu
+BR += [{"stred": b_["stred"], "smer": b_["smer_cesty"], "delka": (t_["sirka"] * RZ0 + 4.0) / max(abs(b_["smer_cesty"][0] * -b_["tecna"][1] + b_["smer_cesty"][1] * b_["tecna"][0]), 0.3)}
+       for t_ in TH0.values() for b_ in t_.get("brody_tvar", []) if "smer_cesty" in b_]
 if os.path.exists(os.path.join(K, "hra/data/brody.json")): BR += json.load(open(os.path.join(K, "hra/data/brody.json")))["brody"]
 # výška tvarů kamenů (hra/modely/hrady/kameny_koryta.glb, blender/kameny_koryta.py: půdorys 1 m, výška podle skenu) – hřbet u hladiny
 import struct as _st
