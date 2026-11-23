@@ -479,3 +479,17 @@ Výkonově (rozbor_gpu_15_11.md): les s podrostem místo trávy = méně průhle
   okraj lesa východně od vsi má plášť řídký (kruh 140 m kolem staré návsi v `_lesni_plast` odstraněn – po něm jen pár keřů:
   řada stromů tam je nejspíš stromořadí, ne okraj masky `_les`); světle zelené čáry na hlíně dvorů a návsi (hrana masky).
 - Focení: dvě foto Godot najednou = OOM; fotit přes `beh.sh <jm> cmd` s výhradním zámkem.
+
+## 23. 11. – sady mezi dvory, clona vjezdu, hmota lesa (krok 5)
+- **Míša 18. 11. ř. 6** („další část obce je prázdná“, snímek 05 z (411, 784) na JV): nové záznamy `lokace.json kompozice.clony`
+  typu sad – `ves_sad_krcma` (mezi ohybem ulice a krčmou), `ves_sad_3` (krčma × usedlost 3), `ves_sad_2_5` (za humny 2 a 5),
+  `ves_sad_5_6` (mezi 5/6 a polem za vsí). Předlohy bejcek_08, kcd_sada2_05, bejcek_16/18. Polohy navrženy mimo Godot
+  nástrojem (ve scratchpadu, postup: výpis testu `build/clona_vsi.json` = koruny, cíle, terén po 2 m; kusy z `kraj.clony`;
+  paprsky jako test) – pro stávající koruny výpis sedí přesně (42 % = 42 %), nové kusy model obalu ±20 %.
+- **Příčiny 42 %:** (1) test nepočítal žádný strom – obal sítě jen z buněk dat do 100 m (`_rost_uzly`), stromy jsou uzly přímo
+  pod kořenem rostlin; (2) pravidlo `rozmisteni` bralo kus clony rozptýlený za okraj pásu jako ves (strop 3) a proředilo ho
+  → `kompozice.clony_rozptyl` (dřív čísla v `kraj.clony`) a `svet.scena_bod` s okrajem pás + rozptyl × rozestup.
+- Výsledek (běh clona2, export 09:53): clona_vsi 59/64 = 92 %, zasazeni, houstina_volno, test smyslu OK; snímky `build/sceny23/`.
+- **Hmota lesa krok 5** (vzhled bez nové sítě): `les_podrost.json dalka.hmota` – impostory stromů od `od_m` 250 do `do_m` 700 m
+  tmavnou/modrají (`barva`) a zvětší korunu (`zvetseni` 1,35) → sousední koruny splývají. Kalibrace proti ref_kcd2_ves_shora
+  a měření (krok 0) ZBÝVÁ; krok 4 (síť z Blenderu) nezačat.

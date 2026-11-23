@@ -1754,3 +1754,16 @@ Hotovo v kódu a datech (testy u každého):
   → `HOTOVO_TEST` s 0 výsledky = CHYBA ve všech 4 sadách a `hlidaci_skupiny.py` bere SCRIPT ERROR mezi testy jako CHYBA;
   otisk skupin zahrnuje `modely/**` (`spolecna_data`, md5 podle velikosti a času – 1. výpočet 11 s, pak 0,2 s);
   `rychle.sh` razítko skriptů ze začátku běhu.
+
+## Scény 23. 11.: sady vsi, clona_vsi, malý tok (B10, D17, D19, B11)
+- **Test bez stromů:** `clona_vsi` bral obal sítě jen z `_rost_uzly` (druhy do 100 m s meta `tok`); stromy jsou MultiMeshe
+  `klic_bx_bz` přímo pod `_rost_root` → každý strom přeskočen bez varování. Kdo píše test nad rostlinami, musí projít obojí
+  a ověřit počet (výpis „korun N“ – po opravě 68 765 místo 42 779).
+- **Kus clony na okraji pásu:** `kraj.clony` rozptyluje kusy o `kompozice.clony_rozptyl` × rozestup – scéna clona v `svet.scena_bod`
+  musí mít stejný okraj, jinak je `rozmisteni` proředí jako ves.
+- **Návrh clon mimo Godot:** test `clona_vsi` zapisuje `build/clona_vsi.json` (koruny v obdélníku cílů, cíle, terén po 2 m) –
+  nové kusy z `kraj.clony` (Blender python) a paprsky jako test, bez exportu a Godotu (sekundy).
+- **Sdílený `random.Random(1515)`** v `veg.py` pro clony, meze a břeh: nová clona posune náhodu mezí a břehu (test smyslu
+  zatím OK, 1 081 kusů, 0 chyb) – PODEZŘENÍ na budoucí plané chyby `houstina_voda` (viz 17. 11.).
+- Malý tok (`voda.json vzhled_hvozd.maly_tok`) zatím nečitelný jako voda – další krok sonda `bod` na ose odtoku, ne čísla.
+- `beh.sh` hlásí rc 1 i při TEST SVET PROSEL kvůli `SCRIPT ERROR get_render_info` v `diag.gd:881` při ukončení (cizí, nerozebráno).
