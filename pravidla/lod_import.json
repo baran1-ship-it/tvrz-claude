@@ -1,0 +1,35 @@
+{
+ "popis": "Plán 18. 11. C14 (rešerše 17. 11. bod 3, Halcyon flora.mjs): citlivé sítě BEZ automatických LOD importu Godotu (generate_lods = meshoptimizer). Automatické LOD už 3× rozbilo data: dům vsi zmizel (střední stupeň, šindele rozpuštěné), rybník bez vody (hladina = obrys s barvou kraje), létající hřiby (terén zjednodušený pod kolizí); dál plutky ohrad a potrhané oděvy. Citlivá síť = data ve vrcholech (hloubka v barvě), shoda s kolizí/_vyska, nebo je sama LOD stupněm z Blenderu. Její LOD je jen vlastní: stupně z Blenderu (_Stredni, _Daleko, lod1, modely.json dily_lod / ves_domy_lod / predmety_lod) nebo dlaždice terénu (teren_dlazdice.json, chyba omezená, okraj zamčený). Nástroj tools/lod_import.py zapis|kontrola píše nastavení do .import (celý soubor meshes/generate_lods=false, nebo jen vybrané sítě _subresources.meshes.<scéna>_<síť>.generate/lods = vypnuto); krok exportu před importem, kontrola v tools/rychle.sh. Ověření ve hře: tools/lod_import_over.gd (počet LOD úrovní importovaných citlivých sítí = 0). Mimo export (gitignorované modely/) platí i pro nové soubory podle vzoru.",
+ "godot_vypnuto": 2,
+ "_godot_vypnuto": "hodnota volby generate/lods u jedné sítě v Godotu 4.4 (resource_importer_scene.cpp: 0 Default, 1 Enable, 2 Disable)",
+ "skupiny": [
+  {
+   "id": "hladiny",
+   "soubory": ["modely/tvrz.glb", "modely/ruiny_ves/ves_studna.glb", "modely/predmety/studanka.glb"],
+   "materialy": ["voda_*"],
+   "duvod": "Míša 17. 11. ř. 1 rybník bez vody: hladina nese hloubku v barvě vrcholu (kraj 0 = průhledný), rovná plocha má chybu zjednodušení 0 → nejhrubší stupeň i zblízka. Hra navíc svet._vody_bez_lod pro vodu přiřazenou až ve hře (kádě, koryta)."
+  },
+  {
+   "id": "teren",
+   "soubory": ["modely/tvrz.glb"],
+   "materialy": ["zem"],
+   "site": ["Teren*", "Nadvori*"],
+   "duvod": "Míša 16. 11. létající hřiby: zjednodušený terén pod kolizí a _vyska. Vlastní LOD = dlaždice terénu (teren_dlazdice.json lod, chyba_m, LOCK_BORDER); modely.json teren_lod_bias tím ztrácí smysl (zůstává jen pro hru bez nového importu)."
+  },
+  {
+   "id": "stupne_z_blenderu",
+   "soubory": ["modely/ves/domy_stredni.glb", "modely/predmety/*_stredni.glb"],
+   "duvod": "Míša 2. 11. a 0.997 mizející dům (test lod_mezera), 18. 11. stodola z dálky: střední stupeň JE vlastní LOD z Blenderu (ves_domy_lod.py, lod_barvy.py), automatické LOD nad ním rozpustilo šindele. Dosud lod_bias 50 v kódu (modely.json ves_domy_lod/predmety_lod)."
+  },
+  {
+   "id": "odevy_postav",
+   "soubory": ["modely/postavy/npc/*_cela.gltf", "modely/postavy/hrdina/*.gltf"],
+   "duvod": "Míša 15. 11. potrhané oblečení: decimace může rozevřít svařené švy oděvu (tools/postavy_q/clothes.py svy_odevu); postava ~7 tis. troj. Dosud postavy_vzhled.json odev_lod_bias."
+  },
+  {
+   "id": "pruty",
+   "soubory": ["modely/predmety/plutek.glb", "modely/predmety/plutek_vetve.glb"],
+   "duvod": "Míša 0.992 „za rychtou není plot“: tenké pruty plůtku od ~12 m zmizely. Dosud zvirata.json plutek_lod_bias."
+  }
+ ]
+}
