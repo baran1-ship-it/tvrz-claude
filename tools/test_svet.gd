@@ -3188,6 +3188,36 @@ func _clona_vsi() -> void:
 						kryto += 1
 						po_cilech[ci[0]] = int(po_cilech.get(ci[0], 0)) + 1
 	var podil := float(kryto) / maxf(celkem, 1)
+	# vypis pro navrh clon mimo Godot (build/clona_vsi.json): cile, paprsky s vysledkem, koruny v obdelniku cilu
+	var lo := Vector2(INF, INF)
+	var hi := -lo
+	for od: Array in cv["odkud"]:
+		lo = lo.min(Vector2(float(od[0]), float(od[1])))
+		hi = hi.max(Vector2(float(od[0]), float(od[1])))
+	for ci: Array in cile:
+		lo = lo.min(ci[1])
+		hi = hi.max(ci[1])
+	var kor_v: Array = []
+	for k: Vector2i in koruny:
+		for e: Array in koruny[k]:
+			var c3: Vector2 = e[0]
+			if c3.x >= lo.x and c3.y >= lo.y and c3.x <= hi.x and c3.y <= hi.y:
+				kor_v.append([c3.x, c3.y, e[1], e[2], e[3]])
+	var cile_v: Array = []
+	for ci: Array in cile:
+		var c4: Vector2 = ci[1]
+		cile_v.append([ci[0], c4.x, c4.y, sv._teren_y(c4.x, c4.y)])
+	var odk_v: Array = []
+	for od: Array in cv["odkud"]:
+		odk_v.append([float(od[0]), float(od[1]), sv._teren_y(float(od[0]), float(od[1]))])
+	var obal_v := {}
+	for key: String in obal:
+		var ab2: AABB = obal[key]
+		obal_v[key] = [ab2.position.x, ab2.position.y, ab2.position.z, ab2.size.x, ab2.size.y, ab2.size.z]
+	var fj := FileAccess.open("res://build/clona_vsi.json", FileAccess.WRITE)
+	if fj:
+		fj.store_string(JSON.stringify({"cile": cile_v, "odkud": odk_v, "koruny": kor_v, "obal": obal_v, "podil": podil}))
+		fj.close()
 	_vysledek("clona_vsi", podil >= float(cv["kryti_min"]), "z vjezdu zakryto vegetaci %d / %d paprsku (%.0f %%, min %.0f %%), korun %d, po cilech %s" % [kryto, celkem, podil * 100.0, float(cv["kryti_min"]) * 100.0, nkor, str(po_cilech)])
 
 

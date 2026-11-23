@@ -64,6 +64,10 @@
  "koruny": {
   "_popis": "10. 11. (Míša: trvale brzdí jen stromy; postup Puchartu 12ad855, les p95 −56 % na PC): jadro = listy stromu s těžištěm uvnitř elipsoidu obalu listí × jadro bez alfy (listi_jadro.gdshader, early-Z); stin_proxy = stín slunce vrhá elipsoid koruny × stin_obal + válec kmene (SHADOWS_ONLY do stin_dosah_m), listí stín nevrhá; kmen_r_podil = poloměr kmene / výška stromu (min kmen_r_min_m).",
   "jadro": 0.6,
+  "jadro_druhy": {
+   "briza": 0.0
+  },
+  "_jadro_druhy": "23. 11. (plan_18_11 bod 3, snímek build/m18/b8_stodola_12.png: v koruně břízy u studny tmavé obdélníkové karty): bříza má řídkou převislou korunu - karty uvnitř elipsoidu jsou v listi_jadro.gdshader bez alfy (průhledná místa = tmavý průměr listí), mezerami mezi převislými větvemi je vidět celá karta jako tmavý obdélník. Jádro (early-Z) dává smysl jen u husté koruny, kde ho zakryje obrys. Klíč = _strom_tvar druhu (briza_0..3 → briza), hodnota = k pro druh (0 = bez jádra, celé listí s alfou). Návrat: smazat klíč.",
   "stin_proxy": true,
   "stin_obal": 0.85,
   "stin_dosah_m": 40.0,

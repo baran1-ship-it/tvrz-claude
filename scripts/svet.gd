@@ -15623,7 +15623,10 @@ func _plants(parent: Node3D, quality: int) -> void:
 		if not kind.contains("_daleko") and (_strom_tvar(kind) != "" or skupina(kind) == "strom"):
 			if not _koruny_cache.has(kind):
 				var kc: Dictionary = Pravidla.cti("les_podrost", "koruny")
-				var mj: Mesh = _jadro_koruny(mesh, float(kc["jadro"])) if float(kc["jadro"]) > 0.0 else mesh
+				# 23. 11. (plan_18_11 bod 3, bříza ve vsi: tmavé obdélníky v koruně): řídká převislá koruna - karty jádra
+				# bez alfy jsou vidět mezerami jako celé obdélníky -> druh s vlastním k v jadro_druhy (0 = bez jádra)
+				var kj := float((kc.get("jadro_druhy", {}) as Dictionary).get(_strom_tvar(kind), kc["jadro"]))
+				var mj: Mesh = _jadro_koruny(mesh, kj) if kj > 0.0 else mesh
 				_koruny_cache[kind] = [mj, _stin_koruny(mj, kc) if bool(kc["stin_proxy"]) else null]
 			mesh = _koruny_cache[kind][0]
 			stin_koruny = _koruny_cache[kind][1]
