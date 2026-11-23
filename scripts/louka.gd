@@ -1233,7 +1233,9 @@ func rozsev_vse() -> void:
 		z1 = maxf(z1, float(g["z0"]) + float(g["k"]) * int(g["nz"]))
 	var t0 := Time.get_ticks_msec()
 	var out := PackedByteArray()
+	var out_p := PackedByteArray()            # kryti_povrch.bin: stejny format, jen pevny povrch (plan_18_11 B7)
 	var bunek := 0
+	var bunek_p := 0
 	var n := int(BUNKA / KRYTI_K)
 	for cz in range(floori(z0 / BUNKA), ceili(z1 / BUNKA)):
 		for cx in range(floori(x0 / BUNKA), ceili(x1 / BUNKA)):
@@ -1247,16 +1249,26 @@ func rozsev_vse() -> void:
 			e.resize(4 + n * n / 8)
 			e.encode_s16(0, cx)
 			e.encode_s16(2, cz)
+			var ep := e.duplicate()
 			for i in n * n:
 				if kr[i] != 0:
 					e[4 + (i >> 3)] |= 1 << (i & 7)
+				if kr[i] == 3:
+					ep[4 + (i >> 3)] |= 1 << (i & 7)
 			out.append_array(e)
 			bunek += 1
+			if kr.count(3) > 0:
+				out_p.append_array(ep)
+				bunek_p += 1
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(ROZSEV))
 	var f := FileAccess.open(ROZSEV + "kryti.bin", FileAccess.WRITE)
 	f.store_buffer(out)
 	f.close()
+	var fp := FileAccess.open(ROZSEV + "kryti_povrch.bin", FileAccess.WRITE)
+	fp.store_buffer(out_p)
+	fp.close()
 	print("ROZSEV kryti: %d bunek se zakrytim, %.1f kB, %.0f s" % [bunek, out.size() / 1024.0, (Time.get_ticks_msec() - t0) / 1000.0])
+	print("ROZSEV kryti povrch: %d bunek s pevnym povrchem" % bunek_p)
 	# otisk exportu, ze ktereho kryti vzniklo (Misa 17. 11. r. 2: kryti z 15. 11. po exportu 16. 11. = trava skrz novou
 	# dlazbu prelivu) - test kryti_otisk
 	var ot = JSON.parse_string(FileAccess.get_file_as_string("res://build/export_otisk.json")) if FileAccess.file_exists("res://build/export_otisk.json") else null
@@ -1381,7 +1393,7 @@ func _kryti(c: Vector2i) -> PackedByteArray:
 						continue
 					paprsku += 1
 					if _zasah(space, q, c.x * BUNKA + (i + 0.5) * KRYTI_K, c.y * BUNKA + (j + 0.5) * KRYTI_K):
-						out[j * n + i] = 1
+						out[j * n + i] = 3 if _posl_povrch else 1          # 3 = pevny povrch (dlazba), 1 = pod strechou/stolem
 					else:
 						out[j * n + i] = 2      # overeno volne
 	for k in out.size():
@@ -1393,7 +1405,11 @@ func _kryti(c: Vector2i) -> PackedByteArray:
 	return out
 
 
+var _posl_povrch := false              # posledni _zasah: prvni zasah je pevny povrch u zeme (pasma predmet kryti_povrch_do_m)
+
+
 func _zasah(space: PhysicsDirectSpaceState3D, q: PhysicsRayQueryParameters3D, px: float, pz: float) -> bool:
+	_posl_povrch = false
 	var y := _vzorek(px, pz).y
 	q.from = Vector3(px, y + 9.0, pz)
 	q.to = Vector3(px, y - 2.0, pz)
@@ -1425,6 +1441,18 @@ func _zasah(space: PhysicsDirectSpaceState3D, q: PhysicsRayQueryParameters3D, px
 		# teren o 0,5 m niz nez mrizka 2 m (hrana skaly, prevys, zarez): trs by levitoval (Misa 0.56b ve skalach);
 		# mensi rozdil na svahu je bezny (mrizka vs. trojuhelniky) a trs ho skryje
 		return (h["position"] as Vector3).y < y - 0.5
+	# Misa 17. 11. r. 2 / plan_18_11 B7 (stebla mezi kameny dlazby prelivu): zasah tesne nad terenem pod nim = pevny
+	# povrch (dlazba, prah, deska) - tam nic neroste; vys (stul, vuz, strecha) dal nizky vejir. Teren pod zasahem:
+	# druhy paprsek s vyrazenym telesem (vyska louky _vzorek je mrizka 2 m, u zapustene dlazby o desetiny vedle)
+	var hy := (h["position"] as Vector3).y
+	var ex1 := q.exclude
+	var ex2 := ex1.duplicate()
+	ex2.append(h["rid"])
+	q.exclude = ex2
+	var h2 := space.intersect_ray(q)
+	q.exclude = ex1
+	var ty := (h2["position"] as Vector3).y if not h2.is_empty() else y
+	_posl_povrch = hy - ty < float(main.svet.pasma()["predmet"]["kryti_povrch_do_m"])
 	return true
 
 
@@ -1745,6 +1773,8 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					# povrchu cesty (teren pod siti cesty je zapusteny)
 				elif px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4:
 					continue                          # mistnosti tvrze (strecha) - podlaha muze byt u terenu
+				elif _kryti_hodnota(kr, c, px, pz) == 3:
+					continue                          # pevny povrch (dlazba prelivu, prah): nic, ani vejir (plan_18_11 B7)
 				else:
 					_zaznam(zaz[4], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 4, rng.randi() % 256)
 					continue

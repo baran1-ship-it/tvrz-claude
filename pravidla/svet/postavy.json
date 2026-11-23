@@ -141,7 +141,10 @@
    "nelze_platnost_s": 90.0
   },
   "zmena_bloku_snimek": 1,
-  "_zmena_bloku_snimek": "14. 11.: v jedné hodině (6:00, 18:00) mění činnost až 30 postav v jednom snímku, každá 1–10 ms (místo, cesta) = zásek ~20 ms; nejvýš 4 změny za snímek, zbytek další snímky (test lide_zasek) | 14. 11. 4 → 2: test 9,5 a 13,4 ms (rozptyl na hraně 12 ms); rešerše (docs/rozpracovane/reserse_frekvence_npc.md): 1–2 nové činnosti za snímek | 14. 11. 2 → 1: sada 14,5 a 13,1 ms (36 postav = 36 snímků ≈ 0,6 s zpoždění, nevadí)"
+  "_zmena_bloku_snimek": "14. 11.: v jedné hodině (6:00, 18:00) mění činnost až 30 postav v jednom snímku, každá 1–10 ms (místo, cesta) = zásek ~20 ms; nejvýš 4 změny za snímek, zbytek další snímky (test lide_zasek) | 14. 11. 4 → 2: test 9,5 a 13,4 ms (rozptyl na hraně 12 ms); rešerše (docs/rozpracovane/reserse_frekvence_npc.md): 1–2 nové činnosti za snímek | 14. 11. 2 → 1: sada 14,5 a 13,1 ms (36 postav = 36 snímků ≈ 0,6 s zpoždění, nevadí)",
+  "ostrovy": [],
+  "ostrov_r_m": 10.0,
+  "_ostrovy": "plan_18_11 C12 (misa_17_11 ř. 16): síť chůze má být jedna část; povolený ostrov = {bod [x, z], proc} – část, která má bod do ostrov_r_m od bodu, je záměrně oddělená (důvod povinný). Test sit_chuze."
  },
  "mista": {
   "naves_1": {
@@ -179,7 +182,13 @@
    "poradi": 0,
    "strana": "dlouha",
    "_p": "Misa 14. 11. „kamenik tluce kladivem na ceste“ (-21, 903): drive pevne (126,5, 931) 2 m od paty steny v leseni - mrizka chuze cestu nenasla (log 4x), nouze ho nechala pracovat, kde stal. Ted u spalku s kovadlinou pod 1. pristreskem (svet._lom_vybaveni, venku = mistnost \"\").",
-   "_lom_otevreno": "17. 11. OTEVŘENO (misa_16_11_chyby ř. 11): kusy kovadlina_spalek se řadí podle x → bere se kovadlina kovárny TVRZE (-15,2; 11), ne lomu (132,1; 927,2). U lomové kovadliny (y −1,01, pod přístřeškem) hra nenašla žádnou průchozí buňku do 2 m – rozbor (výška země pod přístřeškem × výška kusu) po vydání; podpora výběru `blizko` v lide.gd je připravena."
+   "_lom_otevreno": "17. 11. OTEVŘENO (misa_16_11_chyby ř. 11): kusy kovadlina_spalek se řadí podle x → bere se kovadlina kovárny TVRZE (-15,2; 11), ne lomu (132,1; 927,2). U lomové kovadliny (y −1,01, pod přístřeškem) hra nenašla žádnou průchozí buňku do 2 m – rozbor (výška země pod přístřeškem × výška kusu) po vydání; podpora výběru `blizko` v lide.gd je připravena.",
+   "blizko": [
+    132.1,
+    927.2
+   ],
+   "blizko_r_m": 6.0,
+   "_blizko": "plan_18_11 B9: jen kovadlina lomu (pracoviště kameníka pod 1. přístřeškem, svet._lom_vybaveni; poloha z výpisu 17. 11.), ne kovadlina kovárny tvrze (−15,2; 11, ~920 m). Test kamenik_lom."
   },
   "nadvori_studna": {
    "p": [

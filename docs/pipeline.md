@@ -57,6 +57,7 @@ Cíl: chybu ukáže stroj dřív než člověk, a ukáže **kde** a **který kro
 | 5 invarianty hotového světa | voda v korytu, nic natažené, nic na cestě/ve vstupu/ve vodě, nic visí, ruce v záběru, mlýn funguje | `test_svet.gd`: `voda_v_korytu`, `site_natazene`, `zasazeni`, `visici`, `telo_zaber`, `mlyn` … | `<DRUH> druh (x, z) popis` |
 | 6 mapa | kroky (barevné buňky 8 m), osy toků a cest a všechny chyby z bodů 4–5 na jedné mapě | `tools/protokol_mapa.py` (po rychlých testech sám) | `build/mapa_stavby.png` |
 | 6b matice vztahů | každá dvojice druhů (terén, voda, cesta, budova, plot, strom, keř, bylina, kámen, předmět) má pravidlo a test; povolení jen jako záznam s důvodem | `pravidla/svet/vztahy.json`, `tools/kontrola_vztahu.py` (brána ve `vydani.py`), test `vztahy` | `VZTAH dvojice (x, z)`, souhrn povolení |
+| 1c barva vrcholů | každý GLB v `modely/` s COLOR_0 u materiálu má značku sRGB (`barvy_vrcholu.json`), střední stupeň jen z importu je v `hra_linearni_stredni`, výjimky s důvodem (17. 11. domy, 18. 11. stodola zdálky černé) | `tools/barvy_vrcholu.py kontrola` (brána ve `vydani.py`) | `BARVY_VRCHOLU CHYBA …`, nevydá se |
 | 7 tabulka chyb | každá chyba od člověka má kontrolu v testu | `tools/kontrola_tabulek.py` (brána ve `vydani.py`) | bez kontroly = nevydá se |
 
 Postup u každé změny světa:
@@ -64,3 +65,9 @@ Postup u každé změny světa:
 2. Export (vrstvy 0–1), stavba ve hře s testy (2–5), mapa (6). Mapu prohlédnout dřív než snímky – ukáže, který krok a kde.
 3. Chyba z hlášení člověka → řádek tabulky chyb s příčinou, pravidlem a **kontrolou** (test vypisuje `<DRUH> druh (x, z)`, aby byla na mapě). Bez kontroly se nevydává (vrstva 7).
 4. Nový test vypisuje chyby ve formátu `<DRUH> druh (x, z) popis` a jeho meze jsou v `pasma.test` s podtržítkovým popisem.
+5. **Kontrola světla po změně materiálu, textury, barvy vrcholů nebo LOD** (plan_18_11 C13; 17. 11. domy a 18. 11. stodola
+   zdálky černé – stačil by jeden snímek večer): `flock build/beh/godot.lock tools/beh.sh <jméno> svetlo "x,z,tx,tz" ["x,y,z,cx,cy,cz"]`
+   na pozadí → `build/svetlo/<jméno>_rano|poledne|vecer.png` (hodiny `pasma.test.svetlo_hodiny`) a s druhým zadáním
+   `_interier.png` (noc, louč v ruce). Místo volit tak, aby změněný model byl v pásmu, kde se mění (střední stupeň: dál než
+   `predmety_lod.stredni_od_m`). Všechny snímky si prohlédnout dřív, než se změna pošle; tmavý nebo černý model = nejdřív
+   `barvy_vrcholu.json` a `docs/predani.md` „Tmavé/černé modely“, ne hádat stíny.

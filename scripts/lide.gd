@@ -355,6 +355,24 @@ func _model(muz: bool, rng: RandomNumberGenerator) -> Array:
 	return [uzel, kostra, geo]
 
 
+## Oddelene casti site chuze: id bodu -> cislo casti (1..K). Test sit_chuze (plan_18_11 C12) i vypis v _graf.
+func casti_site() -> Dictionary:
+	var cast := {}
+	var casti := 0
+	for i: int in _g.get_point_ids():
+		if cast.has(i):
+			continue
+		casti += 1
+		var fr: Array[int] = [i]
+		cast[i] = casti
+		while not fr.is_empty():
+			for sq: int in _g.get_point_connections(fr.pop_back()):
+				if not cast.has(sq):
+					cast[sq] = casti
+					fr.append(sq)
+	return cast
+
+
 ## Sit chuze (po prvnim snimku - osy cest sveta jsou hotove): body os po krok_m, spojene po ose a mezi osami do spoj_m.
 func _graf() -> void:
 	var sv: RefCounted = main.svet
@@ -388,19 +406,10 @@ func _graf() -> void:
 			posl = q
 			n += 1
 	# Misa 17. 11. (mapa: figurka „utika do lesa“): pocet oddelenych casti site - nenapojene osy cest = cesta lesem
-	var cast := {}
+	var cast := casti_site()
 	var casti := 0
-	for i in n:
-		if cast.has(i):
-			continue
-		casti += 1
-		var fr: Array[int] = [i]
-		cast[i] = casti
-		while not fr.is_empty():
-			for sq: int in _g.get_point_connections(fr.pop_back()):
-				if not cast.has(sq):
-					cast[sq] = casti
-					fr.append(sq)
+	for v: int in cast.values():
+		casti = maxi(casti, v)
 	print("lide: sit chuze %d bodu, %d oddelenych casti" % [n, casti])
 
 

@@ -29,7 +29,9 @@ func run(p_main: Node) -> void:
 	for t: String in TESTY:
 		if jen.has(t):
 			nic = false
+			var n0 := vysledky.size()
 			await call("_" + t)
+			print("HOTOVO_TEST %s %s %d" % [t, "OK" if vysledky.slice(n0).all(func(v: Array) -> bool: return bool(v[1])) else "CHYBA", vysledky.size() - n0])   # plan E2
 	if nic:
 		return
 	var ok := true

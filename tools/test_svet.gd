@@ -26,6 +26,8 @@ var main: Node
 var player: CharacterBody3D
 var sv
 var vysledky: Array = []
+## testy, ktere ctou obraz z viewportu - v behu testyfoto (tools/beh.sh, plan 18. 11. E1) jen ony kresli
+const S_KRESLENIM := ["vlastni_site", "dira", "pasmo", "dalka"]
 
 
 static func _otisk_souboru(cesty: Array, pripona: String) -> String:
@@ -61,9 +63,14 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "hladiny_lod", "teren_svy", "kryti_otisk", "cesta_skoky", "sklep_vstup", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400", "houby_na_zemi", "clona_vsi", "houstina_volno", "schody_vstupu", "lide_rozmisteni"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_nadvori", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava", "hostinec_prochod", "mlyn_zlab", "hostinec_trava", "lednice_blok", "ryb_napojeni", "pocasi", "postavy_modif", "duplicity", "menu_posun", "mapa_jizda", "kovarna", "krcma_l", "mista_dvere", "tvrz_lavice", "rostliny_v_budovach", "zahrada_bylinkarky", "vstupy_bez_travy", "kamera_prekazky", "krcma_schody", "krcma_dvur", "lavice_sedaky", "louka_nahravani", "potok_kaskada", "povrch", "planovac_snimek", "strom_na_zemi", "volne_hrany", "lod_urovne", "ruiny_ves", "kostel_zed", "teren_dlazdice", "ryb_vznaseni", "hladiny_lod", "teren_svy", "kryti_otisk", "cesta_skoky", "sklep_vstup", "katalog_1400", "postele_domu", "zemljanka_schody", "ohen_u_pece", "nevisi_1400", "houby_na_zemi", "clona_vsi", "houstina_volno", "schody_vstupu", "lide_rozmisteni", "kamenik_lom", "sit_chuze"]:
 		if jen.is_empty() or jen.has(t):
+			if OS.has_environment("TVRZ_TESTYFOTO"):    # plan E1: v behu se snimky kresli jen testy, ktere ctou obraz
+				RenderingServer.render_loop_enabled = S_KRESLENIM.has(t)
+			var n0 := vysledky.size()
 			await call("_" + t)
+			# plan E2: vysledek testu hned (tools/hlidaci_skupiny.py zapise skupinu, jakmile dobehnou vsechny jeji testy)
+			print("HOTOVO_TEST %s %s %d" % [t, "OK" if vysledky.slice(n0).all(func(v: Array) -> bool: return bool(v[1])) else "CHYBA", vysledky.size() - n0])
 	var ok := true
 	print("TEST SVET ------------------------------")
 	for v: Array in vysledky:
@@ -11290,3 +11297,118 @@ func _lide_rozmisteni() -> void:
 
 func P_mista_p(k: String) -> Array:
 	return (Pravidla.cti("postavy", "mista") as Dictionary)[k]["p"]
+
+
+## plan_18_11 B9 (misa_16_11 r. 11: kamenik z lomu kul u kovadliny kovarny tvrze): misto lom_spalek musi byt u kovadliny
+## lomu (postavy.json mista.lom_spalek blizko + blizko_r_m) se schudnou bunkou mrizky chuze. Hrac u lomu (kolize lomu
+## jako ve hre), mezipamet mista smazana. Vypis kazde strany spalku: zem pod bodem, co brani (rozbor misto hadani).
+func _kamenik_lom() -> void:
+	var lide: Node = main.get_node_or_null("World/Lide")
+	if lide == null:
+		lide = get_tree().root.find_child("Lide", true, false)
+	if lide == null:
+		_vysledek("kamenik_lom", false, "uzel Lide nenalezen")
+		return
+	var P: Dictionary = lide.get("P")
+	var z: Dictionary = P["mista"]["lom_spalek"]
+	if not z.has("blizko"):
+		_vysledek("kamenik_lom", false, "mista.lom_spalek bez blizko - bere se kus podle x (kovadlina tvrze)")
+		return
+	var bz := Vector2(float(z["blizko"][0]), float(z["blizko"][1]))
+	var kus: Dictionary = {}
+	for r: Dictionary in sv.data.get("vybaveni", []):
+		if String(r["id"]) == String(z["u_predmetu"]) and Vector2(float(r["p"][0]), float(r["p"][2])).distance_to(bz) <= float(z["blizko_r_m"]):
+			kus = r
+	if kus.is_empty():
+		_vysledek("kamenik_lom", false, "zadna %s do %s m od %s" % [z["u_predmetu"], z["blizko_r_m"], bz])
+		return
+	var kp := Vector3(float(kus["p"][0]), float(kus["p"][1]), float(kus["p"][2]))
+	main.player.place(kp + Vector3(4.0, 1.7, 0.0), kp)
+	for i in 30:
+		await get_tree().process_frame
+	await get_tree().physics_frame
+	(lide.get("_misto_xz") as Dictionary).erase("lom_spalek")
+	(lide.get("_nav_kes") as Dictionary).clear()
+	var ll: Array = lide.get("_lide")
+	var out: Array = lide.call("_misto", ll[0], "lom_spalek")
+	var q: Vector2 = out[0]
+	var d := q.distance_to(Vector2(kp.x, kp.z))
+	print("KAMENIK_LOM kus %s misto %s (%.2f m) yaw %s dbg %s" % [kp.snapped(Vector3.ONE * 0.01), q.snapped(Vector2.ONE * 0.01), d, out[1], str(lide.get("_u_pred_dbg"))])
+	var sp := main.get_viewport().get_world_3d().direct_space_state
+	for a in 8:
+		var w := Vector2(kp.x, kp.z) + Vector2(cos(TAU * a / 8.0), sin(TAU * a / 8.0)) * 0.8
+		var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(w.x, kp.y + 5.0, w.y), Vector3(w.x, kp.y - 3.0, w.y)))
+		var bx := PhysicsShapeQueryParameters3D.new()
+		var sh := BoxShape3D.new()
+		sh.size = Vector3(0.36, 1.42, 0.36)
+		bx.shape = sh
+		var gy: float = (h["position"] as Vector3).y if not h.is_empty() else NAN
+		bx.transform = Transform3D(Basis.IDENTITY, Vector3(w.x, (gy if not is_nan(gy) else kp.y) + 0.99, w.y))
+		var jm: Array = []
+		for hh: Dictionary in sp.intersect_shape(bx, 6):
+			jm.append(str((hh["collider"] as Node).get_path()).get_file() if hh["collider"] is Node else "?")
+		print("KAMENIK_LOM smer %d bod %s zem %.2f (%s) kus y %.2f prekazky %s" % [a, w.snapped(Vector2.ONE * 0.01), gy,
+				(h["collider"] as Node).name if not h.is_empty() and h["collider"] is Node else "-", kp.y, str(jm)])
+	_vysledek("kamenik_lom", out[1] != INF and d < 2.0, "misto %s %.2f m od kovadliny lomu %s" % [q.snapped(Vector2.ONE * 0.01), d, kp.snapped(Vector3.ONE * 0.01)])
+
+
+## plan_18_11 C12 (misa_17_11 r. 16: figurka mapy „utika do lesa“, trasa po oddelene casti site): sit chuze lide._g je
+## jedna cast, nebo kazda dalsi cast je v postavy.json graf.ostrovy (bod [x, z] do ostrov_r_m od nektereho bodu casti,
+## s duvodem). Vypis: velikost a obdelnik kazde casti, nejmensi mezera k nejvetsi casti (kde chybi spojka osy).
+func _sit_chuze() -> void:
+	var lide: Node = main.get_node_or_null("World/Lide")
+	if lide == null:
+		lide = get_tree().root.find_child("Lide", true, false)
+	if lide == null:
+		_vysledek("sit_chuze", false, "uzel Lide nenalezen")
+		return
+	var g: AStar2D = lide.get("_g")
+	var cast: Dictionary = lide.call("casti_site")
+	var body := {}
+	for i: int in cast:
+		var k: int = cast[i]
+		if not body.has(k):
+			body[k] = []
+		(body[k] as Array).append(g.get_point_position(i))
+	var hl := -1
+	for k: int in body:
+		if hl < 0 or (body[k] as Array).size() > (body[hl] as Array).size():
+			hl = k
+	var gp: Dictionary = Pravidla.cti("postavy", "graf")
+	var ostrovy: Array = gp.get("ostrovy", [])
+	var r_os := float(gp.get("ostrov_r_m", 10.0))
+	var chyby: Array = []
+	for k: int in body:
+		if k == hl:
+			continue
+		var bb := Rect2((body[k] as Array)[0], Vector2.ZERO)
+		for q: Vector2 in body[k]:
+			bb = bb.expand(q)
+		# nejmensi mezera k hlavni casti (hrube: kazdy 1. bod casti x kazdy 2. bod hlavni)
+		var nej := INF
+		var pa := Vector2.ZERO
+		var pb := Vector2.ZERO
+		for q: Vector2 in body[k]:
+			for j in range(0, (body[hl] as Array).size(), 2):
+				var w: Vector2 = body[hl][j]
+				var dd := q.distance_to(w)
+				if dd < nej:
+					nej = dd
+					pa = q
+					pb = w
+		var povol := ""
+		for o: Dictionary in ostrovy:
+			var ob := Vector2(float(o["bod"][0]), float(o["bod"][1]))
+			for q: Vector2 in body[k]:
+				if q.distance_to(ob) <= r_os:
+					povol = String(o.get("proc", "?"))
+					break
+			if povol != "":
+				break
+		var t := "cast %d: %d bodu, obdelnik (%.0f, %.0f)-(%.0f, %.0f), mezera %.1f m mezi (%.1f, %.1f) a (%.1f, %.1f)%s" % [k,
+				(body[k] as Array).size(), bb.position.x, bb.position.y, bb.end.x, bb.end.y, nej, pa.x, pa.y, pb.x, pb.y,
+				(" POVOLENO: " + povol) if povol != "" else ""]
+		print("SIT_CHUZE ", t)
+		if povol == "":
+			chyby.append(t)
+	_vysledek("sit_chuze", chyby.is_empty(), "casti %d (hlavni %d bodu), nepovolenych ostrovu %d %s" % [body.size(), (body[hl] as Array).size(), chyby.size(), str(chyby.slice(0, 4))])

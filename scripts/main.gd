@@ -630,6 +630,9 @@ func _build() -> void:
 		if OS.has_environment("TVRZ_SITE_V"):
 			_site_v(OS.get_environment("TVRZ_SITE_V"))
 		await _mereni(OS.get_environment("TVRZ_MERENI"))
+		if OS.has_environment("TVRZ_TEST"):          # plan 18. 11. E1 (tools/beh.sh testyfoto): testy po snimcich, jedna stavba sveta
+			add_child(load("res://scripts/dev_test.gd").new())   # dev_test na konci sam ukonci hru
+			return
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_TRASA"):
 		# overeni meřicí trasy na PC: TVRZ_TRASA=kratka (2 useky, 2 varianty, mereni 3 s)
@@ -2840,8 +2843,17 @@ func _mereni(spec: String) -> void:
 					ni += mm2.visible_instance_count if mm2.visible_instance_count >= 0 else mm2.instance_count
 					nmm += 1
 			print("MERENI_LOUKA %-12s instanci %d v %d MultiMeshich" % [parts[0], ni, nmm])
+		# 5. pole "louc" (tools/beh.sh svetlo, plan_18_11 C13): interier v noci s louci v ruce jako hrac
+		var louc := parts.size() > 4 and parts[4] == "louc"
+		if louc:
+			predmety.on_time("noc", true)
+			predmety.hold("louc", true)
+			for i in 20:
+				await get_tree().process_frame
 		if parts.size() > 2:
 			get_viewport().get_texture().get_image().save_png(parts[2])
+		if louc:
+			predmety.hold("", false)
 		if louka and parts[0].begins_with("un_"):
 			louka.diag_unshaded(Vector3(v[2], 0.0, v[3]) if v.size() < 6 else Vector3(v[3], 0.0, v[5]))
 		if OS.has_environment("TVRZ_MERENI_AB"):

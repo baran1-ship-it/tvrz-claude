@@ -6,9 +6,20 @@
 #  tools/beh.sh <jmeno> foto "oci;x,z,tx,tz;soubor.png|..."    snimky (xvfb, gl_compatibility jako tablet)
 #  tools/beh.sh <jmeno> testy ["test1,test2"]                   tools/rychle_testy.sh (log Godotu build/beh/<jmeno>_godot.log)
 #  tools/beh.sh <jmeno> cmd <prikaz...>                          cokoli jineho (napr. python3 tools/vydani.py ...)
+#  tools/beh.sh <jmeno> svetlo "x,z,tx,tz" ["x,y,z,cx,cy,cz"]      kontrola svetla po zmene materialu (plan_18_11 C13):
+#       misto rano/poledne/vecer (pasma.test.svetlo_hodiny) + interier v noci s louci v ruce -> build/svetlo/<jmeno>_*.png
 cd "$(dirname "$0")/.."
 jm="$1"; druh="$2"; shift 2
+[ "$druh" = svetlo ] && { MISTO="$1"; INTERIER="${2:-}"; }
 mkdir -p build/beh
+# svetlo = foto ze ctyr snimku (rano, poledne, vecer; interier v noci s louci - 5. pole "louc" v main._mereni)
+if [ "$druh" = svetlo ]; then
+  hod=$(python3 -c "import json;print(' '.join(str(h) for h in json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test']['svetlo_hodiny']))")
+  set -- $hod; spec=""
+  for nm in rano poledne vecer; do spec="$spec|sv_$nm;$MISTO;build/svetlo/${jm}_$nm.png;$1"; shift; done
+  [ -n "$INTERIER" ] && spec="$spec|sv_interier;$INTERIER;build/svetlo/${jm}_interier.png;$1;louc"
+  druh=foto; set -- "${spec#|}"
+fi
 # foto: slozky snimku zalozit predem (3. 11. f142: neexistujici build/f142 = "Can't save PNG", snimky ztraceny)
 if [ "$druh" = foto ]; then echo "$1" | tr '|' '\n' | awk -F';' '{print $3}' | xargs -r -n1 dirname | sort -u | xargs -r mkdir -p; fi
 log="build/beh/$jm.log"

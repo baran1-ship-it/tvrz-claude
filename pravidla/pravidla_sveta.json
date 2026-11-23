@@ -1940,7 +1940,14 @@
    },
    "_clona_vsi": "Míša 16. 11. „nelíbí se mi, jak je krajina otevřená, hlavně ve vsi“ (test tools/test_svet.gd clona_vsi): z bodů vjezdu odkud ve výškách oci_m paprsky k cílům (dum_k = dům usedlosti k ze svet._domy, ostatní = lokace.json <id>.stred: krčma do L, kovárna) ve výškách vyska_cile_m; paprsek je zakrytý, když projde korunou keře (koule poloměru výška × polomer_podil_vysky ve středu výšky) nebo korunou stromu (od koruna_stromu_podil výšky po vrchol, poloměr = menší polovina vodorovného obalu AABB sítě × 0,8) z hotových instancí data rostliny; podíl zakrytých paprsků ≥ kryti_min (vjezd: ves se otevírá až po ohybu). Pevné zakrytí (domy, terén) se nepočítá – měří jen vegetaci.",
    "teren_svy_m": 0.02,
-   "_teren_svy_m": "Míša 17. 11. r. 6 (08, 10, 11: tmavé čáry a schod přes cesty na styku sítí terénu): test hry teren_svy – na otevřené hraně každé sítě Teren* (ne obzor, cesta) výška sousední sítě v tomtéž bodě nesmí lišit o víc než teren_svy_m a horní hrana svislého lemu (Teren_lem, lem Teren_most/okoli) nesmí trčet nad povrch o víc než totéž. Práh 0,02 m = tloušťka čáry na snímku 08 (cm; NEOVĚŘENO měřením viditelnosti)."
+   "_teren_svy_m": "Míša 17. 11. r. 6 (08, 10, 11: tmavé čáry a schod přes cesty na styku sítí terénu): test hry teren_svy – na otevřené hraně každé sítě Teren* (ne obzor, cesta) výška sousední sítě v tomtéž bodě nesmí lišit o víc než teren_svy_m a horní hrana svislého lemu (Teren_lem, lem Teren_most/okoli) nesmí trčet nad povrch o víc než totéž. Práh 0,02 m = tloušťka čáry na snímku 08 (cm; NEOVĚŘENO měřením viditelnosti).",
+   "svetlo_hodiny": [
+    7.0,
+    12.0,
+    19.0,
+    22.0
+   ],
+   "_svetlo_hodiny": "plan_18_11 C13 (lehká kontrola světla po změně materiálu – stodola, domy, ruiny zdálky černé 17. 11.): tools/beh.sh <jméno> svetlo \"x,z,tx,tz\" [\"x,y,z,cx,cy,cz\"] vyfotí místo ráno, v poledne a večer (první tři hodiny) a interiér v noci s loučí v ruce (čtvrtá) do build/svetlo/. Postup v docs/pipeline.md „Kontrola světla“."
   },
   "rozmisteni": {
    "popis": "Odstupy rozmístění keřů a kopřiv podle scény (les_podrost.json houstina.rozmisteni, svet._rozmisteni; Míša 18. 11. ř. 6 a 8): bunka_m = buňka stropu keřů; ves_dosah_m = scéna ves do této vzdálenosti od ves.stred_stare_navsi (130 m = svet.divokost SEC_VES − 150 m kosy); rozestup_ker_m = nejmenší vzdálenost dvou keřů ve scéně (ves 5 m: keř jednotlivě, clona bez rozestupu – hustotu má záznam kompozice.clony, les 1,2 m: hustý plášť jako dosud); kopriva_shluk_m = poloměr shluku kopřiv, kopriva_rozestup_m = nejmenší vzdálenost shluků ve scéně.",
@@ -2032,7 +2039,9 @@
    ],
    "opreni_podil_delky": 0.85,
    "o_zed_uhel_st": 14.0,
-   "_o_zed_uhel_st": "Misa 0.99994 r. 68 „metla v kazde chalupe lezi na zemi“: naradi v domech (nabytek.json domy, kus s 6. polem o_zed) opreny o nejblizsi zed mistnosti, naklon od svisle (metla, lopata o zed 10-20 st.; KCD2 interiery - naradi u zdi). Test opreny_o_zed (tools/test_stavby.gd)."
+   "_o_zed_uhel_st": "Misa 0.99994 r. 68 „metla v kazde chalupe lezi na zemi“: naradi v domech (nabytek.json domy, kus s 6. polem o_zed) opreny o nejblizsi zed mistnosti, naklon od svisle (metla, lopata o zed 10-20 st.; KCD2 interiery - naradi u zdi). Test opreny_o_zed (tools/test_stavby.gd).",
+   "kryti_povrch_do_m": 0.3,
+   "_kryti_povrch_do_m": "Míša 17. 11. ř. 2 / plan_18_11 B7 (stébla mezi kameny na dolním konci dlažby přelivu Lhota, build/m17/po2_03.png): krytí shora (louka._zasah) nerozlišovalo stůl a dlažbu – na každém krytém bodě rostl nízký vějíř louky („pod vozem aspoň trochu trávy“) a na dlažbě (horní plocha 0,03 m nad dnem, obruba 0,15 m nad terénem, voda.json preliv.dlazba) prorůstal mezi kameny. První zásah, který není terén, níž než tato výška nad terénem pod ním = pevný povrch (dlažba, práh, kamenná deska, obruba) – tam neroste nic; výš = pod stolem/vozem/střechou dál vějíř. 0,3 m: obruba 0,15 + rezerva, pod sedákem lavice (0,45) vějíř zůstane. Soubor modely/louka/kryti_povrch.bin (TVRZ_ROZSEV=1), ve hře kryti_tab 3."
   },
   "dosednuti": {
    "popis": "Misa 14. 11. „projdi, co se ve svete vznasi“: rostliny a kameny z exportu dosednou na HOTOVY viditelny teren v datech (krok vstupu druhu, po zamku terenu) - drive jen svet.dosednout pri startu paprskem proti kolizim, ktere jsou v tu chvili nactene jen kolem hrace (dal od startu vse viselo, test visici byl slepy - headless MultiMesh). visi_m = kolik smi stred instance byt nad terenem, ponor_m = o kolik ji posadit pod povrch. Na skalach (pudorys sity skaly x meritko) se nesedá - rostlina na vrcholu skaly je spravne.",

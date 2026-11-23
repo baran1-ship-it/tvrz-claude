@@ -221,18 +221,25 @@ func _ready() -> void:
 		await _pruchod_test()
 	elif mode == "svet":
 		# testy pred vydanim (radce 20:05): tools/test_svet.gd
+		# plan 18. 11. E1 (beh.sh testyfoto, testy po snimcich v okne): bez kresleni jako headless; kresli jen testy se snimkem
+		# (test_svet.gd S_KRESLENIM) - llvmpipe kresli snimek 1-3 s
+		var bez_kresleni := OS.has_environment("TVRZ_TESTYFOTO")
+		RenderingServer.render_loop_enabled = not bez_kresleni
 		var ts: Node = load("res://tools/test_svet.gd").new()
 		add_child(ts)
 		await ts.run(main)
 		# druha sada (testy staveb a predmetu, Misa 6. 11.): pusti jen testy vyjmenovane v TVRZ_TEST_JEN
+		RenderingServer.render_loop_enabled = not bez_kresleni
 		var ts2: Node = load("res://tools/test_stavby.gd").new()
 		add_child(ts2)
 		await ts2.run(main)
 		# treti sada (testy vody, Misa 9. 11. r. 51/53/61/79): jen testy vyjmenovane v TVRZ_TEST_JEN
+		RenderingServer.render_loop_enabled = not bez_kresleni
 		var ts3: Node = load("res://tools/test_voda.gd").new()
 		add_child(ts3)
 		await ts3.run(main)
 		# ctvrta sada (vykon, Misa 11. 11. trasa 0.99997): jen testy vyjmenovane v TVRZ_TEST_JEN
+		RenderingServer.render_loop_enabled = not bez_kresleni
 		var ts4: Node = load("res://tools/test_vykon.gd").new()
 		add_child(ts4)
 		await ts4.run(main)

@@ -1571,6 +1571,13 @@ Hotovo v kódu a datech (testy u každého):
 
 ## Poučení 16.–17. 11. (vydání 0.9999991)
 - **Tmavé/černé modely s barvou vrcholů = NEJDŘÍV `pravidla/svet/barvy_vrcholu.json`** (17. 11., ř. 5 domy zdálky černé, několik hodin): Compatibility bere COLOR_0 jako sRGB, glTF ho ukládá lineárně → hnědá 0,15 = černá. Známé od 16. 11. (Puchart, sady), a přesto jsem hádal stíny (2 pokusy naslepo). Postup: izolovaná scéna – tatáž barva jako albedo_color × jako barva vrcholu; když se liší, převod `tools/barvy_vrcholu.py` (seznam `soubory`/`sady`). Než se začne hádat, projít `docs/predani.md` a pravidla na známou příčinu.
+- **Barva vrcholů – kontrola všech GLB (18. 11., plan_18_11 B8):** Godot import zapne Vertex Color → albedo u KAŽDÉHO
+  materiálu s COLOR_0 (sonda `build/beh/vcf.log`), takže lineární COLOR_0 ztmaví i modely mimo sady (kostel, ruiny vsi).
+  `tools/barvy_vrcholu.py kontrola` (brána ve `vydani.py`) hlídá celé `modely/`; výjimky s důvodem v `barvy_vrcholu.json
+  vyjimky` (tvrz.glb = data, ne barva). Střední stupně stodol/kůlny existují jen jako import – pravidlo hry
+  `hra_linearni_stredni` (shader s převodem v `predmety.gd`); `lod_barvy.py`/`ves_domy_lod.py` od 18. 11. píšou sRGB a značku
+  → po nové stavbě středních stupňů id ze seznamu smazat (kontrola hlásí dvojí převod). Převedené GLB se do hry dostanou
+  až v balíku (`modely/` není v gitu) – po převodu `--import` a vydání; záloha původních v `build/zaloha_barvy_18_11/`.
 - **Fronta na zámek Godotu (17. 11.):** `flock build/beh/godot.lock …` na pozadí čeká, dokud běží cizí export (i 30+ min) – výchozí limit úlohy na pozadí 30 min ji zabije dřív, než se dostane na řadu (focení fcer). Úlohy ve frontě spouštět s `timeout` 7200000.
 - **Stínové světlo ohně nesmí ležet uvnitř modelu pece** (dum1: černá kopule, stín přes celou jizbu). Pece z katalogu
   (`ohen_znacky.k_usti_predmety`): světlo před ústím (`svetlo_pred_ustim_m`), plamen v ústí.

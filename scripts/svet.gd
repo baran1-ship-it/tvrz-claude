@@ -9720,7 +9720,7 @@ func _cesty_kameny() -> void:
 					continue                        # 15. 11. test stanoviste: kameni ne v kosene louce (557 u cest)
 				# krajnice jen pod sirym nebem: ne na mostovce ani pod strechou (kryti shora 1; Misa 5. 11. most, test most)
 				var kc := Vector2i(floori(q.x / 32.0), floori(q.y / 32.0))
-				if kryti_tab.has(kc) and int(kryti_tab[kc][clampi(floori((q.y - kc.y * 32.0) / 0.5), 0, 63) * 64 + clampi(floori((q.x - kc.x * 32.0) / 0.5), 0, 63)]) == 1:
+				if kryti_tab.has(kc) and int(kryti_tab[kc][clampi(floori((q.y - kc.y * 32.0) / 0.5), 0, 63) * 64 + clampi(floori((q.x - kc.x * 32.0) / 0.5), 0, 63)]) in [1, 3]:
 					continue
 				var sc := rng.randf_range(0.06, 0.2) * (1.4 if absf(lat) > hw - 0.6 else 1.0)
 				if rng.randf() < 0.25 * kmn:
@@ -13050,6 +13050,7 @@ func _stanoviste() -> void:
 ## Kryti shora z offline casti (TVRZ_ROZSEV=1 -> modely/louka/kryti.bin, paprsky pod stoly, lavice, strechy,
 ## pavlac, skaly): bunka 32 m, mrizka 64 x 64 po 0,5 m.
 const KRYTI_SOUBOR := "res://modely/louka/kryti.bin"
+const KRYTI_POVRCH := "res://modely/louka/kryti_povrch.bin"
 var kryti_tab := {}
 
 
@@ -13066,6 +13067,18 @@ func _nacti_kryti() -> void:
 			kr[i] = (by[o + 4 + (i >> 3)] >> (i & 7)) & 1
 		kryti_tab[c] = kr
 		o += 516
+	# pevny povrch (louka._zasah, pasma predmet kryti_povrch_do_m; plan_18_11 B7): 3 = zakryto, ale ne strechou -
+	# louka tam nesazi ani nizky vejir (dlazba prelivu). Ostatni ctenari: 3 jako 1 (zakryto)
+	if FileAccess.file_exists(KRYTI_POVRCH):
+		var bp := FileAccess.get_file_as_bytes(KRYTI_POVRCH)
+		var op := 0
+		while op + 516 <= bp.size():
+			var cp := Vector2i(bp.decode_s16(op), bp.decode_s16(op + 2))
+			if kryti_tab.has(cp):
+				for i in 4096:
+					if (bp[op + 4 + (i >> 3)] >> (i & 7)) & 1:
+						kryti_tab[cp][i] = 3
+			op += 516
 
 
 ## Cesta z tvrze (sit Teren_cesta, Misa 0.60: "cesta z hradu plna travy"): louka i rozsevy ji braly jako teren
