@@ -87,6 +87,14 @@ Postup u každé změny světa:
   `vydani.py` dál čte log k aktuálnímu otisku; převzatá matice = log z jejího posledního běhu je stále platný.
 - `nevydavat_neblokuje` (E6): testy s planými poplachy (`lide_zasek` 12 ms na PC, `clona_vsi`) běží a vypíšou
   `CHYBA_NEBLOKUJE`, skupinu ani vydání neblokují; po opravě testu vyřadit ze seznamu.
+- **Mezipaměť stavby světa (E3, 23. 11.)**: `svet.kes_otisk()` – na PC klíč z `build/export_otisk.json`, md5 všech
+  `scripts/*.gd`, `pravidla/**/*.json`, `tools/krok_b/*.json`, `modely/louka/*.bin`, časů souborů `modely/` a proměnných
+  `TVRZ_*` (kromě výběru testů, `pasma.test.kes_bez_promennych`); v APK `sestaveni.json` (commit + manifest). Ukládá se
+  `user://cache/<krok>_<klíč>.bin` (cesty v terénu, výšky zámku, záplaty, vstup druhů, lesní plášť); změna kteréhokoli
+  skriptu nebo pravidla = nový klíč (první běh počítá a uloží, další převezme). `TVRZ_BEZ_CACHE=1` vypne.
+- **Souběh (E5, 23. 11.)**: `beh.sh` pustí až `pasma.test.beh_soubezne` běhů, jen když se vejdou do paměti
+  (`beh_pamet_mb` podle druhu: testy 3,5 GB, s obrazem 8 GB; rezerva `beh_pamet_rezerva_mb`) → testy + foto nebo 2× testy
+  naráz, 2× foto ne. Vnější `flock build/beh/godot.lock` souběh vypíná (fronta po jednom) – pro souběh volat `beh.sh` bez něj.
 - Testy, snímky i rychlý režim **čekají, dokud běží export světa** (`export.sh`, `export_game.py`) – žádné plané poplachy z rozdělané práce.
 - V `testyfoto` jdou nejdřív snímky (čistý svět), pak testy bez kreslení (`RenderingServer.render_loop_enabled`); kreslí
   jen testy, které čtou obraz (`test_svet.gd` `S_KRESLENIM`). Testy tu běží s kvalitou měření (1 = tablet) a skutečným

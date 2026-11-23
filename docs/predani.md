@@ -1726,3 +1726,31 @@ Hotovo v kódu a datech (testy u každého):
   pohltila – `save_png` skončil v bloku `if louc` a od commitu f8106c4 do 21ab08e se ukládal jen snímek interiéru s loučí;
   běh přitom hlásil OK (řádky MERENI v logu). **Náhrada textu: `old` končit na celém bloku, který se vrací v `new` celý;
   po běhu foto vždy ověřit, že soubory existují (`ls`), ne jen řádek BEH OK.** Snímky foto/svetlo z té doby chybí – pustit znovu.
+
+### 23. 11. – padající testy a hlídači (pomocník E3/E5/D20)
+- **`breh_nadrzi` – POTVRZENÁ příčina (protokol stavby `build/protokol_stavby.json`, buňky 8 m)**: hra po Blenderu znovu
+  měnila terén rybníků, které staví celé Blender: (1) krok „potok a nádrže“ – staré pravidlo `nadrz.gd` (břeh o OKRAJ
+  1,1 m dovnitř, svah 1:4, bahno) prohloubilo rybník tvrze o 0,3–0,8 m → sráz 36–53°; (2) `_koryta_naposled` – dolina
+  odtoku od prvního bodu osy (za hrází) sahá 20 m zpět a znovu rozkopala hráz Lhoty (−1,9 m) i tvrze (−1,25 m) → „prorva“.
+  Blender staví rybník PO korytech, hra koryta opakovala naposled. Oprava pravidlem: hladiny `Rybnik_*` v nádržích s
+  `blender` (strop = INF, terén se nemění), `koryto_toku_y` v zóně nádrže (`voda.json toky_tvar.nadrz_zona_m` 25 m za
+  břehem, stejné číslo čte `kraj.py`, dřív 25 natvrdo) vrací terén exportu. Ověřeno: `breh_nadrzi` OK (obvod 531, prorva 0,
+  sráz 0), `voda_v_korytu` OK (běh t_e6a 23. 11.). **Poučení: rozpor Blender × hra hledat v protokolu stavby – který krok
+  hry mění buňky, kde má být hotový export.**
+- **`vratka` branka_2 −0,17 m**: spodek křídla 4,79, kolize `Teren_ves_kolize` 4,96–5,09. Protokol: `_cesty_tvar` běžel PO
+  `_teren_pod_vraty` a v buňkách vrat (46, 94), (47, 94) měnil terén o 0,03–0,11 m (výška cest z původních trojúhelníků).
+  Oprava pořadím podle kontraktu (cesty krok 3 před vraty krok 4): `_teren_pod_vraty` až po `_cesty_tvar`
+  (`pasma.test.poradi_terenu` upraveno), přestavba sítě s vlastními kanály cest jako `_koryta_naposled` (SurfaceTool by
+  CUSTOM0/1 zahodil). Ověření: běh t_e3a.
+- **`steny` 22 paprsků – test opraven, ne svět**: kuchyně tvrze (misa_28 ř. 66, 9. 11.) má před zdí z = −14 ohniště
+  s kapucí a komínem (`Kolize` z exportu, kotlík `nabytek.json`), v komnatě nábytek – paprsek trefil překážku 0,9–1,94 m
+  před zdí. Test ověřuje, že ZEĎ má kolizi (tapiserie, louč): paprsek teď za překážkou pokračuje (nejvýš 4), překážka se
+  vypíše `STENY prekazka`; chybějící zeď dál = CHYBA.
+- **`lide_zasek` planý poplach – potvrzen**: tři stejné běhy s rozpočtem v 18:01 naměřily 49,6 / 9,7 ms (6:01: 7,8 / 11,3 /
+  12,5) – rozdíl = přerušení procesu (Blender export, druhý Godot), ne skript. Test měří nejlepší z
+  `postavy.json graf.mrizka.test_opakovani` (3) běhů; skutečný zásek skriptu je ve všech. Vyřazen z `nevydavat_neblokuje`.
+  (Čas vlákna z `/proc/thread-self/schedstat` nejde – aktualizuje se po tiku plánovače, chyba až 3 ms.)
+- **Hlídači (nezávislá kontrola)**: test bez jediného výsledku (spadlý na SCRIPT ERROR) se zapsal OK (`all()` nad prázdným)
+  → `HOTOVO_TEST` s 0 výsledky = CHYBA ve všech 4 sadách a `hlidaci_skupiny.py` bere SCRIPT ERROR mezi testy jako CHYBA;
+  otisk skupin zahrnuje `modely/**` (`spolecna_data`, md5 podle velikosti a času – 1. výpočet 11 s, pak 0,2 s);
+  `rychle.sh` razítko skriptů ze začátku běhu.
