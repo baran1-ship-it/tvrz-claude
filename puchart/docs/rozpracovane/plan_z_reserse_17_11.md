@@ -110,6 +110,21 @@ geometrie kamenů tam, kde je kámen vidět zblízka (nároží, ostění, cimbu
 míst jako misa_18_11_zdivo_*.jpg vedle předloh docs/reference/zdivo_kcd_18_11/.
 Míša 18. 11.: „…nejenom“ (hrady) → F platí pro všechny stavby na mapě: ves, krčma, kovárna, hájovna, mlýn, chýše a zemljanky, studny, podezdívky, zídky, mosty, pece a krby – všude, kde je kámen nebo omítka.
 
+**F2 + F bod 2 + klenby hotovo 23. 11. (hrady, PC; tablet NEOVERENO)** – chyby.md 414–418, smysl:kameny_lod0, smysl:narozi_bez_styku:
+- blender/kamenivo.py (společné pro oba hrady, volá puchart_hrad.zed2, hrady.zed, zed_plynula, narozi): zub cimbuří z 2–4 řad
+  nepravidelných kamenů se spárou 1,6 cm, otlučené hrany, krycí deska; krycí kameny koruny zídky / předprseně v prolukách;
+  patka hradeb z větších kamenů u terénu; nárožní kvádry na vazbu po celé výšce s otlučenými hranami. LOD0 = sítě Kameny_* po
+  buňkách 10 m, hlavni.gd je kreslí do 28 m (+4 m okraj), bez vrhání stínu (stín dělá jádro zubu, o 6 cm menší – jinak
+  šrafování na kamenech); dál zub = kvádr zdiva, nároží kvádr s texturou jednoho kamene (kamen_kus). Data hrad_vzhled.json
+  kameny_lod0 se zdrojem. Ostění oken a dveří už byla z tesaných kvádrů na vazbu (portaly.py, kit.stone_window).
+- Troj. (PC, stejné místo, A/B kameny vyp./zap.): x −0,8 z 22,4 +24 k (1,58 → 1,60 M), x 1,3 z 22,3 +20 k (1,55 → 1,57 M);
+  celkově před začátkem práce 1,685 / 1,656 M → 1,602 / 1,570 M (včetně souběžných změn krajiny). Kreslení +11.
+- Omítka (hrad_puchart.json omitka_zdiva): paláce líc vápenná omítka místy opadaná (zdivo_omitka_opadana), strana v hradbě
+  kámen, uvnitř místností omítka; sklep a šíje A režné lomové zdivo (zdivo_rezne). Klenby (kamen_klenak) a kamenné stupně
+  (kamen_stupen): textura jednoho kamene s UV po plochách kvádru – bez natažení světovou projekcí, bez reliéfu zdiva.
+- Zbývá z F: stavby vsi, mosty, studny, pece (F platí pro všechny stavby – Míša 18. 11.), klenební pasy z kamenů v geometrii,
+  vypadlé kameny; klenáky nemají spáru v geometrii (jen předěl textury).
+
 ## G. Míša 19. 11. (APK f60122c) – k dalšímu kolu
 | č. | snímek | co |
 |---|---|---|
@@ -137,6 +152,13 @@ maska cest v louka.gd/byliny.gd?) a zúžit vyloučení jen na vyjeté koleje; p
 | H4 | misa_20_11_vykon (svah s hradem) | černé skvrny na svahu pod hradem (stíny/impostory?) – prověřit |
 | H5 | misa_20_11_staj_tma.jpg (x 8,4 z 16 – i s loučí) | stáj uvnitř skoro černá i s hořící loučí – zjistit příčinu (stáj bere „interiér se stropem“ → světlo jen z otvorů? tmavé dřevo prkna_ven/dub? louč nesvítí na dřevo stáje?) – zesvětlení pod_strechou 1,6 nepomohlo a přesvětlilo místnosti → vráceno |
 | H6 | misa_20_11_svy.jpg (x 8,2 z 24,3) | svislé tmavé švy / rýhy na zdech a nároží (spáry mezi díly zdí – úkol #25) + kámen pořád „tapeta“ (plán F) |
+
+**H6 hotovo 23. 11.** (chyby.md 415, smysl:narozi_bez_styku): příčina nebyla mezera sítí, normály ani UV – nárožní kvádry
+(hrady.narozi) se kladly na všechny rohy věží, paláců a pilířů, i tam, kam přiléhá hradba; ve styku trčely 1–3,5 cm z líce po
+celé výšce (stín + mech zdivového shaderu na horních plochách = svislý šev a vodorovné čárky). Nároží se teď staví až po všech
+zdech (kamenivo.dokonci) a na rohu s přiléhající zdí se nekladou (402 kamenů); kontrolní snímek ze stejného místa bez švu.
+**Hlídač spojů 34 > 32** (chyby.md 417): ne stáj – slučování konců zábradlí do těžiště posunulo madlo ramene schodiště ochozu A
+o 5,6 cm a sloupky prošly schodnicí; konec zábradlí ramene je teď pevný → 28.
 
 H5 rozbor 20. 11.: hlavni.gd pozná „uvnitř“ paprskem 25 m nahoru (interier.paprsek_nahoru_m); ve stáji trefí kolizi ochozu nad ní (~8 m) → hra ji bere jako uzavřenou místnost se stropem (světlo jen z otvorů) → černo. Oprava: strop jen do výšky místnosti (např. ≤ 5 m nad hráčem) nebo stáj vyjmout z kolize stropu; pozor na vysoké síně hradu – ověřit.
 H5 návrh (promyšleno 20. 11., Míša: „stáj nemá přední díl – světlo dovnitř, stín dělá jen střecha“):
