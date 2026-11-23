@@ -6278,10 +6278,11 @@
   "maly_tok_stred": 0.45,
   "_maly_tok_stred": "18. 11. kontrola snímků (build/m18v/po_odtok12.png: malý tok = černý pás, Míša 0.991 „asfalt“): malý tok je mělký, střed těla a alfy jen do 0,45 – dno prosvítá",
   "maly_tok": {
-   "odraz_min": 0.3,
+   "odraz_min": 0.55,
    "sklon": 1.6,
-   "alfa_stred": 0.7,
-   "_p": "Míša 18. 11. ř. 11 (po maly_tok_stred 0,45 „vody je vidět málo“, build/sady/odtok_po.png = kamenitá cesta): malý tok je mělký a dno prosvítá, vodou ho dělá odraz v čeřené hladině a pohyb. odraz_min = nejmenší podíl odrazu (panorama) i při pohledu shora (fresnel f0 0,03 dával shora ~0), jen uvnitř pásu; sklon = násobek vlnky.sklon (proud čeří víc než rybník); alfa_stred = alfa ve středu pásu (místo alfa_stred 0,92 × maly_tok_stred). Tělo (barva) dál jen do maly_tok_stred – žádný černý pás. Návrat: odraz_min 0, sklon 1, alfa_stred 0,92 × 0,45 + 0,2 × 0,55 ≈ 0,52."
+   "alfa_stred": 0.5,
+   "_p23": "23. 11. NAMĚŘENO (tvrz.glb): Toky_voda u (420, 928) y 1,508, dno Teren_toky 1,11 – voda v korytu je; neviditelná, protože tělo mělké vody (hnědé 0,08) ≈ barva kamínků a odraz 0,3 slabý → odraz_min 0,55, alfa_stred 0,5 (dno prosvítá světleji pod odleskem). Snímky build/b11/b11_pred_*.png → b11_po_*.png.",
+  "_p": "Míša 18. 11. ř. 11 (po maly_tok_stred 0,45 „vody je vidět málo“, build/sady/odtok_po.png = kamenitá cesta): malý tok je mělký a dno prosvítá, vodou ho dělá odraz v čeřené hladině a pohyb. odraz_min = nejmenší podíl odrazu (panorama) i při pohledu shora (fresnel f0 0,03 dával shora ~0), jen uvnitř pásu; sklon = násobek vlnky.sklon (proud čeří víc než rybník); alfa_stred = alfa ve středu pásu (místo alfa_stred 0,92 × maly_tok_stred). Tělo (barva) dál jen do maly_tok_stred – žádný černý pás. Návrat: odraz_min 0, sklon 1, alfa_stred 0,92 × 0,45 + 0,2 × 0,55 ≈ 0,52."
   }
  },
  "mlha_vody": {
