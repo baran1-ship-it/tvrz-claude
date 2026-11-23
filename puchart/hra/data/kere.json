@@ -1,6 +1,6 @@
 {
  "popis": "Keře a zmlazení podle stanoviště (Míša 2. 11.: „nemáš podrost a křoví“; GPT scény bod 3 a 7: lesní okraje, remízky, křoviny jako přirozené clony, mladé stromky). Stejný systém jako byliny.json (hra/scripts/byliny.gd), větší buňky a dosah; do dálky se rozpouští ditheringem (zanik_m), nic neodskočí. Modely Havrana (modely/nove, CC0/vlastní). Hustota = kusů na m². NEOVERENO výkon – měření K.",
- "dosah_m": 64,
+ "dosah_m": 48,
  "bunka_m": 14,
  "vzorku_na_m2": 0.25,
  "zanik_m": [
@@ -177,5 +177,7 @@
  "pozn_houstiny_17_11": "Míša 16. 11. („plnější příroda a scény s houštinami, jak teď dělá Havran“): hustoty podle Havrana houstina – plášť lesa (les_okraj) 0,07 → 0,108/m² (Havran plášť: mřížka 2,5 m × keř 0,78 ≈ 0,12/m², vnitřní okraj mladé stromy 22 % → zmlazení buk+jedle 0,016); paseka zarůstá náletem (zmlazení 0,009 → 0,03, líska, hloh, bez); pod zápojem (patro) ×1,5 (Havran: keř u každého 2. stromu = buk. les 2,06 stromu/100 m² → 0,010/m², tj. ×2,3 – zatím jen ×1,5, keře jsou drahé: tablet les bez keřů −9 ms 13. 11., NEOVERENO po zvýšení); luh ×1,4. Dřív: {\"les_okraj\": {\"liska\": 0.03, \"hloh\": 0.012, \"trnka\": 0.01, \"bez\": 0.008, \"sipek\": 0.006, \"zmlazeni_buk\": 0.004}, \"les_paseka\": {\"liska\": 0.006, \"bez\": 0.008, \"zmlazeni_buk\": 0.006, \"zmlazeni_jedle\": 0.003}, \"luh\": {\"bez\": 0.012, \"liska\": 0.006, \"vrba_ker\": 0.0015}, \"les_dubohabrina\": {\"liska\": 0.003, \"hloh\": 0.002, \"zmlazeni_buk\": 0.0015}, \"les_bucina\": {\"zmlazeni_buk\": 0.003, \"zmlazeni_jedle\": 0.0015, \"liska\": 0.001}, \"les_bucina_kysela\": {\"zmlazeni_buk\": 0.002, \"zmlazeni_jedle\": 0.002, \"liska\": 0.001}, \"les_sut\": {\"liska\": 0.003, \"bez\": 0.003, \"zmlazeni_jedle\": 0.001}}",
  "shluky_frekvence": 1.0,
  "_shluky_frekvence": "frekvence šumu shluků (byliny.gd _sum); souřadnice se dělí vlna_m → vlna ≈ vlna_m. Do 17. 11. výchozí 0,01 (vlna 4,8 km, shluky nefungovaly)",
- "pozn_plnost_19_11": "Míša 19. 11. (plán E3, „roste to před očima“): dosah a pozvolné řídnutí dál – předtím {'dosah_m': 48}; automatika detailu (regulator.gd) ubírá trávu a keře jako první, když tablet nestíhá. Tablet NEOVERENO."
+ "pozn_plnost_19_11": "Míša 19. 11. (plán E3, „roste to před očima“): dosah a pozvolné řídnutí dál – předtím {'dosah_m': 48}; automatika detailu (regulator.gd) ubírá trávu a keře jako první, když tablet nestíhá. Tablet NEOVERENO.",
+ "pozn_e1_23_11": "Plán E1 (Míša 20. 11., misa_20_11_vykon.jpg: troj. 2,27–2,70 M > rozpočet 2,1 M): dosah 64 → 48 m = konec rozpouštění zanik_m [36, 46] – za ním byly keře neviditelné (zmenšené k patě), ale kreslily se celé buňky (PC 23. 11.: keře 0,6–0,8 M troj.). Vzhled beze změny; střední pás trávy (louka.json pas) kryje 25–120 m.",
+ "zdroj_e1": "Míša 18.–20. 11., plán E1, předloha lod_trava_video"
 }

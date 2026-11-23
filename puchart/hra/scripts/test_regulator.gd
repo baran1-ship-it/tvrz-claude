@@ -69,6 +69,11 @@ func _ready() -> void:
 		chyby.append("stín %.1f m (původně %.1f)" % [sun.directional_shadow_max_distance, st0])
 	if pak.has("lod_prah_nasobek") and not is_equal_approx(get_viewport().mesh_lod_threshold, lod0 * pak["lod_prah_nasobek"]):
 		chyby.append("LOD práh %.2f (původně %.2f)" % [get_viewport().mesh_lod_threshold, lod0])
+	# plán E1: střední pás trávy ubírá automatika jako první (stupeň 1 = pas_dosah)
+	if lou and lou.get("_pas") != null:
+		if not (cfg["stupne"][0] as Dictionary).has("pas_dosah"): chyby.append("stupeň 1 není střední pás (pas_dosah)")
+		if pak.has("pas_dosah") and not is_equal_approx(float(lou.pas_nasobek), pak["pas_dosah"]): chyby.append("pás násobek %s" % lou.pas_nasobek)
+	elif lou: chyby.append("louka bez středního pásu")
 	if get_viewport().scaling_3d_scale <= 0.0: chyby.append("rozlišení 3D změněno")
 	var sc0 := get_viewport().scaling_3d_scale
 	# 3) klid u limitu 30 FPS: zpět po jednom, mezi změnami aspoň nahoru_vydrz_s
@@ -86,6 +91,7 @@ func _ready() -> void:
 	if km and kz0 != null and km.get_shader_parameter("zanik") != kz0: chyby.append("keře nevráceny")
 	if sun and sun.directional_shadow_max_distance != st0: chyby.append("stín nevrácen")
 	if get_viewport().mesh_lod_threshold != lod0: chyby.append("LOD nevrácen")
+	if lou and lou.get("_pas") != null and float(lou.pas_nasobek) != 1.0: chyby.append("pás nevrácen")
 	if get_viewport().scaling_3d_scale != sc0: chyby.append("rozlišení 3D změněno")
 	# 4) měření: vypnuto na stupni 0, pomalé snímky nic nemění
 	for i in 2000: reg.krok(60.0)

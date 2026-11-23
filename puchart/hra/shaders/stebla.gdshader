@@ -36,10 +36,15 @@ uniform float stin_korun = 0.0;
 varying float sl_k;
 uniform float hust_konec = 1e6;
 uniform float hust_do = 130.0;
+uniform float konec_sirka = 30.0;   // šířka mizení za hust_konec (louka.json konec_m; dřív pevně 30 m)
+// střední pás (plán E1, louka.json pas, rezim 2): karta s pečenou texturou porostu (trava_pas_atlas.png), bunka = druh,
+// výška vyska_od..do; objevuje se po kartách (hash) mezi pas_od.x a pas_od.y, zatímco jemné trsy mizí (konec_m)
+uniform vec2 pas_od = vec2(-1.0, 0.0);
+uniform float pas_rust = 1.25;      // karta v dálce (u hust_konec + konec_sirka) o tolik větší
 
 uniform float sloupce = 3.0;
 uniform float radky = 2.0;
-uniform int rezim = 0;              // 0 atlas trav (tabulka druhu), 1 grass_pack: bunka = druh, vyska vyska_od..do
+uniform int rezim = 0;              // 0 atlas trav (tabulka druhu), 1 grass_pack: bunka = druh, vyska vyska_od..do, 2 střední pás (pečený atlas porostu)
 uniform float vyska_od = 0.15;
 uniform float vyska_do = 0.3;
 // barva terenu od teren_od do teren_do (KCD e_vegetationUseTerrainColorDistance = 80 m): trs ma barvu krajiny pod sebou,
@@ -154,19 +159,27 @@ void vertex() {
 		vec3 pw = (MODEL_MATRIX * vec4(pata, 1.0)).xyz;
 		float d = distance(pw.xz, INV_VIEW_MATRIX[3].xz);
 		float dal = smoothstep(hust_od, hust_do, d);
-		float hu = mix(1.0, hust_zbytek, dal) * (1.0 - smoothstep(hust_konec, hust_konec + 30.0, d)) * hustota * 1.1;
+		float hu = mix(1.0, hust_zbytek, dal) * (1.0 - smoothstep(hust_konec, hust_konec + konec_sirka, d)) * hustota * 1.1;
+		if (rezim == 2) {   // střední pás: bez řídnutí, jen náběh (prolnutí s jemnými trsy) a konec
+			hu = smoothstep(pas_od.x, pas_od.y, d) * (1.0 - smoothstep(hust_konec, hust_konec + konec_sirka, d)) * hustota * 1.1;
+			dal = 0.0;
+		}
 		// druh -> bunka atlasu a vyska karty (m)
 		float bun = druh < 1.5 ? 0.0 : (druh < 3.5 ? 1.0 : (druh < 4.5 ? 2.0 : druh - 2.0));
 		float h0 = druh < 0.5 ? 0.36 : (druh < 1.5 ? 0.5 : (druh < 2.5 ? 0.6 : (druh < 3.5 ? 0.82 : (druh < 4.5 ? 0.6
 				: (druh < 5.5 ? 0.28 : (druh < 6.5 ? 0.55 : 0.32))))));
-		float h = rezim == 1 ? mix(vyska_od, vyska_do, fract(hs * 3.71 + 0.11)) : h0;
-		if (rezim == 1) {
+		float h = rezim >= 1 ? mix(vyska_od, vyska_do, fract(hs * 3.71 + 0.11)) : h0;
+		if (rezim >= 1) {
 			bun = druh;
 		}
 		float s = h * navic * mix(0.75, 1.25, fract(hs * 17.31)) * clamp((hu - hs) / 0.1, 0.0, 1.0) * mix(1.0, 1.6, dal);
+		if (rezim == 2) s *= mix(1.0, pas_rust, smoothstep(pas_od.y, hust_konec + konec_sirka, d));
 		float a = fract(hs * 91.7 + 0.13) * 6.2831853;
 		vec3 v = VERTEX * vec3(s, s * mix(0.85, 1.15, fract(hs * 5.13)), s);
-		VERTEX = pata + vec3(cos(a) * v.x + sin(a) * v.z, v.y, -sin(a) * v.x + cos(a) * v.z);
+		vec3 vr = vec3(cos(a) * v.x + sin(a) * v.z, v.y, -sin(a) * v.x + cos(a) * v.z);
+		// střední pás: natočení a zkosení podle svahu už je v transformaci instance (louka.gd) – jen stejnoměrné měřítko
+		if (rezim == 2) vr = VERTEX * s;
+		VERTEX = pata + vr;
 		ic = vec4(rezim == 0 && druh > 3.5 && druh < 4.5 ? 0.1 : fract(hs * 7.31) * 0.15, fract(hs * 13.7 + 0.29), (bun + 0.5) / (sloupce * radky), 1.0);
 	}
 	sl_k = 1.0;

@@ -7,7 +7,7 @@
   ],
   "popis": "17. 11. (Havran les_podrost.json, Míša 17. 11.): trsy trávy bylin × násobek zápoje korun (hra/data/kryt.png, pravidlo pravidla/svet/louka.json les) – pod zapojenými korunami žádná tráva; kapradí, mech, ostružiník, pařezy beze změny = řídký podrost (KCD docs/reference/les/kcd_les_svetlo_havran_9_11.png)"
  },
- "dosah_m": 44,
+ "dosah_m": 40,
  "bunka_m": 10,
  "tridy": {
   "louka_kosena": {
@@ -379,5 +379,7 @@
  "_shluky_frekvence": "frekvence šumu shluků (byliny.gd _sum); souřadnice se dělí vlna_m → vlna ≈ vlna_m. Do 17. 11. výchozí 0,01 (vlna 4,8 km, shluky nefungovaly)",
  "pozn_hrady_18_11": "Míša 18. 11.: na nádvořích a v koutech hradů žádná tráva ani byliny – zůstávají jen kameny a mech.",
  "pozn_plnost_19_11": "Míša 19. 11. (plán E3, „roste to před očima“): dosah a pozvolné řídnutí dál – předtím {'dosah_m': 32}; automatika detailu (regulator.gd) ubírá trávu a keře jako první, když tablet nestíhá. Tablet NEOVERENO.",
- "pozn_krajnice_19_11": "Míša 19. 11.: krajnice cest – v třídě stanoviště cesta mimo hlínu masky cest (textury/maska_cesty.png) rostou byliny jako na pastvině (cesta_krajnice), byliny.gd."
+ "pozn_krajnice_19_11": "Míša 19. 11.: krajnice cest – v třídě stanoviště cesta mimo hlínu masky cest (textury/maska_cesty.png) rostou byliny jako na pastvině (cesta_krajnice), byliny.gd.",
+ "pozn_e1_23_11": "Plán E1 (Míša 20. 11., misa_20_11_vykon.jpg: troj. 2,27–2,70 M > rozpočet 2,1 M): dosah 44 → 40 m = konec rozpouštění zanik_m [22, 40] – za ním byly byliny neviditelné (zmenšené k patě), ale kreslily se celé buňky (PC 23. 11.: keře 0,6–0,8 M troj.). Vzhled beze změny; střední pás trávy (louka.json pas) kryje 25–120 m.",
+ "zdroj_e1": "Míša 18.–20. 11., plán E1, předloha lod_trava_video"
 }

@@ -1663,6 +1663,39 @@ if '"panorama"' not in _hl412 or "pridej_vodu" not in _hl412: _c412.append("hlav
 if "func pridej_vodu" not in _den412 or '"okoli"' not in _den412: _c412.append("den.gd nemění okoli vody podle denní doby")
 TEST("voda_odraz_hvozd", not _c412, "; ".join(_c412) if _c412 else "odraz panoramy %s (EMISSION × okolí dne), krytí %.2f → %.2f, %d vzorkovačů" % (_vz412.get("panorama_soubor"), _vz412["kryti_kraj"], _vz412["kryti_stred"], len(re.findall(r"uniform\s+sampler2D", _sh412))))
 
+# plán E1 (Míša 18.–20. 11., předloha docs/reference/lod_trava_video, H3 výkon 2,27–2,70 M troj.): střední pás trávy
+# (karty s pečenou texturou porostu) kryje 40–100 m, jemné trsy jen blízko, prolnutí bez díry; keře/byliny bez neviditelných buněk
+_c231 = []
+_lk231 = json.load(open(os.path.join(K, "pravidla/svet/louka.json"), encoding="utf-8")); _P231 = _lk231.get("pas", {})
+def _ss231(a, b, x): t = min(max((x - a) / (b - a), 0.0), 1.0); return t * t * (3 - 2 * t)
+def _jemne231(d): return (1 + (_lk231.get("hust_zbytek", 0) - 1) * _ss231(_lk231["hust_od_m"], _lk231["hust_do_m"], d)) * (1 - _ss231(_lk231["konec_m"][0], _lk231["konec_m"][1], d))
+def _pas231(d): return _ss231(_P231["od_m"][0], _P231["od_m"][1], d) * (1 - _ss231(_P231["do_m"][0], _P231["do_m"][1], d))
+if not _P231.get("zapnuto") or "plán E1" not in _P231.get("zdroj", ""): _c231.append("louka.json pas chybí / bez zdroje plán E1")
+else:
+    _m231 = min(_pas231(d) for d in range(40, 101))
+    if _m231 <= 0.9: _c231.append("pás 40–100 m hustota min %.2f" % _m231)
+    _d231 = [d for d in range(0, 121) if _jemne231(d) + _pas231(d) < 0.3]
+    if _d231: _c231.append("díra v prolnutí jemné/pás v %s m" % _d231[:5])
+    if not (_lk231["dosah_m"] <= 60 and _lk231["konec_m"][1] <= _lk231["dosah_m"] and _lk231["konec_m"][1] <= _P231["od_m"][1] + 10): _c231.append("jemné trsy dosah %s / konec %s – ne kratší než pás" % (_lk231["dosah_m"], _lk231["konec_m"]))
+    if _P231["dosah_m"] < _P231["do_m"][1]: _c231.append("pás dosah %s < konec %s" % (_P231["dosah_m"], _P231["do_m"][1]))
+    _A231 = _P231["atlas"]
+    try:
+        from PIL import Image as _Im231
+        _sz231 = _Im231.open(os.path.join(K, "hra", _A231["soubor"].replace("res://", ""))).size
+        if _sz231 != (_A231["bunka_px"][0] * _A231["sloupce"], _A231["bunka_px"][1] * _A231["radky"]): _c231.append("atlas pásu %s ≠ buňky × mřížka" % (_sz231,))
+    except FileNotFoundError: _c231.append("atlas pásu %s chybí (nastroje/trava_pas_atlas.py)" % _A231["soubor"])
+    if len(_A231["varianty"]) > _A231["sloupce"] * _A231["radky"] or any(len(v) != len(_A231["varianty"]) for k, v in _P231["druhy"].items() if isinstance(v, list)): _c231.append("druhy pásu ≠ počet variant atlasu")
+_lg231 = open(os.path.join(K, "hra/scripts/louka.gd"), encoding="utf-8").read(); _sh231 = open(os.path.join(K, "hra/shaders/stebla.gdshader"), encoding="utf-8").read()
+if '"rezim", 2' not in _lg231 or "rezim == 2" not in _sh231 or "func nastav_pas" not in _lg231: _c231.append("louka.gd/stebla.gdshader bez vrstvy pásu (rezim 2, nastav_pas)")
+_rz231 = json.load(open(os.path.join(K, "pravidla/svet/rozpocty.json"), encoding="utf-8"))["automatika"]["stupne"]
+if not _rz231 or "pas_dosah" not in _rz231[0] or "_pas(" not in open(os.path.join(K, "hra/scripts/regulator.gd"), encoding="utf-8").read(): _c231.append("automatika: stupeň 1 není střední pás (pas_dosah)")
+for _f231 in ("kere.json", "byliny.json"):
+    _j231 = json.load(open(os.path.join(K, "pravidla/svet", _f231), encoding="utf-8"))
+    if _j231["dosah_m"] > _j231["zanik_m"][1] + 4: _c231.append("%s dosah %s m daleko za koncem zániku %s (neviditelné buňky = troj. navíc)" % (_f231, _j231["dosah_m"], _j231["zanik_m"]))
+for _f231 in ("louka.json", "kere.json", "byliny.json", "rozpocty.json"):
+    if json.load(open(os.path.join(K, "hra/data", _f231), encoding="utf-8")) != json.load(open(os.path.join(K, "pravidla/svet", _f231), encoding="utf-8")): _c231.append("hra/data/%s není kopie" % _f231)
+TEST("stredni_pas_travy", not _c231, "; ".join(_c231) if _c231 else "pás %s–%s m (min hustota 40–100 m %.2f), jemné trsy do %s m (konec %s), keře/byliny dosah = zánik" % (_P231["od_m"], _P231["do_m"], _m231, _lk231["dosah_m"], _lk231["konec_m"]))
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

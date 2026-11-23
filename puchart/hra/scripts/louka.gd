@@ -12,8 +12,14 @@ var st: Image
 var _trs: Mesh
 var _kr: Image = null   # krytí korun (nastroje/kryt_korun.py)
 var LS_: Dictionary = {}
-var bunky := {}            # Vector2i -> MultiMeshInstance3D / null (prázdná)
-var _ceka := {}            # Vector2i -> id úlohy
+var bunky := {}            # Vector3i(x, z, vrstva) -> MultiMeshInstance3D / null (prázdná)
+var _ceka := {}            # Vector3i(x, z, vrstva) -> id úlohy
+## Vrstvy rozsevu (plán E1, Míša 18.–20. 11., předloha docs/reference/lod_trava_video): 0 jemné trsy blízko (louka.json),
+## 1 střední pás – karty s pečenou texturou porostu (louka.json pas, trava_pas_atlas.png, stebla.gdshader rezim 2).
+## Každá: [síť, buňka m, dosah m, krok m, tabulka druhů, výchozí druhy]
+var _vrstvy: Array = []
+var _pas: Mesh = null
+var pas_nasobek := 1.0     # automatika detailu (regulator.gd pas_dosah): násobek dosahu pásu – méně buněk = méně troj.
 var _hotove: Array = []
 var _zamek := Mutex.new()
 const ZasobaMM := preload("res://scripts/zasoba_mm.gd")
@@ -33,7 +39,25 @@ func postav(s: Node3D, kamera: Camera3D) -> void:
 	var m := _trs.surface_get_material(0) as ShaderMaterial
 	m.set_shader_parameter("z_custom", true)
 	m.set_shader_parameter("hust_od", float(cfg["hust_od_m"])); m.set_shader_parameter("hust_do", float(cfg["hust_do_m"]))
-	m.set_shader_parameter("hust_konec", float(cfg["hust_do_m"])); m.set_shader_parameter("hust_zbytek", float(cfg.get("hust_zbytek", 0.0)))
+	var ko: Array = cfg.get("konec_m", [cfg["hust_do_m"], float(cfg["hust_do_m"]) + 30.0])
+	m.set_shader_parameter("hust_konec", float(ko[0])); m.set_shader_parameter("konec_sirka", float(ko[1]) - float(ko[0]))
+	m.set_shader_parameter("hust_zbytek", float(cfg.get("hust_zbytek", 0.0)))
+	_vrstvy = [[_trs, float(cfg["bunka_m"]), float(cfg["dosah_m"]), float(cfg["krok_m"]), cfg["druhy"], int(cfg.get("nove_za_snimek", 1))]]
+	var P: Dictionary = cfg.get("pas", {})
+	if bool(P.get("zapnuto", false)) and ResourceLoader.exists(str(P["atlas"]["soubor"])):
+		var A: Dictionary = P["atlas"]
+		_pas = _karta_mesh(int(P.get("karty", 3)), float(A["bunka_px"][0]) / float(A["bunka_px"][1]), 1.0)
+		var pm := _pas.surface_get_material(0) as ShaderMaterial
+		pm.set_shader_parameter("atlas", load(str(A["soubor"])))
+		pm.set_shader_parameter("sloupce", float(A["sloupce"])); pm.set_shader_parameter("radky", float(A["radky"]))
+		pm.set_shader_parameter("z_custom", true); pm.set_shader_parameter("rezim", 2)
+		pm.set_shader_parameter("vyska_od", float(P["vyska_m"][0])); pm.set_shader_parameter("vyska_do", float(P["vyska_m"][1]))
+		pm.set_shader_parameter("pas_od", Vector2(float(P["od_m"][0]), float(P["od_m"][1])))
+		pm.set_shader_parameter("hust_konec", float(P["do_m"][0])); pm.set_shader_parameter("konec_sirka", float(P["do_m"][1]) - float(P["do_m"][0]))
+		pm.set_shader_parameter("hust_od", 1e5); pm.set_shader_parameter("hust_do", 1e5 + 1.0)
+		pm.set_shader_parameter("vitr", 0.6)
+		_vrstvy.append([_pas, float(P["bunka_m"]), float(P["dosah_m"]), float(P["krok_m"]), P["druhy"], int(P.get("nove_za_snimek", 1))])
+		print("LOUKA střední pás %s–%s m, buňka %s m, krok %s m" % [P["od_m"], P["do_m"], P["bunka_m"], P["krok_m"]])
 
 	if str(cfg.get("rezim", "bunky")) == "mrizka": _mrizka_postav()
 	nastav_unshaded(_un_vychozi())
@@ -164,7 +188,16 @@ func _mrizka_tick() -> void:
 		var k: float = q[1]
 		(q[0] as Node3D).global_position = Vector3(roundf(p.x / k) * k, 0.0, roundf(p.z / k) * k)
 
-func vsechny_site() -> Array: return [_trs] + _prst.map(func(q): return (q[0] as MultiMeshInstance3D).multimesh.mesh)
+## Automatika detailu (regulator.gd pas_dosah, rozpocty.json stupeň 1): dosah středního pásu × f – buňky za ním se
+## uvolní (méně troj.), konec v shaderu se posune stejně (karty mizí po jedné, ne hrana buněk). 1 = podle louka.json.
+func nastav_pas(f: float) -> void:
+	pas_nasobek = f
+	if _pas == null: return
+	var P: Dictionary = cfg["pas"]
+	var m := _pas.surface_get_material(0) as ShaderMaterial
+	m.set_shader_parameter("hust_konec", float(P["do_m"][0]) * f); m.set_shader_parameter("konec_sirka", (float(P["do_m"][1]) - float(P["do_m"][0])) * f)
+
+func vsechny_site() -> Array: return [_trs] + ([_pas] if _pas else []) + _prst.map(func(q): return (q[0] as MultiMeshInstance3D).multimesh.mesh)
 
 var _mc: Image = null   # maska cest (hlína R/G) – krajnice cest
 func _trida(x: float, z: float) -> String:
@@ -176,29 +209,34 @@ func _process(_d: float) -> void:
 	if cam == null or _trs == null: return
 	_svetlo_travy(_d)
 	if not _prst.is_empty(): _mrizka_tick(); return
-	var B := float(cfg["bunka_m"]); var R := float(cfg["dosah_m"]); var p := cam.global_position
-	var c0 := Vector2i(int(floor(p.x / B)), int(floor(p.z / B))); var n := int(ceil(R / B))
-	var nove := 0
-	for i in range(-n, n + 1):
-		for j in range(-n, n + 1):
-			var k := c0 + Vector2i(i, j)
-			if bunky.has(k) or _ceka.has(k): continue
+	var p := cam.global_position
+	for li in _vrstvy.size():
+		var V: Array = _vrstvy[li]
+		var B: float = V[1]; var R: float = V[2] * (pas_nasobek if li == 1 else 1.0)
+		var c0 := Vector2i(int(floor(p.x / B)), int(floor(p.z / B))); var n := int(ceil(R / B))
+		var nove := 0
+		for i in range(-n, n + 1):
+			for j in range(-n, n + 1):
+				var k := Vector3i(c0.x + i, c0.y + j, li)
+				if bunky.has(k) or _ceka.has(k): continue
+				var stred := Vector2((k.x + 0.5) * B, (k.y + 0.5) * B)
+				if stred.distance_to(Vector2(p.x, p.z)) > R + B * 0.71: continue
+				if nove >= int(V[5]) * 2: continue
+				_ceka[k] = WorkerThreadPool.add_task(_rozsej.bind(k)); nove += 1
+		for k: Vector3i in bunky.keys():   # uvolnit vzdálené (hystereze 0,5 buňky – menší buňky jemných trsů, plán E1)
+			if k.z != li: continue
 			var stred := Vector2((k.x + 0.5) * B, (k.y + 0.5) * B)
-			if stred.distance_to(Vector2(p.x, p.z)) > R + B * 0.71: continue
-			if nove >= int(cfg["nove_za_snimek"]) * 2: continue
-			_ceka[k] = WorkerThreadPool.add_task(_rozsej.bind(k)); nove += 1
+			if stred.distance_to(Vector2(p.x, p.z)) > R + B * 1.2:
+				if bunky[k] != null: ZasobaMM.vrat_strom(bunky[k]); bunky[k].queue_free()
+				bunky.erase(k)
 	_zamek.lock(); var hot := _hotove.duplicate(); _hotove.clear(); _zamek.unlock()
 	for h in hot: _vloz(h)
-	for k in bunky.keys():   # uvolnit vzdálené
-		var stred := Vector2((k.x + 0.5) * B, (k.y + 0.5) * B)
-		if stred.distance_to(Vector2(p.x, p.z)) > R + B * 1.6:
-			if bunky[k] != null: ZasobaMM.vrat_strom(bunky[k]); bunky[k].queue_free()
-			bunky.erase(k)
 
-func _rozsej(k: Vector2i) -> void:
-	var B := float(cfg["bunka_m"]); var krok := float(cfg["krok_m"])
-	var rng := RandomNumberGenerator.new(); rng.seed = hash(Vector2i(k.x * 7919, k.y * 104729))
-	var tridy: Dictionary = cfg["tridy"]; var druhy: Dictionary = cfg["druhy"]
+func _rozsej(k: Vector3i) -> void:
+	var V: Array = _vrstvy[k.z]
+	var B: float = V[1]; var krok: float = V[3]
+	var rng := RandomNumberGenerator.new(); rng.seed = hash(Vector3i(k.x * 7919, k.y * 104729, k.z * 31))
+	var tridy: Dictionary = cfg["tridy"]; var druhy: Dictionary = V[4]
 	var cust := PackedFloat32Array(); var x0 := k.x * B; var z0 := k.y * B
 	var cx := x0 + B * 0.5; var cz := z0 + B * 0.5
 	var z := 0.0
@@ -221,18 +259,27 @@ func _rozsej(k: Vector2i) -> void:
 					acc += float(pod[di])
 					if u <= acc: druh = di; break
 				var hs := rng.randf() * 0.999
-				cust.append_array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, float(druh) + hs, px - cx, svet.vyska(px, pz) - 0.04, pz - cz])   # formát MultiMesh.buffer: jednotková transformace + custom (zásoba MM)
+				var y: float = svet.vyska(px, pz) - 0.04
+				if k.z == 1:   # karta pásu je ~2,4 m široká: natočení a zkosení podle svahu v transformaci instance (custom je v Compatibility jen half float) – spodní hrana leží na zemi, nevisí ani se nezaboří
+					var r := float(cfg["pas"].get("pata_r_m", 1.3))
+					var gx := clampf((svet.vyska(px + r, pz) - svet.vyska(px - r, pz)) / (2.0 * r), -1.5, 1.5)
+					var gz := clampf((svet.vyska(px, pz + r) - svet.vyska(px, pz - r)) / (2.0 * r), -1.5, 1.5)
+					var a := rng.randf() * TAU; var ca := cos(a); var sa := sin(a)
+					y -= float(cfg["pas"].get("ponor_m", 0.04))
+					cust.append_array([ca, 0.0, sa, 0.0, gx * ca - gz * sa, 1.0, gx * sa + gz * ca, 0.0, -sa, 0.0, ca, 0.0, float(druh) + hs, px - cx, y, pz - cz])
+				else:
+					cust.append_array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, float(druh) + hs, px - cx, y, pz - cz])   # formát MultiMesh.buffer: jednotková transformace + custom (zásoba MM)   # formát MultiMesh.buffer: jednotková transformace + custom (zásoba MM)
 			x += krok
 		z += krok
 	_zamek.lock(); _hotove.append([k, cust]); _zamek.unlock()
 
 func _vloz(h: Array) -> void:
-	var k: Vector2i = h[0]; var cust: PackedFloat32Array = h[1]
+	var k: Vector3i = h[0]; var cust: PackedFloat32Array = h[1]
 	if _ceka.has(k): WorkerThreadPool.wait_for_task_completion(_ceka[k]); _ceka.erase(k)
 	var n := cust.size() / 16
 	if n == 0: bunky[k] = null; return
-	var B := float(cfg["bunka_m"])
-	var mm := ZasobaMM.vezmi(_trs, cust, n, true, AABB(Vector3(-B * 0.5 - 1, -200, -B * 0.5 - 1), Vector3(B + 2, 400, B + 2)))
+	var V: Array = _vrstvy[k.z]; var B: float = V[1]
+	var mm := ZasobaMM.vezmi(V[0], cust, n, true, AABB(Vector3(-B * 0.5 - 2, -200, -B * 0.5 - 2), Vector3(B + 4, 400, B + 4)))
 	var mi := MultiMeshInstance3D.new(); mi.multimesh = mm; mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.position = Vector3((k.x + 0.5) * B, 0, (k.y + 0.5) * B)
 	add_child(mi); bunky[k] = mi

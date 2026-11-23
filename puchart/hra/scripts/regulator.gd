@@ -89,6 +89,7 @@ func nastav_stupen(n: int) -> void:
 		for k: String in (st[i] as Dictionary):
 			if k in ["jmeno", "popis", "zdroj"] or k.begins_with("_"): continue
 			pak[k] = float(st[i][k])
+	_pas(float(pak.get("pas_dosah", 1.0)))
 	_trava(float(pak.get("trava_dosah", 1.0)))
 	_kere(float(pak.get("kere_dosah", 1.0)))
 	_stiny(float(pak.get("stiny_dosah_m", -1.0)))
@@ -116,13 +117,18 @@ func panel() -> String:
 func _scena() -> Node:
 	return get_tree().current_scene if get_tree() else null
 
+## Střední pás trávy (plán E1, louka.json pas): dosah buněk i konec v shaderu × f (louka.gd nastav_pas) – méně troj.
+func _pas(f: float) -> void:
+	var lou := _scena().get_node_or_null("Louka") if _scena() else null
+	if lou and lou.has_method("nastav_pas"): lou.nastav_pas(f)
+
 ## Tráva (louka.gd, stebla.gdshader): úbytek trsů hust_do a konec hust_konec blíž – sdílené materiály, bez přestavby buněk.
 func _trava(f: float) -> void:
 	var lou := _scena().get_node_or_null("Louka") if _scena() else null
 	if lou == null or not lou.has_method("vsechny_site"): return
 	for m: Mesh in lou.vsechny_site():
 		var mat := m.surface_get_material(0) as ShaderMaterial
-		if mat == null: continue
+		if mat == null or mat.get_shader_parameter("rezim") == 2: continue   # střední pás má vlastní páku (_pas)
 		var id := "trava%d" % mat.get_instance_id()
 		if not _puvodni.has(id): _puvodni[id] = [mat.get_shader_parameter("hust_do"), mat.get_shader_parameter("hust_konec")]
 		var p: Array = _puvodni[id]

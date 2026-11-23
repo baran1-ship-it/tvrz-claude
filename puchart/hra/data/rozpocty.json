@@ -194,6 +194,10 @@
   "_max_snimek_ms": "delší snímek = pauza, nabídka nebo načítání – do okna se nepočítá",
   "stupne": [
    {
+    "jmeno": "střední pás blíž",
+    "pas_dosah": 0.6
+   },
+   {
     "jmeno": "tráva blíž",
     "trava_dosah": 0.7
    },
@@ -210,6 +214,7 @@
     "lod_prah_nasobek": 2.0
    }
   ],
-  "_stupne": "pořadí podle rešerše (A4): 1) dohled louky, 2) keře a byliny, 3) stíny 40 → 25 m, 4) dřívější LOD. Násobky 0,7 a 2,0 jsou NAVRH – cena jednotlivých pák na tabletu NEOVERENO (měřit variantami mereni.json)"
+  "_stupne": "pořadí: 1) střední pás trávy blíž (plán E1, 23. 11.), pak podle rešerše (A4): 2) dohled louky, 3) keře a byliny, 4) stíny 40 → 25 m, 5) dřívější LOD. Násobky 0,6, 0,7 a 2,0 jsou NAVRH – cena jednotlivých pák na tabletu NEOVERENO (měřit variantami mereni.json)",
+  "_pas_dosah": "plán E1 (Míša 20. 11.: automatika ať umí nový pás ubrat jako první): stupeň 1 = násobek dosahu středního pásu trávy (louka.json pas, louka.gd pas_nasobek) – buňky za 0,6 × 122 m se uvolní = méně troj. i výplně; tráva blízko i keře zůstávají. NEOVERENO na tabletu"
  }
 }

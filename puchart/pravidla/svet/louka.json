@@ -2,10 +2,10 @@
  "popis": "Louka z trsů trávy (hra/scripts/louka.gd, převzato z Havrana scripts/louka.gd + shaders/stebla.gdshader; Míša 4. 11.: „na louce není tráva jen rastr“). Trs = 3 zkřížené karty z atlasu textury/trava_atlas.png; buňky bunka_m kolem kamery do dosah_m; do hust_od všechny trsy, k hust_do ubývají po jednotlivých trsech (bez hrany).",
  "zdroj": "Havran louka.gd (KROK 0.36, HUST_OD 20, tablet hust_do 80), KCD2: na 1 m² není vidět půda",
  "krok_m": 0.5,
- "bunka_m": 32,
- "dosah_m": 96,
+ "bunka_m": 16,
+ "dosah_m": 48,
  "hust_od_m": 14,
- "hust_do_m": 85,
+ "hust_do_m": 34,
  "hust_zbytek": 0.35,
  "pozn_zbytek_19_11": "Míša 19. 11. (svah pod hradem 30–80 m řídký, docs/screens/misa_19_11_svah_ridky.png): od hust_od do hust_do ubývá jen na hust_zbytek (stebla.gdshader), dřív 0 = louka 50–85 m skoro holá. NAVRH, tablet NEOVERENO.",
  "zdroj_zbytek": "Míša 19. 11., plán E1 krok 1 (docs/rozpracovane/plan_z_reserse_17_11.md)",
@@ -212,5 +212,245 @@
   ],
   "tablet": "NEOVERENO (vzhled i výkon kontroluje Míša na tabletu)"
  },
- "pozn_krajnice_19_11": "Míša 19. 11. (misa_19_11_krajnice_holé.png): krajnice cest holé – třída stanoviště cesta má ~10 m, vyjetá hlína ~4 m; tráva v třídě cesta s hustotou cesta_krajnice tam, kde maska cest (textury/maska_cesty.png R+G) nemá hlínu (louka.gd)."
+ "pozn_krajnice_19_11": "Míša 19. 11. (misa_19_11_krajnice_holé.png): krajnice cest holé – třída stanoviště cesta má ~10 m, vyjetá hlína ~4 m; tráva v třídě cesta s hustotou cesta_krajnice tam, kde maska cest (textury/maska_cesty.png R+G) nemá hlínu (louka.gd).",
+ "konec_m": [
+  30.0,
+  45.0
+ ],
+ "_konec_m": "jemné trsy mizí po jednotlivých trsech od konec_m[0] do konec_m[1] (stebla.gdshader hust_konec, konec_sirka); od pas.od_m je přebírá střední pás (prolnutí po trsech podle hashe, žádná hrana ani šachovnice)",
+ "pozn_e1_23_11": "Plán E1 (Míša 18.–20. 11., docs/screens/misa_20_11_vykon.jpg: troj. 2,27–2,70 M > 2,1 M, pokles na 25 FPS): jemné trsy zpět na kratší dosah – předtím {\"dosah_m\": 96, \"bunka_m\": 32, \"hust_od_m\": 14, \"hust_do_m\": 85}, hust_zbytek 0,35 a konec = hust_do; buňka 32 → 16 m (načtený kruh dosah + 0,71 × buňka – s 32 m se kreslily neviditelné trsy 48–71 m). Dál střední pás (pas).",
+ "zdroj_e1": "Míša 18.–20. 11., plán E1, předloha lod_trava_video (docs/reference/lod_trava_video/ obr. 11–20)",
+ "pas": {
+  "popis": "Střední pás trávy (plán E1, louka.gd vrstva pas, stebla.gdshader rezim 2): místo jednotlivých trsů levné karty s PEČENOU texturou celého porostu (nastroje/trava_pas_atlas.py skládá z trava_atlas.png pruhy hustého porostu 4 : 1 – „impostor buňka“ předlohy obr. 15–20 / Havranovy kupy). Jedna karta = 3 zkřížené obdélníky (6 troj.) na krok_m², rozsev v buňkách bunka_m ve vlákně stejnými pravidly jako jemné trsy (třída stanoviště, krajnice z masky cest, zápoj korun). Mezi od_m[0] a od_m[1] se karty objevují po jednotlivých kartách (hash), zatímco jemné trsy mizí (konec_m) – plynulé prolnutí bez hrany; do_m mizení do terénu (zem.gdshader porost_dalka). Jeden materiál, 1 vzorkovač atlasu (+ kryt v unshaded variantě).",
+  "zdroj": "Míša 18.–20. 11., plán E1, předloha lod_trava_video (README + obr. 11–20: jemné karty blízko, dál impostor buňky 2 troj. s pečenou texturou, 41k místo 83k troj., stejný vzhled); Havran scripts/louka.gd KUPY (claude/new-session-0dtk58: kupy trávy 64 m buňky, 45–280 m, karty z hustého spodku atlasu, měřítko 1,2–2,0, pokrytí 0,85) a vejir_atlas (pečený hustý porost na kartě: „drn_atlas má jednotlivé chomáče – karta nic nekryla“)",
+  "zapnuto": true,
+  "bunka_m": 48.0,
+  "krok_m": 1.5,
+  "_krok_m": "bod rozsevu po 1,5 m (náhodný posun ±0,45 kroku) × hustota třídy (tridy jako jemné trsy); karta 2,0–2,9 m široká → pokrytí ~2× (Havran pokrytí 0,85 s většími kupami)",
+  "od_m": [
+   25.0,
+   40.0
+  ],
+  "do_m": [
+   125.0,
+   150.0
+  ],
+  "_od_do": "prolnutí s jemnými trsy 25–40 m (jemné mizí 30–45 m), konec 125–150 m (plán E1: pás 20–150 m; porost_dalka terénu plně od 110 m – za pásem jen terén). 23. 11. první verze 100–122 m: svah pod hradem a kopec ve 130–150 m zůstaly hladké",
+  "dosah_m": 150.0,
+  "vyska_m": [
+   0.5,
+   0.72
+  ],
+  "_vyska_m": "výška karty (m), šířka = 4 × výška (buňka atlasu 512 × 128); s dálkou do do_m[1] ×1,25 (Havran kupy dál větší: menší karta by v dálce pixelově zmizela)",
+  "karty": 3,
+  "pata_r_m": 1.3,
+  "_pata_r_m": "sklon terénu pod kartou se měří na ±pata_r_m (polovina šířky karty); stebla.gdshader kartu zkosí podle svahu – spodní hrana leží na zemi, na svahu nevisí ani se nezaboří (Míša 20. 11.: žádné „rostliny lezoucí ze země“). 23. 11. první verze pata v nejnižším bodě okolí: na svahu pod hradem byly karty celé pod terénem",
+  "ponor_m": 0.04,
+  "_ponor_m": "pata karty o tolik pod terén (navíc k 0,04 m jemných trsů) – hustý spodek karty bez mezery u země",
+  "nove_za_snimek": 1,
+  "tridy_nasobek": 1.0,
+  "atlas": {
+   "soubor": "res://textury/trava_pas_atlas.png",
+   "bunka_px": [
+    512,
+    128
+   ],
+   "sloupce": 2,
+   "radky": 4,
+   "_trsy": "buňky zdrojového atlasu trava_atlas.png: 0 louka, 1 střední, 2 suchá, 3 byliny, 4 kapradí, 5 květy",
+   "varianty": [
+    {
+     "jm": "louka zelená",
+     "trsy": [
+      0,
+      1,
+      3
+     ],
+     "vahy": [
+      0.7,
+      0.2,
+      0.1
+     ],
+     "pocet": 16
+    },
+    {
+     "jm": "louka s květy",
+     "trsy": [
+      0,
+      5,
+      3,
+      1
+     ],
+     "vahy": [
+      0.55,
+      0.2,
+      0.1,
+      0.15
+     ],
+     "pocet": 16
+    },
+    {
+     "jm": "pastva nízká",
+     "trsy": [
+      0,
+      3
+     ],
+     "vahy": [
+      0.85,
+      0.15
+     ],
+     "pocet": 20,
+     "vyska": [
+      0.4,
+      0.7
+     ]
+    },
+    {
+     "jm": "suchá",
+     "trsy": [
+      2,
+      0
+     ],
+     "vahy": [
+      0.6,
+      0.4
+     ],
+     "pocet": 14
+    },
+    {
+     "jm": "bylinná",
+     "trsy": [
+      3,
+      0,
+      5,
+      4
+     ],
+     "vahy": [
+      0.4,
+      0.35,
+      0.15,
+      0.1
+     ],
+     "pocet": 14
+    },
+    {
+     "jm": "kapradí a paseka",
+     "trsy": [
+      4,
+      0,
+      3
+     ],
+     "vahy": [
+      0.5,
+      0.35,
+      0.15
+     ],
+     "pocet": 12
+    },
+    {
+     "jm": "vysoká",
+     "trsy": [
+      1,
+      0,
+      2
+     ],
+     "vahy": [
+      0.5,
+      0.35,
+      0.15
+     ],
+     "pocet": 22
+    },
+    {
+     "jm": "louka zelená B",
+     "trsy": [
+      0,
+      3,
+      1
+     ],
+     "vahy": [
+      0.75,
+      0.15,
+      0.1
+     ],
+     "pocet": 18
+    }
+   ]
+  },
+  "druhy": {
+   "pozn": "podíl variant atlasu (pořadí atlas.varianty) podle třídy stanoviště; _ = ostatní (les na světle, okraj, paseka, břeh)",
+   "louka_kosena": [
+    0.3,
+    0.15,
+    0.1,
+    0.05,
+    0.07,
+    0.0,
+    0.05,
+    0.28
+   ],
+   "pastvina": [
+    0.25,
+    0.05,
+    0.45,
+    0.05,
+    0.05,
+    0.0,
+    0.0,
+    0.15
+   ],
+   "pole": [
+    0.25,
+    0.15,
+    0.05,
+    0.12,
+    0.1,
+    0.0,
+    0.13,
+    0.2
+   ],
+   "zemedelstvi": [
+    0.25,
+    0.15,
+    0.05,
+    0.12,
+    0.1,
+    0.0,
+    0.13,
+    0.2
+   ],
+   "cesta": [
+    0.2,
+    0.1,
+    0.2,
+    0.1,
+    0.25,
+    0.0,
+    0.05,
+    0.1
+   ],
+   "breh": [
+    0.2,
+    0.05,
+    0.0,
+    0.0,
+    0.3,
+    0.15,
+    0.2,
+    0.1
+   ],
+   "_": [
+    0.25,
+    0.1,
+    0.1,
+    0.07,
+    0.15,
+    0.08,
+    0.1,
+    0.15
+   ]
+  },
+  "automatika": "rozpocty.json automatika stupeň 1 „střední pás blíž“ (pas_dosah): násobek dosahu pásu – méně buněk = méně troj., ubírá se jako první",
+  "tablet": "NEOVERENO (vzhled i výkon kontroluje Míša na tabletu)"
+ }
 }
