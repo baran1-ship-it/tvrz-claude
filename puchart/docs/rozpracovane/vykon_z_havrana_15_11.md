@@ -97,3 +97,15 @@ měření tabletu (rozpočet scén 2,1 M troj.).
 | les tráva stínovaná / unshaded | – | 31,1 / 43,3, 73 · 30,2 / 39,1, 36 |
 VRAM 859 → 707 MB (Godot textury 444 MB). Zásoba MM: znovu použito 37 926, nových 19 574. Les na prvním úseku
 horší než „les znovu“ (náběh/načítání) – reálně ~30 ms p50, p95 ~40 ms. Unshaded tráva p95 −4 ms, poloviční záseky.
+
+## Měření tabletu 23. 11. (APK fc25f38, Míša, misa_23_11_mereni.jpg) – p50 / p95 ms
+| úsek | 23. 11. |
+|---|---|
+| hrad | 17,2 / 20,5 |
+| les | 34,2 / 49,7 (176 záseků > 40 ms, troj 2,23 M) |
+| voda | 26,8 / 43,5 |
+| výhled | 24,6 / 32,6 |
+| les bez trávy | 26,3 / 35,5 |
+| les tráva unshaded | 28,7 / 42,8 |
+VRAM ~735 MB. Les zhoršen proti 19. 11. (střední pás trávy kartami + kamenivo + E4 modely) – kandidát na úsporu:
+hustota karet středního pásu, dosah unshaded trávy. 23. 11. odpoledne: voda +13 % trojúhelníků (pás brodu, chyby 426).
