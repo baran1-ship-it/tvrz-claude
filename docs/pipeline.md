@@ -76,7 +76,7 @@ Postup u každé změny světa:
 | kdy | co | příkaz | trvání (tento stroj) |
 |---|---|---|---|
 | **po každé změně** | rychlý režim bez Godotu a stavby světa: test smyslu, tabulky chyb, `--check-only` změněných .gd, platnost JSON v `pravidla/`, barvy vrcholů – souběžně | `tools/rychle.sh` (`--vse-gd` = všechny skripty) | 23–28 s (změřeno 23. 11.) |
-| snímek opraveného místa + jeho testy | testy a snímky v **jednom** běhu = jedna stavba světa (dřív `testy` + `foto` = dvě) | `flock build/beh/godot.lock tools/beh.sh <jm> testyfoto "test1,test2" "oci;x,z,tx,tz;soubor.png"` | viz plan_18_11 E |
+| snímek opraveného místa + jeho testy | testy a snímky v **jednom** běhu = jedna stavba světa (dřív `testy` + `foto` = dvě) | `flock build/beh/godot.lock tools/beh.sh <jm> testyfoto "test1,test2" "oci;x,z,tx,tz;soubor.png"` | 585 s místo 277 + 521 = 798 s (5 testů + 1 snímek, 23. 11.) |
 | **před vydáním** | testy po skupinách podle otisku vstupů (`pravidla/hlidaci_skupiny.json`): skupina s nezměněnými vstupy a posledním OK se převezme, ostatní běží v jednom Godotu; výsledek skupiny se zapíše hned (`build/hlidaci_otisky.json`, restart kontejneru nevadí) | `flock build/beh/godot.lock tools/beh.sh <jm> skupiny [skupina,…\|vse] ["snímky"]`; přehled `python3 tools/hlidaci_skupiny.py stav` | jen změněné skupiny |
 | **jen před velkým vydáním** | vše znovu bez převzetí | `HLIDACI_VSE=1 … beh.sh <jm> skupiny vse` | celá sada ~1,5 h (13. 11.) |
 
