@@ -3129,6 +3129,19 @@ func _clona_vsi() -> void:
 			var key := "_".join(cs.slice(0, cs.size() - 3))
 			if not obal.has(key):
 				obal[key] = mmi.multimesh.mesh.get_aabb()
+	# stromy (23. 11.): nejsou v bunkach dat (_rost_uzly jen druhy do 100 m s meta tok), ale primo pod korenem rostlin
+	# jako klic_bx_bz - bez nich test nepocital zadny strom (obal chybel = kus preskocen), ani lipy a jablone clon
+	if sv._rost_root:
+		for c: Node in sv._rost_root.get_children():
+			var mt := c as MultiMeshInstance3D
+			if mt == null or mt.has_meta("tok") or mt.multimesh == null or mt.multimesh.mesh == null or String(mt.name).ends_with("_tvar"):
+				continue
+			var ct := String(mt.name).split("_")
+			if ct.size() < 3:
+				continue
+			var kt := "_".join(ct.slice(0, ct.size() - 2))
+			if not obal.has(kt):
+				obal[kt] = mt.multimesh.mesh.get_aabb()
 	for key: String in sv.data["rostliny"]:
 		if not obal.has(key) or key.contains("daleko"):
 			continue

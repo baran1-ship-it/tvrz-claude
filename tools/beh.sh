@@ -83,20 +83,35 @@ else
   while [ -f /tmp/godot_beh.vyhradne ] && kill -0 "$(cat /tmp/godot_beh.vyhradne 2>/dev/null)" 2>/dev/null; do
     [ $(( $(date +%s) - tc0 )) -gt $cek ] && { echo "BEH $jm: CHYBA ceka export $((cek/60)) min"; exit 3; }; sleep 5; done
   if ! flock -s -w $cek 9; then echo "BEH $jm: CHYBA zamek obsazeny $((cek/60)) min ($(cat /tmp/godot_beh.kdo* 2>/dev/null | tr '\n' ' '))"; exit 3; fi
+  # E5 (plan 18. 11., 23. 11.): misto se prideli, jen kdyz se vejde do pameti - soucet rezervaci obsazenych mist
+  # + tento beh <= MemTotal - pasma.test.beh_pamet_rezerva_mb; rezervace podle druhu pasma.test.beh_pamet_mb (namereno
+  # 23. 11.: headless testy spicka 3,1 GB, s obrazem (foto, testyfoto) 7,4 GB) -> 2 testy nebo testy + foto naraz, 2 foto ne
+  read pamet_mb rez_mb < <(python3 -c "import json;t=json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test'];p=t['beh_pamet_mb'];print(int(p.get('$druh',p['cmd'])),int(t['beh_pamet_rezerva_mb']))")
+  celk_mb=$(awk '/MemTotal/{print int($2/1024)}' /proc/meminfo)
   misto=""
   while [ -z "$misto" ]; do
     for i in $(seq 1 "$mist"); do
       exec 8>/tmp/godot_beh.misto$i
-      if flock -n 8; then misto=$i; break; fi
+      if flock -n 8; then
+        obs=0
+        for j in $(seq 1 "$mist"); do
+          [ "$j" = "$i" ] && continue
+          if ! flock -n /tmp/godot_beh.misto$j true 2>/dev/null; then
+            r=$(awk '{print $3}' /tmp/godot_beh.kdo$j 2>/dev/null); obs=$(( obs + ${r:-$pamet_mb} ))
+          fi
+        done
+        if [ $(( obs + pamet_mb )) -le $(( celk_mb - rez_mb )) ]; then misto=$i; break; fi
+        exec 8>&-
+      fi
     done
     if [ -z "$misto" ]; then
-      [ $(( $(date +%s) - tc0 )) -gt $cek ] && { echo "BEH $jm: CHYBA vsechna mista obsazena $((cek/60)) min"; exit 3; }; sleep 5
+      [ $(( $(date +%s) - tc0 )) -gt $cek ] && { echo "BEH $jm: CHYBA vsechna mista obsazena nebo malo pameti $((cek/60)) min"; exit 3; }; sleep 5
     fi
   done
 fi
 echo "$(date '+%F %T') $jm $druh cekal $(( $(date +%s) - tc0 )) s misto $misto" >> build/beh/cekani.log
 kdo=/tmp/godot_beh.kdo; [ "$misto" != vyhradne ] && kdo=/tmp/godot_beh.kdo$misto
-echo "$jm $(date +%T)" > $kdo; export BEH_ZAMEK=1
+echo "$jm $(date +%T) ${pamet_mb:-0}" > $kdo; export BEH_ZAMEK=1
 trap 'rm -f '"$kdo" EXIT
 # disk (28. 10.: plny disk = useknute textury, poskozeny import i nastaveni editoru): pod pasma test beh_volno_mb
 # se nic nespusti; prubeh hlida hlidac na pozadi a pri kriticke mezi beh zastavi (lepsi CHYBA nez rozbita data)

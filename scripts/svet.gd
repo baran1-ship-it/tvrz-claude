@@ -14650,18 +14650,74 @@ func _druhy_mimo_katalog() -> void:
 
 ## Vstup kroku 8: kazdy kus z Blenderu a z kroku 6 na stanovisti podle masek kroku 7 (druhy.json vyjma).
 func _vstup_druhu() -> void:
+	# E3 (23. 11., ~16 s na PC): vysledek = vyska po dosednuti a ktere kusy zustanou, po druzich (mezipamet stavby)
+	var ulozene: Variant = kes_nacti("vstup_druhu")
+	if ulozene is Dictionary and _vstup_druhu_z_kes(ulozene):
+		print("vstup druhu: z mezipameti")
+		return
 	_dosednuti_dat()
+	var kes := {}
 	var pocty := {}
 	for k: String in data["rostliny"].keys():
 		var zust: Array = []
+		var ys := PackedFloat32Array()
+		var drz := PackedByteArray()
 		for t: Array in data["rostliny"][k]:
+			ys.append(float(t[7]))
 			if druh_smi_hra(k, float(t[3]), float(t[11]), float(t[7]), Vector3(float(t[0]), float(t[4]), float(t[8])).length()):
 				zust.append(t)
+				drz.append(1)
+			else:
+				drz.append(0)
+		kes[k] = [ys, drz]
 		var n := (data["rostliny"][k] as Array).size() - zust.size()
 		if n > 0:
 			pocty[druh_klice(k)] = int(pocty.get(druh_klice(k), 0)) + n
 		data["rostliny"][k] = zust
+	kes_uloz("vstup_druhu", kes)
 	print("vstup druhu (stanoviste z masek kroku 7, druhy.json vyjma, voda): mimo stanoviste %s" % str(pocty))
+
+
+func _vstup_druhu_z_kes(kes: Dictionary) -> bool:
+	for k: String in data["rostliny"].keys():
+		if not kes.has(k) or ((kes[k] as Array)[0] as PackedFloat32Array).size() != (data["rostliny"][k] as Array).size():
+			return false                       # jine vstupy nez pri ulozeni (nemelo by nastat - klic je otisk vstupu)
+	for k: String in data["rostliny"].keys():
+		var ys: PackedFloat32Array = kes[k][0]
+		var drz: PackedByteArray = kes[k][1]
+		var zust: Array = []
+		var a: Array = data["rostliny"][k]
+		for i in a.size():
+			if drz[i] == 1:
+				var t: Array = a[i]
+				t[7] = ys[i]
+				zust.append(t)
+		data["rostliny"][k] = zust
+	return true
+
+
+## E3 (23. 11.): krok, ktery jen pridava instance do data.rostliny (deterministicke seminko) - pridane kusy v mezipameti
+## stavby; pri shode klice se jen pripoji.
+func _kes_pridani(krok: String, fn: Callable) -> void:
+	var r: Dictionary = data["rostliny"]
+	var ulozene: Variant = kes_nacti(krok)
+	if ulozene is Dictionary:
+		for k: String in ulozene:
+			if not r.has(k):
+				r[k] = []
+			(r[k] as Array).append_array(ulozene[k])
+		print("%s: z mezipameti" % krok)
+		return
+	var pred := {}
+	for k: String in r:
+		pred[k] = (r[k] as Array).size()
+	fn.call()
+	var pridane := {}
+	for k: String in r:
+		var n0 := int(pred.get(k, 0))
+		if (r[k] as Array).size() > n0:
+			pridane[k] = (r[k] as Array).slice(n0)
+	kes_uloz(krok, pridane)
 
 
 ## Dosednuti v datech (pasma dosednuti): kazda instance z exportu, ktera visi nad hotovym terenem (_teren_y) vic nez
@@ -15704,7 +15760,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	# kryt 7 (jehlicnan / listnac podle porostu) a kryt nemeni (mlade stromy a lem uvnitr a na kraji zapoje)
 	_les_hustsi()
 	_tk("_les_hustsi")
-	_lesni_plast()
+	_kes_pridani("lesni_plast", _lesni_plast)
 	_tk("_lesni_plast")
 	_okraj_novych_lesu()
 	_tk("_okraj_novych_lesu")
