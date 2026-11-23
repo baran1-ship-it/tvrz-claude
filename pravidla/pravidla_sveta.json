@@ -1771,6 +1771,8 @@
    "beh_volno_mb": 800,
    "beh_kriticke_mb": 300,
    "beh_soubezne": 2,
+   "kes_bez_promennych": ["TVRZ_TEST", "TVRZ_TEST_JEN", "TVRZ_TEST_LIMIT", "TVRZ_TESTYFOTO", "TVRZ_MERENI", "TVRZ_BODY", "TVRZ_STANI_S"],
+   "_kes_bez_promennych": "E3 (plan 18. 11., 23. 11.): mezipamet stavby sveta na PC (svet.kes_otisk) - promenne TVRZ_*, ktere stavbu nemeni (vyber testu a snimku); ostatni TVRZ_* jsou v klici (TVRZ_MOBIL, TVRZ_LOUKA_VYP...). TVRZ_BEZ_CACHE mezipamet vypne.",
    "beh_cekani_s": 5400,
    "krok_kvality_max_ms": 500,
    "_krok_kvality_max_ms": "test_vykon kroky_kvality (Misa 11. 11., trasa 0.99997): uplatneni kroku automaticke kvality + nejdelsi snimek po nem (headless = skripty); tablet mel 2,7-3,5 s",

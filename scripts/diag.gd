@@ -1,4 +1,5 @@
 extends Node
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Hlidac vykonu: kazde 2 s zapise do user://diag.log stav hry (FPS, pamet, graficka pamet, trojuhelniky,
 ## volani kresleni, objekty, poloha hrace, bunky louky). Pri startu pozna, ze hra minule spadla
 ## (nezmizel znacka "bezi"), a zpravu o padu (posledni zaznamy + chyby z logu Godotu) ukaze a zkopiruje do schranky.
@@ -877,7 +878,7 @@ func _zapis(pozn: String, hned := true) -> void:
 		_varovano = Time.get_ticks_msec() / 1000.0
 		push_warning("VAROVANI RAM %d MB (prah 1200)" % _ram)
 	var rez := "plny" if bool(main.get("mereni_on")) else ("jenfps" if bool(main.get("mereni_fps")) else "vyp")
-	var r := "[panel %s, snimek prumer %.1f ms] " % [rez, _sn_prumer] + "%ds fps %d (nejdelsi snimek %.0f ms, proces max %.1f ms) | halda %d MB (max %d, volna %d, pss %d, trend %s) | gpu %d MB (tex %d, buf %d) | troj %.1f M | kresleni %d | obj %d | uzly %d (objekty %d, zdroje %d, sirotci %d) | %s | hrac %d,%d,%d %s" % [
+	var r := "[panel %s, snimek prumer %.1f ms] " % [rez, _sn_prumer] + "%ds fps %d (nejdelsi snimek %.0f ms, proces max %.1f ms) | halda %d MB (max %d, volna %d, pss %d, trend %s) | gpu %d MB (tex %d, buf %d) | troj %.1f M (stin %.2f M) | kresleni %d | obj %d | uzly %d (objekty %d, zdroje %d, sirotci %d) | %s | hrac %d,%d,%d %s" % [
 		(Time.get_ticks_msec() - _start) / 1000,
 		Engine.get_frames_per_second(), _max_dt * 1000.0, _cpu_max * 1000.0,
 		_ram, _ram_max, _volna, _pss, "N/A" if is_nan(trend_mb_min()) else "%+.0f" % trend_mb_min(),
@@ -885,6 +886,7 @@ func _zapis(pozn: String, hned := true) -> void:
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
+		get_viewport().get_render_info(Viewport.RENDER_INFO_TYPE_SHADOW, Viewport.RENDER_INFO_PRIMITIVES_IN_FRAME) / 1000000.0,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 		Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 		Performance.get_monitor(Performance.OBJECT_NODE_COUNT), Performance.get_monitor(Performance.OBJECT_COUNT),
@@ -1053,11 +1055,8 @@ var _sk_troj := {}                     # Mesh RID -> troj.
 var _skup_text := "-"
 var _sk_zas: Array = []
 var _sk_nove: Array = []
-const SKUPINY := [["trava", ["louka_", "kupy", "Louka"]], ["stromy", ["dub", "buk", "lipa", "smrk", "borovice", "briza", "olse",
-		"vrba", "imp_", "impostor", "fir_", "pine_"]], ["puda", ["kapradi", "ker_imp", "ker_husty", "ker_kulaty", "shrub", "sipek", "bez_", "mech",
-		"moss", "fern", "celandine", "periwinkle", "bark", "dry_", "tree_stump", "root_", "dead_"]],
-		["byliny+kvety", ["kopretiny", "kvety", "dandelion", "nettle", "byliny", "celandine", "periwinkle", "weed"]], ["skaly", ["skala", "balvan", "kamen", "rock"]],
-		["voda", ["voda", "Reka", "Prikop", "Potok", "rakos", "orobinec"]], ["teren", ["Teren", "Nadvori", "zaplata"]]]
+# K1 (23. 11., rozbor_gpu_15_11): skupiny panelu podle predpon jmen z dat kontroly.json diag_skupiny (drive pole v kodu)
+var SKUPINY: Array = Pravidla.cti("kontroly", "diag_skupiny")
 
 
 func _skupina(n: Node) -> String:

@@ -1340,15 +1340,16 @@ func _nacti_kryti() -> void:
 	var by := FileAccess.get_file_as_bytes(ROZSEV + "kryti.bin")
 	var o := 0
 	var sz := 4 + n * n / 8
+	var t0 := Time.get_ticks_usec()
+	var lut: Array = Svet._bity_tabulka()        # 23. 11.: po bajtech (drive 4096 bitu na bunku v GDScriptu)
 	while o + sz <= by.size():
 		var c := Vector2i(by.decode_s16(o), by.decode_s16(o + 2))
 		var kr := PackedByteArray()
-		kr.resize(n * n)
-		for i in n * n:
-			kr[i] = (by[o + 4 + (i >> 3)] >> (i & 7)) & 1
+		for j in n * n / 8:
+			kr.append_array(lut[by[o + 4 + j]])
 		_kr_tab[c] = kr
 		o += sz
-	print("louka: kryti %d bunek" % _kr_tab.size())
+	print("louka: kryti %d bunek za %.1f ms" % [_kr_tab.size(), (Time.get_ticks_usec() - t0) / 1000.0])
 
 
 func _mm(root: Node3D, mesh: Mesh, xfs: Array, cen: Vector3, dos0: float, dos1: float, stin: bool, cust: Array = [], fade := 14.0) -> void:

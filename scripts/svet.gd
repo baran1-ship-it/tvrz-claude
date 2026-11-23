@@ -2506,9 +2506,40 @@ func v_nove_zahrade(x: float, z: float) -> int:
 func _zaplaty(root: Node3D) -> void:
 	if koryto == null:
 		return
-	var space := root.get_world_3d().direct_space_state
+	# E3 (23. 11.): vysledek (vrcholy zaplat) v mezipameti stavby - paprsky po bunkach 1 m podel Bystrice ~9 s na PC
+	var ulozene: Variant = kes_nacti("zaplaty")
+	var vrcholy := PackedVector3Array()
+	var n := 0
+	if ulozene is PackedVector3Array:
+		vrcholy = ulozene
+		n = vrcholy.size() / 6
+	else:
+		vrcholy = _zaplaty_vypocet(root)
+		n = vrcholy.size() / 6
+		kes_uloz("zaplaty", vrcholy)
+	if n == 0:
+		return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for v: Vector3 in vrcholy:
+		st.set_color(Color(0, 0.85, 0, 1))
+		st.set_uv(Vector2(v.x, v.z))
+		st.add_vertex(v)
+	st.generate_normals()
+	st.generate_tangents()                 # bez UV a tecen kreslil zem.gdshader zaplatu sede (normala z mapy = 0)
+	var mi := MeshInstance3D.new()
+	mi.name = "Teren_zaplata"
+	mi.mesh = st.commit()
+	mi.material_override = material("zem")
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(mi)
+	_trimesh(mi)
+	print("zaplaty terenu u potoka: %d bunek 1 m%s" % [n, " (z mezipameti)" if ulozene is PackedVector3Array else ""])
+
+
+func _zaplaty_vypocet(root: Node3D) -> PackedVector3Array:
+	var vrcholy := PackedVector3Array()
+	var space := root.get_world_3d().direct_space_state
 	var hotovo := {}
 	var n := 0
 	var kr = koryto
@@ -2548,22 +2579,9 @@ func _zaplaty(root: Node3D) -> void:
 				var v01 := Vector3(p0.x, minf(_vyska(p0.x, p1.y), kr.strop(p0.x, p1.y)) - 0.03, p1.y)
 				var v11 := Vector3(p1.x, minf(_vyska(p1.x, p1.y), kr.strop(p1.x, p1.y)) - 0.03, p1.y)
 				for v: Vector3 in [v00, v11, v10, v00, v01, v11]:
-					st.set_color(Color(0, 0.85, 0, 1))
-					st.set_uv(Vector2(v.x, v.z))
-					st.add_vertex(v)
+					vrcholy.append(v)
 				n += 1
-	if n == 0:
-		return
-	st.generate_normals()
-	st.generate_tangents()                 # bez UV a tecen kreslil zem.gdshader zaplatu sede (normala z mapy = 0)
-	var mi := MeshInstance3D.new()
-	mi.name = "Teren_zaplata"
-	mi.mesh = st.commit()
-	mi.material_override = material("zem")
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	root.add_child(mi)
-	_trimesh(mi)
-	print("zaplaty terenu u potoka: %d bunek 1 m" % n)
+	return vrcholy
 
 
 ## Kuly mostu (Misa 0.62: "podpery konci ve vzduchu"): kuly z modelu stoji na puvodnim terenu, zarez potoka
@@ -9077,10 +9095,12 @@ func _cesty_do_terenu(root: Node3D) -> int:
 			for stary in DirAccess.get_files_at(cache.get_base_dir()):
 				if stary.begins_with("cesty_"):
 					DirAccess.remove_absolute(cache.get_base_dir().path_join(stary))
-			var f := FileAccess.open_compressed(cache, FileAccess.WRITE, FileAccess.COMPRESSION_ZSTD)
+			var tmp_c := cache + ".%d.tmp" % OS.get_process_id()      # soubezne behy nectou rozepsany soubor
+			var f := FileAccess.open_compressed(tmp_c, FileAccess.WRITE, FileAccess.COMPRESSION_ZSTD)
 			if f:
 				f.store_var(vys)
 				f.close()
+				DirAccess.rename_absolute(tmp_c, cache)
 	var tv := Time.get_ticks_msec()
 	var hotove := {}                    # mi -> {si: vysledek}
 	for i in ulohy.size():
@@ -9119,15 +9139,110 @@ func _cesty_do_terenu(root: Node3D) -> int:
 	return nt
 
 
-## Soubor ulozenych cest v terenu pro toto sestaveni (res://sestaveni.json: commit + manifest); bez sestaveni (editor,
-## testy na PC) se neuklada. TVRZ_BEZ_CACHE vypne.
+## Soubor ulozenych cest v terenu pro tento svet (klic kes_otisk); bez klice (TVRZ_BEZ_CACHE) se neuklada.
 func _cesty_cache_cesta() -> String:
-	if OS.has_environment("TVRZ_BEZ_CACHE") or (not OS.has_environment("TVRZ_CACHE") and (OS.has_feature("editor") or not OS.has_feature("template"))) or not FileAccess.file_exists("res://sestaveni.json"):
+	var o := kes_otisk()
+	return "" if o == "" else "user://cache/cesty_%s_%d.bin" % [o, CESTA_VERZE]
+
+
+## E3 (plan 18. 11., Misa 23. 11. „at testy nejdou hodiny“): mezipamet stavby sveta. Klic = otisk vseho, z ceho se svet
+## stavi - sestaveni (APK, tablet): res://sestaveni.json commit + manifest dat (jako drive cesty); PC (testy, snimky,
+## vyvoj): build/export_otisk.json + md5 vsech scripts/*.gd, pravidla/**/*.json, tools/krok_b/*.json, modely/louka/*.bin,
+## seznam souboru modely/ s casem zmeny a promenne TVRZ_* krome vyberu testu/snimku (pasma.test.kes_bez_promennych).
+## Zmena kteréhokoli skriptu nebo pravidla = novy klic: zadna rucni „verze kroku“, kterou by slo zapomenout zvysit.
+## TVRZ_BEZ_CACHE vypne. Soubory user://cache/<krok>_<klic>.bin, stare soubory kroku se pri zapisu mazou (disk).
+var _kes_klic := ""
+
+
+func kes_otisk() -> String:
+	if _kes_klic != "":
+		return "" if _kes_klic == "-" else _kes_klic
+	_kes_klic = "-"
+	if OS.has_environment("TVRZ_BEZ_CACHE"):
 		return ""
-	var j = JSON.parse_string(FileAccess.get_file_as_string("res://sestaveni.json"))
-	if not (j is Dictionary):
-		return ""
-	return "user://cache/cesty_%s_%s_%d.bin" % [String(j.get("commit", "")), String(j.get("manifest", "")), CESTA_VERZE]
+	if OS.has_feature("template"):
+		if not FileAccess.file_exists("res://sestaveni.json"):
+			return ""
+		var j = JSON.parse_string(FileAccess.get_file_as_string("res://sestaveni.json"))
+		if not (j is Dictionary):
+			return ""
+		_kes_klic = "%s_%s" % [String(j.get("commit", "")), String(j.get("manifest", ""))]
+		return _kes_klic
+	var t0 := Time.get_ticks_msec()
+	var ctx := HashingContext.new()
+	ctx.start(HashingContext.HASH_MD5)
+	var obsah: Array = ["res://build/export_otisk.json"]
+	_kes_soubory("res://scripts", ".gd", obsah, false)
+	_kes_soubory("res://pravidla", ".json", obsah, true)
+	_kes_soubory("res://tools/krok_b", ".json", obsah, false)
+	_kes_soubory("res://modely/louka", ".bin", obsah, false)
+	obsah.sort()
+	for f: String in obsah:
+		if FileAccess.file_exists(f):
+			ctx.update((f + FileAccess.get_md5(f)).to_utf8_buffer())
+	var cas: Array = []
+	_kes_soubory("res://modely", "", cas, true)
+	cas.sort()
+	for f: String in cas:
+		ctx.update(("%s %d" % [f, FileAccess.get_modified_time(f)]).to_utf8_buffer())
+	# promenne prostredi (Linux): TVRZ_* meni stavbu (TVRZ_MOBIL, TVRZ_LOUKA_VYP...), krome vyberu testu a snimku
+	var bez: Array = pasma()["test"]["kes_bez_promennych"]
+	var env := FileAccess.get_file_as_bytes("/proc/self/environ").get_string_from_utf8() if FileAccess.file_exists("/proc/self/environ") else ""
+	var prom: Array = []
+	for e: String in env.split(String.chr(0), false):
+		var k := e.get_slice("=", 0)
+		if k.begins_with("TVRZ_") and not bez.has(k):
+			prom.append(e)
+	prom.sort()
+	ctx.update(str(prom).to_utf8_buffer())
+	_kes_klic = "pc" + ctx.finish().hex_encode().left(16)
+	print("MEZIPAMET klic %s (%d souboru, %d v modely, promenne %s) %d ms" % [_kes_klic, obsah.size(), cas.size(), str(prom), Time.get_ticks_msec() - t0])
+	return _kes_klic
+
+
+func _kes_soubory(dir: String, pripona: String, out: Array, rekurz: bool) -> void:
+	var d := DirAccess.open(dir)
+	if d == null:
+		return
+	for f in d.get_files():
+		if pripona == "" or f.ends_with(pripona):
+			out.append(dir.path_join(f))
+	if rekurz:
+		for sd in d.get_directories():
+			_kes_soubory(dir.path_join(sd), pripona, out, true)
+
+
+## Ulozeny vysledek kroku (null = neni / klic jiny / vypnuto).
+func kes_nacti(krok: String) -> Variant:
+	var o := kes_otisk()
+	var cesta := "user://cache/%s_%s.bin" % [krok, o]
+	if o == "" or not FileAccess.file_exists(cesta):
+		return null
+	var f := FileAccess.open_compressed(cesta, FileAccess.READ, FileAccess.COMPRESSION_ZSTD)
+	if f == null:
+		return null
+	var d: Variant = f.get_var()
+	f.close()
+	return d
+
+
+## Zapis vysledku kroku: nejdriv do .tmp, pak prejmenovat (soubezne behy nectou rozepsany soubor); starsi klice kroku pryc.
+func kes_uloz(krok: String, data_kroku: Variant) -> void:
+	var o := kes_otisk()
+	if o == "":
+		return
+	DirAccess.make_dir_recursive_absolute("user://cache")
+	for stary in DirAccess.get_files_at("user://cache"):
+		if stary.begins_with(krok + "_") and not stary.contains(o):
+			DirAccess.remove_absolute("user://cache".path_join(stary))
+	var cesta := "user://cache/%s_%s.bin" % [krok, o]
+	var tmp := cesta + ".%d.tmp" % OS.get_process_id()
+	var f := FileAccess.open_compressed(tmp, FileAccess.WRITE, FileAccess.COMPRESSION_ZSTD)
+	if f == null:
+		return
+	f.store_var(data_kroku)
+	f.close()
+	DirAccess.rename_absolute(tmp, cesta)
 
 
 ## Hloubka v povrchu cesty (|lat| / okraj), kde ma jeji osa prednost pred jinou blizsi osou (cesta_lat). Okraj hliny
@@ -13135,13 +13250,15 @@ func _nacti_kryti() -> void:
 	if not kryti_tab.is_empty() or not FileAccess.file_exists(KRYTI_SOUBOR):
 		return
 	var by := FileAccess.get_file_as_bytes(KRYTI_SOUBOR)
+	var t0 := Time.get_ticks_usec()
+	# 23. 11. (kontrola: cyklus 4096 bitu na bunku v GDScriptu pri nacitani): rozbaleni po bajtech tabulkou 256 x 8
+	var lut := _bity_tabulka()
 	var o := 0
 	while o + 516 <= by.size():
 		var c := Vector2i(by.decode_s16(o), by.decode_s16(o + 2))
 		var kr := PackedByteArray()
-		kr.resize(4096)
-		for i in 4096:
-			kr[i] = (by[o + 4 + (i >> 3)] >> (i & 7)) & 1
+		for j in 512:
+			kr.append_array(lut[by[o + 4 + j]])
 		kryti_tab[c] = kr
 		o += 516
 	# pevny povrch (louka._zasah, pasma predmet kryti_povrch_do_m; plan_18_11 B7): 3 = zakryto, ale ne strechou -
@@ -13152,10 +13269,28 @@ func _nacti_kryti() -> void:
 		while op + 516 <= bp.size():
 			var cp := Vector2i(bp.decode_s16(op), bp.decode_s16(op + 2))
 			if kryti_tab.has(cp):
-				for i in 4096:
-					if (bp[op + 4 + (i >> 3)] >> (i & 7)) & 1:
-						kryti_tab[cp][i] = 3
+				var kt: PackedByteArray = kryti_tab[cp]
+				for j in 512:
+					var bj := bp[op + 4 + j]
+					if bj != 0:
+						for q in 8:
+							if (bj >> q) & 1:
+								kt[j * 8 + q] = 3
+				kryti_tab[cp] = kt
 			op += 516
+	print("kryti: %d bunek nacteno za %.1f ms" % [kryti_tab.size(), (Time.get_ticks_usec() - t0) / 1000.0])
+
+
+## Tabulka bajt -> 8 bajtu (bit i = 0/1), pro rozbaleni bitovych masek kryti po bajtech misto po bitech.
+static func _bity_tabulka() -> Array:
+	var lut: Array = []
+	for b in 256:
+		var p := PackedByteArray()
+		p.resize(8)
+		for k in 8:
+			p[k] = (b >> k) & 1
+		lut.append(p)
+	return lut
 
 
 ## Cesta z tvrze (sit Teren_cesta, Misa 0.60: "cesta z hradu plna travy"): louka i rozsevy ji braly jako teren
