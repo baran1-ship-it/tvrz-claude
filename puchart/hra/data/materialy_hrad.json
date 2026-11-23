@@ -199,5 +199,35 @@
   ],
   "spina": 1.0
  },
- "pozn_koruna_narozi": "Míša 10. 11. (snímek brány B, zakroužkované stínky a nároží): stínky cimbuří a nárožní kameny působily jako hladké světlé bloky – omítka a malta ostrůvky přes celý malý kus. Na koruně a nárožích omítka opadá první (déšť, mráz; KCD fotky misa_kcd_*: stínky a nároží holý kámen) → kryti −2 = holý kámen, malta jen ve spárách."
+ "pozn_koruna_narozi": "Míša 10. 11. (snímek brány B, zakroužkované stínky a nároží): stínky cimbuří a nárožní kameny působily jako hladké světlé bloky – omítka a malta ostrůvky přes celý malý kus. Na koruně a nárožích omítka opadá první (déšť, mráz; KCD fotky misa_kcd_*: stínky a nároží holý kámen) → kryti −2 = holý kámen, malta jen ve spárách.",
+ "zdivo_omitka_opadana": {
+  "kryti": 0.6,
+  "tint": [
+   0.92,
+   0.88,
+   0.78
+  ],
+  "kamen_tint": [
+   0.78,
+   0.76,
+   0.72
+  ],
+  "spina": 1.1,
+  "pozn": "23. 11. (plán F bod 2, Míša 18. 11.): paláce a obytné místnosti – vápenná omítka místy opadaná, kámen vykukuje v opadaných skvrnách (kryti 0,6 < 0,85 souvislá omítka); předlohy docs/reference/zdivo_kcd_18_11/09–12, výběr zdí pravidla/svet/hrad_puchart.json omitka_zdiva"
+ },
+ "zdivo_rezne": {
+  "kryti": -1.4,
+  "tint": [
+   0.6,
+   0.55,
+   0.47
+  ],
+  "kamen_tint": [
+   0.66,
+   0.64,
+   0.6
+  ],
+  "spina": 1.4,
+  "pozn": "23. 11. (plán F bod 2): sklep a podzemí režné zdivo z lomového kamene bez omítky, malta jen ve spárách, tmavší a vlhčí než hradby (předloha zdivo_kcd_18_11/10 arkády a podezdívka); výběr zdí hrad_puchart.json omitka_zdiva.sklep"
+ }
 }

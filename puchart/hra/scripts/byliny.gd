@@ -23,6 +23,8 @@ func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json") -> v
 	st = load("res://data/stanoviste.png").get_image()
 	sj_c = sj; _st_w = st.get_width(); _st_h = st.get_height()
 	if ResourceLoader.exists("res://textury/maska_cesty.png"): _mc = (load("res://textury/maska_cesty.png") as Texture2D).get_image()
+	_kc = (JSON.parse_string(FileAccess.get_file_as_string("res://data/louka.json")) as Dictionary).get("kraj_cesty", {})   # plán C2: úseky krajnice (stejný šum jako louka.gd)
+	if not _kc.is_empty(): _kc_sum.seed = int(_kc["seed"]); _kc_sum.frequency = 1.0 / float(_kc["usek_m"])
 	if ResourceLoader.exists("res://data/kamenitost.png"): km_img = load("res://data/kamenitost.png").get_image()   # kde je kamenito (stavby_vegetace.py)
 	# zápoj korun (byliny.json zapoj, pravidlo louka.json les – Havran les_podrost.json): tráva bylin pod zápojem ≈ 0, podrost zůstává
 	if cfg.has("zapoj") and ResourceLoader.exists("res://data/kryt.png"):
@@ -118,6 +120,7 @@ func vsechny_site() -> Array:
 	for k in meshe: a.append_array(meshe[k])
 	return a
 
+var _kc: Dictionary = {}; var _kc_sum := FastNoiseLite.new()   # úseky krajnice cest (louka.json kraj_cesty, plán C2)
 var _mc: Image = null; var sj_c: Dictionary = {}; var _st_w := 1; var _st_h := 1   # maska cest – krajnice (Míša 19. 11.)
 func _trida(x: float, z: float) -> String:
 	var c := int((x - float(sj["x0_hra"])) / float(sj["krok_m"])); var r := int((z - float(sj["z0_hra"])) / float(sj["krok_m"]))
@@ -260,6 +263,10 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 			var pc := _mc.get_pixel(mcx, mcz); nas = 1.0 - smoothstep(0.08, 0.35, pc.r + pc.g)
 			if nas <= 0.01: continue
 			tr = "cesta_krajnice"
+			if not _kc.is_empty():   # C2: holá hlína s kameny / tráva / květnatý lem (byliny.json tridy cesta_krajnice_hola, _kvety)
+				var ku := _kc_sum.get_noise_2d(x, z) * 0.5 + 0.5
+				if ku < float(_kc["hola_do"]) and tridy.has("cesta_krajnice_hola"): tr = "cesta_krajnice_hola"
+				elif ku > float(_kc["kvety_od"]) and tridy.has("cesta_krajnice_kvety"): tr = "cesta_krajnice_kvety"
 		if not tridy.has(tr): continue
 		var h: Dictionary = tridy[tr]
 		var sht: Dictionary = cfg.get("shluky_tridy", {}).get(tr, sh)   # houštiny po třídách (Havran les_podrost.json houstina: plášť souvislý, břeh v pásech s mezerami)
@@ -309,8 +316,9 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 			for druh: String in hp:
 				if not (hp[druh] is float or hp[druh] is int) or not meshe.has(druh) or meshe[druh].is_empty(): continue
 				var n := int(plocha * float(hp[druh]) + rng.randf())
+				var pm_: Array = (cfg["voda_pas"].get("pasmo", {}) as Dictionary).get(druh, []) if voda else []   # C3: pásmo od vody (podíl šířky) – kameny u čáry, tráva za nimi
 				for q in n:
-					var p := a.lerp(b, rng.randf()) + nn * (w * pow(rng.randf(), 1.6))
+					var p := a.lerp(b, rng.randf()) + nn * (w * (lerpf(float(pm_[0]), float(pm_[1]), rng.randf()) if pm_.size() == 2 else pow(rng.randf(), 1.6)))
 					if voda: p -= nn * float(sk[9]) * rng.randf() * rng.randf()   # přes čáru vody (převis, 0–presah_m)
 					var mr: Array = cfg.get("meritko_druh", {}).get(druh, cfg.get("meritko", [0.8, 1.3]))
 					var sc := rng.randf_range(float(mr[0]), float(mr[1]))
@@ -318,7 +326,7 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 					var rp: float = float(cfg.get("pata_polomer_m", {}).get(druh, cfg.get("pata_polomer_m", {}).get("_", 0.25))) * sc
 					for u in 4: y = minf(y, svet.vyska(p.x + rp * cos(u * PI / 2 + 0.785), p.y + rp * sin(u * PI / 2 + 0.785)))
 					var bz := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(sc, sc * rng.randf_range(0.85, 1.2), sc))
-					if voda: bz = Basis(osa, k_vode * deg_to_rad(float(sk[8])) * rng.randf_range(0.5, 1.2)) * bz   # nakloněný k vodě (30–50°)
+					if voda and not druh in cfg["voda_pas"].get("bez_naklonu", []): bz = Basis(osa, k_vode * deg_to_rad(float(sk[8])) * rng.randf_range(0.5, 1.2)) * bz   # nakloněný k vodě (30–50°)
 					var tf := Transform3D(bz, Vector3(p.x, y - float(cfg.get("pata_zapusteni_m", 0.03)), p.y))
 					var klic: String = druh + str(rng.randi() % meshe[druh].size())
 					if not mista.has(klic): mista[klic] = []

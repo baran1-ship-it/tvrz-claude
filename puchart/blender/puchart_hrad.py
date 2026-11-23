@@ -116,7 +116,7 @@ def hrubost(p, a=None):
     def h(k): return (math.sin(p.x * 12.9898 * k + p.y * 78.233 + p.z * 37.719 * k) * 43758.5453) % 1.0 * 2 - 1
     return Vector((h(1.0) * a, h(1.7) * a * 1.2, h(2.3) * a))
 
-def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-1e9, y_stinky=None, y_hrubne=None):
+def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-1e9, y_stinky=None, y_hrubne=None, mat_rub=None):
     """Zeď jako JEDNA síť se sdílenými vrcholy (Míša 5. 11.: „černé čáry máš pořád a všude“ – skládaná zeď z kvádrů má
     vnitřní čela, jejichž hrana leží v rovině líce souseda: hloubkový buffer je nerozliší a čelo prosvítá černou čárou).
     Mřížka xs (podél osy d od a) × ys (výšky); hloubka(x, y) středu buňky = do jaké hloubky od líce (vo) je buňka plná, None = prázdná.
@@ -171,6 +171,18 @@ def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-
             hq = qs(min(qd, qu), max(qd, qu))
             for q0, q1 in zip(hq, hq[1:]):
                 quad([v(i, j, q0), v(i + 1, j, q0), v(i + 1, j, q1), v(i, j, q1)], UP if qd > qu else -UP)
+    if faces and mat_rub is not None and mat_rub != mat:   # rub zdi jiným materiálem (palác: venku kámen v hradbě, uvnitř omítka – hrad_puchart.json omitka_zdiva)
+        def _n(f): return (verts[f[1]] - verts[f[0]]).cross(verts[f[2]] - verts[f[0]])
+        rb_ = [f for f in faces if _n(f).length > 1e-12 and _n(f).normalized().dot(vo) < -0.9]; rs_ = set(rb_)
+        for ff_, mm_ in (([f for f in faces if f not in rs_], mat), (rb_, mat_rub)):
+            if not ff_: continue
+            ix_ = sorted({k for f in ff_ for k in f}); re_ = {k: n for n, k in enumerate(ix_)}
+            P.mesh([tuple(verts[k]) for k in ix_], [tuple(re_[k] for k in f) for f in ff_], mm_)
+        if H.DETAIL:
+            vid = [f for f in faces if min(verts[k].y for k in f) > y_jemne - 1e-6] or faces
+            dl = max(max((verts0[f[k]] - verts0[f[k - 1]]).length for k in range(4)) for f in vid)
+            ZDI_SIT.append({"bod": [round(a.x, 2), round(a.z, 2)], "ploch": len(faces), "max_hrana": round(dl, 3)})
+        return
     if faces:
         if y_stinky is not None and mat == "zdivo":   # stínky cimbuří holý kámen (Míša 10. 11.: zakroužkované hladké světlé zuby)
             st_ = [f for f in faces if min(verts[k].y for k in f) > y_stinky - 0.01]; zb_ = [f for f in faces if min(verts[k].y for k in f) <= y_stinky - 0.01]
@@ -186,7 +198,7 @@ def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-
             ZDI_SIT.append({"bod": [round(a.x, 2), round(a.z, 2)], "ploch": len(faces), "max_hrana": round(dl, 3)})
 
 def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5, ext0=None, ext1=None, parapet=1.0, par=None,
-         cela=(True, True)):
+         cela=(True, True), patka=False):
     """Hradba s vodorovnou korunou (= podlaha ochozu) a pata stupňovitě po terénu. otvory = [(s_stred, šířka, y_podlahy,
     výška[, zbytek])]: pod podlahou zdivo (práh = podlaha průjezdu), nad otvorem překlad až do koruny; zbytek = nika zevnitř,
     na líci zůstane zeď této tloušťky (slupka okna). Cimbuří na vnější hraně. Viditelná zeď je jedna síť (stena_sit),
@@ -235,6 +247,18 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
                     kus(M((q.x, koruna + parapet + hs_ / 2, q.z), basis=frame(d)), (0.55, hs_, dl_), mat)
                     k += dl_ + rg_.uniform(0.55, 0.85)
     if not H.DETAIL: return
+    # --- kameny LOD0 (plán F2, Míša 18. 11.: „kámen musí být kámen“): zuby cimbuří z kamenů, krycí kameny zídky v prolukách,
+    # patka zdi z větších kamenů (jen hradby – patka=True); z dálky zůstává jedna síť zdi níže (hlavni.gd: Kameny_* jen zblízka)
+    if mat == "zdivo":
+        pc_ = vo * (t / 2 - 0.275)
+        for k0, k1, hs_ in stinky:
+            H.KV.stinka(a + d * ((k0 + k1) / 2) + pc_ + UP * (koruna + parapet), d, vo, 0.55, hs_, k1 - k0)
+            H.KV.jadro_stinky(P, a + d * ((k0 + k1) / 2) + pc_ + UP * (koruna + parapet - PR), d, vo, 0.55 + 2 * PR, hs_ + 2 * PR, k1 - k0 + 2 * PR, "zdivo_koruna")   # zub v síti zdi níže vynechán
+        for s0, s1 in pz:
+            hr_ = sorted({s0, s1} | {x for k0, k1, _ in stinky for x in (k0, k1) if s0 < x < s1})
+            for g0, g1 in zip(hr_, hr_[1:]):
+                if not any(k0 - 1e-6 <= (g0 + g1) / 2 <= k1 + 1e-6 for k0, k1, _ in stinky): H.KV.kryti(a + pc_, d, vo, 0.55, koruna + parapet, g0, g1)
+        if patka: H.KV.patka(a + vo * (t / 2), d, vo, -e0, L + e1, vynechat=[(o[0] - o[1] / 2, o[0] + o[1] / 2) for o in otvory])
     # --- viditelná zeď: jedna síť
     xs = {-e0 - PR, L + e1 + PR}
     for o in otvory: xs |= {o[0] - o[1] / 2 + PR, o[0] + o[1] / 2 - PR}
@@ -265,10 +289,12 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
         if ym < koruna + parapet + PR:
             return 0.55 + PR if any(s0 - PR <= xm <= s1 + PR for s0, s1 in pz) else None
         if ym < koruna + parapet + 0.9 + PR:
+            if mat == "zdivo": return None   # 23. 11.: zuby staví kamenivo (kameny LOD0 + zmenšené jádro) – ne v síti zdi
             return 0.55 + PR if any(k0 - PR <= xm <= k1 + PR and ym < koruna + parapet + hs_ + PR for k0, k1, hs_ in stinky) else None
         return None
-    stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=cela, y_jemne=min(y0 for _, _, y0 in pata) + 1.5 - 0.3, y_stinky=(koruna + parapet if (cimburi and stinky) else None), y_hrubne=(koruna + 0.1 if parapet > 0 else None))   # pata 1,5 m pod nejnižším terénem
+    stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=cela, y_jemne=min(y0 for _, _, y0 in pata) + 1.5 - 0.3, y_stinky=(koruna + parapet if (cimburi and stinky) else None), y_hrubne=(koruna + 0.1 if parapet > 0 and mat != "zdivo" else None))   # 23. 11.: nerovné hrany zídky a stínek dělají kameny LOD0 (kamenivo) – posun vrcholů ±6 cm by z nich trčel   # pata 1,5 m pod nejnižším terénem
 
+H.MAT_PALAC = D["omitka_zdiva"]["palac"]   # 23. 11. omítka paláců a obytných místností (plán F bod 2)
 H.STENA_SIT = None if os.environ.get("PUCHART_BEZ_SITE") else stena_sit   # zdi budov (hrady.budova) jednou sítí jako hradby (Míša 12. 11.: černé švy z bloků)
 
 def pokos_ext(poly, i, t):
@@ -1074,7 +1100,7 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
         q = a + d * (r * (k + 0.5))
         if kamenne:
             yb = y0 + h * (k + 1)
-            P.box(M(q + UP * (yb - (yb - y0 + 0.3) / 2), basis=frame(d)), (w, yb - y0 + 0.3, r + 0.02), "kvadr_schod")
+            P.box(M(q + UP * (yb - (yb - y0 + 0.3) / 2), basis=frame(d)), (w, yb - y0 + 0.3, r + 0.02), "kamen_stupen")   # 23. 11.: stupeň = jeden tesaný kámen, krabicové UV po ploše (dřív kvadr_schod s fotkou zdi + reliéf zdiva)
         else:   # Havran stairs: stupeň ze dvou ošlapaných prken (kit.plank), ne holý kvádr
             base = a + UP * (y0 + h * (k + 1) - 0.055)
             # Míša 14. 11.: „schody do věží a paláců vypadají jako z kostiček, chceme nepravidelná prkna“ – nášlap z prken
@@ -1109,7 +1135,7 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
             kol(P, a + d * ((t0 + t1) / 2) + UP * ((top + g - 0.3) / 2), d, (w - 0.1, top - g + 0.3, t1 - t0))
     for sg in zabradli:   # sloupky přiložené z vnějšího líce schodnice (plát s kolíkem), madlo na jejich hlavách
         o = s * sg * (w / 2 + 0.02)
-        ZAB_REC.append({"P": P, "a": hz(a + o), "b": hz(a + d * run + o), "ya": y0, "yb": y1, "dolu": 0.34})
+        ZAB_REC.append({"P": P, "a": hz(a + o), "b": hz(a + d * run + o), "ya": y0, "yb": y1, "dolu": 0.34, "pevne": True})   # pevné: sloupky jsou přiložené ke schodnici – při spojování konců se k nim přizpůsobí ostatní (23. 11.: těžiště skupiny s podestou posunulo madlo ramene o 5,6 cm dovnitř, sloupky prošly schodnicí – kontrola_spoju 34 > 32)
         nk = max(1, math.ceil(run / 0.5))   # kolize po svislých dílech 0,5 m podél sklonu: celá délka jako viditelné zábradlí, nic nepřečnívá patu
         for i in range(nk):                  # (šikmý kvádr musel být o 1,5 m kratší – konce zábradlí byly bez kolize, povrch_kolize 3. 11.)
             t0_, t1_ = run * i / nk, run * (i + 1) / nk; yl = y0 + (y1 - y0) * t0_ / run; yh = y0 + (y1 - y0) * t1_ / run
@@ -1201,7 +1227,7 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
             n_ = max(1, round((podl - g) / 0.17)); hs_ = (podl - g) / n_; rs_ = Ln / n_   # stupně po celé délce rampy, vrch = rampa uprostřed stupně (±půl stupně)
             for k_ in range(n_):
                 yt_ = podl - hs_ * (k_ + 0.5); q_ = top + nn * (rs_ * (k_ + 0.5) + 0.05); gq_ = min(ter(*(q_ + nn * a_).xz) for a_ in (-rs_ / 2, rs_ / 2)) - 0.25
-                P.box(M(q_ + UP * ((yt_ + gq_) / 2), basis=frame(hz(nn))), (vs[2] + 0.4 - k_ * 0.04, yt_ - gq_, rs_ + 0.01), "kvadr_schod", collide=None)
+                P.box(M(q_ + UP * ((yt_ + gq_) / 2), basis=frame(hz(nn))), (vs[2] + 0.4 - k_ * 0.04, yt_ - gq_, rs_ + 0.01), "kamen_stupen", collide=None)
         svetlo(c + UP * (podl + 2.0), 1.0, 6.0, svit="svicen")
         jm_b = "budova_%s_%d_%d" % (typ, round(c.x), round(c.z))
         TR[jm_b] = [bod(dvere + nn * (tz + 3.0)), bod(dvere + nn * (tz + 0.6)), bod(dvere - nn * 0.6, podl), bod(c, podl)]
@@ -1234,9 +1260,12 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
     return podl
 
 _VYSTUP = json.load(open(os.path.join(H.K, "pravidla/svet/hrad_vzhled.json")))["zdivo"]["kamen_vystup_m"][1]   # reliéf: nejvyšší vystupující kámen
-def klenba(P, o, du, dv, u0, u1, v0, v1, osa, y_patka, vzepeti, tl=0.35, mat="kvadr", diry=(), n=10, kus=0.7, y_strop=None):
+def klenba(P, o, du, dv, u0, u1, v0, v1, osa, y_patka, vzepeti, tl=0.35, mat="kamen_klenak", diry=(), n=10, kus=0.7, y_strop=None):
     """Valená (segmentová) klenba z klenáků nad obdélníkem u0..u1 × v0..v1 (lokálně od o po du, dv); osa 'u' nebo 'v' =
-    směr osy klenby, rozpětí je v druhém směru. diry = [(u0, u1, v0, v1)] – otvor v klenbě (hladomorna)."""
+    směr osy klenby, rozpětí je v druhém směru. diry = [(u0, u1, v0, v1)] – otvor v klenbě (hladomorna).
+    23. 11. (Míša: textura natažená na klenbě): klenák = kámen s UV po vlastních plochách (krabicová projekce v ose klenáku,
+    bez natažení), materiál kamen_klenak; dřív kvadr = světová projekce zdiva přepínaná podle normály + reliéf zdiva –
+    na zakřivené ploše natažená až √2× a se švy po klenácích."""
     du3, dv3 = hz(du).normalized(), hz(dv).normalized()
     if osa == "u": a_ax, a_sp, l0, l1, s0, s1 = du3, dv3, u0, u1, v0, v1
     else: a_ax, a_sp, l0, l1, s0, s1 = dv3, du3, v0, v1, u0, u1
@@ -1275,6 +1304,7 @@ def sud(P, p, y):
 # ------------------------------------------------------------------ sklep pod palácem s kobkami
 def sklep_A(P, g):
     S = g["S"]; y = g["y"]; Li, Wi, tl = g["Li"], g["Wi"], g["tl"]
+    MS_ = D["omitka_zdiva"]["sklep"]   # sklep a podzemí: režné zdivo z lomového kamene bez omítky (plán F, předlohy zdivo_kcd_18_11 09–12)
     o = Vector((g["o"][0], 0, g["o"][1])); du = Vector((g["du"][0], 0, g["du"][1])); dv = Vector((g["dv"][0], 0, g["dv"][1]))
     W = lambda u, v, yy=0.0: o + du * u + dv * v + UP * yy
     strop = g["podl"] - 0.25                      # pod podlahou paláce
@@ -1284,11 +1314,11 @@ def sklep_A(P, g):
     pr = S["pricka"]; vp = (pr["v0"] + pr["v1"]) / 2; tp = pr["v1"] - pr["v0"]; dk = S["dvere_kobky"]; zs = S["zasobarna"]
     Wk_, Hk_ = portaly.otvor(dk["sirka"], dk["vyska"], "segment")
     otv = [((k["u0"] + k["u1"]) / 2, Wk_, y, Hk_) for k in S["kobky"]] + [((zs["u0"] + Li) / 2, zs["otvor"], y, 2.0)]
-    zed2(P, W(0, vp), W(Li, vp), tp, strop, dv, otvory=otv, cimburi=False, parapet=0, ext0=0, ext1=0)
+    zed2(P, W(0, vp), W(Li, vp), tp, strop, dv, otvory=otv, cimburi=False, parapet=0, ext0=0, ext1=0, mat=MS_)
     hrany = [k["u1"] for k in S["kobky"]]
     for k, u1 in enumerate(hrany):
         u2 = S["kobky"][k + 1]["u0"] if k + 1 < len(S["kobky"]) else zs["u0"]
-        um = (u1 + u2) / 2; zed2(P, W(um, 0), W(um, pr["v0"]), u2 - u1, strop, du, cimburi=False, parapet=0, ext0=0, ext1=0)
+        um = (u1 + u2) / 2; zed2(P, W(um, 0), W(um, pr["v0"]), u2 - u1, strop, du, cimburi=False, parapet=0, ext0=0, ext1=0, mat=MS_)
     # okapový chodník u V čela paláce v úrovni nádvoří (kryje hranu výkopu)
     # Míša 14. 11.: „ten blok mezi paláci horního hradu je co? nelíbí se mi tam“ – chodník stál ve výšce nádvoří, terén uličky je
     # o 0,2–0,3 m níž → vrch chodníku v úrovni terénu uličky (medián podél vnější hrany), dolů přes hranu výkopu
@@ -1302,8 +1332,8 @@ def sklep_A(P, g):
         P.box(M(W(-tl - oc["sirka"] / 2, (va_ + vb_) / 2, top_oc - 0.6), basis=frame(du)), (vb_ - va_ + 0.01, 1.2, oc["sirka"]), "kvadr_sedy")
     # vyzdívka V čela a S stěny (schová hranu terénní jámy), dveře ze šíje i skrz ni
     ob = S["obklad"]; sj = S["sije"]
-    zed2(P, W(ob["u_tl"] / 2, 0), W(ob["u_tl"] / 2, Wi), ob["u_tl"], strop, du, cimburi=False, parapet=0, ext0=0, ext1=0)
-    zed2(P, W(0, Wi - ob["v_tl"] / 2), W(Li, Wi - ob["v_tl"] / 2), ob["v_tl"], strop, -dv, cimburi=False, parapet=0, ext0=0, ext1=0,
+    zed2(P, W(ob["u_tl"] / 2, 0), W(ob["u_tl"] / 2, Wi), ob["u_tl"], strop, du, cimburi=False, parapet=0, ext0=0, ext1=0, mat=MS_)
+    zed2(P, W(0, Wi - ob["v_tl"] / 2), W(Li, Wi - ob["v_tl"] / 2), ob["v_tl"], strop, -dv, cimburi=False, parapet=0, ext0=0, ext1=0, mat=MS_,
          otvory=[(sj["u_dvere"],) + (lambda WH: (WH[0], y, WH[1]))(portaly.otvor(sj["dvere"][0], sj["dvere"][1], "segment"))])
     Wv = Wi - ob["v_tl"]
     # klenby: sál (osa podél paláce), kobky a zásobárna (osa napříč)
@@ -1330,12 +1360,12 @@ def sklep_A(P, g):
                                                           W(sj["u_dvere"] + 1.5, v0 + sj["sirka"] + sj["zed"]), W(sj["u_horni"] - 0.6, v0 + sj["sirka"] + sj["zed"]))])
     P.box(M(W((u_dole + sj["u_dvere"] + 1.5) / 2, vm, y - 0.4), basis=frame(du)), (sj["sirka"] + 0.8, 0.8, sj["u_dvere"] + 1.5 - u_dole + 0.6), "kvadr_sedy")   # podlaha šíje přes celý otvor v terénu (Míša 5. 11.: díra do ničeho u dveří)
     vz_ = v0 + sj["sirka"] + sj["zed"] / 2; kz = ytop + 0.9
-    zed2(P, W(sj["u_horni"] - 0.6, vz_), W(sj["u_dvere"] + 1.3 + sj["zed"], vz_), sj["zed"], kz, -dv, cimburi=False, parapet=0, ext0=0, ext1=0)
+    zed2(P, W(sj["u_horni"] - 0.6, vz_), W(sj["u_dvere"] + 1.3 + sj["zed"], vz_), sj["zed"], kz, -dv, cimburi=False, parapet=0, ext0=0, ext1=0, mat=MS_)
     zed2(P, W(sj["u_dvere"] + 1.3 + sj["zed"] / 2, v0), W(sj["u_dvere"] + 1.3 + sj["zed"] / 2, v0 + sj["sirka"] + sj["zed"]), sj["zed"], kz, du,
-         cimburi=False, parapet=0, ext0=0, ext1=0)
+         cimburi=False, parapet=0, ext0=0, ext1=0, mat=MS_)
     # zdi šíje až k podlaze šíje (pata zed2 je podle terénu nádvoří – nad podlahou zůstala díra do ničeho, Míša 5. 11.)
-    P.box(M(W(sj["u_dvere"] + 1.3 + sj["zed"] / 2, v0 + (sj["sirka"] + sj["zed"]) / 2, (y - 0.8 + ytop) / 2), basis=frame(du)), (sj["sirka"] + sj["zed"], ytop - y + 0.8, sj["zed"]), "zdivo")
-    P.box(M(W((sj["u_horni"] - 0.6 + sj["u_dvere"] + 1.3 + sj["zed"]) / 2, vz_, (y - 0.8 + ytop) / 2), basis=frame(du)), (sj["zed"], ytop - y + 0.8, sj["u_dvere"] + 1.9 + sj["zed"] - sj["u_horni"]), "zdivo")
+    P.box(M(W(sj["u_dvere"] + 1.3 + sj["zed"] / 2, v0 + (sj["sirka"] + sj["zed"]) / 2, (y - 0.8 + ytop) / 2), basis=frame(du)), (sj["sirka"] + sj["zed"], ytop - y + 0.8, sj["zed"]), MS_)
+    P.box(M(W((sj["u_horni"] - 0.6 + sj["u_dvere"] + 1.3 + sj["zed"]) / 2, vz_, (y - 0.8 + ytop) / 2), basis=frame(du)), (sj["zed"], ytop - y + 0.8, sj["u_dvere"] + 1.9 + sj["zed"] - sj["u_horni"]), MS_)
     if H.DETAIL:
         kit.doorway(P, M(W(sj["u_dvere"], v0, y), basis=Matrix((UP.cross(dv), UP, dv)).transposed()), kind="obycejne", w=sj["dvere"][0],
                     h=sj["dvere"][1], depth=tl, top="segment", leaf=True)
@@ -1667,7 +1697,7 @@ def postav_A(P):
             wz = 2 * wv - t / 2; y_o = (A["nadvori_y"] - 2.0) if A["vezicka"].get("prizemi") else (kor - 0.02)   # s přízemím zeď končí u věže už od nádvoří
             if i == rv - 1: ot.append((L - wz / 2 + 0.6, wz + 1.2, y_o, 30.0 + kor - y_o)); par = (-t / 2, L - 2 * wv + t / 2)
             if i == rv: ot.append((wz / 2 - 0.6, wz + 1.2, y_o, 30.0 + kor - y_o)); par = (2 * wv - t / 2, L + t / 2)
-        e0_, e1_ = pokos_ext(j, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, par=par, cela=(False, False), ext0=e0_, ext1=e1_, cimburi=A.get("cimburi", True))   # čela kusů v nároží by v tupém úhlu vyčnívala z líce (Míša 5. 11.: švy) – roh kryje klín naroze()
+        e0_, e1_ = pokos_ext(j, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, par=par, cela=(False, False), ext0=e0_, ext1=e1_, cimburi=A.get("cimburi", True), patka=True)   # čela kusů v nároží by v tupém úhlu vyčnívala z líce (Míša 5. 11.: švy) – roh kryje klín naroze()
     naroze(P, j, t, kor, vynechat=(A["vezicka"]["roh"],))
     a, b, L, d, vn = U[br["usek"]]; C = (a + b) / 2
     dA_ = d.copy(); prah_A, vyk_A = portal_vyklenek(P, C - vn * (t / 2), -vn, br, br["prah_y"], kor, t, A["most"]["sirka"] - 0.2, A["most"]["padaci_m"])
@@ -1954,7 +1984,7 @@ def postav_B(P):
         if iv:   # u konce úseku i přesah zdi za vrchol (t/2)
             s0_ = iv[0] - (t if iv[0] < 0.1 else 0.05); s1_ = iv[1] + (t if iv[1] > L - 0.1 else 0.05)
             ot.append(((s0_ + s1_) / 2, s1_ - s0_, pa_.get("podlaha_min_y", -100.0), 200.0))
-        e0_, e1_ = pokos_ext(hp, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0, cimburi=B.get("cimburi", True), cela=(False, False), ext0=e0_, ext1=e1_)
+        e0_, e1_ = pokos_ext(hp, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0, cimburi=B.get("cimburi", True), cela=(False, False), ext0=e0_, ext1=e1_, patka=True)
     naroze(P, hp, t, kor, vynechat=tuple(k for k, q in enumerate(hp) if v_palaci(V(q), -t) or k in B.get("hradba_palac", []) or (k - 1) % len(hp) in B.get("hradba_palac", [])))   # rohy úseků, kde hranou je palác: klín by trčel do paláce (test 5. 11.)
     a, b, L, d, vn = U[br["usek"]]; G = a + d * br["stred_m"]; vnG = vn
     prah_B, vyk_B = portal_vyklenek(P, G - vn * (t / 2), -vn, br, B["dolni_y"], kor, t, B["most"]["sirka"] - 0.2, B["most"]["padaci_m"])
@@ -2182,12 +2212,14 @@ def zabradli_stavba():
     for g in sk.values():
         if len(g) < 2: continue
         c = sum((E_[i][0][E_[i][1]] for i in g), Vector()) / len(g); yy = max(E_[i][0]["y" + E_[i][1]] for i in g)
+        pv_ = [i for i in g if E_[i][0].get("pevne")]
+        if pv_: c = sum((E_[i][0][E_[i][1]] for i in pv_), Vector()) / len(pv_)   # konec ramene schodů drží polohu (sloupek na schodnici), podesta se napojí k němu
         for i in g:
             E_[i][0][E_[i][1]] = c.copy(); E_[i][0]["y" + E_[i][1]] = yy; E_[i][0]["s" + E_[i][1]] = True
     # T-spoj: volný konec do 0,6 m od jiného zábradlí (stejná výška) se dotáhne na jeho linii – sloupek ve spoji, žádná mezera
     for r in ZAB_REC:
         for k in ("a", "b"):
-            if r.get("s" + k): continue
+            if r.get("s" + k) or r.get("pevne"): continue
             q = r[k]; best = None
             for o in ZAB_REC:
                 if o is r or abs(o["ya"] - o["yb"]) > 0.05 or abs(o["ya"] - r["y" + k]) > 0.25: continue

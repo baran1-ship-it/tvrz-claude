@@ -31,6 +31,8 @@ func postav(s: Node3D, kamera: Camera3D) -> void:
 	sj = JSON.parse_string(FileAccess.get_file_as_string("res://data/stanoviste.json"))
 	st = load("res://data/stanoviste.png").get_image()
 	if ResourceLoader.exists("res://textury/maska_cesty.png"): _mc = (load("res://textury/maska_cesty.png") as Texture2D).get_image()
+	_kc = cfg.get("kraj_cesty", {})   # plán C2: krajnice střídá holou hlínu, trávu a květy po úsecích (louka.json kraj_cesty)
+	if not _kc.is_empty(): _kc_sum.seed = int(_kc["seed"]); _kc_sum.frequency = 1.0 / float(_kc["usek_m"])
 	_trs = _karta_mesh(3, ATLAS_POMER, 1.0)
 	LS_ = cfg.get("les", {})
 	if ResourceLoader.exists("res://data/kryt.png"):
@@ -38,6 +40,7 @@ func postav(s: Node3D, kamera: Camera3D) -> void:
 		if _kr.is_compressed(): _kr.decompress()
 	var m := _trs.surface_get_material(0) as ShaderMaterial
 	m.set_shader_parameter("z_custom", true)
+	if cfg.has("ohyb"): m.set_shader_parameter("ohyb_sila", Vector2(float(cfg["ohyb"]["sila"][0]), float(cfg["ohyb"]["sila"][1])))   # plán C6
 	m.set_shader_parameter("hust_od", float(cfg["hust_od_m"])); m.set_shader_parameter("hust_do", float(cfg["hust_do_m"]))
 	var ko: Array = cfg.get("konec_m", [cfg["hust_do_m"], float(cfg["hust_do_m"]) + 30.0])
 	m.set_shader_parameter("hust_konec", float(ko[0])); m.set_shader_parameter("konec_sirka", float(ko[1]) - float(ko[0]))
@@ -202,6 +205,7 @@ func nastav_pas(f: float) -> void:
 func vsechny_site() -> Array: return [_trs] + ([_pas] if _pas else []) + _prst.map(func(q): return (q[0] as MultiMeshInstance3D).multimesh.mesh)
 
 var _mc: Image = null   # maska cest (hlína R/G) – krajnice cest
+var _kc: Dictionary = {}; var _kc_sum := FastNoiseLite.new()   # úseky krajnice (plán C2, stejný šum jako byliny.gd)
 func _trida(x: float, z: float) -> String:
 	var c := int((x - float(sj["x0_hra"])) / float(sj["krok_m"])); var r := int((z - float(sj["z0_hra"])) / float(sj["krok_m"]))
 	if c < 0 or r < 0 or c >= st.get_width() or r >= st.get_height(): return ""
@@ -210,6 +214,10 @@ func _trida(x: float, z: float) -> String:
 func _process(_d: float) -> void:
 	if cam == null or _trs == null: return
 	_svetlo_travy(_d)
+	var oh: Dictionary = cfg.get("ohyb", {})   # plán C6: tráva se ohýbá od hráče (jemné trsy, stebla.gdshader ohyb_hrac)
+	if not oh.is_empty() and bool(oh.get("zapnuto", true)):
+		var pc := cam.global_position
+		(_trs.surface_get_material(0) as ShaderMaterial).set_shader_parameter("ohyb_hrac", Vector4(pc.x, pc.y - float(oh["oci_m"]), pc.z, float(oh["polomer_m"])))
 	if not _prst.is_empty(): _mrizka_tick(); return
 	var p := cam.global_position
 	for li in _vrstvy.size():
@@ -251,6 +259,10 @@ func _rozsej(k: Vector3i) -> void:
 				var mcx := clampi(int((px - float(sj["x0_hra"])) / float(sj["krok_m"]) * _mc.get_width() / st.get_width()), 0, _mc.get_width() - 1)
 				var mcz := clampi(int((pz - float(sj["z0_hra"])) / float(sj["krok_m"]) * _mc.get_height() / st.get_height()), 0, _mc.get_height() - 1)
 				var pc := _mc.get_pixel(mcx, mcz); h = float(tridy.get("cesta_krajnice", 0.0)) * (1.0 - smoothstep(0.08, 0.35, pc.r + pc.g))
+				if h > 0.0 and not _kc.is_empty():   # C2: úsek holé hlíny (s kameny – byliny.gd) / trávy / květů podle šumu podél cesty
+					var ku := _kc_sum.get_noise_2d(px, pz) * 0.5 + 0.5
+					if ku < float(_kc["hola_do"]): h *= float(_kc["hola_trava"])
+					elif ku > float(_kc["kvety_od"]) and druhy.has("cesta_kvety"): tr = "cesta_kvety"
 			if h > 0.0 and _kr != null:   # zápoj korun (kryt.png, Havran les_podrost.json trava): pod zápojem ≈ 0, světliny jako louka; samotný strom v louce zápoj nemá
 				var kc := clampi(int((px - float(sj["x0_hra"])) / float(sj["krok_m"])), 0, _kr.get_width() - 1)
 				var kz := clampi(int((pz - float(sj["z0_hra"])) / float(sj["krok_m"])), 0, _kr.get_height() - 1)

@@ -13,6 +13,9 @@ uniform float mech = 0.0;              // 1 = police s mechem (skala_mech)
 uniform vec3 barva_mech = vec3(0.26, 0.30, 0.15);   // tmavě olivový mech (fotky puchart_skaly)
 uniform vec3 barva_rez = vec3(1.12, 0.98, 0.80);
 uniform vec3 barva_lisejnik = vec3(0.55, 0.57, 0.52);
+// cílová střední odrazivost fotky droby (pudy.json skala_vychozy.albedo_cil; 0 = vypnuto – kameny koryt mají vlastní jas):
+// skaly_droba_Diffuse.jpg má průměr jen 0,088 lineárně, po ztmavení níže ~0,06 – výchozy ve stínu vycházely černé (chyba H4, 23. 11.)
+uniform float albedo_cil = 0.0;
 
 varying vec3 wp;
 varying vec3 wn;
@@ -35,6 +38,7 @@ void fragment() {
 	vec3 w = pow(abs(n), vec3(4.0)); w /= (w.x + w.y + w.z);
 	vec2 ux = wp.zy * meritko; vec2 uy = wp.xz * meritko; vec2 uz = wp.xy * meritko;
 	vec3 c = texture(tex_a, ux).rgb * w.x + texture(tex_a, uy).rgb * w.y + texture(tex_a, uz).rgb * w.z;
+	if (albedo_cil > 0.0) c *= albedo_cil / max(dot(textureLod(tex_a, vec2(0.5), 20.0).rgb, vec3(0.3, 0.59, 0.11)), 0.01);   // průměr fotky = nejmenší mipmapa
 	vec3 tnx = texture(tex_n, ux).rgb * 2.0 - 1.0; vec3 tny = texture(tex_n, uy).rgb * 2.0 - 1.0; vec3 tnz = texture(tex_n, uz).rgb * 2.0 - 1.0;
 	// whiteout blend normál ve světě
 	vec3 nx = vec3(0.0, tnx.y, tnx.x) * w.x; vec3 ny = vec3(tny.x, 0.0, tny.y) * w.y; vec3 nz = vec3(tnz.x, tnz.y, 0.0) * w.z;

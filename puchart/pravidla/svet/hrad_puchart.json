@@ -1232,6 +1232,8 @@
    "zdivo": 0.12,
    "kvadr": 0.12,
    "kvadr_sedy": 0.12,
+   "kamen_klenak": 0.12,
+   "zdivo_rezne": 0.12,
    "omitka": 0.03,
    "zdivo_hole": 0.12,
    "zdivo_omitka": 0.12,
@@ -1316,5 +1318,16 @@
   "topeni_pozn": "Míša 15. 11. (modely topení od modeláře, pravidla/svet/topeni.json): ohniště s dýmníkem černé kuchyně a kachlová kamna paláce A z kvádrů blender/puchart_hrad.py se nestaví – místo nich Topeniste_Kuchynske_Siroke a Kamna_Hradni_Nadobkova (hlavni.gd _topeni); topeniště kamen ze síně (tmavé ústí) a značka HradA_Ohen_Kamna zůstávají",
   "svetla_louci": false,
   "pozn": "Míša 12. 11.: „vymaž všechny vlastní modely vybavení z hradu a vesnice, ani jedno není hezké a nedá se používat, vše si vybavím sám“; „na horním hradě máš v kuchyni louč přímo v místě kamenné pece, nesmysl, vymaž louče taky, si je dám sám“ – hrad bez nábytku, sudů, truhel, loží a loučí; zůstávají pevné stavební díly (pec, krb, kamna, schody, dveře)"
+ },
+ "omitka_zdiva": {
+  "palac": {
+   "lic": "zdivo_omitka_opadana",
+   "lic_v_hradbe": "zdivo",
+   "rub": "zdivo_omitka_opadana"
+  },
+  "sklep": "zdivo_rezne",
+  "popis": "Povrch zdí podle účelu (Míša 18. 11., plán F bod 2: „omítka uvnitř obytných místností a na palácích (vápenná, místy opadaná), sklepy/podzemí režné zdivo z lomového kamene“). Paláce obou hradů: líc vápenná omítka místy opadaná – kámen vykukuje (zdivo_omitka_opadana, zdivo.gdshader kryti z hra/data/materialy_hrad.json); strana paláce v hradbě zůstává kamenná jako hradba (Míša 4. 11.: v hradbě kámen, ne kombinace omítky a kamene); rub zdí paláce = obytné místnosti omítnuté. Sklep a šíje hradu A režné zdivo z lomového kamene, bez omítky, tmavší a vlhčí (zdivo_rezne). Přednost před „budovy kamenné bez omítky“ z kresby 5. 11. (hrad_puchart.json budovy omitka false = bez samostatných desek omítky, hrady.OMITKA).",
+  "zdroj": "docs/reference/zdivo_kcd_18_11/09 a 12 (palác KCD: vápenná omítka, kámen u paty a v opadaných místech), 11 (brána: bílá omítka otlučená, kámen vykukuje), 10 (palác s omítkou místy opadanou; arkády a podezdívka režné lomové zdivo = vzor pro sklep a šíji), README bod 3",
+  "jistota": "NAVRH (podoba povrchů paláců Puchartu nedoložena; obvyklá praxe 14. st. – vápenná omítka obytných prostor)"
  }
 }

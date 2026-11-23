@@ -70,7 +70,18 @@
    0.17,
    0.03,
    0.05
-  ]
+  ],
+  "cesta_kvety": [
+   0.3,
+   0.15,
+   0.08,
+   0.04,
+   0.03,
+   0.1,
+   0.0,
+   0.3
+  ],
+  "_cesta_kvety": "krajnice – květnatý úsek (kraj_cesty): druhy 0–4 jako louka, 5 byliny (buňka 3), 7 květy (buňka 5 trava_atlas.png)"
  },
  "pozn_rozpocet": "4. 11.: krok 0,42/do 80 m = +0,66 M troj. (rozpočet scén 2,1 M) → krok 0,5, řídnou 14–60 m; mezi trsy fotka trávníku v terénu",
  "rezim": "bunky",
@@ -210,7 +221,63 @@
    1.0,
    0.68
   ],
-  "tablet": "NEOVERENO (vzhled i výkon kontroluje Míša na tabletu)"
+  "porost_dal_vzd": [
+   110.0,
+   190.0
+  ],
+  "_porost_dal_vzd": "E2 23. 11.: přechod z blízké struktury (trsy 3,1 m) na dálkovou – trsy 3 m se nad ~150 m slijí v mipmapách šumu do hladké plochy (docs/screens/kontrola_23_11_pas_273.jpg vlevo nahoře: kopec za koncem středního pásu 125–150 m hladký); začíná pod koncem pásu, aby karty pásu mizely do už členitého terénu",
+  "porost_dal_trsy": [
+   9.0,
+   4.3,
+   0.45,
+   0.85
+  ],
+  "_porost_dal_trsy": "dálkové trsy: měřítko m, jemnější m (pootočené), práh šumu, síla – barva porost_trs_barva; pevná měřítka (měřítko podle vzdálenosti by při chůzi plavalo)",
+  "porost_dal_skvrny": [
+   23.0,
+   0.56,
+   0.7,
+   0.0
+  ],
+  "_porost_dal_skvrny": "tmavé skvrny hustšího porostu/keříků (měřítko m, práh, síla) – KCD2 louka u lesa: louka v dálce posetá tmavými chomáči a keříky, ne jednolitá",
+  "porost_dal_skvrna_barva": [
+   0.5,
+   0.62,
+   0.45
+  ],
+  "porost_dal_svetle": [
+   0.42,
+   0.9
+  ],
+  "_porost_dal_svetle": "světlá (osluněná, žlutozelená porost_zluta) místa mezi trsy: práh šumu (pod ním), síla – KCD2 louka v dálce má světlé i tmavé skvrny, ne jen ztmavení",
+  "porost_dal_sum": [
+   7.0,
+   0.3,
+   0.0,
+   0.0
+  ],
+  "_porost_dal_sum": "barevný šum: měřítko m, síla posunu zelená ↔ žlutozelená (R a B proti sobě)",
+  "zdroj_dal_23_11": "docs/reference/les/kcd2_louka_les_havran.jpg (KCD2: louka 100–300 m s tmavšími chomáči, žlutozelenými a sytými skvrnami), Havran shaders/zem.gdshader (zrno trsu: druhé měřítko 6× od 6–30 m, makro skvrny 20–50 m) a scripts/louka.gd KUPY 45–280 m (u nás geometrie pásu jen do 150 m, dál struktura v terénu – 0 troj., 0 vzorkovačů navíc, +5 čtení šumu)",
+  "tablet": "NEOVERENO (vzhled i výkon kontroluje Míša na tabletu)",
+  "_porost_dal_vysledek_23_11": "PC snímek 23. 11. (x 146,7 z 311 směr 267°, protisvětlo): kopec 150–250 m má tmavší trsy a světlejší skvrny místo hladké plochy, ale v protisvětle je tmavý (ACES + kontrast stlačí tmavé rozdíly) – proto silnější světlá místa (0,42; 0,9). Tablet NEOVERENO.",
+  "mraky_stin": [
+   0.32,
+   260.0,
+   0.56,
+   0.3
+  ],
+  "_mraky_stin": "Plán C5 – stíny mraků po krajině (zem.gdshader, procedurálně ze šumu sum, 0 vzorkovačů navíc – 9 z 13 zůstává): síla ztmavení albeda, velikost mraku m, práh šumu, měkkost okraje. Sílu nebere z počasí (zatažení) – NEOVERENO, zda při zataženém nebe nevadí.",
+  "mraky_vitr": [
+   3.0,
+   1.2
+  ],
+  "_mraky_vitr": "posun stínů m/s (x východ, z jih) – mraky táhnou od Z/SZ (převládající vítr na Moravě)",
+  "mraky_vzd": [
+   60.0,
+   140.0
+  ],
+  "_mraky_vzd": "náběh od..do m: u nohou tráva, byliny a keře stín mraku nemají (jiné shadery), proto až za pásem jemných trsů",
+  "zdroj_mraky": "PDF 1 (rešerše 17. 11., plán C5: stíny mraků po krajině, zem.gdshader 9 → 10 vzorkovačů – zde 9, šum už je), KCD1/KCD2 (pohledy z kopců: putující stíny mraků po loukách a lesích)"
  },
  "pozn_krajnice_19_11": "Míša 19. 11. (misa_19_11_krajnice_holé.png): krajnice cest holé – třída stanoviště cesta má ~10 m, vyjetá hlína ~4 m; tráva v třídě cesta s hustotou cesta_krajnice tam, kde maska cest (textury/maska_cesty.png R+G) nemá hlínu (louka.gd).",
  "konec_m": [
@@ -450,9 +517,46 @@
     0.08,
     0.1,
     0.15
+   ],
+   "cesta_kvety": [
+    0.2,
+    0.4,
+    0.1,
+    0.05,
+    0.1,
+    0.0,
+    0.05,
+    0.1
    ]
   },
   "automatika": "rozpocty.json automatika stupeň 1 „střední pás blíž“ (pas_dosah): násobek dosahu pásu – méně buněk = méně troj., ubírá se jako první",
   "tablet": "NEOVERENO (vzhled i výkon kontroluje Míša na tabletu)"
+ },
+ "kraj_cesty": {
+  "popis": "Plán C2: krajnice cest a pěšin (třída stanoviště cesta mimo vyjetou hlínu masky cest) se po úsecích střídá – holá hlína s kameny, tráva, květnatý lem. Úsek podle šumu (FastNoiseLite simplex, seed, vlna usek_m); stejný šum čte louka.gd (jemné trsy a pás) i byliny.gd (tráva sady, vysoká tráva, kameny – byliny.json tridy cesta_krajnice_hola / _kvety).",
+  "zdroj": "docs/reference/kcd_ves_predloha/01_ulice_rattay.jpg (tráva jen v pruhu u kraje, místy holá hlína až k trávě), 03_ves_ploty_zahrady.jpg (cesty hlína a štěrk, u kraje kameny a trsy), 04_dvur_remeslo_hlina.jpg (tráva v trsech u paty, kamení u kraje); Qiankun Seal (rešerše 17. 11., plán C2: okraj cesty střídá hlínu, trávu, květy a kameny)",
+  "seed": 1393,
+  "usek_m": 7.0,
+  "_usek_m": "délka vlny šumu – úseky ~3–8 m (KCD: lem cesty se mění po pár krocích, ne pravidelně)",
+  "hola_do": 0.4,
+  "_hola_do": "šum < hola_do = úsek holé hlíny: tráva × hola_trava, byliny.json cesta_krajnice_hola (kameny, řídká tráva); simplex ~25 % délky",
+  "hola_trava": 0.15,
+  "kvety_od": 0.6,
+  "_kvety_od": "šum > kvety_od = květnatý lem (louka.json druhy cesta_kvety: buňka atlasu 5 květy, pás 'louka s květy'; byliny cesta_krajnice_kvety); ~25 % délky, mezi tím travnatý lem",
+  "tablet": "NEOVERENO"
+ },
+ "ohyb": {
+  "popis": "Plán C6: jemné trsy louky (stebla.gdshader rezim 0/louka) se u hráče odkloní od nohou a sklopí – špička víc než pata (× výška² karty). Poloha = kamera − oci_m (louka.gd _process, 1 uniform na snímek, bez textury a vzorkovače). Pás (25 m+) a byliny trava_sada beze změny.",
+  "zapnuto": true,
+  "polomer_m": 0.9,
+  "oci_m": 1.65,
+  "_polomer_m": "plný ohyb do 0,35 × poloměru, k poloměru mizí; ve svislici jen do 1,2–2 m od nohou (most, hradba nad loukou)",
+  "sila": [
+   0.45,
+   0.25
+  ],
+  "_sila": "stebla.gdshader ohyb_sila: odklon špičky m, pokles špičky m",
+  "zdroj": "PDF 1 (rešerše 17. 11., plán C6: interaktivní tráva vertex shaderem s polohou hráče), KCD2 (tráva se rozhrnuje kolem nohou postavy); Havran nemá",
+  "tablet": "NEOVERENO (cena: 1 uniform + ~12 operací ve vrcholu trsu)"
  }
 }

@@ -45,6 +45,7 @@ done
 python3 $K/nastroje/pole_textur.py $K
 mkdir -p $K/hra/modely/stromy && for m in $(python3 -c "import json;print(' '.join(json.load(open('$K/pravidla/svet/stromy_modely.json'))['varianty']))"); do cp -n $K/../modely/nove/${m}_*.glb $K/hra/modely/stromy/ 2>/dev/null || true; done
 python3 $K/nastroje/stromy_lod.py $K/hra/modely/stromy 0.3 1.45
+mkdir -p $K/hra/modely/rostliny && for m in $(python3 -c "import json;print(' '.join(m for f in ('byliny','kere') for v in json.load(open('$K/pravidla/svet/'+f+'.json'))['modely'].values() for m in v))"); do [ -f $K/hra/modely/rostliny/$m.glb ] || cp $K/../modely/nove/$m.glb $K/hra/modely/rostliny/ 2>/dev/null || true; done   # byliny a keře z knihovny Havrana (plán E4: každý druh ≥ 3 modely; vlastní generátory – ostřice, devětsil, vrby – blender/rostliny_u_vody.py)
 [ -x /opt/bl/bin/python ] && /opt/bl/bin/python $K/blender/stromy_lod_kmen.py $K   # kůra LOD1 decimovaná v Blenderu (plán A4, stromy_modely.json lod1_kmen)
 cp $K/pravidla/svet/stromy_modely.json $K/hra/data/
 python3 $K/nastroje/cesty_graf.py $K   # síť cest pro rychlé cestování po mapě (Míša 14. 11.)

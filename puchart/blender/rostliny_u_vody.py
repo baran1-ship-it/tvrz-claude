@@ -464,6 +464,14 @@ VRBY = {
         vetve=dict(rozestup=(0.3, 0.5), uhel=(15, 35), delka=(0.4, 0.75), r=0.55, krivost=0.22, gravitace=0.06, svetlo=0.05, od=0.12),
         vetvicky=dict(rozestup=(0.9, 1.3), uhel=(20, 40), delka=(0.2, 0.35), r=0.5, krivost=0.2, gravitace=0.05, svetlo=0.05, od=0.45),
         karet_m=0.08, koruna=(1.05, 0.95), listi_od=0.35, cil_troj=8000),
+    "vrba_ker_3": dict(   # ~4 m (S. cinerea, vrba popelavá – K2.1, mokřady a luhy): širší kulovitý, šedozelený (plán E4 23. 11.)
+        vyska=4.0, listy="LeafSet013", tint=(0.5, 0.6, 0.47), kura="bark_willow", kura_m=0.5,
+        karta_m=0.8, list_m=0.09, listu=40, plod=None, plodu=(0, 0), plod_karet=0,
+        kmen=dict(delka=0.18, r=0.1, krivost=0.12, sklon=0.06),
+        ramena=dict(n=(7, 9), od=0.05, uhel=(18, 55), delka=(2.4, 3.4), r=0.42, krivost=0.28, gravitace=0.06, svetlo=0.05),
+        vetve=dict(rozestup=(0.3, 0.5), uhel=(20, 45), delka=(0.6, 1.1), r=0.55, krivost=0.25, gravitace=0.06, svetlo=0.05, od=0.12),
+        vetvicky=dict(rozestup=(0.9, 1.3), uhel=(20, 45), delka=(0.25, 0.45), r=0.5, krivost=0.2, gravitace=0.05, svetlo=0.05, od=0.4),
+        karet_m=0.08, koruna=(1.2, 0.9), listi_od=0.3, cil_troj=9000),
 }
 
 

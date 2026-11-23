@@ -97,5 +97,100 @@
   "zdroj": "Míša 5. 11.: „přesahy střech, mrkni na net“. Tesařské zdroje: štítový přesah nesený latěmi do ~30 cm, větší jen se žebříkem (ceskestavby.cz/clanky/jak-resit-stitovy-presah-strechy-pomoci-vazniku-26717); okapový přesah prodloužením krokví/pozednice, historicky námětky (pamatky.npu.cz 2022/03); KCD reference docs/reference/kcd_vzhled/misa_kcd_01,02,13,14: okap ~0,7–1 m, viditelná tloušťka krytiny a čela krokví pod okapem. Konkrétní cm pro středověký šindel NEOVERENO (odhad z referencí).",
   "stity": "drevo",
   "stity_zdroj": "Míša 9. 11.: „určitě není kamení až do štítu“ – KCD fotky misa_kcd_15/16 (palác: kamenné zdi do okapu, štít z prken), misa_kcd_02 (věž: kámen pod střechou, výš dřevo); štít = bedněný ze svislých prken"
+ },
+ "kameny_lod0": {
+  "popis": "Kámen jako kámen zblízka (Míša 18. 11., pravidlo v CLAUDE.md; plán F2): zuby cimbuří z 2–4 řad nepravidelných kamenů se spárou a krycí deskou, krycí kameny koruny zídky v prolukách, patka hradeb z větších kamenů, nárožní kvádry na vazbu s otlučenými hranami. Staví blender/kamenivo.py (společné pro oba hrady), sítě Kameny_* po buňkách; hra je kreslí jen do do_m (hlavni.gd _hrad_lod, visibility_range), dál zůstává jednoduchá síť zdi s texturou (LOD1).",
+  "zdroj": "docs/reference/zdivo_kcd_18_11/07 a 08 (koruna a nároží z kvádrů vystupují, KCD), 01 a 11 (nároží a podezdívka z velkých tesaných kvádrů), README bod 2 a 4; Míša misa_cimburi_kostky.jpg (zuby jako kostky s tapetou) a misa_20_11_svy.jpg (H6); rozměry zubu docs/reference/detaily_hradu_1393.md §5",
+  "do_m": 28.0,
+  "okraj_m": 4.0,
+  "bunka_m": 10.0,
+  "material": "kamen_kus",
+  "sraz_m": 0.016,
+  "nerovnost_m": 0.01,
+  "otluceny_roh_p": 0.3,
+  "stinka": {
+   "rad": [
+    2,
+    4
+   ],
+   "vrstva_m": 0.26,
+   "kamen_delka_m": [
+    0.28,
+    0.55
+   ],
+   "spara_m": 0.016,
+   "vystup_m": [
+    0.012,
+    0.03
+   ],
+   "kryci_deska_m": [
+    0.08,
+    0.12
+   ],
+   "kryci_presah_m": 0.035,
+   "jadro_m": 0.06
+  },
+  "kryti": {
+   "kamen_delka_m": [
+    0.3,
+    0.6
+   ],
+   "vyska_m": [
+    0.07,
+    0.11
+   ],
+   "zapust_m": 0.015,
+   "presah_m": [
+    0.015,
+    0.035
+   ]
+  },
+  "patka": {
+   "kamen_delka_m": [
+    0.55,
+    0.95
+   ],
+   "vyska_m": [
+    0.32,
+    0.48
+   ],
+   "hloubka_m": 0.32,
+   "vystup_m": [
+    0.03,
+    0.05
+   ],
+   "pod_terenem_m": 0.12,
+   "nad_terenem_min_m": 0.14,
+   "max_spad_m": 0.6
+  },
+  "narozi": {
+   "vrstva_m": [
+    0.25,
+    0.45
+   ],
+   "vazak_m": [
+    0.55,
+    0.85
+   ],
+   "kratky_m": [
+    0.28,
+    0.42
+   ],
+   "hloubka_m": [
+    0.28,
+    0.4
+   ],
+   "vystup_m": [
+    0.02,
+    0.045
+   ],
+   "sraz_m": [
+    0.03,
+    0.06
+   ]
+  },
+  "pozn_lod": "do_m 28 + okraj 4: buňka 10 m (střed AABB buňky ±7 m) → kameny vidět ~21–35 m od hráče; z dálky kvádr zubu / nároží stejné siluety (kameny vystupují jen 1–3,5 cm, krycí deska +3 cm). Rozpočet troj.: měřeno ve 2 polohách Míši (docs/chyby.md).",
+  "pozn_vzhled": "23. 11. kontrolní snímek (x −0,8 z 22,4): sražení 2,2 cm a otlučení ×2,4 dělalo „polštářky“ – sraz 1,6 cm, otlučený roh ×1,9, nerovné plochy ±1 cm; kámen o ~13 % tmavší (TEX kamen_kus jas 0,68) – světlejší než zeď svítil",
+  "pozn_stin": "23. 11. kontrolní snímek x 1,3 z 22,3: krycí deska jen 1,4–2,6 cm nad vrchem kvádru zubu → stín kvádru (posun stínu) kreslil na desce pruhy; deska leží na zubu (vrch +6–10 cm), krycí kameny koruny zapuštěné 1,5 cm. Kameny nevrhají stín (hlavni.gd cast_shadow off) – stín dělá kvádr zdi pod nimi, stínový průchod je nekreslí. Kvádr zubu pod kameny je v blízké verzi o 6 cm z každé strany menší (stinka.jadro_m) a nárožní kvádr pod kamenem se v blízké verzi nestaví – stín jádra 1–3 cm za lícem kamene dělal na kamenech šrafování (kontrolní snímek x −0,8 z 22,4); nárožní kameny vystupují 2–4,5 cm."
  }
 }

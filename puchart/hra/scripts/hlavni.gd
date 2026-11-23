@@ -89,6 +89,7 @@ func _start() -> void:
 			(k as MeshInstance3D).visible = false
 		# barva vrcholu = odstín/AO po plochách (hrady.barva_kusu) – jako albedo dělala ze skály čtverce („minecraft“, Míša 9. 11.)
 		var _sh_skala: Shader = load("res://shaders/skala.gdshader")
+		var _sv: Dictionary = (JSON.parse_string(FileAccess.get_file_as_string("res://data/pudy.json")) as Dictionary).get("skala_vychozy", {}) if FileAccess.file_exists("res://data/pudy.json") else {}   # H4 23. 11.
 		var _droba: StandardMaterial3D = null   # police s mechem dostanou taky drobu – mech dělá shader jen místy (Míša 10. 11.)
 		for mi_ in sk.find_children("*", "MeshInstance3D", true, false):
 			var m0_ := (mi_ as MeshInstance3D).mesh
@@ -107,7 +108,7 @@ func _start() -> void:
 				var zd_ := _droba if (_droba and mt_.resource_name.begins_with("skala_mech")) else mt_
 				sm_.set_shader_parameter("tex_a", zd_.albedo_texture); sm_.set_shader_parameter("tex_n", zd_.normal_texture)
 				sm_.set_shader_parameter("meritko", 1.0 / 2.6); sm_.set_shader_parameter("mech", 1.0 if mt_.resource_name.begins_with("skala_mech") else 0.0)
-				sm_.set_shader_parameter("jas", 0.85)
+				sm_.set_shader_parameter("jas", float(_sv.get("jas", 0.85))); sm_.set_shader_parameter("albedo_cil", float(_sv.get("albedo_cil", 0.0)))   # pudy.json skala_vychozy (H4: černé skvrny na svahu)
 				ms_.surface_set_material(i_, sm_)
 	Denik.zapis("rostliny skal")
 	if FileAccess.file_exists("res://data/skaly_rostliny.json"): _rostliny_skal()
@@ -521,7 +522,6 @@ func _process(_d: float) -> void:
 	if _foto == "":
 		return
 	_snimek += 1
-	if _snimek == 40:
 	if _snimek == 35 and den and OS.get_environment("PUCHART_FOTO_CASY") != "" and OS.get_environment("PUCHART_FOTO_LOUC") != "0":
 		if _foto_louc == null:
 			var sv_: Dictionary = _pr.get("atmosfera", {}).get("svitidla", {})
@@ -531,6 +531,7 @@ func _process(_d: float) -> void:
 			_foto_louc.light_energy = 1.8 * float(sv_.get("energie_nasobek", 1.0)); _foto_louc.omni_range = 9.0 * float(sv_.get("dosah_nasobek", 1.0))
 			get_viewport().get_camera_3d().add_child(_foto_louc)
 		_foto_louc.visible = den.is_night()
+	if _snimek == 40:
 		var c := _foto.split(";")
 		# víc denních dob z jednoho startu (plán B3, nastroje/foto_tri_svetla.sh): PUCHART_FOTO_CASY="7,12,19.6,23" →
 		# <soubor bez .png>_<hodina>.png; v noci louč v ruce (PUCHART_FOTO_LOUC, světlo jako predmety.gd SVETLA louc × svitidla)
@@ -622,9 +623,14 @@ func _hrad_lod(h: Node3D, hid: String) -> void:
 	for m in d.find_children("*", "MeshInstance3D", true, false):
 		if String(m.name).begins_with("KOLIZE"): (m as MeshInstance3D).visible = false; continue
 		dal[String(m.name)] = m
+	var k0: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/hrad_vzhled.json")).get("kameny_lod0", {})
 	for m in h.find_children("*", "MeshInstance3D", true, false):
 		var jm := String(m.name)
 		if jm.begins_with("KOLIZE") or jm.begins_with("Pohyb"): continue
+		if jm.begins_with("Kameny") and not k0.is_empty():   # kameny LOD0 (Míša 18. 11.: kámen jako kámen zblízka) jen do do_m, dál síť zdi
+			(m as GeometryInstance3D).visibility_range_end = float(k0["do_m"]); (m as GeometryInstance3D).visibility_range_end_margin = float(k0["okraj_m"])
+			(m as GeometryInstance3D).visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+			(m as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF   # stín vrhá kvádr zdi pod kameny (stejná silueta) – kámen sám sebe stínil (pruhy na krycí desce) a stínový průchod by kreslil kameny podruhé
 		var bb: AABB = (m as MeshInstance3D).global_transform * (m as MeshInstance3D).get_aabb()
 		var dm = dal.get(jm, null)
 		_lod_pary.append([bb.get_center(), bb.size.length() * 0.5, [m], [dm] if dm != null else []])
@@ -659,6 +665,8 @@ const TEXTURA_NAST := {   # Havran scripts/svet.gd material(): šindel radky+skv
 	"dvere": {"kus": 1.0, "stekance": 0.3},
 	"omitka": {"skvrny": 0.7, "stekance": 0.45, "budova": 0.6},
 	"kvadr_okno": {"antitile": 1.0, "skvrny": 0.5},
+	"kamen_kus": {"antitile": 1.0, "skvrny": 0.45},   # 23. 11. kameny LOD0 (blender/kamenivo.py): zuby cimbuří, nároží, patky – odstín po kameni (COLOR.r)
+	"kamen_klenak": {"antitile": 1.0, "skvrny": 0.5}, "kamen_stupen": {"antitile": 1.0, "skvrny": 0.4},   # klenáky a kamenné stupně: UV po ploše kamene (bez natažení)
 }
 var _tex_mat: Dictionary = {}
 func _textura_mat(jm: String, mt: StandardMaterial3D) -> Material:

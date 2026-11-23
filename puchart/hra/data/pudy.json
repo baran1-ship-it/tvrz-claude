@@ -79,5 +79,13 @@
    0.86
   ],
   "zdroj": "pravidla/svet/skaly.json geologie.barva_zvetrale; reference docs/reference/misa_3_11/kcd2_nadvori_brana_hlina.jpg"
+ },
+ "skala_vychozy": {
+  "popis": "Skalní výchozy (blender/skaly.py → modely/hrady/skaly.glb, hra/shaders/skala.gdshader v hlavni.gd): jas a cílová střední odrazivost fotky droby. Fotka skaly_droba_Diffuse.jpg má průměr jen 0,088 (lineárně), shader ji dál ztmavuje (barva_droby, tónové skvrny, mech, jas) – výchozy na svahu odvráceném od slunce (svah pod hradem, x 150,8 z 132,7 směr 319°) vycházely po ACES a úpravě kontrastu (prostredi atmosfera.uprava) čistě černé (0,0,0) mezi zelenými kartami pásu (Míša 20. 11., plán H4). Zkoušeno 23. 11. na PC: cíl 0,17 a 0,24 pořád 0,0,0; 0,45 tmavě šedá skála s čitelnou strukturou, na slunci světle šedá; 1,0 přesvětlené.",
+  "albedo_cil": 0.45,
+  "_albedo_cil": "střední odrazivost fotky před tónováním (lineárně, jas = 0,3R+0,59G+0,11B; shader dělí průměrem fotky z nejmenší mipmapy); po tónování ~0,3 – ve stínu tmavě šedá, ne černá. Kameny koryt mají 0 (vlastní jas voda_hra.json kameny_jas)",
+  "jas": 0.85,
+  "zdroj": "docs/reference/puchart_skaly (fotky Potštátu: tmavá šedohnědá až modrošedá droba, ve stínu šedá s mechem – nikde černá), docs/reference/kcd2/ref_kcd2_vez_skala.jpg (KCD2: skála ve stínu tmavě šedá s čitelnou strukturou); odrazivost břidlice/droby 0,1–0,25 (zvětralé tmavé horniny)",
+  "tablet": "NEOVERENO"
  }
 }

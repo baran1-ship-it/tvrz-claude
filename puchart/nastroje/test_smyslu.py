@@ -1696,6 +1696,51 @@ for _f231 in ("louka.json", "kere.json", "byliny.json", "rozpocty.json"):
     if json.load(open(os.path.join(K, "hra/data", _f231), encoding="utf-8")) != json.load(open(os.path.join(K, "pravidla/svet", _f231), encoding="utf-8")): _c231.append("hra/data/%s není kopie" % _f231)
 TEST("stredni_pas_travy", not _c231, "; ".join(_c231) if _c231 else "pás %s–%s m (min hustota 40–100 m %.2f), jemné trsy do %s m (konec %s), keře/byliny dosah = zánik" % (_P231["od_m"], _P231["do_m"], _m231, _lk231["dosah_m"], _lk231["konec_m"]))
 
+# plán F2 a H6 (Míša 18.–20. 11., pravidlo „Kámen musí být kámen – ne tapeta“; misa_cimburi_kostky.jpg, misa_20_11_svy.jpg,
+# chyby.md 414–418): zblízka kameny v geometrii (zuby cimbuří, koruny, patky, nároží) v sítích Kameny_* kreslených jen do do_m,
+# klenáky a stupně s texturou jednoho kamene (bez natažení světovou projekcí), paláce omítka místy opadaná, sklep režné zdivo;
+# nárožní kámen nesmí ležet ve styku s přiléhající zdí (svislý tmavý šev)
+_c414 = []; _c415 = []
+_HV414 = json.load(open(os.path.join(K, "pravidla/svet/hrad_vzhled.json"), encoding="utf-8"))
+_K0414 = _HV414.get("kameny_lod0", {})
+try: _KL414 = json.load(open(os.path.join(K, "build/kameny_lod0.json"), encoding="utf-8"))
+except FileNotFoundError: _KL414 = None
+if not _K0414 or "zdivo_kcd_18_11" not in _K0414.get("zdroj", ""): _c414.append("hrad_vzhled.json kameny_lod0 chybí / bez zdroje předlohy")
+elif _K0414["do_m"] + _K0414["okraj_m"] >= _HV414["lod"]["daleko_od_m"]: _c414.append("kameny do %s m nejsou blíž než daleká verze %s m" % (_K0414["do_m"], _HV414["lod"]["daleko_od_m"]))
+if _KL414 is None: _c414.append("build/kameny_lod0.json chybí (blender/puchart_hrad.py)")
+else:
+    _c414 += ["%s: 0" % k for k in ("stinek", "kryti", "patka", "narozi_kamenu") if _KL414["stat"].get(k, 0) <= 0]
+_gb414 = open(os.path.join(K, "hra/modely/hrady/puchart.glb"), "rb").read(); _n414 = struct.unpack("<I", _gb414[12:16])[0]; _J414 = json.loads(_gb414[20:20 + _n414])
+_mt414 = {m.get("name", "") for m in _J414.get("materials", [])}; _nd414 = [n.get("name", "") for n in _J414.get("nodes", [])]
+_OZ414 = json.load(open(os.path.join(K, "pravidla/svet/hrad_puchart.json"), encoding="utf-8")).get("omitka_zdiva", {})
+_chci414 = {"kamen_kus", "kamen_klenak", "kamen_stupen", _OZ414.get("sklep", "?"), (_OZ414.get("palac") or {}).get("lic", "?"), (_OZ414.get("palac") or {}).get("rub", "?")}
+if _chci414 - _mt414: _c414.append("puchart.glb bez materiálů %s" % sorted(_chci414 - _mt414))
+if {"kvadr_schod", "zdivo_narozi"} & _mt414: _c414.append("puchart.glb má staré materiály %s (tapeta na kvádru)" % sorted({"kvadr_schod", "zdivo_narozi"} & _mt414))
+_mh414 = json.load(open(os.path.join(K, "hra/data/materialy_hrad.json"), encoding="utf-8"))
+if any(m not in _mh414 for m in _chci414 if m.startswith("zdivo")): _c414.append("hra/data/materialy_hrad.json bez nastavení %s" % [m for m in _chci414 if m.startswith("zdivo") and m not in _mh414])
+_nk414 = sum(1 for n in _nd414 if n.startswith("Kameny"))
+if _KL414 is not None and _nk414 != _KL414["bunek"]: _c414.append("buněk Kameny_* v glb %d ≠ %d" % (_nk414, _KL414["bunek"]))
+if any(n.startswith("Kameny") for n in [m.get("name", "") for m in json.loads(open(os.path.join(K, "hra/modely/hrady/puchart_daleko.glb"), "rb").read()[20:20 + struct.unpack("<I", open(os.path.join(K, "hra/modely/hrady/puchart_daleko.glb"), "rb").read()[12:16])[0]]).get("nodes", [])]): _c414.append("daleká verze má kameny LOD0")
+_hg414 = open(os.path.join(K, "hra/scripts/hlavni.gd"), encoding="utf-8").read()
+if 'begins_with("Kameny")' not in _hg414 or "visibility_range_end" not in _hg414: _c414.append("hlavni.gd nekreslí Kameny_* jen zblízka (visibility_range)")
+for _m414 in ("kamen_kus", "kamen_klenak", "kamen_stupen"):
+    if '"%s"' % _m414 not in _hg414: _c414.append("hlavni.gd TEXTURA_NAST bez %s" % _m414)
+TEST("kameny_lod0", not _c414, "; ".join(_c414) if _c414 else "zubů %d, korun %d, patek %d, nárožních kamenů %d (vynecháno u přiléhajících zdí %d), buněk %d, troj. LOD0 %d" % (
+    _KL414["stat"]["stinek"], _KL414["stat"]["kryti"], _KL414["stat"]["patka"], _KL414["stat"]["narozi_kamenu"], _KL414["stat"]["narozi_vynechano"], _KL414["bunek"], _KL414["troj"]))
+_kv415 = json.load(open(os.path.join(K, "hra/data/stavby_clony.json"), encoding="utf-8"))["kvadry"]
+def _v_kv415(q):
+    for kv_ in _kv415:
+        if q[2] > kv_["vrch"]: continue
+        r_ = kv_["rohy"]; zn_ = set()
+        for i_ in range(4):
+            a_, b_ = r_[i_], r_[(i_ + 1) % 4]; zn_.add((b_[0] - a_[0]) * (q[1] - a_[1]) - (b_[1] - a_[1]) * (q[0] - a_[0]) > 0)
+        if len(zn_) == 1: return True
+    return False
+if _KL414 is not None:
+    _sp415 = [b for b in _KL414["narozi_body"] if _v_kv415(b)]
+    if _sp415: _c415.append("%d nárožních kamenů ve styku s přiléhající zdí, např. %s" % (len(_sp415), _sp415[:3]))
+TEST("narozi_bez_styku", _KL414 is not None and not _c415, "; ".join(_c415) if _c415 else "nárožních kamenů %d, žádný ve styku s cizí zdí" % (len(_KL414["narozi_body"]) // 2 if _KL414 else 0))
+
 # plán F + C4 + C1 + A4 + B3 (rešerše 17. 11., Míša 18. 11. „dřevo je dřevo – ne tapeta“; chyby.md 421–424): šindel stodol
 # a kůlen v geometrii (řady s čely, úseky s tónem v barvě vrcholů, jen zblízka), krytá vrata vsi taky; proutěné díly plotu
 # v řadě různě (otočení, výška, vychýlení); opotřebení stodoly v barvě vrcholů (pata tmavší, mech k severu, 4 varianty);
@@ -1776,6 +1821,60 @@ TEST("stromy_lod1_kmen", not _c420 and _s0 > 0, "; ".join(_c420[:6]) if _c420 el
 _h421 = open(os.path.join(K, "hra/scripts/hlavni.gd"), encoding="utf-8").read()
 TEST("foto_vice_svetel", os.path.exists(os.path.join(K, "nastroje/foto_tri_svetla.sh")) and "PUCHART_FOTO_CASY" in _h421 and "FotoLouc" in _h421,
      "nastroje/foto_tri_svetla.sh + hlavni.gd PUCHART_FOTO_CASY (ráno, poledne, soumrak, noc s loučí)")
+
+# --- plán E2/E4/H4/C2/C3/C5/C6 (23. 11.)
+import hashlib as _hl23
+_L23 = json.load(open(D + "louka.json")); _B23 = json.load(open(D + "byliny.json")); _K23 = json.load(open(D + "kere.json"))
+# E4: každý druh porostu ≥ 3 různé modely (různé soubory, ne natočení/škála); zmlazení (mladé stromy) jako skupina
+_c23 = []
+def _md5_23(m):
+    f = K + "/hra/modely/rostliny/%s.glb" % m
+    return _hl23.md5(open(f, "rb").read()).hexdigest() if os.path.exists(f) else None
+for _jm, _cf in (("byliny", _B23), ("kere", _K23)):
+    _zml = set()
+    for _dr, _ms in _cf.get("modely", {}).items():
+        _h = {_md5_23(m) for m in _ms} - {None}
+        if _dr.startswith("zmlazeni"): _zml |= _h; continue
+        if len(_h) < 3 and _dr not in _cf.get("e4_vyjimky", {}): _c23.append("%s.%s: %d různých modelů" % (_jm, _dr, len(_h)))
+    if _jm == "kere" and len(_zml) < 3: _c23.append("kere zmlazení (mladé stromy): %d různých modelů" % len(_zml))
+if len([x for x in _L23["druhy"]["_"] if x > 0]) < 3: _c23.append("louka: < 3 druhy trsů")
+if len(_L23["pas"]["atlas"]["varianty"]) < 3: _c23.append("pás: < 3 varianty atlasu")
+TEST("tri_modely_druhu", not _c23, "; ".join(_c23) if _c23 else "byliny, keře, kameny, tráva (5 druhů trsů, %d variant pásu) a mladé stromy ≥ 3 modely" % len(_L23["pas"]["atlas"]["varianty"]))
+_v23 = [d_ for c_ in (_B23, _K23) for d_ in c_.get("e4_vyjimky", {})]
+TEST("tri_modely_vyjimky", not _v23, "druhy s < 3 modely (výjimka s důvodem v datech): %s" % _v23, vaha="varovani")
+# H4: skalní výchozy nesmí být černé – střední odrazivost fotky droby zvednutá (pudy.json skala_vychozy), shader ji čte
+_sv23 = json.load(open(D + "pudy.json")).get("skala_vychozy", {})
+_sk23 = open(K + "/hra/shaders/skala.gdshader", encoding="utf-8").read(); _hl23s = open(K + "/hra/scripts/hlavni.gd", encoding="utf-8").read()
+TEST("skaly_bez_cerne", float(_sv23.get("albedo_cil", 0)) >= 0.4 and "albedo_cil" in _sk23 and "skala_vychozy" in _hl23s,
+     "albedo_cil %s (≥ 0,4: 0,17 a 0,24 dávaly na PC 0,0,0 na svahu pod hradem x 150,8 z 132,7)" % _sv23.get("albedo_cil"))
+# E2: struktura porostu za koncem pásu (větší pevná měřítka) navazuje na konec pásu
+_po23 = _L23["porost_dalka"]; _ze23 = open(K + "/hra/shaders/zem.gdshader", encoding="utf-8").read()
+_e2 = []
+if not (_po23["porost_dal_vzd"][0] <= _L23["pas"]["do_m"][0] and _po23["porost_dal_vzd"][1] >= _L23["pas"]["do_m"][1]): _e2.append("přechod %s neobklopuje konec pásu %s" % (_po23["porost_dal_vzd"], _L23["pas"]["do_m"]))
+if _po23["porost_dal_trsy"][0] < 2 * _po23["porost_trsy"][0]: _e2.append("dálkové trsy nejsou ≥ 2× větší")
+if "porost_dal_trsy" not in _ze23: _e2.append("zem.gdshader nečte porost_dal_*")
+TEST("porost_dalka_za_pasem", not _e2, "; ".join(_e2) if _e2 else "dálková struktura %s m, trsy %s m" % (_po23["porost_dal_vzd"], _po23["porost_dal_trsy"][:2]))
+# C2: krajnice po úsecích – holá hlína s kameny / tráva / květy; louka.gd i byliny.gd čtou stejný šum
+_kc23 = _L23.get("kraj_cesty", {}); _lg23 = open(K + "/hra/scripts/louka.gd", encoding="utf-8").read(); _bg23 = open(K + "/hra/scripts/byliny.gd", encoding="utf-8").read()
+_c2 = []
+if not _kc23 or not (0 < _kc23["hola_do"] < _kc23["kvety_od"] < 1): _c2.append("kraj_cesty prahy")
+if "kamen" not in _B23["tridy"].get("cesta_krajnice_hola", {}): _c2.append("holý úsek bez kamenů")
+if _L23["druhy"].get("cesta_kvety", [0] * 8)[7] <= 0: _c2.append("květnatý úsek bez květů (druh 7)")
+if "kraj_cesty" not in _lg23 or "kraj_cesty" not in _bg23: _c2.append("louka.gd/byliny.gd nečtou kraj_cesty")
+TEST("kraj_cesty_strida", not _c2, "; ".join(_c2) if _c2 else "úsek %s m, holá < %s, květy > %s" % (_kc23.get("usek_m"), _kc23.get("hola_do"), _kc23.get("kvety_od")))
+# C3: u vody kameny na čáře, tráva za nimi, pak keře břehu (vrba, olše)
+_vp23 = _B23["voda_pas"]; _pa23 = _vp23.get("pasmo", {})
+_c3 = []
+if not ("kamen" in _vp23["voda_louka"] and "kamen" in _pa23 and "trava" in _pa23 and _pa23["kamen"][0] < _pa23["trava"][0] and _pa23["kamen"][1] < _pa23["trava"][1]): _c3.append("pásma kámen → tráva")
+if not ("vrba_ker" in _K23["tridy"]["breh"] and "zmlazeni_olse" in _K23["tridy"]["breh"]): _c3.append("břeh bez vrby/olše")
+if "pasmo" not in _bg23: _c3.append("byliny.gd nečte voda_pas.pasmo")
+TEST("breh_voda_kamen_trava", not _c3, "; ".join(_c3) if _c3 else "kámen %s, tráva %s šířky pásu, za nimi keře břehu" % (_pa23.get("kamen"), _pa23.get("trava")))
+# C6 + C5: ohyb trávy u hráče, stíny mraků bez nového vzorkovače (zem ≤ 13)
+_st23 = open(K + "/hra/shaders/stebla.gdshader", encoding="utf-8").read()
+import re as _re23
+_vz23 = len(_re23.findall(r"^uniform\s+sampler", _ze23, _re23.M))
+TEST("ohyb_travy_hrac", "ohyb_hrac" in _st23 and "ohyb_hrac" in _lg23 and _L23.get("ohyb", {}).get("polomer_m", 0) > 0, "louka.json ohyb %s" % _L23.get("ohyb", {}).get("polomer_m"))
+TEST("mraky_stin_vzorkovace", "mraky_stin" in _ze23 and _po23.get("mraky_stin", [0])[0] > 0 and _vz23 <= 13, "zem.gdshader vzorkovačů %d (≤ 13), mraky %s" % (_vz23, _po23.get("mraky_stin")))
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)

@@ -45,6 +45,9 @@ uniform float pas_rust = 1.25;      // karta v dálce (u hust_konec + konec_sirk
 
 uniform float sloupce = 3.0;
 uniform float radky = 2.0;
+// plán C6: tráva se ohýbá od hráče (louka.json ohyb; louka.gd každý snímek): xyz = poloha nohou hráče, w = poloměr m (0 = vypnuto)
+uniform vec4 ohyb_hrac = vec4(0.0);
+uniform vec2 ohyb_sila = vec2(0.45, 0.25);   // vodorovné odklonění špičky m, pokles špičky m (× výška² karty)
 uniform int rezim = 0;              // 0 atlas trav (tabulka druhu), 1 grass_pack: bunka = druh, vyska vyska_od..do, 2 střední pás (pečený atlas porostu)
 uniform float vyska_od = 0.15;
 uniform float vyska_do = 0.3;
@@ -208,6 +211,13 @@ void vertex() {
 	float k = vyska * vyska * 0.09 * vitr * (i > 2.5 && i < 4.5 ? 0.4 : 1.0);
 	VERTEX.x += (sin(t) * 0.7 + sin(t * 2.3 + w.z * 0.3) * 0.3) * k;      // faze se po karte meni jen malo (karta drzi tvar)
 	VERTEX.z += cos(t * 0.8 + w.x * 0.3) * k * 0.6;
+	if (ohyb_hrac.w > 0.0) {   // C6: ohyb od nohou hráče (pata stojí, špička se odkloní a sklopí) – jen jemné trsy u hráče, bez textury
+		vec2 od = w.xz - ohyb_hrac.xz;
+		float r = length(od);
+		float o = (1.0 - smoothstep(ohyb_hrac.w * 0.35, ohyb_hrac.w, r)) * (1.0 - smoothstep(1.2, 2.0, abs(w.y - ohyb_hrac.y))) * vyska * vyska;
+		VERTEX.xz += od / max(r, 0.05) * o * ohyb_sila.x;
+		VERTEX.y -= o * ohyb_sila.y;
+	}
 	// vertex_lighting: svetlo se pocita z teto normaly (uprava NORMAL ve fragment() se neprojevi) - normala
 	// skoro nahoru jako louka (KCD normaly_od_stredu), jinak karty odvracene od slunce tmave pruhy (test dira)
 	NORMAL = normalize(mix(NORMAL, vec3(0.0, 1.0, 0.0), 0.75));

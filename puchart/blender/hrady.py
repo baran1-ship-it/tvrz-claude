@@ -35,6 +35,7 @@ lib.GAME = True       # střechy jako deska s fotkou šindele (hra), ne jednotli
 HRADBA_OKENKA = False   # úzká okénka v nejvyšším patře i na straně ve zdi (hrad A podle kresby misa_04)
 STRECHA_POMER = 0.62   # výška sedlové střechy / šířka (palác B 1,0 podle kresby misa_01)
 OMITKA = True        # False = palác bez omítky (hrad B podle kresby, Míša 5. 11.)
+MAT_PALAC = None     # materiály zdí paláce {lic, lic_v_hradbe, rub} – puchart_hrad z hrad_puchart.json omitka_zdiva (Míša 18. 11.: vápenná omítka místy opadaná)
 DETAIL = True         # False = dálková verze (*_daleko.glb): jen hmoty, střechy, tmavá okna – bez kování, prken, trámků
 D = json.load(open(os.path.join(K, "pravidla/svet/hrady_navrhy.json")))
 VI = json.load(open(os.path.join(K, "hra/data/vysek.json")))
@@ -66,6 +67,8 @@ def baze(d):
     z = d.cross(UP).normalized()
     return Matrix((d, UP, z)).transposed()
 
+import kamenivo as KV   # kameny LOD0 (Míša 18. 11.: kámen jako kámen) – zuby cimbuří, koruny, patky, nároží
+KV.init(K, ter)
 import portaly   # portály: ostění v líci, hladký oblouk, polodrážka, klenba průchodu (Míša 4. 11., pravidla/svet/portaly.json)
 kit._doorway_havran = kit.doorway; kit.doorway = portaly.doorway; kit.PRAVIDELNE = True
 _kit_window = kit.stone_window; _kit_door = kit.doorway; _kit_deck = kit.deck; _ht = lib.half_timber; _plank = kit.plank
@@ -83,7 +86,7 @@ def _deck_puchart(P, a, b, hw, mat="prkna_ven", *ar, **k):
 kit.deck = _deck_puchart; _kit_deck_p = _deck_puchart
 def nastav_detail(ano):
     global DETAIL
-    DETAIL = ano
+    DETAIL = ano; KV.ZAP = ano
     kit.stone_window = _kit_window if ano else _okno_daleko
     kit.doorway = _kit_door if ano else _dvere_daleko
     kit.deck = _kit_deck_p if ano else _deck_daleko
@@ -183,12 +186,25 @@ def zed_plynula(P, a, b, t, h, mat="zdivo", pata=2.0, krok=1.5, e0=0.0, e1=0.0, 
             ym_ = (yt[k] + yt[k + 1]) / 2; c_ = (q0 + q1) / 2
             P.cols.append((M((c_.x, ym_ + hp_ / 2, c_.z), basis=frame(d)), (t * 0.4, hp_, ss[k + 1] - ss[k])))
         yt = [y_ + hp_ for y_ in yt]
+    sm_int = []
     if cimburi:   # stínky po rytmu cimbuří i na plynulé koruně (Míša 5. a 12. 11.: „vracíme se k hradbičkám všude“ – vnější hradba A byla
         out_n = d.cross(UP).normalized(); R = CIMB["rytmus_m"]; nr = max(1, round(L / R)); Rl = L / nr; sw = min(CIMB["stinka_m"], Rl - 0.5)   # hladká)
         for k in range(nr):
             sm_ = (k + 0.5) * Rl; yk = float(np.interp(sm_, ss, yt)); p = a + d * sm_ + out_n * (t * 0.3)
             sk_ = (float(np.interp(sm_ + sw / 2, ss, yt)) - float(np.interp(sm_ - sw / 2, ss, yt))) / sw   # stínka sedí na šikmé koruně celou spodní hranou
-            P.box(M((p.x, yk + CIMB["vyska_m"] / 2 - 0.04, p.z), basis=frame(d) @ Matrix.Rotation(-math.atan(sk_), 3, "X")), (t * 0.4, CIMB["vyska_m"] + 0.08, sw), mat + "_koruna" if mat == "zdivo" else mat, collide=True)   # stínka má kolizi (povrch_kolize 12. 11.: „projde viditelným“)
+            m_ = M((p.x, yk + CIMB["vyska_m"] / 2 - 0.04, p.z), basis=frame(d) @ Matrix.Rotation(-math.atan(sk_), 3, "X")); sz_ = (t * 0.4, CIMB["vyska_m"] + 0.08, sw)
+            if DETAIL and mat == "zdivo": P.cols.append((m_.copy(), sz_)); KV.jadro_stinky(P, p + UP * (yk - 0.04), d, out_n, t * 0.4, CIMB["vyska_m"] + 0.08, sw, "zdivo_koruna", sklon=sk_)   # blízko: kameny LOD0 + zmenšené jádro (kolize plná)
+            else: P.box(m_, sz_, mat + "_koruna" if mat == "zdivo" else mat, collide=True)   # stínka má kolizi (povrch_kolize 12. 11.: „projde viditelným“)
+            KV.stinka(p + UP * (yk - 0.04), d, out_n, t * 0.4, CIMB["vyska_m"], sw, sklon=sk_); sm_int.append((sm_ - sw / 2, sm_ + sw / 2))   # zub z kamenů (LOD0)
+    if DETAIL and mat == "zdivo":   # koruna předprseně / zdi v prolukách a patka z kamenů (LOD0, plán F2)
+        on_ = d.cross(UP).normalized()
+        for k in (range(n) if (cimburi or hp_ > 0) else ()):
+            u0_, u1_ = float(ss[k]), float(ss[k + 1]); sk_ = (yt[k + 1] - yt[k]) / max(1e-6, u1_ - u0_)
+            hr_ = sorted({u0_, u1_} | {x for i0, i1 in sm_int for x in (i0, i1) if u0_ < x < u1_})
+            for g0, g1 in zip(hr_, hr_[1:]):
+                if any(i0 - 1e-6 <= (g0 + g1) / 2 <= i1 + 1e-6 for i0, i1 in sm_int): continue
+                KV.kryti(a + d * g0 + on_ * (t * 0.3) + UP * (yt[k] + sk_ * (g0 - u0_)), d, on_, t * 0.4, 0.0, 0.0, g1 - g0, sklon=sk_)
+        KV.patka(a + on_ * (t / 2), d, on_, -e0, L + e1)
     return out
 
 def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=None, okna=0, pilire=False, bez_stinek=None, rovne=False):
@@ -227,7 +243,19 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
                 if bez_stinek and bez_stinek[0] <= (k + 0.5) * Rl <= bez_stinek[1]: continue   # vstup ochozu do věže (13. 11. povrch_kolize: stínka v cestě k portálku)
                 p = a + d * ((k + 0.5) * Rl) + out_n * (t * 0.3)
                 if os.environ.get("PUCHART_DBGS") and (p - Vector((12.45, 0, -45.45))).length < 1.5: print("DBGSTINKA", [round(p.x, 2), round(p.z, 2)], "s", round((k + 0.5) * Rl, 2), "L", round(L, 2), "a", [round(a.x, 2), round(a.z, 2)], "b", [round(b.x, 2), round(b.z, 2)], "volno", bez_stinek, flush=True)
-                P.box(M((p.x, y1 + hp_ + CIMB["vyska_m"] / 2, p.z), basis=frame(d)), (t * 0.4, CIMB["vyska_m"], sw), mat + "_koruna" if mat == "zdivo" else mat, collide=True)   # stínka holý kámen (Míša 10. 11.); kolize jako u plynulé koruny (13. 11.: stínky byly průchozí)
+                m_ = M((p.x, y1 + hp_ + CIMB["vyska_m"] / 2, p.z), basis=frame(d)); sz_ = (t * 0.4, CIMB["vyska_m"], sw)
+                if DETAIL and mat == "zdivo": P.cols.append((m_.copy(), sz_)); KV.jadro_stinky(P, p + UP * (y1 + hp_), d, out_n, t * 0.4, CIMB["vyska_m"], sw, "zdivo_koruna")   # blízko: kameny LOD0 + zmenšené jádro (kolize plná)
+                else: P.box(m_, sz_, mat + "_koruna" if mat == "zdivo" else mat, collide=True)   # stínka holý kámen (Míša 10. 11.); kolize jako u plynulé koruny (13. 11.: stínky byly průchozí)
+                KV.stinka(p + UP * (y1 + hp_), d, out_n, t * 0.4, CIMB["vyska_m"], sw)   # zub z kamenů (LOD0, plán F2)
+        if DETAIL and mat == "zdivo":   # koruna v prolukách cimbuří (na předprseni nebo na vnějším pásu koruny) a patka z kamenů (LOD0)
+            on_ = d.cross(UP).normalized(); sw = min(CIMB["stinka_m"], Rl - 0.5)
+            zuby_ = [((k + 0.5) * Rl - sw / 2, (k + 0.5) * Rl + sw / 2) for k in range(i0, i1) if cimburi and not (bez_stinek and bez_stinek[0] <= (k + 0.5) * Rl <= bez_stinek[1])]
+            if cimburi or hp_ > 0:
+                hr_ = sorted({s0 - e0, s1 + e1} | {x for z0, z1 in zuby_ for x in (z0, z1) if s0 - e0 < x < s1 + e1})
+                for g0, g1 in zip(hr_, hr_[1:]):
+                    if any(z0 - 1e-6 <= (g0 + g1) / 2 <= z1 + 1e-6 for z0, z1 in zuby_) or (bez_stinek and bez_stinek[0] - 0.3 < (g0 + g1) / 2 < bez_stinek[1] + 0.3): continue
+                    KV.kryti(a + on_ * (t * 0.3), d, on_, t * 0.4, y1 + hp_, g0, g1)
+            KV.patka(a + on_ * (t / 2), d, on_, s0 - e0, s1 + e1)
     return out
 
 NAROZI_POKOS = True
@@ -540,26 +568,12 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
 # ------------------------------------------------------------------ budovy
 def narozi(P, R, stena_a, stena_b, y0, y1, mat="zdivo", seme=0):
     """Nárožní kameny (Míša 9. 11.: „hrany nemůžou být takhle dokonalé, je to postavené z kamení“; rozhodnutí: nárožní kameny):
-    na svislém vnějším rohu R lomové kameny ze stejného zdiva – střídavě vazák dlouhý podél stěny a a krátký podél b, vrstvy
-    0,25–0,45 m, vystupují 1–5 cm z líce a přesahují roh, otlučené hrany (kit.stone). Silueta hrany je zubatá jako u
-    lomového zdiva (Puchart GC80T08: lomový kámen, nároží z větších kamenů). stena = (směr podél líce od rohu, vnější normála)."""
-    if mat == "zdivo": mat = "zdivo_narozi"   # nárožní kameny holé, bez ostrůvků omítky (Míša 10. 11.)
-    if y1 - y0 < 0.5: return
-    # rozpočet scén (hlídač 9. 11.: +100 k troj.): otlučené kameny jen do 6 m nad terénem (vidět zblízka), výš a ve vzdálené
-    # verzi hradu kvádry se stejným natočením a výstupkem (silueta stejná – bez doskoku při přepnutí LOD)
-    rg = __import__("random").Random(int(abs(R.x * 131 + R.z * 71)) + seme)
-    y = y0; k = rg.randrange(2)
-    while y < y1 - 0.12:
-        h = min(rg.uniform(0.25, 0.45), y1 - y)
-        for i_, (dx, nx) in enumerate((stena_a, stena_b)):
-            dlouhy = (i_ == k % 2)
-            L = rg.uniform(0.55, 0.85) if dlouhy else rg.uniform(0.28, 0.42)
-            dep = rg.uniform(0.28, 0.4); pv = rg.uniform(0.01, 0.035); pk = rg.uniform(0.0, 0.04)   # výstupek z líce a přes roh
-            c = R + dx * (L / 2 - pk) - nx * (dep / 2 - pv) + UP * (y + h / 2 + rg.uniform(-0.01, 0.01))
-            bz = frame(dx) @ Matrix.Rotation(math.radians(rg.uniform(-2.5, 2.5)), 3, "Z") @ Matrix.Rotation(math.radians(rg.uniform(-2.0, 2.0)), 3, "Y")   # lomový kámen není v lati
-            if DETAIL and y - y0 < 2.5: kit.stone(P, M(c, basis=bz), (dep, h - 0.03, L), mat, cham=rg.uniform(0.05, 0.09), rough=rg.uniform(0.03, 0.05))
-            else: P.box(M(c, basis=bz), (dep, h - 0.03, L), mat, collide=None)
-        y += h; k += 1
+    na svislém vnějším rohu R velké kvádry střídavě vazák dlouhý podél stěny a a krátký podél b, vrstvy 0,25–0,45 m,
+    vystupují 1–3,5 cm z líce a přesahují roh. 23. 11. (plán F2, Míša 18. 11. „kostka potažená tapetou“): zblízka (LOD0)
+    skutečné kameny s otlučenými hranami po celé výšce, dál kvádry s texturou jednoho kamene (ne zdivo – drobné kameny na
+    kvádru byly tapeta, na horních plochách mech = tmavé čárky, misa_20_11_svy.jpg); na nároží, ke kterému přiléhá zeď, se
+    nekladou (H6: svislý tmavý šev ve styku věže a hradby). Staví kamenivo.dokonci() – stena = (směr podél líce od rohu, vnější normála)."""
+    KV.narozi(P, R, stena_a, stena_b, y0, y1, mat, seme)
 
 def vypln_okna(P, m, x0, x1, y0, y1, z, mat):
     """Výplň okna dvěma plochami (KCD fotky: okna zvenku tmavá): dovnitř `mat` (ve hře svítí denním světlem), ven `mat_ven`
@@ -707,6 +721,8 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
     otvory = otvory_zed
     for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
         dd = (p1 - p0).normalized(); Ls = (p1 - p0).length
+        mz_, mr_ = "zdivo", None   # palác: líc omítnutý místy opadaný (v hradbě kámen jako hradba), uvnitř omítka obytných místností
+        if typ == "palac" and MAT_PALAC: mz_ = MAT_PALAC["lic_v_hradbe"] if STR_HR.get(si) is not None else MAT_PALAC["lic"]; mr_ = MAT_PALAC["rub"]
         ot = [o for o in otvory if o[0] == si]   # otvory = [(strana, od rohu, šířka, y_dole, y_nahore)] – dveře do sklepa
         hr = sorted({-t / 2, Ls + t / 2} | {x for o in ot for x in (o[1] - o[2] / 2, o[1] + o[2] / 2)})
         for s0, s1 in zip(hr, hr[1:]):
@@ -722,7 +738,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                     # zdiva po kusech nechávaly vlasovou škvíru odshora dolů); u ostění otvoru ne (líc ostění)
                     if STENA_SIT is not None and DETAIL:   # viditelná zeď jednou sítí níž, tady jen kolizní kvádr
                         P.cols.append((M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0)))
-                    else: P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0 + 2 * ov_), "zdivo")
+                    else: P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0 + 2 * ov_), mz_)
         if STENA_SIT is not None and DETAIL:
             # Míša 12. 11.: „černé švy jsou všude na každé zdi, podle mě po stavbě hradu, kdy to stavíš z různých bloků“ – zdi budov
             # byly kvádry po kusech mezi okny (přesah 4 cm = dvě plochy v jedné rovině → tablet je střídavě kreslí, čáry a tmavé
@@ -736,7 +752,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                 for o in ot:
                     if o[1] - o[2] / 2 < xm < o[1] + o[2] / 2 and o[3] < ym < o[4]: return None
                 return t + lib.PRESAH
-            STENA_SIT(P, p0, dd, vo_, t, sorted(xs_), sorted(ys_), hl_, "zdivo", cela=(dlouha, dlouha), y_jemne=lo + 0.5)
+            STENA_SIT(P, p0, dd, vo_, t, sorted(xs_), sorted(ys_), hl_, mz_, cela=(dlouha, dlouha), y_jemne=lo + 0.5, mat_rub=mr_)
     if typ == "palac" and not OMITKA:   # kamenný palác (B): nárožní kameny na vnějších rozích (Míša 9. 11.)
         for k_ in range(4):
             r_ = rohy[k_]; e1 = (rohy[k_ - 1] - r_).normalized(); e2 = (rohy[(k_ + 1) % 4] - r_).normalized()
@@ -1115,6 +1131,7 @@ TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "hlina": ("dirt_floor", 2.0, 0.5),   # násyp nájezdu mostu (Havran: hlína za fošnami opěry)
     "omitka": ("omitka_vapno", 2.5, 1.0), "zdivo_omitka": ("omitka_vapno", 2.5, 0.95),   # vápenná omítka světlá (okna_palace.md)
     "kvadr_okno": ("kamen_teseny", 0.8, 1.0),   # tesané ostění oken – světlejší než zdivo
+    "kamen_kus": ("kamen_teseny", 0.9, 0.68), "kamen_klenak": ("kamen_teseny", 0.9, 0.66), "kamen_stupen": ("kamen_teseny", 0.9, 0.72),   # jednotlivé kameny (kamenivo.py: zuby cimbuří, nároží, patky, klenáky, stupně) – textura jednoho kamene po ploše, ne drobné zdivo (plán F2)
     "sindel": ("sindel", 1.5, 1.35), "sindel_hra": ("sindel", 1.5, 1.35),
     "rez_drevo": ("letokruhy", 1.0, 0.85),   # čela (textura zešedlá na tón zvětralého dubu – čerstvě oranžová svítila, 3. 11.) trámů a prken: letokruhy (Havran vlastni._tex_endgrain; Míša 3. 11.: „víš jak vypadá řez dřeva?“)
     "provaz": ("rough_wood", 0.3, 0.55), "voda": ("droba", 2.0, 0.12),
@@ -1450,6 +1467,7 @@ def odstran_neviditelne(objs, smeru=48, dosah=600.0, min_y=-0.35):
     return smaz, celk
 
 def uloz(parts, jmeno, kolize=False, vzhled=None, vnitrek_pryc=False):
+    parts = list(parts) + KV.dokonci(parts)   # odložená nároží + buňky kamenů LOD0 (Kameny_*, hlavni.gd je kreslí jen zblízka)
     for o in list(bpy.data.objects):
         if not (kolize and o.name.startswith("Pohyb_")): bpy.data.objects.remove(o)   # křídla vrat (kit.movable) zůstanou
     coll = bpy.context.scene.collection

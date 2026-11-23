@@ -49,6 +49,19 @@ uniform vec4 porost_barvy = vec4(37.0, 61.0, 0.5, 0.6);  // měřítko žlutozel
 uniform vec3 porost_zluta = vec3(1.12, 1.08, 0.78);
 uniform vec3 porost_sucha = vec3(1.18, 1.0, 0.68);
 uniform vec3 hlina_ton = vec3(1.0);
+// porost za koncem středního pásu (louka.json porost_dalka porost_dal_*, plán E2 23. 11.): trsy 3 m se nad 150 m slijí v mipmapách
+// do hladké plochy (kontrola_23_11_pas_273.jpg) – druhá, větší pevná měřítka (ne měřítko podle vzdálenosti: vzor by plaval)
+uniform vec2 porost_dal_vzd = vec2(110.0, 190.0);         // přechod blízká → dálková struktura m od kamery
+uniform vec4 porost_dal_trsy = vec4(9.0, 4.3, 0.5, 0.6);  // měřítko trsů m, jemnější m, práh, síla
+uniform vec4 porost_dal_skvrny = vec4(23.0, 0.56, 0.5, 0.0); // tmavé skvrny (hustší porost, keříky) m, práh, síla
+uniform vec3 porost_dal_skvrna_barva = vec3(0.55, 0.68, 0.5);
+// stíny mraků (plán C5, louka.json mraky_stin): procedurálně z textury šumu `sum` (0 vzorkovačů navíc, 2 čtení), posun větrem;
+// jen od mraky_vzd (u nohou tráva a keře stín nemají – nesedělo by), ztmaví albedo (na odvrácené straně kopce stejně je stín)
+uniform vec4 mraky_stin = vec4(0.0, 260.0, 0.55, 0.3);   // síla (0 = vypnuto), velikost m, práh, měkkost
+uniform vec2 mraky_vitr = vec2(3.0, 1.2);                // posun m/s (x, z)
+uniform vec2 mraky_vzd = vec2(60.0, 140.0);              // náběh od..do m od kamery
+uniform vec2 porost_dal_svetle = vec2(0.36, 0.35);        // světlé (žlutozelené, osluněné) místo mezi trsy: práh šumu (pod ním), síla
+uniform vec4 porost_dal_sum = vec4(7.0, 0.16, 0.0, 0.0);  // barevný šum: měřítko m, síla posunu zelená ↔ žlutozelená
 
 varying vec3 svet_poz;
 varying vec3 svet_nor;
@@ -171,13 +184,29 @@ void fragment() {
 	float pp = smoothstep(porost_vzd.x, porost_vzd.y, d) * smoothstep(0.15, 0.6, w_por);
 	{   // porost v dálce (plán E2); bez větvení – mipmapy šumu potřebují derivace
 		float tk = texture(sum, xz / porost_trsy.x + 0.43).r * 0.6 + texture(sum, ROT * xz / porost_trsy.y + 0.17).r * 0.4;
-		vec3 pm = mix(vec3(1.0), porost_trs_barva, smoothstep(porost_trsy.z, porost_trsy.z + 0.2, tk) * porost_trsy.w);
+		vec3 ptr = mix(vec3(1.0), porost_trs_barva, smoothstep(porost_trsy.z, porost_trsy.z + 0.2, tk) * porost_trsy.w);
+		vec3 pm = vec3(1.0);
 		float sl = dot(texture(pudy_a, vec3(ROT * xz / (velikost_m[0] * porost_srafa.x), 0.0)).rgb, vec3(0.3, 0.55, 0.15));
 		float sp = dot(textureLod(pudy_a, vec3(0.5, 0.5, 0.0), 20.0).rgb, vec3(0.3, 0.55, 0.15));
 		pm *= mix(1.0, clamp(sl / max(sp, 0.01), 0.5, 1.5), porost_srafa.y);
 		pm *= mix(vec3(1.0), porost_zluta, smoothstep(0.5, 0.75, texture(sum, xz / porost_barvy.x + 0.29).r) * porost_barvy.z);
 		pm *= mix(vec3(1.0), porost_sucha, smoothstep(0.6, 0.8, texture(sum, ROT * xz / porost_barvy.y + 0.61).r) * porost_barvy.w);
+		// dálka za pásem (E2): trsy a skvrny ve větším měřítku + barevný šum; plynule od konce pásu
+		float fd = smoothstep(porost_dal_vzd.x, porost_dal_vzd.y, d);
+		float tk2 = texture(sum, xz / porost_dal_trsy.x + 0.11).r * 0.6 + texture(sum, ROT * xz / porost_dal_trsy.y + 0.53).r * 0.4;
+		vec3 pd = mix(vec3(1.0), porost_trs_barva, smoothstep(porost_dal_trsy.z, porost_dal_trsy.z + 0.2, tk2) * porost_dal_trsy.w);
+		pd *= mix(vec3(1.0), porost_zluta, (1.0 - smoothstep(porost_dal_svetle.x - 0.12, porost_dal_svetle.x, tk2)) * porost_dal_svetle.y);
+		float sv = texture(sum, ROT * xz / porost_dal_skvrny.x + 0.77).r;
+		pd *= mix(vec3(1.0), porost_dal_skvrna_barva, smoothstep(porost_dal_skvrny.y, porost_dal_skvrny.y + 0.12, sv) * porost_dal_skvrny.z);
+		float bs = texture(sum, xz / porost_dal_sum.x + 0.37).r - 0.5;
+		pd *= vec3(1.0 + bs * porost_dal_sum.y, 1.0 + bs * porost_dal_sum.y * 0.4, 1.0 - bs * porost_dal_sum.y);
+		pm *= mix(ptr, pd, fd);
 		ALBEDO *= mix(vec3(1.0), pm, pp);
+	}
+	{   // stíny mraků (C5): bez větvení (mipmapy šumu)
+		vec2 mu = (xz - TIME * mraky_vitr) / mraky_stin.y;
+		float mn = texture(sum, mu).r * 0.65 + texture(sum, ROT * mu * 2.3 + 0.41).r * 0.35;
+		ALBEDO *= 1.0 - smoothstep(mraky_stin.z, mraky_stin.z + mraky_stin.w, mn) * mraky_stin.x * smoothstep(mraky_vzd.x, mraky_vzd.y, d);
 	}
 	// síť nemá tečny: normálu fotky přidat ve světě (osa u = +x, v = -z; OpenGL normály), v dálce vypnout
 	vec3 tn = (nn * 2.0 - 1.0) * (1.0 - t);

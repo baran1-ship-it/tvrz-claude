@@ -90,7 +90,7 @@ func _material() -> ShaderMaterial:
 	var po: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/louka.json")).get("porost_dalka", {})
 	for k in po:   # porost v dálce (louka.json porost_dalka, plán E2)
 		var v = po[k]
-		if not k.begins_with("porost_") or not v is Array: continue
+		if not (k.begins_with("porost_") or k.begins_with("mraky_")) or not v is Array: continue   # mraky_* = stíny mraků (plán C5)
 		m.set_shader_parameter(k, Vector2(v[0], v[1]) if v.size() == 2 else (Vector3(v[0], v[1], v[2]) if v.size() == 3 else Vector4(v[0], v[1], v[2], v[3])))
 	var pu: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/pudy.json"))
 	var vel := PackedFloat32Array()

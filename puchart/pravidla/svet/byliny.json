@@ -148,6 +148,15 @@
   "cesta_krajnice": {
    "trava": 1.4,
    "vysoka": 0.15
+  },
+  "cesta_krajnice_hola": {
+   "kamen": 0.12,
+   "trava": 0.25
+  },
+  "cesta_krajnice_kvety": {
+   "trava": 1.4,
+   "vysoka": 0.35,
+   "kopriva": 0.01
   }
  },
  "pozn": "29. 10.: 2,6/m² bylo z 1,7 m řídké (snímek t_trava) -> 5/m² na louce",
@@ -159,18 +168,23 @@
   ],
   "kopriva": [
    "kopriva_1",
-   "kopriva_2"
+   "kopriva_2",
+   "kopriva_3"
   ],
   "mech": [
    "mech_1",
-   "mech_2"
+   "mech_2",
+   "mech_3"
   ],
   "ostruzina": [
-   "ostruzina_1"
+   "ostruzina_1",
+   "ostruzina_2",
+   "ostruzina_3"
   ],
   "parez": [
    "parez_1",
-   "parez_2"
+   "parez_2",
+   "parez_3"
   ],
   "kmen": [
    "padly_strom_1",
@@ -194,7 +208,8 @@
   ],
   "spalek": [
    "kmen_1",
-   "kmen_2"
+   "kmen_2",
+   "kmen_3"
   ]
  },
  "pozn_podrost": "2. 11. (Míša bod 6): podrost podle stanovišť – mech, ostružiník, pařezy, padlé kmeny, kameny droby z modelů Havrana (modely/nove, CC0/vlastní); kyčelnice a bika zatím chybí model",
@@ -264,14 +279,16 @@
   "voda_louka": {
    "trava": 2.2,
    "vysoka": 0.8,
-   "ostrice": 0.45
+   "ostrice": 0.45,
+   "kamen": 0.5
   },
   "voda_les": {
    "kapradi": 0.6,
    "mech": 0.5,
    "trava": 0.4,
    "ostrice": 0.15,
-   "devetsil": 0.08
+   "devetsil": 0.08,
+   "kamen": 0.6
   },
   "sirka_m": [
    0.5,
@@ -289,7 +306,26 @@
   "presah_m": 0.3,
   "hledat_m": 8.0,
   "seminko": 1314,
-  "pozn": "13. 11.: ostřice (Carex) a devětsil (Petasites hybridus) mají model (hra/modely/rostliny ostrice_*, devetsil_*; blender/rostliny_u_vody.py); keřové vrby v kere.json (vrba_ker). Hustoty ostřice a devětsilu NEOVERENO (README_jak_se_stavi.md: „hustoty v trsech na m² nejsou ve snímcích ani v katalogu“). Devětsil jen v lese a řídce: M5 uvádí 450–800 m n. m., Potštátsko ~400 m (README krok 8, okrajově)."
+  "pozn": "13. 11.: ostřice (Carex) a devětsil (Petasites hybridus) mají model (hra/modely/rostliny ostrice_*, devetsil_*; blender/rostliny_u_vody.py); keřové vrby v kere.json (vrba_ker). Hustoty ostřice a devětsilu NEOVERENO (README_jak_se_stavi.md: „hustoty v trsech na m² nejsou ve snímcích ani v katalogu“). Devětsil jen v lese a řídce: M5 uvádí 450–800 m n. m., Potštátsko ~400 m (README krok 8, okrajově).",
+  "pasmo": {
+   "kamen": [
+    0.0,
+    0.35
+   ],
+   "trava": [
+    0.2,
+    1.0
+   ],
+   "vysoka": [
+    0.3,
+    1.0
+   ]
+  },
+  "_pasmo": "Plán C3 (přechod voda → kameny → tráva → první řada keřů a stromů): druh se sází jen v pásmu [od, do] podílu šířky pásu od čáry vody (ostatní druhy dál pow(náhoda, 1,6) – u vody nejhustěji). Kameny droby hned u čáry (část přes čáru do vody – presah_m), tráva a vysoká tráva za nimi a přes ně převislé; za pásem třída breh (keře vrba_ker, bez, olše a buk zmlazení – kere.json) a stromy (les).",
+  "zdroj_c3_23_11": "docs/reference/potoky/kcd1_lesni_potok_kameny_mech.jpg (u vody kameny s mechem, za nimi kapradí a tráva), kcd1_oficial_potok_valouny_pruhlednost.jpg (valouny na kraji koryta), docs/reference/kcd_ves_predloha/05_mlyn_potok_breh.jpg (kamenné břehy, vysoká tráva u vody, vrbové keře), Havran kcd2_potok_previsla_trava_kameny.jpg (tráva visí přes kameny); NOSTALGIC TRAIN (rešerše 17. 11., plán C3)",
+  "bez_naklonu": [
+   "kamen"
+  ]
  },
  "pozn_koryto_13_11": "13. 11.: koryto (dno pod vodou) bez mechu – docs/reference/potoky/README_jak_se_stavi.md krok 8: „vodní mech pod hladinou NEOVERENO, nedělat“; mech jen na kamenech nad vodou. Třída koryto_kamenite a břeh se dřív ve stanovištích přepisovaly na „cesta“ (cesty.py bral zářez koryt jako jámu sklepa) – porost u vody proto chyběl úplně (docs/chyby.md).",
  "pozn_vodni_rostliny": "13. 11. (Míša: „pokud ti chybí nějaké rostliny, stáhni si je z internetu“): ostřice v pásu čáry vody (voda_pas) a v breh 0,3/m², devětsil v lesním pásu 0,15/m² a v breh 0,04/m²; vše NEOVERENO. Zdroj: docs/reference/potoky/README_jak_se_stavi.md §2.3 a krok 8 (pásma u vody podle snímků KCD a misa_real_01–04; Chytrý et al. 2010, Katalog biotopů ČR: K2 vrbové křoviny 2–5 m na březích a náplavech, M5 devětsilové lemy podhorských potoků 450–800 m n. m.); modely blender/rostliny_u_vody.py (licence hra/modely/rostliny/LICENCE.txt)",
@@ -381,5 +417,10 @@
  "pozn_plnost_19_11": "Míša 19. 11. (plán E3, „roste to před očima“): dosah a pozvolné řídnutí dál – předtím {'dosah_m': 32}; automatika detailu (regulator.gd) ubírá trávu a keře jako první, když tablet nestíhá. Tablet NEOVERENO.",
  "pozn_krajnice_19_11": "Míša 19. 11.: krajnice cest – v třídě stanoviště cesta mimo hlínu masky cest (textury/maska_cesty.png) rostou byliny jako na pastvině (cesta_krajnice), byliny.gd.",
  "pozn_e1_23_11": "Plán E1 (Míša 20. 11., misa_20_11_vykon.jpg: troj. 2,27–2,70 M > rozpočet 2,1 M): dosah 44 → 40 m = konec rozpouštění zanik_m [22, 40] – za ním byly byliny neviditelné (zmenšené k patě), ale kreslily se celé buňky (PC 23. 11.: keře 0,6–0,8 M troj.). Vzhled beze změny; střední pás trávy (louka.json pas) kryje 25–120 m.",
- "zdroj_e1": "Míša 18.–20. 11., plán E1, předloha lod_trava_video"
+ "zdroj_e1": "Míša 18.–20. 11., plán E1, předloha lod_trava_video",
+ "pozn_e4_23_11": "Plán E4 (Míša 18. 11.: „máme mít vše zastoupené minimálně třemi modely“): každý druh ≥ 3 různé modely (ne jen natočení/škála) – doplněno z knihovny Havrana modely/nove (kopriva_3, mech_3, ostruzina_2–3, parez_3, kmen_3); padlé stromy výjimka (e4_vyjimky). Kopírování: nastroje/postav_vse.sh (cp -n z ../modely/nove podle byliny.json a kere.json). Hlídá smysl:tri_modely_druhu.",
+ "pozn_kraj_cesty_23_11": "Plán C2: krajnice po úsecích (louka.json kraj_cesty) – cesta_krajnice_hola: holá hlína s kameny droby a řídkou trávou (kamen × kamenitost jako v lese), cesta_krajnice: tráva, cesta_krajnice_kvety: hustší vysoká tráva a byliny (květy dělají trsy louky, buňka atlasu 5). Zdroj KCD předloha vsi 01, 03, 04 (docs/reference/kcd_ves_predloha).",
+ "e4_vyjimky": {
+  "kmen": "padlé stromy: zatím jen 2 modely – Poly Haven má jen dva CC0 padlé kmeny střední Evropy (dead_tree_trunk, dead_tree_trunk_02; ostatní jsou africké Quiver), kmen_1–3 Havrana jsou pokácené klády (Míša 13. 11.: „mají to být popadané stromy, ne pokácené“, smysl:padle_stromy). Třetí model: vývrat/souš z generátoru blender/havran/strom2.py – NEUDĚLÁNO 23. 11."
+ }
 }

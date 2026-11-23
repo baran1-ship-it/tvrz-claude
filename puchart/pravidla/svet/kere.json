@@ -23,26 +23,31 @@
    "trnka": 0.012,
    "bez": 0.014,
    "sipek": 0.008,
-   "zmlazeni_buk": 0.012,
-   "zmlazeni_jedle": 0.004
+   "zmlazeni_buk": 0.008,
+   "zmlazeni_jedle": 0.004,
+   "zmlazeni_dub": 0.004
   },
   "les_paseka": {
    "liska": 0.012,
    "hloh": 0.004,
    "bez": 0.012,
-   "zmlazeni_buk": 0.02,
-   "zmlazeni_jedle": 0.01
+   "zmlazeni_buk": 0.014,
+   "zmlazeni_jedle": 0.01,
+   "zmlazeni_lipa": 0.003,
+   "zmlazeni_dub": 0.003
   },
   "luh": {
    "bez": 0.016,
    "liska": 0.01,
-   "vrba_ker": 0.003
+   "vrba_ker": 0.003,
+   "zmlazeni_olse": 0.003
   },
   "breh": {
    "vrba_ker": 0.01,
    "bez": 0.03,
    "liska": 0.02,
-   "zmlazeni_buk": 0.004
+   "zmlazeni_buk": 0.002,
+   "zmlazeni_olse": 0.002
   },
   "pastvina": {
    "hloh": 0.002,
@@ -55,12 +60,14 @@
   "les_dubohabrina": {
    "liska": 0.0045,
    "hloh": 0.003,
-   "zmlazeni_buk": 0.0025
+   "zmlazeni_buk": 0.0015,
+   "zmlazeni_dub": 0.001
   },
   "les_doubrava": {
    "liska": 0.003,
    "hloh": 0.003,
-   "trnka": 0.002
+   "trnka": 0.002,
+   "zmlazeni_dub": 0.002
   },
   "les_bucina": {
    "zmlazeni_buk": 0.0045,
@@ -75,7 +82,8 @@
   "les_sut": {
    "liska": 0.004,
    "bez": 0.004,
-   "zmlazeni_jedle": 0.0015
+   "zmlazeni_jedle": 0.001,
+   "zmlazeni_lipa": 0.0015
   },
   "skala": {
    "liska": 0.002,
@@ -99,20 +107,28 @@
  "modely": {
   "liska": [
    "liska_1",
-   "liska_2"
+   "liska_2",
+   "liska_3"
   ],
   "hloh": [
    "hloh_1",
-   "hloh_2"
+   "hloh_2",
+   "hloh_3"
   ],
   "trnka": [
-   "trnka_1"
+   "trnka_1",
+   "trnka_2",
+   "trnka_3"
   ],
   "bez": [
-   "bez_cerny_1"
+   "bez_cerny_1",
+   "bez_cerny_2",
+   "bez_cerny_3"
   ],
   "sipek": [
-   "sipek_1"
+   "sipek_1",
+   "sipek_2",
+   "sipek_3"
   ],
   "zmlazeni_buk": [
    "buk_mlady"
@@ -122,7 +138,17 @@
   ],
   "vrba_ker": [
    "vrba_ker_1",
-   "vrba_ker_2"
+   "vrba_ker_2",
+   "vrba_ker_3"
+  ],
+  "zmlazeni_dub": [
+   "dub_mlady"
+  ],
+  "zmlazeni_olse": [
+   "olse_mlada"
+  ],
+  "zmlazeni_lipa": [
+   "lipa_mlada"
   ]
  },
  "meritko_druh": {
@@ -131,6 +157,18 @@
    0.5
   ],
   "zmlazeni_jedle": [
+   0.25,
+   0.5
+  ],
+  "zmlazeni_dub": [
+   0.25,
+   0.5
+  ],
+  "zmlazeni_olse": [
+   0.25,
+   0.5
+  ],
+  "zmlazeni_lipa": [
    0.25,
    0.5
   ]
@@ -179,5 +217,7 @@
  "_shluky_frekvence": "frekvence šumu shluků (byliny.gd _sum); souřadnice se dělí vlna_m → vlna ≈ vlna_m. Do 17. 11. výchozí 0,01 (vlna 4,8 km, shluky nefungovaly)",
  "pozn_plnost_19_11": "Míša 19. 11. (plán E3, „roste to před očima“): dosah a pozvolné řídnutí dál – předtím {'dosah_m': 48}; automatika detailu (regulator.gd) ubírá trávu a keře jako první, když tablet nestíhá. Tablet NEOVERENO.",
  "pozn_e1_23_11": "Plán E1 (Míša 20. 11., misa_20_11_vykon.jpg: troj. 2,27–2,70 M > rozpočet 2,1 M): dosah 64 → 48 m = konec rozpouštění zanik_m [36, 46] – za ním byly keře neviditelné (zmenšené k patě), ale kreslily se celé buňky (PC 23. 11.: keře 0,6–0,8 M troj.). Vzhled beze změny; střední pás trávy (louka.json pas) kryje 25–120 m.",
- "zdroj_e1": "Míša 18.–20. 11., plán E1, předloha lod_trava_video"
+ "zdroj_e1": "Míša 18.–20. 11., plán E1, předloha lod_trava_video",
+ "pozn_e4_23_11": "Plán E4 (Míša 18. 11.: „máme mít vše zastoupené minimálně třemi modely“): keře liska, hloh, trnka, bez, šípek po 3 modelech z knihovny Havrana (modely/nove liska_3, hloh_3, trnka_2–3, bez_cerny_2–3, sipek_2–3), vrba_ker_3 (S. cinerea) z blender/rostliny_u_vody.py. Mladé stromy (zmlazení) jako skupina 5 modelů: buk, jedle + nově dub (doubrava, dubohabřina, okraj, paseka), olše (luh, břeh), lípa (suťový les, paseka) – Havran dub_mlady, olse_mlada, lipa_mlada; dřeviny podle stanoviště (historie_vegetace.json: bučina s jedlí, dubohabřina, olšový luh, suťový les s lípou); hustota buku rozdělena (součet na stanoviště beze změny kromě luhu/břehu +0,002–0,003). Hlídá smysl:tri_modely_druhu.",
+ "zdroj_e4": "Havran větev claude/new-session-0dtk58 + knihovna repo modely/nove (POZNAMKY_GODOT.txt), docs/reference/les/kcd2_louka_les_havran.jpg (okraj lesa: keře a mladé stromy různých druhů)"
 }
