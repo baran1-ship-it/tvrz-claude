@@ -14,6 +14,15 @@ S Míšou česky.
 - Míša 28. 10.: když něco běží, hned dělat další bod plánu (seznam v odpovědi „co ještě dle plánu“, tabulka
   `docs/rozpracovane/misa_28_chyby.md`, úkoly) – nikdy nekončit tah jen „čekám na výsledek“, dokud je v plánu práce.
 
+## Jeden agent, úkol po úkolu (Míša 23. 11., po limitu vyčerpaném 4 pomocníky za hodinu)
+- Práci dělá hlavní agent sám, úkol po úkolu, a každý výsledek si sám zkontroluje (snímek + test toho místa).
+  Žádné týmy pomocníků na běžnou práci: každý si znovu načítá kód a podklady (až 5× dražší), šlapou si do souborů.
+- Pomocník (subagent) jen na: nezávislou kontrolu před vydáním (nezná závěry stavitele) a rozsáhlé hledání
+  v mnoha souborech, kde stačí závěr. Nanejvýš jeden najednou.
+- Testy s mírou: po každé změně `tools/rychle.sh` + testy dotčené skupiny; celá sada a export až na konci větší části.
+- **Vzory toho, co se povedlo** (`docs/vzory.md`): když Míša něco pochválí nebo se část povede (ves, voda Hvozd…),
+  rozebrat, jak vznikla (data, pravidla, postup, snímky), a zapsat jako vzor. Podobná práce začíná přečtením vzoru.
+
 ## Regrese a měření verzí (Míša 2. 11.: „příště nemusím já hledat, co rozbilo hru“)
 - Každé vydání: Míša projede **Nastavení → Měřicí trasa** (`pravidla/svet/mereni_trasa.json`), tabulka se zapíše do
   `docs/mereni_verze.md` k verzi a commitu. Bez záznamu je výkon verze NEOVĚŘENO NA ZAŘÍZENÍ.
