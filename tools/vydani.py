@@ -291,7 +291,9 @@ if JEN and "z_reka" in JEN:
 sys.path.insert(0, "tools")
 import textury_predmetu as _tp  # noqa: E402
 for _n, _fs in groups.items():
-    if _n.startswith("z_") and _fs and os.path.dirname(_fs[0]) in _tp.DILY["slozky_dilu"]:
+    # plan 18. 11. A2: i rostliny (kvalita.json textury_rostlin, z_rostliny / z_stromy)
+    if _n.startswith("z_") and _fs and (os.path.dirname(_fs[0]) in _tp.DILY["slozky_dilu"]
+                                         or os.path.dirname(_fs[0]) == os.path.dirname(_tp.ROSTLINY["soubory"])):
         _fs += sorted({z for g in _fs if g.endswith(".glb") for z in _tp.zavislosti(g) if os.path.exists(z)} - set(_fs))
 
 old = {}

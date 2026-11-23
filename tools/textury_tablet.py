@@ -4,6 +4,7 @@ PC (S3TC) beze zmeny. Vystup: seznam zmenenych souboru build/textury_tablet.txt 
   python3 tools/textury_tablet.py [--suchy]
 Limity: rostliny (mimo stromy a skaly) a predmety 512, ostatni 1024 (stromy, skaly, teren, stavby)."""
 import glob
+import json
 import os
 import re
 import struct
@@ -13,11 +14,14 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(root)
 STROMY = ("smrk", "dub", "lipa", "briza", "buk", "olse", "vrba", "borovice", "skala_", "impostor")
 SUCHY = "--suchy" in sys.argv
+ROSTLINY_TEX = json.load(open("pravidla/svet/kvalita.json", encoding="utf-8"))["textury_rostlin"]["slozka"]
 
 
 def limit(src):
     p = src.replace("res://", "")
     n = os.path.basename(p)
+    if p.startswith(ROSTLINY_TEX + "/"):              # plan 18. 11. A2: sdilene textury rostlin <slozka>/<px>/
+        return int(p[len(ROSTLINY_TEX) + 1:].split("/")[0])
     if p.startswith("modely/rostliny/") and not n.startswith(STROMY):
         return 512
     if p.startswith("modely/predmety/"):

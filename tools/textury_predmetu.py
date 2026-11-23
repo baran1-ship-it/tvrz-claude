@@ -9,6 +9,8 @@ z Disku (kvalita.json textury_dilu.slozky_dilu: ruiny_ves 168 textur / 28 ruznyc
 slozky textury_dilu.slozka; uklid smaze rozbalene kopie <model>_<obrazek>.* (+ .import a cache v .godot/imported).
   python3 tools/textury_predmetu.py            prevede vsechna glb predmetu (idempotentni; vola ho blender/predmety.py build)
   python3 tools/textury_predmetu.py dily       prevede glb dilu a uklidi rozbalene kopie (krok exportu tools/export.sh)
+  python3 tools/textury_predmetu.py rostliny   (plan 18. 11. A2) glb rostlin z exportu -> kvalita.json textury_rostlin.slozka/<limit>/,
+                                               rozbalene kopie v modely/rostliny pryc (krok exportu tools/export.sh)
   python3 tools/textury_predmetu.py kontrola   rc 1 = vlozeny obrazek v glb, duplicitni md5, textura nad mez nebo
                                                rozbalena kopie v slozce dilu (predmety i dily)
 Po prevodu: godot --import."""
@@ -30,6 +32,7 @@ SLOZKA = CFG["slozka"]
 MEZ = int(CFG["mez_px"])
 LIMIT_IMPORTU = int(CFG["size_limit_importu"])
 DILY = _KV["textury_dilu"]
+ROSTLINY = _KV["textury_rostlin"]
 OBRAZKY = (".png", ".jpg", ".jpeg", ".webp")
 PRIPONA = {"image/png": ".png", "image/jpeg": ".jpg"}
 
@@ -216,6 +219,9 @@ def kontrola():
     chyby = _kontrola_slozky(sorted(glob.glob("modely/predmety/*.glb")), SLOZKA, MEZ, "")
     glby = sorted(g for s in DILY["slozky_dilu"] for g in glob.glob(s + "/*.glb"))
     chyby += _kontrola_slozky(glby, DILY["slozka"], int(DILY["mez_px"]), " dily")
+    for lim_sl in sorted(glob.glob(ROSTLINY["slozka"] + "/*")):
+        chyby += _kontrola_slozky([], lim_sl, int(os.path.basename(lim_sl)), " rostliny")
+    chyby += _kontrola_slozky(sorted(glob.glob(ROSTLINY["soubory"])), "/nic", 0, " rostliny")   # jen glb (vlozene, chybejici)
     for s in DILY["slozky_dilu"]:
         r = rozbalene(s)
         if r:
@@ -228,6 +234,19 @@ if __name__ == "__main__":
         ch = kontrola()
         print("TEXTURY_PREDMETU %s %s" % ("OK" if not ch else "CHYBA", ch[:20]))
         sys.exit(1 if ch else 0)
+    if "rostliny" in sys.argv:
+        sys.path.insert(0, os.path.join(ROOT, "tools"))
+        from limity_textur import limit as _limit          # jeden zdroj limitu importu rostlin (stromy, skaly 1024, jinak 512)
+        n_img = n_nove = 0
+        for g in sorted(glob.glob(ROSTLINY["soubory"])):
+            lim = _limit(g[:-4] + "_x.png")
+            a, b_ = preved(g, "%s/%d" % (ROSTLINY["slozka"], lim), lim, lim)
+            n_img += a
+            n_nove += b_
+        n_pryc = uklid(os.path.dirname(ROSTLINY["soubory"]))
+        print("textury rostlin: %d vlozenych obrazku prevedeno, %d novych souboru v %s, %d rozbalenych kopii smazano"
+              % (n_img, n_nove, ROSTLINY["slozka"], n_pryc))
+        sys.exit(0)
     if "dily" in sys.argv:
         n_img = n_nove = n_pryc = 0
         for sl in DILY["slozky_dilu"]:
