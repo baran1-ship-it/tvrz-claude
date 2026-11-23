@@ -299,8 +299,23 @@ func _na_process() -> void:
 		# odebrane uzly (queue_free se maze po _process, pred kreslenim): pocet pred + pridane - pocet ted
 		var nu := int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 		_sn_ted["odebrano"] = maxi(0, _uzlu_pred + _pridano_uzlu - nu)
+		_sn_ted["pridano"] = _pridano_uzlu
 		_uzlu_pred = nu
 		_pridano_uzlu = 0
+		# 23. 11. (A1 spicky 0.9999994, hostinec 3 s „skripty 0, fyzika 0“): co se v snimku nacetlo / nahralo - pocet
+		# zdroju v kesi (ResourceCache: load() noveho souboru = +N), objektu, textury a buffery GPU (MB) proti minulemu
+		var rc := int(Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT))
+		var oc := int(Performance.get_monitor(Performance.OBJECT_COUNT))
+		var tx := Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0
+		var bf := Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0
+		_sn_ted["zdroje"] = rc - _zdroju_pred if _zdroju_pred >= 0 else 0
+		_sn_ted["objekty"] = oc - _objektu_pred if _objektu_pred >= 0 else 0
+		_sn_ted["tex_mb"] = tx - _tex_pred if _tex_pred >= 0.0 else 0.0
+		_sn_ted["buf_mb"] = bf - _buf_pred if _buf_pred >= 0.0 else 0.0
+		_zdroju_pred = rc
+		_objektu_pred = oc
+		_tex_pred = tx
+		_buf_pred = bf
 		_sn = _sn_ted
 		_detektor()
 		_hist_sn.push_back(int(_sn["celkem"]))
@@ -331,6 +346,11 @@ var _ud := {}
 var _hist_sn: Array[int] = []            # delky 3 predchozich snimku (us) pred prave uzavrenym
 var _uzlu_pred := 0
 var _pridano_uzlu := 0
+var _zdroju_pred := -1
+var _objektu_pred := -1
+var _tex_pred := -1.0
+var _buf_pred := -1.0
+var pss_vyp := false                     # varianta trasy bez_pss: PSS se necte (podezreni A1: cteni smaps_rollup x pamet)
 var _hlavicka := ""
 
 
@@ -411,6 +431,7 @@ func _detektor() -> void:
 	# (RenderingServer PIPELINE_COMPILATIONS_*; v Compatibility nemusi ovladac hlasit - 0 = nevime, ne „nic“)
 	var pk := _pipe_minule
 	z += ", shadery +%d" % (pk - _pipe_pred_snimku)
+	z += ", " + nacteno_text(_sn)
 	if main.player and bool(main.player.get("flying")):
 		z += ", LET"                      # rychly pohyb = rychlejsi nacitani okoli (Misa 26. 10.)
 	z += " | " + _fronty_zasek()
@@ -419,6 +440,22 @@ func _detektor() -> void:
 	_zaseky_log.append(Time.get_time_string_from_system() + " ZASEK " + z)
 	if _zaseky_log.size() > MAX_ZASEKU:
 		_zaseky_log = _zaseky_log.slice(_zaseky_log.size() - MAX_ZASEKU)
+
+
+## 23. 11. (A1): co v uzavrenem snimku pribylo - uzly (z toho geometrie), zdroje v kesi (nacteni souboru), objekty,
+## textury a buffery GPU; PSS (cteni ve vlakne bezi / posledni trvani).
+func nacteno_text(sn: Dictionary) -> String:
+	return "přibylo uzlů %d (geometrie %d), zdrojů %+d, objektů %+d, textury %+.1f MB, buffery %+.1f MB, PSS %s" % [
+			int(sn.get("pridano", 0)), int(sn.get("uzly", 0)), int(sn.get("zdroje", 0)), int(sn.get("objekty", 0)),
+			float(sn.get("tex_mb", 0.0)), float(sn.get("buf_mb", 0.0)),
+			("čte se (minule %.0f ms)" % _pss_ms) if bool(sn.get("pss", false)) else ("minule %.0f ms" % _pss_ms)]
+
+
+## Rozpad uzavreneho snimku pro tabulku trasy (kratky): fyzika, skripty, pred kreslenim, kresleni CPU, swap/GPU (ms).
+func rozpad_kratky() -> String:
+	return "fyz %.0f skr %.0f před %.0f krCPU %.0f swap %.0f" % [float(_sn.get("fyzika", 0)) / 1000.0,
+			float(_sn.get("skripty", 0)) / 1000.0, int(_sn.get("pred_kr", 0)) / 1000.0, int(_sn.get("kr_cpu", 0)) / 1000.0,
+			int(_sn.get("swap", 0)) / 1000.0]
 
 
 ## „kreslení+čekání“ rozdelene razitky frame_pre_draw / frame_post_draw: pred kreslenim (mazani, casovace, sync),
@@ -766,7 +803,7 @@ func ram_mb() -> int:
 			WorkerThreadPool.wait_for_task_completion(_pss_uloha)
 			_pss_uloha = -1
 			_pss = _pss_kb / 1024 if _pss_kb > 0 else -1
-		if _pss_uloha < 0 and ((not lehky and Time.get_ticks_msec() - _pss_t > 30000) or (lehky and _pss_hranice)):
+		if _pss_uloha < 0 and not pss_vyp and ((not lehky and Time.get_ticks_msec() - _pss_t > 30000) or (lehky and _pss_hranice)):
 			_pss_t = Time.get_ticks_msec()
 			_pss_uloha = WorkerThreadPool.add_task(_pss_vlakno)
 			_sn_ted["pss"] = true        # zasek v tomto snimku muze byt od mereni
@@ -958,10 +995,11 @@ func _svetla_text() -> String:
 
 func _pridan(n: Node) -> void:
 	_pridano_uzlu += 1
-	if lehky:
-		return                             # lehky monitor: jen citac (bez materialu a geometrii)
 	if n is GeometryInstance3D:
-		_nove_geom += 1
+		_nove_geom += 1                    # 23. 11.: i v lehkem rezimu (jen citac - spicky trasy)
+	if lehky:
+		return                             # lehky monitor: jen citace (bez materialu)
+	if n is GeometryInstance3D:
 		var g := n as GeometryInstance3D
 		var mats: Array = [g.material_override]
 		if n is MultiMeshInstance3D and (n as MultiMeshInstance3D).multimesh and (n as MultiMeshInstance3D).multimesh.mesh:

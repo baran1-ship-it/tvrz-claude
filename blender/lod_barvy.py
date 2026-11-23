@@ -8,6 +8,9 @@ import sys
 
 import bpy
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools"))
+import barvy_vrcholu  # noqa: E402
+
 for vstup in sys.argv[1:]:
     pid = os.path.splitext(os.path.basename(vstup))[0]
     vystup = os.path.join(os.path.dirname(vstup), pid + "_stredni.glb")
@@ -62,4 +65,7 @@ for vstup in sys.argv[1:]:
     j.select_set(True)
     bpy.ops.export_scene.gltf(filepath=vystup, export_format="GLB", use_selection=True, export_apply=True, export_yup=True,
                               export_materials="EXPORT", export_vertex_color="ACTIVE")
+    # barva vrcholu do sRGB + znacka (pravidla/svet/barvy_vrcholu.json, Misa 17. 11. r. 5 / plan_18_11 B8): glTF uklada COLOR_0
+    # linearne, Compatibility ho bere jako sRGB -> hneda 0,15 cerna. Tentyz prevod jako tools/barvy_vrcholu.py.
+    barvy_vrcholu.preved(vystup, {})
     print("STREDNI %s: %d troj, 1 material -> %s" % (pid, sum(len(p.vertices) - 2 for p in me.polygons), vystup))

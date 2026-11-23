@@ -30,6 +30,8 @@ var gpu := 0.0
 var cpu_r := 0.0
 var nej: Dictionary = {}                 # nejhorsi snimek useku: ms, skripty, fyzika, gpu, kresleni
 var spicky: Array = []                   # snimky nad spicka_ms (cely beh): kde, kolik, rozpad
+var spicky_plne: Array = []              # 23. 11. (A1): k nim plny radek detektoru diag (do souboru a schranky, ne na obrazovku)
+var _zas0 := 0                           # diag.zaseku v minulem snimku trasy (novy zaznam detektoru = tento snimek)
 var nad100 := 0
 var _pozice0: Transform3D
 var _let0 := false
@@ -216,6 +218,9 @@ func _varianta(zap: bool) -> void:
 			td.zapni(zap, true)
 	elif v == "diag_plny":                     # 15. 11. bod 1: plny monitor jako drive (prepina _monitor)
 		pass
+	elif v == "bez_pss":                       # 23. 11. (A1 podezreni): PSS (cteni /proc/self/smaps_rollup ve vlakne) se necte
+		if main.diag:
+			main.diag.set("pss_vyp", zap)
 	elif v == "dest":                          # 13. 11.: cena deste (pocasi.gd z Pucharta) - plny dest po celou variantu
 		if main.pocasi:
 			main.pocasi.vynuceno = 1.0 if zap else -1.0
@@ -398,6 +403,8 @@ func _jm(v: String) -> String:
 		return "svět.bez st"
 	if v == "diag_plny":
 		return "diag plný"
+	if v == "bez_pss":
+		return "bez PSS"
 	if v == "bez_stropu_koster":
 		return "bez stropu"
 	if v == "modif_pripojene":
@@ -454,20 +461,38 @@ func _process(d: float) -> void:
 	var cr := RenderingServer.viewport_get_measured_render_time_cpu(vrid)
 	var kr := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 	# spicky v cele trase (i pri zahrati - tam byva kompilace shaderu a nacitani)
-	if ms > float(cfg.get("spicka_ms", 200.0)) and spicky.size() < 12:
+	var dg: Node = main.diag
+	if ms > float(cfg.get("spicka_ms", 200.0)) and spicky.size() < int(cfg.get("spicky_max", 12)):
 		# rešerše 10. 11. krok 2b (Android: málo volné paměti = snímky přes 1 s): paměť u každé špičky
 		# 11. 11. (trasa 0.99998: „volna -0, halda 0“): OS.get_memory_info a get_static_memory_usage na tabletu vraci 0 -
 		# hodnoty z diag (volna z /proc/meminfo, halda Debug.getNativeHeapAllocatedSize)
-		var dg: Node = main.diag
+		# 23. 11. (A1, 0.9999994 hostinec 3029 ms „skripty 0 fyzika 0“): skripty a fyzika ted z razitek uzavreneho snimku
+		# diag (drive skripty minuleho snimku a Performance.TIME_PHYSICS_PROCESS = max kroku za 1 s - pro spicku
+		# nepouzitelne), rozpad kresleni (pred / CPU / swap), cas v useku, co pribylo a nacetlo se (diag.nacteno_text);
+		# plny radek detektoru diag (udalosti planovace a louky, fronty, PSS) do souboru a schranky
+		var vol_mb := -1.0
+		var hal_mb := -1.0
+		var rozpad := "fyz - skr -"
+		var nac := "-"
 		if dg:
 			dg.ram_mb()
-		var vol_mb := float(dg.get("_volna")) if dg else -1.0
-		var hal_mb := float(dg.get("_ram")) if dg else -1.0
-		spicky.append("%.0f ms %s %s/%s u (%.0f, %.0f): skripty %.0f fyzika %.0f gpu %.0f kresleni %d, uzly %d, volna %.0f MB, halda %.0f MB, vram %.0f MB" % [ms,
-				"zahrati" if t <= zah else "mereni", String(varianty[i_var]), u["jmeno"], (pc[0] as Vector3).x, (pc[0] as Vector3).z,
-				pr, fy, gp, kr, int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
-				vol_mb, hal_mb,
-				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0])
+			vol_mb = float(dg.get("_volna"))
+			hal_mb = float(dg.get("_ram"))
+			if dg.has_method("rozpad_kratky"):
+				rozpad = dg.rozpad_kratky()
+				nac = dg.nacteno_text(dg.get("_sn"))
+		var kr_sp := "%.0f ms %s %.1f s %s/%s u (%.0f, %.0f): %s, kresleni %d, uzly %d, volna %.0f MB, halda %.0f MB, vram %.0f MB" % [ms,
+				"zahrati" if t <= zah else "mereni", t, String(varianty[i_var]), u["jmeno"], (pc[0] as Vector3).x, (pc[0] as Vector3).z,
+				rozpad, kr, int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)), vol_mb, hal_mb,
+				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0]
+		spicky.append(kr_sp)
+		var det := "(detektor diag snímek nezapsal)"
+		if dg and int(dg.get("zaseku")) > _zas0 and not (dg.get("_zaseky") as Array).is_empty():
+			det = String((dg.get("_zaseky") as Array)[0])
+		spicky_plne.append(kr_sp + "\n    " + nac + "\n    diag: " + det)
+		print("TRASA SPICKA " + kr_sp + " | " + nac + " | " + det)
+	if dg:
+		_zas0 = int(dg.get("zaseku"))
 	if t > zah:
 		casy.append(ms)
 		kres += kr
@@ -480,7 +505,9 @@ func _process(d: float) -> void:
 		if ms > 100.0:
 			nad100 += 1
 		if ms > float(nej.get("ms", 0.0)):
-			nej = {"ms": ms, "pr": pr, "fy": fy, "gp": gp, "kr": kr}
+			# fyzika nejhorsiho snimku z razitek diag (TIME_PHYSICS_PROCESS je max kroku za 1 s, ne tento snimek)
+			var fy_sn: float = float((dg.get("_sn") as Dictionary).get("fyzika", 0)) / 1000.0 if dg else fy
+			nej = {"ms": ms, "pr": pr, "fy": fy_sn, "gp": gp, "kr": kr}
 	var vn := String(varianty[i_var])
 	_lbl_t -= d
 	if _lbl_t <= 0.0 or not bool(main.diag.get("lehky") if main.diag else false):
@@ -493,12 +520,17 @@ func _process(d: float) -> void:
 	s.sort()
 	var n := maxi(s.size(), 1)
 	var zas := 0
+	var nad := 0
+	var nad_ms := float(cfg.get("nad_ms", 33.4))
 	for x in s:
 		if x > 40.0:
 			zas += 1
+		if x > nad_ms:
+			nad += 1
 	vysledky.append({"var": _jm(vn) if vn != "louka" else "bez trávy",  # nazev v okamziku mereni (0.9998: prvni „vse“ se vypsalo jako „vse znovu“)
 			 "us": String(u["jmeno"]), "p50": s[n / 2] if s.size() > 0 else 0.0,
 			"p95": s[mini(int(n * 0.95), n - 1)] if s.size() > 0 else 0.0, "max": s[n - 1] if s.size() > 0 else 0.0,
+			"p99": s[mini(int(n * 0.99), n - 1)] if s.size() > 0 else 0.0, "nad": 100.0 * nad / maxf(s.size(), 1),
 			"zas": zas, "n": s.size(), "kres": kres / maxf(vz, 1), "troj": troj / maxf(vz, 1) / 1e6,
 			"vram": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0,
 			"proc": proc / maxf(vz, 1), "fyz": fyz / maxf(vz, 1), "gpu": gpu / maxf(vz, 1), "cpur": cpu_r / maxf(vz, 1),
@@ -542,22 +574,25 @@ func _uloz(hotovo := false) -> void:
 		f.close()
 
 
-func _tabulka() -> String:
+func _tabulka(plne := true) -> String:
 	var vp := get_viewport().get_visible_rect().size
-	var txt := "(skr = měřené skripty; gpu/cpuR = 0, když je zařízení neměří)\nVÝSLEDEK měřicí trasy %s · %s · obrazovka %dx%d, 3D %d %%\n" % [Time.get_datetime_string_from_system(),
+	# 23. 11. (A3, 30 FPS: p50 je vzdy 33 = strop): hlavni je p95, p99 a nad30 = % snimku nad nad_ms (33,4 ms = snimek
+	# vypadl z 30 FPS); >40 = pocet snimku nad 40 ms (zaseky jako drive). Sloupce gpu vypusteny (tablet GPU cas nevraci -
+	# zaseky_rozbor_system.md F2; na PC je v souboru diag). Porovnani verzi: docs/mereni_verze.md „Jak číst tabulku trasy“.
+	var txt := "(ms na snímek; při 30 FPS je p50 vždy 33 – porovnávat p95, p99 a nad30 = %% snímků nad %.1f ms; skr = měřené skripty, cpuR = 0, když zařízení neměří)\nVÝSLEDEK měřicí trasy %s · %s · obrazovka %dx%d, 3D %d %%\n" % [float(cfg.get("nad_ms", 33.4)), Time.get_datetime_string_from_system(),
 			main.diag.sestaveni_text() if main.diag and main.diag.has_method("sestaveni_text") else "", int(vp.x), int(vp.y), roundi(_sc0 * 100)]
-	txt += "varianta   úsek      p50 p95 max >40 >100 kresl trojM skr fyz gpu cpuR | nejhorší: ms skr fyz gpu kresl\n"
+	txt += "varianta   úsek            p50 p95 p99  max nad30%% >40 >100 kresl trojM skr fyz cpuR | nejhorší: ms skr fyz kresl\n"
 	for r: Dictionary in vysledky:
 		var nj: Dictionary = r["nej"]
-		txt += "%-10s %-8s %3.0f %3.0f %3.0f %3d %4d %5.0f %5.2f %3.0f %3.0f %3.0f %3.0f | %3.0f %3.0f %3.0f %3.0f %4d\n" % [
-				String(r["var"]), r["us"], r["p50"], r["p95"], r["max"], r["zas"], r["n100"], r["kres"], r["troj"],
-				r["proc"], r["fyz"], r["gpu"], r["cpur"], float(nj.get("ms", 0)), float(nj.get("pr", 0)), float(nj.get("fy", 0)),
-				float(nj.get("gp", 0)), int(nj.get("kr", 0))]
+		txt += "%-10s %-15s %3.0f %3.0f %3.0f %4.0f %5.1f %4d %4d %5.0f %5.2f %3.0f %3.0f %4.0f | %4.0f %3.0f %3.0f %4d\n" % [
+				String(r["var"]), r["us"], r["p50"], r["p95"], float(r.get("p99", 0.0)), r["max"], float(r.get("nad", 0.0)), r["zas"],
+				r["n100"], r["kres"], r["troj"], r["proc"], r["fyz"], r["cpur"], float(nj.get("ms", 0)), float(nj.get("pr", 0)),
+				float(nj.get("fy", 0)), int(nj.get("kr", 0))]
 	var z: Dictionary = vysledky[-1] if not vysledky.is_empty() else {}
 	txt += "paměť: VRAM %.0f MB (textury %.0f, buffery %.0f), halda %.0f MB, uzlů %d\n" % [float(z.get("vram", 0)),
 			float(z.get("tex", 0)), float(z.get("buf", 0)), float(z.get("halda", 0)), int(z.get("uzly", 0))]
 	txt += "špičky nad %.0f ms (%d):\n" % [float(cfg.get("spicka_ms", 200.0)), spicky.size()]
-	for sp: String in spicky:
+	for sp: String in (spicky_plne if plne else spicky):
 		txt += "  " + sp + "\n"
 	if main.kvalita and not main.kvalita.historie.is_empty():
 		txt += "automatická kvalita – změny (%d):\n" % main.kvalita.zmen
@@ -569,7 +604,7 @@ func _tabulka() -> String:
 func _konec() -> void:
 	var txt := _tabulka()
 	_uloz(true)
-	lbl.text = txt + "\n(ms na snímek; tabulka je ve schránce – vlož ji do chatu. Zpět do hry za 60 s.)"
+	lbl.text = _tabulka(false) + "\n(ms na snímek; tabulka je ve schránce – vlož ji do chatu. Zpět do hry za 60 s.)"
 	print(txt)
 	DisplayServer.clipboard_set(txt)
 	await get_tree().create_timer(60.0).timeout

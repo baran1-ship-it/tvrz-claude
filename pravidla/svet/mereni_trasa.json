@@ -3,6 +3,9 @@
  "zahrati_s": 4.0,
  "mereni_s": 10.0,
  "spicka_ms": 200.0,
+ "spicky_max": 12,
+ "nad_ms": 33.4,
+ "_tabulka_23_11": "23. 11. (plan_18_11 A3, rešerše 17. 11. bod 2): s pevnými 30 FPS je p50 vždy 33 ms (strop) - tabulka má u každého řádku p50, p95, p99, nad30% = podíl snímků měření delších než nad_ms (33,4 ms = snímek vypadl z 30 FPS) a >40 = počet snímků nad 40 ms (záseky, jako dřív). Sloupce gpu vypuštěny (tablet GPU čas nevrací, zaseky_rozbor_system.md F2). Porovnání verzí: docs/mereni_verze.md „Jak číst tabulku trasy“. spicky_max = kolik špiček se zapíše; u každé špičky (A1) čas v úseku, rozpad z razítek snímku diag (fyz, skr, před kreslením, kreslení CPU, swap/GPU), co přibylo (uzly, geometrie, zdroje v keši = načtené soubory, objekty, textury a buffery GPU), stav čtení PSS a v souboru/schránce plný řádek detektoru diag (události plánovače a louky, fronty). Varianta bez_pss (v _varianty_pristi) = PSS se během trasy nečte (podezření A1).",
  "useky": [
   {
    "jmeno": "tvrz-cesta",
@@ -324,7 +327,8 @@
   "louka_puchart",
   "stin_filtr_1",
   "bez_stropu_koster",
-  "modif_pripojene"
+  "modif_pripojene",
+  "bez_pss"
  ],
  "_varianty_16_11b": "16. 11. sceny (houstina, clony vsi, pole za vsi): bez_houstin pridana pred posledni vse - cena houstiny na useku ves-vjezd, les, kun-les-mimo proti vse ve stejnem behu. NEOVERENO NA ZARIZENI.",
  "_varianty_17_11": "17. 11. (měření 0.9999991): teren_dlazdice vyřazena (dlaždice zapnuty = totéž co „vše“); les_bez_korun, rostliny, stavby a dohled_kratsi změřeny 0.9999991/0.999999 → pryč, trasa kratší (pád po ~44 min, 60 úseků). Nově izolace postav ve vsi (ves-dvory 44 → 27 ms bez postav, skripty jen 4 ms): postavy_skryte (logika běží, nekreslí se), postavy_stoji (kreslí se, nechodí), bez_animace. bez_houstin kvůli novým houštinám (ř. 8). | bez_obzoru (Míša 17. 11. ř. 13: „mrak stromů za koncem mapy nevadí, pokud nežere“): skryje Obzor_les (76 550 impostorů za okrajem mapy) – cena lesa za mapou."

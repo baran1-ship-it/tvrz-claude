@@ -7,9 +7,13 @@ Vstup modely/ves/domy.glb (blender/ves_domy.py), vystup modely/ves/domy_stredni.
 korene, stejne jako puvodni uzly). Puvodni domy.glb se nemeni.
   /opt/bl/bin/python -I blender/ves_domy_lod.py modely/ves/domy.glb modely/ves/domy_stredni.glb"""
 import math
+import os
 import sys
 
 import bpy
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools"))
+import barvy_vrcholu  # noqa: E402
 
 KORENY = ["Dum1", "Dum2", "Rychta", "ChyseKura", "ChysePrkna"]
 CASTI = ("Vnejsek", "Drobne")
@@ -85,4 +89,7 @@ for j in hotove:
     j.select_set(True)
 bpy.ops.export_scene.gltf(filepath=vystup, export_format="GLB", use_selection=True, export_apply=True, export_yup=True,
                           export_materials="EXPORT", export_vertex_color="ACTIVE")
+# barva vrcholu do sRGB + znacka (pravidla/svet/barvy_vrcholu.json, Misa 17. 11. r. 5 / plan_18_11 B8): glTF uklada COLOR_0
+# linearne, Compatibility ho bere jako sRGB -> hneda 0,15 cerna. Tentyz prevod jako tools/barvy_vrcholu.py.
+barvy_vrcholu.preved(vystup, {})
 print("STREDNI hotovo %d domu -> %s" % (len(hotove), vystup))

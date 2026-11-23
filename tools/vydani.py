@@ -72,6 +72,9 @@ if TESTOVACI:
 _bez = subprocess.run([sys.executable, "tools/kontrola_tabulek.py"])
 if _bez.returncode != 0:
     sys.exit("CHYBA: opravene chyby bez kontroly v testu (tools/kontrola_tabulek.py) - doplnit test, pak vydat")
+# barva vrcholu jako albedo jen se znackou sRGB (Misa 17. 11. r. 5 domy, plan_18_11 B8 stodola: linearni COLOR_0 = cerne)
+if JEN is None and subprocess.run([sys.executable, "tools/barvy_vrcholu.py", "kontrola"]).returncode != 0:
+    sys.exit("CHYBA: GLB s barvou vrcholu bez prevodu do sRGB (tools/barvy_vrcholu.py kontrola) - prevest, pak vydat")
 # rozpocet graficke pameti: limity textur a reimport pred kazdym vydanim
 if JEN is None:                 # bez zdrojovych .jpg by albedo_textur prepsal kalibraci a import nema co delat
     subprocess.run([sys.executable, "tools/limity_textur.py"], check=True)

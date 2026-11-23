@@ -36,6 +36,7 @@ var _bad_mat: StandardMaterial3D
 
 
 var _st_mat: StandardMaterial3D = null           # material stredniho stupne velkych predmetu (barva vrcholu)
+var _st_mat_lin: ShaderMaterial = null           # totez pro stredni stupen s linearni barvou vrcholu (barvy_vrcholu.json)
 var _latky: Dictionary = {}                      # id -> ShaderMaterial latky ve vetru (modely.json latka) nebo null
 
 func setup(p_main: Node, world: Node3D) -> void:
@@ -218,6 +219,20 @@ func spawn(rec: Dictionary) -> void:
 				_st_mat = StandardMaterial3D.new()
 				_st_mat.vertex_color_use_as_albedo = true
 				_st_mat.roughness = 0.9
+			# Misa 18. 11. B8 (stodola, kulna z dalky tmave): stredni stupen z blender/lod_barvy.py pred 18. 11. ma barvu
+			# vrcholu linearne (glTF), Compatibility ji bere jako sRGB (hneda 0,06 = cerna). Zdrojove glb nejsou (jen
+			# importovane baliky) -> barvy_vrcholu.json hra_linearni_stredni: prevod lin -> sRGB ve shaderu (stejny vzorec
+			# jako tools/barvy_vrcholu.py), po nove stavbe lod_barvy.py (zapise sRGB + znacku) id ze seznamu pryc
+			var st_m: Material = _st_mat
+			if (Pravidla.cti("barvy_vrcholu", "hra_linearni_stredni") as Array).has(id):
+				if _st_mat_lin == null:
+					var sh := Shader.new()
+					sh.code = "shader_type spatial;\nvoid fragment() {\n\tvec3 c = clamp(COLOR.rgb, 0.0, 1.0);\n" \
+							+ "\tALBEDO = mix(1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, c * 12.92, vec3(lessThanEqual(c, vec3(0.0031308))));\n" \
+							+ "\tROUGHNESS = %.2f;\n}\n" % _st_mat.roughness
+					_st_mat_lin = ShaderMaterial.new()
+					_st_mat_lin.shader = sh
+				st_m = _st_mat_lin
 			for g in m.find_children("*", "GeometryInstance3D", true, false):
 				(g as GeometryInstance3D).visibility_range_end = od
 				(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -231,7 +246,7 @@ func spawn(rec: Dictionary) -> void:
 				st.name = id + ("_Stredni" if k == 0 else "_Stredni_stin")
 				st.mesh = (smi[0] as MeshInstance3D).mesh
 				st.transform = st_xf
-				st.material_override = _st_mat
+				st.material_override = st_m
 				st.lod_bias = float(plod["lod_bias"])          # bez automatickeho LOD (stodola z dalky cerna silueta)
 				st.visibility_range_begin = od if k == 0 else 0.0
 				st.visibility_range_end = dosah

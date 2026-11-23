@@ -4,6 +4,22 @@ Každé vydání: Nastavení → Měřicí trasa (7 míst × 8 variant, `pravidl
 tabulky, stavitel ji sem přepíše. Hodnoty jsou ms na snímek (p50 / p95 / max), záseky = snímky nad 40 ms.
 Varianty: vše (1. průchod), 2. průchod, 3D 70 %, bez stínů / trávy / stromů / staveb / předmětů.
 
+### Jak číst tabulku trasy (od 23. 11., plan_18_11 A3)
+Tablet má pevných 30 FPS → snímek nemůže být kratší než ~33 ms a **p50 je vždy 33 = nic neříká**. Sloupce řádku:
+`p50 p95 p99 max nad30% >40 >100 kresl trojM skr fyz cpuR | nejhorší: ms skr fyz kresl`.
+- **Porovnání verzí a variant:** stejný úsek, stejná varianta, pořadí (1) **nad30%** = podíl snímků měření delších než
+  `nad_ms` 33,4 ms (snímek vypadl z 30 FPS; 0 % = plynulé), (2) **p95**, (3) **p99**, (4) **>40** = počet snímků nad 40 ms
+  (záseky, srovnatelné se staršími záznamy). p50 a max jen pro úplnost (max = jedna špička, ta patří do seznamu špiček).
+- Rozdíl beru jako naměřený vliv, když se nad30% liší o ≥ 10 procentních bodů nebo p95 o ≥ 5 ms ve **stejném běhu**
+  (varianta × „vše“); menší rozdíl = šum (0.9999994: p95 ±5 mezi variantami bez změny). Mezi verzemi porovnávat první
+  „vše“ (teplo: „vše znovu“ na konci je jiný stav).
+- Sloupce gpu vypuštěny (tablet čas GPU nevrací, `zaseky_rozbor_system.md` F2).
+- **Špičky** (nad `spicka_ms` 200, nejvýš `spicky_max`): na obrazovce krátce – čas v úseku, rozpad snímku z razítek diag
+  (fyz, skr, před kreslením, kreslení CPU, swap/GPU), paměť. Ve schránce/souboru navíc co v tom snímku přibylo (uzly,
+  geometrie, zdroje v keši = načtené soubory, objekty, textury/buffery GPU MB), stav čtení PSS a plný řádek detektoru diag
+  (události plánovače a louky, fronty). Starší záznamy (do 0.9999994) měly „skripty“ z minulého snímku a „fyzika“ jako
+  max kroku za 1 s – u špičky nepoužitelné („hostinec 3029 ms, skripty 0, fyzika 0“ nic nevylučuje).
+
 ## Historie před měřicí trasou (z `docs/radce.md`, panel na tabletu)
 | verze | datum | stav |
 |---|---|---|

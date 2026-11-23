@@ -1,8 +1,10 @@
 {
- "popis": "Barvy vrcholů (COLOR_0) modelů od modeláře převedené z lineárních (glTF) na sRGB pro renderer Compatibility (převzato z Puchartu, větev ccr-f2d32673-9fi7m5 pravidla/svet/barvy_vrcholu.json, chyby.md 356): Compatibility násobí albedo (textura × albedo_color × COLOR) v sRGB a teprve výsledek převede do lineárního prostoru – lineární barva vrcholu se vezme jako sRGB a ztmavne (béžová 0,34 → 0,095: houně a přikrývka chudé postele téměř černé, Míša/koordinátor 16. 11. snímky chalupa2, zemljanka). tools/barvy_vrcholu.py převede COLOR_0 v GLB katalogu (modely/predmety/<id>.glb a <id>_lod1.glb) jednou – značka v asset.extras (opakované spuštění nic nezmění) – a u materiálů sady albedo_modulace nastaví baseColorFactor; pak godot --import. Test smyslu? ne – kontrola tools/barvy_vrcholu.py kontrola (rc 1 = GLB sady s COLOR_0 bez značky).",
+ "popis": "Barvy vrcholů (COLOR_0) modelů od modeláře převedené z lineárních (glTF) na sRGB pro renderer Compatibility (převzato z Puchartu, větev ccr-f2d32673-9fi7m5 pravidla/svet/barvy_vrcholu.json, chyby.md 356): Compatibility násobí albedo (textura × albedo_color × COLOR) v sRGB a teprve výsledek převede do lineárního prostoru – lineární barva vrcholu se vezme jako sRGB a ztmavne (béžová 0,34 → 0,095: houně a přikrývka chudé postele téměř černé, Míša/koordinátor 16. 11. snímky chalupa2, zemljanka). tools/barvy_vrcholu.py převede COLOR_0 v GLB katalogu (modely/predmety/<id>.glb a <id>_lod1.glb) jednou – značka v asset.extras (opakované spuštění nic nezmění) – a u materiálů sady albedo_modulace nastaví baseColorFactor; pak godot --import. Test smyslu? ne – kontrola tools/barvy_vrcholu.py kontrola (rc 1 = KAŽDÝ GLB v modely/ s COLOR_0 u materiálu bez značky, mimo vyjimky; střední stupeň jen z importu mimo hra_linearni_stredni; id v hra_linearni_stredni s GLB se značkou).",
  "jen_blender": [
   "znacka",
-  "sady"
+  "sady",
+  "soubory",
+  "vyjimky"
  ],
  "znacka": "barvy_vrcholu_srgb",
  "sady": {
@@ -76,7 +78,31 @@
   }
  },
  "soubory": [
-  "modely/ves/domy_stredni.glb"
+  "modely/ves/domy_stredni.glb",
+  "modely/kostel/kostel_ruiny.glb",
+  "modely/ruiny_ves/ves_dum2.glb",
+  "modely/ruiny_ves/ves_dum3.glb",
+  "modely/ruiny_ves/ves_sklep.glb",
+  "modely/ruiny_ves/ves_snos.glb",
+  "modely/ruiny_ves/ves_stodola.glb",
+  "modely/ruiny_ves/ves_studna.glb",
+  "modely/ruiny_ves/ves_usedlost.glb",
+  "modely/ruiny_ves/ves_zidka_roh.glb",
+  "modely/ruiny_ves/ves_zidka_rovna.glb",
+  "modely/nove/jablon.glb",
+  "modely/nove/jablon_daleko.glb"
  ],
- "_soubory_17_11": "Míša 17. 11. ř. 5 (domy zdálky černé): střední stupeň domů vsi (blender/ves_domy_lod.py, barva zapečená do COLOR_0, lineárně) – Compatibility ho bral jako sRGB, hnědá 0,15 → 0,02 = černá (izolovaná scéna build/dbg/stredni_sky.png: tatáž hnědá jako albedo_color hnědá, jako barva vrcholů černá). Převod týmž nástrojem. Zbývá: střední stupně předmětů (blender/lod_barvy.py → modely/predmety/<id>_stredni.glb – zdroje v kontejneru nejsou) – převod přidat do lod_barvy.py a ves_domy_lod.py při příští stavbě."
+ "_soubory_17_11": "Míša 17. 11. ř. 5 (domy zdálky černé): střední stupeň domů vsi (blender/ves_domy_lod.py, barva zapečená do COLOR_0, lineárně) – Compatibility ho bral jako sRGB, hnědá 0,15 → 0,02 = černá (izolovaná scéna build/dbg/stredni_sky.png: tatáž hnědá jako albedo_color hnědá, jako barva vrcholů černá). Převod týmž nástrojem. Zbývá: střední stupně předmětů (blender/lod_barvy.py → modely/predmety/<id>_stredni.glb – zdroje v kontejneru nejsou) – převod přidat do lod_barvy.py a ves_domy_lod.py při příští stavbě.",
+ "_soubory_18_11": "18. 11. (plan_18_11 B8, nová kontrola všech GLB v modely/): kostel_ruiny a ruiny_ves/* = sady od modeláře (NAVOD_KOSTEL, NAVOD_VES: mech, saze, vlhko v COLOR_0, ve hře Vertex Color → albedo – sonda build/beh/vcf.log: M_ZdivoKamen, M_ZdivoVes … col=true vc_alb=true), lineárně (průměr 0,39 / 0,54) → totéž ztmavnutí jako luzka/topeni. jablon* = bílá 1,0 (převod nic nezmění, jen značka).",
+ "hra_linearni_stredni": [
+  "stodola",
+  "stodola_mala",
+  "kolna"
+ ],
+ "_hra_linearni_stredni": "Míša 17. 11. ř. 5 / plan_18_11 B8 (stodola a kůlna zdálky tmavé): střední stupně <id>_stredni.glb z blender/lod_barvy.py do 18. 11. mají COLOR_0 lineárně (sonda build/beh/vcf.log: stodola_stredni průměr 0,065 / 0,043 / 0,029 = skoro černá jako sRGB). Zdrojové GLB v kontejneru ani na Disku (Modely) nejsou – jen importované balíky (.godot/imported), převést soubor nejde. Pravidlo hry: id v seznamu dostane ve predmety.gd místo st_mat shader s převodem lin → sRGB (vzorec tools/barvy_vrcholu.srgb). lod_barvy.py od 18. 11. zapisuje sRGB a značku – po nové stavbě id ze seznamu SMAZAT (kontrola tools/barvy_vrcholu.py kontrola: id v seznamu s GLB se značkou = dvojí převod = CHYBA). Návrat: [] (tmavé jako dřív).",
+ "vyjimky": {
+  "modely/tvrz.glb": "barva vrcholu = data, ne albedo: export_game.vertex_colors (rnd odstín kusu, grass/pole/les terénu, Pena hladiny) – hra materiály nahrazuje vlastními (svet.gd materiály podle typu, voda.gdshader hloubka)",
+  "modely/krcma/krcma_L.glb": "import barvu vrcholů nemá (sonda build/beh/vcf.log 18. 11.: všechny povrchy col=false) – COLOR_0 se do hry nedostane",
+  "modely/rostliny/divoka_trava.glb": "vlastní model trsu (blender, Blender I/O 4.2), COLOR_0 = tmavnutí ke kořeni (min 0, průměr 0,46), vzhled laděn ve hře od 25. 10.; převod by zesvětlil trsy po celé vsi – NEROZHODNUTO, NEOVĚŘENO (k posouzení Míšou se snímkem)"
+ }
 }

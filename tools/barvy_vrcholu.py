@@ -2,7 +2,8 @@
 nastroje/barvy_vrcholu.py glb_sada). COLOR_0 v GLB katalogu (float / normalizovane uint16 / uint8) se prevede jednou,
 znacka v asset.extras; materialy podle albedo_modulace dostanou baseColorFactor. Po prevodu godot --import (beh.sh cmd).
   python3 tools/barvy_vrcholu.py            prevod (idempotentni)
-  python3 tools/barvy_vrcholu.py kontrola   rc 1 = GLB sady s COLOR_0 bez znacky"""
+  python3 tools/barvy_vrcholu.py kontrola   rc 1 = GLB v modely/ s COLOR_0 u materialu bez znacky (mimo vyjimky),
+                                            stredni stupen jen z importu mimo hra_linearni_stredni, dvoji prevod"""
 import json
 import os
 import sys
@@ -72,16 +73,40 @@ def soubory():
                     yield s, sd, f
 
 
+def kontrola():
+    """Kazdy GLB v modely/ s COLOR_0 u materialu (import Godotu zapne Vertex Color -> albedo, sonda build/beh/vcf.log)
+    nese znacku, nebo je ve vyjimky (barva = data / import bez barvy); stredni stupen predmetu jen z importu (bez GLB)
+    musi byt v hra_linearni_stredni; id v hra_linearni_stredni s GLB se znackou = dvoji prevod."""
+    import glob
+    ch = []
+    vyj = C.get("vyjimky", {})
+    for f in sorted(glob.glob("modely/**/*.glb", recursive=True)):
+        if f in vyj:
+            continue
+        j, _ = nacti(f)
+        ma = any("COLOR_0" in p["attributes"] and "material" in p for m in j.get("meshes", []) for p in m["primitives"])
+        if ma and not j.get("asset", {}).get("extras", {}).get(C["znacka"]):
+            ch.append("bez znacky " + f)
+    hl = C.get("hra_linearni_stredni", [])
+    for imp in sorted(glob.glob("modely/predmety/*_stredni.glb.import")):
+        f = imp[:-len(".import")]
+        pid = os.path.basename(f)[:-len("_stredni.glb")]
+        if not os.path.exists(f) and pid not in hl:
+            ch.append("stredni jen z importu, stav barvy neznamy (hra_linearni_stredni?) " + f)
+    for pid in hl:
+        f = "modely/predmety/%s_stredni.glb" % pid
+        if os.path.exists(f) and nacti(f)[0].get("asset", {}).get("extras", {}).get(C["znacka"]):
+            ch.append("dvoji prevod (znacka v GLB i hra_linearni_stredni) " + f)
+    for f in vyj:
+        if not os.path.exists(f):
+            ch.append("vyjimka bez souboru " + f)
+    print("BARVY_VRCHOLU %s %d %s" % ("OK" if not ch else "CHYBA", len(ch), ch[:12]))
+    return 1 if ch else 0
+
+
 if __name__ == "__main__":
     if "kontrola" in sys.argv:
-        ch = []
-        for s, sd, f in soubory():
-            j, _ = nacti(f)
-            ma = any("COLOR_0" in p["attributes"] for m in j.get("meshes", []) for p in m["primitives"])
-            if ma and not j.get("asset", {}).get("extras", {}).get(C["znacka"]):
-                ch.append(f)
-        print("BARVY_VRCHOLU %s %s" % ("OK" if not ch else "CHYBA", ch[:10]))
-        sys.exit(1 if ch else 0)
+        sys.exit(kontrola())
     n = 0
     for s, sd, f in soubory():
         k, z = preved(f, sd.get("albedo_modulace", {}))
