@@ -90,9 +90,11 @@
   "modely/ruiny_ves/ves_zidka_roh.glb",
   "modely/ruiny_ves/ves_zidka_rovna.glb",
   "modely/nove/jablon.glb",
-  "modely/nove/jablon_daleko.glb"
+  "modely/nove/jablon_daleko.glb",
+  "modely/kovarna/kovarna.glb"
  ],
  "_soubory_17_11": "Míša 17. 11. ř. 5 (domy zdálky černé): střední stupeň domů vsi (blender/ves_domy_lod.py, barva zapečená do COLOR_0, lineárně) – Compatibility ho bral jako sRGB, hnědá 0,15 → 0,02 = černá (izolovaná scéna build/dbg/stredni_sky.png: tatáž hnědá jako albedo_color hnědá, jako barva vrcholů černá). Převod týmž nástrojem. Zbývá: střední stupně předmětů (blender/lod_barvy.py → modely/predmety/<id>_stredni.glb – zdroje v kontejneru nejsou) – převod přidat do lod_barvy.py a ves_domy_lod.py při příští stavbě.",
+ "_soubory_23_11": "plán 18. 11. A2: glb kovárny z Disku (kovarna.zip, stejná rodina dílů jako kostel a ruiny vsi) teď v modely/kovarna – COLOR_0 u M_DlazbaPolniKamen a M_ZdivoKamen lineárně bez značky (kontrola exportu 23. 11. „bez znacky“) → do soubory, převod jednou jako kostel; kovarna_lod1 barvu vrcholů nemá.",
  "_soubory_18_11": "18. 11. (plan_18_11 B8, nová kontrola všech GLB v modely/): kostel_ruiny a ruiny_ves/* = sady od modeláře (NAVOD_KOSTEL, NAVOD_VES: mech, saze, vlhko v COLOR_0, ve hře Vertex Color → albedo – sonda build/beh/vcf.log: M_ZdivoKamen, M_ZdivoVes … col=true vc_alb=true), lineárně (průměr 0,39 / 0,54) → totéž ztmavnutí jako luzka/topeni. jablon* = bílá 1,0 (převod nic nezmění, jen značka).",
  "hra_linearni_stredni": [
   "stodola",

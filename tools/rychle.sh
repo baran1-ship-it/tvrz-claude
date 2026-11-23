@@ -42,11 +42,12 @@ PY
 krok smysl /opt/bl/bin/python tools/test_smyslu.py &
 krok tabulky python3 tools/kontrola_tabulek.py &
 krok barvy python3 tools/barvy_vrcholu.py kontrola &
+krok lod python3 tools/lod_import.py kontrola &        # plan 18. 11. C14 citlive site bez LOD importu
 krok json json_pravidla &
 krok skripty skripty $gd &
 wait
 rc=0
-for j in json skripty tabulky barvy smysl; do
+for j in json skripty tabulky barvy lod smysl; do
   r=$(cat $D/$j.rc 2>/dev/null || echo 9)
   posl=$(grep -vE "^\s*$" $D/$j.log | tail -1 | cut -c1-150)
   printf "RYCHLE %-8s %s %3s s  %s\n" $j "$([ "$r" = 0 ] && echo "OK   " || echo CHYBA)" "$(cat $D/$j.s 2>/dev/null)" "$posl"

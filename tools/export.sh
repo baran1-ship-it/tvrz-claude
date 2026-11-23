@@ -5,7 +5,8 @@
 #   rc 2 test smyslu pred exportem | 3 Blender (rc nebo chybi build/export_hotov.json z tohoto svet.json)
 #   rc 4 test smyslu po exportu   | 5 malo mista | 6 poskozeny obrazek | 7 pyflakes | 8 import Godotu
 #   rc 9 krok stavby nad mez       | 10 limity textur | 11 textury pro tablet | 12 predpeceni potoka | 13 zapis otisku
-#   rc 17 sdilene textury dilu (tools/textury_predmetu.py dily) | 18 kryti louky (TVRZ_ROZSEV)
+#   rc 17 sdilene textury dilu a rostlin (tools/textury_predmetu.py dily|rostliny) | 18 kryti louky (TVRZ_ROZSEV)
+#   rc 19 citlive site bez automatickych LOD importu (tools/lod_import.py, pravidla/lod_import.json)
 # --jen-po: jen brany po exportu a dokonceni nad hotovym exportem (Blender se nespousti).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -45,6 +46,10 @@ if [ "$REZIM" != "--jen-po" ]; then
     krok 10 "limity textur" python3 tools/limity_textur.py
     krok 16 "zesvetleni a hnede drevo vsi (Misa 14. 11., ves_jas; opakovani nic nemeni)" python3 tools/zesvetli_ves.py
     krok 17 "sdilene textury dilu pred importem (Misa 16. 11., kvalita.json textury_dilu)" python3 tools/textury_predmetu.py dily
+    # plan 18. 11. A2 + C14 (23. 11.: export 95 spadl na kontrole datovych textur - rostliny se prevadely az za fi, kontrola
+    # textury_predmetu.py kontrola v kroku 11 nize je uz hlida): prevod pred kontrolou a importem
+    krok 17 "sdilene textury rostlin pred importem (plan 18. 11. A2, kvalita.json textury_rostlin)" python3 tools/textury_predmetu.py rostliny
+    krok 19 "citlive site bez LOD importu pred importem (plan 18. 11. C14, pravidla/lod_import.json)" python3 tools/lod_import.py zapis
     krok 15 "jas dreva (Misa 13. 11. cerne drevo)" python3 tools/export_kontroly.py drevo
     krok 14 "UV modelu s texturou (hlidac 0.996 strechy stodol)" python3 tools/test_uv.py
     krok 11 "datove textury bezztratove pred importem" python3 tools/datove_textury_import.py
