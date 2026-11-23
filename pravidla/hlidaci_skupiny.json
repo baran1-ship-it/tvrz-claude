@@ -11,8 +11,8 @@
   "limit_test_s": 90,
   "limit_min_s": 300,
   "_limit": "tools/beh.sh skupiny: hlídací pes testů = limit_test_s × počet spouštěných testů, nejméně limit_min_s (celá sada 150 testů ~1,5 h = 36 s/test, rezerva 2,5×)",
-  "nevydavat_neblokuje": ["lide_zasek", "clona_vsi"],
-  "_nevydavat_neblokuje": "testy s planými poplachy (plán 18. 11. E6): lide_zasek měří 12 ms na PC (llvmpipe, ne tablet), clona_vsi padá na mezistavu přestavby vegetace. Běží a vypisují se (CHYBA_NEBLOKUJE), ale skupinu ani vydání neblokují. Nemazat – opravit test, pak vyřadit odsud.",
+  "nevydavat_neblokuje": ["clona_vsi"],
+  "_nevydavat_neblokuje": "testy s planými poplachy (plán 18. 11. E6): lide_zasek vyřazen 23. 11. (měří nejlepší z postavy.json graf.mrizka.test_opakovani běhů – běh t_e6a: 18:01 v opakováních 49,6 / 9,7 ms = přerušení procesu, ne skript; test OK), clona_vsi padá na mezistavu přestavby vegetace. Běží a vypisují se (CHYBA_NEBLOKUJE), ale skupinu ani vydání neblokují. Nemazat – opravit test, pak vyřadit odsud.",
   "skupiny": {
     "matice": {
       "popis": "matice vztahů (brána vydani.py / kontrola_vztahu.py čte log k otisku KOD = všechny skripty + test_svet.gd) – vstupy proto stejné jako KOD",

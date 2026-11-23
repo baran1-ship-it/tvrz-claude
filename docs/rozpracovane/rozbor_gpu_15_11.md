@@ -315,6 +315,22 @@ pak oprava. Hypotézu nevydávat za opravu.
 | **K11** | Les hustší, houština místo trávy (`sceny_kcd_15_11.md` krok 3 a 4) | `les_podrost.json trava.okoli_od/do`, nový záznam houštiny v `sceny.json` | varianta `les_bez_travy` (už je) proti nové | vrátit prahy |
 | **K12** | Diag `_pod_krizem` bez zpětného čtení z GPU (poloha jen z dat buněk, ne z MultiMeshe) | – (diag) | snímek panelu při stání | – |
 
+### Stav K1–K12 (23. 11., pomocník D18; kód ověřen čtením, výkon NEOVĚŘENO NA ZAŘÍZENÍ – GPU tabletu na PC změřit nejde)
+| # | stav | co je v kódu / datech | jak změřit (Míša) |
+|---|---|---|---|
+| K1 | HOTOVO (kód) | skupiny panelu z `kontroly.json diag_skupiny` (+ obzor, jablon, pole, díly, dlaždice `D_`); řádek diag.log má „troj … (stin … M)“ = trojúhelníky stínového průchodu (`get_render_info TYPE_SHADOW`) | plný panel na místech 02, 03, 12 |
+| K2 | ČÁSTEČNĚ (A1 23. 11.) | řádek špičky trasy: rozpad snímku, přibylé uzly/zdroje, textury/buffery MB, PSS; počet nových MultiMeshů louky `louka.sloty_novych` (K5) | trasa na tabletu |
+| K3 | ČÁSTEČNĚ | varianty `bez_obzoru`, `bez_houstin`, `louka_puchart`, nově `louka_15_45` (K7) a `louka_sloty` (K5) v `_varianty_pristi`; `teren_jen_blizko`, `bez_podrostu_lesa`, `bez_stinovych_teles` NEZAČATO | měřicí trasa |
+| K4 | HOTOVO | dlaždice terénu (zapnuto 0.9999991, změřeno −12 až −14 ms) | – |
+| K5 | HOTOVO (kód), VYPNUTO v datech | `louka._slot/_uvolni`, `rozpocty.json louka_sloty` (pocet 0 = jako dřív): MultiMeshe vrstev se vracejí do zásoby a nová buňka přepíše data (gles3 jen glBufferSubData změněných oblastí), odklad 3 snímky; platný počet = meta `n` | varianta `louka_sloty` (pocet 48) proti vše: p95, nad30, špičky louka/kůň |
+| K6 | NEZAČATO | – | – |
+| K7 | HOTOVO (přesun do dat, hodnoty beze změny) | `rozpocty.json louka_dosahy` (zanik, uroven_od/pro, kupy, vejir_shader); mrtvá čísla HUST_OD/DO, KVETY_OD/DO smazána; tablet 15/45 jen jako varianta | varianta `louka_15_45` |
+| K8 | ČÁSTEČNĚ | okluzory krčmy (`pasma.budova.okluzor_dily`, `lokace.json krcma_l.okluzor_lok`: hlavní dům + stáj); kovárna NE (otevřená strana); portály krčmy NEZAČATO | snímek 02, kreslení u krčmy |
+| K9 | ČÁSTEČNĚ (záměrně) | `rozpocty.json obzor` (bunka_m 1024 z dat, `orez_dohledem`: buňka za dohledem se nekreslí); 256 m NE – `bez_obzoru` 0.9999992 bez rozdílu | – |
+| K10 | ČÁSTEČNĚ | `rozpocty.json bunky_statickych` (24 / 48 m z dat, hodnoty beze změny); větší buňky stromů + `visibility_parent` NEPROVEDENO (bez skupinové viditelnosti by mizely blízké stromy) | kreslení CPU, objekty v panelu |
+| K11 | jiný pomocník | – | – |
+| K12 | HOTOVO (kód) | diag „pod křížem“ čte polohy z `meta diag_buf` (data buňky rostlin, kup a louky), MultiMesh bez dat přeskočí – žádné `get_instance_transform` (gles3 `_multimesh_make_local` = `glMapBufferRange` čtení z GPU u bufferu nastaveného `mm.buffer`, ověřeno ve zdroji 4.4.1) | panel při stání |
+
 ### První navrhovaná oprava: K4 terén na dlaždice (po rychlém K3 `teren_jen_blizko`)
 - **Proč:** terén je potvrzeně kreslen celý a stále (547 tis. troj., odhad panelu 0,46–0,63 M = největší skupina na všech
   snímcích), a nikdo ho ještě nezkoušel ořezávat. Tráva už měřená byla (dosah nepomohl) a stromy a stíny už ořezané jsou.

@@ -1803,12 +1803,15 @@ func _koryto_terenu(root: Node3D) -> void:
 	_krok_cas("koryto: potok a nadrze")
 	_najezdy_mostu(root)
 	_krok_cas("koryto: _najezdy_mostu")
-	_teren_pod_vraty(root)
-	_krok_cas("koryto: _teren_pod_vraty")
 	_upravy_terenu(root)
 	_krok_cas("koryto: _upravy_terenu")
 	_cesty_tvar(root)
 	_krok_cas("koryto: _cesty_tvar")
+	# 23. 11. (test vratka: branka_2 spodek 0,17 m pod terenem, protokol stavby: _cesty_tvar po _teren_pod_vraty menil
+	# bunky vrat (46, 94) o 0,03-0,11 m - teren u cest se pocita z puvodnich trojuhelniku _ter_tri): kontrakt
+	# docs/pipeline.md - cesty (krok 3) pred plosinami a vraty (krok 4), pozdejsi krok nehybe drivejsim
+	_teren_pod_vraty(root)
+	_krok_cas("koryto: _teren_pod_vraty")
 	# koryta malych toku az po vsech upravach terenu ve hre (posun vsi, ulice, cesty, domy) - jinak hladina lezela
 	# nad travou a suche koryto vedle (Misa 0.98); pravidla zasazeni: voda po stavbach, pozdejsi krok nehybe drivejsim
 	_koryta_naposled(root)
@@ -2429,14 +2432,11 @@ func _teren_pod_vraty(root: Node3D) -> void:
 						v[i] = inv * w
 						zmen += 1
 			arr[Mesh.ARRAY_VERTEX] = v
-			arr[Mesh.ARRAY_NORMAL] = null
+			# po _cesty_tvar (23. 11.) nese teren vsi vlastni kanaly cest (CUSTOM0/1) - SurfaceTool by je zahodil
+			# („Invalid array format“, 28. 10.): normaly z ploch a format cest jako _koryta_naposled
+			_normaly_z_ploch(arr)
 			arr[Mesh.ARRAY_TANGENT] = null
-			var st := SurfaceTool.new()
-			st.create_from_arrays(arr)
-			st.generate_normals()
-			if arr[Mesh.ARRAY_TEX_UV] != null:
-				st.generate_tangents()
-			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, st.commit_to_arrays())
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr, [], {}, _cesta_format(arr))
 			nove.surface_set_material(si, am.surface_get_material(si))
 			nove.surface_set_name(si, am.surface_get_name(si))
 		mi2.mesh = nove

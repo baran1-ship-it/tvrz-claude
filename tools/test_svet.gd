@@ -5163,17 +5163,29 @@ func _steny() -> void:
 					b = Vector3(float(zd[1]) + float(zd[5]) * 1.5, y, u)
 				if _otvor_palace(zd, u, y):
 					continue
-				var q := PhysicsRayQueryParameters3D.create(a, b)
-				q.exclude = [player.get_rid()]
-				var h := sp.intersect_ray(q)
-				vse += 1
+				# 23. 11. (rozbor STENY: kuchyne tvrze z 9. 11. (misa_28 r. 66) ma ohniste s kapuci a komin pred zdi z = -14,
+				# kotlik a nabytek komnaty): test overuje, ze ZED ma kolizi na svem miste (tapiserie, louc) - prekazka pred
+				# zdi (ohniste, nabytek) zed neruší: paprsek pokracuje za ni (nejvys 4 prekazky), prekazka se vypise
+				var dirv := (b - a).normalized()
+				var od := a
+				var h := {}
 				var ok := false
 				var co := "nic"
-				if not h.is_empty():
+				for _pk in 5:
+					var q := PhysicsRayQueryParameters3D.create(od, b)
+					q.exclude = [player.get_rid()]
+					h = sp.intersect_ray(q)
+					if h.is_empty():
+						break
 					var hp: Vector3 = h["position"]
 					var d := absf((hp.z if zd[0] == "z" else hp.x) - float(zd[1]))
 					ok = d < 0.25 and absf((h["normal"] as Vector3).y) < 0.35
 					co = "%s d %.2f" % [(h["collider"] as Node).name, d]
+					if ok or d < 0.25:
+						break
+					print("STENY prekazka pred zdi %s=%.1f/%.0f u %.1f v %.1f: %s %s" % [zd[0], zd[1], zd[6], u, y, (h["collider"] as Node).get_path(), str(hp)])
+					od = hp + dirv * 0.05
+				vse += 1
 				if not ok:
 					spatne += 1
 					if hy == 1.6:
