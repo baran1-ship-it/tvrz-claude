@@ -82,5 +82,8 @@ krok 13 "zapis otisku exportu" python3 tools/otisk_exportu.py zapis
 # „po kazdem exportu se stavbami znovu“ (9. 11.) nikdo nepoustel: export 16. 11. 19:37, kryti.bin z 15. 11. 15:57. Rozsev
 # zapise otisk exportu do modely/louka/kryti_otisk.txt, test hry kryti_otisk ho porovna s build/export_otisk.json.
 krok 18 "kryti louky z tohoto exportu (build/pregeneruj_kryti.log)" bash -c "bash tools/pregeneruj.sh kryti && grep -q '^ROZSEV kryti' build/pregeneruj_kryti.log"
+# 23. 11. (B11 potok bez vody): dlazdice terenu (hra je kresli misto site z exportu) byly z 18. 11., export z 23. 11. ->
+# stare dno koryta zakrylo hladinu malych toku. Dlazdice = odvozeny vystup exportu -> krok exportu, ne rucne.
+krok 20 "dlazdice terenu z tohoto exportu (build/pregeneruj_dlazdice.log)" bash -c "bash tools/pregeneruj.sh dlazdice && grep -q 'TEREN_DLAZDICE PEC' build/pregeneruj_dlazdice.log"
 stav OK 0
 echo "EXPORT OK"
