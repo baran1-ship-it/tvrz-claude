@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "1da1bc0",
+ "commit": "fc25f38",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -150,7 +150,28 @@
    "staj_A": true,
    "voda_neni_bila": true,
    "zdivo_klidne": true,
-   "staj_bez_porostu": true
+   "staj_bez_porostu": true,
+   "ridnuti_bez_sachovnice": true,
+   "krajnice_trava": true,
+   "pata_pas_mimo_nadvori": true,
+   "brod_v_ose_cesty": true,
+   "voda_odraz_hvozd": true,
+   "stredni_pas_travy": true,
+   "kameny_lod0": true,
+   "narozi_bez_styku": true,
+   "drevo_sindel_geometrie": true,
+   "c4_plot_varianty": true,
+   "c1_opotrebeni_stodola": true,
+   "stromy_lod1_kmen": true,
+   "foto_vice_svetel": true,
+   "tri_modely_druhu": true,
+   "tri_modely_vyjimky": false,
+   "skaly_bez_cerne": true,
+   "porost_dalka_za_pasem": true,
+   "kraj_cesty_strida": true,
+   "breh_voda_kamen_trava": true,
+   "ohyb_travy_hrac": true,
+   "mraky_stin_vzorkovace": true
   },
   "pruchod": {
    "cesta_mezi_hrady": true,
@@ -285,24 +306,24 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 1162698,
-    "troj_max": 1204921,
-    "kresleni_p95": 381,
+    "troj_p95": 940152,
+    "troj_max": 966615,
+    "kresleni_p95": 384,
     "kresleni_m_median": 477.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1671955,
-    "troj_max": 1947391,
-    "kresleni_p95": 881,
-    "kresleni_m_median": 716.0
+    "troj_p95": 1521717,
+    "troj_max": 1668175,
+    "kresleni_p95": 895,
+    "kresleni_m_median": 715.0
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1682132,
-    "troj_max": 1888884,
-    "kresleni_p95": 1064,
-    "kresleni_m_median": 1761.5
+    "troj_p95": 1465629,
+    "troj_max": 1521236,
+    "kresleni_p95": 1074,
+    "kresleni_m_median": 1760.0
    },
    "zmena_median": 35.35,
    "doskoky": [],
