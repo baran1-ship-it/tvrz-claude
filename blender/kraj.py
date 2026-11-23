@@ -1402,6 +1402,12 @@ def houstiny_breh(R):
     return out
 
 
+def clona_rozptyl(typ):
+    """Podil rozestupu, o ktery se kus clony rozptyli (lokace.json kompozice.clony_rozptyl; hra svet.scena_bod tentyz okraj)."""
+    r = _LOKACE_J.get("kompozice", {}).get("clony_rozptyl", {})
+    return r.get(typ, r.get("jine", 0.4))
+
+
 def clony(R):
     """Clony z lokace.json kompozice.clony (sad, houstina): pas podel osy, sirka_m napric, body po rozestup_m.
     [(model, x, z, vyska, id clony)]."""
@@ -1416,7 +1422,7 @@ def clony(R):
             while t < L:
                 for i in range(nr):
                     o = (i - (nr - 1) / 2.0) * (w / max(nr - 1, 1) if nr > 1 else 0.0)
-                    jt = krok * (0.15 if c["typ"] == "sad" else 0.4)
+                    jt = krok * clona_rozptyl(c["typ"])
                     x = ax + (bx - ax) * t / L + nx * o + R.uniform(-jt, jt)
                     z = az + (bz - az) * t / L + nz * o + R.uniform(-jt, jt)
                     pid, h = houstina_vyber(c["skladba"], R)

@@ -5550,12 +5550,16 @@ func _okraj_novych_lesu() -> void:
 ## ves (pasma.rozmisteni.ves_dosah_m od stare navsi), les (zapoj >= houstina.plast.les_kraj[0] do dosah_lesa_m), jinak louka.
 func scena_bod(x: float, z: float) -> String:
 	var pr: Dictionary = pasma()["rozmisteni"]
-	for c: Dictionary in (Pravidla.cti("lokace", "kompozice") as Dictionary).get("clony", []):
+	var kp: Dictionary = Pravidla.cti("lokace", "kompozice")
+	var roz: Dictionary = kp.get("clony_rozptyl", {})
+	for c: Dictionary in kp.get("clony", []):
 		var osa: Array = c["osa"]
+		# pas + rozptyl kusu (kraj.clony: ± clony_rozptyl × rozestup_m) - kus clony na okraji pasu je porad clona
+		var okraj := float(c["sirka_m"]) * 0.5 + float(roz.get(c["typ"], roz.get("jine", 0.0))) * float(c["rozestup_m"])
 		for i in osa.size() - 1:
 			var a := Vector2(float(osa[i][0]), float(osa[i][1]))
 			var b := Vector2(float(osa[i + 1][0]), float(osa[i + 1][1]))
-			if Geometry2D.get_closest_point_to_segment(Vector2(x, z), a, b).distance_to(Vector2(x, z)) < float(c["sirka_m"]) * 0.5:
+			if Geometry2D.get_closest_point_to_segment(Vector2(x, z), a, b).distance_to(Vector2(x, z)) < okraj:
 				return "clona"
 	var vs: Array = Pravidla.cti("lokace", "ves")["stred_stare_navsi"]
 	if Vector2(x - float(vs[0]), z - float(vs[1])).length() < float(pr["ves_dosah_m"]):
