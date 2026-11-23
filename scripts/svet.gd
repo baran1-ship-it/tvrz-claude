@@ -2448,7 +2448,10 @@ func _teren_pod_vraty(root: Node3D) -> void:
 					ypov = minf(ypov, (hp as Vector3).y)
 		if ypov < INF:
 			ymin = ypov
-		if bb.position.y > ymin + 0.02:
+		# 23. 11. (branka_2 −0,17 m, rozbor po 2 pokusech: spodek 4,79 z exportu, povrch hry 4,96-5,09 - hra teren u vrat
+		# zvedla a kridlo se jen spoustelo, nikdy nezvedlo): spodek kridla = povrch + 2 cm obema smery; teren se dal
+		# nezvedá (Misa 0.72 „zrus kopecek“), jen vyssi teren pod kridlem srovna nize
+		if absf(bb.position.y - ymin - 0.02) > 0.01:
 			var dy := bb.position.y - ymin - 0.02
 			mi.global_position.y -= dy
 			bb.position.y -= dy
