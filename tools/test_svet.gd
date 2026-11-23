@@ -5178,13 +5178,13 @@ func _steny() -> void:
 					continue
 				# 23. 11. (rozbor STENY: kuchyne tvrze z 9. 11. (misa_28 r. 66) ma ohniste s kapuci a komin pred zdi z = -14,
 				# kotlik a nabytek komnaty): test overuje, ze ZED ma kolizi na svem miste (tapiserie, louc) - prekazka pred
-				# zdi (ohniste, nabytek) zed neruší: paprsek pokracuje za ni (nejvys 4 prekazky), prekazka se vypise
+				# zdi (ohniste, nabytek, komin) zed neruší: paprsek pokracuje za ni (nejvys 8 kroku), prekazka se vypise
 				var dirv := (b - a).normalized()
 				var od := a
 				var h := {}
 				var ok := false
 				var co := "nic"
-				for _pk in 5:
+				for _pk in 9:
 					var q := PhysicsRayQueryParameters3D.create(od, b)
 					q.exclude = [player.get_rid()]
 					h = sp.intersect_ray(q)
@@ -5197,7 +5197,8 @@ func _steny() -> void:
 					if ok or d < 0.25:
 						break
 					print("STENY prekazka pred zdi %s=%.1f/%.0f u %.1f v %.1f: %s %s" % [zd[0], zd[1], zd[6], u, y, (h["collider"] as Node).get_path(), str(hp)])
-					od = hp + dirv * 0.05
+					od = hp + dirv * 0.25            # plna prekazka (komin u zdi): paprsek zevnitr ji trefi znovu, krok 0,25 m
+
 				vse += 1
 				if not ok:
 					spatne += 1

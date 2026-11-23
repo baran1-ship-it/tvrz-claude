@@ -2370,6 +2370,7 @@ func _teren_pod_vraty(root: Node3D) -> void:
 			okno = b0 if prvni else okno.merge(b0)
 			prvni = false
 	okno = okno.grow(4.0)
+	var ttri := {}                                   # trojuhelniky Teren_ves v okne po bunkach 4 m (povrch = kolize Teren_ves_kolize)
 	for t0 in root.find_children("Teren_ves*", "MeshInstance3D", true, false):
 		var m0 := t0 as MeshInstance3D
 		if m0.mesh == null:
@@ -2380,6 +2381,18 @@ func _teren_pod_vraty(root: Node3D) -> void:
 				var w := x0 * vv
 				if not prvni and w.x > okno.position.x and w.x < okno.end.x and w.z > okno.position.z and w.z < okno.end.z:
 					tv.append(w)
+		var f0 := m0.mesh.get_faces()
+		for ti in range(0, f0.size(), 3):
+			var a0 := x0 * f0[ti]
+			if not prvni and a0.x > okno.position.x - 4.0 and a0.x < okno.end.x + 4.0 and a0.z > okno.position.z - 4.0 and a0.z < okno.end.z + 4.0:
+				var b0 := x0 * f0[ti + 1]
+				var c0 := x0 * f0[ti + 2]
+				for cx in range(floori(minf(a0.x, minf(b0.x, c0.x)) / 4.0), floori(maxf(a0.x, maxf(b0.x, c0.x)) / 4.0) + 1):
+					for cz in range(floori(minf(a0.z, minf(b0.z, c0.z)) / 4.0), floori(maxf(a0.z, maxf(b0.z, c0.z)) / 4.0) + 1):
+						var kc := Vector2i(cx, cz)
+						if not ttri.has(kc):
+							ttri[kc] = []
+						(ttri[kc] as Array).append([a0, b0, c0])
 	for nd in root.find_children("Pohyb_ves_*", "MeshInstance3D", true, false):
 		var nm := String(nd.name)
 		if not (nm.contains("branka") or nm.contains("vrata")):
@@ -2403,6 +2416,18 @@ func _teren_pod_vraty(root: Node3D) -> void:
 		if not pod.is_empty():
 			pod.sort()
 			ymin = float(pod[pod.size() / 2])
+		# 23. 11. (test vratka branka_2 −0,17 m): median VRCHOLU (mrizka 2 m) lezel v prohlubni 0,17 m pod POVRCHEM pod
+		# kridlem (trojuhelniky k vyssim vrcholum za r2) - vyska vrat = nejnizsi povrch site v 5 bodech pod kridlem
+		# (stred ± 0,3 m, jako pohyb.na_zem a test vratka); median vrcholu jen kdyz trojuhelnik chybi
+		var ypov := INF
+		for o: Vector2 in [Vector2(0, 0), Vector2(0.3, 0), Vector2(-0.3, 0), Vector2(0, 0.3), Vector2(0, -0.3)]:
+			var q2 := c2 + o
+			for tr: Array in ttri.get(Vector2i(floori(q2.x / 4.0), floori(q2.y / 4.0)), []):
+				var hp: Variant = Geometry3D.ray_intersects_triangle(Vector3(q2.x, 1000.0, q2.y), Vector3.DOWN, tr[0], tr[1], tr[2])
+				if hp != null:
+					ypov = minf(ypov, (hp as Vector3).y)
+		if ypov < INF:
+			ymin = ypov
 		if bb.position.y > ymin + 0.02:
 			var dy := bb.position.y - ymin - 0.02
 			mi.global_position.y -= dy
