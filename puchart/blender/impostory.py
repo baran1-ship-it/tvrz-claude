@@ -18,7 +18,12 @@ OUT = os.path.join(ROOT, "hra", "textury", "impostory")
 N = 8                 # pohledu na stranu
 PX = int(json.load(open(os.path.join(ROOT, "pravidla/svet/stromy_modely.json"))).get("impostor", {}).get("px_na_pohled", 128))   # stromy_modely.json impostor
 # druh impostoru: (soubor glb, uzel) - varianty stejneho druhu sdileji jeden impostor
+PX_STROM, PX_KER = PX, 128
 DRUHY = {d: (d + ("_stredni"), None) for d in ("buk", "jedle", "smrk", "dub", "lipa", "olse", "vrba", "briza", "borovice", "javor", "jasan", "habr", "jilm")}
+# Keře a zmlazení (Míša 23. 11.: „vyskakování a růst keřů“ – keře měly jen plný model do 46 m): impostor druhu z první varianty
+# kere.json modely, adresář modely/rostliny, výstup ker_<druh>_a/_n.png (byliny.gd režim daleko)
+_KERE = json.load(open(os.path.join(ROOT, "pravidla/svet/kere.json")))["modely"]
+DRUHY.update({"ker_" + d: ("rostliny/" + v[0], None) for d, v in _KERE.items()})
 
 
 def smer(i, j):
@@ -73,8 +78,10 @@ def _emise(mat, normal):
 
 
 def druh(name, soubor, uzel, meta):
+    global PX
+    PX = PX_KER if name.startswith("ker_") else PX_STROM   # keř je od 36 m malý: 128 px na pohled (atlas 1024)
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, "hra", "modely", "stromy", soubor + ".glb"))
+    bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, "hra", "modely", soubor if "/" in soubor else "stromy/" + soubor) + ".glb")
     ob = bpy.data.objects.get(uzel) if uzel else next((o for o in bpy.data.objects if o.type == "MESH"), None)
     if ob is None:
         print("PRESKOCENO", name, "uzel", uzel)

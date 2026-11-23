@@ -13,9 +13,21 @@ var cam: Camera3D
 var _sum := FastNoiseLite.new()
 const ZasobaMM := preload("res://scripts/zasoba_mm.gd")
 
-func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json") -> void:
+## Režim daleko (Míša 23. 11.: „vyskakování a růst keřů“; „máme 3 a více podoby trávy, keřů a stromů“): druhý uzel se stejnými
+## daty (kere.json) kreslí stejné keře jako impostor (shaders/ker_impostor.gdshader) do daleko.dosah_m. Polohy z týchž malých
+## buněk (_bunka_mista, stejné semínko), jen sloučené po daleko.bunek × daleko.bunek do jedné velké (málo volání kreslení).
+var daleko := false
+var _nb := 1   # malých buněk na stranu velké (režim daleko)
+
+func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json", rezim_daleko := false) -> void:
 	svet = s; cam = kamera
 	cfg = JSON.parse_string(FileAccess.get_file_as_string(cesta))
+	daleko = rezim_daleko
+	if daleko:
+		var dc: Dictionary = cfg["daleko"]
+		_nb = int(dc["bunek"])
+		cfg["dosah_m"] = float(dc["dosah_m"]); cfg["predstih_m"] = float(dc.get("predstih_m", 0.0))
+		cfg["trava_sada"] = false
 	# šum shluků: souřadnice se dělí vlna_m, frekvence 1 = vlna ~vlna_m (17. 11.: výchozí 0,01 dávala vlnu 100 × vlna_m = 4,8 km –
 	# „shluky“ keřů byly jeden pomalý přechod přes celou mapu, žádné houštiny a světliny)
 	_sum.frequency = float(cfg.get("shluky_frekvence", 1.0))
@@ -44,7 +56,8 @@ func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json") -> v
 		meshe["trava"] = trava; meshe["vysoka"] = vysoka
 	var modely: Dictionary = cfg.get("modely", {})
 	var zanik: Array = cfg.get("zanik_m", [])
-	for k in modely:   # druh -> modely (tabulka modely); se zanik_m rozpouštění ditheringem do dálky (žádné odskočení)
+	if daleko: _impostory(modely, zanik)
+	for k in (modely if not daleko else {}):   # druh -> modely (tabulka modely); se zanik_m rozpouštění ditheringem do dálky (žádné odskočení)
 		meshe[k] = []
 		for d in modely[k]:
 			if not ResourceLoader.exists("res://modely/rostliny/%s.glb" % d): continue
@@ -76,6 +89,39 @@ func _zapoj_nas(x: float, z: float) -> float:   # násobek hustoty podle zápoje
 	var c := clampi(int((x - float(sj["x0_hra"])) / float(sj["krok_m"])), 0, _zap.get_width() - 1)
 	var r := clampi(int((z - float(sj["z0_hra"])) / float(sj["krok_m"])), 0, _zap.get_height() - 1)
 	return 1.0 - float(_zap_les.get("ubytek", 0.985)) * smoothstep(float(_zap_les.get("kryt_od", 0.3)), float(_zap_les.get("kryt_do", 0.8)), _zap.get_pixel(c, r).r)
+
+## Impostor na druh: čtverec + ShaderMaterial (atlas textury/impostory/ker_<druh>). Druh bez plného modelu zůstane prázdný
+## (stejné přeskakování v _bunka_mista jako u plného uzlu – jinak by se rozešla náhoda a polohy).
+func _impostory(modely: Dictionary, zanik: Array) -> void:
+	var dc: Dictionary = cfg["daleko"]
+	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://textury/impostory/impostory.json"))
+	var sh: Shader = load("res://shaders/ker_impostor.gdshader")
+	for k: String in modely:
+		meshe[k] = []
+		var ma := false
+		for d in modely[k]: ma = ma or ResourceLoader.exists("res://modely/rostliny/%s.glb" % d)
+		if not ma: continue
+		var ik := "ker_" + k
+		if not meta.has(ik) or not ResourceLoader.exists("res://textury/impostory/%s_a.png" % ik):
+			push_warning("keře daleko: chybí impostor " + ik); continue
+		var r := float(meta[ik]["polomer"])
+		var q := ArrayMesh.new(); var a := []; a.resize(Mesh.ARRAY_MAX)
+		a[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3(-1, 0, 0), Vector3(1, 0, 0), Vector3(1, 2, 0), Vector3(-1, 2, 0)])
+		a[Mesh.ARRAY_TEX_UV] = PackedVector2Array([Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)])
+		a[Mesh.ARRAY_INDEX] = PackedInt32Array([0, 1, 2, 0, 2, 3])
+		q.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a)
+		q.custom_aabb = AABB(Vector3(-r, 0.0, -r), Vector3(r * 2.0, float(meta[ik]["vyska"]) + r, r * 2.0))   # čtverec se natahuje v shaderu
+		var m := ShaderMaterial.new(); m.shader = sh
+		m.set_shader_parameter("barva", load("res://textury/impostory/%s_a.png" % ik))
+		m.set_shader_parameter("normaly", load("res://textury/impostory/%s_n.png" % ik))
+		var st: Array = meta[ik]["stred"]
+		m.set_shader_parameter("stred", Vector3(float(st[0]), float(st[1]), float(st[2])))
+		m.set_shader_parameter("polomer", r)
+		if zanik.size() == 2: m.set_shader_parameter("zanik", Vector2(float(zanik[1]), float(zanik[0])))
+		var ko: Array = dc["konec_m"]
+		m.set_shader_parameter("konec", Vector2(float(ko[1]), float(ko[0])))
+		q.surface_set_material(0, m)
+		meshe[k] = [q]
 
 var _pas := {}   # "i,j" -> skvrny [x0, z0, x1, z1, nx, nz, šířka, zdroj]
 
@@ -141,7 +187,7 @@ var _mutex := Mutex.new()
 
 func aktualizuj(max_novych: int) -> void:
 	var p := cam.global_position
-	var B: float = cfg["bunka_m"]; var R: float = float(cfg["dosah_m"]) + float(cfg.get("predstih_m", 0.0))
+	var B: float = float(cfg["bunka_m"]) * _nb; var R: float = float(cfg["dosah_m"]) + float(cfg.get("predstih_m", 0.0))
 	var chci := {}; var nove: Array = []
 	for i in range(floori((p.x - R) / B), floori((p.x + R) / B) + 1):
 		for j in range(floori((p.z - R) / B), floori((p.z + R) / B) + 1):
@@ -188,7 +234,16 @@ func _ve_stavbe(x: float, z: float) -> bool:
 
 func _pocitej(i: int, j: int, B: float) -> Dictionary:
 	var out := {}
-	for tf: Array in _bunka_mista(i, j, B):
+	var mista: Array = []
+	if daleko:   # velká buňka = _nb × _nb malých (polohy stejné jako plný uzel), jedna varianta impostoru na druh
+		var bm := B / _nb
+		for a in _nb:
+			for b in _nb:
+				for tf: Array in _bunka_mista(i * _nb + a, j * _nb + b, bm):
+					mista.append([String(tf[0]).rstrip("0123456789") + "0", tf[1]])
+	else:
+		mista = _bunka_mista(i, j, B)
+	for tf: Array in mista:
 		var klic: String = tf[0]; var t: Transform3D = tf[1]
 		if not _stavby.is_empty() and _ve_stavbe(t.origin.x, t.origin.z): continue
 		if not out.has(klic): out[klic] = PackedFloat32Array()
@@ -207,7 +262,7 @@ func _vloz(data: Dictionary) -> Array:
 		var mm := ZasobaMM.vezmi(meshe[druh][int(klic.substr(druh.length()))], buf, buf.size() / 12)   # zásoba MultiMeshů (P2)
 		var mi := MultiMeshInstance3D.new(); mi.multimesh = mm
 		mi.position = data.get("_stred", Vector3.ZERO)
-		mi.visibility_range_end = float(cfg["dosah_m"]) + float(cfg["bunka_m"]) * 0.75   # buňky předstihu se nekreslí (jen připravené)
+		mi.visibility_range_end = float(cfg["dosah_m"]) + float(cfg["bunka_m"]) * _nb * 0.75   # buňky předstihu se nekreslí (jen připravené)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if cfg.get("stin", false) else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(mi); vys.append(mi)
 	return vys

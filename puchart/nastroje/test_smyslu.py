@@ -1925,6 +1925,20 @@ for _k31 in ("vrstva_rozptyl", "lic_rozptyl_m", "natoceni_st", "kryci_desek"):
 if _st31 != _sh31: _c31.append("hra/data/hrad_vzhled.json kameny_lod0.stinka ≠ pravidla")
 TEST("cimburi_vrstvy", not _c31, "; ".join(_c31) if _c31 else "stínky: vrstva %.2f m × %s, krycí desky %s" % (_st31["vrstva_m"], _vr31, _st31["kryci_desek"]))
 
+# keře do dálky (Míša 23. 11.: „to vyskakování a růst keřů přede mnou je hrozný“; „máme 3 a více podoby … a do dálky plno“):
+# každý druh keře má impostor (ker_<druh>), vzdálený uzel sahá aspoň 3× dál než plný keř, hash shaderů je stejný
+_c32 = []; _kj32 = json.load(open(K + "/hra/data/kere.json")); _dl32 = _kj32.get("daleko", {})
+if _kj32 != json.load(open(K + "/pravidla/svet/kere.json")): _c32.append("hra/data/kere.json ≠ pravidla")
+if float(_dl32.get("dosah_m", 0)) < 3 * float(_kj32["zanik_m"][1]): _c32.append("daleko.dosah_m %s < 3 × konec plného keře" % _dl32.get("dosah_m"))
+_im32 = json.load(open(K + "/hra/textury/impostory/impostory.json"))
+for _d32 in _kj32["modely"]:
+    if "ker_" + _d32 not in _im32 or not os.path.exists(K + "/hra/textury/impostory/ker_%s_a.png" % _d32): _c32.append("chybí impostor ker_" + _d32)
+_h32 = "floor(wp.xz * 8.0 + 0.5) * 0.125"
+for _f32 in ("listi", "bylina", "ker_impostor"):
+    if _h32 not in open(K + "/hra/shaders/%s.gdshader" % _f32).read(): _c32.append("%s.gdshader: jiný hash keře (doplněk by nesedl)" % _f32)
+if '"KereDaleko"' not in open(K + "/hra/scripts/hlavni.gd").read() or '"KereDaleko"' not in open(K + "/hra/scripts/regulator.gd").read(): _c32.append("KereDaleko není v hlavni.gd / regulator.gd")
+TEST("kere_do_dalky", not _c32, "; ".join(_c32) if _c32 else "keře: plný model do %s m, impostor do %s m (%d druhů)" % (_kj32["zanik_m"][1], _dl32["dosah_m"], len(_kj32["modely"])))
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

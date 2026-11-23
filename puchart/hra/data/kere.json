@@ -1,6 +1,13 @@
 {
  "popis": "Keře a zmlazení podle stanoviště (Míša 2. 11.: „nemáš podrost a křoví“; GPT scény bod 3 a 7: lesní okraje, remízky, křoviny jako přirozené clony, mladé stromky). Stejný systém jako byliny.json (hra/scripts/byliny.gd), větší buňky a dosah; do dálky se rozpouští ditheringem (zanik_m), nic neodskočí. Modely Havrana (modely/nove, CC0/vlastní). Hustota = kusů na m². NEOVERENO výkon – měření K.",
  "dosah_m": 48,
+ "daleko": {
+  "dosah_m": 150,
+  "bunek": 4,
+  "konec_m": [130, 150],
+  "predstih_m": 20,
+  "pozn": "Míša 23. 11. („to vyskakování a růst keřů přede mnou je hrozný“; „máme 3 a více podoby trávy, keřů a stromů a do dálky plno“): keře měly jen plný model (7–14 tis. troj.) do 46 m a v pásmu zanik_m se objevovaly celé. Teď druhá podoba – impostor 8×8 pohledů (blender/impostory.py ker_<druh>, shaders/ker_impostor.gdshader), přesný doplněk plného keře po celých keřích (hash polohy), do dosah_m; na konci (konec_m) mizí po celých keřích u porostu E2 v zemi (louka.json porost_dalka od 110 m). Velká buňka = bunek × bunek buněk bunka_m (stejné polohy, málo volání kreslení). Zdroj: stromy (les.gd impostory, Havran svet.gd), Míša 23. 11."
+ },
  "bunka_m": 14,
  "vzorku_na_m2": 0.25,
  "zanik_m": [

@@ -218,11 +218,13 @@ func _start() -> void:
 	Denik.zapis("keře")
 	var ker: Node3D = load("res://scripts/byliny.gd").new(); ker.name = "Kere"; add_child(ker)   # keře a zmlazení (data/kere.json)
 	ker.postav(svet, cam, "res://data/kere.json")
+	var ker_d: Node3D = load("res://scripts/byliny.gd").new(); ker_d.name = "KereDaleko"; add_child(ker_d)   # tytéž keře jako impostor do dálky (Míša 23. 11.)
+	ker_d.postav(svet, cam, "res://data/kere.json", true)
 	_kolize_hradu.call_deferred()   # před předehřátím: predehrati.gd čeká na ohne.gd a ohně čekají na kolize hradu
 	Denik.zapis("předehřátí shaderů")
 	if _foto == "" and OS.get_environment("PUCHART_TEST") == "" and _pr.get("predehrati", {}).get("zapojeno", false):   # shadery všech materiálů sestavit hned, ne až za chůze (záseky při 1. průchodu – Havran 0.62)
 		await get_tree().process_frame
-		await load("res://scripts/predehrati.gd").predehrej(self, cam, byl.vsechny_site() + ker.vsechny_site() + _vzory_bunek(), int(_pr.get("predehrati", {}).get("snimku", 4)))
+		await load("res://scripts/predehrati.gd").predehrej(self, cam, byl.vsechny_site() + ker.vsechny_site() + ker_d.vsechny_site() + _vzory_bunek(), int(_pr.get("predehrati", {}).get("snimku", 4)))
 	# rozpočet uzlů (pád na tabletu 11. 11.: 115 tis. buněk lesu = nedostatek paměti) – výpis po vrstvách
 	var uz := []
 	for ch in get_children(): uz.append("%s %d" % [ch.name, ch.find_children("*", "", true, false).size()])

@@ -20,7 +20,7 @@ void vertex() {
 	if (zanik.x != zanik.y) {
 		vec3 wp = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 		float vz = clamp((length(wp - INV_VIEW_MATRIX[3].xyz) - zanik.x) / (zanik.y - zanik.x), 0.0, 1.0);
-		float hz = fract(sin(dot(wp.xz, vec2(12.9898, 78.233))) * 43758.5453);
+		float hz = fract(sin(dot(floor(wp.xz * 8.0 + 0.5) * 0.125, vec2(12.9898, 78.233))) * 43758.5453);   // poloha na 1/8 m – stejný hash jako ker_impostor.gdshader (Míša 23. 11.)
 		VERTEX *= step(hz * 0.8, vz);   // Míša 20. 11.: „před očima mi lezou stromy a keře ze země“ – žádné zvětšování od paty, rostlina se objeví celá v náhodné vzdálenosti pásma
 	}
 }
