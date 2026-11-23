@@ -1775,3 +1775,10 @@ Hotovo v kódu a datech (testy u každého):
   zatím OK, 1 081 kusů, 0 chyb) – PODEZŘENÍ na budoucí plané chyby `houstina_voda` (viz 17. 11.).
 - Malý tok (`voda.json vzhled_hvozd.maly_tok`) zatím nečitelný jako voda – další krok sonda `bod` na ose odtoku, ne čísla.
 - `beh.sh` hlásí rc 1 i při TEST SVET PROSEL kvůli `SCRIPT ERROR get_render_info` v `diag.gd:881` při ukončení (cizí, nerozebráno).
+- **Pád exportu 95 (23. 11.) – příčina a oprava:** (1) převod textur rostlin byl jen za `fi`, ale `kontrola_datovych_textur.py` (krok 11
+  uvnitř bloku) volá `textury_predmetu.py kontrola`, která už rostliny hlídá → „vložené obrázky“. Teď `textury_predmetu.py rostliny`
+  a `lod_import.py zapis` i uvnitř bloku před importem (krok 17/19), za `fi` zůstávají pro `--jen-po`. (2) `kovarna.glb` z Disku má
+  COLOR_0 lineárně bez značky → `barvy_vrcholu.json soubory` (převod jako kostel, `barvy_vrcholu.py`). Kdo přidá nový glb z Disku:
+  spustit `barvy_vrcholu.py kontrola` a `textury_predmetu.py kontrola` hned, ne až v exportu.
+- Naměřeno po převodu (import v kontejneru, `tools/textury_vram.py`): ETC2 879,5 → 817,2 MB, duplicity 189,9 → 100,9 MB (`build/a2_vram_po.json`).
+  Snímky `build/a2/kovarna_x.png` (kovárna s texturami beze změny), `build/a2/skala_vez.png` (skály s texturami ze sdílené složky).
