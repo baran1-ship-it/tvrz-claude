@@ -641,6 +641,14 @@ func _build() -> void:
 			mt.cfg["zahrati_s"] = 2.0
 			mt.useky = (mt.cfg["useky"] as Array).slice(0, 2)
 			mt.varianty = ["", "trava_50"]
+		elif mt and OS.get_environment("TVRZ_TRASA") == "useky":
+			# 23. 11. (A1 spicky 0.9999994): jen vybrane useky a varianty, plne casy z pravidla - sonda na PC u mista spicky
+			# TVRZ_TRASA_USEKY="ves-dvory,hostinec", TVRZ_TRASA_VARIANTY="vse,diag_plny" (vse = "")
+			var jm: PackedStringArray = OS.get_environment("TVRZ_TRASA_USEKY").split(",", false)
+			mt.useky = (mt.cfg["useky"] as Array).filter(func(u: Dictionary) -> bool: return jm.has(String(u["jmeno"])))
+			if OS.has_environment("TVRZ_TRASA_VARIANTY"):
+				mt.varianty = Array(OS.get_environment("TVRZ_TRASA_VARIANTY").split(",", false)).map(
+						func(v: String) -> String: return "" if v == "vse" else v)
 		while is_instance_valid(mt) and mt.i_var < mt.varianty.size():
 			await get_tree().process_frame
 		get_tree().quit()
