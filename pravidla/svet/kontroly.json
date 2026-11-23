@@ -201,8 +201,11 @@
    "v datech",
    "v kodu",
    "ověřeno",
-   "overeno"
+   "overeno",
+   "přeřazeno",
+   "prerazeno"
   ],
+  "_hotove_preneseno": "přeřazeno (D20 23. 11., plan_18_11 F): řádek staré tabulky přenesený do plánu jako konkrétní bod (plan_18_11.md F…/A…/B…/C…) – sleduje se tam, v tabulce už není otevřený",
   "duvod": [
    "proč",
    "proc",
