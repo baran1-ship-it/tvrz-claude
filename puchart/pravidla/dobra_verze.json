@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "a5246bf",
+ "commit": "9cdc50e",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -173,7 +173,8 @@
    "ohyb_travy_hrac": true,
    "mraky_stin_vzorkovace": true,
    "brod_pas_kryje": true,
-   "cimburi_vrstvy": true
+   "cimburi_vrstvy": true,
+   "kere_do_dalky": true
   },
   "pruchod": {
    "cesta_mezi_hrady": true,
@@ -308,26 +309,26 @@
   "sceny": {
    "A": {
     "snimku": 3,
-    "troj_p95": 943663,
-    "troj_max": 969967,
-    "kresleni_p95": 385,
-    "kresleni_m_median": 477.0
+    "troj_p95": 943392,
+    "troj_max": 970163,
+    "kresleni_p95": 388,
+    "kresleni_m_median": 478.0
    },
    "B": {
     "snimku": 68,
-    "troj_p95": 1494220,
-    "troj_max": 1686581,
-    "kresleni_p95": 895,
-    "kresleni_m_median": 714.5
+    "troj_p95": 1498635,
+    "troj_max": 1686727,
+    "kresleni_p95": 898,
+    "kresleni_m_median": 712.0
    },
    "C": {
     "snimku": 44,
-    "troj_p95": 1476322,
-    "troj_max": 1521236,
-    "kresleni_p95": 1074,
-    "kresleni_m_median": 1764.5
+    "troj_p95": 1476801,
+    "troj_max": 1521750,
+    "kresleni_p95": 1080,
+    "kresleni_m_median": 1759.0
    },
-   "zmena_median": 35.15,
+   "zmena_median": 35.34,
    "doskoky": [],
    "ve_zdi": 2
   },
