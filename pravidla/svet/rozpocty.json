@@ -151,5 +151,17 @@
   "bunka_m": 24.0,
   "dlouhy_dosah_m": 48.0,
   "_pozn": "23. 11. K10 (rozbor_gpu_15_11 Z7): buňky MultiMeshů rostlin (svet._plants, streamování svet.rostliny_*). bunka_m = byliny, podrost, stromy s impostorem nebo tvarem (krátký dosah: větší buňka se středem za koncem dosahu by schovala blízké kusy – viditelnost se měří ke středu buňky); dlouhy_dosah_m = kameny, balvany, skály, vzdálené LOD (Míša 0.66/0.67: 48 200 uzlů = pád). Hodnoty beze změny proti 0.9999992 (dřív BUNKA 24 a BUNKA × 2 v kódu); okraj načítání = dlouhy_dosah_m × 0,75 (dřív BUNKA × 1,5 = 36). Návrh rozboru (stromy 48, skály 96 + jedna úroveň viditelnosti na buňku přes visibility_parent) NEPROVEDEN: větší buňka stromů bez přestavby viditelnosti na skupinu = mizení blízkých stromů; cena ořezu na instanci je jen ODHAD (Z7) – nejdřív změřit kreslení CPU a počet objektů (panel) na tabletu. Návrat: nic (hodnoty = dřívější kód)."
+ },
+ "louka_sloty": {
+  "pocet": 0,
+  "kapacita_instanci": [
+   8192,
+   2048,
+   4096,
+   4096,
+   4096
+  ],
+  "odklad_snimku": 3,
+  "_pozn": "23. 11. K5 (rozbor_gpu_15_11 Z4 bod 2–4, Puchart: pevná zásoba připravených kusů): louka.gd _slot/_uvolni – MultiMeshe vrstev louky se po uvolnění buňky vracejí do zásoby (nejvýš pocet na vrstvu) a nová buňka přepíše data slotu (set_instance_*: Godot 4.4.1 gles3 mesh_storage.cpp nahraje jen změněné oblasti po 512 instancích glBufferSubData; MultiMesh.new() + instance_count = nový buffer glBufferData). kapacita_instanci = velikost nového slotu po vrstvách (0 trsy: plná buňka 32 m po 0,36 m ≈ 7 900; 1 květy, 2 drn, 3 vysoká tráva, 4 vějíř); buňka s víc trsy dostane slot své velikosti. odklad_snimku = slot vrácený v tomto snímku se vezme až za tolik snímků (GPU může buffer ještě číst; rada Qualcomm, trojí buffer). Platný počet trsů slotu = meta n (shader kreslí jen visible_instance_count ≤ n). pocet 0 = MultiMesh.new() jako dosud (výchozí: NEOVĚŘENO NA ZAŘÍZENÍ, na PC GPU tabletu změřit nejde); varianta měřicí trasy louka_sloty (mereni_trasa.json varianty_parametry) zapne zásobu za běhu – porovnat p95, nad30 a řádky špiček (louka B, kreslení) na úsecích louka/kůň proti vše. Přestavba úrovně doplněním (bod 3) a nahrávání jen do skrytých (bod 4: plnění už jde do skrytého uzlu) beze změny. Kupy (mm.buffer = celé nahrání) mimo zásobu. Návrat: pocet 0."
  }
 }

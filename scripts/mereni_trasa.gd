@@ -206,6 +206,10 @@ func _varianta(zap: bool) -> void:
 		if lp:
 			var pp: Dictionary = _par(v)
 			lp.nastav_puchart(zap, float(pp.get("krok_m", 0.5)), float(pp.get("od_m", 14.0)), float(pp.get("do_m", 60.0)))
+	elif v == "louka_sloty":                   # 23. 11. K5: zasoba MultiMeshu louky (varianty_parametry.louka_sloty.pocet)
+		var ls: Node = main.get_node_or_null("Louka")
+		if ls:
+			ls.nastav_sloty(int(_par(v).get("pocet", 48)) if zap else -1)
 	elif v == "stin_filtr_1":                  # 15. 11. bod 8: filtr stinu slunce (Compatibility: 2 = PCF 5, 1 = jeden vzorek)
 		var q0 := int(ProjectSettings.get_setting_with_override("rendering/lights_and_shadows/directional_shadow/soft_shadow_filter_quality"))
 		var q := int(_par(v).get("kvalita", 1)) if zap else q0
@@ -417,6 +421,8 @@ func _jm(v: String) -> String:
 		return "louka Puch"
 	if v == "louka_15_45":
 		return "louka 15/45"
+	if v == "louka_sloty":
+		return "louka sloty"
 	if v == "stin_filtr_1":
 		return "filtr st.1"
 	if v == "dohled_kratsi":

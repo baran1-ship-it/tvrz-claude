@@ -589,7 +589,7 @@ func _krok() -> void:
 			var c: Vector2i = sh["c"]
 			var stara: Dictionary = _bunky.get(c, {})
 			if stara.has("uzel"):
-				Planovac.zrus(stara["uzel"])              # prestavba na jinou uroven (skryt hned, uvolnit po castech)
+				_uvolni(stara["uzel"], true)              # prestavba na jinou uroven (skryt hned, uvolnit po castech)
 			if sb.has("uzel"):
 				(sb["uzel"] as Node3D).visible = true
 			sb["lvl"] = sh.get("lvl", 0)
@@ -662,7 +662,7 @@ func _krok() -> void:
 		var d := _vzdal_bunky(c, q)
 		if d > _dosah + UVOLNIT:
 			if b.has("uzel"):
-				Planovac.zrus(b["uzel"])
+				_uvolni(b["uzel"], true)
 			_bunky.erase(c)
 			continue
 		if (_snimek + c.x + c.y) % 4 == 0:
@@ -758,7 +758,7 @@ func _viditelne(c: Vector2i, b: Dictionary, q: Vector2, rozpocet := true) -> voi
 	for k in VRSTVY:
 		var mm: MultiMesh = b["mm"][k]
 		if mm:
-			_vid_nastav(mm, mini(_pocet(b["hash"][k], _podil(k, d, false)), mm.instance_count), rozpocet)
+			_vid_nastav(mm, mini(_pocet(b["hash"][k], _podil(k, d, false)), _n(mm)), rozpocet)
 	# vejir: pasma 0-25 m plne, 25-60 m na 25 %, 60-90 m pryc (radce 10:50) - podle nejblizsiho bodu ctvrtiny
 	for e: int in range((b.get("mm4", []) as Array).size()):
 		var mm: MultiMesh = b["mm4"][e][0]
@@ -768,7 +768,7 @@ func _viditelne(c: Vector2i, b: Dictionary, q: Vector2, rozpocet := true) -> voi
 		var dx := maxf(maxf(x0 - q.x, q.x - (x0 + BUNKA * 0.5)), 0.0)
 		var dz := maxf(maxf(z0 - q.y, q.y - (z0 + BUNKA * 0.5)), 0.0)
 		var dq := sqrt(dx * dx + dz * dz)
-		_vid_nastav(mm, mini(_pocet(b["hash4"][e], _podil(4, dq)), mm.instance_count), rozpocet)
+		_vid_nastav(mm, mini(_pocet(b["hash4"][e], _podil(4, dq)), _n(mm)), rozpocet)
 
 
 ## Kreslenych instanci MultiMeshe pro potrebu `need` (prvnich need podle hashe): nahoru na cele kvantum (instance navic
@@ -777,12 +777,12 @@ func _viditelne(c: Vector2i, b: Dictionary, q: Vector2, rozpocet := true) -> voi
 func _vid_nastav(mm: MultiMesh, need: int, rozpocet: bool) -> void:
 	var cur := mm.visible_instance_count
 	if cur < 0:
-		cur = mm.instance_count
+		cur = _n(mm)
 	if need <= 0:
 		if cur != 0:
 			mm.visible_instance_count = 0
 		return
-	var cil := mini(ceili(float(need) / _nah_kv) * _nah_kv, mm.instance_count)
+	var cil := mini(ceili(float(need) / _nah_kv) * _nah_kv, _n(mm))
 	if cil == cur:
 		return
 	if cil < cur:
@@ -840,7 +840,7 @@ func _nah_vejde(mm: MultiMesh, do_: int, prvni: bool) -> bool:
 func _nah_zvys(mm: MultiMesh, do_: int) -> void:
 	var cur := mm.visible_instance_count
 	if cur < 0:
-		cur = mm.instance_count
+		cur = _n(mm)
 	if do_ == cur:
 		return
 	if do_ > cur:
@@ -926,7 +926,7 @@ func _strop(q: Vector2, d: float) -> bool:
 			return false
 		var b: Dictionary = _bunky[nej]
 		if b.has("uzel"):
-			(b["uzel"] as Node).queue_free()
+			_uvolni(b["uzel"], false)
 		_bunky.erase(nej)
 	return true
 
@@ -1140,6 +1140,68 @@ const PLNIT := 400                     # davka instanci travy (radce 18:35); dav
 # cas stavby louky za snimek: rozpocty.json snimek.louka_us (drive const ROZPOCET_US 4 ms, 0.991: trava pri behu nestihala)
 
 
+## K5 (rozbor_gpu_15_11 Z4/Z7, Puchart „pevna zasoba pripravenych kusu“): kruh slotu MultiMeshu louky. Bunka si vezme
+## slot (MultiMesh s kapacitou rozpocty.json louka_sloty.kapacita_instanci podle vrstvy), prepise data (set_instance_*:
+## gles3 nahraje jen zmenene oblasti glBufferSubData, zadna nova alokace glBufferData) a pri uvolneni ho vrati; slot
+## uvolneny v tomto snimku se vezme az za odklad_snimku (GPU muze buffer jeste cist - implicitni cekani ovladace).
+## Platny pocet instanci slotu = meta "n" (kapacita muze byt vetsi; kresli se jen visible_instance_count <= n).
+## pocet 0 = MultiMesh.new() pro kazdou bunku jako drive (vychozi, NEOVERENO NA ZARIZENI - varianta trasy louka_sloty).
+var _sloty_cfg: Dictionary = Pravidla.cti("rozpocty", "louka_sloty")
+var sloty_pocet := int(_sloty_cfg["pocet"])
+var _sloty: Array = [[], [], [], [], []]   # po vrstvach [[MultiMesh, snimek uvolneni]]
+var sloty_novych := 0                       # pocitadla (diag, rozbor): nove MultiMeshe / vzate ze zasoby
+var sloty_vzatych := 0
+
+
+func _n(mm: MultiMesh) -> int:
+	return int(mm.get_meta("n", mm.instance_count))
+
+
+func _slot(k: int, n: int) -> MultiMesh:
+	if sloty_pocet > 0:
+		var fr: Array = _sloty[k]
+		for i in fr.size():
+			var e: Array = fr[i]
+			var m0: MultiMesh = e[0]
+			if m0.instance_count >= n and _snimek - int(e[1]) >= int(_sloty_cfg["odklad_snimku"]):
+				fr.remove_at(i)
+				m0.visible_instance_count = 0
+				m0.set_meta("n", n)
+				sloty_vzatych += 1
+				return m0
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_custom_data = true
+	mm.instance_count = maxi(n, int((_sloty_cfg["kapacita_instanci"] as Array)[k])) if sloty_pocet > 0 else n
+	mm.set_meta("n", n)
+	sloty_novych += 1
+	return mm
+
+
+## Uvolneni uzlu bunky: MultiMeshe vrstev zpet do zasoby (do louka_sloty.pocet na vrstvu), uzel pryc (planovac snimku
+## po castech nebo hned).
+func _uvolni(uzel: Node, planovac: bool) -> void:
+	if sloty_pocet > 0 and is_instance_valid(uzel):
+		for nd in uzel.find_children("*", "MultiMeshInstance3D", true, false):
+			var mmi := nd as MultiMeshInstance3D
+			if mmi.has_meta("slot_k") and mmi.multimesh:
+				var fr: Array = _sloty[int(mmi.get_meta("slot_k"))]
+				if fr.size() < sloty_pocet:
+					fr.append([mmi.multimesh, _snimek])
+				mmi.multimesh = null
+	if planovac:
+		Planovac.zrus(uzel)
+	elif is_instance_valid(uzel):
+		uzel.queue_free()
+
+
+## Varianta merici trasy louka_sloty: zasoba zapnuta (pocet z varianty) / vypnuta (z dat); zasoba se pri vypnuti vyprazdni.
+func nastav_sloty(pocet: int) -> void:
+	sloty_pocet = pocet if pocet >= 0 else int(_sloty_cfg["pocet"])
+	if sloty_pocet == 0:
+		_sloty = [[], [], [], [], []]
+
+
 ## Naplni nejvys n instanci rozestavenych MultiMeshu bunky; true = v tomto snimku se plnilo (dalsi krok stavby az priste).
 ## rozpocet: davka jen v rozpoctu bajtu snimku (jinak _nah_plno a false). visible_instance_count roste s naplnenym
 ## poctem (uzel bunky je skryty): ovladac nahraje do GPU jen nove davky v tomto snimku (14. 11., F4 - drive 0 az do
@@ -1152,7 +1214,7 @@ func _plnit(b: Dictionary, n: int, rozpocet := false) -> bool:
 	var mm: MultiMesh = e[0]
 	var buf: PackedFloat32Array = e[1]
 	var i0: int = e[2]
-	var i1 := mini(i0 + n, mm.instance_count)
+	var i1 := mini(i0 + n, _n(mm))
 	if rozpocet and not _nah_vejde(mm, i1, true):
 		_nah_plno = true
 		return false
@@ -1162,7 +1224,7 @@ func _plnit(b: Dictionary, n: int, rozpocet := false) -> bool:
 		mm.set_instance_custom_data(i, Color(buf[j + 12], buf[j + 13], buf[j + 14], buf[j + 15]))
 	e[2] = i1
 	_nah_zvys(mm, i1)
-	if i1 >= mm.instance_count:
+	if i1 >= _n(mm):
 		fr.pop_front()
 	return true
 
@@ -1184,11 +1246,8 @@ func _postav_cast(hot: Dictionary, b: Dictionary, krok: int) -> bool:
 	var yy: Vector2 = hot["y"]
 	var aabb := AABB(Vector3(-BUNKA * 0.5 - 1.5, -0.5, -BUNKA * 0.5 - 1.5), Vector3(BUNKA + 3.0, yy.y - yy.x + 2.5, BUNKA + 3.0))
 	var meshe := [_trs, _kvety[0], _drn, _vysoka, _vejir]
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_custom_data = true
+	var mm := _slot(k, n)                    # K5: ze zasoby slotu (louka_sloty.pocet > 0) nebo nova jako drive
 	mm.mesh = meshe[k]
-	mm.instance_count = n
 	# radce 18:35 (panel: spicky 60-84 ms "zbytek" pri nacteni bunky vysoke travy): buffer cele vrstvy najednou =
 	# nahrani do GPU v jednom snimku. Plni se po PLNIT instancich za snimek (_plnit); visible_instance_count roste
 	# s plnenim (14. 11.: pri 0 ovladac nenahral nic a celou bunku az pri odkryti), bunka je videt az naplnena.
@@ -1201,6 +1260,7 @@ func _postav_cast(hot: Dictionary, b: Dictionary, krok: int) -> bool:
 	mmi.multimesh = mm
 	mmi.custom_aabb = aabb
 	mmi.set_meta("diag_buf", [hot["buf%d" % k] if k < 4 else hot["buf4_%d" % qi], 16, [13, 14, 15]])   # K12: poloha v custom
+	mmi.set_meta("slot_k", k)
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mmi.visibility_range_end = float(_zanik[k][1]) + 30.0
 	(b["uzel"] as Node3D).add_child(mmi)

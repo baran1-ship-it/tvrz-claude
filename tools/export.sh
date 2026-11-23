@@ -56,6 +56,11 @@ fi
 # 16. 11. (zamrznuti 0.999999, textury +220 MB): obrazky dilu z Disku jednou podle md5 do spolecne slozky, rozbalene kopie
 # pryc; i v --jen-po (prevod hotovych dilu), v plnem exportu uz nic nemeni. Import je az po predpeceni potoka (krok 8 nize).
 krok 17 "sdilene textury dilu (Misa 16. 11., kvalita.json textury_dilu)" python3 tools/textury_predmetu.py dily
+# plan 18. 11. A2 (duplicity rostlin 49-54 MB ve VRAM): obrazky glb rostlin jednou podle md5 do kvalita.json textury_rostlin
+# (podslozka podle limitu importu), rozbalene kopie pryc; plan C14: citlive site bez automatickych LOD (pravidla/lod_import.json)
+# - oboje pred importem nize (rc 17 / 19)
+krok 17 "sdilene textury rostlin (plan 18. 11. A2, kvalita.json textury_rostlin)" python3 tools/textury_predmetu.py rostliny
+krok 19 "citlive site bez LOD importu (plan 18. 11. C14, pravidla/lod_import.json)" python3 tools/lod_import.py zapis
 krok 4 "test smyslu po exportu (build/beh/smysl_po.log)" bash -c "/opt/bl/bin/python tools/test_smyslu.py --po > build/beh/smysl_po.log 2>&1"
 krok 9 "protokol stavby terenu (build/beh/protokol_blender.log)" bash -c "/opt/bl/bin/python tools/protokol_blender.py > build/beh/protokol_blender.log 2>&1"
 if ! python3 tools/export_kontroly.py reka; then

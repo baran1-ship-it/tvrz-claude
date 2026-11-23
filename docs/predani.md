@@ -1693,3 +1693,30 @@ Hotovo v kódu a datech (testy u každého):
   uzel `Mlha_vody`; měřicí trasa varianta `bez_mlhy_vody`. NEOVĚŘENO NA ZAŘÍZENÍ.
 - **Poučení (pád běhu):** foto před změnou spadlo na kontrole skriptu (`Pravidla` bez `const Pravidla := preload(...)` ve skriptu
   bez autoloadu) a pak na typu argumentu (svet.gd je RefCounted) – nový skript se statickou funkcí: preload Pravidla a typ RefCounted.
+
+## Plán 18. 11. B5, A2, C14 – sady postav, sdílené textury, citlivé sítě bez LOD importu (pomocník 23. 11.)
+- **B5 sady postav (misa_17_11 ř. 10, misa_15_11 ř. 3):** 15 sad (anežka … petr) mělo `.gltf` z 15. 11. 10:28 a `.bin`
+  z 15:58 → `.import valid=false`, hra brala starý balík z_postavy (0.999998, nesvařené oděvy = díry na hrudníku).
+  Přestavěno `tools/postavy_q/sestav.sh <15 sad>` (zdroje z větve assets, 438 MB v Q_WORK, po běhu smazat): všech 15 `SVY CELKEM 0`,
+  `.gltf` a `.bin` z jednoho běhu, `postavy_vzhled.json troj` přepsán (7 048–7 212). **cv2 v /opt/bl není** (instalace tam
+  zamítnuta): `/opt/bl/bin/python -m pip install --no-deps --target <scratch>/cv2pkg opencv-python-headless` a obal
+  `Q_PY=<scratch>/qpy.sh` (`[ "$1" = -I ] && shift; PYTHONPATH=<scratch>/cv2pkg exec /opt/bl/bin/python "$@"` – `-I` by PYTHONPATH
+  ignoroval). Po stavbě z `.import` sad smazat řádek `valid=false` a `.md5`, `touch` `.gltf`, `--import` (`build/beh/b5_po.sh`).
+- **A2 kovárna:** glb z Disku (`kovarna.zip` → `modely/kovarna/kovarna.glb`, `kovarna_lod1.glb`), `kvalita.json textury_dilu.slozky_dilu`
+  + `modely/kovarna`, `textury_predmetu.py dily`: 69 vložených obrázků → 9 nových v `dily_tex` (zbytek sdílený s krčmou), 69 rozbalených
+  kopií pryč. Vydat `--jen z_kovarna` (vydani přibalí `dily_tex`).
+- **A2 rostliny:** `kvalita.json textury_rostlin` + `tools/textury_predmetu.py rostliny` (krok 17 `export.sh` za `fi`, i v `--jen-po`):
+  obrázky glb rostlin jednou podle md5 do `modely/rostliny_tex/<limit>/` (limit z `limity_textur.limit()` pro glb – stromy a skály 1024,
+  jinak 512; `limity_textur.py` a `textury_tablet.py` čtou limit z podsložky). Složka je mimo `modely/rostliny` (export ji maže).
+  `vydani.py --jen z_rostliny` přibalí závislosti glb. `limity_textur.py` má hlavní smyčku pod `if __name__` (importuje se jako modul).
+- **A2 staré předměty (66,6 MB duplicit, 149 předmětů):** glb v kontejneru nejsou (jen `.import` + import z balíků) – převod jen po
+  přestavbě `blender/predmety.py build <id…>` (Poly Haven fetch) a nových balících `p_<id>`. NEPROVEDENO.
+- **C14 citlivé sítě bez automatických LOD:** `pravidla/lod_import.json` (skupiny hladiny `voda_*`, terén `zem` Teren*/Nadvori,
+  střední stupně z Blenderu `domy_stredni.glb` a `predmety/*_stredni.glb`, oděvy NPC `*_cela.gltf`, plůtky) → `tools/lod_import.py zapis`
+  píše do `.import` celý soubor `meshes/generate_lods=false` nebo `_subresources.meshes.<soubor>_<síť>.generate/lods = 2` (Disable;
+  jméno sítě = Godot 4.4 `gltf_document.cpp _parse_meshes`: `<jméno souboru bez přípony>_<jméno sítě glTF>`). Krok 19 `export.sh`,
+  `kontrola` (rc 1) a ověření ve hře `tools/lod_import_over.gd` (xvfb, počet LOD úrovní citlivých sítí = 0). Staré `lod_bias` (teren_lod_bias,
+  ves_domy_lod, predmety_lod, odev_lod_bias, plutek_lod_bias) a `svet._vody_bez_lod` zůstávají jako pojistka – po ověření na tabletu
+  zvážit odstranění (nemají už co dělat). Vlastní LOD citlivých sítí = stupně z Blenderu (`_Stredni`, `_Daleko`, `lod1`) a dlaždice terénu.
+- **Pozor na běžící skript:** `export.sh` se čte průběžně a celý `if … fi` je načtený najednou → za běhu exportu nic nevkládat
+  PŘED aktuální místo (posun bajtů rozbije běžící export); nové kroky jen za `fi`, nebo až po doběhnutí.
