@@ -189,3 +189,20 @@ vlhko, špína, stékance, mech k severu v barvě vrcholů, 4 varianty podle nat
 (blender/stromy_lod_kmen.py, 172,7 → 80,1 tis. troj.), les x 136,9 z 155,9: 2,005 → 1,929 M (sever), 1,796 → 1,646 M (východ)
 (424). B3: `nastroje/foto_tri_svetla.sh "x,z,y,cx,cz,cy" prefix [hodiny]` – jeden start, snímky ráno/poledne/soumrak/noc
 s loučí v ruce (hlavni.gd PUCHART_FOTO_CASY), 4 snímky ~1,5 min. Mosty a lávky (blender/voda.py) nekontrolovány – soubor krajiny.
+
+**Stav 23. 11. odpoledne – krajina (E2, H4, E4, C2, C3, C5, C6; PC, tablet NEOVERENO).** PC troj. ve Míšiných polohách
+(nastroje měření mer_troj, 500 snímků ustálení): x 131,4 z 276,4 sever 1,586 → 1,744 M, x 146,7 z 311 směr 273° 1,321 → 1,411 M
+(nárůst hlavně keře E4: těžší modely liska_3, hloh_3, trnka_3, šípek 2–3 a nové zmlazení; rozpočet 2,1 M drží).
+- E2: zem.gdshader porost_dal_* (louka.json porost_dalka): od 110–190 m trsy 9/4,3 m, tmavé skvrny 23 m, světlá místa, barevný
+  šum – 0 vzorkovačů, +5 čtení šumu. Na PC v protisvětle (směr 267–273°) kopec 150–250 m pořád spíš tmavý a klidný (ACES + kontrast
+  stlačí tmavé rozdíly) – docs/screens/kontrola_23_11_e2_273.jpg; ověřit na tabletu za světla od zad.
+- H4: černé skvrny = skalní výchozy (skaly.glb, skala.gdshader) – fotka droby průměr 0,088 → ve stínu 0,0,0; pudy.json skala_vychozy
+  albedo_cil 0,45 (chyby.md 425, smysl:skaly_bez_cerne, docs/screens/kontrola_23_11_h4_svah.jpg).
+- E4: každý druh ≥ 3 modely (smysl:tri_modely_druhu) – z knihovny Havrana modely/nove + vrba_ker_3 z rostliny_u_vody.py; mladé
+  stromy: buk, jedle + dub, olše, lípa podle stanoviště. Výjimka padlé stromy (2 modely, e4_vyjimky, varování) – třetí CC0 padlý kmen
+  střední Evropy není, kmen_* Havrana jsou pokácené klády (Míša 13. 11.) → vývrat z blender/havran/strom2.py NEUDĚLÁNO.
+- C2: louka.json kraj_cesty – krajnice po úsecích ~7 m: holá hlína s kameny / tráva / květy (louka.gd + byliny.gd stejný šum).
+- C3: byliny.json voda_pas.pasmo – kameny u čáry vody, tráva za nimi, pak keře břehu (vrba_ker 1–3, olše zmlazení); stromy první řady
+  dělá les (stromy.bin) – beze změny (jiný pomocník).
+- C6: stebla.gdshader ohyb_hrac (louka.json ohyb) – jemné trsy se odkloní od nohou do 0,9 m. Trava_sada bylin (bylina.gdshader) ne.
+- C5: zem.gdshader mraky_stin – putující stíny mraků od 60–140 m, ze šumu (vzorkovačů 9), bez vazby na zatažení (NEOVERENO).
