@@ -1741,11 +1741,19 @@ Hotovo v kódu a datech (testy u každého):
   `_teren_pod_vraty` a v buňkách vrat (46, 94), (47, 94) měnil terén o 0,03–0,11 m (výška cest z původních trojúhelníků).
   Oprava pořadím podle kontraktu (cesty krok 3 před vraty krok 4): `_teren_pod_vraty` až po `_cesty_tvar`
   (`pasma.test.poradi_terenu` upraveno), přestavba sítě s vlastními kanály cest jako `_koryta_naposled` (SurfaceTool by
-  CUSTOM0/1 zahodil). Ověření: běh t_e3a.
+  CUSTOM0/1 zahodil) – ověření t_e3a: pořád −0,17. **Skutečná příčina (rozbor dat):** spodek 4,79 = výška z exportu,
+  povrch hry 4,96–5,09 (hra terén u vrat zvedla) a `_teren_pod_vraty` křídlo jen SPOUŠTĚL, nikdy nezvedl (a výšku bral
+  z mediánu vrcholů 2 m, ne z povrchu). Oprava: spodek křídla = nejnižší povrch sítě (trojúhelníky) v 5 bodech pod křídlem
+  + 2 cm obema směry, terén se dál nezvedá; křídlo z víc sítí (`svet.kridlo_aabb`, i `pohyb.na_zem`). `vratka` OK
+  (t_e3z, t_e3w: 23 křídel, vše +0,02). Pořadí cesty → vrata ponecháno (kontrakt). `zamek_terenu` padal od 17. 11.
+  („_svy_terenu mimo seznam“ – `_lem_normaly` mění jen normály lemu) → krok zařazen do `poradi_terenu`, OK.
 - **`steny` 22 paprsků – test opraven, ne svět**: kuchyně tvrze (misa_28 ř. 66, 9. 11.) má před zdí z = −14 ohniště
   s kapucí a komínem (`Kolize` z exportu, kotlík `nabytek.json`), v komnatě nábytek – paprsek trefil překážku 0,9–1,94 m
   před zdí. Test ověřuje, že ZEĎ má kolizi (tapiserie, louč): paprsek teď za překážkou pokračuje (nejvýš 4), překážka se
-  vypíše `STENY prekazka`; chybějící zeď dál = CHYBA.
+  vypíše `STENY prekazka`; chybějící zeď dál = CHYBA. Komín za kapucí je plný (paprsek zevnitř ho trefí znovu) → krok
+  0,25 m, nejvýš 8. `steny` OK (bez zdi 0).
+- **Mezipaměť stavby (E3) a souběh (E5)**: viz plan_18_11 E (stavba 157 → 94 s; testy + foto naráz podle paměti).
+  Při podezření na stará data `TVRZ_BEZ_CACHE=1`; soubory `~/.local/share/godot/app_userdata/Odkaz Havrana/cache`.
 - **`lide_zasek` planý poplach – potvrzen**: tři stejné běhy s rozpočtem v 18:01 naměřily 49,6 / 9,7 ms (6:01: 7,8 / 11,3 /
   12,5) – rozdíl = přerušení procesu (Blender export, druhý Godot), ne skript. Test měří nejlepší z
   `postavy.json graf.mrizka.test_opakovani` (3) běhů; skutečný zásek skriptu je ve všech. Vyřazen z `nevydavat_neblokuje`.

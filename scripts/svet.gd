@@ -9410,6 +9410,9 @@ func _zamek_terenu(parent: Node3D) -> void:
 		ulozit[key] = ys
 	if cs != "":
 		DirAccess.make_dir_recursive_absolute("user://cache")
+		for stary in DirAccess.get_files_at("user://cache"):         # E3: starsi klice pryc (disk)
+			if stary.begins_with("vysky_") and stary != cs.get_file():
+				DirAccess.remove_absolute("user://cache".path_join(stary))
 		var f2 := FileAccess.open(cs, FileAccess.WRITE)
 		if f2:
 			f2.store_var(ulozit)
