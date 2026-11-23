@@ -93,6 +93,9 @@ for ti, t in enumerate(toky):
 # síť podél osy po krok_podel_m × body_napric, výšky ze skutečného terénu (vysek.r16 = DMR 1 m s korytem) + nad_m;
 # kusy po kus_m (ořez pohledem); ve hře materiál terénu, terén dlaždic je pod pásem snížen (teren_dlazdice.py)
 JP = VH["koryto"]["jemny_pas"]; BR = []; BRD = VH["koryto"].get("brod", {}); VZ = VH.get("vzhled_13_11", {})
+_JM = None   # jemné buňky terénu (nastroje/teren_dlazdice.py): pod nimi je síť dlaždic snížená – pás BREH je musí krýt
+if os.path.exists(os.path.join(K, "build/teren_jemne.npz")):
+    _jz = np.load(os.path.join(K, "build/teren_jemne.npz")); _JM = np.unpackbits(_jz["m"])[:int(np.prod(_jz["tvar"]))].reshape(_jz["tvar"]).astype(bool)
 # KAMENY, KTERÉ LÁMOU HLADINU (návrh krok 4; misa_real_01): z nastroje/koryto_kameny.py (běží před voda.py) – kámen s vrchem nad
 # hladinou − pena_kamen_pod_hladinou_m a patou pod hladinou; pěna do barvy vrcholu hladiny R = 1 − pěna (Schreibt: vzdálenost
 # k překážce, protažená po proudu). Bez kamenů (první stavba) hladina bez pěny u kamenů.
@@ -146,11 +149,37 @@ for ti, t in enumerate(toky):
     o = o[sel_]; x, z = o[:, 0], o[:, 1]
     d = np.gradient(np.c_[x, z], axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-9; n = np.c_[-d[:, 1], d[:, 0]]
     wbr, rbr, n = _brod_rady({k_: (np.array(v_)[sel_].tolist() if k_ in ("brod_vaha", "brod_breh_m") else v_) for k_, v_ in TH[str(ti)].items()}, x, z, n)
-    fmax_ = JP["body_napric"][-1]
-    def _off(i):   # body napříč v řadě i: násobky (kraj vody + práh), pak metry břehu; v brodu rozlitá voda a pás až na konec nájezdu
-        pw_i = pw + (w / 2) * (BRD.get("rozliti_sirky", 1.0) - 1) * wbr[i]; bm_i = max(VH["koryto"]["breh_m"], rbr[i] - pw_i)
-        of_ = [f * pw_i if f <= 1.0 else pw_i + (f - 1.0) / (fmax_ - 1.0) * bm_i for f in JP["body_napric"]]
-        return sorted(set([-v_ for v_ in of_] + of_))
+    fmax_ = JP["body_napric"][-1]; FV_ = [f for f in JP["body_napric"] if f <= 1.0]; FB_ = [(f - 1.0) / (fmax_ - 1.0) for f in JP["body_napric"] if f > 1.0]
+    pw_r = np.array([pw + (w / 2) * (BRD.get("rozliti_sirky", 1.0) - 1) * wbr[i] for i in range(len(x))])
+    bm_r = np.maximum(VH["koryto"]["breh_m"], rbr - pw_r); bm0_r = bm_r.copy()   # bm0 = původní pás (hladina jen do něj)
+    # OSTRÉ HRANY BRODU (Míša 23. 11., misa_23_11_brod.jpg): v náběhu brodu končil pás dřív než maska jemných buněk
+    # (pod ní je síť dlaždic snížená) a vnější body byly po 4–5 m – síť 2 m vyčuhovala zubatě (schody podle buněk masky).
+    # Pás teď sahá za poslední jemnou buňku o JP okraj_za_maskou_m (prstenec snížené sítě 2 m + rezerva), po řadách
+    # vyhlazeno klouzavým maximem, a body břehu jsou nejvýš po JP krok_brehu_m (v brodu).
+    if _JM is not None:
+        aa_ = np.arange(0.0, JP.get("maska_hledat_m", 30.0), 0.5); ext_ = np.zeros(len(x))
+        for i in range(len(x)):
+            for sg_ in (1, -1):
+                cc_ = np.round(x[i] + sg_ * n[i, 0] * aa_ - X0).astype(int); rr_ = np.round(z[i] + sg_ * n[i, 1] * aa_ - Z0).astype(int)
+                ok_ = (cc_ >= 0) & (rr_ >= 0) & (cc_ < _JM.shape[1]) & (rr_ < _JM.shape[0])
+                hit_ = np.zeros(len(aa_), bool); hit_[ok_] = _JM[rr_[ok_], cc_[ok_]]
+                hi_ = np.nonzero(hit_)[0]   # souvislý úsek od osy (mezera nejvýš 2 m – ne maska jiného toku za ní)
+                if len(hi_) == 0 or aa_[hi_[0]] > 3.0: continue
+                br_ = np.nonzero(np.diff(aa_[hi_]) > 2.0)[0]; ext_[i] = max(ext_[i], float(aa_[hi_[br_[0]] if len(br_) else hi_[-1]]))
+        ext_ = np.where(ext_ > 0, ext_ + JP.get("okraj_za_maskou_m", 3.0), 0.0)
+        from scipy.ndimage import maximum_filter1d as _mf1
+        ext_ = _mf1(ext_, size=2 * JP.get("maska_rady_okoli", 3) + 1, mode="nearest")
+        u_brodu_ = _mf1((wbr > 0).astype(np.uint8), size=2 * JP.get("brod_rady_okoli", 10) + 1, mode="nearest") > 0
+        bm_r = np.where(u_brodu_, np.maximum(bm_r, ext_ - pw_r), bm_r)   # brod a řady kolem (náběh s váhou 0); běžné koryto beze změny (výkon)
+    roz_ = (bm_r - bm0_r) >= 0.5   # řady s rozšířeným pásem (u brodu)
+    NB_ = max(len(FB_), int(math.ceil(float(bm_r[roz_].max()) / JP.get("krok_brehu_m", 1.0)))) if roz_.any() else len(FB_)
+    def _fb(i, hust_):   # podíly metrů břehu v řadě i: rozšířená řada po ≤ krok_brehu_m, jinak FB_; v hustém kusu FB_ doplněné
+        # opakováním posledního bodu na NB_ (stejný počet bodů v řadě v celém kusu; šev k řídkému kusu má tytéž polohy – bez trhlin)
+        if not hust_: return FB_
+        return [j_ / NB_ for j_ in range(1, NB_ + 1)] if roz_[i] else FB_ + [FB_[-1]] * (NB_ - len(FB_))
+    def _off(i, hust_):   # body napříč v řadě i: násobky (kraj vody + práh), pak podíly metrů břehu; v brodu rozlitá voda a pás až za masku
+        of_ = [f * pw_r[i] for f in FV_] + [pw_r[i] + f * bm_r[i] for f in _fb(i, hust_)]
+        return [-v_ for v_ in reversed(of_[1:])] + of_   # FV_[0] = 0 (osa); opakované body zůstanou (degenerované trojúhelníky)
     s_ = np.r_[0, np.cumsum(np.hypot(np.diff(x), np.diff(z)))]
     kus = np.floor(s_ / JP["kus_m"]).astype(int)
     hl_o = o[:, 2]
@@ -160,8 +189,10 @@ for ti, t in enumerate(toky):
         idx = np.r_[idx, idx[-1] + 1] if idx[-1] + 1 < len(x) else idx
         if len(idx) < 2: continue
         Pk = Part("BREH_%d_%d" % (ti, k)); V_ = []; F_ = []; C_ = []
+        fb_k = bool(roz_[idx].any())   # hustý kus (všechny řady NB_ bodů břehu)
+        OF_ = [_off(i, fb_k) for i in idx]
         for i in idx:
-            for ov in _off(i):
+            for ov in _off(i, fb_k):
                 px_, pz_ = x[i] + n[i, 0] * ov, z[i] + n[i, 1] * ov
                 V_.append((px_, ter(px_, pz_) + JP["nad_m"], pz_))
                 # MOKRO (návrh krok 3, docs/reference/potoky/README_jak_se_stavi.md): A = sucho – 0,5 na čáře vody, k 1 do mokry_pas_m
@@ -169,8 +200,9 @@ for ti, t in enumerate(toky):
                 # tmavší a sytější: kcd1_oficial_potok_valouny); zem.gdshader větev mokro
                 dh_ = V_[-1][1] - JP["nad_m"] - hl_o[i]
                 a_ = 0.5 + 0.5 * min(1.0, dh_ / VZ.get("mokry_pas_m", 0.3)) if dh_ >= 0 else 0.5 - 0.5 * min(1.0, -dh_ / VZ.get("dno_tmave_m", 0.3))
+                if abs(ov) > pw_r[i] + bm0_r[i] + 1e-3: a_ = 1.0   # rozšíření za původní pás: suchý terén jako síť dlaždic pod ním
                 C_.append((1.0, 1.0, 1.0, a_))
-        m_ = len(_off(idx[0]))
+        m_ = len(_off(idx[0], fb_k))
         for a in range(len(idx) - 1):   # trojúhelníky výslovně (stejná úhlopříčka jako hladina)
             for b in range(m_ - 1):
                 i0 = a * m_ + b; F_ += [(i0, i0 + 1, i0 + m_ + 1), (i0, i0 + m_ + 1, i0 + m_)]
@@ -184,12 +216,14 @@ for ti, t in enumerate(toky):
             if (aa, bb) not in vm_:
                 q_ = V_[aa * m_ + bb]; hq_ = hlr[idx[aa]] - q_[1]
                 vm_[(aa, bb)] = len(VW); VW.append((q_[0], hlr[idx[aa]], q_[2]))
-                CW.append((1.0, 1.0, 1.0, 1.0 if hq_ > 0 and 0 < bb < m_ - 1 else 0.0))
+                uv_ = abs(OF_[aa][bb]) < pw_r[idx[aa]] + bm0_r[idx[aa]] - 1e-3   # na hranici původního pásu průhledný kraj (23. 11.)
+                CW.append((1.0, 1.0, 1.0, 1.0 if hq_ > 0 and 0 < bb < m_ - 1 and uv_ else 0.0))
             return vm_[(aa, bb)]
         for a in range(len(idx) - 1):
             for bi in range(m_ - 1):
                 q = [(a, bi), (a, bi + 1), (a + 1, bi + 1), (a + 1, bi)]
-                hq = [max(0.0, hlr[idx[aa]] - V_[aa * m_ + bb][1]) for aa, bb in q]
+                # hladina jen v původním pásu (rozšířený pás leží i na úvozu cesty pod hladinou – 23. 11. by ho zatopil)
+                hq = [max(0.0, hlr[idx[aa]] - V_[aa * m_ + bb][1]) if abs(OF_[aa][bb]) <= pw_r[idx[aa]] + bm0_r[idx[aa]] + 1e-3 else 0.0 for aa, bb in q]
                 if max(hq) <= 0.0: continue   # celý čtverec nad vodou
                 ix_ = [_vw(aa, bb) for aa, bb in q]
                 for kk_ in ((0, 1, 2), (0, 2, 3)):

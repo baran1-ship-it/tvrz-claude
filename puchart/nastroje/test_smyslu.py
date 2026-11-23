@@ -117,7 +117,7 @@ def _glb_voda(f):
         if not m["name"].startswith("VODA_") or m["name"].startswith("VODA_DALEKO"): continue
         pr = m["primitives"][0]; at = pr["attributes"]
         yield acc(at["POSITION"]), (acc(at["COLOR_0"]) if "COLOR_0" in at else None), acc(at["TEXCOORD_0"]), acc(pr["indices"]).astype(int).ravel()
-_tvrde = 0; _bez_barvy = 0; _mel = 0; _kusu = 0
+_tvrde = 0; _bez_barvy = 0; _mel = 0; _kusu = 0; _HR_ = {}; _KR_ = {}
 _OSA_ = np.vstack([np.array(t["osa"])[:, :2] for t in TH.values()]); _TG_ = np.vstack([np.gradient(np.array(t["osa"])[:, :2], axis=0) for t in TH.values()])
 _TG_ /= np.linalg.norm(_TG_, axis=1, keepdims=True) + 1e-9; _KO_ = cKDTree(_OSA_)
 _KE_ = cKDTree(np.array([np.array(t["osa"])[e, :2] for t in TH.values() for e in (0, -1)]))
@@ -133,7 +133,12 @@ if os.path.exists(K + "/hra/modely/voda.glb"):
         tg_ = _TG_[_KO_.query((P_[ok_[:, 0]][:, [0, 2]] + P_[ok_[:, 1]][:, [0, 2]]) / 2)[1]]
         podel_ = np.abs((d_ * tg_).sum(1)) > 0.5   # hrana podél toku = kraj vody (napříč = šev mezi kusy po kus_m)
         podel_ &= _KE_.query((P_[ok_[:, 0]][:, [0, 2]] + P_[ok_[:, 1]][:, [0, 2]]) / 2)[0] > KC["voda"]["soutok_m"]   # konec toku (soutok, kraj výseku): přítok končí ve vodě hlavního toku
-        _tvrde += int((podel_ & (a_[ok_[:, 0]] > 0.01) & (a_[ok_[:, 1]] > 0.01)).sum())
+        _tv_ = podel_ & (a_[ok_[:, 0]] > 0.01) & (a_[ok_[:, 1]] > 0.01)
+        for _e in np.nonzero(_tv_)[0]:   # šev se sousedním kusem (tatáž hrana v jiném kusu) není kraj vody – v ostrém oblouku
+            # (brod 95/−422, 23. 11.) má nejbližší bod osy jiný směr a šev napříč vypadal jako hrana podél toku
+            _kl = tuple(sorted([tuple(P_[ok_[_e, 0]].round(3)), tuple(P_[ok_[_e, 1]].round(3))])); _HR_.setdefault(_kl, []).append(_kusu)
+        for _q0, _q1 in ok_: _KR_.setdefault(tuple(sorted([tuple(P_[_q0].round(3)), tuple(P_[_q1].round(3))])), set()).add(_kusu)
+_tvrde = sum(1 for _kl, _ks in _HR_.items() if len(_KR_.get(_kl, set())) < 2)
 TEST("voda_bez_hrany", _kusu > 0 and _tvrde == 0 and _bez_barvy == 0 and _mel == 0,
      "kusů hladiny %d, bez barvy vrcholu %d, tvrdých hran na kraji %d, krytí bez vody %d" % (_kusu, _bez_barvy, _tvrde, _mel))
 # porost až k vodě (Míša 13. 11.: „hlavně ty břehy a přechod vody a hlíny plus vegetace“; misa_real_01/04): břeh u vody není
@@ -1875,6 +1880,50 @@ import re as _re23
 _vz23 = len(_re23.findall(r"^uniform\s+sampler", _ze23, _re23.M))
 TEST("ohyb_travy_hrac", "ohyb_hrac" in _st23 and "ohyb_hrac" in _lg23 and _L23.get("ohyb", {}).get("polomer_m", 0) > 0, "louka.json ohyb %s" % _L23.get("ohyb", {}).get("polomer_m"))
 TEST("mraky_stin_vzorkovace", "mraky_stin" in _ze23 and _po23.get("mraky_stin", [0])[0] > 0 and _vz23 <= 13, "zem.gdshader vzorkovačů %d (≤ 13), mraky %s" % (_vz23, _po23.get("mraky_stin")))
+
+# hrany brodu (Míša 23. 11., misa_23_11_brod.jpg: „hrany brodu jsou ostré“): v náběhu brodu končil pás BREH (blender/voda.py) dřív
+# než jemné buňky, pod nimiž je síť dlaždic snížená (teren_dlazdice.py) – síť 2 m vyčuhovala zubatě. Do 10 m od středu brodu musí body
+# pásu krýt jemné buňky i prstenec 2 m snížené sítě. Mez 12 %: dvojitý brod v meandru Veličky (237/802, 250/809) má uvnitř oblouku
+# 5–11 % nekrytých buněk (kolmice řad se tam nesejdou) – zbývá, chyby.md 426.
+from scipy.ndimage import binary_dilation as _bd30
+import glb_sit as _gs   # _gs je výš přepsané seznamem; _glb_svet čte modul
+_c30 = []; _VY30 = json.load(open(K + "/hra/data/vysek.json"))
+_jz30 = np.load(K + "/build/teren_jemne.npz") if os.path.exists(K + "/build/teren_jemne.npz") else None
+if _jz30 is None: _c30.append("chybí build/teren_jemne.npz")
+else:
+    _JM30 = np.unpackbits(_jz30["m"])[:int(np.prod(_jz30["tvar"]))].reshape(_jz30["tvar"]).astype(bool)
+    _kr30 = np.zeros(_JM30.shape, bool)
+    for _jm, _mt, _T in _glb_svet(K + "/hra/modely/voda.glb")[0]:
+        if not _jm.startswith("BREH") or not len(_T): continue
+        _V = _T.reshape(-1, 3); _cc = np.round(_V[:, 0] - _VY30["x0_hra"]).astype(int); _rr = np.round(_V[:, 2] - _VY30["z0_hra"]).astype(int)
+        _ok = (_cc >= 0) & (_rr >= 0) & (_cc < _JM30.shape[1]) & (_rr < _JM30.shape[0]); _kr30[_rr[_ok], _cc[_ok]] = True
+    _kr30 = _bd30(_kr30, iterations=1)   # body pásu po ≤ 1 m: buňka krytá, když je bod v ní nebo v sousední
+    _cel30 = 0; _nek30 = 0; _nej30 = []; _hor30 = []
+    _R30 = _bd30(_JM30, iterations=2)    # maska + prstenec snížené sítě 2 m (teren_dlazdice.py mkd); u brodu ± 10 m (rozšíření pásu)
+    for _tk, _tt in json.load(open(K + "/hra/data/toky_hladina.json"))["toky"].items():
+        for _b in _tt.get("brody_tvar", []):
+            _c0 = int(round(_b["stred"][0] - _VY30["x0_hra"])); _r0 = int(round(_b["stred"][1] - _VY30["z0_hra"])); _rad = 10
+            _sl = (slice(max(0, _r0 - _rad), _r0 + _rad + 1), slice(max(0, _c0 - _rad), _c0 + _rad + 1))
+            _m = _R30[_sl]
+            _n = int(_m.sum()); _k = int((_m & ~_kr30[_sl]).sum()); _cel30 += _n; _nek30 += _k
+            if _n and _k / _n > 0.02: _hor30.append(("brod %s: %d/%d" % (_b["stred"], _k, _n)))
+            if _n and _k / _n > 0.12: _nej30.append("brod %s: %d/%d buněk bez pásu" % (_b["stred"], _k, _n))
+    if _nej30: _c30 += _nej30
+TEST("brod_pas_kryje", not _c30, "; ".join(_c30[:6]) if _c30 else "jemné buňky + prstenec 2 m u brodů kryté pásem BREH: nekryto %d z %d (nad 2 %%, mez 12 %%: %s)" % (_nek30, _cel30, "; ".join(_hor30) or "žádný"))
+
+# cimbuří (Míša 23. 11., misa_23_11_cimburi_1/2.jpg: „moc se mi to nezdá ty hradbičky, nešlo by to ještě jinak?“): stínky z tenkých
+# nestejných vrstev lomové droby/břidlice (vrstva ≤ 0,15 m s rozptylem), líc nerovný, 2+ krycí desky; kamenivo.py hodnoty čte
+_c31 = []; _st31 = json.load(open(K + "/pravidla/svet/hrad_vzhled.json"))["kameny_lod0"]["stinka"]
+_sh31 = json.load(open(K + "/hra/data/hrad_vzhled.json"))["kameny_lod0"]["stinka"]
+if float(_st31.get("vrstva_m", 1)) > 0.15: _c31.append("vrstva_m %.2f > 0,15 (bloky místo vrstev)" % float(_st31.get("vrstva_m", 1)))
+_vr31 = _st31.get("vrstva_rozptyl", [1, 1])
+if _vr31[1] - _vr31[0] < 0.5: _c31.append("vrstva_rozptyl %s – vrstvy stejně vysoké" % _vr31)
+if _st31.get("kryci_desek", [1])[0] < 2: _c31.append("kryci_desek %s < 2" % _st31.get("kryci_desek"))
+_kv31 = open(K + "/blender/kamenivo.py").read()
+for _k31 in ("vrstva_rozptyl", "lic_rozptyl_m", "natoceni_st", "kryci_desek"):
+    if '"%s"' % _k31 not in _kv31: _c31.append("kamenivo.py nečte %s" % _k31)
+if _st31 != _sh31: _c31.append("hra/data/hrad_vzhled.json kameny_lod0.stinka ≠ pravidla")
+TEST("cimburi_vrstvy", not _c31, "; ".join(_c31) if _c31 else "stínky: vrstva %.2f m × %s, krycí desky %s" % (_st31["vrstva_m"], _vr31, _st31["kryci_desek"]))
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)

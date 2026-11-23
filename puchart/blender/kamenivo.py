@@ -128,18 +128,18 @@ def stinka(base, d, n, tl, h, L, sklon=0.0):
     bz = _baze(d, n, sklon); dd = bz.col[0]; nn = bz.col[2]; up = bz.col[1]
     hc = rg.uniform(*C["kryci_deska_m"]); hb = h - 0.02   # krycí deska leží na zubu: vrch o 6–10 cm nad kvádrem zubu (těsněji – stín kvádru pod deskou dělal pruhy)
     nr = max(C["rad"][0], min(C["rad"][1], round(hb / C["vrstva_m"])))
-    vy = [rg.uniform(0.8, 1.2) for _ in range(nr)]; s_ = sum(vy); vy = [v * hb / s_ for v in vy]
+    rv_ = C.get("vrstva_rozptyl", [0.8, 1.2]); vy = [rg.uniform(*rv_) for _ in range(nr)]; s_ = sum(vy); vy = [v * hb / s_ for v in vy]
     sp = C["spara_m"]; y = 0.0
     for j, hv in enumerate(vy):
         for x0, x1 in _delky(L, rg, C["kamen_delka_m"][0], C["kamen_delka_m"][1], j % 2 == 1):
             v_ = rg.uniform(*C["vystup_m"])
-            c = base + dd * (x0 + x1 - L) / 2 + up * (y + hv / 2) + nn * rg.uniform(-0.006, 0.006)
-            b_ = bz @ Matrix.Rotation(math.radians(rg.uniform(-1.5, 1.5)), 3, "Z")
-            kamen(c, b_, (x1 - x0 - sp, hv - sp, tl + 2 * v_), rg)
+            c = base + dd * (x0 + x1 - L) / 2 + up * (y + hv / 2) + nn * rg.uniform(-C.get("lic_rozptyl_m", 0.006), C.get("lic_rozptyl_m", 0.006))
+            b_ = bz @ Matrix.Rotation(math.radians(rg.uniform(-C.get("natoceni_st", 1.5), C.get("natoceni_st", 1.5))), 3, "Z")
+            kamen(c, b_, (x1 - x0 - sp, hv - sp, tl + 2 * v_), rg, cham=C.get("sraz_m"), otluk=C.get("nerovnost_m"))
         y += hv
     # krycí deska (1–2 desky přes celý zub, přesah, sražené hrany)
-    nd = 1 if L < 1.0 or rg.random() < 0.5 else 2; ps = C["kryci_presah_m"]
-    for x0, x1 in _delky(L + 2 * ps, rg, (L + 2 * ps) / nd * 0.85, (L + 2 * ps) / nd * 1.15, False)[:2]:
+    kd_ = C.get("kryci_desek", [1, 2]); nd = rg.randint(kd_[0], kd_[1]) if L >= 1.0 else kd_[0]; ps = C["kryci_presah_m"]
+    for x0, x1 in _delky(L + 2 * ps, rg, (L + 2 * ps) / nd * 0.75, (L + 2 * ps) / nd * 1.25, False)[:nd]:
         c = base + dd * ((x0 + x1) / 2 - L / 2 - ps) + up * (hb + hc / 2)
         b_ = bz @ Matrix.Rotation(math.radians(rg.uniform(-1.2, 1.2)), 3, "X")
         kamen(c, b_, (x1 - x0 - sp, hc, tl + 2 * ps), rg, cham=CFG["sraz_m"] * 1.3)

@@ -110,25 +110,38 @@
   "otluceny_roh_p": 0.3,
   "stinka": {
    "rad": [
+    5,
+    11
+   ],
+   "vrstva_m": 0.12,
+   "kamen_delka_m": [
+    0.16,
+    0.46
+   ],
+   "spara_m": 0.02,
+   "vystup_m": [
+    0.004,
+    0.018
+   ],
+   "kryci_deska_m": [
+    0.045,
+    0.075
+   ],
+   "kryci_presah_m": 0.03,
+   "jadro_m": 0.06,
+   "vrstva_rozptyl": [
+    0.55,
+    1.5
+   ],
+   "lic_rozptyl_m": 0.014,
+   "natoceni_st": 3.0,
+   "sraz_m": 0.012,
+   "nerovnost_m": 0.016,
+   "kryci_desek": [
     2,
     4
    ],
-   "vrstva_m": 0.26,
-   "kamen_delka_m": [
-    0.28,
-    0.55
-   ],
-   "spara_m": 0.016,
-   "vystup_m": [
-    0.012,
-    0.03
-   ],
-   "kryci_deska_m": [
-    0.08,
-    0.12
-   ],
-   "kryci_presah_m": 0.035,
-   "jadro_m": 0.06
+   "pozn_23_11": "Míša 23. 11. (misa_23_11_cimburi_1/2.jpg): „moc se mi to nezdá ty hradbičky, nešlo by to ještě jinak?“ – zuby jako stavebnice z velkých pravidelných kvádrů. Nově jako zeď: lomová droba/břidlice v tenkých nestejných vrstvách (5–11 řad), ploché kratší kameny, nerovný líc, širší malta, krytí 2–4 tenkými deskami (docs/reference/zdivo_kcd_18_11 02, 04, 07; historie_pravidla: droba/břidlice)."
   },
   "kryti": {
    "kamen_delka_m": [
