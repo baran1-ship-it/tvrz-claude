@@ -23,3 +23,9 @@ u ženy, přezky) → jako dobové oblečení nevyhovuje; jen případně nohavi
 - v4 měkčí látka → sklouzla. v5/v6 připnutá ramena → drží, ale stahuje se k tělu a lem jde šikmo nahoru.
 - Další krok: hodnoty z rešerše (Cotton, kolize 5/2 mm s vlastní kolizí, speed 0,5, sewing 20, gravitace až po sešití),
   díly podle měr těla s volností; pak váhy, skrytí těla pod oděvem, export do sady, test švů v pózách.
+
+## ODLOŽENO 23. 11. (Míša: „pokud ti nejde modelování oblečení, kašli na to, ať nepálíš tokeny“)
+- Simulace látky (v1–v8) nevyšla (padá / lepí se na tělo). Model z obtočených dílů bez simulace (v9–v12,
+  `tools/postavy_q/prototyp/kotle_model.py`, snímky poslané Míše) dává uzavřenou tuniku se sklady, ale do hry chybí:
+  váhy kostí z těla, skrytí těla, export do sad, test v pózách, další kusy (cotte, kápě, šátek, zástěra) – velká práce.
+- Ve hře zůstávají sady přestavěné 23. 11. (B5: 15 sad bez děr na hrudníku, kukle v kleku/sedu dál prorůstá).
