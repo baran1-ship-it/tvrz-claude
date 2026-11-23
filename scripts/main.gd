@@ -655,7 +655,7 @@ func _build() -> void:
 			if OS.has_environment("TVRZ_TRASA_SPICKA_MS"):        # PC (llvmpipe): snimky jsou dele, prah spicky jiny
 				mt.cfg = mt.cfg.duplicate(true)
 				mt.cfg["spicka_ms"] = float(OS.get_environment("TVRZ_TRASA_SPICKA_MS"))
-				mt.cfg["spicky_max"] = 400
+				mt.cfg["spicky_max"] = int(mt.cfg["spicky_max_pc"])
 		while is_instance_valid(mt) and mt.i_var < mt.varianty.size():
 			await get_tree().process_frame
 		get_tree().quit()

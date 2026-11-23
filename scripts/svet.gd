@@ -1731,6 +1731,13 @@ func _koryto_terenu(root: Node3D) -> void:
 	var nd: RefCounted = preload("res://scripts/nadrz.gd").new()
 	nd.priprav(hl)
 	nadrz = nd
+	# 23. 11. (test breh_nadrzi, protokol stavby: krok „potok a nadrze“ menil teren rybnika tvrze o 0,3-0,8 m): rybniky
+	# z voda.json (Rybnik_*) stavi cele Blender (kraj.voda_tvar: dno, breh, hraz, hladina = vrstevnice jeho terenu) -
+	# stare pravidlo nadrz.gd (breh o OKRAJ dovnitr, svah 1:4, bahno) je prohloubilo po svem a z brehu udelalo sraz
+	# 36-53 st. Jako Lhota v2: hladina zustava v nadrzich (hloubka, louka), teren se nemeni.
+	for k4 in hl.size():
+		if String((hl[k4][0] as Node).name).begins_with("Rybnik_"):
+			nd.nadrze[k4]["blender"] = true
 	if RYBNIK_DIL:
 		# Misa 24. 10. (rybnik_lhota v3, NAVOD.md bod 1; blender/rybnik_dil.py): navesni rybnicek z vesnice.py pryc - hladina skryta, nadrz
 		# (oval, vyhloubeni, bahno) vyrazena; misto nej dil z modely/rybnik (_rybnik_dil)
@@ -1936,6 +1943,8 @@ func koryto_toku_y(x: float, z: float, y: float, i_v_pasu_dilu := false) -> floa
 	var seg: Array = _kor_mriz.get(Vector2i(floori(x / 8.0), floori(z / 8.0)), [])
 	if seg.is_empty():
 		return y
+	if _v_zone_nadrze(Vector2(x, z)):
+		return y
 	# pas napojeni dilu mlyna patri dilu: tok se v nem prolina do terenu dilu uz v Blenderu (kraj.voda_tvar
 	# * dil_dolina_vaha). Hra ho neprepisuje - prolnuti neni idempotentni (kazde dalsi volani by koryto prohloubilo).
 	if not i_v_pasu_dilu and dil_dolina_vaha(x, z) < 1.0:
@@ -1982,6 +1991,32 @@ func koryto_toku_y(x: float, z: float, y: float, i_v_pasu_dilu := false) -> floa
 		elif d < pw:
 			v_korytu = true
 	return y if v_korytu else maxf(y, nasyp)
+
+
+## Zona rybnika (voda.json toky_tvar.nadrz_zona_m za brehem, jako kraj.voda_tvar): Blender v ni stavi rybnik PO korytech
+## toku (dno, breh, hraz - hraz se odtokem neprerusuje, Misa 9. 11. r. 61/79). Hra koryta opakuje naposled
+## (_koryta_naposled) - v zone by dolina odtoku znovu rozkopala hraz (23. 11. test breh_nadrzi: Lhota (512, 878-884) a
+## hraz tvrze (-166, -165) prorva, protokol stavby: _koryta_naposled -1,9 m v hrazi). Teren exportu je tu konecny.
+var _nadrz_zony: Array = []
+
+
+func _v_zone_nadrze(q: Vector2) -> bool:
+	if _nadrz_zony.is_empty():
+		var zona := float(Pravidla.cti("voda", "toky_tvar")["nadrz_zona_m"])
+		for k: String in ["rybnik_lhota", "rybnik_tvrz"]:
+			var r: Dictionary = Pravidla.cti("voda", k)
+			var c := Vector2(float(r["stred"][0]), float(r["stred"][1]))
+			var rmax := float(r["polomer_m"])
+			for b: Array in r.get("obrys", []):
+				rmax = maxf(rmax, c.distance_to(Vector2(float(b[0]), float(b[1]))))
+			for v: Array in r.get("okraj_vlny", []):
+				rmax += float(r["polomer_m"]) * absf(float(v[1]))
+			_nadrz_zony.append([r, c, rmax + zona, zona])
+	for z: Array in _nadrz_zony:
+		var d := q.distance_to(z[1])
+		if d < float(z[2]) and d < _ryb_polomer(z[0], q) + float(z[3]):
+			return true
+	return false
 
 
 ## Nejvyssi teren brehu maleho toku v bode (Misa 0.99993 r. 54, snimek misa_6_11/23: mlyn - breh potoka v dilu ostra

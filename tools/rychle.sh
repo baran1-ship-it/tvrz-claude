@@ -18,6 +18,8 @@ krok() {   # $1 jméno, zbytek příkaz; rc do $D/<jméno>.rc, čas do .s
 }
 # skripty: změněné .gd od posledního úspěšného běhu (značka), poprvé všechny - Parse Error za sekundy, 4 souběžně
 zn=$D/.skripty_ok
+# razítko ze ZAČÁTKU běhu (kontrola 23. 11.: značka nastavená až po běhu přeskočila .gd změněný během běhu)
+zac=$D/.skripty_zacatek.$$; touch $zac
 if [ "$1" = --vse-gd ] || [ ! -f $zn ]; then gd=$(ls scripts/*.gd tools/*.gd)
 else gd=$(find scripts tools -name "*.gd" -newer $zn); fi
 skripty() {
@@ -50,6 +52,6 @@ for j in json skripty tabulky barvy smysl; do
   printf "RYCHLE %-8s %s %3s s  %s\n" $j "$([ "$r" = 0 ] && echo "OK   " || echo CHYBA)" "$(cat $D/$j.s 2>/dev/null)" "$posl"
   if [ "$r" != 0 ]; then rc=1; grep -E "CHYBA|Error|ERROR" $D/$j.log | head -5 | sed 's/^/    /'; fi
 done
-[ "$(cat $D/skripty.rc)" = 0 ] && touch $zn
+if [ "$(cat $D/skripty.rc)" = 0 ]; then mv -f $zac $zn; else rm -f $zac; fi
 echo "RYCHLE $([ $rc = 0 ] && echo OK || echo CHYBA) za $(( $(date +%s) - t0 )) s (logy $D/)"
 exit $rc

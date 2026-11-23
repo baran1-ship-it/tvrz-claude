@@ -397,7 +397,7 @@ func _graf() -> void:
 			var p1: Vector2 = pp[k]
 			var p2: Vector2 = pp[k + 1]
 			var p3: Vector2 = pp[mini(k + 2, pp.size() - 1)]
-			var mm := maxi(1, int(p1.distance_to(p2) / 1.0))
+			var mm := maxi(1, int(p1.distance_to(p2) / float(P["graf"]["pesina_krok_m"])))
 			for j in mm:
 				var t := float(j) / mm
 				hl.append(0.5 * ((2.0 * p1) + (-p0 + p2) * t + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * t * t + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * t * t * t))

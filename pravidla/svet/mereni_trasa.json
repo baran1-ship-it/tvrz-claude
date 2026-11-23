@@ -4,6 +4,8 @@
  "mereni_s": 10.0,
  "spicka_ms": 200.0,
  "spicky_max": 12,
+ "spicky_max_pc": 400,
+ "_spicky_max_pc": "TVRZ_TRASA=useky s TVRZ_TRASA_SPICKA_MS (sonda na PC, llvmpipe: snimky delsi, prah spicky jiny) - kolik spicek zapsat; drive 400 natvrdo v main.gd (kontrola 23. 11.)",
  "nad_ms": 33.4,
  "_tabulka_23_11": "23. 11. (plan_18_11 A3, rešerše 17. 11. bod 2): s pevnými 30 FPS je p50 vždy 33 ms (strop) - tabulka má u každého řádku p50, p95, p99, nad30% = podíl snímků měření delších než nad_ms (33,4 ms = snímek vypadl z 30 FPS) a >40 = počet snímků nad 40 ms (záseky, jako dřív). Sloupce gpu vypuštěny (tablet GPU čas nevrací, zaseky_rozbor_system.md F2). Porovnání verzí: docs/mereni_verze.md „Jak číst tabulku trasy“. spicky_max = kolik špiček se zapíše; u každé špičky (A1) čas v úseku, rozpad z razítek snímku diag (fyz, skr, před kreslením, kreslení CPU, swap/GPU), co přibylo (uzly, geometrie, zdroje v keši = načtené soubory, objekty, textury a buffery GPU), stav čtení PSS a v souboru/schránce plný řádek detektoru diag (události plánovače a louky, fronty). Varianta bez_pss (v _varianty_pristi) = PSS se během trasy nečte (podezření A1).",
  "useky": [

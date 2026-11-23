@@ -34,12 +34,12 @@ def md5(cesta):
     return _md5[cesta]
 
 
-def soubory(vzory):
+def soubory(vzory, vse=False):
     out = set()
     for v in vzory:
         for c in glob.glob(os.path.join(K, v), recursive=True):
             r = os.path.relpath(c, K)
-            if os.path.isfile(c) and any(r.endswith(p) for p in P["pripony"]): out.add(r)
+            if os.path.isfile(c) and (vse or any(r.endswith(p) for p in P["pripony"])): out.add(r)
     return sorted(out)
 
 
@@ -74,7 +74,9 @@ def rozdel(testy):
 def vypocet():
     testy, pom = sady()
     roz = rozdel(testy)
-    sp = soubory(P["spolecne"])
+    # data hry mimo export (kontrola 23. 11.: kryti.bin, kryti_povrch.bin, rozsevy, GLB po barvy_vrcholu.py) – všechny
+    # přípony; md5 v mezipaměti podle velikosti a času, takže 1,2 GB modelů se čte jen po změně
+    sp = sorted(set(soubory(P["spolecne"])) | set(soubory(P.get("spolecna_data", []), vse=True)))
     o = {}
     for s, v in P["skupiny"].items():
         h = hashlib.md5((pom + json.dumps(roz[s])).encode())
@@ -106,12 +108,20 @@ def adresar(jm):
 
 
 def vysledky_logu(log):
+    """test → OK/CHYBA z řádků HOTOVO_TEST. Kontrola 23. 11.: test bez jediného výsledku (spadl na SCRIPT ERROR, all() nad
+    prázdným = true) nebo se SCRIPT ERROR mezi předchozím HOTOVO_TEST a svým = CHYBA (jinak by se skupina příště převzala)."""
     v = {}
+    chyba_skriptu = False
     try:
         for ln in open(log, errors="replace"):
-            if ln.startswith("HOTOVO_TEST "):
+            if "SCRIPT ERROR" in ln:
+                chyba_skriptu = True
+            elif ln.startswith("HOTOVO_TEST "):
                 c = ln.split()
-                if len(c) >= 3: v[c[1]] = c[2]
+                if len(c) >= 3:
+                    pocet = int(c[3]) if len(c) >= 4 and c[3].isdigit() else -1
+                    v[c[1]] = "CHYBA" if chyba_skriptu or pocet == 0 else c[2]
+                chyba_skriptu = False
     except FileNotFoundError: pass
     return v
 

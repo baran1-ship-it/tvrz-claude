@@ -4,6 +4,8 @@
     "scripts/svet.gd", "scripts/main.gd", "scripts/pravidla.gd", "scripts/dev_test.gd", "scripts/data.gd",
     "pravidla/pravidla_sveta.json", "project.godot", "build/export_otisk.json"
   ],
+  "spolecna_data": ["modely/**/*"],
+  "_spolecna_data": "data hry, která se mění i mimo export (kontrola 23. 11.: kryti.bin a kryti_povrch.bin z rozsevu, GLB po barvy_vrcholu.py, rozsevy) – všechny přípony, změna = všechny skupiny znovu; md5 v mezipaměti build/hlidaci_md5.json podle velikosti a času",
   "_spolecne": "změna kteréhokoli = všechny skupiny znovu (jádro stavby světa, pásma, otisk exportu = jiný svět)",
   "pripony": [".gd", ".json", ".gdshader", ".tscn", ".tres", ".godot", ".sh"],
   "limit_test_s": 90,

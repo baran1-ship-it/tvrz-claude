@@ -219,14 +219,14 @@ func misto(x: float, z: float) -> Array:
 			continue
 		var d: float = (n["d"] as PackedFloat32Array)[j * int(n["nx"]) + i]
 		if best.is_empty() or d > float(best[0]):
-			best = [d, n["y"]]
+			best = [d, n["y"], bool(n.get("blender", false))]
 	return best
 
 
 func strop(x: float, z: float) -> float:
 	var m := misto(x, z)
-	if m.is_empty():
-		return INF
+	if m.is_empty() or bool(m[2]):
+		return INF                  # rybnik z Blenderu (voda.json, hladina = vrstevnice jeho terenu): teren nehloubit
 	var d: float = m[0]
 	var y: float = m[1]
 	if d > 0.0:

@@ -137,6 +137,8 @@
    "sondy_snimek": 48,
    "cas_ms_snimek": 2.0,
    "test_snimek_ms": 12.0,
+   "test_opakovani": 3,
+   "_test_opakovani": "test lide_zasek (23. 11., plan 18. 11. E6): beh s rozpoctem se opakuje tolikrat a plati nejlepsi beh (nejmensi nejdelsi snimek) - preruseni procesu jinym programem na PC (Blender, druhy Godot) jen pridava (plany poplach 14-16 ms), skutecny zasek skriptu je v kazdem behu",
    "_rozpocet": "Misa 6. 11. (panel tabletu: skript lide 692/868/957 ms v jednom snimku pri zmene rozvrhu): hledani cesty mrizkou nejvys sondy_snimek novych bunek (paprsek + kvadr) a cas_ms_snimek ms za snimek, zbytek dalsi snimky (postava zatim stoji, nikdy rovne pres zed); test lide_zasek: nejdelsi snimek skriptu lide pri prepnuti rozvrhu vsech postav pod test_snimek_ms (PC). Namereno 9. 11. PC: pred 843-974 ms (purkrabi k nadvori_brana: A* 14 463 sond, cesta neexistuje -> nouze), po 9,2 ms; z toho 5-8 ms je zmena bloku vsech 32 postav v jednom snimku bez hledani (18:01: 15 sond, 5,1-8,0 ms) - ve hre se postavy stridaji po minutach (rozvrh_rozptyl). Neprochozi dvojice bunek se pamatuje trvale (_nav_nelze), cekajici se stridaji (_nav_fronta).",
    "nelze_platnost_s": 90.0
   },
@@ -146,6 +148,8 @@
   "ostrov_r_m": 10.0,
   "_ostrovy": "plan_18_11 C12 (misa_17_11 ř. 16): síť chůze má být jedna část; povolený ostrov = {bod [x, z], proc} – část, která má bod do ostrov_r_m od bodu, je záměrně oddělená (důvod povinný). Test sit_chuze.",
   "konec_napoj_m": 6.0,
+  "pesina_krok_m": 1.0,
+  "_pesina_krok_m": "sit chuze (lide._graf, plan_18_11 C12): krok bodu osy pesiny se sit_chuze (Catmull-Rom jako osy cest) - drive 1,0 natvrdo v kodu (kontrola 23. 11.)",
   "_konec_napoj_m": "plan_18_11 C12 (test sit_chuze 23. 11.: k_mlynu „z ulice vsi“ končí 4,9 m od osy ulice, mlýn a 61 bodů cesty odděleně): první a poslední bod každé osy se spojí s nejbližším bodem jiné osy do této vzdálenosti, když mezi nimi není zeď (_volno). Jako svet._cesty_napoj pro pěšiny (6 m). Spojky uprostřed os dál jen do spoj_m."
  },
  "mista": {

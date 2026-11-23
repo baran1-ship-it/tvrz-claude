@@ -838,7 +838,7 @@ def ryb2_tvar(x, z, h, ryb, prof_toku):
     (voda nevytece), koryto toku (prof_toku) brehem projde; hraz (ryb2_hraz) a tune vypusti naposled."""
     hl = ryb["hladina_y"]
     de = ryb_de(ryb, x, z)
-    if de > -25.0:
+    if de > -_TT["nadrz_zona_m"]:
         if de >= 0.0:
             f = min(1.0, de / ryb["dno_svah_m"])
             dno = hl - ryb["hloubka_m"] * (1.0 - (1.0 - f) ** 2)
@@ -1533,7 +1533,7 @@ def voda_tvar(x, z, h):
             cx, cz = ryb["stred"]
             d = math.hypot(x - cx, z - cz)
             r = ryb_polomer(ryb, x, z)
-            if d < r + 25.0:
+            if d < r + _TT["nadrz_zona_m"]:
                 dno = ryb["hladina_y"] - ryb["hloubka_m"] * max(0.0, 1.0 - (d / r) ** 2)
                 breh = ryb["hladina_y"] + 0.3 * smooth(r - 1.0, r + 1.0, d) + _TT["svah"] * max(0.0, d - r - 1.0)
                 h = smin(h, min(breh, dno) if d < r else breh, 0.8)

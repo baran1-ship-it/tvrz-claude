@@ -1446,7 +1446,7 @@ func _zasah(space: PhysicsDirectSpaceState3D, q: PhysicsRayQueryParameters3D, px
 		# a trava rostla mezi kameny - build/m18/b7_b.png 23. 11.): kratky paprsek od terenu dolu bez terenu - pevne
 		# teleso tesne pod nim (pasma predmet kryti_povrch_pod_terenem_m) = pevny povrch
 		var ht := (h["position"] as Vector3).y
-		var qt := PhysicsRayQueryParameters3D.create(Vector3(px, ht + 0.15, pz), Vector3(px, ht - float(main.svet.pasma()["predmet"]["kryti_povrch_pod_terenem_m"]), pz))
+		var qt := PhysicsRayQueryParameters3D.create(Vector3(px, ht + float(main.svet.pasma()["predmet"]["kryti_povrch_nad_terenem_m"]), pz), Vector3(px, ht - float(main.svet.pasma()["predmet"]["kryti_povrch_pod_terenem_m"]), pz))
 		var ext := q.exclude.duplicate()
 		ext.append(h["rid"])
 		qt.exclude = ext

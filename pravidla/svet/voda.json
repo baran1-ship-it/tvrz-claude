@@ -6147,6 +6147,8 @@
   "zarez_max_m": 3.5,
   "dolina_m": 10.0,
   "dolina_nabeh_m": 8.0,
+  "nadrz_zona_m": 25.0,
+  "_nadrz_zona_m": "zona rybnika za brehem (rybnik tvrze polomer podle smeru, Lhota v2 vzdalenost od obrysu): Blender (kraj.voda_tvar) v ni stavi rybnik PO korytech toku - dno, breh, hraz (odtokem neprerusena); hra (svet.koryto_toku_y, _koryta_naposled) v ni koryta neopakuje, teren exportu je konecny (23. 11. test breh_nadrzi: dolina odtoku znovu rozkopala hraz Lhoty i tvrze, protokol stavby -1,9 m). Driv cislo 25 natvrdo v kraj.py.",
   "pramen": {
    "balvanu": 5,
    "polomer_m": 1.4,
