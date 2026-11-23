@@ -11337,7 +11337,8 @@ func _kamenik_lom() -> void:
 	var sp := main.get_viewport().get_world_3d().direct_space_state
 	for a in 8:
 		var w := Vector2(kp.x, kp.z) + Vector2(cos(TAU * a / 8.0), sin(TAU * a / 8.0)) * 0.8
-		var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(w.x, kp.y + 5.0, w.y), Vector3(w.x, kp.y - 3.0, w.y)))
+		# paprsek jako _nav_bunka (od kusu + schod dolu), ne shora (shora trefi strechu pristresku)
+		var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(w.x, kp.y + 1.2, w.y), Vector3(w.x, kp.y - 3.0, w.y)))
 		var bx := PhysicsShapeQueryParameters3D.new()
 		var sh := BoxShape3D.new()
 		sh.size = Vector3(0.36, 1.42, 0.36)
@@ -11346,7 +11347,7 @@ func _kamenik_lom() -> void:
 		bx.transform = Transform3D(Basis.IDENTITY, Vector3(w.x, (gy if not is_nan(gy) else kp.y) + 0.99, w.y))
 		var jm: Array = []
 		for hh: Dictionary in sp.intersect_shape(bx, 6):
-			jm.append(str((hh["collider"] as Node).get_path()).get_file() if hh["collider"] is Node else "?")
+			jm.append(String((hh["collider"] as Node).name) + "<" + String((hh["collider"] as Node).get_parent().name) if hh["collider"] is Node else "?")
 		print("KAMENIK_LOM smer %d bod %s zem %.2f (%s) kus y %.2f prekazky %s" % [a, w.snapped(Vector2.ONE * 0.01), gy,
 				(h["collider"] as Node).name if not h.is_empty() and h["collider"] is Node else "-", kp.y, str(jm)])
 	_vysledek("kamenik_lom", out[1] != INF and d < 2.0, "misto %s %.2f m od kovadliny lomu %s" % [q.snapped(Vector2.ONE * 0.01), d, kp.snapped(Vector3.ONE * 0.01)])
@@ -11408,6 +11409,17 @@ func _sit_chuze() -> void:
 		var t := "cast %d: %d bodu, obdelnik (%.0f, %.0f)-(%.0f, %.0f), mezera %.1f m mezi (%.1f, %.1f) a (%.1f, %.1f)%s" % [k,
 				(body[k] as Array).size(), bb.position.x, bb.position.y, bb.end.x, bb.end.y, nej, pa.x, pa.y, pb.x, pb.y,
 				(" POVOLENO: " + povol) if povol != "" else ""]
+		# ktere osy (svet.cesty_osy) cast tvori a proc se nenapojila: druh osy, konce, prekazka mezi (lide._volno)
+		var osy := {}
+		for q: Vector2 in body[k]:
+			for oi in sv.cesty_osy.size():
+				var o: Dictionary = sv.cesty_osy[oi]
+				for w: Vector2 in o["p"]:
+					if w.distance_to(q) < 0.05:
+						osy[oi] = "osa %d %s n %d %s..%s" % [oi, "pesina" if o.get("pesina", false) else "cesta", (o["p"] as PackedVector2Array).size(),
+								((o["p"] as PackedVector2Array)[0]).snapped(Vector2.ONE * 0.1), ((o["p"] as PackedVector2Array)[-1]).snapped(Vector2.ONE * 0.1)]
+						break
+		t += " volno %s osy %s" % [lide.call("_volno", pa, pb), str(osy.values())]
 		print("SIT_CHUZE ", t)
 		if povol == "":
 			chyby.append(t)

@@ -382,6 +382,9 @@ func _graf() -> void:
 	var osa_id := {}
 	var n := 0
 	for oi in sv.cesty_osy.size():
+		# cesticka do dvora za plotem (svet.PES_DVUR): do site ne - jinak oddeleny ostrov (plan_18_11 C12, test sit_chuze)
+		if bool((sv.cesty_osy[oi] as Dictionary).get("dvur", false)):
+			continue
 		var pts: Variant = sv.cesty_osy[oi]["p"]
 		var prev := -1
 		var posl := Vector2.INF

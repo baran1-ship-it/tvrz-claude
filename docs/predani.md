@@ -97,6 +97,11 @@ Vše, co pouští Godot (testy, focení, vydání), jde přes `tools/beh.sh <jm�
 - `beh.sh` před `foto`/`testy` prověří změněné skripty (`--check-only`, 2 s/soubor) – chyba typu `step()` v GDScriptu (jen shader) skončí hned.
 - Zabíjet jen `pgrep -x godot` / `kill PID` – `pkill -f` i `pgrep -f vzor` najdou i vlastní shell (exit 144).
 - Log je v `build/beh/<jméno>.log`. Když je zámek obsazený, `/tmp/godot_beh.kdo` říká kým.
+- **Past 23. 11.:** úprava `tools/beh.sh` během běhu jiného pomocníka shodí jeho běh (bash čte skript po řádcích:
+  „line 97: syntax error near unexpected token“, rc 2, výsledek ztracen – sonda A1). beh.sh upravovat jen, když nic neběží
+  (`ls /tmp/godot_beh.kdo*`), nebo nový skript zapsat vedle a přejmenovat (`mv` = nový soubor, běžící bash čte starý).
+- PC (llvmpipe, 1200×800) kreslí snímek světa 3,5–8,5 s (sonda 23. 11., vše v „kreslení CPU“) → záseky tabletu se na PC
+  s obrazem změřit nedají; CPU stranu (skripty, načítání, plánovač) měřit **headless** trasou (`TVRZ_TRASA=useky`).
 
 ## Pokládání objektů na terén (Míša 25. 10.) – tři skupiny
 1. **Jeden bod** (sud, kámen, nářadí): nejnižší bod terénu pod celým půdorysem (hustý vzorek 5×5, `svet.pata_lom`), nic nevisí.

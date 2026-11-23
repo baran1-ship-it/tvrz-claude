@@ -6747,7 +6747,12 @@ func _pesiny_k_domum() -> void:
 			c.append_array(d.get("k_cili", []))
 			cesty.append(c)
 		_pesina_k_ulici(cesty[0])                  # jen od dveri (dvorek zustava za plotem)
-		for c: Array in cesty:
+		for ci in cesty.size():
+			var c: Array = cesty[ci]
+			# druha cesticka domu se vstupem = od dvornich dveri do dvora (za plotem, konci ve dvore) - sit chuze postav
+			# ji nebere (oddeleny ostrov, plan_18_11 C12: 8 ostrovu po 2 bodech), dvur obslouzi mrizka chuze
+			if m.has("vstup") and ci == 1:
+				PES_DVUR[PESINY.size()] = true
 			PESINY.append(c)
 			PES_SIRKA.append(float(Pravidla.cti("cesty", "pesiny_odvozene", "ke_dverim_pulsirka_m")))
 			n += 1
@@ -8847,6 +8852,8 @@ func _cesty_tvar(root: Node3D) -> void:
 			continue
 		var op2 := _osa_prevzorkuj(cp3, cw3, 1.0)
 		op2["pesina"] = true
+		if PES_DVUR.has(pi2):
+			op2["dvur"] = true
 		cesty_osy.append(op2)
 	_cesty_napoj()
 	_cesty_mriz.clear()
@@ -12574,6 +12581,7 @@ const JEHLICNATE := ["smrk", "borovice", "fir_", "pine_"]
 ## PES_ZAKLAD, takze shader, louka i rozsevy (prahy v metrech pro pesinu) roztahnou cestu i jeji okraj se sirkou.
 var PESINY: Array = []
 var PES_SIRKA: Array = []
+var PES_DVUR := {}                    # index PESINY -> true: cesticka od dvornich dveri do dvora za plotem (plan_18_11 C12)
 var PES_ZAKLAD := 0.55
 
 
