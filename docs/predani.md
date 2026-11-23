@@ -1786,3 +1786,11 @@ Hotovo v kódu a datech (testy u každého):
   skryté tělo hráče, které při focení/letu zůstalo jinde (`build/beh/m23d.log` SVETLO_LOUC). Interiér kovárny ve `svetlo`
   byl černý kvůli tomu, ne kvůli síle světla. `predmety.hold`: bez viditelného těla jde louč před kameru. Ověřit snímkem
   `tools/beh.sh <jm> svetlo … "-12.5,1.7,9.5,-15.5,1.0,11"` (NEOVĚŘENO – snímek po opravě neudělán).
+
+## 23. 11. – černé karty listí břízy (misa_17_11 ř. 3) – POTVRZENÁ příčina izolací
+- 3 pokusy naslepo (jádro koruny, dělení alfou, bříza bez jádra) nepomohly. Izolovaná scéna `build/dbg/briza_stin.gd`
+  (bříza jako ve hře se stínovým tělesem / s vlastním stínem) a `briza_bezstinu.gd` (totéž bez stínů): bez stínů žádné
+  obdélníky → příčina = stín (těleso koruny i listí zatemní celou kartu do černa; ambient pod korunou skoro nic).
+- Oprava: `light()` v listi*.gdshader, list ve stínu = `les_podrost.json koruny.listi_stin_min` (prosvítání), rub karty
+  vrací normálu ven (Godot ji u cull_disabled otočí, naše normála „od středu koruny“ pak míří dovnitř).
+- Poučení: tmavé/černé plochy = nejdřív izolovaná scéna s vypínáním vlivů (stín, jádro, barvy vrcholů), teprve pak oprava.

@@ -4673,6 +4673,7 @@ func _listi_shader(om: BaseMaterial3D, bb: AABB, strom: bool) -> ShaderMaterial:
 	m.set_shader_parameter("vyska", maxf(bb.end.y, 0.5))
 	m.set_shader_parameter("sila_vetru", 1.0 if strom else 0.6)       # kere mene
 	m.set_shader_parameter("objem", 0.65 if strom else 0.5)
+	m.set_shader_parameter("stin_min", float(Pravidla.cti("les_podrost", "koruny", "listi_stin_min")))
 	return m
 
 
@@ -4730,7 +4731,7 @@ func _jadro_koruny(m: Mesh, k: float) -> Mesh:
 				var jm := ShaderMaterial.new()
 				jm.shader = _jadro_sh
 				jm.resource_name = mat.resource_name + "_jadro"
-				for pn: String in ["barva", "tint", "stred", "vyska", "sila_vetru", "objem", "vitr_smer"]:
+				for pn: String in ["barva", "tint", "stred", "vyska", "sila_vetru", "objem", "vitr_smer", "stin_min"]:
 					jm.set_shader_parameter(pn, (mat as ShaderMaterial).get_shader_parameter(pn))
 				mm = jm
 			out.surface_set_material(out.get_surface_count() - 1, mm)

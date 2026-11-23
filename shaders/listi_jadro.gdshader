@@ -15,6 +15,7 @@ uniform float vyska = 10.0;                   // vyska modelu (m)
 uniform float sila_vetru = 1.0;
 uniform float objem = 0.65;                    // 0 = normaly karet, 1 = koule kolem stredu
 uniform vec2 vitr_smer = vec2(0.8, 0.6);
+uniform float stin_min = 0.5;               // les_podrost.json koruny.listi_stin_min (prosvitani listu ve stinu)
 varying float v_ao;          // vnitrek koruny tmavsi (Misa 0.61 "placacky": koruna jako jedna plocha bez hloubky)
 varying vec3 v_tint;         // kazdy trs listi trochu jinak (svetlejsi, zlutejsi, tmavsi)
 
@@ -42,6 +43,12 @@ void vertex() {
 }
 
 void fragment() {
+	// Misa 17. 11. r. 3 (tmave obdelniky v korune brizy, rozbor 23. 11. v izolovane scene build/dbg/briza_stin.gd):
+	// cull_disabled -> Godot rubu karty normalu otoci; nase normala je ale smer od stredu koruny (objem), po otoceni
+	// miri dovnitr a cela karta zcerna. Rub tedy vraci normalu zpet (koruna se svitit jako objem z obou stran karty).
+	if (!FRONT_FACING) {
+		NORMAL = -NORMAL;
+	}
 	vec4 t = texture(barva, UV);
 	// Misa 17. 11. r. 3 (listi zespodu cerne obdelniky): karta jadra je bez alfy, pruhledna mista textury maji RGB 0
 	// -> zespodu / zevnitr koruny cerny ctverec. Pruhledna mista = prumerna barva listu (nejmensi mip, deleno alfou =
@@ -56,4 +63,15 @@ void fragment() {
 	// zadni strana: svetlo prosvita (karty proti slunci nejsou cerne)
 	BACKLIGHT = c * 0.5;
 	ROUGHNESS = 0.85;
+}
+
+// Misa 17. 11. r. 3 (tmave obdelniky v korune brizy; izolovane 23. 11.: bez stinu zadne, se stinem stinoveho telesa
+// koruny i vlastniho listi cele karty cerne): list ve stinu neni cerny - prosvita (listi_stin_min). Jinak stejne jako
+// diffuse_lambert_wrap + BACKLIGHT.
+void light() {
+	float nl = dot(NORMAL, LIGHT);
+	float wrap = max((nl + 0.5) / 1.5, 0.0);
+	float att = mix(stin_min, 1.0, ATTENUATION);
+	DIFFUSE_LIGHT += wrap * att * LIGHT_COLOR / PI;
+	DIFFUSE_LIGHT += BACKLIGHT * max(-nl, 0.0) * att * LIGHT_COLOR / PI;
 }

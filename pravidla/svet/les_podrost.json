@@ -68,6 +68,8 @@
   "_jadro_druhy": "23. 11. (plan_18_11 bod 3): klíč = _strom_tvar druhu, hodnota = k jádra pro druh (0 = bez jádra). Zkouška {\"briza\": 0} NEPOMOHLA – snímek build/m23/briza_12.png (bříza bez jádra) má tmavé obdélníkové karty stejně jako build/m18/b8_stodola_12.png → jádro koruny NENÍ příčina (3. neúspěšný pokus o tutéž chybu, PODEZŘENÍ vyvráceno), vráceno na {} (jádro zpět kvůli early-Z). Další krok: nový rozbor (izolovaná scéna s modelem břízy: listi.gdshader × listi_jadro × stínové těleso × LOD/tvar).",
   "stin_proxy": true,
   "stin_obal": 0.85,
+  "listi_stin_min": 0.55,
+  "_listi_stin_min": "23. 11. (misa_17_11 r. 3, briza): podil svetla slunce, ktery list dostane i ve stinu (prosvitani listu) - stinove teleso koruny a vlastni listi jinak delaly cele karty cerne (izolovane build/dbg/briza_stin.gd vs briza_bezstinu.gd).",
   "stin_dosah_m": 40.0,
   "kmen_r_podil": 0.012,
   "kmen_r_min_m": 0.12
