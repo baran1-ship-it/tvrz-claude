@@ -2,10 +2,13 @@
   "popis": "Skupiny testů hry podle vstupů (plán 18. 11. E2, převzato z Pucharta nastroje/hlidaci_skupiny.py; Míša 23. 11.: „ať testy nejdou hodiny“). tools/hlidaci_skupiny.py: otisk skupiny = md5 společných vstupů + vstupů skupiny + těla funkcí jejích testů (tools/test_*.gd, func _<test>) + pomocný kód testovacích souborů (vše mimo testovací funkce). Skupina s nezměněným otiskem a posledním výsledkem OK se převezme a nepouští (build/hlidaci_otisky.json); HLIDACI_VSE=1 vynutí vše. Výsledek každé skupiny se zapíše hned, jak její testy doběhnou (restart kontejneru = další běh převezme hotové). Test, který není v žádné skupině, patří do skupiny se „zbytek“ (vstupy = všechny skripty a pravidla). md5 souborů v mezipaměti podle velikosti a času (build/hlidaci_md5.json).",
   "spolecne": [
     "scripts/svet.gd", "scripts/main.gd", "scripts/pravidla.gd", "scripts/dev_test.gd", "scripts/data.gd",
-    "pravidla/pravidla_sveta.json", "project.godot", "build/export_otisk.json", "tools/beh.sh", "tools/rychle_testy.sh"
+    "pravidla/pravidla_sveta.json", "project.godot", "build/export_otisk.json"
   ],
   "_spolecne": "změna kteréhokoli = všechny skupiny znovu (jádro stavby světa, pásma, otisk exportu = jiný svět)",
   "pripony": [".gd", ".json", ".gdshader", ".tscn", ".tres", ".godot", ".sh"],
+  "limit_test_s": 90,
+  "limit_min_s": 300,
+  "_limit": "tools/beh.sh skupiny: hlídací pes testů = limit_test_s × počet spouštěných testů, nejméně limit_min_s (celá sada 150 testů ~1,5 h = 36 s/test, rezerva 2,5×)",
   "nevydavat_neblokuje": ["lide_zasek", "clona_vsi"],
   "_nevydavat_neblokuje": "testy s planými poplachy (plán 18. 11. E6): lide_zasek měří 12 ms na PC (llvmpipe, ne tablet), clona_vsi padá na mezistavu přestavby vegetace. Běží a vypisují se (CHYBA_NEBLOKUJE), ale skupinu ani vydání neblokují. Nemazat – opravit test, pak vyřadit odsud.",
   "skupiny": {

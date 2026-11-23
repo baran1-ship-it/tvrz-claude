@@ -71,3 +71,23 @@ Postup u každé změny světa:
    `_interier.png` (noc, louč v ruce). Místo volit tak, aby změněný model byl v pásmu, kde se mění (střední stupeň: dál než
    `predmety_lod.stredni_od_m`). Všechny snímky si prohlédnout dřív, než se změna pošle; tmavý nebo černý model = nejdřív
    `barvy_vrcholu.json` a `docs/predani.md` „Tmavé/černé modely“, ne hádat stíny.
+
+## Kdy co běží (plán 18. 11. E, Míša 23. 11.: „ať testy nejdou hodiny“; podle Pucharta)
+| kdy | co | příkaz | trvání (tento stroj) |
+|---|---|---|---|
+| **po každé změně** | rychlý režim bez Godotu a stavby světa: test smyslu, tabulky chyb, `--check-only` změněných .gd, platnost JSON v `pravidla/`, barvy vrcholů – souběžně | `tools/rychle.sh` (`--vse-gd` = všechny skripty) | 23–28 s (změřeno 23. 11.) |
+| snímek opraveného místa + jeho testy | testy a snímky v **jednom** běhu = jedna stavba světa (dřív `testy` + `foto` = dvě) | `flock build/beh/godot.lock tools/beh.sh <jm> testyfoto "test1,test2" "oci;x,z,tx,tz;soubor.png"` | viz plan_18_11 E |
+| **před vydáním** | testy po skupinách podle otisku vstupů (`pravidla/hlidaci_skupiny.json`): skupina s nezměněnými vstupy a posledním OK se převezme, ostatní běží v jednom Godotu; výsledek skupiny se zapíše hned (`build/hlidaci_otisky.json`, restart kontejneru nevadí) | `flock build/beh/godot.lock tools/beh.sh <jm> skupiny [skupina,…\|vse] ["snímky"]`; přehled `python3 tools/hlidaci_skupiny.py stav` | jen změněné skupiny |
+| **jen před velkým vydáním** | vše znovu bez převzetí | `HLIDACI_VSE=1 … beh.sh <jm> skupiny vse` | celá sada ~1,5 h (13. 11.) |
+
+- Otisk skupiny = společné vstupy (`svet.gd`, `main.gd`, `pravidla.gd`, `dev_test.gd`, `data.gd`, `pravidla_sveta.json`,
+  `build/export_otisk.json`, …; změna = vše znovu) + vstupy skupiny + těla funkcí jejích testů + pomocný kód testovacích
+  souborů. md5 v mezipaměti podle velikosti a času (`build/hlidaci_md5.json`). Nový test bez skupiny padne do „zbytek“.
+- Skupina `matice` má vstupy jako otisk KOD brány `kontrola_vztahu.py` (všechny skripty + `test_svet.gd`) – brána ve
+  `vydani.py` dál čte log k aktuálnímu otisku; převzatá matice = log z jejího posledního běhu je stále platný.
+- `nevydavat_neblokuje` (E6): testy s planými poplachy (`lide_zasek` 12 ms na PC, `clona_vsi`) běží a vypíšou
+  `CHYBA_NEBLOKUJE`, skupinu ani vydání neblokují; po opravě testu vyřadit ze seznamu.
+- Testy, snímky i rychlý režim **čekají, dokud běží export světa** (`export.sh`, `export_game.py`) – žádné plané poplachy z rozdělané práce.
+- V `testyfoto` jdou nejdřív snímky (čistý svět), pak testy bez kreslení (`RenderingServer.render_loop_enabled`); kreslí
+  jen testy, které čtou obraz (`test_svet.gd` `S_KRESLENIM`). Testy tu běží s kvalitou měření (1 = tablet) a skutečným
+  rendererem (polohy MultiMeshů známé) – výsledek se od headless `testy` může lišit; rozdíl je nález, ne důvod k výjimce.
