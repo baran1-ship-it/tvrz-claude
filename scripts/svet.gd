@@ -2355,6 +2355,19 @@ func _svy_terenu(root: Node3D) -> int:
 	return n
 
 
+## Obal kridla vrat/branky ve svete: sit uzlu a vsech siti pod nim (kridlo z vic materialu = uzel s detmi). Prazdny = nic.
+static func kridlo_aabb(n: Node3D) -> AABB:
+	var bb := AABB()
+	var prv := true
+	for m in [n] + n.find_children("*", "MeshInstance3D", true, false):
+		if not (m is MeshInstance3D) or (m as MeshInstance3D).mesh == null:
+			continue
+		var b := (m as MeshInstance3D).global_transform * (m as MeshInstance3D).get_aabb()
+		bb = b if prv else bb.merge(b)
+		prv = false
+	return bb
+
+
 ## Radce 17:05 bod 6 (Misa 0.70 "vratka ve vzduchu"): branky a vrata ve vsi visely 0,1-0,74 m nad terenem
 ## (Teren_ves po vyhloubeni a mrizce 2 m nize nez _land v Blenderu). Teren pod kridlem a kuly zvednout ke spodku
 ## kridla - 3 cm (do 1,2 m od stredu plne, do 3 m plynule).
@@ -2364,11 +2377,19 @@ func _teren_pod_vraty(root: Node3D) -> void:
 	# okno = vsechna vrata a branky po posunu vsi (driv pevne x 400-560, z 760-900 = stara ves; Misa 0.98)
 	var okno := AABB()
 	var prvni := true
-	for nd0 in root.find_children("Pohyb_ves_*", "MeshInstance3D", true, false):
-		if String(nd0.name).contains("branka") or String(nd0.name).contains("vrata"):
-			var b0 := (nd0 as MeshInstance3D).global_transform * (nd0 as MeshInstance3D).get_aabb()
-			okno = b0 if prvni else okno.merge(b0)
-			prvni = false
+	# 23. 11. (test vratka branka_2 −0,17 m, spodek beze zmeny z exportu 4,79): kridlo nemusi byt jedna sit - uzel s
+	# detmi (vic materialu) se driv preskocil (hledaly se jen MeshInstance3D) a zustal na vysce z Blenderu
+	var kridla: Array = []
+	for nd0 in root.find_children("Pohyb_ves_*", "Node3D", true, false):
+		var nm0 := String(nd0.name)
+		if not (nm0.contains("branka") or nm0.contains("vrata")) or (nd0.get_parent() and String(nd0.get_parent().name).begins_with("Pohyb_ves_")):
+			continue
+		var b0 := kridlo_aabb(nd0 as Node3D)
+		if b0.size == Vector3.ZERO:
+			continue
+		kridla.append(nd0)
+		okno = b0 if prvni else okno.merge(b0)
+		prvni = false
 	okno = okno.grow(4.0)
 	var ttri := {}                                   # trojuhelniky Teren_ves v okne po bunkach 4 m (povrch = kolize Teren_ves_kolize)
 	for t0 in root.find_children("Teren_ves*", "MeshInstance3D", true, false):
@@ -2393,13 +2414,12 @@ func _teren_pod_vraty(root: Node3D) -> void:
 						if not ttri.has(kc):
 							ttri[kc] = []
 						(ttri[kc] as Array).append([a0, b0, c0])
-	for nd in root.find_children("Pohyb_ves_*", "MeshInstance3D", true, false):
-		var nm := String(nd.name)
-		if not (nm.contains("branka") or nm.contains("vrata")):
-			continue
-		var mi := nd as MeshInstance3D
-		_prkna_tram(mi)
-		var bb := mi.global_transform * mi.get_aabb()
+	for nd: Node3D in kridla:
+		var mi: Node3D = nd
+		for pm in [nd] + nd.find_children("*", "MeshInstance3D", true, false):
+			if pm is MeshInstance3D:
+				_prkna_tram(pm as MeshInstance3D)
+		var bb := kridlo_aabb(nd)
 		# Misa 0.72 "branka strasne, zrus i kopecek": teren se pod kridlem uz nezveda - kridlo se spusti na teren
 		# (nejvyssi bod terenu pod kridlem, at nikde nevisi vys nez 2 cm); kul a plot zustavaji
 		# vyska ze site Teren_ves (mrizka 2 m _vyska se lisi az o 0,5 m): nejnizsi vrchol pod kridlem; vyssi teren

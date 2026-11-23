@@ -27,10 +27,10 @@ func na_zem(prefix: String) -> void:
 			var node: Node3D = it["node"]
 			if not String(node.name).contains(prefix) or String(node.name).contains("dvere"):
 				continue
-			var mi := node as MeshInstance3D
-			if mi == null:
+			# 23. 11.: kridlo z vic siti (uzel s detmi) - drive jen MeshInstance3D, branka_2 zustala z exportu (test vratka)
+			var bb := preload("res://scripts/svet.gd").kridlo_aabb(node)
+			if bb.size == Vector3.ZERO:
 				continue
-			var bb := mi.global_transform * mi.get_aabb()
 			var c := bb.get_center()
 			var y0 := INF
 			for o: Vector2 in [Vector2(0, 0), Vector2(0.3, 0), Vector2(-0.3, 0), Vector2(0, 0.3), Vector2(0, -0.3)]:
