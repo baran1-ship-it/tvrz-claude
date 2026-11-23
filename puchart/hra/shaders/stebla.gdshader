@@ -36,7 +36,8 @@ uniform float stin_korun = 0.0;
 varying float sl_k;
 uniform float hust_konec = 1e6;
 uniform float hust_do = 130.0;
-uniform float konec_sirka = 30.0;   // šířka mizení za hust_konec (louka.json konec_m; dřív pevně 30 m)
+uniform float konec_sirka = 30.0;
+uniform float prechod_trsu = 0.1;   // šířka (v hashi) zmenšování trsu k patě při ubývání; malá = trs se objeví/zmizí celý (chyby.md 408, „lezou ze země“)   // šířka mizení za hust_konec (louka.json konec_m; dřív pevně 30 m)
 // střední pás (plán E1, louka.json pas, rezim 2): karta s pečenou texturou porostu (trava_pas_atlas.png), bunka = druh,
 // výška vyska_od..do; objevuje se po kartách (hash) mezi pas_od.x a pas_od.y, zatímco jemné trsy mizí (konec_m)
 uniform vec2 pas_od = vec2(-1.0, 0.0);
@@ -156,7 +157,7 @@ void vertex() {
 		float navic = 1.0 + 0.1 * floor(kod / 16.0);
 		float hs = fract(ic.x);
 		vec3 pata = ic.yzw;
-		vec3 pw = (MODEL_MATRIX * vec4(pata, 1.0)).xyz;
+		vec3 pw = rezim == 2 ? MODEL_MATRIX[3].xyz + pata : (MODEL_MATRIX * vec4(pata, 1.0)).xyz;   // pás: báze instance není jednotková
 		float d = distance(pw.xz, INV_VIEW_MATRIX[3].xz);
 		float dal = smoothstep(hust_od, hust_do, d);
 		float hu = mix(1.0, hust_zbytek, dal) * (1.0 - smoothstep(hust_konec, hust_konec + konec_sirka, d)) * hustota * 1.1;
@@ -172,14 +173,15 @@ void vertex() {
 		if (rezim >= 1) {
 			bun = druh;
 		}
-		float s = h * navic * mix(0.75, 1.25, fract(hs * 17.31)) * clamp((hu - hs) / 0.1, 0.0, 1.0) * mix(1.0, 1.6, dal);
+		float s = h * navic * mix(0.75, 1.25, fract(hs * 17.31)) * clamp((hu - hs) / prechod_trsu, 0.0, 1.0) * mix(1.0, 1.6, dal);
 		if (rezim == 2) s *= mix(1.0, pas_rust, smoothstep(pas_od.y, hust_konec + konec_sirka, d));
 		float a = fract(hs * 91.7 + 0.13) * 6.2831853;
 		vec3 v = VERTEX * vec3(s, s * mix(0.85, 1.15, fract(hs * 5.13)), s);
 		vec3 vr = vec3(cos(a) * v.x + sin(a) * v.z, v.y, -sin(a) * v.x + cos(a) * v.z);
-		// střední pás: natočení a zkosení podle svahu už je v transformaci instance (louka.gd) – jen stejnoměrné měřítko
-		if (rezim == 2) vr = VERTEX * s;
 		VERTEX = pata + vr;
+		// střední pás: natočení a zkosení podle svahu je v transformaci instance (louka.gd); Compatibility ji násobí až po vertex()
+		// (MODEL_MATRIX = uzel × instance, VERTEX je síť; ověřeno ve zdroji scene.glsl 4.7.2) – pata se proto vrátí inverzí báze
+		if (rezim == 2) VERTEX = inverse(mat3(MODEL_MATRIX)) * pata + v;
 		ic = vec4(rezim == 0 && druh > 3.5 && druh < 4.5 ? 0.1 : fract(hs * 7.31) * 0.15, fract(hs * 13.7 + 0.29), (bun + 0.5) / (sloupce * radky), 1.0);
 	}
 	sl_k = 1.0;

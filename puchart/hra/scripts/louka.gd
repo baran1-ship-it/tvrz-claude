@@ -42,6 +42,7 @@ func postav(s: Node3D, kamera: Camera3D) -> void:
 	var ko: Array = cfg.get("konec_m", [cfg["hust_do_m"], float(cfg["hust_do_m"]) + 30.0])
 	m.set_shader_parameter("hust_konec", float(ko[0])); m.set_shader_parameter("konec_sirka", float(ko[1]) - float(ko[0]))
 	m.set_shader_parameter("hust_zbytek", float(cfg.get("hust_zbytek", 0.0)))
+	m.set_shader_parameter("prechod_trsu", float(cfg.get("prechod_trsu", 0.1)))
 	_vrstvy = [[_trs, float(cfg["bunka_m"]), float(cfg["dosah_m"]), float(cfg["krok_m"]), cfg["druhy"], int(cfg.get("nove_za_snimek", 1))]]
 	var P: Dictionary = cfg.get("pas", {})
 	if bool(P.get("zapnuto", false)) and ResourceLoader.exists(str(P["atlas"]["soubor"])):
@@ -56,6 +57,7 @@ func postav(s: Node3D, kamera: Camera3D) -> void:
 		pm.set_shader_parameter("hust_konec", float(P["do_m"][0])); pm.set_shader_parameter("konec_sirka", float(P["do_m"][1]) - float(P["do_m"][0]))
 		pm.set_shader_parameter("hust_od", 1e5); pm.set_shader_parameter("hust_do", 1e5 + 1.0)
 		pm.set_shader_parameter("vitr", 0.6)
+		pm.set_shader_parameter("prechod_trsu", float(cfg.get("prechod_trsu", 0.1)))
 		_vrstvy.append([_pas, float(P["bunka_m"]), float(P["dosah_m"]), float(P["krok_m"]), P["druhy"], int(P.get("nove_za_snimek", 1))])
 		print("LOUKA střední pás %s–%s m, buňka %s m, krok %s m" % [P["od_m"], P["do_m"], P["bunka_m"], P["krok_m"]])
 

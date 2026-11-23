@@ -132,6 +132,8 @@ maska cest v louka.gd/byliny.gd?) a zúžit vyloučení jen na vyjeté koleje; p
 | H1 | misa_20_11_voda.jpg (x 136,9 z 155,9) | voda „není pěkná a měla by být“ – tmavá plochá s bílými šmouhami vln, bez odrazu; plán D (Hvozd) dotáhnout pořádně |
 | H2 | misa_20_11_dira.jpg (x 127,1 z 30,3 směr 4°) | díra v povrchu terénu u přechodu cesty přes potok (brod) – terén nad korytem nenavazuje |
 | H3 | misa_20_11_vykon.jpg + ostatní | výkon: troj. 2,27–2,70 M (rozpočet 2,1 M), p95 až 63 ms, záseky 171–416, automatika stupeň 2/4 – rozšíření trávy 19. 11. (dosah 96 m, hust_zbytek 0,35, krajnice) je na tabletu drahé → nahradit plánem E1 (buňky), zatím vrátit dosah/hustotu |
+
+**E1 hotovo 23. 11. (PC, tablet NEOVERENO):** jemné trsy do 45 m (buňka 16 m), střední pás 25–150 m = karty s pečenou texturou porostu (louka.json pas, nastroje/trava_pas_atlas.py, stebla.gdshader rezim 2, zkosení podle svahu v transformaci instance), keře dosah 48 a byliny 40 (= konec zániku), automatika stupeň 1 = pás blíž. PC troj. ve Míšiných polohách 1,86 → 1,55 M (x 131,4 z 276,4 sever) a 1,78 → 1,30 M (x 146,7 z 311 směr 273°); chyby.md 413, smysl:stredni_pas_travy. Zbývá E2 (dálka za 150 m) a impostory keřů.
 | H4 | misa_20_11_vykon (svah s hradem) | černé skvrny na svahu pod hradem (stíny/impostory?) – prověřit |
 | H5 | misa_20_11_staj_tma.jpg (x 8,4 z 16 – i s loučí) | stáj uvnitř skoro černá i s hořící loučí – zjistit příčinu (stáj bere „interiér se stropem“ → světlo jen z otvorů? tmavé dřevo prkna_ven/dub? louč nesvítí na dřevo stáje?) – zesvětlení pod_strechou 1,6 nepomohlo a přesvětlilo místnosti → vráceno |
 | H6 | misa_20_11_svy.jpg (x 8,2 z 24,3) | svislé tmavé švy / rýhy na zdech a nároží (spáry mezi díly zdí – úkol #25) + kámen pořád „tapeta“ (plán F) |

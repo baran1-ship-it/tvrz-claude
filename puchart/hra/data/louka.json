@@ -218,6 +218,8 @@
   45.0
  ],
  "_konec_m": "jemné trsy mizí po jednotlivých trsech od konec_m[0] do konec_m[1] (stebla.gdshader hust_konec, konec_sirka); od pas.od_m je přebírá střední pás (prolnutí po trsech podle hashe, žádná hrana ani šachovnice)",
+ "prechod_trsu": 0.03,
+ "_prechod_trsu": "plán E1: trs/karta pásu se při ubývání a náběhu (konec_m, pas.od_m) neztrácí zmenšováním k patě, ale objeví/zmizí skoro celá (hash ± 0,03 = ~0,5 m chůze místo ~1,5 m) – jako oprava keřů a bylin chyby.md 408 (Míša 20. 11.: „rostliny lezoucí ze země“); prolnutí jemné → pás tak zůstává po jednotlivých trsech bez hrany. Dřív pevně 0,1.",
  "pozn_e1_23_11": "Plán E1 (Míša 18.–20. 11., docs/screens/misa_20_11_vykon.jpg: troj. 2,27–2,70 M > 2,1 M, pokles na 25 FPS): jemné trsy zpět na kratší dosah – předtím {\"dosah_m\": 96, \"bunka_m\": 32, \"hust_od_m\": 14, \"hust_do_m\": 85}, hust_zbytek 0,35 a konec = hust_do; buňka 32 → 16 m (načtený kruh dosah + 0,71 × buňka – s 32 m se kreslily neviditelné trsy 48–71 m). Dál střední pás (pas).",
  "zdroj_e1": "Míša 18.–20. 11., plán E1, předloha lod_trava_video (docs/reference/lod_trava_video/ obr. 11–20)",
  "pas": {
