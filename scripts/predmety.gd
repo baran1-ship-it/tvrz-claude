@@ -299,6 +299,10 @@ func spawn(rec: Dictionary) -> void:
 		if not ((float(r[1]) > 0.25 or float(r[0]) > 0.6) and not info.get("zed", false)) or bool(info.get("pruchozi", false)) or prejit:
 			b.collision_layer = 2
 			b.collision_mask = 0
+		# stan, pristresek (katalog pruchozi): mrizka chuze postav (lide._nav_pruchozi) pod nim chodi jako hrac - kvadr
+		# pro pokladani zakryl celou plochu pod platnem (plan_18_11 B9: kamenik u kovadliny pod pristreskem lomu 0 bunek)
+		if bool(info.get("pruchozi", false)):
+			b.set_meta("pruchozi", true)
 		var cs := CollisionShape3D.new()
 		var bs := BoxShape3D.new()
 		# vyska presne po horni plochu (na stul se pokladaji drobnosti), pudorys o kousek mensi

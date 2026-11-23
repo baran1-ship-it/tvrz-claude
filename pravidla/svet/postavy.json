@@ -144,7 +144,9 @@
   "_zmena_bloku_snimek": "14. 11.: v jedné hodině (6:00, 18:00) mění činnost až 30 postav v jednom snímku, každá 1–10 ms (místo, cesta) = zásek ~20 ms; nejvýš 4 změny za snímek, zbytek další snímky (test lide_zasek) | 14. 11. 4 → 2: test 9,5 a 13,4 ms (rozptyl na hraně 12 ms); rešerše (docs/rozpracovane/reserse_frekvence_npc.md): 1–2 nové činnosti za snímek | 14. 11. 2 → 1: sada 14,5 a 13,1 ms (36 postav = 36 snímků ≈ 0,6 s zpoždění, nevadí)",
   "ostrovy": [],
   "ostrov_r_m": 10.0,
-  "_ostrovy": "plan_18_11 C12 (misa_17_11 ř. 16): síť chůze má být jedna část; povolený ostrov = {bod [x, z], proc} – část, která má bod do ostrov_r_m od bodu, je záměrně oddělená (důvod povinný). Test sit_chuze."
+  "_ostrovy": "plan_18_11 C12 (misa_17_11 ř. 16): síť chůze má být jedna část; povolený ostrov = {bod [x, z], proc} – část, která má bod do ostrov_r_m od bodu, je záměrně oddělená (důvod povinný). Test sit_chuze.",
+  "konec_napoj_m": 6.0,
+  "_konec_napoj_m": "plan_18_11 C12 (test sit_chuze 23. 11.: k_mlynu „z ulice vsi“ končí 4,9 m od osy ulice, mlýn a 61 bodů cesty odděleně): první a poslední bod každé osy se spojí s nejbližším bodem jiné osy do této vzdálenosti, když mezi nimi není zeď (_volno). Jako svet._cesty_napoj pro pěšiny (6 m). Spojky uprostřed os dál jen do spoj_m."
  },
  "mista": {
   "naves_1": {
@@ -182,7 +184,7 @@
    "poradi": 0,
    "strana": "dlouha",
    "_p": "Misa 14. 11. „kamenik tluce kladivem na ceste“ (-21, 903): drive pevne (126,5, 931) 2 m od paty steny v leseni - mrizka chuze cestu nenasla (log 4x), nouze ho nechala pracovat, kde stal. Ted u spalku s kovadlinou pod 1. pristreskem (svet._lom_vybaveni, venku = mistnost \"\").",
-   "_lom_otevreno": "17. 11. OTEVŘENO (misa_16_11_chyby ř. 11): kusy kovadlina_spalek se řadí podle x → bere se kovadlina kovárny TVRZE (-15,2; 11), ne lomu (132,1; 927,2). U lomové kovadliny (y −1,01, pod přístřeškem) hra nenašla žádnou průchozí buňku do 2 m – rozbor (výška země pod přístřeškem × výška kusu) po vydání; podpora výběru `blizko` v lide.gd je připravena.",
+   "_lom_otevreno": "18. 11. (plan B9) OPRAVENO: příčina změřena testem kamenik_lom – země u kovadliny lomu −1,00 (terén lomu), kovadlina −1,01 = sedí správně; všech 8 směrů do 0,8 m blokoval kvádr přístřešku pro pokládání (pristresek_plachta 6,3 × 3,8 × 5,2 m, vrstva 2, katalog pruchozi) – mřížka chůze (lide._nav_bunka) ho brala jako zeď. Pravidlo: kolize předmětu s katalogem pruchozi nese meta pruchozi a lide._nav_pruchozi ji pustí (jako hráč pod plachtou). S blizko: místo (132,38; 927,87) 0,73 m od kovadliny lomu.",
    "blizko": [
     132.1,
     927.2

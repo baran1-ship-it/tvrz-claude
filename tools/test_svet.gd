@@ -11424,3 +11424,4 @@ func _sit_chuze() -> void:
 		if povol == "":
 			chyby.append(t)
 	_vysledek("sit_chuze", chyby.is_empty(), "casti %d (hlavni %d bodu), nepovolenych ostrovu %d %s" % [body.size(), (body[hl] as Array).size(), chyby.size(), str(chyby.slice(0, 4))])
+

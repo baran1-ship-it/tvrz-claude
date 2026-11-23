@@ -1583,6 +1583,9 @@ Hotovo v kódu a datech (testy u každého):
   `hra_linearni_stredni` (shader s převodem v `predmety.gd`); `lod_barvy.py`/`ves_domy_lod.py` od 18. 11. píšou sRGB a značku
   → po nové stavbě středních stupňů id ze seznamu smazat (kontrola hlásí dvojí převod). Převedené GLB se do hry dostanou
   až v balíku (`modely/` není v gitu) – po převodu `--import` a vydání; záloha původních v `build/zaloha_barvy_18_11/`.
+- **Řetěz běhů v jedné úloze na pozadí (18./23. 11.):** skript `flock … rozsev; flock … foto` a `testy; svetlo` čekal ve frontě za
+  cizími běhy ~1,5 h a limit úlohy (2 h od spuštění, i s čekáním) ho zabil uprostřed focení (snímky ruin a přelivu chyběly,
+  svetlo bez snímků). Každý běh Godotu = vlastní úloha na pozadí, další se zařadí až po oznámení předchozí.
 - **Fronta na zámek Godotu (17. 11.):** `flock build/beh/godot.lock …` na pozadí čeká, dokud běží cizí export (i 30+ min) – výchozí limit úlohy na pozadí 30 min ji zabije dřív, než se dostane na řadu (focení fcer). Úlohy ve frontě spouštět s `timeout` 7200000.
 - **Stínové světlo ohně nesmí ležet uvnitř modelu pece** (dum1: černá kopule, stín přes celou jizbu). Pece z katalogu
   (`ohen_znacky.k_usti_predmety`): světlo před ústím (`svetlo_pred_ustim_m`), plamen v ústí.

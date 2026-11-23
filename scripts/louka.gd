@@ -1440,19 +1440,33 @@ func _zasah(space: PhysicsDirectSpaceState3D, q: PhysicsRayQueryParameters3D, px
 	if je_teren:
 		# teren o 0,5 m niz nez mrizka 2 m (hrana skaly, prevys, zarez): trs by levitoval (Misa 0.56b ve skalach);
 		# mensi rozdil na svahu je bezny (mrizka vs. trojuhelniky) a trs ho skryje
-		return (h["position"] as Vector3).y < y - 0.5
-	# Misa 17. 11. r. 2 / plan_18_11 B7 (stebla mezi kameny dlazby prelivu): zasah tesne nad terenem pod nim = pevny
-	# povrch (dlazba, prah, deska) - tam nic neroste; vys (stul, vuz, strecha) dal nizky vejir. Teren pod zasahem:
-	# druhy paprsek s vyrazenym telesem (vyska louky _vzorek je mrizka 2 m, u zapustene dlazby o desetiny vedle)
-	var hy := (h["position"] as Vector3).y
-	var ex1 := q.exclude
-	var ex2 := ex1.duplicate()
-	ex2.append(h["rid"])
-	q.exclude = ex2
-	var h2 := space.intersect_ray(q)
-	q.exclude = ex1
-	var ty := (h2["position"] as Vector3).y if not h2.is_empty() else y
-	_posl_povrch = hy - ty < float(main.svet.pasma()["predmet"]["kryti_povrch_do_m"])
+		if (h["position"] as Vector3).y < y - 0.5:
+			return true
+		# dlazba v urovni terenu (preliv Lhota: teren dna prelivu o par cm nad horni plochou kamenu, paprsek trefil teren
+		# a trava rostla mezi kameny - build/m18/b7_b.png 23. 11.): kratky paprsek od terenu dolu bez terenu - pevne
+		# teleso tesne pod nim (pasma predmet kryti_povrch_pod_terenem_m) = pevny povrch
+		var ht := (h["position"] as Vector3).y
+		var qt := PhysicsRayQueryParameters3D.create(Vector3(px, ht + 0.15, pz), Vector3(px, ht - float(main.svet.pasma()["predmet"]["kryti_povrch_pod_terenem_m"]), pz))
+		var ext := q.exclude.duplicate()
+		ext.append(h["rid"])
+		qt.exclude = ext
+		var hp := space.intersect_ray(qt)
+		if not hp.is_empty() and not (hp["collider"] is CharacterBody3D or hp["collider"] is RigidBody3D):
+			var nm2 := String((hp["collider"] as Node).name)
+			if nm2.begins_with("StaticBody3D") and (hp["collider"] as Node).get_parent():
+				nm2 = String((hp["collider"] as Node).get_parent().name)
+			var teren2 := false
+			for pf: String in main.svet.pasma()["dil"]["teren_site"]:
+				teren2 = teren2 or nm2.begins_with(pf)
+			if not teren2:
+				_posl_povrch = true
+				return true
+		return false
+	# Misa 17. 11. r. 2 / plan_18_11 B7 (stebla mezi kameny dlazby prelivu): zasah blizko pate trsu (vyska louky y, kam
+	# se trs sazi) = pevny povrch (dlazba, prah, deska) - nizky vejir by jim prorostl, nesazi se nic; vys (stul, vuz,
+	# strecha) dal vejir. 1. pokus 23. 11. meril od terenu pod zasahem (druhy paprsek) - na svahu prelivu je dlazba
+	# zapustena pod mrizku louky, stred dlazby zustal „pod stolem“ (build/m18/b7_b.png)
+	_posl_povrch = (h["position"] as Vector3).y - y < float(main.svet.pasma()["predmet"]["kryti_povrch_do_m"])
 	return true
 
 

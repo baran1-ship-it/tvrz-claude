@@ -381,11 +381,35 @@ func _graf() -> void:
 	var mriz := {}
 	var osa_id := {}
 	var n := 0
-	for oi in sv.cesty_osy.size():
-		# cesticka do dvora za plotem (svet.PES_DVUR): do site ne - jinak oddeleny ostrov (plan_18_11 C12, test sit_chuze)
-		if bool((sv.cesty_osy[oi] as Dictionary).get("dvur", false)):
+	# osy cest + vyslapane pesiny z cesty.json se „sit_chuze“ (nejsou osou cesty - jen textura, napr. ves_uhliri k chysim
+	# uhliru; plan_18_11 C12): pesina = body jejich osy (Catmull-Rom jako osy cest), id osy za koncem cesty_osy
+	var osy: Array = []
+	for o: Dictionary in sv.cesty_osy:
+		osy.append(o["p"])
+	var pes: Array = Pravidla.cti("cesty", "pesiny")
+	for pi in pes.size():
+		if not bool((pes[pi] as Dictionary).get("sit_chuze", false)):
 			continue
-		var pts: Variant = sv.cesty_osy[oi]["p"]
+		var pp: Array = sv.PESINY[pi]
+		var hl := PackedVector2Array()
+		for k in pp.size() - 1:
+			var p0: Vector2 = pp[maxi(k - 1, 0)]
+			var p1: Vector2 = pp[k]
+			var p2: Vector2 = pp[k + 1]
+			var p3: Vector2 = pp[mini(k + 2, pp.size() - 1)]
+			var mm := maxi(1, int(p1.distance_to(p2) / 1.0))
+			for j in mm:
+				var t := float(j) / mm
+				hl.append(0.5 * ((2.0 * p1) + (-p0 + p2) * t + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * t * t + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * t * t * t))
+		hl.append(pp[pp.size() - 1])
+		osy.append(hl)
+	var konce: Array = []                  # [id bodu, id osy] prvni a posledni bod kazde osy v siti
+	for oi in osy.size():
+		# cesticka do dvora za plotem (svet.PES_DVUR): do site ne - jinak oddeleny ostrov (plan_18_11 C12, test sit_chuze)
+		if oi < sv.cesty_osy.size() and bool((sv.cesty_osy[oi] as Dictionary).get("dvur", false)):
+			continue
+		var pts: Variant = osy[oi]
+		var n0 := n
 		var prev := -1
 		var posl := Vector2.INF
 		for q0: Variant in pts:
@@ -408,6 +432,29 @@ func _graf() -> void:
 			prev = n
 			posl = q
 			n += 1
+		if n > n0:
+			konce.append([n0, oi])
+			konce.append([n - 1, oi])
+	# konec osy u jine osy (cesta „z ulice“, ktera konci 4,9 m od ni - k_mlynu, plan_18_11 C12): spojka do konec_napoj_m
+	# k nejblizsimu bodu jine osy bez zdi mezi (spojky uprostred os jen do spoj_m, jinak by preskakovaly ploty)
+	var kn := float(P["graf"]["konec_napoj_m"])
+	for ko: Array in konce:
+		var e := _g.get_point_position(int(ko[0]))
+		var best := -1
+		var bd := kn
+		var ce := Vector2i(floori(e.x / spoj), floori(e.y / spoj))
+		var rc := ceili(kn / spoj)
+		for dx in range(-rc, rc + 1):
+			for dz in range(-rc, rc + 1):
+				for m: int in mriz.get(ce + Vector2i(dx, dz), []):
+					if int(osa_id[m]) == int(ko[1]):
+						continue
+					var d := _g.get_point_position(m).distance_to(e)
+					if d < bd:
+						bd = d
+						best = m
+		if best >= 0 and not _g.are_points_connected(best, int(ko[0])) and _volno(e, _g.get_point_position(best)):
+			_g.connect_points(best, int(ko[0]))
 	# Misa 17. 11. (mapa: figurka „utika do lesa“): pocet oddelenych casti site - nenapojene osy cest = cesta lesem
 	var cast := casti_site()
 	var casti := 0
@@ -788,7 +835,8 @@ func _nav_bunka(ij: Vector2i, y_ref: float) -> float:
 
 
 static func _nav_pruchozi(col: Object) -> bool:
-	return col is Node and str((col as Node).get_path()).contains("Pohyb_")
+	# dvere a vrata (Pohyb_*) a kvadr stanu/pristresku pro pokladani (predmety.gd meta pruchozi, plan_18_11 B9)
+	return col is Node and (str((col as Node).get_path()).contains("Pohyb_") or (col as Node).has_meta("pruchozi"))
 
 
 func _nav_ij(q: Vector2) -> Vector2i:

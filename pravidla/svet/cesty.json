@@ -3116,6 +3116,14 @@
    "pulsirka_m": 0.6,
    "osa": [
     [
+     514.19,
+     867.56
+    ],
+    [
+     520.0,
+     858.0
+    ],
+    [
      538.0,
      856.0
     ],
@@ -3135,7 +3143,10 @@
      640.0,
      825.0
     ]
-   ]
+   ],
+   "sit_chuze": true,
+   "_sit_chuze": "plan_18_11 C12 (test sit_chuze 23. 11.): pěšina od vsi k chýším uhlířů není osou cesty (jen textura), chýše s plackem (osy 24, 25) byly v síti chůze ostrov 134 m od ostatních – postavy a figurka mapy po ní chodí (lide._graf).",
+   "_osa_18_11": "plan_18_11 C12 (test sit_chuze 23. 11.): pěšina začínala (538, 856) 27 m od konce pěšiny k_rybniku (514,2; 867,6) – chýše uhlířů ostrov sítě chůze. Napojena na konec k_rybniku obloukem jižně od rybníka Lhota (bod (520, 858) 22 m od středu, poloměr 16,8). V textuře terénu až po dalším exportu."
   },
   {
    "id": "lom_brod_odbocka",
