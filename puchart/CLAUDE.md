@@ -42,6 +42,14 @@ a měřením; tablet měří Míša.
 - **Design podle fotek KCD** (Míša 13. 11., pravidlo): vzhled vsi, staveb, cest, trávy, plotů, brodů… se navrhuje podle
   fotek KCD; závazná předloha vsi `docs/reference/kcd_ves_predloha/` (hlína kde se chodí, tráva u paty zdí a plotů, ploty
   napojené na stavby). Ve hře funkční vše, co jde (dveře, vrata, vrátka, předměty) – Míša 13. 11.
+- **Jeden agent, úkol po úkolu** (Míša 23. 11., převzato z Havrana): práci dělá hlavní agent sám, úkol po úkolu, a každý
+  výsledek si sám zkontroluje (kontrolní snímek + test toho místa). Žádné týmy pomocníků na běžnou práci – každý si znovu
+  načítá kód a podklady (až 5× dražší) a šlapou si do sdílených souborů. Pomocník (subagent) jen na nezávislou kontrolu
+  před vydáním (nezná závěry stavitele) a na rozsáhlé hledání v mnoha souborech, kde stačí závěr; nanejvýš jeden najednou.
+- **Testy s mírou**: po změně test smyslu + trasy dotčené skupiny (hlídači po skupinách, otisky); celá sada a export až
+  na konci větší části.
+- **Vzory toho, co se povedlo** (`docs/vzory.md`): když Míša něco pochválí nebo se část povede, rozebrat, jak vznikla
+  (data, pravidla, postup, ověření, na co pozor) a zapsat jako vzor. Podobná práce začíná přečtením vzoru.
 - **Snímky šetřit** (Míša 19. 11., pravidlo): jeden kontrolní snímek jen tam, kde hrozí špatné umístění nebo prostup
   (nová/posunutá stavba, předmět, terén u zdí); žádné série před/po. Barvy, světlo, voda, hustota trávy a výkon bez
   snímku – vzhled kontroluje Míša na tabletu (posílá snímky s polohou). Víc snímků jen na Míšino přání.
