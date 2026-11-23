@@ -13,6 +13,11 @@ uniform float fade_od = 50.0;                 // nabeh (plny strom konci na 60 m
 uniform float fade_pas = 10.0;               // delka nabehu ditherem (kere: les_podrost.json dalka.kere_prolinani_m)
 uniform float fade_do = 900.0;
 uniform vec4 tint = vec4(1.0);      // odstin listi druhu (svet.TINT_LISTI) - jako plny strom
+// hmota lesa v dalce (les_podrost.json dalka.hmota, sceny_kcd_15_11.md krok 4-5): od hm_pas.x do hm_pas.y tmavsi
+// a modrejsi listi (hm_barva) a vetsi koruna (hm_zvetseni) - sousedni koruny splynou; vychozi hodnoty = beze zmeny
+uniform vec2 hm_pas = vec2(100000.0, 100001.0);
+uniform vec3 hm_barva = vec3(1.0);
+uniform float hm_zvetseni = 1.0;
 
 const float N = 8.0;
 
@@ -20,6 +25,7 @@ varying vec2 bunka;
 varying float viditelnost;
 varying float prah;
 varying float otoc;
+varying float hmota;
 
 void vertex() {
 	vec4 ic = INSTANCE_CUSTOM;
@@ -41,9 +47,10 @@ void vertex() {
 	vec3 fv = normalize(vec3(f.x, min(f.y, 0.95), f.z));
 	vec3 r = normalize(cross(vec3(0.0, 1.0, 0.0), fv));
 	vec3 u = cross(fv, r);
-	vec2 k = (UV - 0.5) * 2.0 * polomer * s;
-	VERTEX = c - o + r * k.x - u * k.y;
 	float dist = distance(c, cam);
+	hmota = smoothstep(hm_pas.x, hm_pas.y, dist);
+	vec2 k = (UV - 0.5) * 2.0 * polomer * s * mix(1.0, hm_zvetseni, hmota);
+	VERTEX = c - o + r * k.x - u * k.y;
 	viditelnost = smoothstep(fade_od, fade_od + fade_pas, dist) * (1.0 - smoothstep(fade_do - 60.0, fade_do, dist));
 	prah = fract(sin(dot(ic.xz + o.xz, vec2(12.9898, 78.233))) * 43758.5453);
 	// mimo pasmo (blizko pod plnym modelem, za dosahem): ctverec do bodu - nerasterizuje se (driv cely ctverec
@@ -65,7 +72,7 @@ void fragment() {
 	// vlastni stin koruny (plny strom ho ma z geometrie, obrazek ne): dole a uvnitr tmavsi
 	// odstin jen pro listi (kmen v dalce je par pixelu): zelenejsi nez sede = listi
 	float li = smoothstep(0.0, 0.08, a.g - max(a.r, a.b) * 0.8);
-	ALBEDO = a.rgb * mix(vec3(1.0), tint.rgb, li) * mix(0.55, 0.85, 1.0 - UV.y);
+	ALBEDO = a.rgb * mix(vec3(1.0), tint.rgb, li) * mix(0.55, 0.85, 1.0 - UV.y) * mix(vec3(1.0), hm_barva, hmota);
 	// normala ve svete stromu -> otocit o otoceni stromu -> do pohledu kamery
 	vec3 n = texture(normaly, uv).rgb * 2.0 - 1.0;
 	float co = cos(otoc);

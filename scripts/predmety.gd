@@ -226,12 +226,9 @@ func spawn(rec: Dictionary) -> void:
 			var st_m: Material = _st_mat
 			if (Pravidla.cti("barvy_vrcholu", "hra_linearni_stredni") as Array).has(id):
 				if _st_mat_lin == null:
-					var sh := Shader.new()
-					sh.code = "shader_type spatial;\nvoid fragment() {\n\tvec3 c = clamp(COLOR.rgb, 0.0, 1.0);\n" \
-							+ "\tALBEDO = mix(1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, c * 12.92, vec3(lessThanEqual(c, vec3(0.0031308))));\n" \
-							+ "\tROUGHNESS = %.2f;\n}\n" % _st_mat.roughness
 					_st_mat_lin = ShaderMaterial.new()
-					_st_mat_lin.shader = sh
+					_st_mat_lin.shader = load("res://shaders/stredni_lin_srgb.gdshader")
+					_st_mat_lin.set_shader_parameter("drsnost", _st_mat.roughness)
 				st_m = _st_mat_lin
 			for g in m.find_children("*", "GeometryInstance3D", true, false):
 				(g as GeometryInstance3D).visibility_range_end = od

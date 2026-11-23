@@ -201,7 +201,7 @@ func _varianta(zap: bool) -> void:
 		var lb: Node = main.get_node_or_null("Louka")
 		if lb:
 			lb.nastav_bez_stinu(zap)
-	elif v == "louka_puchart":                 # 15. 11. bod 6: trs krok_m, plna do od_m, ridne do do_m (varianty_parametry)
+	elif v == "louka_puchart" or v == "louka_15_45":   # 15. 11. bod 6 / K7 23. 11.: trs krok_m, plna do od_m, ridne do do_m (varianty_parametry)
 		var lp: Node = main.get_node_or_null("Louka")
 		if lp:
 			var pp: Dictionary = _par(v)
@@ -415,6 +415,8 @@ func _jm(v: String) -> String:
 		return "louka b.st"
 	if v == "louka_puchart":
 		return "louka Puch"
+	if v == "louka_15_45":
+		return "louka 15/45"
 	if v == "stin_filtr_1":
 		return "filtr st.1"
 	if v == "dohled_kratsi":

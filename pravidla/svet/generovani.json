@@ -18,6 +18,8 @@
   670.0,
   990.0
  ],
+ "blender_hrube_body_jemnych": true,
+ "_blender_hrube_body_jemnych": "23. 11. (plan_18_11 B6, Míša 17. 11. ř. 6 – čáry na hranách terénu): kraj._hrube_body_jemnych – Teren_okoli (5 m) dostane na hraně k Teren_ves (2 m) a Teren_most (1 m) jejich body (výška hrubé hrany), takže obě sítě mají na hraně tytéž vrcholy (žádný T-spoj = žádná skulina, kterou byla vidět tmavá čára i při výškovém rozdílu 0,006 m). Tvar hrubé sítě se nemění. Návrat: false.",
  "blender_pasmo_obzor_25m": [
   -1500.0,
   2000.0,

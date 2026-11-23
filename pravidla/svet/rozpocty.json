@@ -82,5 +82,74 @@
  "ves_vnitrek": {
   "do_m": 12.0,
   "_pozn": "13. 11. (rozbor kresleni ves_vjezd: predmety 87 kresleni vc. luzek, maselnic, hrncu uvnitr domu vsi): predmet uvnitr pudorysu domu vsi (svet.v_dome) jen do do_m - zvenku je dovnitr videt jen dvermi zblizka (jako portaly tvrze: zvenku do 12 m)"
+ },
+ "louka_dosahy": {
+  "zanik": [
+   [
+    20.0,
+    110.0
+   ],
+   [
+    12.0,
+    45.0
+   ],
+   [
+    12.0,
+    45.0
+   ],
+   [
+    20.0,
+    110.0
+   ],
+   [
+    40.0,
+    60.0
+   ]
+  ],
+  "uroven_od": [
+   0.0,
+   35.0,
+   65.0
+  ],
+  "uroven_pro": [
+   0.0,
+   20.0,
+   50.0
+  ],
+  "kupy": [
+   [
+    64.0,
+    45.0,
+    280.0,
+    1.2,
+    2.0,
+    0.85
+   ],
+   [
+    128.0,
+    240.0,
+    650.0,
+    2.6,
+    4.2,
+    0.4
+   ]
+  ],
+  "vejir_shader": {
+   "hust_od": 15.0,
+   "hust_do": 40.0,
+   "hust_zbytek": 0.25,
+   "hust_konec": 40.0
+  },
+  "_pozn": "23. 11. K7 (rozbor_gpu_15_11 Z6: dosahy louky byly čísla v kódu louka.gd) – hodnoty beze změny proti 0.9999992, jen přesun do dat. zanik = [plné do m, konec m] po vrstvách louky (0 trsy, 1 květy, 2 drn, 3 vysoká tráva, 4 vějíř; konec trsů a vysoké trávy navíc omezí modely.json trava_dosah_m, tablet 80); uroven_od = od jaké vzdálenosti buňky má buffer úroveň 0/1/2, uroven_pro = pro jakou vzdálenost je buffer úrovně postaven (víc trsů = rezerva na přiblížení); kupy = [buňka m, od m, do m, měřítko min, max, pokrytí] impostorů trávy za trsy; vejir_shader = parametry shaderu vějíře (vrstva 4, dnes vypnutá). Míšin návrh 15/45 (tablet) NENÍ zapnut – nezměřeno; varianta měřicí trasy louka_15_45 (mereni_trasa.json varianty_parametry, _varianty_pristi). Smazaná nepoužívaná čísla v kódu: HUST_OD 20, HUST_DO 130, KVETY_OD 12, KVETY_DO 45 (nikdo je nečetl). Návrat: hodnoty výše = dřívější konstanty."
+ },
+ "obzor": {
+  "bunka_m": 1024.0,
+  "orez_dohledem": true,
+  "_pozn": "23. 11. K9 (rozbor_gpu_15_11): impostory stromů (svet._impostory – les za okrajem mapy Obzor_les i impostory uvnitř mapy). bunka_m = buňka MultiMeshe lesa za mapou (dříve OBZ_BUNKA 1024 v kódu). Návrh rozboru 256 m NEPROVEDEN: varianta trasy bez_obzoru 0.9999992 bez jasného rozdílu (mereni_verze.md) = obzor nic zásadního nestojí, menší buňka = víc volání (Míša 0.92: 256 m = 312 uzlů) – měnit jen při naměřené ceně. orez_dohledem = visibility_range_end buňky = dohled (les_podrost.dalka) + půl úhlopříčky buňky + poloměr koruny: buňka celá za dohledem se nekreslí (dřív šly všechny vrcholy do GPU a zahodily se ve shaderu); v dohledu nic nezmizí. Návrat: false. Účinek NEOVĚŘENO NA ZAŘÍZENÍ (varianta bez_obzoru dá horní mez)."
+ },
+ "bunky_statickych": {
+  "bunka_m": 24.0,
+  "dlouhy_dosah_m": 48.0,
+  "_pozn": "23. 11. K10 (rozbor_gpu_15_11 Z7): buňky MultiMeshů rostlin (svet._plants, streamování svet.rostliny_*). bunka_m = byliny, podrost, stromy s impostorem nebo tvarem (krátký dosah: větší buňka se středem za koncem dosahu by schovala blízké kusy – viditelnost se měří ke středu buňky); dlouhy_dosah_m = kameny, balvany, skály, vzdálené LOD (Míša 0.66/0.67: 48 200 uzlů = pád). Hodnoty beze změny proti 0.9999992 (dřív BUNKA 24 a BUNKA × 2 v kódu); okraj načítání = dlouhy_dosah_m × 0,75 (dřív BUNKA × 1,5 = 36). Návrh rozboru (stromy 48, skály 96 + jedna úroveň viditelnosti na buňku přes visibility_parent) NEPROVEDEN: větší buňka stromů bez přestavby viditelnosti na skupinu = mizení blízkých stromů; cena ořezu na instanci je jen ODHAD (Z7) – nejdřív změřit kreslení CPU a počet objektů (panel) na tabletu. Návrat: nic (hodnoty = dřívější kód)."
  }
 }

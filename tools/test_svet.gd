@@ -3214,9 +3214,17 @@ func _clona_vsi() -> void:
 	for key: String in obal:
 		var ab2: AABB = obal[key]
 		obal_v[key] = [ab2.position.x, ab2.position.y, ab2.position.z, ab2.size.x, ab2.size.y, ab2.size.z]
+	var teren_v: Array = []                              # vysky terenu po 2 m v obdelniku (navrh novych kusu)
+	var gx := floori(lo.x / 2.0) * 2
+	while gx <= ceili(hi.x):
+		var gz := floori(lo.y / 2.0) * 2
+		while gz <= ceili(hi.y):
+			teren_v.append([gx, gz, snappedf(sv._teren_y(float(gx), float(gz)), 0.01)])
+			gz += 2
+		gx += 2
 	var fj := FileAccess.open("res://build/clona_vsi.json", FileAccess.WRITE)
 	if fj:
-		fj.store_string(JSON.stringify({"cile": cile_v, "odkud": odk_v, "koruny": kor_v, "obal": obal_v, "podil": podil}))
+		fj.store_string(JSON.stringify({"cile": cile_v, "odkud": odk_v, "koruny": kor_v, "obal": obal_v, "podil": podil, "teren": teren_v}))
 		fj.close()
 	_vysledek("clona_vsi", podil >= float(cv["kryti_min"]), "z vjezdu zakryto vegetaci %d / %d paprsku (%.0f %%, min %.0f %%), korun %d, po cilech %s" % [kryto, celkem, podil * 100.0, float(cv["kryti_min"]) * 100.0, nkor, str(po_cilech)])
 

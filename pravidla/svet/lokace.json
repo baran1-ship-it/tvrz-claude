@@ -3592,6 +3592,21 @@
     -9.8
    ]
   ],
+  "okluzor_lok": [
+   [
+    -8.16,
+    7.17,
+    -4.16,
+    4.16
+   ],
+   [
+    9.8,
+    18.2,
+    -8.4,
+    4.0
+   ]
+  ],
+  "_okluzor_lok": "23. 11. K8: krabice okluzoru (pasma budova okluzor_dily) = hlavní dům a kamenné stájové křídlo z pudorys_lok; malá přístavba (−7,7…−3,1 × −12,8…−9,8) vynechána (malá, nic za ní nezakryje). Spodek na terénu středu krabice (křídlo je o kridlo_posun_y_m níž).",
   "vstupy_lok": [
    [
     0.65,

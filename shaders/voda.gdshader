@@ -28,6 +28,11 @@ uniform vec3 telo_kraj : source_color = vec3(0.08, 0.065, 0.04);
 uniform vec3 telo_stred : source_color = vec3(0.015, 0.024, 0.019);
 uniform float stred_hloubka = 1.0;
 uniform float maly_tok_stred = 0.45;            // maly tok: kolik ze stredu (melka voda, dno prosvita)
+// maly tok - aby byl citelne vodou (Misa 18. 11. r. 11 „vody je videt malo“): odraz aspon mt_odraz_min i shora (zcerinena
+// mela hladina odrazi oblohu ve vlnkach), vlnky strmejsi o mt_sklon, alfa stredu pasu mt_alfa (voda.json vzhled_hvozd.maly_tok)
+uniform float mt_odraz_min = 0.0;
+uniform float mt_sklon = 1.0;
+uniform float mt_alfa = 0.92;
 uniform vec2 alfa = vec2(0.2, 0.92);              // kraj, stred
 uniform float vl_uv_m = 4.0;
 uniform vec2 vl_meritko = vec2(0.8, 1.9);
@@ -80,7 +85,7 @@ void fragment() {
 	// vlnky: jedna normalova mapa ctena dvakrat (Hvozd: uv.x*0,8 - t*0,45 a uv.x*1,9 - t*0,8, vahy 0,55/0,45)
 	vec3 n1 = texture(nmap, vec2(u * vl_meritko.x - t * vl_rychlost.x, v * vl_meritko.x)).rgb;
 	vec3 n2 = texture(nmap, vec2(u * vl_meritko.y - t * vl_rychlost.y, v * vl_meritko.y) + 0.37).rgb;
-	vec2 nxy = ((n1.xy * vl_vaha.x + n2.xy * vl_vaha.y) * 2.0 - 1.0) * vl_sklon * (1.0 + 0.8 * v_perej);
+	vec2 nxy = ((n1.xy * vl_vaha.x + n2.xy * vl_vaha.y) * 2.0 - 1.0) * vl_sklon * (1.0 + 0.8 * v_perej) * (maly_tok ? mt_sklon : 1.0);
 	vec2 g = sm * nxy.x + bok * nxy.y;               // sklon hladiny ve svete (x, z)
 	// okraj -> stred (0 = kraj, 1 = stred): hloubka z barvy vrcholu, maly tok napric pasu
 	float kraj_p = min(UV.x, 1.0 - UV.x);
@@ -140,6 +145,9 @@ void fragment() {
 	if (abs(dy2.x) < abs(dy.x)) { dy.x = dy2.x; }
 	vec3 refl = textureGrad(panorama, puv, dx, dy).rgb;
 	float fres = f0 + (1.0 - f0) * pow(1.0 - max(dot(V, wn), 0.0), f_mocnina);
+	if (maly_tok) {
+		fres = max(fres, mt_odraz_min * smoothstep(0.02, 0.2, kraj_p));
+	}
 	vec3 svetlo = mix(vec3(dot(voda_svetlo, vec3(0.3333))), voda_svetlo, odraz_tonovani);
 	vec3 telo = mix(telo_kraj, telo_stred, stred);
 	float bila = clamp(pena + hreben * 0.25, 0.0, 1.0);
@@ -151,7 +159,7 @@ void fragment() {
 	SPECULAR = 0.15 * (1.0 - kryt);                  // jen odlesk slunce - oblohu z enginu nahrazuje panorama
 	METALLIC = 0.0;
 	// pruhlednost: kraj alfa.x -> stred alfa.y, pod malym uhlem (fresnel) kryje odraz; okraj site se ztraci
-	float a = mix(mix(alfa.x, alfa.y, stred), 1.0, fres);
+	float a = mix(mix(alfa.x, maly_tok ? mt_alfa : alfa.y, maly_tok ? stred / max(maly_tok_stred, 0.001) : stred), 1.0, fres);
 	a = max(a, kryt);
 	if (maly_tok) {
 		a *= smoothstep(0.02, 0.2, kraj_p);

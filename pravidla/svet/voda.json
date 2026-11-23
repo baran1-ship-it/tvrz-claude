@@ -6276,7 +6276,13 @@
   "stred_hloubka_reka_m": 0.4,
   "_stred_hloubka_reka_m": "Bystrice (reka.gdshader) je hluboka nejvys ~0,6 m (potok.hloubka_vody_m): se stred_hloubka_m 1,0 zustala cela v alfa kraje 0,2 = jen prosvitajici sterk (snimek build/m18v/po_byst12.png)",
   "maly_tok_stred": 0.45,
-  "_maly_tok_stred": "18. 11. kontrola snímků (build/m18v/po_odtok12.png: malý tok = černý pás, Míša 0.991 „asfalt“): malý tok je mělký, střed těla a alfy jen do 0,45 – dno prosvítá"
+  "_maly_tok_stred": "18. 11. kontrola snímků (build/m18v/po_odtok12.png: malý tok = černý pás, Míša 0.991 „asfalt“): malý tok je mělký, střed těla a alfy jen do 0,45 – dno prosvítá",
+  "maly_tok": {
+   "odraz_min": 0.3,
+   "sklon": 1.6,
+   "alfa_stred": 0.7,
+   "_p": "Míša 18. 11. ř. 11 (po maly_tok_stred 0,45 „vody je vidět málo“, build/sady/odtok_po.png = kamenitá cesta): malý tok je mělký a dno prosvítá, vodou ho dělá odraz v čeřené hladině a pohyb. odraz_min = nejmenší podíl odrazu (panorama) i při pohledu shora (fresnel f0 0,03 dával shora ~0), jen uvnitř pásu; sklon = násobek vlnky.sklon (proud čeří víc než rybník); alfa_stred = alfa ve středu pásu (místo alfa_stred 0,92 × maly_tok_stred). Tělo (barva) dál jen do maly_tok_stred – žádný černý pás. Návrat: odraz_min 0, sklon 1, alfa_stred 0,92 × 0,45 + 0,2 × 0,55 ≈ 0,52."
+  }
  },
  "mlha_vody": {
   "_zdroj": "Hvozd 18. 11.: pruhledne billboardy pri zemi nad toky (MultiMesh, unshaded, bez zapisu hloubky). Prekresleni na tabletu = riziko: varianta merici trasy bez_mlhy_vody. NEOVERENO NA ZARIZENI.",

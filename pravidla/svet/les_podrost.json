@@ -649,6 +649,17 @@
   "kere_do_m": 400.0,
   "kere_prolinani_m": 10.0,
   "stromy_do_m": 2500.0,
-  "obzor_do_m": 2500.0
+  "obzor_do_m": 2500.0,
+  "hmota": {
+   "od_m": 250.0,
+   "do_m": 700.0,
+   "barva": [
+    0.62,
+    0.7,
+    0.78
+   ],
+   "zvetseni": 1.35,
+   "_p": "Hmota lesa (sceny_kcd_15_11.md krok 4–5, Míša 15. 11. „les je plný a dálka ochuzená“, předlohy kcd1_28, ref_kcd2_ves_shora, les100_hmota_dalka): od od_m do do_m impostory stromů (ne keřů, ne blízké plné stromy) postupně tmavnou a modrají (barva = násobek albeda listí, KCD: dálka tmavší než louka, do oparu) a koruny se zvětší až na zvetseni × poloměr, takže sousední koruny splynou do souvislé hmoty s hrbolky jen na hraně (místo řad světlých kuželů, naše misa_15_11/17, 18). Bez nové sítě a průhlednosti (shaders/impostor.gdshader, dither a discard jako dosud); síť hmoty z Blenderu (krok 4) zatím nepostavena. Návrat: barva [1, 1, 1], zvetseni 1. Čísla NEOVĚŘENA na tabletu – kalibrace snímkem z věže proti ref_kcd2_ves_shora."
+  }
  }
 }

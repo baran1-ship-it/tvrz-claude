@@ -8,7 +8,9 @@ const PadVody := preload("res://scripts/pad_vody.gd")
 const MOD := "res://modely/"
 const BARVA_LOUKY := Vector3(0.145, 0.235, 0.02)   # linearne; kalibrace testem dalka (tools/test_svet.gd)
 const BARVA_LESA := Vector3(0.062, 0.095, 0.015)
-const BUNKA := 24.0
+# K10 (23. 11.): bunky rostlin z dat rozpocty.json bunky_statickych (drive BUNKA 24 a BUNKA * 2 v kodu)
+var BUNKA := float(Pravidla.cti("rozpocty", "bunky_statickych", "bunka_m"))
+var BUNKA_DLOUHE := float(Pravidla.cti("rozpocty", "bunky_statickych", "dlouhy_dosah_m"))
 ## textury s vyskovou mapou -> parallax (hloubka v metrech)
 const HLOUBKA := {"dlazba": 0.04, "dlazba_hrad": 0.035, "kocicky": 0.05, "piskovec": 0.02, "podlaha": 0.008, "prkna_ven": 0.012, "sindel": 0.035, "skala_piskovec": 0.07, "kamen": 0.04, "kamen_lisejnik": 0.05}
 
@@ -3916,6 +3918,8 @@ func _rost_dil(b: Vector2i, i: int) -> void:
 	mmi.cast_shadow = e["stin"]
 	if e["mat"]:
 		mmi.material_override = e["mat"]
+	# K12 (rozbor_gpu_15_11): diag „pod křížem“ čte polohy z dat buňky, ne get_instance_transform (zpětné čtení z GPU)
+	mmi.set_meta("diag_buf", [e["buf"], 12 + (4 if e["barvy"] else 0) + (4 if e["data"] else 0), [3, 7, 11]])
 	mmi.visible = false
 	_rost_root.add_child(mmi)
 	(_rost_uzly[b] as Array).append(mmi)
@@ -3956,7 +3960,7 @@ func rostliny_okoli(p: Vector3, vse := false, rozpocet_us := 1500) -> void:
 			var b := c0 + Vector2i(dx, dz)
 			if _rost_uzly.has(b) or not _rost_data.has(b):
 				continue
-			var d := (Vector2(b) * BUNKA + Vector2.ONE * BUNKA * 0.5).distance_to(q) - BUNKA * 1.5   # i bunky 48 m
+			var d := (Vector2(b) * BUNKA + Vector2.ONE * BUNKA * 0.5).distance_to(q) - BUNKA_DLOUHE * 0.75   # i bunky dlouheho dosahu (48 m: 36 jako drive)
 			if d < ROST_R:
 				chybi.append([d, b])
 	chybi.sort_custom(func(a2: Array, b2: Array) -> bool: return a2[0] < b2[0])
@@ -4814,6 +4818,12 @@ func _impostory(root: Node3D, imp: Dictionary, bunka: float, dohled: float, jmen
 		for pf: String in TINT_LISTI:
 			if d.begins_with(pf):
 				m.set_shader_parameter("tint", TINT_LISTI[pf])
+		if jmeno != "ker_imp":
+			# hmota lesa v dalce (les_podrost.json dalka.hmota): stromy i obzor, kere ne
+			var hm: Dictionary = Pravidla.cti("les_podrost", "dalka", "hmota")
+			m.set_shader_parameter("hm_pas", Vector2(float(hm["od_m"]), float(hm["do_m"])))
+			m.set_shader_parameter("hm_barva", Vector3(float(hm["barva"][0]), float(hm["barva"][1]), float(hm["barva"][2])))
+			m.set_shader_parameter("hm_zvetseni", float(hm["zvetseni"]))
 		for bc: Vector2i in imp[d]:
 			var list: Array = imp[d][bc]
 			var mm := MultiMesh.new()
@@ -4837,6 +4847,10 @@ func _impostory(root: Node3D, imp: Dictionary, bunka: float, dohled: float, jmen
 			mmi.multimesh = mm
 			mmi.material_override = m
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			# K9 (23. 11., rozpocty.json obzor.orez_dohledem): bunka za dohledem se neposila ke kresleni vubec (drive jen
+			# zahozeni ve shaderu); dosah se meri ke stredu obalu -> + pul uhlopricky bunky, aby nic v dohledu nezmizelo
+			if bool(Pravidla.cti("rozpocty", "obzor", "orez_dohledem")):
+				mmi.visibility_range_end = dohled + bunka * 0.71 + r
 			mmi.name = "%s_%s_%d_%d" % [jmeno, d, bc.x, bc.y]
 			mmi.position = o
 			root.add_child(mmi)
@@ -4850,7 +4864,8 @@ func _impostory(root: Node3D, imp: Dictionary, bunka: float, dohled: float, jmen
 ## dohled 2500 m (v mlze). Mimo Rostliny: testy a dosednuti po fyzice obzor nemaji (bez kolize).
 const OBZ_ACT := Rect2(-250.0, -250.0, 1150.0, 1600.0)
 const OBZ_PAS := 1100.0
-const OBZ_BUNKA := 1024.0
+# K9 (23. 11.): bunka obzoru z dat rozpocty.json obzor.bunka_m (drive OBZ_BUNKA 1024 v kodu)
+var OBZ_BUNKA := float(Pravidla.cti("rozpocty", "obzor", "bunka_m"))
 
 
 func _obzor_les(root: Node3D) -> void:
@@ -9507,6 +9522,25 @@ func _okluzory(parent: Node3D) -> void:
 		parent.add_child(dom)
 		_okl_prep.append([dom, Vector2(wc.x, wc.z), Vector2(bo3.size.x, bo3.size.z).length() * 0.5 + float(pasma()["test"]["okluzor_vypnout_m"])])
 		nd += 1
+	# K8 (23. 11., rozbor_gpu_15_11): dily od modelare (krcma do L) - krabice zdi z lokace.json <id>.okluzor_lok
+	# ([x0, x1, z0, z1] v souradnicich modelu, jen plne zdene casti), zmensene a vysoke jako domy vsi (pasma budova),
+	# spodek na terenu stredu krabice; seznam dilu pasma budova okluzor_dily. U hrace se vypinaji (okluzory_u_hrace).
+	for oid: String in pb.get("okluzor_dily", []):
+		var oz: Dictionary = Pravidla.cti("lokace", oid)
+		var oxf := Transform3D(Basis(Vector3.UP, float(oz["natoceni"])), Vector3(float(oz["stred"][0]), 0.0, float(oz["stred"][1])))
+		for ob: Array in oz.get("okluzor_lok", []):
+			var zm2 := float(pb["okluzor_zmenseni"])
+			var vy2 := float(pb["okluzor_vyska_m"])
+			var oc := oxf * Vector3((float(ob[0]) + float(ob[1])) * 0.5, 0.0, (float(ob[2]) + float(ob[3])) * 0.5)
+			var obx := BoxOccluder3D.new()
+			obx.size = Vector3((float(ob[1]) - float(ob[0])) * zm2, vy2, (float(ob[3]) - float(ob[2])) * zm2)
+			var oin := OccluderInstance3D.new()
+			oin.name = "Okluzor_%s_%d" % [oid, nd]
+			oin.occluder = obx
+			oin.transform = Transform3D(oxf.basis, Vector3(oc.x, _vyska(oc.x, oc.z) + vy2 * 0.5, oc.z))
+			parent.add_child(oin)
+			_okl_prep.append([oin, Vector2(oc.x, oc.z), Vector2(obx.size.x, obx.size.z).length() * 0.5 + float(pasma()["test"]["okluzor_vypnout_m"])])
+			nd += 1
 	# houstina (pasma.test.okluzor_houstina, nahrazuje okluzor_listi false): kandidati clony (lokace kompozice.clony)
 	# a remizky; krabice jen v jadru, ktere je z oka hrace opravdu neprustrelne (podil vzorku kryty korunou kere / mladeho
 	# stromu z hotovych instanci >= kryti_min). U hrace se vypina (okluzory_u_hrace).
@@ -14254,6 +14288,10 @@ static func voda_odraz(m: ShaderMaterial) -> void:
 			["pena_mr", Vector2(float(pn["meritko"]), float(pn["rychlost"]))], ["pena_prah", Vector2(float(pn["prah"][0]), float(pn["prah"][1]))],
 			["pena_sila", Vector2(float(pn["kraj"]), float(pn["stred"]))], ["pena_barva", v3.call(pn["barva"])]]:
 		m.set_shader_parameter(k[0], k[1])
+	var mt: Dictionary = h["maly_tok"]
+	m.set_shader_parameter("mt_odraz_min", float(mt["odraz_min"]))
+	m.set_shader_parameter("mt_sklon", float(mt["sklon"]))
+	m.set_shader_parameter("mt_alfa", float(mt["alfa_stred"]))
 	if m.shader and m.shader.resource_path.ends_with("reka.gdshader"):
 		m.set_shader_parameter("stred_hloubka", float(h["stred_hloubka_reka_m"]))
 
@@ -15425,7 +15463,19 @@ func _ves_rostliny_novy() -> void:
 	print("ves: %d rostlin v ramci nove vsi" % n)
 
 
+## E3 (plan 18. 11., 23. 11.): cas kroku rostlin (_plants 58-70 s na PC) - kde je cas, co se vyplati ukladat
+var _tk_us := 0
+
+
+func _tk(co: String) -> void:
+	var t := Time.get_ticks_usec()
+	if co != "" and t - _tk_us > 300000:
+		print("ROSTLINY krok %s %d ms" % [co, (t - _tk_us) / 1000])
+	_tk_us = t
+
+
 func _plants(parent: Node3D, quality: int) -> void:
+	_tk("")
 	var root := Node3D.new()
 	root.name = "Rostliny"
 	# staticke MultiMeshe bez interpolace fyziky (project: physics_interpolation): s ni se zmena instance mimo krok
@@ -15439,7 +15489,9 @@ func _plants(parent: Node3D, quality: int) -> void:
 	# pudorysy statickych staveb (hostinec, stan): uvnitr zadna trava, kapradi ani kere (rostla v krbu)
 	var uvnitr: Array = []
 	_nacti_kryti()
+	_tk("_nacti_kryti")
 	_cesta_do_kryti()
+	_tk("_cesta_do_kryti")
 	# Misa 14. 11.: kovarna a krcma do L (dily z Disku) - pudorys modelu jako staticke stavby (krcma i s dvorem)
 	_kryti.clear()
 	_uvnitr_bez_strechy.clear()
@@ -15496,64 +15548,102 @@ func _plants(parent: Node3D, quality: int) -> void:
 	# krok 0: katalog - druhy s „pouzit“: false se z dat vyradi pred vsemi rozsevy (sipek, vrba hlavata); rozsevy jejich
 	# klice nenajdou a nesazi je
 	_druhy_nacti()
+	_tk("_druhy_nacti")
 	_druhy_mimo_katalog()
+	_tk("_druhy_mimo_katalog")
 	# krok 6a: stromy z dat a lesu (Blender, skalni mesto, nove lesy)
 	_smrky_na_listnace()
+	_tk("_smrky_na_listnace")
 	_skalni_mesto()
+	_tk("_skalni_mesto")
 	# lesni patro (krok 8) jen k dosavadnim stromum - nove lesy maji vlastni lem a podrost (stejne pocty jako drive)
 	_stromy_6a = {}
 	for k: String in data["rostliny"]:
 		_stromy_6a[k] = (data["rostliny"][k] as Array).size()
 	_nove_lesy()
+	_tk("_nove_lesy")
 	# krok 5 + 7: masky pesin a lomu, kryt korun ze stromu 6a
 	_stanoviste()
+	_tk("_stanoviste")
 	# krok 6b: doplneni lesa uvnitr zapoje - mlade stromy pod korunami, stromoradi podel lesnich pesin, plast lesa; cte
 	# kryt 7 (jehlicnan / listnac podle porostu) a kryt nemeni (mlade stromy a lem uvnitr a na kraji zapoje)
 	_les_hustsi()
+	_tk("_les_hustsi")
 	_lesni_plast()
+	_tk("_lesni_plast")
 	_okraj_novych_lesu()
+	_tk("_okraj_novych_lesu")
 	# krok 8 vstup: kazdy kus z Blenderu a kroku 6 na stanovisti sveho druhu podle masek kroku 7 (druhy.json vyjma:
 	# kosena_louka - smrk a kameni ne v kosene louce, radce 17:00); dal kazdy rozsev vola druh_smi_hra sam
 	_vstup_druhu()
+	_tk("_vstup_druhu")
 	# krok 8: podrost, kere, byliny, kameni
 	_krajina()
+	_tk("_krajina")
 	if _mats.has("zem"):
 		_pudy(_mats["zem"] as ShaderMaterial)
+		_tk("_pudy")
 	_lesni_patro()
+	_tk("_lesni_patro")
 	_tvrz_zvencí()
 	_kere_podel_pesin()
+	_tk("_kere_podel_pesin")
 	_lesni_puda()
+	_tk("_lesni_puda")
 	_kvetiny_louky()
+	_tk("_kvetiny_louky")
 	_kvetiny_zahrad()
+	_tk("_kvetiny_zahrad")
 	_kere_kulate()
+	_tk("_kere_kulate")
 	_ves_cesty_volne()
+	_tk("_ves_cesty_volne")
 	_rybnik_breh()
+	_tk("_rybnik_breh")
 	_brody()
+	_tk("_brody")
 	_lom_cisti()
+	_tk("_lom_cisti")
 	_trziste_cisti()
+	_tk("_trziste_cisti")
 	_cesty_kere()
+	_tk("_cesty_kere")
 	_ves_kompozice()
+	_tk("_ves_kompozice")
 	# rozmisteni kerů a kopřiv podle sceny (houstina.rozmisteni, Misa 18. 11. r. 6 a 8) - po vsech sazenich vegetace
 	_rozmisteni()
+	_tk("_rozmisteni")
 	# _byliny_rozsev()                # byliny z vetve assets: zastaveno (radce 18:00), zapnout po vykonu
 	# krok 9: predmety u zdi mimo cesty a pesiny (vybaveni domu se klade pri stavbe vsi, pred odvozenymi pesinami ke
 	# dverim - test zasazeni: hranice dreva na pesine domu 4)
 	_vybaveni_mimo_cest()
+	_tk("_vybaveni_mimo_cest")
 	# krok 10: usazeni vseho z 6-9 (jeden pruchod, radce 20:05 bod 1), volne pesiny a most, kmeny a kolize naposled
 	if not _na_zem_arg.is_empty():
 		_na_zem(_na_zem_arg[0], _na_zem_arg[1])
+		_tk("_na_zem")
 	# odstup od cest a vyska podle profilu cesty pred usazenim paprskem (po nem se profil, ktery uz je v povrchu,
 	# pricital podruhe - trsy a kere 0,7-1,1 m nad zemi u hlavni cesty (5, 600), test zasazeni visi_*)
 	_cesty_rostliny()
+	_tk("_cesty_rostliny")
 	_na_povrch(parent)
+	_tk("_na_povrch")
 	_mekke_mimo_kvadry()
+	_tk("_mekke_mimo_kvadry")
 	_pesiny_volne()
+	_tk("_pesiny_volne")
 	_most_bez_stromu()
+	_tk("_most_bez_stromu")
 	_stromy_mimo_balvany()
+	_tk("_stromy_mimo_balvany")
 	_cesty_kameny()
+	_tk("_cesty_kameny")
 	_kmeny()
+	_tk("_kmeny")
 	_kolize_kamenu_bez_zaznamu()
+	_tk("_kolize_kamenu_bez_zaznamu")
 	_koruny_stin()                          # po vsech krocich sazeni stromu (tráva unshaded: stin korun)
+	_tk("_koruny_stin")
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))
@@ -15688,7 +15778,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 		# Misa 0.66/0.67 pad: 48 200 MultiMeshInstance3D (druh x bunka 24 m) = cast z 1,5 GB RAM. Druhy viditelne
 		# dal nez ~60 m (kameny, balvany, skaly, vzdalene LOD) po 48 m - 4x mene uzlu; kratky dosah (byliny, puda,
 		# stromy s impostorem) zustava 24 m, jinak by bunka se stredem za koncem dosahu schovala blizke kusy
-		var bk := BUNKA if (low or mid or imp_druh != "" or tvar_mesh != null) else BUNKA * 2.0
+		var bk := BUNKA if (low or mid or imp_druh != "" or tvar_mesh != null) else BUNKA_DLOUHE
 		var k := 0
 		var vys_druhu := Vector2.ZERO
 		for pf: String in VYSKA_BYLIN:
@@ -15879,12 +15969,14 @@ func _plants(parent: Node3D, quality: int) -> void:
 					and imp_druh == "" and tvar_mesh == null and not kind.begins_with("skala_"):
 				mmi.set_meta("tok", true)
 			root.add_child(mmi)
+	_tk("modely a bunky rostlin")
 	_impostory(root, imp, IMP_BUNKA, float(dalka["stromy_do_m"]))
 	_impostory(root, imp_ker, IMP_BUNKA, float(dalka["kere_do_m"]), "ker_imp", _imp_ker_meta, ker_konec, float(dalka["kere_prolinani_m"]))
 	_obzor_les.call_deferred(root.get_parent() if root.get_parent() else root)
 	for kind: String in scenes:
 		if scenes[kind]:
 			(scenes[kind] as Node).free()
+	_tk("multimeshe a impostory")
 
 
 ## 15. 11. (zaseky_rozbor_system.md A8 - potvrzena pricina: hrac v hostinci 28,3 ms, move_and_slide 16,5 + schod 11,7

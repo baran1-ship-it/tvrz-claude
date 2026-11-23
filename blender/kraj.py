@@ -2918,6 +2918,63 @@ def _hrana_hrube(verts, faces, rect, land_fn):
     return len(novy)
 
 
+def _hrube_body_jemnych(verts, faces, jemne_pasma, land_fn):
+    """Hruba sit (Teren_okoli): na hranu k jemnemu pasmu vlozit body jemne mrizky (krok pasma) - spolecne vrcholy
+    misto T-spoju. Misa 17. 11. r. 6 / plan_18_11 B6 (23. 11., novy rozbor po 2 neuspesnych opravach ve hre): tenka
+    tmava cara pres cestu na x 310 (build/m17/po3_08.png) zustala i bez vyskoveho rozdilu (0,006 m) a s normalou lemu
+    vzhuru - vrchol jemne site uprostred hrube hrany (T-spoj) nesdili vrchol s hrubou siti, rasterizace mezi nimi nechava
+    skulinu, kterou je videt lem / pozadi. Vlozene body maji vysku hrube hrany (_hruba_hrana_y, tataz jako jemna sit),
+    tvar hrube site se nemeni (body lezi na usecce), kazdy vrchol hrany je v obou sitich se stejnou polohou - a herni
+    upravy terenu podle polohy (cesty, koryta) ho posunou v obou sitich stejne. Bod, kde hrubou bunku za hranou nahrazuje
+    pas reky (_hruba_hrana_y None), se nevklada."""
+    novy = {}
+    out = []
+    for f in faces:
+        poly = []
+        for j in range(len(f)):
+            a, b = f[j], f[(j + 1) % len(f)]
+            poly.append(a)
+            (ax, _, az), (bx, _, bz) = verts[a], verts[b]
+            for rect, step in jemne_pasma:
+                body = []
+                if abs(ax - bx) < 1e-6 and (abs(ax - rect[0]) < 1e-6 or abs(ax - rect[1]) < 1e-6):
+                    lo, hi = min(az, bz), max(az, bz)
+                    if lo < rect[2] - 1e-6 or hi > rect[3] + 1e-6:
+                        continue
+                    q = rect[2] + math.ceil((lo - rect[2]) / step - 1e-6) * step
+                    while q < hi - 1e-6:
+                        if q > lo + 1e-6:
+                            body.append((ax, q))
+                        q += step
+                    if az > bz:
+                        body.reverse()
+                elif abs(az - bz) < 1e-6 and (abs(az - rect[2]) < 1e-6 or abs(az - rect[3]) < 1e-6):
+                    lo, hi = min(ax, bx), max(ax, bx)
+                    if lo < rect[0] - 1e-6 or hi > rect[1] + 1e-6:
+                        continue
+                    q = rect[0] + math.ceil((lo - rect[0]) / step - 1e-6) * step
+                    while q < hi - 1e-6:
+                        if q > lo + 1e-6:
+                            body.append((q, az))
+                        q += step
+                    if ax > bx:
+                        body.reverse()
+                for x, z in body:
+                    yh = _hruba_hrana_y(x, z, rect, land_fn)
+                    if yh is None:
+                        continue
+                    key = (round(x * 16), round(z * 16))
+                    if key not in novy:
+                        novy[key] = len(verts)
+                        verts.append((x, yh, z))
+                    poly.append(novy[key])
+                if body:
+                    break
+        out.append(tuple(poly))
+    faces[:] = out
+    return len(novy)
+
+
 def tiles(coll, land_fn):
     """Pasma 5 m a 25 m (pasmo 1 m dela fort.terrain), kazde jako vlastni objekt Teren_*."""
     from lib import Part
@@ -2953,6 +3010,11 @@ def tiles(coll, land_fn):
             nv = _hrana_hrube(verts, faces, rect, land_fn)
             attrs += [ground_attrs(x, z) for x, _y, z in verts[len(attrs):]]
             print("%s: hrana k Teren_okoli po hrube mrizce, vlozeno %d bodu" % (name, nv))
+        if name == "Teren_okoli" and _GEN_J.get("blender_hrube_body_jemnych", True):
+            jp = [(r, st) for nm, r, _i, st in pasma if nm in ("Teren_ves", "Teren_most")]
+            nv = _hrube_body_jemnych(verts, faces, jp, land_fn)
+            attrs += [ground_attrs(x, z) for x, _y, z in verts[len(attrs):]]
+            print("%s: hrana k jemnym pasmum s jejich body (bez T-spoju), vlozeno %d bodu" % (name, nv))
         # obzor: lesy jako tmava vyvysena koruna (z dalky vypada jako les, stromy by stály moc)
         if name == "Teren_obzor":
             verts = [(x, y + 11.0 * a[1] * smooth(0.0, 1.0, a[1]), z) for (x, y, z), a in zip(verts, attrs)]

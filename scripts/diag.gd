@@ -226,7 +226,9 @@ func _pod_krizem() -> String:
 	var prohledano := 0
 	for n in get_tree().root.find_children("*", "MultiMeshInstance3D", true, false):
 		var mmi := n as MultiMeshInstance3D
-		if not mmi.is_visible_in_tree() or mmi.multimesh == null:
+		# K12 (rozbor_gpu_15_11): polohy jen z dat buňky (meta diag_buf = [buffer, krok, indexy x y z] z louky a rostlin);
+		# get_instance_transform u MultiMeshe plněného přes buffer = zpětné čtení z GPU (gles3 _multimesh_make_local)
+		if not mmi.is_visible_in_tree() or mmi.multimesh == null or not mmi.has_meta("diag_buf"):
 			continue
 		var ab := mmi.global_transform * mmi.get_aabb()
 		if ab.grow(1.0).intersects_segment(o, o + smer * minf(d_kol + 1.0, 40.0)) == null:
@@ -236,11 +238,14 @@ func _pod_krizem() -> String:
 		if cnt > 30000 or prohledano > 60000:
 			continue
 		prohledano += cnt
+		var db: Array = mmi.get_meta("diag_buf")
+		var bf: PackedFloat32Array = db[0]
+		var kr := int(db[1])
+		var ix: Array = db[2]
+		cnt = mini(cnt, bf.size() / kr)
 		for i in cnt:
-			var lp := mm.get_instance_transform(i).origin
-			if lp == Vector3.ZERO and mm.use_custom_data:
-				var cd := mm.get_instance_custom_data(i)
-				lp = Vector3(cd.g, cd.b, cd.a)
+			var j := i * kr
+			var lp := Vector3(bf[j + int(ix[0])], bf[j + int(ix[1])], bf[j + int(ix[2])])
 			var wp := mmi.global_transform * lp
 			var t := (wp - o).dot(smer)
 			if t < 0.3 or t > minf(d_kol + 0.5, 40.0):

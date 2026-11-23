@@ -20,17 +20,14 @@ const UVOLNIT := 24.0                 # hystereze uvolneni za dosahem
 const STROP := 90                     # nejvic bunek v pameti (tablet ~45 v kruhu 90 m); za stropem nejdal pryc PRED nactenim
 # urovne bunky: [od vzdalenosti bunky, buffer postaven pro vzdalenost] - vzdalena bunka drzi jen prvnich N trsu
 # (serazene podle hashe), kolik se v jeji vzdalenosti kresli; pri priblizeni se prestavi (15 m rezerva na nacteni)
-const UROVEN_OD := [0.0, 35.0, 65.0]
-const UROVEN_PRO := [0.0, 20.0, 50.0]
-const HUST_OD := 20.0                 # do 20 m vsechny trsy, k HUST_DO plynule ubyva po jednotlivych trsech
-const HUST_DO := 130.0
-const KVETY_OD := 12.0
-const KVETY_DO := 45.0
+# K7 (23. 11.): dosahy louky z dat rozpocty.json louka_dosahy (drive cisla v kodu)
+var UROVEN_OD: Array = Pravidla.cti("rozpocty", "louka_dosahy", "uroven_od")
+var UROVEN_PRO: Array = Pravidla.cti("rozpocty", "louka_dosahy", "uroven_pro")
 ## Vrstvy rozsevu (radce 13:20, KCD2: na 1 m2 neni videt puda): 0 trsy (atlas trav), 1 kvety, 2 nizky drn 10-25 cm
 ## (grass_pack LOLIPOP, 2 karty = 4 troj., hustota DRN_HUST/m2 do 50 m), 3 vysoka trava 60-110 cm na okrajich
 ## (mez, les, cesta, zed; grass_pack). [od, do] zaniku po trsech podle vzdalenosti.
 const VRSTVY := 5                     # 4 = drn-vejir (radce 09:10, pasma 10:50): do 25 m plny, 25-60 m na 25 %, do 90 m pryc
-const ZANIK := [[20.0, 110.0], [12.0, 45.0], [12.0, 45.0], [20.0, 110.0], [40.0, 60.0]]   # vejir: 0-15 m plny, 15-40 m 25 %, do 60 m pryc
+var ZANIK: Array = Pravidla.cti("rozpocty", "louka_dosahy", "zanik")    # [plne do, konec] po vrstvach (K7, data)
 const DRN_KROK := 0.35                # ~8 drnu na m2 (0.57 pokryv: zelena zem mezi trsy byla videt; 0,41 = 6/m2)
 const ROZSEV := "res://modely/louka/" # offline cast (TVRZ_ROZSEV=1): kryti.bin - zakryti shora po bunkach 32 m
 const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), (otoceni, sirka, vyska - rezerva), druh u8, hash u8, 0
@@ -38,10 +35,7 @@ const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), 
 # tablet ma 8 jader a louka nestihala (3. 11. test trava_dorust: bunka 1,5-2 s, krok 1800/1800 snimku pozde)
 var VLAKEN := clampi(OS.get_processor_count() - 2, 3, 6)
 const PREDSTIH_S := 8.0               # nacitani bunek dopredu ve smeru pohybu (s); 8 s (Misa 0.994 „i pri chuzi trava doroste az pred ocima“)
-const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
-	[64.0, 45.0, 280.0, 1.2, 2.0, 0.85],         # impostor travy od 45 m (radce 07:45, pokryv; drn konci na 45 m)
-	[128.0, 240.0, 650.0, 2.6, 4.2, 0.4],
-]
+var KUPY: Array = Pravidla.cti("rozpocty", "louka_dosahy", "kupy")   # kupy travy: [bunka, od, do, meritko min, max, pokryti] (K7, data)
 
 var main: Node
 var hustota := 1.0
@@ -170,10 +164,9 @@ func setup(p_main: Node) -> void:
 	# tablet (radce 20:45 krok 3, troj. <= 1,2 M): trsy ridnou do 80 m, dal kupy a teren
 	(_trs.surface_get_material(0) as ShaderMaterial).set_shader_parameter("hust_do", _trs_do())
 	var vm := _vejir.surface_get_material(0) as ShaderMaterial
-	vm.set_shader_parameter("hust_od", 15.0)
-	vm.set_shader_parameter("hust_do", 40.0)
-	vm.set_shader_parameter("hust_zbytek", 0.25)
-	vm.set_shader_parameter("hust_konec", 40.0)
+	var vsh: Dictionary = Pravidla.cti("rozpocty", "louka_dosahy", "vejir_shader")      # K7: data
+	for pn: String in ["hust_od", "hust_do", "hust_zbytek", "hust_konec"]:
+		vm.set_shader_parameter(pn, float(vsh[pn]))
 	vm.set_shader_parameter("vejir", true)
 	for m: Mesh in [_trs, _kvety[0], _drn, _vysoka, _vejir]:
 		var sm := m.surface_get_material(0) as ShaderMaterial
@@ -1207,6 +1200,7 @@ func _postav_cast(hot: Dictionary, b: Dictionary, krok: int) -> bool:
 	var mmi := MultiMeshInstance3D.new()
 	mmi.multimesh = mm
 	mmi.custom_aabb = aabb
+	mmi.set_meta("diag_buf", [hot["buf%d" % k] if k < 4 else hot["buf4_%d" % qi], 16, [13, 14, 15]])   # K12: poloha v custom
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mmi.visibility_range_end = float(_zanik[k][1]) + 30.0
 	(b["uzel"] as Node3D).add_child(mmi)
@@ -1335,6 +1329,7 @@ func _mm(root: Node3D, mesh: Mesh, xfs: Array, cen: Vector3, dos0: float, dos1: 
 	var mmi := MultiMeshInstance3D.new()
 	mmi.multimesh = mm
 	mmi.position = cen
+	mmi.set_meta("diag_buf", [buf, st, [3, 7, 11]])     # K12: diag cte polohy z dat, ne z GPU
 	# prolinani dela shader (po trsech, i v rendereru compatibility); viditelnost jen hrube orezava
 	var mat := mesh.surface_get_material(0)
 	if mat is ShaderMaterial:
