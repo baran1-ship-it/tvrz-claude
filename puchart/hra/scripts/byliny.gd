@@ -90,38 +90,44 @@ func _zapoj_nas(x: float, z: float) -> float:   # násobek hustoty podle zápoje
 	var r := clampi(int((z - float(sj["z0_hra"])) / float(sj["krok_m"])), 0, _zap.get_height() - 1)
 	return 1.0 - float(_zap_les.get("ubytek", 0.985)) * smoothstep(float(_zap_les.get("kryt_od", 0.3)), float(_zap_les.get("kryt_do", 0.8)), _zap.get_pixel(c, r).r)
 
-## Impostor na druh: čtverec + ShaderMaterial (atlas textury/impostory/ker_<druh>). Druh bez plného modelu zůstane prázdný
-## (stejné přeskakování v _bunka_mista jako u plného uzlu – jinak by se rozešla náhoda a polohy).
+## Impostory všech druhů v jednom atlasu (textury/impostory/kere_vse_*, nastroje/kere_atlas.py): jeden čtverec + jeden
+## ShaderMaterial, druh se pozná z INSTANCE_CUSTOM (políčko, střed y, poloměr) – jeden MultiMesh na buňku = 1 volání kreslení
+## (hlídač scén 23. 11.: 11 druhů zvlášť přidalo 60–94 volání). meshe[druh] = [čtverec] jen kvůli stejnému přeskakování
+## v _bunka_mista jako u plného uzlu (druh bez plného modelu zůstane prázdný – jinak by se rozešla náhoda a polohy).
+var _imp_mesh: ArrayMesh = null
+var _imp_par := {}   # druh -> [políčko, střed y, poloměr]
 func _impostory(modely: Dictionary, zanik: Array) -> void:
 	var dc: Dictionary = cfg["daleko"]
 	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://textury/impostory/impostory.json"))
-	var sh: Shader = load("res://shaders/ker_impostor.gdshader")
+	var at: Dictionary = meta.get("kere_atlas", {})
+	var q := ArrayMesh.new(); var a := []; a.resize(Mesh.ARRAY_MAX)
+	a[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3(-1, 0, 0), Vector3(1, 0, 0), Vector3(1, 2, 0), Vector3(-1, 2, 0)])
+	a[Mesh.ARRAY_TEX_UV] = PackedVector2Array([Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)])
+	a[Mesh.ARRAY_INDEX] = PackedInt32Array([0, 1, 2, 0, 2, 3])
+	q.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a)
+	var rmax := 1.0; var hmax := 1.0
 	for k: String in modely:
 		meshe[k] = []
 		var ma := false
 		for d in modely[k]: ma = ma or ResourceLoader.exists("res://modely/rostliny/%s.glb" % d)
 		if not ma: continue
 		var ik := "ker_" + k
-		if not meta.has(ik) or not ResourceLoader.exists("res://textury/impostory/%s_a.png" % ik):
+		if not meta.has(ik) or not (at.get("druhy", {}) as Dictionary).has(k):
 			push_warning("keře daleko: chybí impostor " + ik); continue
-		var r := float(meta[ik]["polomer"])
-		var q := ArrayMesh.new(); var a := []; a.resize(Mesh.ARRAY_MAX)
-		a[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3(-1, 0, 0), Vector3(1, 0, 0), Vector3(1, 2, 0), Vector3(-1, 2, 0)])
-		a[Mesh.ARRAY_TEX_UV] = PackedVector2Array([Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)])
-		a[Mesh.ARRAY_INDEX] = PackedInt32Array([0, 1, 2, 0, 2, 3])
-		q.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a)
-		q.custom_aabb = AABB(Vector3(-r, 0.0, -r), Vector3(r * 2.0, float(meta[ik]["vyska"]) + r, r * 2.0))   # čtverec se natahuje v shaderu
-		var m := ShaderMaterial.new(); m.shader = sh
-		m.set_shader_parameter("barva", load("res://textury/impostory/%s_a.png" % ik))
-		m.set_shader_parameter("normaly", load("res://textury/impostory/%s_n.png" % ik))
-		var st: Array = meta[ik]["stred"]
-		m.set_shader_parameter("stred", Vector3(float(st[0]), float(st[1]), float(st[2])))
-		m.set_shader_parameter("polomer", r)
-		if zanik.size() == 2: m.set_shader_parameter("zanik", Vector2(float(zanik[1]), float(zanik[0])))
-		var ko: Array = dc["konec_m"]
-		m.set_shader_parameter("konec", Vector2(float(ko[1]), float(ko[0])))
-		q.surface_set_material(0, m)
+		var r := float(meta[ik]["polomer"]); var st: Array = meta[ik]["stred"]
+		_imp_par[k] = [float(at["druhy"][k]), float(st[1]), r]
+		rmax = maxf(rmax, r); hmax = maxf(hmax, float(meta[ik]["vyska"]) + r)
 		meshe[k] = [q]
+	q.custom_aabb = AABB(Vector3(-rmax, 0.0, -rmax), Vector3(rmax * 2.0, hmax, rmax * 2.0))   # čtverec se natahuje v shaderu
+	var m := ShaderMaterial.new(); m.shader = load("res://shaders/ker_impostor.gdshader")
+	m.set_shader_parameter("barva", load("res://textury/impostory/kere_vse_a.png"))
+	m.set_shader_parameter("normaly", load("res://textury/impostory/kere_vse_n.png"))
+	m.set_shader_parameter("policek", Vector2(float(at.get("sloupcu", 4)), float(at.get("radku", 3))))
+	if zanik.size() == 2: m.set_shader_parameter("zanik", Vector2(float(zanik[1]), float(zanik[0])))
+	var ko: Array = dc["konec_m"]
+	m.set_shader_parameter("konec", Vector2(float(ko[1]), float(ko[0])))
+	q.surface_set_material(0, m)
+	_imp_mesh = q
 
 var _pas := {}   # "i,j" -> skvrny [x0, z0, x1, z1, nx, nz, šířka, zdroj]
 
@@ -246,9 +252,14 @@ func _pocitej(i: int, j: int, B: float) -> Dictionary:
 	for tf: Array in mista:
 		var klic: String = tf[0]; var t: Transform3D = tf[1]
 		if not _stavby.is_empty() and _ve_stavbe(t.origin.x, t.origin.z): continue
-		if not out.has(klic): out[klic] = PackedFloat32Array()
 		var bs := t.basis; var o := t.origin
-		out[klic].append_array(PackedFloat32Array([bs.x.x, bs.y.x, bs.z.x, o.x - (i + 0.5) * B, bs.x.y, bs.y.y, bs.z.y, o.y, bs.x.z, bs.y.z, bs.z.z, o.z - (j + 0.5) * B]))
+		var radek := PackedFloat32Array([bs.x.x, bs.y.x, bs.z.x, o.x - (i + 0.5) * B, bs.x.y, bs.y.y, bs.z.y, o.y, bs.x.z, bs.y.z, bs.z.z, o.z - (j + 0.5) * B])
+		if daleko:   # všechny druhy do jednoho MultiMeshe (custom = políčko atlasu, střed y, poloměr)
+			var pr: Array = _imp_par.get(klic.rstrip("0123456789"), [])
+			if pr.is_empty(): continue
+			radek.append_array(PackedFloat32Array([pr[0], pr[1], pr[2], 0.0])); klic = "_imp"
+		if not out.has(klic): out[klic] = PackedFloat32Array()
+		out[klic].append_array(radek)
 	out["_stred"] = Vector3((i + 0.5) * B, 0.0, (j + 0.5) * B)   # uzel buňky ve středu: visibility_range měří od polohy uzlu
 	return out
 
@@ -257,9 +268,12 @@ func _vloz(data: Dictionary) -> Array:
 	var vys := []
 	for klic: String in data:
 		if klic == "_stred": continue
-		var druh: String = klic.rstrip("0123456789")
 		var buf: PackedFloat32Array = data[klic]
-		var mm := ZasobaMM.vezmi(meshe[druh][int(klic.substr(druh.length()))], buf, buf.size() / 12)   # zásoba MultiMeshů (P2)
+		var mm: MultiMesh
+		if klic == "_imp": mm = ZasobaMM.vezmi(_imp_mesh, buf, buf.size() / 16, true)   # vzdálené keře: všechny druhy, custom data
+		else:
+			var druh: String = klic.rstrip("0123456789")
+			mm = ZasobaMM.vezmi(meshe[druh][int(klic.substr(druh.length()))], buf, buf.size() / 12)   # zásoba MultiMeshů (P2)
 		var mi := MultiMeshInstance3D.new(); mi.multimesh = mm
 		mi.position = data.get("_stred", Vector3.ZERO)
 		mi.visibility_range_end = float(cfg["dosah_m"]) + float(cfg["bunka_m"]) * _nb * 0.75   # buňky předstihu se nekreslí (jen připravené)

@@ -6,7 +6,7 @@
   "bunek": 4,
   "konec_m": [130, 150],
   "predstih_m": 20,
-  "pozn": "Míša 23. 11. („to vyskakování a růst keřů přede mnou je hrozný“; „máme 3 a více podoby trávy, keřů a stromů a do dálky plno“): keře měly jen plný model (7–14 tis. troj.) do 46 m a v pásmu zanik_m se objevovaly celé. Teď druhá podoba – impostor 8×8 pohledů (blender/impostory.py ker_<druh>, shaders/ker_impostor.gdshader), přesný doplněk plného keře po celých keřích (hash polohy), do dosah_m; na konci (konec_m) mizí po celých keřích u porostu E2 v zemi (louka.json porost_dalka od 110 m). Velká buňka = bunek × bunek buněk bunka_m (stejné polohy, málo volání kreslení). Zdroj: stromy (les.gd impostory, Havran svet.gd), Míša 23. 11."
+  "pozn": "Míša 23. 11. („to vyskakování a růst keřů přede mnou je hrozný“; „máme 3 a více podoby trávy, keřů a stromů a do dálky plno“): keře měly jen plný model (7–14 tis. troj.) do 46 m a v pásmu zanik_m se objevovaly celé. Teď druhá podoba – impostor 8×8 pohledů (blender/impostory.py ker_<druh>, shaders/ker_impostor.gdshader), přesný doplněk plného keře po celých keřích (hash polohy), do dosah_m; na konci (konec_m) mizí po celých keřích u porostu E2 v zemi (louka.json porost_dalka od 110 m). Velká buňka = bunek × bunek buněk bunka_m (stejné polohy, málo volání kreslení). Všechny druhy v jednom atlasu (nastroje/kere_atlas.py → kere_vse_*, druh v INSTANCE_CUSTOM) = 1 volání na buňku – hlídač scén 23. 11.: 11 druhů zvlášť přidalo 60–94 volání a typ C přešel 1000. Zdroj: stromy (les.gd impostory, Havran svet.gd), Míša 23. 11."
  },
  "bunka_m": 14,
  "vzorku_na_m2": 0.25,

@@ -214,5 +214,23 @@
   ],
   "polomer": 3.9945249946152823,
   "vyska": 7.889246091246605
+ },
+ "kere_atlas": {
+  "sloupcu": 4,
+  "radku": 3,
+  "druhy": {
+   "bez": 0,
+   "hloh": 1,
+   "liska": 2,
+   "sipek": 3,
+   "trnka": 4,
+   "vrba_ker": 5,
+   "zmlazeni_buk": 6,
+   "zmlazeni_dub": 7,
+   "zmlazeni_jedle": 8,
+   "zmlazeni_lipa": 9,
+   "zmlazeni_olse": 10
+  },
+  "pozn": "nastroje/kere_atlas.py – políčko i = sloupec i % sloupcu, řádek i // sloupcu; uvnitř 8×8 pohledů jako ker_<druh>"
  }
 }

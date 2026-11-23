@@ -2,14 +2,15 @@ shader_type spatial;
 // Puchart (Míša 23. 11.: „to vyskakování a růst keřů přede mnou je hrozný“): vzdálená podoba keře – impostor 8×8 pohledů
 // (blender/impostory.py ker_<druh>, stejné mapování jako impostor.gdshader stromů) v MultiMeshi bylin (byliny.gd režim daleko).
 // Poloha, měřítko a otočení z transformace instance (stejné polohy jako plné keře – stejný generátor buněk).
+// Všechny druhy v jednom atlasu (nastroje/kere_atlas.py, 4 × 3 políčka) – INSTANCE_CUSTOM = (políčko, střed y, poloměr, –),
+// jeden MultiMesh na buňku = 1 volání kreslení (hlídač scén 23. 11.: 11 druhů zvlášť přidalo 60–94 volání).
 // Doplněk k plnému keři: listi.gdshader / bylina.gdshader kreslí keř, když vz >= h*0,8; tady naopak (vz < h*0,8) – každý keř
 // je v každé vzdálenosti právě jednou, celý (žádné šachovnice ani růst). Na konci dosahu (konec) mizí po celých keřích.
 render_mode world_vertex_coords, cull_disabled, diffuse_lambert_wrap, specular_disabled;
 
 uniform sampler2D barva : source_color, filter_linear_mipmap;
 uniform sampler2D normaly : filter_linear_mipmap;   // normála ve světě (ne tečná mapa)
-uniform vec3 stred = vec3(0.0, 1.5, 0.0);   // střed koule keře nad patou (m, měřítko 1)
-uniform float polomer = 1.5;
+uniform vec2 policek = vec2(4.0, 3.0);   // sloupců, řádků atlasu
 uniform vec2 zanik = vec2(0.0);    // jako plný keř (byliny.gd _fade: (do, od)); regulator.gd ho násobí stejně
 uniform vec2 konec = vec2(150.0, 130.0);   // (do, od): za „do“ nic, mezi od a do mizí po celých keřích
 uniform vec4 tint = vec4(1.0);
@@ -17,6 +18,7 @@ uniform vec4 tint = vec4(1.0);
 const float N = 8.0;
 
 varying vec2 bunka;
+varying vec2 policko;
 varying float otoc;
 varying float odst;
 
@@ -29,6 +31,10 @@ float hash_ker(vec3 wp) {
 
 void vertex() {
 	vec3 wp = MODEL_MATRIX[3].xyz;
+	float sl = INSTANCE_CUSTOM.x;
+	policko = vec2(mod(sl, policek.x), floor(sl / policek.x + 0.01)) / policek;
+	vec3 stred = vec3(0.0, INSTANCE_CUSTOM.y, 0.0);
+	float polomer = INSTANCE_CUSTOM.z;
 	vec3 sx = MODEL_MATRIX[0].xyz;
 	float s = length(sx);
 	float sy = length(MODEL_MATRIX[1].xyz);
@@ -61,7 +67,7 @@ void vertex() {
 }
 
 void fragment() {
-	vec2 uv = bunka + clamp(UV, vec2(0.01), vec2(0.99)) / N;
+	vec2 uv = policko + (bunka + clamp(UV, vec2(0.01), vec2(0.99)) / N) / policek;
 	vec4 a = texture(barva, uv);
 	if (a.a < 0.5) discard;
 	float li = smoothstep(0.0, 0.08, a.g - max(a.r, a.b) * 0.8);

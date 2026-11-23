@@ -11,3 +11,4 @@ co (místo, verze/commit), z čeho (data/pravidla – soubory a klíče), postup
   - voda podle Hvozdu (23. 11., commit ec9aa6e) – čeká na posouzení,
   - střední pás trávy kartami s pečeným atlasem (23. 11., commit 6fb4662) – čeká na posouzení,
   - kámen cimbuří a nároží zblízka (blender/kamenivo.py, 23. 11.) – čeká na posouzení.
+  - keře do dálky: impostor všech druhů v jednom atlasu (23. 11.) – čeká na posouzení na tabletu.

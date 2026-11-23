@@ -1931,8 +1931,12 @@ _c32 = []; _kj32 = json.load(open(K + "/hra/data/kere.json")); _dl32 = _kj32.get
 if _kj32 != json.load(open(K + "/pravidla/svet/kere.json")): _c32.append("hra/data/kere.json ≠ pravidla")
 if float(_dl32.get("dosah_m", 0)) < 3 * float(_kj32["zanik_m"][1]): _c32.append("daleko.dosah_m %s < 3 × konec plného keře" % _dl32.get("dosah_m"))
 _im32 = json.load(open(K + "/hra/textury/impostory/impostory.json"))
+_at32 = _im32.get("kere_atlas", {}).get("druhy", {})   # společný atlas (nastroje/kere_atlas.py): 1 MultiMesh na buňku
 for _d32 in _kj32["modely"]:
-    if "ker_" + _d32 not in _im32 or not os.path.exists(K + "/hra/textury/impostory/ker_%s_a.png" % _d32): _c32.append("chybí impostor ker_" + _d32)
+    if "ker_" + _d32 not in _im32 or _d32 not in _at32: _c32.append("chybí impostor ker_%s v atlasu kere_vse" % _d32)
+for _s32 in ("a", "n"):
+    if not os.path.exists(K + "/hra/textury/impostory/kere_vse_%s.png" % _s32): _c32.append("chybí kere_vse_%s.png" % _s32)
+if "impostory/ker_*" not in open(K + "/hra/export_presets.cfg").read(): _c32.append("ker_* atlasy jednotlivě v APK (exclude_filter)")
 _h32 = "floor(wp.xz * 8.0 + 0.5) * 0.125"
 for _f32 in ("listi", "bylina", "ker_impostor"):
     if _h32 not in open(K + "/hra/shaders/%s.gdshader" % _f32).read(): _c32.append("%s.gdshader: jiný hash keře (doplněk by nesedl)" % _f32)
