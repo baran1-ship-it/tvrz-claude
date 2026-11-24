@@ -981,24 +981,31 @@ func _interier(delta: float) -> void:
 			if String(p[8]) == "" and pc.distance_to(pp) < 10.0 and cam.is_position_in_frustum(pc):
 				okno = true
 				break
-	var _t_a := Time.get_ticks_usec()
 	_vnitrek(not cur.is_empty(), pp, okno, 0.2)
-	var _t_b := Time.get_ticks_usec()
-	var _n_mist := 0
-	for rec: Dictionary in placed:
+	# F9 (plan_18_11, predmety_cas 3,9 ms > test_snimek_ms 2): viditelnost predmetu po mistnostech - pri zmene mistnosti
+	# (nebo viditelnych sousedu) cely pruchod, jinak po rozpocty.predmety_vnitrek.zaznamu_krok zaznamech dokola (jen kvuli
+	# predmetum, ktere nekdo prenesl jinam; zmena hrace se projevi hned)
+	var klic := rn + "|" + ",".join(PackedStringArray(vid.keys().filter(func(k: String) -> bool: return bool(vid[k]))))
+	var vse := klic != _int_klic
+	_int_klic = klic
+	var n := placed.size()
+	var krok := n if vse else mini(n, int(Pravidla.cti("rozpocty", "predmety_vnitrek", "zaznamu_krok")))
+	for j in krok:
+		_int_i = (_int_i + 1) % maxi(n, 1)
+		var rec: Dictionary = placed[_int_i if not vse else j]
 		if not rec.has("node") or not is_instance_valid(rec["node"]):
 			continue
 		if not rec.has("_mist") or rec.get("_mist_p") != rec["p"]:
 			rec["_mist"] = _mistnost_predmetu(rec["p"])          # v zaznamu (klic Dictionary se hashuje obsahem)
-			_n_mist += 1
 			rec["_mist_p"] = rec["p"]
 		var nm2: String = rec["_mist"]
 		var ma := nm2 == "" or bool(vid.get(nm2, true))
 		if (rec["node"] as Node3D).visible != ma:
 			(rec["node"] as Node3D).visible = ma
-	# F9 (plan_18_11, predmety_cas 45 ms): rozpad dlouheho prepoctu jen v testech (TVRZ_TEST)
-	if OS.has_environment("TVRZ_TEST") and Time.get_ticks_usec() - _t_a > 10000:
-		print("INTERIER_ROZPAD vnitrek %.1f ms, predmety %.1f ms (mistnost znovu %d z %d), okno %s, uvnitr %s" % [(_t_b - _t_a) / 1000.0, (Time.get_ticks_usec() - _t_b) / 1000.0, _n_mist, placed.size(), okno, not cur.is_empty()])
+
+
+var _int_klic := ""
+var _int_i := 0
 
 
 ## Hrac uvnitr budovy s portaly (0.60, hostinec 3,7 M troj. / 2079 kresleni na tabletu): krajina za zdmi se kreslila
