@@ -585,3 +585,13 @@ Změny: strom bez žlutých ploch (jádro koruny), postavy rozmístěné hned na
 S pevnými 30 FPS je p50 všude 33 ms (strop) → porovnávat p95 a počet snímků > 40 ms. „vše“ p95: tvrz-cesta 37, les 49, kůň-louka-tráva 65, ves 36, ves-vjezd 37, ves-dvory 39, hostinec 37. Proti 0.9999993 ves-vjezd >40 ms 16 → 12, na konci trasy („vše znovu“) 180 → 5 – drift zmizel (30 FPS = méně tepla, PODEZŘENÍ).
 Varianty: bez mlhy vody / bez obzoru / bez houštin / postavy – bez jasného rozdílu (p95 ±5) → mlha nad toky a les za mapou nic zásadního nestojí.
 Špičky: ves-dvory 1796 ms, hostinec 3029 ms (bez_houstin, skripty 0, fyzika 0 = mimo skripty – podezření načítání/GC), tvrz-cesta 505, ves-vjezd 529, kůň-louka 523. Paměť: VRAM 1091 MB (textury 693), halda 1774 MB.
+
+## 0.9999995 (vydáno 24. 11.)
+Změny: bříza bez černých karet listí (list ve stínu slunce prosvítá, přesný wrap Godotu), malý potok čitelný jako voda
+(klidné vlnky, odraz oblohy), dlaždice terénu krokem exportu (byly z 18. 11.), ves: clona vjezdu 92 %, sady mezi dvory,
+hmota lesa z dálky; stodoly a kůlny zdálky sRGB, kostel a ruiny převedené barvy; přeliv bez trávy na dlažbě; kameník
+u lomové kovadliny; síť chůze jedna část; postavy přestavěné (15 sad, bez děr na hrudníku); paměť −62 MB (kovárna,
+rostliny ve sdílených texturách); citlivé sítě bez automatických LOD; švy terénu (sdílené vrcholy jemné × hrubé sítě);
+nádvoří tvrze rozprostřené (rozvrhy), spánek bez vstávání ze sedu v lůžku; interiér po částech (F9); louka bez nových
+bufferů za hry (sloty vypnuté v datech); trasa: p95/p99/nad30 a rozpad špiček (A1/A3). Výkon NEOVĚŘENO NA ZAŘÍZENÍ –
+projet Měřicí trasu (nové varianty v `_varianty_pristi`: louka_15_45, louka_sloty, bez_pss).
