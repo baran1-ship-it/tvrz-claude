@@ -1556,7 +1556,44 @@ def voda_tvar(x, z, h):
         hr = _hraz(x, z, ryb)
         if hr > h:
             h = hr                                            # hraz
-    return h
+    return _lednice_koryto(x, z, h)
+
+
+_LEDNICE = None
+
+
+def _lednice_koryto(x, z, h):
+    """Koryto lednice mlyna mimo dil (voda.json mlyn.lednice_koryto; plan_18_11 F3, test mlyn_zlab bod 6: hladina lednice
+    0,08 m pod jemnym terenem toku - lednice tekla brehem potoka bez koryta). Dno hladina - hloubka_m v sirce lednice,
+    breh svahem svah (dy/dx) k puvodnimu terenu; uvnitr dilu teren dilu (mlyn_pad), tam nic."""
+    global _LEDNICE
+    if not _MDIL or "lednice_koryto" not in _VODA_J["mlyn"]:
+        return h
+    if _LEDNICE is None:
+        pts = [mlyn_svet(*q) for q in _MVODA["lednice"]["body"]]
+        tk = next(t for t in TOKY if t.id == _MDIL["tok"])
+        ex, _, ez = pts[-1]
+        j = min(range(len(tk.osa)), key=lambda i: math.hypot(tk.osa[i][0] - ex, tk.osa[i][1] - ez))
+        pts.append((tk.osa[j][0], tk.hl[j], tk.osa[j][1]))
+        _LEDNICE = pts
+    if v_dilu_mlyna(x, z):
+        return h
+    lk = _VODA_J["mlyn"]["lednice_koryto"]
+    pol = _MVODA["lednice"]["sirka"] / 2.0
+    best = None
+    for k in range(len(_LEDNICE) - 1):
+        (ax, ya, az), (bx, yb, bz) = _LEDNICE[k], _LEDNICE[k + 1]
+        vx, vz = bx - ax, bz - az
+        L2 = vx * vx + vz * vz or 1e-9
+        t = min(1.0, max(0.0, ((x - ax) * vx + (z - az) * vz) / L2))
+        d = math.hypot(x - ax - vx * t, z - az - vz * t)
+        if best is None or d < best[0]:
+            best = (d, ya + (yb - ya) * t)
+    d, wy = best
+    if d > pol + lk["dosah_m"]:
+        return h
+    dno = wy - lk["hloubka_m"]
+    return min(h, dno + lk["svah"] * max(0.0, d - pol))
 
 
 _BR = []

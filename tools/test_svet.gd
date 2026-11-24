@@ -2025,6 +2025,18 @@ func _v_pudorysu_domu(body: Array, okap: float) -> bool:
 				break
 		if ok:
 			return true
+		# 24. 11. (plan F3, r. 28): novy dum ma vlastni ramec modelu (d.xf, mery DUM_MER hw/f/b) - pocatek u predni podezdivky
+		# a vetsi nez stara chalupa (c, L, W); strecha a steny domu 1 (16,8-17,8 m) lezely „mimo“ stary pudorys
+		var m: Dictionary = d.get("m", {})
+		if m.has("hw") and m.has("f") and m.has("b"):
+			var ok2 := true
+			for p: Vector3 in body:
+				var l: Vector3 = (d["inv"] as Transform3D) * Vector3(p.x, 0.0, p.z)
+				if absf(l.x) > float(m["hw"]) + okap or l.z > float(m["f"]) + okap or l.z < float(m["b"]) - okap:
+					ok2 = false
+					break
+			if ok2:
+				return true
 	return false
 
 

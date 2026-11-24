@@ -5960,6 +5960,12 @@
    594.5,
    916.8
   ],
+  "lednice_koryto": {
+   "hloubka_m": 0.3,
+   "svah": 0.6,
+   "dosah_m": 1.5,
+   "_p": "24. 11. (plan_18_11 F3, test mlyn_zlab bod 6 (598,9; 914,0): hladina lednice 0,08 m pod jemnym terenem toku) - lednice mimo dil mlyna tekla brehem potoka bez koryta. Blender (kraj._lednice_koryto, krok voda) vyhloubi dno hladina - hloubka_m v sirce lednice a breh svahem svah do dosah_m za kraj vody; uvnitr dilu teren dilu."
+  },
   "spad_m": 3.24,
   "rovina_r_m": 6.0,
   "na_toku": [
@@ -6179,6 +6185,7 @@
   "nechat_m": 0.3
  },
  "jen_blender": [
+  "mlyn/lednice_koryto",
   "potok/breh_nasobek",
   "potok/udoli_svah_blizko",
   "potok/udoli_svah_daleko",
