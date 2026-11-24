@@ -1794,3 +1794,5 @@ Hotovo v kódu a datech (testy u každého):
 - Oprava: `light()` v listi*.gdshader, list ve stínu = `les_podrost.json koruny.listi_stin_min` (prosvítání), rub karty
   vrací normálu ven (Godot ji u cull_disabled otočí, naše normála „od středu koruny“ pak míří dovnitř).
 - Poučení: tmavé/černé plochy = nejdřív izolovaná scéna s vypínáním vlivů (stín, jádro, barvy vrcholů), teprve pak oprava.
+- 24. 11.: poznámka `_…` vložená DO slovníku `postavy.json role` shodila hru (lide.gd čte každou položku role jako slovník:
+  „Invalid access 'rozvrh' on String“, watchdog testu). Poznámky jen na úroveň, kterou kód neprochází smyčkou (kořen souboru).
