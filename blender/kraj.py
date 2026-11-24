@@ -1484,6 +1484,7 @@ def voda_tvar(x, z, h):
     """Teren po vode: koryta a doliny malych toku, dno a breh rybniku (mimo dil), hraze."""
     if _BEZ_VODY_TVAR:
         return h                                              # planovani tras toku (tools/krok_b) nad terenem bez nich
+    h_vstup = h
     tn = tok_near(x, z)
     prof_toku = 1e9                     # vyska koryta a brehu nejblizsiho toku v bode (pro pruraz hraze odtokem)
     if tn is not None:
@@ -1556,6 +1557,10 @@ def voda_tvar(x, z, h):
         hr = _hraz(x, z, ryb)
         if hr > h:
             h = hr                                            # hraz
+    # 24. 11. (plan F3, mlyn_zlab bod 6): v pudorysu dilu mlyna je teren sveta pod terenem dilu (mlyn_pad, pod_dilem_m);
+    # breh toku dilu (nasyp nad hladinu) ho zvedal nad teren dilu a jemny teren toku zakryl lednici - voda tam jen snizuje
+    if _MDIL and v_dilu_mlyna(x, z):
+        h = min(h, h_vstup)
     return _lednice_koryto(x, z, h)
 
 

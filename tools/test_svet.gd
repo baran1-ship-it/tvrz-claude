@@ -2037,6 +2037,19 @@ func _v_pudorysu_domu(body: Array, okap: float) -> bool:
 					break
 			if ok2:
 				return true
+	# stodoly a kulny dvorce (vybaveni "dvorec", pudorys z katalogu = svet._placky; strecha stodoly usedlosti 1 16,8 m)
+	sv.stavba_dolina_vaha(0.0, 0.0)
+	for pl: Array in sv.get("_placky"):
+		if pl.size() < 5:
+			continue
+		var ok3 := true
+		for p: Vector3 in body:
+			var q := Vector2(p.x, p.z) - (pl[0] as Vector2)
+			if absf(q.dot(pl[1])) > float(pl[3]) + okap or absf(q.dot(pl[2])) > float(pl[4]) + okap:
+				ok3 = false
+				break
+		if ok3:
+			return true
 	return false
 
 
