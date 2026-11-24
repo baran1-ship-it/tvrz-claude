@@ -2322,6 +2322,30 @@ func _mlyn() -> void:
 
 
 ## Breh hladky (pasma.test _breh_hladky): okraj vody bez zubu, hladina bez dlouhe roviny a schodu.
+## Body osy v kaskade (plan F1): sklon hladiny v okne voda.json potok.raz_toku.sklon_okno_m kolem bodu >= sklon_od druhu kaskada.
+func _kaskada_osy(b: PackedVector2Array, hl: PackedFloat32Array) -> PackedByteArray:
+	var rt: Dictionary = preload("res://scripts/pravidla.gd").cti("voda", "potok", "raz_toku")
+	var okno := float(rt["sklon_okno_m"])
+	var prah := INF
+	for dr: Dictionary in rt["druhy"]:
+		if String(dr["nazev"]) == "kaskada":
+			prah = float(dr["sklon_od"])
+	var out := PackedByteArray()
+	var cum := PackedFloat32Array([0.0])
+	for i in range(1, b.size()):
+		cum.append(cum[i - 1] + b[i - 1].distance_to(b[i]))
+	for i in b.size():
+		var a := i
+		var e := i
+		while a > 0 and cum[i] - cum[a] < okno:
+			a -= 1
+		while e < b.size() - 1 and cum[e] - cum[i] < okno:
+			e += 1
+		var dl := cum[e] - cum[a]
+		out.append(1 if dl > 0.0 and (hl[a] - hl[e]) / dl >= prah else 0)
+	return out
+
+
 func _breh_hladky() -> void:
 	var P = preload("res://scripts/pravidla.gd")
 	var pt: Dictionary = sv.pasma()["test"]
@@ -2354,10 +2378,16 @@ func _breh_hladky() -> void:
 		for q: Array in tk["osa_xzy"]:
 			b.append(Vector2(float(q[0]), float(q[1])))
 			hl.append(float(q[2]))
-		osy.append([String(tk["id"]), b, hl, float(tk["sirka_m"]) * 0.5, 1.0, 0.1])
+		osy.append([String(tk["id"]), b, hl, float(tk["sirka_m"]) * 0.5, 1.0, 0.1, _kaskada_osy(b, hl)])
 	if sv.koryto:
-		osy.append(["bystrice", sv.koryto.get("body"), sv.koryto.get("hladiny"), float(P.cti("voda", "potok")["pulsirka_vody_m"]), 2.0, 0.25])
-	var n := {"zub": 0, "rovina": 0, "schod": 0, "bodu": 0}
+		var rz: PackedInt32Array = sv.koryto.get("raz")
+		var kb := PackedByteArray()
+		for r in rz:
+			kb.append(1 if r >= 2 else 0)
+		osy.append(["bystrice", sv.koryto.get("body"), sv.koryto.get("hladiny"), float(P.cti("voda", "potok")["pulsirka_vody_m"]), 2.0, 0.25, kb])
+	# 24. 11. (plan F1): kaskada (voda.json potok.raz_toku, sklon nad druhy[kaskada].sklon_od) ma hladinu po stupnich a breh
+	# mezi balvany schvalne nepravidelny (Misa 14. 11. „pereje az vodopad, hodne kameni“) - schod a zub se tam nemeri, jen pocet
+	var n := {"zub": 0, "rovina": 0, "schod": 0, "bodu": 0, "kaskada": 0}
 	for o: Array in osy:
 		var b: PackedVector2Array = o[1]
 		var hl: PackedFloat32Array = o[2]
@@ -2375,6 +2405,15 @@ func _breh_hladky() -> void:
 				var h := lerpf(hl[i], hl[i + 1], f)
 				s += kr
 				if vynech.any(func(v: Array) -> bool: return q.distance_to(v[0]) < float(v[1])):
+					for sd: float in [-1.0, 1.0]:
+						(hrany[sd] as Array).append(NAN)
+					stanice.append(q)
+					hl_minule = NAN
+					rov = 0.0
+					continue
+				var kask_b: PackedByteArray = o[6]
+				if i < kask_b.size() and kask_b[i] == 1:
+					n["kaskada"] += 1
 					for sd: float in [-1.0, 1.0]:
 						(hrany[sd] as Array).append(NAN)
 					stanice.append(q)

@@ -1796,3 +1796,7 @@ Hotovo v kódu a datech (testy u každého):
 - Poučení: tmavé/černé plochy = nejdřív izolovaná scéna s vypínáním vlivů (stín, jádro, barvy vrcholů), teprve pak oprava.
 - 24. 11.: poznámka `_…` vložená DO slovníku `postavy.json role` shodila hru (lide.gd čte každou položku role jako slovník:
   „Invalid access 'rozvrh' on String“, watchdog testu). Poznámky jen na úroveň, kterou kód neprochází smyčkou (kořen souboru).
+- 24. 11. (plan F1/F3, testy): `breh_hladky` meří schod hladiny a zub okraje jen mimo kaskády (`voda.json potok.raz_toku`,
+  sklon v okně ≥ druh kaskada 12 %) – v kaskádě hladina po stupních a břeh mezi balvany schválně (Míša 14. 11. „peřeje až
+  vodopád“); horní lhota_potok 30–105 % a Bystřice u (281, 1126) jsou kaskády. `site_natazene`: výjimka půdorysu i podle
+  rámce nového domu (DUM_MER hw/f/b) – dlouhé plochy střechy domu 1 (16,8 m) nejsou natažená síť.
