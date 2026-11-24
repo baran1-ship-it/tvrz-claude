@@ -1960,6 +1960,9 @@ func _do_postele(c: Dictionary, cn: Dictionary) -> void:
 	c["yaw_mista"] = u.rotation.y
 	c["postel_y"] = u.position.y                       # vyska z postele, ne paprskem
 	c["v_posteli"] = true
+	# 24. 11. (plan F4, spanek_hra): kdo sedel, kdyz prisel cas spanku, nesmi v luzku vstavat ze sedu (Sed_Vystup v poze
+	# stani ve vysce luzka = Misa r. 59 „stoji na luzku“)
+	c["sedi"] = false
 	ruce(c, {})
 	# lehnuti bez prolinani (prolinani ze stani do lehu by postavu chvili ukazalo stojici v luzku - test spanek 10. 11.);
 	# Mixamo spanek dycha (tempo 1), UAL LayToIdle stoji (tempo 0)

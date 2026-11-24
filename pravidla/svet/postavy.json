@@ -3734,7 +3734,7 @@
     {
      "od": 9.0,
      "cinnost": "hovor",
-     "kde": "nadvori_kovarna",
+     "kde": "brana_straz",
      "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
     },
     {
@@ -6964,5 +6964,5 @@
   "rada_max": 4,
   "_popis": "Misa 18. 11. (misa_18_11_chyby r. 3 a 4): test lide_rozmisteni - hrac na tvrzi (hrac x z), postavy od zacatku hry, den od_h..do_h po krok_h (snimku_krok snimku 1/30 s); chyba = na nadvori aspon min_na_nadvori a podil do u_brany_m od nadvori_brana nad u_brany_podil_max, nebo vic nez rada_max postav v pohybu v pasu cesty od tvrze cesta_pas [x0, x1, z0, z1] (u brany se pocitaji jen postavy na miste, ne prochazejici; 18. 11. 20:00 paze sel kolem studny do ubytovny)"
  },
- "_24_11_nadvori": "Míša 18. 11. („zase jsou všichni u brány“), test lide_rozmisteni 9,25 h: 4 u brány (studna −2/6 a brana_straz 2,4/8,2 u brány 0/7,8) → čeledín 8/13/17 h stáje a kovárna (voda dál 5,5 a 15,5 h), kuchařka 9 h před kuchyní, purkrabí 9 h kovárna."
+ "_24_11_nadvori": "Míša 18. 11. („zase jsou všichni u brány“), test lide_rozmisteni 9,25 h: 4 u brány (studna −2/6 a brana_straz 2,4/8,2 u brány 0/7,8) → čeledín 8/13/17 h stáje a kovárna (voda dál 5,5 a 15,5 h), kuchařka 9 h před kuchyní (purkrabí 9 h zůstává u brány – společná scéna s hlídkou)."
 }
