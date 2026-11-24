@@ -945,6 +945,7 @@ func _interier(delta: float) -> void:
 	_int_t = 0.0
 	if _portaly.is_empty():
 		_portaly = Portaly.nacti(main.life.rooms)
+	var _t0 := Time.get_ticks_usec()
 	var pp: Vector3 = main.player.global_position + Vector3(0, 1.6, 0)
 	var cam: Camera3D = main.player.cam
 	var fw := -cam.global_transform.basis.z
@@ -981,7 +982,9 @@ func _interier(delta: float) -> void:
 			if String(p[8]) == "" and pc.distance_to(pp) < 10.0 and cam.is_position_in_frustum(pc):
 				okno = true
 				break
+	var _t1 := Time.get_ticks_usec()
 	_vnitrek(not cur.is_empty(), pp, okno, 0.2)
+	var _t2 := Time.get_ticks_usec()
 	# F9 (plan_18_11, predmety_cas 3,9 ms > test_snimek_ms 2): viditelnost predmetu po mistnostech - pri zmene mistnosti
 	# (nebo viditelnych sousedu) cely pruchod, jinak po rozpocty.predmety_vnitrek.zaznamu_krok zaznamech dokola (jen kvuli
 	# predmetum, ktere nekdo prenesl jinam; zmena hrace se projevi hned)
@@ -1002,6 +1005,8 @@ func _interier(delta: float) -> void:
 		var ma := nm2 == "" or bool(vid.get(nm2, true))
 		if (rec["node"] as Node3D).visible != ma:
 			(rec["node"] as Node3D).visible = ma
+	if OS.has_environment("TVRZ_TEST") and Time.get_ticks_usec() - _t0 > 2000:
+		print("INTERIER_ROZPAD portaly %.2f ms, vnitrek %.2f ms, predmety %.2f ms (%d zaznamu, cely %s)" % [(_t1 - _t0) / 1000.0, (_t2 - _t1) / 1000.0, (Time.get_ticks_usec() - _t2) / 1000.0, krok, vse])
 
 
 var _int_klic := ""
