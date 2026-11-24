@@ -1005,7 +1005,7 @@ func _interier(delta: float) -> void:
 		var ma := nm2 == "" or bool(vid.get(nm2, true))
 		if (rec["node"] as Node3D).visible != ma:
 			(rec["node"] as Node3D).visible = ma
-	if OS.has_environment("TVRZ_TEST") and Time.get_ticks_usec() - _t0 > 2000:
+	if OS.has_environment("TVRZ_TEST") and Time.get_ticks_usec() - _t0 > 1000:
 		print("INTERIER_ROZPAD portaly %.2f ms, vnitrek %.2f ms, predmety %.2f ms (%d zaznamu, cely %s)" % [(_t1 - _t0) / 1000.0, (_t2 - _t1) / 1000.0, (Time.get_ticks_usec() - _t2) / 1000.0, krok, vse])
 
 
