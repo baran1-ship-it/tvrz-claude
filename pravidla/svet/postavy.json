@@ -2769,11 +2769,11 @@
     {
      "od": 8.0,
      "cinnost": "voda_staje",
-     "kde": "nadvori_studna",
+     "kde": "nadvori_staje",
      "moznosti": [
       {
        "cinnost": "voda_staje",
-       "kde": "nadvori_studna",
+       "kde": "nadvori_staje",
        "vaha": 1.0
       }
      ]
@@ -2786,7 +2786,7 @@
     {
      "od": 13.0,
      "cinnost": "voda_staje",
-     "kde": "nadvori_studna"
+     "kde": "nadvori_kovarna"
     },
     {
      "od": 15.0,
@@ -2802,7 +2802,7 @@
     {
      "od": 17.0,
      "cinnost": "volno",
-     "kde": "nadvori_studna"
+     "kde": "nadvori_staje"
     },
     {
      "od": 19.0,
@@ -3734,7 +3734,7 @@
     {
      "od": 9.0,
      "cinnost": "hovor",
-     "kde": "brana_straz",
+     "kde": "nadvori_kovarna",
      "_scena": "Misa 11. 11. spolecna scena (choreografie_postav.md)"
     },
     {
@@ -3816,7 +3816,7 @@
     {
      "od": 9.0,
      "cinnost": "voda_kuchyne",
-     "kde": "nadvori_studna"
+     "kde": "tvrz_kuchyne_dvor"
     },
     {
      "od": 10.0,
@@ -5138,7 +5138,8 @@
    "zrak_m": 16.0,
    "trida": "nizka",
    "_rozvrh": "Misa 11. 11. choreografie (docs/rozpracovane/choreografie_postav.md): kupec u stanu"
-  }
+  },
+  "_24_11_nadvori": "Míša 18. 11. („zase jsou všichni u brány“), test lide_rozmisteni 9,25 h: 4 u brány (studna −2/6 a brana_straz 2,4/8,2 u brány 0/7,8) → čeledín 8/13/17 h stáje a kovárna (voda dál 5,5 a 15,5 h), kuchařka 9 h před kuchyní, purkrabí 9 h kovárna."
  },
  "_role": "rozvrh: bloky od hodiny (0-24) do zacatku dalsiho, posledni pres pulnoc do prvniho; kde: domov / dvere (pred domovem) / zahrada (u domova) / prace (misto prace obyvatele) / naves (nahodne misto skupiny naves) / id mista; zvedavost 0-1: jak casto se postava ohledne po hraci, ktery jde kolem (rychtar ano, lamac skoro ne); ostrazitost, ucta, strach, mluvnost 0-1, zrak_m, trida (reserse_reakce_kcd2.md 6.2, NEOVERENO - odhad podle KCD trid); repliky: vlastni klic misto systemoveho (KCD: monolog role prebije systemovy)",
  "obyvatele": [

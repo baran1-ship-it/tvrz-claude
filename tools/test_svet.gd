@@ -7391,7 +7391,9 @@ func _spanek_hra() -> void:
 				for c: Dictionary in ll:
 					if not (c["uzel"] as Node3D).visible:
 						continue
-					var lz := bool(c.get("v_posteli", false))
+					# 24. 11. (plan F4): postava v klipu spanku lezi (scena spanku na slamniku u celedi/dvorky nema v_posteli) -
+					# test hlida stani nad luzkem, ne zpusob, jak se do luzka dostala
+					var lz := bool(c.get("v_posteli", false)) or String(c["klip"]) == String(P["spani"]["klip"])
 					var nl := String(nad_luzkem.call(c))
 					if not lz and nl != "" and chyby.size() < 20 and not chyby.any(func(t: String) -> bool: return t.begins_with(String(c["id"]) + " ")):
 						chyby.append("%s %.1f h: stoji nad luzkem %s (klip %s, cinnost %s, y %.2f)" % [c["id"], hod, nl, c["klip"], str((c["cn"] as Dictionary).keys()), (c["uzel"] as Node3D).global_position.y])
