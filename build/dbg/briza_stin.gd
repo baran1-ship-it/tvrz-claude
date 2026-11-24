@@ -46,5 +46,5 @@ func _init() -> void:
 	cam.look_at_from_position(Vector3(0, 6, 18), Vector3(0, 7, 0))
 	for k in 10:
 		await process_frame
-	get_root().get_texture().get_image().save_png("res://build/dbg/briza_stin_min.png")
+	get_root().get_texture().get_image().save_png("res://build/dbg/briza_stin_v2.png")
 	quit()

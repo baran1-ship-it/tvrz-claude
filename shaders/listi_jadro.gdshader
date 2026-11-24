@@ -66,12 +66,13 @@ void fragment() {
 }
 
 // Misa 17. 11. r. 3 (tmave obdelniky v korune brizy; izolovane 23. 11.: bez stinu zadne, se stinem stinoveho telesa
-// koruny i vlastniho listi cele karty cerne): list ve stinu neni cerny - prosvita (listi_stin_min). Jinak stejne jako
-// diffuse_lambert_wrap + BACKLIGHT.
+// koruny i vlastniho listi cele karty cerne): list ve stinu slunce neni cerny - prosvita (listi_stin_min). Jinak presne
+// diffuse_lambert_wrap + BACKLIGHT Godotu 4.4 (GLES3 light_compute: wrap podle ROUGHNESS, prosvitani (1/PI - d) x BL);
+// bodova svetla (louc, ohen) beze zmeny - ATTENUATION v nich nese i utlum vzdalenosti (kontrola 24. 11.)
 void light() {
-	float nl = dot(NORMAL, LIGHT);
-	float wrap = max((nl + 0.5) / 1.5, 0.0);
-	float att = mix(stin_min, 1.0, ATTENUATION);
-	DIFFUSE_LIGHT += wrap * att * LIGHT_COLOR / PI;
-	DIFFUSE_LIGHT += BACKLIGHT * max(-nl, 0.0) * att * LIGHT_COLOR / PI;
+	float cnl = max(dot(NORMAL, LIGHT), 0.0);
+	float d = max(0.0, (cnl + ROUGHNESS) / ((1.0 + ROUGHNESS) * (1.0 + ROUGHNESS))) / PI;
+	float att = LIGHT_IS_DIRECTIONAL ? mix(stin_min, 1.0, ATTENUATION) : ATTENUATION;
+	DIFFUSE_LIGHT += LIGHT_COLOR * d * att;
+	DIFFUSE_LIGHT += LIGHT_COLOR * (vec3(1.0 / PI) - d) * BACKLIGHT * att;
 }
