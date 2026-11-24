@@ -7396,7 +7396,7 @@ func _spanek_hra() -> void:
 					var lz := bool(c.get("v_posteli", false)) or String(c["klip"]) == String(P["spani"]["klip"])
 					var nl := String(nad_luzkem.call(c))
 					if not lz and nl != "" and chyby.size() < 20 and not chyby.any(func(t: String) -> bool: return t.begins_with(String(c["id"]) + " ")):
-						chyby.append("%s %.1f h: stoji nad luzkem %s (klip %s, cinnost %s, y %.2f)" % [c["id"], hod, nl, c["klip"], str((c["cn"] as Dictionary).keys()), (c["uzel"] as Node3D).global_position.y])
+						chyby.append("%s %.1f h: stoji nad luzkem %s (klip %s, y %.2f, xz %.1f %.1f, vchazi %d, na_miste %s, cesta %d, snimek %d)" % [c["id"], hod, nl, c["klip"], (c["uzel"] as Node3D).global_position.y, (c["uzel"] as Node3D).global_position.x, (c["uzel"] as Node3D).global_position.z, int(c.get("vchazi", 0)), str(c.get("na_miste", false)), (c.get("cesta", PackedVector2Array()) as PackedVector2Array).size(), f])
 					var sp: Dictionary = (c["o"] as Dictionary).get("spanek", {})
 					if String(sp.get("budova", "")) != String(kde[0]):
 						continue
