@@ -12,6 +12,7 @@ import os
 import sys
 
 import bpy
+from mathutils import Matrix
 
 VSTUP, TEX, SADA = sys.argv[-4:-1] if len(sys.argv) > 4 and sys.argv[-1].isdigit() else sys.argv[-3:]
 CIL = int(sys.argv[-1]) if sys.argv[-1].isdigit() else 12000
@@ -70,6 +71,32 @@ bpy.ops.object.mode_set(mode="EDIT")
 for z in zkrutne:
     arm.data.edit_bones.remove(arm.data.edit_bones[z])
 bpy.ops.object.mode_set(mode="OBJECT")
+
+# --- osy kosti jako UAL (zkouska 25. 11.: klipy UAL na kostre UE4 - postava lezela; klipy Godotu jsou mistni rotace
+# kosti, ty sedi jen pri stejnych osach klidove pozy). Klid se meni bez pozy - sit v Blenderu zustane (deformace =
+# poza x klid^-1 = 1), vazebne matice glTF se spocitaji z noveho klidu. Poloha kloubu zustava (proporce postavy).
+UAL_SADA = os.path.join(OUT, "npc_bartos_cela.gltf")
+pred = set(bpy.data.objects)
+bpy.ops.import_scene.gltf(filepath=UAL_SADA)
+nove = [o for o in bpy.data.objects if o not in pred]
+ual = next(o for o in nove if o.type == "ARMATURE")
+osy = {b.name: (ual.matrix_world @ b.matrix_local).to_quaternion() for b in ual.data.bones}
+for o in nove:
+    bpy.data.objects.remove(o)
+bpy.context.view_layer.objects.active = arm
+bpy.ops.object.mode_set(mode="EDIT")
+inv = arm.matrix_world.to_quaternion().inverted()
+srovnano = 0
+for b in arm.data.edit_bones:
+    q = osy.get(b.name)
+    if q is None:
+        continue
+    d = b.length
+    b.matrix = Matrix.LocRotScale(b.head.copy(), inv @ q, None)
+    b.length = d
+    srovnano += 1
+bpy.ops.object.mode_set(mode="OBJECT")
+print("OSY srovnano", srovnano, "z", len(arm.data.bones), "chybi v UAL", [b.name for b in arm.data.bones if b.name not in osy])
 
 
 # --- materialy a textury 1K
