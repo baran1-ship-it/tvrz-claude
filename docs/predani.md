@@ -1812,3 +1812,6 @@ Hotovo v kódu a datech (testy u každého):
   jména, kosti se nenašly (`kun.gd _kost_je`).
 - Godot `GLTFDocument` vyveze síť s tvarovými klíči (blend shapes) bez trojúhelníků → před vývozem klíče odstranit
   (`zk_muz/vyvoz.gd`).
+- 25. 11.: test `postavy_modif` CHYBA „kroku animace za snimek max 9 (strop 8)“ – izolovaně ověřeno, že **není** od nových
+  vesničanů (stejný výsledek se starým `postavy_vzhled.json`, beh `modif_bez`). Předchozí výsledek testu v logu není –
+  od kdy padá, NEOVĚŘENO; otevřené (strop kroků animace `postavy.json anim_strop_snimek` × počet postav v záběru).
