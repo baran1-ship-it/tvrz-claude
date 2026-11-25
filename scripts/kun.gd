@@ -208,12 +208,12 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 		var n := _kostra.get_bone_name(i)
 		var p := (xk * _kostra.get_bone_global_rest(i)).origin
 		for kk: String in KOHOUTEK_KOSTI:
-			if n.begins_with(kk + "_"):
+			if _kost_je(n, kk):
 				a_k.append(p.dot(vpred))
-		if SEDLO_PREDNI != "" and n.begins_with(SEDLO_PREDNI + "_"):
+		if SEDLO_PREDNI != "" and _kost_je(n, SEDLO_PREDNI):
 			_kost_predni = i
 			_kost_predni_klid = _kostra.get_bone_global_rest(i)
-		if n.begins_with(SEDLO_KOST + "_"):
+		if _kost_je(n, SEDLO_KOST):
 			p_sedlo = p
 			_kost_sedla = i
 			_kost_klid = _kostra.get_bone_global_rest(i)
@@ -221,6 +221,7 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	# sedadlo = nejnizsi misto mezi hruskou a zadni rozsochou sedla, ktere do modelu dal jeho autor (sit sedadlo_sit,
 	# skryta) - kun_henry: ~15 cm pred kosti BN_Spine_01, trmeny modelu (BN_*_Stirrup) ~19 cm pred nim
 	var sed_b := _body_site(xk, String(Pravidla.cti("jizda", "kun").get("sedadlo_sit", "")))
+	print("kun: sedadlo_sit %d bodu" % sed_b.size())
 	if not sed_b.is_empty():
 		var sp := _sedadlo(sed_b, vpred, Vector3.UP.cross(vpred).normalized())
 		if sp != Vector3.INF:
@@ -576,6 +577,12 @@ func _jednou(jm: String) -> void:
 
 
 # ------------------------------------------------------------------ jezdec
+
+## Kost podle jmena z pravidel: presne (Hero Horse „horse Spine1“) nebo s priponou (henry „BN_Spine_01_…“). 25. 11.: jen
+## pripona - kosti Hero Horse se nenasly, sedlo a jezdec spadli na panev (jezdec za sedlem).
+static func _kost_je(n: String, k: String) -> bool:
+	return n == k or n.begins_with(k + "_")
+
 
 ## Body vykreslene site v klidu po skinu (souradnice modelu), kazdy n-ty vrchol.
 func _body_site(xk: Transform3D, jen := "") -> Array:
