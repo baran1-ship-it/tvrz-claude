@@ -203,13 +203,14 @@ for k in ("telo", "hlava", "vlasy"):
 
 
 def druh(o):
-    """Podle materialu z FBX (ruce a oci maji material hlavy), u „Default“ podle jmena kusu."""
+    """Podle jmena kusu (hlava, oci a ruce = textura hlavy; vlasy, vousy), jinak podle materialu z FBX (postava 05 ma
+    materialy „20 - Default“ bez jmena)."""
     m = (o.material_slots[0].name if o.material_slots else "").lower()
     j = o.name.lower()
-    if "head" in m:
-        return "hlava"
-    if "hair" in m or any(x in j for x in ("hair", "beard", "mustache", "brow")):
+    if any(x in j for x in ("hair", "beard", "mustache", "brow")) or "hair" in m:
         return "vlasy"
+    if any(x in j for x in ("head", "eyes", "hands")) or "head" in m:
+        return "hlava"
     return "telo"
 
 
