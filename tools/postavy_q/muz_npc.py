@@ -21,7 +21,9 @@ OUT = os.path.join(REPO, "modely", "postavy", "npc")
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=VSTUP)
 arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
-site = [o for o in bpy.data.objects if o.type == "MESH"]
+site = [o for o in bpy.data.objects if o.type == "MESH" and any(m.type == "ARMATURE" for m in o.modifiers)]
+for o in [o for o in bpy.data.objects if o.type == "MESH" and o not in site]:
+    bpy.data.objects.remove(o)  # tvar kosti z importu glTF (Icosphere)
 print("VSTUP kosti", len(arm.data.bones), "site", [(o.name, len(o.data.polygons)) for o in site])
 # UE4: osa z nahoru a centimetry (v Godotu postava lezela a mela 0,12 m) - otoceni a meritko do kostry a vrcholu
 for o in bpy.data.objects:
@@ -122,7 +124,19 @@ for o in site:
     o.data.materials.clear()
     o.data.materials.append(mat[druh(o)])
 
-# --- jedna sit, zmenseni pro tablet
+# --- zmenseni pro tablet (kazdy kus zvlast: hlava a ruce dvojnasobny podil - oblicej a prsty), pak jedna sit
+troj = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in site)
+pomer = min(1.0, CIL / troj)
+for o in site:
+    j = o.name.lower()
+    r = min(1.0, pomer * (2.0 if ("head" in j or "hands" in j) else 1.0))
+    if r < 1.0:
+        bpy.context.view_layer.objects.active = o
+        d = o.modifiers.new("zmenseni", "DECIMATE")
+        d.ratio = r
+        d.use_collapse_triangulate = True
+        bpy.ops.object.modifier_move_to_index(modifier=d.name, index=0)
+        bpy.ops.object.modifier_apply(modifier=d.name)
 bpy.ops.object.select_all(action="DESELECT")
 for o in site:
     o.select_set(True)
@@ -131,12 +145,6 @@ bpy.ops.object.join()
 s = bpy.context.view_layer.objects.active
 s.name = SADA + "_cela"
 s.data.name = SADA + "_cela"
-troj = sum(len(p.vertices) - 2 for p in s.data.polygons)
-if troj > CIL:
-    d = s.modifiers.new("zmenseni", "DECIMATE")
-    d.ratio = CIL / troj
-    d.use_collapse_triangulate = True
-    bpy.ops.object.modifier_apply(modifier=d.name)
 print("SIT", s.name, "trojuhelniku", troj, "->", sum(len(p.vertices) - 2 for p in s.data.polygons))
 arm.name = "Armature"
 cil = os.path.join(OUT, SADA + "_cela.gltf")
