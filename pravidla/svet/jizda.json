@@ -80,7 +80,7 @@
   "sedlo_kost_predni": "horse Neck",
   "sedlo_predni_podil": 0.35,
   "_sedlo_predni": "Misa 11. 11. (kun pohne krkem - kus sedla v tele): sedlo jde se smesi zadni kosti sedlo_kost a predni kosti pod kohoutkem (podil predni); 0,35 NEOVERENO - ladi se snimkem pastvy (Eat, krk dolu)",
-  "sedadlo_sit": "",
+  "sedadlo_sit": "PA_Saddle",
   "hriva_sit": "Horse_mane",
   "hriva_pred_hruskou_m": 0.03,
   "hruska_nad_sedadlem_m": 0.06,
@@ -91,7 +91,12 @@
   },
   "_sedlo_napric": "Misa 0.99994 r. 62 (po 2 neuspesnych opravach, novy rozbor 9. 11.): napric sedlo na osu trupu - stred sirky trupu v pasu |vpred - sedadlo| < pas_podil * delka, v horni casti trupu (hloubka_podil vysky hrbet-kopyta pod hrbetem), v klidove poze po skinu (kun.gd). Kost sedlo_kost a obal Saddle1 lezi 5 cm mimo osu trupu (test kun_klid 6. 11.: sedlo x 0,088, stred trupu 0,037) - sedlo posunute vpravo zabodlo levy panel do tela. Test kun_klid: sedlo_napric_max_m.",
   "mereni_bez_siti": [
-   "Horse_mane"
+   "Horse_mane",
+   "PA_Saddle",
+   "PA_Blanket",
+   "PA_Stirrups",
+   "PA_Skirt",
+   "PA_Harness"
   ],
   "_sedadlo": "Misa 0.9998 „kun ma sedlo na prdeli“ (4. 11.): sedlo a jezdec byli nad kosti BN_Spine_01 (sedlo_kost) a sedlo Balt kotvene stredem obalu (= trmeny, 16-24 cm pred sedadlem, kus otoceny o 180 st.) - sedadlo vyslo ~0,3 m vzad k zadi. Ted bod sedla = sedadlo (nejnizsi misto mezi hruskou a rozsochou) skryteho westernoveho sedla modelu sedadlo_sit, ktere tam dal autor modelu (kun.gd _sedadlo; rozbor glb: sedadlo z ~0 jedn., kohoutek BN_Spine_03 z 5,7, trmeny BN_*_Stirrup z 2,1, BN_Spine_01 z -1,2); sedlo_kost jen zaloha, kdyz sit chybi. Sedlo vystroje se kotvi svym sedadlem. mereni_bez_siti: site mimo mereni kohoutku a delky (Saddle1 s hruskou 17,9 proti kohoutku 15,9 jedn. - kun byl o 12 % mensi; hriva nad kohoutkem).",
   "nohy_polomer_m": 0.3,
@@ -158,7 +163,7 @@
      "kotva": "sedlo"
     }
    },
-   "zapnuto": true,
+   "zapnuto": false,
    "kusy_hnedak": {
     "sedlo": {
      "model": "res://modely/kone/vystroj_sedlo_%s.glb",
@@ -422,7 +427,8 @@
     "horse Neck"
    ],
    "_p": "25. 11.: casti jmen kosti pro rozmery a smer modelu (kun.gd _model; drive v kodu Head_0 / Pelvis|Hips / Neck_00|Spine) - nove kone bez zmeny kodu"
-  }
+  },
+  "_25_11_sedlo": "Misa 25. 11. „na koni nech original sedlo“: sedlo, deka, trmeny a sukne z modelu Hero Horse (tools/kun_hero.py), sedadlo jezdce z site PA_Saddle (kun.gd _sedadlo), dobove sedlo Balt Horse (vystroj) vypnuto; postroj do mereni kohoutku nepocitan"
  },
  "telo": {
   "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",

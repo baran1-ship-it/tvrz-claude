@@ -4,9 +4,9 @@
     rozbaleny_archiv: slozka s Export/Hero_Horse_PoorArmor.FBX a Textures/*.tif (CH_Hero_Horse.v.2.0_LIGHT.rar)
     srst: Bay | Black | Chestnut | Palomino | White,  hriva: Brown | Black | Palomino | White
 Co dela:
- - telo (Hero_Horse 10 374 troj.), hriva (1 000), ocas (192) a z chudeho postroje jen PA_Harness (uzdecka + poprsnik,
-   skinovane na kosti kone, pohybuje se s nim); sedlo, deka, trmeny, otezi a sukne postroje pryc - hra ma dobove sedlo
-   z Balt Horse (jizda.json kun.vystroj) a otezi pocita sama (scripts/otezi.gd)
+ - telo (Hero_Horse 10 374 troj.), hriva (1 000), ocas (192) a chudy postroj modelu (PA_Harness, PA_Saddle, PA_Blanket,
+   PA_Stirrups, PA_Skirt - skinovane na kosti kone, pohybuji se s nim; Misa 25. 11. original sedlo); jen otezi pryc -
+   hra je pocita sama (scripts/otezi.gd)
  - textury z TIF 4096 -> PNG (telo 1024, hriva 512 s alfou, postroj 1024) - tablet, pravidla kvalita.json
  - animace: jedna stopa „Take 001“ (1555 snimku, 30 FPS); klipy dela hra jako useky (jizda.json kun.klipy_z_useku
    podle tabulky snimku z Hero_Horse_notes.rtf)
@@ -18,7 +18,9 @@ import bpy
 
 SRC, SRST, HRIVA = sys.argv[-3], sys.argv[-2], sys.argv[-1]
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "modely", "kone")
-PRYC = ("PA_Saddle", "PA_Blanket", "PA_Stirrups", "PA_Reins", "PA_Skirt")
+# Misa 25. 11.: „na koni nech original sedlo“ - sedlo, deka, trmeny a sukne modelu zustavaji (skinovane na kosti kone);
+# pryc jen otezi modelu (vede je hra sama k rukam jezdce, scripts/otezi.gd)
+PRYC = ("PA_Reins",)
 TEX = os.path.join(OUT, "kun_hero_tex")
 os.makedirs(TEX, exist_ok=True)
 

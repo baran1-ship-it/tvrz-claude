@@ -1800,3 +1800,8 @@ Hotovo v kódu a datech (testy u každého):
   sklon v okně ≥ druh kaskada 12 %) – v kaskádě hladina po stupních a břeh mezi balvany schválně (Míša 14. 11. „peřeje až
   vodopád“); horní lhota_potok 30–105 % a Bystřice u (281, 1126) jsou kaskády. `site_natazene`: výjimka půdorysu i podle
   rámce nového domu (DUM_MER hw/f/b) – dlouhé plochy střechy domu 1 (16,8 m) nejsou natažená síť.
+
+### Lekce 25. 11. (zkouška importu FBX v Godotu)
+- `build/` má `.gdignore` – Godot tam nic neimportuje („No loader found for resource: res://build/…“) a skript
+  `-s` s `load()` pak visel do limitu beh.sh (žádné `quit()` na null). Zkušební import mimo `build/` (např. `zk_muz/`,
+  v .gitignore) a ve zkušebním skriptu vždy `quit()` i při chybě načtení.
