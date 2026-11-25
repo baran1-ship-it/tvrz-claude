@@ -77,6 +77,7 @@ static var PROLINANI: Array = Pravidla.cti("jizda", "kun", "prolinani_s")
 static var VYSTROJ: Dictionary = Pravidla.cti("jizda", "kun").get("vystroj", {})
 static var NECINNOST: Array = Pravidla.cti("jizda", "kun").get("necinnost", ["Eat"])
 static var KLIPY_Z_USEKU: Dictionary = Pravidla.cti("jizda", "kun").get("klipy_z_useku", {})
+static var KOSTI_VZORY: Dictionary = Pravidla.cti("jizda", "kun", "kosti_vzory")
 # nazvy klipu modelu horse.glb -> obecne nazvy klipu_z_useku (kun_hnedak ma jednu dlouhou animaci)
 const ALIAS := {"1 Ilde": "Idle", "6 Eat": "Eat"}
 
@@ -184,11 +185,12 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 		var n := _kostra.get_bone_name(i)
 		var p := (xk * _kostra.get_bone_global_rest(i)).origin
 		dno = minf(dno, p.y)
-		if n.contains("Head_0"):
+		# casti jmen kosti z pravidel (jizda.json kun.kosti_vzory, 25. 11. kun_hero: horse Head / horse Pelvis)
+		if KOSTI_VZORY["hlava"].any(func(v: String) -> bool: return n.contains(v)):
 			hlava = p
-		if n.contains("Pelvis") or n.begins_with("Hips"):
+		if KOSTI_VZORY["panev"].any(func(v: String) -> bool: return n.contains(v)):
 			panev = p
-		if n.contains("Neck_00") or n.contains("Spine") or n.contains("Pelvis") or n.begins_with("Hips"):
+		if KOSTI_VZORY["hrbet"].any(func(v: String) -> bool: return n.contains(v)):
 			vrch = maxf(vrch, p.y)
 	var vpred := Vector3(hlava.x - panev.x, 0, hlava.z - panev.z).normalized()
 	# rozmery z vykreslene site po skinu (Misa 28. 10.: kun v zemi, jezdec na zadku): kopyta = nejnizsi bod site

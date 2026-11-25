@@ -16,7 +16,7 @@
  "popis": "Jizda na koni a telo hrace v prvni osobe (Misa 27. 10. noc: podle KCD2, na tabletu, bez sekani). Cte scripts/kun.gd a scripts/telo.gd; v kodu zadna vlastni cisla. Jednotky: m, m/s, rad/s, s. zapojeno_do_hry: true od 0.98 (Misa 28. 10. „chci tam i ruce a kone“ - fyzicka kontrola na tabletu); false = jen ve zkousce TVRZ_JIZDA.",
  "kun": {
   "popis": "chody krok/cval/trysk (Misa 28. 10. podle KCD2: packa = krok, packa naplno = cval, beh (jako u hrace) = trysk; vydrz kone ubyva jen v trysku (vydrz_s sekund), v kroku a cvalu se doplnuje vydrz_obnova za s; pri nule kun zpomali do cvalu a trysk jde znovu od tretiny); kohoutek = vyska v kohoutku, model se meri z kostry model_vyska: vyska site kone po deformaci kostrou v klidu (Blender, modely/postavy/kun.glb z horse.glb; kosti ukazuji 600 - hierarchie FBX 0,01 x 100 x 0,1 x 10), mereno 28. 10.. 28. 10.: model kun_hnedak.glb (Sketchfab Horse, MAXDESIGN-3D, CC-BY 4.0; horse.glb z Disku ma vadny skin, horse_1 vadnou sit). Rozmery z vykreslene site po skinu (kun.gd _body_site, 28. 10. Misa: kun v zemi, jezdec na zadku): kopyta = nejnizsi bod site (v modelu 17 cm nad nulou), kohoutek = nejvyssi bod hrbetu mezi kostmi kohoutek_kosti, sedlo nad kosti sedlo_kost (za kohoutkem) + sedlo_nad_hrbetem_m; kolize trupu kvadr + nohy valec nohy_polomer_m az ke kopytum (sam kvadr 0,65 m nad zemi stal na terenu a kopyta byla pod nim). Jedna animace „Take 001“ 31 s: klipy_z_useku = useky [od, do] s jako chody (rozbor kosti po 0,1 s - kopyta a hrbet se v useku vraci do stejne polohy: cval 2,0 s, krok 1,3 s, stani 2,0 s; pastva jednou). Sedlo, cabraka a uzdecka z Balt Horse (vystroj). necinnost: volny kun ve stani nahodne jednu z techto jednorazovych animaci v intervalu pastva_s (Misa 28. 10. „ne tupe zvire“): pastva (19-20,5 s), druha pastva hloub (26,5-28,6 s), rozhlizeni s natocenim hlavy (21-24 s).",
-  "model": "res://modely/kone/kun_henry.glb",
+  "model": "res://modely/kone/kun_hero.glb",
   "kohoutek_m": 1.58,
   "oci_nad_sedlem_m": 0.88,
   "chody": {
@@ -72,16 +72,16 @@
   ],
   "kolize_vyska_m": 1.15,
   "kohoutek_kosti": [
-   "BN_Spine_02",
-   "BN_Spine_03"
+   "horse Spine1",
+   "horse Spine2"
   ],
-  "sedlo_kost": "BN_Spine_01",
+  "sedlo_kost": "horse Spine1",
   "sedlo_nad_hrbetem_m": 0.06,
-  "sedlo_kost_predni": "BN_Neck_00",
+  "sedlo_kost_predni": "horse Neck",
   "sedlo_predni_podil": 0.35,
   "_sedlo_predni": "Misa 11. 11. (kun pohne krkem - kus sedla v tele): sedlo jde se smesi zadni kosti sedlo_kost a predni kosti pod kohoutkem (podil predni); 0,35 NEOVERENO - ladi se snimkem pastvy (Eat, krk dolu)",
-  "sedadlo_sit": "Saddle1",
-  "hriva_sit": "Hair",
+  "sedadlo_sit": "",
+  "hriva_sit": "Horse_mane",
   "hriva_pred_hruskou_m": 0.03,
   "hruska_nad_sedadlem_m": 0.06,
   "_hriva": "Nezavisla kontrola 9. 11. (docs/screens/sedlo_9_11/krok_levy.jpg): hriva kun_henry siaha az na kohoutek pod sedlo a prochazi predni rozsochou (hruskou) sedla Balt. Hriva konci hriva_pred_hruskou_m pred predni hranou hrusky (body sedla vystroje vys nez hruska_nad_sedadlem_m nad sedadlem, uzky pas osy) - trojuhelniky hrivy (sit hriva_sit, klidova poza) za ni se pri nacteni vynechaji (kun.gd _hriva_pred_sedlem). Ocas (za sedlem) zustava. Test test_kun_klid „hriva v sedle“.",
@@ -91,8 +91,7 @@
   },
   "_sedlo_napric": "Misa 0.99994 r. 62 (po 2 neuspesnych opravach, novy rozbor 9. 11.): napric sedlo na osu trupu - stred sirky trupu v pasu |vpred - sedadlo| < pas_podil * delka, v horni casti trupu (hloubka_podil vysky hrbet-kopyta pod hrbetem), v klidove poze po skinu (kun.gd). Kost sedlo_kost a obal Saddle1 lezi 5 cm mimo osu trupu (test kun_klid 6. 11.: sedlo x 0,088, stred trupu 0,037) - sedlo posunute vpravo zabodlo levy panel do tela. Test kun_klid: sedlo_napric_max_m.",
   "mereni_bez_siti": [
-   "Saddle1",
-   "Hair"
+   "Horse_mane"
   ],
   "_sedadlo": "Misa 0.9998 „kun ma sedlo na prdeli“ (4. 11.): sedlo a jezdec byli nad kosti BN_Spine_01 (sedlo_kost) a sedlo Balt kotvene stredem obalu (= trmeny, 16-24 cm pred sedadlem, kus otoceny o 180 st.) - sedadlo vyslo ~0,3 m vzad k zadi. Ted bod sedla = sedadlo (nejnizsi misto mezi hruskou a rozsochou) skryteho westernoveho sedla modelu sedadlo_sit, ktere tam dal autor modelu (kun.gd _sedadlo; rozbor glb: sedadlo z ~0 jedn., kohoutek BN_Spine_03 z 5,7, trmeny BN_*_Stirrup z 2,1, BN_Spine_01 z -1,2); sedlo_kost jen zaloha, kdyz sit chybi. Sedlo vystroje se kotvi svym sedadlem. mereni_bez_siti: site mimo mereni kohoutku a delky (Saddle1 s hruskou 17,9 proti kohoutku 15,9 jedn. - kun byl o 12 % mensi; hriva nad kohoutkem).",
   "nohy_polomer_m": 0.3,
@@ -107,7 +106,7 @@
   "_prekrok_vyrovnani_ms": "Misa 0.99993 „kun sebou hazi“: _prekroc posune telo (kolizi) o krok nahoru najednou, model, sedlo a jezdec jsou o tento krok niz a dobehnou touto rychlosti (0,3 m za 0,25 s, jako kun, ktery zveda trup pres prekazku pri kroku 1,7 m/s; odhad) - zadny skok oci (test kun_klid skok_m).",
   "prekrok_skok_nad_m": 0.02,
   "_prekrok_skok_nad_m": "svisly posun tela za krok fyziky vetsi nez vodorovny x tan(podlaha_max_st) + toto (schod, prichyceni k podlaze pri sestupu z prekazky) se ve vzhledu vyrovna jako prekrok (kun.gd _vyr_y)",
-  "zastaveni_klip": "Run_Stop",
+  "zastaveni_klip": "",
   "zastaveni_od_ms": 5.0,
   "zastaveni_s_jezdcem": false,
   "_zastaveni": "Misa 0.99993 „kun pri jizde sebou moc casto hazi hlavou a asi i trochu vzpina“: klip zastaveni_klip modelu (Run_Stop, 2 s) je smyk se vzepjetim - trup +30 st., hlava o 0,7 m nahoru (rozbor glb 6. 11.). Hral se pri kazdem zpomaleni z nad zastaveni_od_ms k nule: pod jezdcem kazde pusteni packy a kazdy vypadek palce na dotyku za cvalu; pozadavek se opakoval kazdy snimek brzdeni. Pod jezdcem (zastaveni_s_jezdcem false) kun zastavi prolinanim chodu (cval -> krok -> stani, jako v KCD2 - jezdecky kun pri zastaveni nevzpina); klip jen pro volneho kone, jednou.",
@@ -129,9 +128,9 @@
   "zivoty_max": 100.0,
   "otezi": {
    "popis": "Misa 9. 11. r. 86 (snimek 17: ruce na otezich jsou, chybi remeny): scripts/otezi.gd - dva remeny od krouzku udidla do dlani jezdce, kazdy snimek, provis z delky (parabola ~ retezovka). Krouzky: body site uzdecky (uzdecka_sit) v pasu udidlo_pas_m kolem udidlo_od_nosu_m za nejprednejsim bodem uzdecky po ose kost_hlavy_zacatek -> kost_hlavy (zacatek jmena kosti), nejvic do stran a nejniz; jdou s kosti hlavy. dlan = bod dlane v soustave kosti ruky jezdce (m). Test telo_zaber: konce u udidla a v dlanich; snimek z pohledu jezdce.",
-   "kost_hlavy_zacatek": "BN_Head_00",
-   "kost_hlavy": "BN_Head_01",
-   "uzdecka_sit": "Bridle",
+   "kost_hlavy_zacatek": "horse Neck3",
+   "kost_hlavy": "horse Head",
+   "uzdecka_sit": "PA_Harness",
    "udidlo_od_nosu_m": 0.12,
    "udidlo_pas_m": 0.05,
    "delka_m": 1.3,
@@ -155,7 +154,7 @@
    "kusy": {
     "sedlo": {
      "model": "res://modely/kone/vystroj_sedlo_%s.glb",
-     "kost": "BN_Spine_01_03_03",
+     "kost": "horse Spine1",
      "kotva": "sedlo"
     }
    },
@@ -193,34 +192,29 @@
   "zivy": {
    "kosti": {
     "panev": [
-     "Hips"
+     "horse Pelvis"
     ],
     "hrbet": [
-     "Spine1",
-     "Spine2"
+     "horse Spine1",
+     "horse Spine2"
     ],
     "krk": [
-     "Neck_",
-     "Neck1",
-     "Neck2",
-     "Neck3"
+     "horse Neck",
+     "horse Neck1",
+     "horse Neck2",
+     "horse Neck3"
     ],
     "hlava": [
-     "Head"
+     "horse Head"
     ],
     "celist": [
-     "Mouth"
+     "horse Jaw"
     ],
-    "usi": [
-     "Left_Ear_",
-     "Right_Ear_"
-    ],
+    "usi": [],
     "ocas": [
-     "Tail_",
-     "Tail1",
-     "Tail2",
-     "Tail3",
-     "Tail4"
+     "horse Tail",
+     "horse Tail1",
+     "horse Tail2"
     ]
    },
    "pastva_s": [
@@ -284,10 +278,65 @@
     24.0
    ]
   },
-  "klipy_z_useku": {},
-  "skryt_site": [
-   "Saddle1"
-  ],
+  "klipy_z_useku": {
+   "Idle": [
+    0.0333,
+    3.3
+   ],
+   "Idle_B": [
+    3.3333,
+    6.6667
+   ],
+   "Rozhled": [
+    8.9333,
+    13.1
+   ],
+   "Eat": [
+    18.1667,
+    21.5
+   ],
+   "Walk": [
+    32.6333,
+    33.7667
+   ],
+   "Walk_L": [
+    33.8,
+    34.9333
+   ],
+   "Walk_R": [
+    35.1,
+    36.2333
+   ],
+   "Trot": [
+    29.8667,
+    30.6667
+   ],
+   "Gallop": [
+    24.0,
+    24.5
+   ],
+   "Gallop_L": [
+    25.7333,
+    26.2333
+   ],
+   "Gallop_R": [
+    26.4,
+    26.9
+   ],
+   "Swim": [
+    28.5667,
+    29.7
+   ],
+   "Jump": [
+    24.5333,
+    25.7
+   ],
+   "Back": [
+    36.4,
+    37.5333
+   ]
+  },
+  "skryt_site": [],
   "model_popis": "4. 11. (Misa: „na koni si das zalezet na novych animacich“): kun_henry.glb = Sketchfab „Horse“ henrysteve973 (henry_7), CC-BY 4.0, 30 750 troj., 28 animaci (1/2/3 Ilde, Walk, Walk_L/R, Gallop, Gallop_L/R, Run_Stop, 6 Eat, Swim, Jump, Buck...). Westernove sedlo (sit Saddle1) skryte - skryt_site. Puvodni kun_hnedak s jednou animaci = model_puvodni + klipy_z_useku_hnedak.",
   "ostruha_klepnuti_s": 0.3,
   "sesednout_drzet_s": 0.8,
@@ -295,7 +344,85 @@
   "cestovani_pokusu": 60,
   "cestovani_spirala_m": 0.2,
   "cestovani_nad_zemi_m": 0.15,
-  "_cestovani": "main.fast_travel na koni (Misa 0.99991 „portovani na koni nefunguje“; kontrola 5. 11.): volne misto pro trup a nohy kone po spirale od cile (cestovani_pokusu bodu, polomer roste o cestovani_spirala_m), body s hladinou nad povrchem se preskoci; tvary kone se zkousi cestovani_nad_zemi_m nad nejvyssim bodem povrchu pod konem (predek, zad, boky - tolerance na svah). Kdyz se nic nenajde, hrac sesedne a cestuje sam (player.place), kun zustane - ne kun ve zdi."
+  "_cestovani": "main.fast_travel na koni (Misa 0.99991 „portovani na koni nefunguje“; kontrola 5. 11.): volne misto pro trup a nohy kone po spirale od cile (cestovani_pokusu bodu, polomer roste o cestovani_spirala_m), body s hladinou nad povrchem se preskoci; tvary kone se zkousi cestovani_nad_zemi_m nad nejvyssim bodem povrchu pod konem (predek, zad, boky - tolerance na svah). Kdyz se nic nenajde, hrac sesedne a cestuje sam (player.place), kun zustane - ne kun ve zdi.",
+  "henry": {
+   "model": "res://modely/kone/kun_henry.glb",
+   "kohoutek_kosti": [
+    "BN_Spine_02",
+    "BN_Spine_03"
+   ],
+   "sedlo_kost": "BN_Spine_01",
+   "sedlo_kost_predni": "BN_Neck_00",
+   "sedadlo_sit": "Saddle1",
+   "hriva_sit": "Hair",
+   "mereni_bez_siti": [
+    "Saddle1",
+    "Hair"
+   ],
+   "skryt_site": [
+    "Saddle1"
+   ],
+   "zastaveni_klip": "Run_Stop",
+   "otezi": {
+    "kost_hlavy": "BN_Head_01",
+    "kost_hlavy_zacatek": "BN_Head_00",
+    "uzdecka_sit": "Bridle"
+   },
+   "zivy_kosti": {
+    "panev": [
+     "Hips"
+    ],
+    "hrbet": [
+     "Spine1",
+     "Spine2"
+    ],
+    "krk": [
+     "Neck_",
+     "Neck1",
+     "Neck2",
+     "Neck3"
+    ],
+    "hlava": [
+     "Head"
+    ],
+    "celist": [
+     "Mouth"
+    ],
+    "usi": [
+     "Left_Ear_",
+     "Right_Ear_"
+    ],
+    "ocas": [
+     "Tail_",
+     "Tail1",
+     "Tail2",
+     "Tail3",
+     "Tail4"
+    ]
+   },
+   "_p": "25. 11.: nastaveni puvodniho kone kun_henry (Sketchfab henrysteve973) pro navrat",
+   "vystroj_sedlo_kost": "BN_Spine_01_03_03"
+  },
+  "_klipy_z_useku": "25. 11. kun_hero: useky jedne stopy Take 001 (30 FPS) podle tabulky snimku Hero_Horse_notes.rtf (balik Horse for Heroes v2.0; M_ = na miste): Idle_A 2-100, Idle_B 101-201, looking_around 269-394, eating 546-646, walk 980-1014, walk_turn_L 1015-1049, walk_turn_R 1054-1088, trot 897-921, galloping 721-736, gallop_turn_L 773-788, gallop_turn_R 793-808, swim 858-892, jump 737-772, walk_back 1093-1127; cas = (snimek - 1) / 30.",
+  "model_popis_hero": "25. 11. (Míša: „co bys řekl na tohoto koníka… udělej to“): kun_hero.glb = Horse for Heroes v2.0 (placený balík Míši, Disk; tools/kun_hero_tex.py + tools/kun_hero.py): telo 10 374 troj., hriva 1 000, ocas 192, uzdecka s poprsnikem PA_Harness 8 546 (skin na kostech kone); 40 kosti Biped (horse Pelvis…), 36 klipu v jedne stope. Sedlo dobove z Balt Horse (vystroj). Puvodni nastaveni v kun.henry.",
+  "kosti_vzory": {
+   "hlava": [
+    "Head_0",
+    "horse Head"
+   ],
+   "panev": [
+    "Pelvis",
+    "Hips"
+   ],
+   "hrbet": [
+    "Neck_00",
+    "Spine",
+    "Pelvis",
+    "Hips",
+    "horse Neck"
+   ],
+   "_p": "25. 11.: casti jmen kosti pro rozmery a smer modelu (kun.gd _model; drive v kodu Head_0 / Pelvis|Hips / Neck_00|Spine) - nove kone bez zmeny kodu"
+  }
  },
  "telo": {
   "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",
