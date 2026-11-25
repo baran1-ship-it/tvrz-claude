@@ -14,13 +14,33 @@ import sys
 import bpy
 from mathutils import Matrix
 
-VSTUP, TEX, SADA = sys.argv[-4:-1] if len(sys.argv) > 4 and sys.argv[-1].isdigit() else sys.argv[-3:]
-CIL = int(sys.argv[-1]) if sys.argv[-1].isdigit() else 12000
+ARG = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
+HLAVA_Z = ARG[ARG.index("--hlava") + 1] if "--hlava" in ARG else ""
+ARG = [a for i, a in enumerate(ARG) if a != "--hlava" and (i == 0 or ARG[i - 1] != "--hlava")]
+VSTUP, TEX, SADA = ARG[0], ARG[1], ARG[2]
+CIL = int(ARG[3]) if len(ARG) > 3 else 12000
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(REPO, "modely", "postavy", "npc")
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=VSTUP)
+# druhy odev postavy (Full_02) je bez hlavy - hlava, oci, vlasy a vousy z prvniho (Full_01, stejna kostra a klid)
+if HLAVA_Z:
+    arm0 = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    pred = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=HLAVA_Z)
+    for o in [o for o in bpy.data.objects if o not in pred]:
+        j = o.name.lower()
+        if o.type == "MESH" and any(x in j for x in ("head", "eyes", "hair", "beard", "mustache", "brow")):
+            m = o.matrix_world.copy()
+            o.parent = arm0.parent if arm0.parent else None
+            o.matrix_world = m
+            for md in o.modifiers:
+                if md.type == "ARMATURE":
+                    md.object = arm0
+            print("HLAVA z", HLAVA_Z, o.name)
+        else:
+            bpy.data.objects.remove(o)
 arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
 site = [o for o in bpy.data.objects if o.type == "MESH" and any(m.type == "ARMATURE" for m in o.modifiers)]
 for o in [o for o in bpy.data.objects if o.type == "MESH" and o not in site]:
@@ -193,9 +213,10 @@ def druh(o):
     return "telo"
 
 
+druhy = {o.name: druh(o) for o in site}  # pred smazanim materialu (druh podle materialu FBX)
 for o in site:
     o.data.materials.clear()
-    o.data.materials.append(mat[druh(o)])
+    o.data.materials.append(mat[druhy[o.name]])
 
 # --- zmenseni pro tablet (kazdy kus zvlast: hlava a ruce dvojnasobny podil - oblicej a prsty), pak jedna sit
 troj = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in site)
@@ -223,4 +244,15 @@ arm.name = "Armature"
 cil = os.path.join(OUT, SADA + "_cela.gltf")
 bpy.ops.export_scene.gltf(filepath=cil, export_format="GLTF_SEPARATE", export_animations=False, export_image_format="AUTO",
                           export_apply=False)
-print("MUZ_NPC", cil)
+# pruhlednost: jen vlasy s orezem (MASK, jako vlasy ostatnich sad); exporter dal BLEND i telu - tablet: razeni
+g = json.load(open(cil))
+for m in g.get("materials", []):
+    m.pop("alphaCutoff", None)
+    if m["name"].endswith("_vlasy"):
+        m["alphaMode"] = "MASK"
+        m["alphaCutoff"] = 0.5
+        m["doubleSided"] = True
+    else:
+        m.pop("alphaMode", None)
+json.dump(g, open(cil, "w"), indent=1)
+print("MUZ_NPC", cil, [(m["name"], m.get("alphaMode", "OPAQUE")) for m in g.get("materials", [])])
