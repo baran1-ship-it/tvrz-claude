@@ -81,8 +81,52 @@ bpy.ops.import_scene.gltf(filepath=UAL_SADA)
 nove = [o for o in bpy.data.objects if o not in pred]
 ual = next(o for o in nove if o.type == "ARMATURE")
 osy = {b.name: (ual.matrix_world @ b.matrix_local).to_quaternion() for b in ual.data.bones}
+klouby = {b.name: ual.matrix_world @ b.head_local for b in ual.data.bones}
 for o in nove:
     bpy.data.objects.remove(o)
+
+# --- klidova poza jako UAL (zkouska 25. 11.: osy stejne, ale ruce 25 cm od tela - kostra UE4 je v klidu v A poze, UAL
+# jinak; mistni rotace klipu pak natoci kosti o jiny smer kloubu). Kazdou kost (od korene) natocit tak, aby smer
+# k hlavnimu potomkovi byl jako v UAL, pozu zapect do site a prijmout jako klid.
+HLAVNI = {"pelvis": "spine_01", "spine_01": "spine_02", "spine_02": "spine_03", "spine_03": "neck_01", "neck_01": "Head",
+          "clavicle_l": "upperarm_l", "upperarm_l": "lowerarm_l", "lowerarm_l": "hand_l", "hand_l": "middle_01_l",
+          "clavicle_r": "upperarm_r", "upperarm_r": "lowerarm_r", "lowerarm_r": "hand_r", "hand_r": "middle_01_r",
+          "thigh_l": "calf_l", "calf_l": "foot_l", "foot_l": "ball_l", "thigh_r": "calf_r", "calf_r": "foot_r",
+          "foot_r": "ball_r"}
+for s in ("l", "r"):
+    for prst in ("index", "middle", "ring", "pinky", "thumb"):
+        HLAVNI["%s_01_%s" % (prst, s)] = "%s_02_%s" % (prst, s)
+        HLAVNI["%s_02_%s" % (prst, s)] = "%s_03_%s" % (prst, s)
+bpy.context.view_layer.objects.active = arm
+bpy.ops.object.mode_set(mode="POSE")
+natoceno = 0
+for b in arm.data.bones:  # poradi: rodic pred potomkem
+    c = HLAVNI.get(b.name)
+    if c is None or c not in arm.pose.bones or b.name not in klouby or c not in klouby:
+        continue
+    bpy.context.view_layer.update()
+    pb = arm.pose.bones[b.name]
+    nyni = arm.pose.bones[c].head - pb.head
+    chci = arm.matrix_world.inverted().to_3x3() @ (klouby[c] - klouby[b.name])
+    if nyni.length < 1e-5 or chci.length < 1e-5:
+        continue
+    r = nyni.rotation_difference(chci).to_matrix().to_4x4()
+    h = pb.head.copy()
+    pb.matrix = Matrix.Translation(h) @ r @ Matrix.Translation(-h) @ pb.matrix
+    natoceno += 1
+bpy.context.view_layer.update()
+bpy.ops.object.mode_set(mode="OBJECT")
+for o in site:
+    md = next(m for m in o.modifiers if m.type == "ARMATURE")
+    bpy.context.view_layer.objects.active = o
+    novy = o.modifiers.new("kostra_nova", "ARMATURE")
+    novy.object = arm
+    bpy.ops.object.modifier_apply(modifier=md.name)
+bpy.context.view_layer.objects.active = arm
+bpy.ops.object.mode_set(mode="POSE")
+bpy.ops.pose.armature_apply(selected=False)
+bpy.ops.object.mode_set(mode="OBJECT")
+print("POZA natoceno kosti", natoceno)
 bpy.context.view_layer.objects.active = arm
 bpy.ops.object.mode_set(mode="EDIT")
 inv = arm.matrix_world.to_quaternion().inverted()
