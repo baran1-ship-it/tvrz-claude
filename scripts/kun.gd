@@ -674,6 +674,8 @@ static func _sedadlo(body: Array, vpred: Vector3, bok: Vector3) -> Vector3:
 	if i_s < 0:
 		return Vector3.INF
 	var a := a0 + (float(i_s) + 0.5) / n * (a1 - a0)
+	print("kun: sedadlo profil a %.2f..%.2f, zadni %d predni %d sedadlo %d (a %.2f), vysky %s" % [a0, a1, i_z, i_p, i_s, a,
+		top.map(func(v: float) -> String: return "%.2f" % v)])
 	return vpred * a + bok * bs + Vector3.UP * float(top[i_s])
 
 
