@@ -1805,3 +1805,10 @@ Hotovo v kódu a datech (testy u každého):
 - `build/` má `.gdignore` – Godot tam nic neimportuje („No loader found for resource: res://build/…“) a skript
   `-s` s `load()` pak visel do limitu beh.sh (žádné `quit()` na null). Zkušební import mimo `build/` (např. `zk_muz/`,
   v .gitignore) a ve zkušebním skriptu vždy `quit()` i při chybě načtení.
+- Kůň Hero Horse (25. 11.): kořen kostry `horse_BIP` má ve snímku 0 (vazebná póza 3ds Max) posun 0,602 m vpřed, ve všech
+  klipech 0 → Godot měřil sedlo z klidu = snímku 0 a jezdec seděl 0,6 m za sedlem. `tools/kun_hero.py` srovná klíče
+  kořene před snímkem 2 s prvním snímkem Idle. Obecně: u modelů z 3ds Max/Maya porovnat klid kostry s prvním snímkem klipu.
+- Kosti z pravidel (`kohoutek_kosti`, `sedlo_kost`) kun.gd hledal jen s příponou „_…“ (henry) – Hero Horse má přesná
+  jména, kosti se nenašly (`kun.gd _kost_je`).
+- Godot `GLTFDocument` vyveze síť s tvarovými klíči (blend shapes) bez trojúhelníků → před vývozem klíče odstranit
+  (`zk_muz/vyvoz.gd`).

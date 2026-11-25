@@ -29,6 +29,23 @@ bpy.ops.import_scene.fbx(filepath=os.path.join(SRC, "Export", "Hero_Horse_PoorAr
 for o in list(bpy.data.objects):
     if o.type == "MESH" and o.name.startswith(PRYC):
         bpy.data.objects.remove(o)
+# 25. 11. (jezdec 0,6 m za sedlem): koren kostry horse_BIP ma ve snimku 0 (vazebni poza 3ds Max) posun 0,602 m vpred,
+# ve vsech klipech (snimky 2-1555, useky na miste) 0 - Godot meri sedlo a kohoutek z klidove pozy (= snimek 0), klipy
+# ho kresli o 0,6 m jinde. Klid korene = prvni snimek klipu Idle (snimek 2), stejna hodnota i v klicich snimku 0.
+for o in bpy.data.objects:
+    ad = o.animation_data
+    if o.type != "ARMATURE" or not ad or not ad.action:
+        continue
+    for fc in ad.action.fcurves:
+        if fc.data_path in ("location", "rotation_euler"):
+            v = fc.evaluate(2)
+            for k in fc.keyframe_points:
+                if k.co[0] < 2:
+                    k.co[1] = v
+                    k.handle_left[1] = v
+                    k.handle_right[1] = v
+            getattr(o, fc.data_path)[fc.array_index] = v
+    print("KOREN", o.name, tuple(round(x, 3) for x in o.location))
 
 
 def png(tif, jm, px, alfa):
