@@ -1,9 +1,9 @@
 extends SceneTree
 # Kopie zkusebniho skriptu: FBX dat do res://zk_muz/muz01.fbx (mimo build/ - .gdignore), --import, pak
-#   godot --headless --path . -s res://zk_muz/vyvoz.gd -> /tmp/claude-0/muzi/muz01.glb -> tools/postavy_q/muz_npc.py
 # 25. 11.: Blender nacte UE4 FBX kostru jen jako prazdne objekty - Godot (ufbx) ji nacte; vyvoz do glb pro Blender
 func _initialize() -> void:
-	var ps := load("res://zk_muz/muz01.fbx") as PackedScene
+	var jm := OS.get_environment("MUZ") if OS.get_environment("MUZ") != "" else "muz01"
+	var ps := load("res://zk_muz/%s.fbx" % jm) as PackedScene
 	if ps == null:
 		print("MUZ nenacteno"); quit(); return
 	var n := ps.instantiate()
@@ -22,6 +22,6 @@ func _initialize() -> void:
 	var doc := GLTFDocument.new()
 	var st := GLTFState.new()
 	var e := doc.append_from_scene(n, st)
-	e = doc.write_to_filesystem(st, "/tmp/claude-0/muzi/muz01.glb") if e == OK else e
+	e = doc.write_to_filesystem(st, "/tmp/claude-0/muzi/%s.glb" % jm) if e == OK else e
 	print("VYVOZ ", e)
 	quit()

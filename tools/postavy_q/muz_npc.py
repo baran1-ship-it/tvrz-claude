@@ -173,21 +173,23 @@ def material(m, barva, normal, alfa):
         nt.links.new(nm.outputs[0], b.inputs["Normal"])
 
 
-c = SADA.split("_")[-1]  # cislo postavy v balicku (01..05)
-predpona = "T_NPC_Character_%s" % c
-mat = {"telo": bpy.data.materials.new(SADA + "_telo"), "hlava": bpy.data.materials.new(SADA + "_hlava"),
-       "vlasy": bpy.data.materials.new(SADA + "_vlasy")}
-material(mat["telo"], obr(predpona + "_Albedo.png"), obr(predpona + "_Normals.png"), True)
-material(mat["hlava"], obr(predpona + "_Heads_Albedo.png"), obr(predpona + "_Heads_Normals.png"), False)
-material(mat["vlasy"], obr(predpona + "_Hair_Albedo_01.png"), obr(predpona + "_Hair_Normals.png"), True)
+import json  # noqa: E402
+c = SADA.split("_")[2]  # npc_muz_<cislo postavy 01..05>[_varianta]
+TX = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "muz_npc.json")))[c]
+mat = {}
+for k in ("telo", "hlava", "vlasy"):
+    mat[k] = bpy.data.materials.new(SADA + "_" + k)
+    material(mat[k], obr(TX[k][0] + ".png"), obr(TX[k][1] + ".png"), k != "hlava")
 
 
 def druh(o):
+    """Podle materialu z FBX (ruce a oci maji material hlavy), u „Default“ podle jmena kusu."""
+    m = (o.material_slots[0].name if o.material_slots else "").lower()
     j = o.name.lower()
-    if "hair" in j or "beard" in j or "mustache" in j or "brow" in j:
-        return "vlasy"
-    if "head" in j or "eyes" in j:
+    if "head" in m:
         return "hlava"
+    if "hair" in m or any(x in j for x in ("hair", "beard", "mustache", "brow")):
+        return "vlasy"
     return "telo"
 
 
