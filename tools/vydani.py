@@ -161,7 +161,26 @@ def export_pack(name, cfg):
     return out
 
 
-def jen_data(path):
+def _bez_zdroje_z(name):
+    """26. 11. (0.9999995-6: postavy v T-poze, bez klobouku a tela hrace): export-pack bere jen soubory se zdrojem; kontejner
+    s daty rozbalenymi z baliku ma u casti postav jen .import a importovany soubor (anim/UAL*.glb, odevy, hrdina) - balik
+    z_* je tise vynechal. Vraci [(cesta v baliku, data)] .import + jeho cilu pro doplneni; chybi-li cil, vydani stoji."""
+    oblast = {"z_postavy": "modely/postavy/**/*.import", "z_kone": "modely/kone/*.import"}.get(name)
+    if not oblast:
+        return []
+    out = []
+    for f in sorted(glob.glob(oblast, recursive=True)):
+        if os.path.exists(f[:-7]):
+            continue
+        out.append((f, open(f, "rb").read()))
+        for cil in re.findall(r'^path[^=]*="res://([^"]+)"', open(f).read(), re.M):
+            if not os.path.exists(cil):
+                sys.exit("CHYBA: %s nema zdroj ani import %s - balik %s by byl bez nej" % (f, cil, name))
+            out.append((cil, open(cil, "rb").read()))
+    return out
+
+
+def jen_data(path, navic=()):
     """Opravny balik z_* se nacita s prepisem: nechat v nem jen modely/ a .godot/imported/ (project.binary, seznam UID
     a ikona plati z APK - starsi oprava by jinak prebila novejsi APK). PCK v2 (Godot 4.4)."""
     import struct
@@ -182,6 +201,20 @@ def jen_data(path):
         name = pth.rstrip(b"\0").decode()
         if name.startswith(("res://modely/", "res://.godot/imported/", "modely/", ".godot/imported/")):
             ents.append((pth, d[base + off:base + off + sz], md5, fl))
+    mam = {pth.rstrip(b"\0").decode() for pth, _, _, _ in ents}
+    for jm, data in navic:
+        if jm in mam:
+            continue
+        pth = jm.encode() + b"\0" * (4 - len(jm.encode()) % 4)
+        ents.append((pth, data, hashlib.md5(data).digest(), 0))
+    if navic:
+        print("balik %s: doplneno %d souboru bez zdroje (.import + import)" % (os.path.basename(path), len(navic)))
+    # Misa 26. 11. (vsechny postavy v T-poze): balik postav bez klipu UAL = nevydavat
+    if os.path.basename(path).startswith("z_postavy"):
+        jm_b = {pth.rstrip(b"\0").decode() for pth, _, _, _ in ents}
+        for f in ("modely/postavy/anim/UAL1.glb.import", "modely/postavy/anim/UAL2.glb.import"):
+            if f not in jm_b and "res://" + f not in jm_b:
+                sys.exit("CHYBA: balik z_postavy bez %s - postavy by stály v T-poze" % f)
     tab = b"".join(struct.pack("<I", len(pth)) + pth + struct.pack("<QQ", 0, 0) + md5 + struct.pack("<I", fl) for pth, _, md5, fl in ents)
     hdr_len = 20 + 12 + 64 + 4 + len(tab)
     base2 = (hdr_len + 31) // 32 * 32
@@ -353,7 +386,7 @@ for name, files in groups.items():
     if name == "z_textury":
         pck = open("build/z_textury.pck", "rb").read()
     else:
-        pck = open(jen_data(export_pack(name, cfg)) if name.startswith("z_") else export_pack(name, cfg), "rb").read()
+        pck = open(jen_data(export_pack(name, cfg), _bez_zdroje_z(name)) if name.startswith("z_") else export_pack(name, cfg), "rb").read()
     if len(pck) < 1024:
         sys.exit("CHYBA: balik %s je prazdny (plny disk?)" % name)
     md5 = hashlib.md5(pck).hexdigest()

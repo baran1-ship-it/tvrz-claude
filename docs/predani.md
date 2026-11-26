@@ -1849,3 +1849,13 @@ Hotovo v kódu a datech (testy u každého):
   seznam balíku teď bere jen soubory (`os.path.isfile`, jako z_rostliny). Brány vydání tento den v pořadí: otisk
   exportu (ruční přestavba postav → `otisk_exportu.py zapis`), starý import (.bin novější → smazat md5, touch .gltf,
   --import), tabulky chyb (nejnovější výsledek testu), podsložka v balíku.
+
+### 26. 11. – Míša 0.9999996: všechny postavy v T-póze, bez očí (POTVRZENÁ příčina, oprava 0.9999997)
+- **T-póza všech postav (i starých) od 0.9999995:** kontejner má data rozbalená z balíků – u `modely/postavy/anim/UAL*.glb`,
+  oděvů, klobouků a těla hráče jen `.import` + import v `.godot/imported`, bez zdroje. `--export-pack` bere jen soubory se
+  zdrojem → balík z_postavy 24. 11. (55 MB) i 26. 11. bez animací (balík z 15. 11. je měl). Ověřeno hledáním „UAL1.glb“
+  v balících z gitu. Oprava: `vydani.py _bez_zdroje_z` doplní do z_postavy/z_kone .import + import bez zdroje (chybí-li
+  import, vydání stojí) a balík z_postavy bez `anim/UAL1.glb.import` = CHYBA. Testy v kontejneru to nepoznají (běží z importů).
+- **Oči:** převodník zmenšoval i bulvy (201 vrcholů → ~20, duhovka z atlasu hlavy rozmazaná do kroužku) → oči se nezmenšují.
+  Snímek přes herní kód (`tools/foto_postava.gd`, TVRZ_FOTO_KDO) zblízka: duhovky vidět.
+- Kůň (hlava kolmo vzhůru v klidu, jízda „v kolečku“) a cedule hospody / zelené pruhy – otevřeno, další krok.
