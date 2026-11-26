@@ -95,7 +95,9 @@ bpy.ops.object.mode_set(mode="OBJECT")
 # --- osy kosti jako UAL (zkouska 25. 11.: klipy UAL na kostre UE4 - postava lezela; klipy Godotu jsou mistni rotace
 # kosti, ty sedi jen pri stejnych osach klidove pozy). Klid se meni bez pozy - sit v Blenderu zustane (deformace =
 # poza x klid^-1 = 1), vazebne matice glTF se spocitaji z noveho klidu. Poloha kloubu zustava (proporce postavy).
-UAL_SADA = os.path.join(OUT, "npc_bartos_cela.gltf")
+ZENA = SADA.startswith("npc_zena")
+# vzor klidu a os: sada UAL stejneho pohlavi (proporce ramen a panve)
+UAL_SADA = os.path.join(OUT, "npc_anezka_cela.gltf" if ZENA else "npc_bartos_cela.gltf")
 pred = set(bpy.data.objects)
 bpy.ops.import_scene.gltf(filepath=UAL_SADA)
 nove = [o for o in bpy.data.objects if o not in pred]
@@ -194,8 +196,9 @@ def material(m, barva, normal, alfa):
 
 
 import json  # noqa: E402
-c = SADA.split("_")[2]  # npc_muz_<cislo postavy 01..05>[_varianta]
-TX = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "muz_npc.json")))[c]
+c = SADA.split("_")[2]  # npc_muz_<cislo postavy 01..05>[_varianta], npc_zena_<cislo>
+_tx = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "muz_npc.json")))
+TX = _tx["zena_" + c] if ZENA else _tx[c]
 mat = {}
 for k in ("telo", "hlava", "vlasy"):
     mat[k] = bpy.data.materials.new(SADA + "_" + k)
@@ -209,7 +212,7 @@ def druh(o):
     j = o.name.lower()
     if any(x in j for x in ("hair", "beard", "mustache", "brow")) or "hair" in m:
         return "vlasy"
-    if any(x in j for x in ("head", "eyes", "hands")) or "head" in m:
+    if any(x in j for x in ("head", "eyes", "hands", "arms")) or "head" in m or (ZENA and "character" in m):
         return "hlava"
     return "telo"
 

@@ -1,8 +1,144 @@
 {
  "_popis": "Textury postav NPC Character Pack (Misa 25. 11., Disk 1qW5K2xC0Ega4xWvTlq7xGVZ5r9ZBLDhL) pro tools/postavy_q/muz_npc.py: druh povrchu (podle materialu FBX: Cloth*/Default = telo, Head = hlava + ruce + oci, Hair = vlasy, Default u vousu/vlasu = vlasy) -> [albedo, normaly] (PNG 1K z TGA). Postavy 03-05 vlastni hlavu nemaji - hlava muzu z postavy 02 (T_NPC_Male_Heads).",
- "01": {"telo": ["T_NPC_Character_01_Albedo", "T_NPC_Character_01_Normals"], "hlava": ["T_NPC_Character_01_Heads_Albedo", "T_NPC_Character_01_Heads_Normals"], "vlasy": ["T_NPC_Character_01_Hair_Albedo_01", "T_NPC_Character_01_Hair_Normals"]},
- "02": {"telo": ["T_NPC_Character_Cloth_02_Albedo", "T_NPC_Character_Cloth_02_Normal"], "hlava": ["T_NPC_Male_Heads_Albedo", "T_NPC_Male_Heads_Normals"], "vlasy": ["T_NPC_Character_02_Hair_Albedo_01", "T_NPC_Character_02_Hair_Normals"]},
- "03": {"telo": ["T_NPC_Character_03_Albedo", "T_NPC_Character_03_Normals"], "hlava": ["T_NPC_Male_Heads_Albedo", "T_NPC_Male_Heads_Normals"], "vlasy": ["T_NPC_Character_03_Hair_Albedo", "T_NPC_Character_03_Hair_Normals"]},
- "04": {"telo": ["T_NPC_Character_04_Albedo", "T_NPC_Character_04_Normals"], "hlava": ["T_NPC_Male_Heads_Albedo", "T_NPC_Male_Heads_Normals"], "vlasy": ["T_NPC_Character_04_Albedo", "T_NPC_Character_04_Normals"]},
- "05": {"telo": ["T_NPC_Character_05_Albedo", "T_NPC_Character_05_Normals"], "hlava": ["T_NPC_Male_Heads_Albedo", "T_NPC_Male_Heads_Normals"], "vlasy": ["NPC_Character_05_Hair_Albedo", "NPC_Character_05_Hair_Normals"]}
+ "01": {
+  "telo": [
+   "T_NPC_Character_01_Albedo",
+   "T_NPC_Character_01_Normals"
+  ],
+  "hlava": [
+   "T_NPC_Character_01_Heads_Albedo",
+   "T_NPC_Character_01_Heads_Normals"
+  ],
+  "vlasy": [
+   "T_NPC_Character_01_Hair_Albedo_01",
+   "T_NPC_Character_01_Hair_Normals"
+  ]
+ },
+ "02": {
+  "telo": [
+   "T_NPC_Character_Cloth_02_Albedo",
+   "T_NPC_Character_Cloth_02_Normal"
+  ],
+  "hlava": [
+   "T_NPC_Male_Heads_Albedo",
+   "T_NPC_Male_Heads_Normals"
+  ],
+  "vlasy": [
+   "T_NPC_Character_02_Hair_Albedo_01",
+   "T_NPC_Character_02_Hair_Normals"
+  ]
+ },
+ "03": {
+  "telo": [
+   "T_NPC_Character_03_Albedo",
+   "T_NPC_Character_03_Normals"
+  ],
+  "hlava": [
+   "T_NPC_Male_Heads_Albedo",
+   "T_NPC_Male_Heads_Normals"
+  ],
+  "vlasy": [
+   "T_NPC_Character_03_Hair_Albedo",
+   "T_NPC_Character_03_Hair_Normals"
+  ]
+ },
+ "04": {
+  "telo": [
+   "T_NPC_Character_04_Albedo",
+   "T_NPC_Character_04_Normals"
+  ],
+  "hlava": [
+   "T_NPC_Male_Heads_Albedo",
+   "T_NPC_Male_Heads_Normals"
+  ],
+  "vlasy": [
+   "T_NPC_Character_04_Albedo",
+   "T_NPC_Character_04_Normals"
+  ]
+ },
+ "05": {
+  "telo": [
+   "T_NPC_Character_05_Albedo",
+   "T_NPC_Character_05_Normals"
+  ],
+  "hlava": [
+   "T_NPC_Male_Heads_Albedo",
+   "T_NPC_Male_Heads_Normals"
+  ],
+  "vlasy": [
+   "NPC_Character_05_Hair_Albedo",
+   "NPC_Character_05_Hair_Normals"
+  ]
+ },
+ "zena_01": {
+  "telo": [
+   "T_NPC_Character_female_01_clothes_Albedo",
+   "T_NPC_Character_female_01_clothes_Normal"
+  ],
+  "hlava": [
+   "T_NPC_Character_female_01_Albedo",
+   "T_NPC_Character_female_01_Normal"
+  ],
+  "vlasy": [
+   "T_NPC_Character_female_01_Hair_Albedo_01",
+   "T_NPC_Character_female_01_Hair_Normal"
+  ]
+ },
+ "zena_02": {
+  "telo": [
+   "T_NPC_Character_female_02_clothes_Albedo",
+   "T_NPC_Character_female_02_clothes_Normal"
+  ],
+  "hlava": [
+   "T_NPC_Character_female_02_Albedo",
+   "T_NPC_Character_female_02_Normal"
+  ],
+  "vlasy": [
+   "T_NPC_Character_female_02_Hair_Albedo_01",
+   "T_NPC_Character_female_02_Hair_Normal"
+  ]
+ },
+ "zena_03": {
+  "telo": [
+   "T_NPC_Character_female_03_clothes_Albedo",
+   "T_NPC_Character_female_03_clothes_Normal"
+  ],
+  "hlava": [
+   "T_NPC_Character_female_03_Albedo",
+   "T_NPC_Character_female_03_Normal"
+  ],
+  "vlasy": [
+   "T_NPC_Character_female_03_Hair_Albedo_01",
+   "T_NPC_Character_female_03_Hair_Normal"
+  ]
+ },
+ "zena_04": {
+  "telo": [
+   "T_NPC_Character_female_04_clothes_Albedo",
+   "T_NPC_Character_female_04_clothes_Normal"
+  ],
+  "hlava": [
+   "T_NPC_Character_female_04_Albedo",
+   "T_NPC_Character_female_04_Normal"
+  ],
+  "vlasy": [
+   "T_NPC_Character_female_04_Hair_Albedo_01",
+   "T_NPC_Character_female_04_Hair_Normal"
+  ]
+ },
+ "zena_05": {
+  "telo": [
+   "T_NPC_Character_female_05_clothes_Albedo",
+   "T_NPC_Character_female_05_clothes_Normal"
+  ],
+  "hlava": [
+   "T_NPC_Character_female_05_Albedo",
+   "T_NPC_Character_female_05_Normal"
+  ],
+  "vlasy": [
+   "T_NPC_Character_female_05_Hair_Albedo_01",
+   "T_NPC_Character_female_05_Hair_Normal"
+  ]
+ },
+ "_zeny": "Zeny (Misa 26. 11., Disk 1zsi7XCa4KQxF2ZZkOQT9ysmVtTglzwZN, RAR UE4/UE5): textura Character = kuze (hlava, ruce, paze, telo pod odevem), Clothes = odev, Hair = vlasy; vzor kostry npc_anezka"
 }
