@@ -595,3 +595,9 @@ rostliny ve sdílených texturách); citlivé sítě bez automatických LOD; šv
 nádvoří tvrze rozprostřené (rozvrhy), spánek bez vstávání ze sedu v lůžku; interiér po částech (F9); louka bez nových
 bufferů za hry (sloty vypnuté v datech); trasa: p95/p99/nad30 a rozpad špiček (A1/A3). Výkon NEOVĚŘENO NA ZAŘÍZENÍ –
 projet Měřicí trasu (nové varianty v `_varianty_pristi`: louka_15_45, louka_sloty, bez_pss).
+
+## 0.9999996 (vydáno 26. 11.)
+Změny: nový kůň Hero Horse (původní sedlo, deka, třmeny a postroj modelu; otěže počítá hra, udidla z klidové pózy;
+hříva a postroj MASK), 5 nových mužů a 5 nových žen vesničanů (NPC Characters, kostra UAL, sukně s kostmi
+sukně, krátké oděvy na váhy stehen). Známé: nohavice místy prochází předkem krátké tuniky při chůzi (předání 26. 11.).
+Výkon nových postav a koně NEOVĚŘENO NA ZAŘÍZENÍ – projet Měřicí trasu.
