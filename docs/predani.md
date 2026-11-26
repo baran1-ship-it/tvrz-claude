@@ -1840,3 +1840,6 @@ Hotovo v kódu a datech (testy u každého):
   UAL nezvedá koleno víc, než tunika zvládne bez simulace (KCD: látka simulací).
 - **Poučení – import Godotu:** po přestavbě .gltf, kde se změní jen `.bin` (váhy), Godot NEPŘEIMPORTUJE (otisk jen
   .gltf) – snímek pak ukazuje stará data. Před snímkem smazat `.godot/imported/<jm>.gltf-*` a `--import`.
+- **26. 11. izolace `kun_prekazky`** (starý kůň `kun_henry`, pravidla jizda.json z 0.9999995): NEPROJEL brod_lom,
+  bystrice_240 **stejně jako s Hero Horse** → chyba není z nového koně (kolize koně je z pravidel, ne z modelu);
+  `kun_terenem` = pozdní tráva v lese (louka), ne model. `lide_rozmisteni` (purkrabí 14:25 u brány) = rozvrh, ne vzhled.
