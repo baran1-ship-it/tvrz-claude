@@ -317,7 +317,9 @@ for x in (-7.4, -3.4): clad(DV, (x + (-0.12 if x < -5 else 0.12), 0, 0), (0, 1, 
 # štít krčmy (Míša 17. 11. ř. 4: věchet „bochník“ pryč, pěkná cedule) – kovaná konzola ze zdi, dubová deska na dvou
 # řetízcích kolmo ke stěně (čitelná z cesty podél průčelí), na obou stranách vypálený džbán. Hotový model nenalezen
 # (Disk, Poly Haven, Quaternius/Kenney, CC0 weby 17. 11.) – postaveno z materiálů krčmy.
-CX, CY, CZ = 0.65, Y0, 2.85
+# Misa 26. 11. (0.9999996 snimek u x 462 z 818: „cedule u hospody patri na roh budovy ne do dveri“): cedule byla nad
+# hlavnimi dvermi (x 0,15-1,15) - ted u zapadniho rohu pruceli (roh X0, zhlaví kuláčů EXT), prvni videt od vsi
+CX, CY, CZ = X0 + 0.45, Y0, 2.85
 I3 = Matrix.Identity(3)
 box(DV, (CX, CY - 0.025, CZ - 0.2), (0.07, 0.03, 0.5), I3, "zelezo")                       # nástěnná deska konzoly
 cone(DV, (CX, CY - 0.02, CZ), (CX, CY - 1.08, CZ), 0.016, 0.014, "zelezo", seg=6)           # rameno
