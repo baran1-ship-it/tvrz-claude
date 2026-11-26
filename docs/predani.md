@@ -1828,3 +1828,15 @@ Hotovo v kódu a datech (testy u každého):
 - Chyby bez vztahu ke koni a vesničanům (známé otevřené, misa_17_11_chyby.md / hlidaci_z_pucharta.md – neblokují):
   `teren_svy`, `cesta_skoky`, `volne_hrany`, `povrch`, `strom_na_zemi`, `logika` (hrby/prohlubně), `pravidla_cteni`
   (nepřečtené větve podle toho, co v běhu proběhlo – i staré postavy).
+
+### 26. 11. – nohavice přes krátkou tuniku vesničanů: 3 neúspěšné opravy → OTEVŘENO, nový rozbor
+- Nezávislá kontrola před vydáním (snímky chůze zblízka): nohavice prochází předkem krátké tuniky (muži 01/03/04).
+- Pokusy: (1) kosti sukně jen pro spodek na nohou, (2) kosti sukně pro vše pod pánví, (3) krátký oděv na váhy stehen
+  (`_skirt_leg_weights`), (4, vráceno) váhy tuniky z nejbližšího bodu kalhot (`_vahy_z_kalhot`) – snímek Godot
+  stará × nová verze muže 01 vedle sebe (`zk_muz/galerie.gd`, GAL_Z 2.0): **beze změny**.
+- NAMĚŘENO (Blender, klidová póza i stehna ±35°): nohavice vně tuniky nejvýš 2 vrcholy / 1 cm – měření průraz ze
+  snímku nezachytí → póza z Blenderu ≠ klip UAL Walk_Loop (zvednutí stehna, pánev). Další krok: měřit ve Godotu
+  přímo v klipu (vrcholy po skinu, `MeshDataTool` nad `get_bone_global_pose`), ne pózou z hlavy; zvážit, jestli klip
+  UAL nezvedá koleno víc, než tunika zvládne bez simulace (KCD: látka simulací).
+- **Poučení – import Godotu:** po přestavbě .gltf, kde se změní jen `.bin` (váhy), Godot NEPŘEIMPORTUJE (otisk jen
+  .gltf) – snímek pak ukazuje stará data. Před snímkem smazat `.godot/imported/<jm>.gltf-*` a `--import`.
