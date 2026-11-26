@@ -1870,3 +1870,4 @@ Hotovo v kódu a datech (testy u každého):
   `zk_muz/kun_svy.gd`). Nové úseky podle nejmenšího švu (pod 1 cm, krok vpravo 5,8) v `jizda.json klipy_z_useku`.
 - Zbývá: krok ↔ cval se v BlendSpace2D míchají bez sladění délek (1,13 s × 0,5 s) – klus mezi nimi může ještě kmitat;
   model má vlastní klip Trot (nepoužitý). Ověřit na tabletu.
+- **26. 11. Míša:** záloha na Disk po 0.9999998 zatím NE („zálohu ještě nedělej“); ženy 03 a 05 v kalhotách zůstávají.
