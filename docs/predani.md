@@ -1871,3 +1871,14 @@ Hotovo v kódu a datech (testy u každého):
 - Zbývá: krok ↔ cval se v BlendSpace2D míchají bez sladění délek (1,13 s × 0,5 s) – klus mezi nimi může ještě kmitat;
   model má vlastní klip Trot (nepoužitý). Ověřit na tabletu.
 - **26. 11. Míša:** záloha na Disk po 0.9999998 zatím NE („zálohu ještě nedělej“); ženy 03 a 05 v kalhotách zůstávají.
+
+### 26. 11. – Míša 0.9999996: cedule krčmy a zelené pruhy
+- **Cedule** visela nad hlavními dveřmi (x 0,15–1,15 modelu, cedule x 0,65) → `krcma_L.py` CX = X0 + 0,45 (západní roh
+  průčelí). Přestavba: `krcma_L.py --norender` → glb vedle zdroje → `mv` do `modely/krcma/` → `textury_predmetu.py dily`
+  → `--import` → `otisk_exportu.py zapis`; testy krcma_l/schody/dvur OK; snímek `build/c26/cedule_misa.png` (deska u rohu).
+  Pozor: snímek `TVRZ_MERENI` trvá ~22 min (stavba světa) – víc záběrů dávat do jednoho běhu.
+- **Zelené pruhy (x 437, z 845)** – PODEZŘENÍ podle snímku shora `build/c26/pruhy_shora.png`: tenké světle zelené čáry
+  (holá tráva bez trsů) na krajích hliněných cest, zubaté po mřížce 2 m přes dvůr. Hlína dvorů = barva vrcholů z Blenderu
+  (zelená složka, mřížka 2 m), hlína cest = shader podle `v_c0.x` (okraj cesty, `rd`). Mezi koncem hlíny dvora a okrajem
+  cesty zůstane pás, kde vrchol nese „trávu“ a cesta už nekreslí. Oprava v exportu (Blender vertex color: hlína pod
+  pásem cesty, kde sousedí s hliněnou plochou), ne v shaderu – NEOVĚŘENO měřením barvy vrcholů, další krok.
