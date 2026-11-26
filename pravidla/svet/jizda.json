@@ -285,60 +285,60 @@
   },
   "klipy_z_useku": {
    "Idle": [
-    0.0333,
-    3.3
+    0.0667,
+    3.3333
    ],
    "Idle_B": [
-    3.3333,
-    6.6667
+    3.4333,
+    6.7333
    ],
    "Rozhled": [
-    8.9333,
-    13.1
+    9.0,
+    13.1667
    ],
    "Eat": [
-    18.1667,
-    21.5
+    18.2333,
+    21.5667
    ],
    "Walk": [
-    32.6333,
-    33.7667
+    32.7,
+    33.8333
    ],
    "Walk_L": [
-    33.8,
-    34.9333
+    33.8667,
+    35.0
    ],
    "Walk_R": [
-    35.1,
-    36.2333
+    35.1667,
+    36.2667
    ],
    "Trot": [
-    29.8667,
-    30.6667
+    29.9333,
+    30.7333
    ],
    "Gallop": [
-    24.0,
-    24.5
+    24.0667,
+    24.5667
    ],
    "Gallop_L": [
-    25.7333,
-    26.2333
+    25.8,
+    26.3
    ],
    "Gallop_R": [
-    26.4,
-    26.9
+    26.4667,
+    26.9667
    ],
    "Swim": [
-    28.5667,
-    29.7
+    28.6333,
+    29.7667
    ],
    "Jump": [
-    24.5333,
-    25.7
+    24.5667,
+    25.7667
    ],
    "Back": [
-    36.4,
-    37.5333
+    36.4667,
+    37.6
    ]
   },
   "skryt_site": [],
@@ -428,7 +428,10 @@
    ],
    "_p": "25. 11.: casti jmen kosti pro rozmery a smer modelu (kun.gd _model; drive v kodu Head_0 / Pelvis|Hips / Neck_00|Spine) - nove kone bez zmeny kodu"
   },
-  "_25_11_sedlo": "Misa 25. 11. „na koni nech original sedlo“: sedlo, deka, trmeny a sukne z modelu Hero Horse (tools/kun_hero.py), sedadlo jezdce z site PA_Saddle (kun.gd _sedadlo), dobove sedlo Balt Horse (vystroj) vypnuto; postroj do mereni kohoutku nepocitan"
+  "_25_11_sedlo": "Misa 25. 11. „na koni nech original sedlo“: sedlo, deka, trmeny a sukne z modelu Hero Horse (tools/kun_hero.py), sedadlo jezdce z site PA_Saddle (kun.gd _sedadlo), dobove sedlo Balt Horse (vystroj) vypnuto; postroj do mereni kohoutku nepocitan",
+  "_klipy_z_useku_26_11": "Misa 26. 11. (0.9999997: kun v klusu „blik a znovu“, telo se chveje a preskakuje): cas = snimek/30 (stopa 1555 snimku = 51,83 s), ne (snimek-1)/30; useky podle nejmensiho svu smycky (zk_muz/kun_svy.gd: max posun kosti mezi prvnim a poslednim snimkem) - drive sev cvalu 29 cm, kroku 19, kroku vlevo 57 cm; ted pod 1 cm (krok vpravo 5,8)",
+  "klus_m_s": 3.6,
+  "_klus_m_s": "Misa 26. 11. (klus „chveje se a preskakuje“): bod klipu Trot v BlendSpace2D mezi krokem a cvalem (kun.gd _strom) - jinak se v klusu michal krok 1,13 s s cvalem 0,5 s bez sladeni; skutecny klus kone 3,5-4,5 m/s; jen kdyz model klip Trot ma"
  },
  "telo": {
   "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",

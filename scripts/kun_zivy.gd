@@ -13,6 +13,7 @@ var volny := true                # bez jezdce (jen volny kun se pase)
 var _t := 0.0
 var _kosti := {}                 # skupina -> [index kosti]
 var _bok := Vector3.RIGHT        # vodorovna osa napric kone (soustava kostry)
+var _nahoru := Vector3.UP        # svislice sveta v soustave kostry (Hero Horse: kostra pod horse_BIP otocenou ze Z-up)
 var _pastva := 0.0               # 0..1 hlava dole
 var _pastva_cil := 0.0
 var _pastva_t := 0.0
@@ -42,10 +43,20 @@ func _ready() -> void:
 		_kosti[sk_jm] = a
 	var hl: Array = _kosti.get("hlava", [])
 	var pn: Array = _kosti.get("panev", [])
+	# Misa 26. 11. (0.9999997 „kun kdyz stoji ma vzdy hlavu nahoru“): kostra Hero Horse lezi pod uzlem horse_BIP, ktery ji
+	# otaci z 3ds Max (Z nahoru) - svislice v soustave kostry je -X, ne Y; pastva (krk 75 st. dolu) ho zvedala k nebi.
+	# Svislice z retezce transformaci rodicu (kun je otoceny jen kolem svisle osy sveta)
+	var bz := Basis()
+	var u: Node = sk
+	while u:
+		if u is Node3D:
+			bz = (u as Node3D).transform.basis * bz
+		u = u.get_parent()
+	_nahoru = (bz.inverse() * Vector3.UP).normalized()
 	if not hl.is_empty() and not pn.is_empty():
 		var f := sk.get_bone_global_rest(hl[0]).origin - sk.get_bone_global_rest(pn[0]).origin
-		f.y = 0.0
-		_bok = f.normalized().cross(Vector3.UP).normalized()
+		f -= _nahoru * f.dot(_nahoru)
+		_bok = f.normalized().cross(_nahoru).normalized()
 	_pastva_t = _rng.randf_range(2.0, 6.0)
 	_ocas_t = _rng.randf_range(2.0, 6.0)
 	_hlava_t = _rng.randf_range(10.0, 25.0)
@@ -103,7 +114,7 @@ func _process_modification() -> void:
 		_toc(sk, i, _bok, dech)
 	# prenaseni vahy: panev se pomalu nakloni (odlehcena zadni noha)
 	for i: int in _kosti.get("panev", []):
-		_toc(sk, i, _bok.cross(Vector3.UP), sin(_t * 0.21) * deg_to_rad(float(Z["vaha_st"])) * st)
+		_toc(sk, i, _bok.cross(_nahoru), sin(_t * 0.21) * deg_to_rad(float(Z["vaha_st"])) * st)
 	# krk a hlava: pastva dolu (kladny uhel kolem _bok = osa vpred k nebi, proto zaporne) (rozdeleni uhlu po kostech krku), pohozeni nahoru-dolu, zvykani
 	var krk: Array = _kosti.get("krk", [])
 	var dolu := deg_to_rad(float(Z["pastva_krk_st"])) * p
@@ -117,10 +128,10 @@ func _process_modification() -> void:
 	# usi
 	var us: Array = _kosti.get("usi", [])
 	for k in mini(2, us.size()):
-		_toc(sk, us[k], Vector3.UP, float(_usi[k]) * deg_to_rad(float(Z["usi_st"])) * (1.0 if k == 0 else -1.0))
+		_toc(sk, us[k], _nahoru, float(_usi[k]) * deg_to_rad(float(Z["usi_st"])) * (1.0 if k == 0 else -1.0))
 	# ocas: kyvani + svihnuti do strany, kazdy clanek o kus pozdeji
 	var oc: Array = _kosti.get("ocas", [])
 	for j in oc.size():
 		var kyv := sin(_t * 1.3 - j * 0.5) * deg_to_rad(3.0)
 		var svih := sin((1.0 - _ocas) * PI * 2.0 - j * 0.6) * _ocas * deg_to_rad(float(Z["ocas_st"])) / float(oc.size()) * _ocas_smer
-		_toc(sk, oc[j], Vector3.UP, kyv + svih)
+		_toc(sk, oc[j], _nahoru, kyv + svih)

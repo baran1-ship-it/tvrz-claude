@@ -1859,3 +1859,14 @@ Hotovo v kódu a datech (testy u každého):
 - **Oči:** převodník zmenšoval i bulvy (201 vrcholů → ~20, duhovka z atlasu hlavy rozmazaná do kroužku) → oči se nezmenšují.
   Snímek přes herní kód (`tools/foto_postava.gd`, TVRZ_FOTO_KDO) zblízka: duhovky vidět.
 - Kůň (hlava kolmo vzhůru v klidu, jízda „v kolečku“) a cedule hospody / zelené pruhy – otevřeno, další krok.
+
+### 26. 11. – Míša 0.9999997: kůň „když stojí, má vždy hlavu nahoru“, klus „blik a znovu“, tělo se chvěje (POTVRZENO, opraveno)
+- **Hlava nahoru:** `scripts/kun_zivy.gd` (pastva 25–70 s, krk 75° dolů) počítal svislici kostry jako Y. Kostra Hero Horse
+  leží pod uzlem `horse_BIP`, který ji otáčí ze Z-up (3ds Max) – svislice v soustavě kostry je −X, pastva krk zvedala
+  k nebi (izolovaný snímek `zk_muz/kun_zivy_t.gd`: pastva 1 = krk kolmo vzhůru, po opravě dolů). Oprava: `_nahoru` z řetězce
+  transformací rodičů, osy krku, pánve, uší a ocasu z ní.
+- **Blik / chvění:** úseky klipů byly (snímek − 1) / 30, stopa ale začíná snímkem 0 (1555 snímků = 51,83 s) → každý úsek
+  o 1–2 snímky dřív, šev smyčky cvalu 29 cm, kroku 19, kroku vlevo 57 cm (max. posun kosti první × poslední snímek,
+  `zk_muz/kun_svy.gd`). Nové úseky podle nejmenšího švu (pod 1 cm, krok vpravo 5,8) v `jizda.json klipy_z_useku`.
+- Zbývá: krok ↔ cval se v BlendSpace2D míchají bez sladění délek (1,13 s × 0,5 s) – klus mezi nimi může ještě kmitat;
+  model má vlastní klip Trot (nepoužitý). Ověřit na tabletu.

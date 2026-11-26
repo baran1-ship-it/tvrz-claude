@@ -537,6 +537,13 @@ func _strom() -> void:
 		var n := AnimationNodeAnimation.new()
 		n.animation = jm
 		bs.add_blend_point(n, Vector2(b[1], b[2]))
+	# klus (Misa 26. 11.): vlastni klip Trot mezi krokem a cvalem, jinak se v klusu michal krok s cvalem (jina delka, kmitalo)
+	var klus := float(Pravidla.cti("jizda", "kun").get("klus_m_s", 0.0))
+	if klus > CHODY["krok"] and klus < CHODY["cval"] and _klip("Trot") != "":
+		for x: float in [-1.0, 0.0, 1.0]:
+			var nt := AnimationNodeAnimation.new()
+			nt.animation = _klip("Trot")
+			bs.add_blend_point(nt, Vector2(x, klus))
 	bt.add_node("chod", bs)
 	bt.add_node("tempo", AnimationNodeTimeScale.new())
 	var os := AnimationNodeOneShot.new()
@@ -562,7 +569,7 @@ func _strom() -> void:
 	_at.tree_root = bt
 	for a in _ap.get_animation_list():
 		var an := _ap.get_animation(a)
-		if String(a).contains("Ilde") or String(a).contains("Idle") or String(a).contains("Walk") or String(a).contains("Gallop") or String(a).contains("Swim"):
+		if String(a).contains("Ilde") or String(a).contains("Idle") or String(a).contains("Walk") or String(a).contains("Gallop") or String(a).contains("Swim") or String(a).contains("Trot"):
 			an.loop_mode = Animation.LOOP_LINEAR
 	_at.active = true
 
