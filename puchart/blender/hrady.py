@@ -1131,7 +1131,7 @@ TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "hlina": ("dirt_floor", 2.0, 0.5),   # násyp nájezdu mostu (Havran: hlína za fošnami opěry)
     "omitka": ("omitka_vapno", 2.5, 1.0), "zdivo_omitka": ("omitka_vapno", 2.5, 0.95),   # vápenná omítka světlá (okna_palace.md)
     "kvadr_okno": ("kamen_teseny", 0.8, 1.0),   # tesané ostění oken – světlejší než zdivo
-    "kamen_kus": ("kamen_teseny", 0.9, 0.68), "kamen_klenak": ("kamen_teseny", 0.9, 0.66), "kamen_stupen": ("kamen_teseny", 0.9, 0.72),   # jednotlivé kameny (kamenivo.py: zuby cimbuří, nároží, patky, klenáky, stupně) – textura jednoho kamene po ploše, ne drobné zdivo (plán F2)
+    "kamen_kus": ("kamen_teseny", 0.9, 0.68), "kamen_zdi": ("kamen_teseny", 0.9, 1.0), "kamen_klenak": ("kamen_teseny", 0.9, 0.66), "kamen_stupen": ("kamen_teseny", 0.9, 0.72),   # jednotlivé kameny (kamenivo.py: zuby cimbuří, nároží, patky, klenáky, stupně) – textura jednoho kamene po ploše, ne drobné zdivo (plán F2)
     "sindel": ("sindel", 1.5, 1.35), "sindel_hra": ("sindel", 1.5, 1.35),
     "rez_drevo": ("letokruhy", 1.0, 0.85),   # čela (textura zešedlá na tón zvětralého dubu – čerstvě oranžová svítila, 3. 11.) trámů a prken: letokruhy (Havran vlastni._tex_endgrain; Míša 3. 11.: „víš jak vypadá řez dřeva?“)
     "provaz": ("rough_wood", 0.3, 0.55), "voda": ("droba", 2.0, 0.12),

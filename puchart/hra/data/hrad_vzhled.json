@@ -104,7 +104,8 @@
   "do_m": 28.0,
   "okraj_m": 4.0,
   "bunka_m": 10.0,
-  "material": "kamen_kus",
+  "material": "kamen_zdi",
+  "pozn_material_26_11": "Míša 26. 11. („kameny nároží asi ok, ale ty hradby nevím, nesedí to k sobě ty dva styly kamení“; předloha KCD zdivo_kcd_18_11/04, 07, 08: zuby cimbuří ze stejného kamene a barvy jako zeď, odlišná jen nároží): kameny zdi (zuby, krycí kameny, patka) materiál kamen_zdi – ve hře textura.gdshader klidny = stejná sytost 0,3, kontrast 0,55 a šedá 0,62 × tint jako zdivo.gdshader; nároží (narozi.material) dál kamen_kus (tesané kvádry).",
   "sraz_m": 0.016,
   "nerovnost_m": 0.01,
   "otluceny_roh_p": 0.3,
@@ -177,6 +178,7 @@
    "max_spad_m": 0.6
   },
   "narozi": {
+   "material": "kamen_kus",
    "vrstva_m": [
     0.25,
     0.45

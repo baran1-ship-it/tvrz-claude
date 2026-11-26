@@ -1720,7 +1720,7 @@ else:
 _gb414 = open(os.path.join(K, "hra/modely/hrady/puchart.glb"), "rb").read(); _n414 = struct.unpack("<I", _gb414[12:16])[0]; _J414 = json.loads(_gb414[20:20 + _n414])
 _mt414 = {m.get("name", "") for m in _J414.get("materials", [])}; _nd414 = [n.get("name", "") for n in _J414.get("nodes", [])]
 _OZ414 = json.load(open(os.path.join(K, "pravidla/svet/hrad_puchart.json"), encoding="utf-8")).get("omitka_zdiva", {})
-_chci414 = {"kamen_kus", "kamen_klenak", "kamen_stupen", _OZ414.get("sklep", "?"), (_OZ414.get("palac") or {}).get("lic", "?"), (_OZ414.get("palac") or {}).get("rub", "?")}
+_chci414 = {"kamen_kus", "kamen_zdi", "kamen_klenak", "kamen_stupen", _OZ414.get("sklep", "?"), (_OZ414.get("palac") or {}).get("lic", "?"), (_OZ414.get("palac") or {}).get("rub", "?")}
 if _chci414 - _mt414: _c414.append("puchart.glb bez materiálů %s" % sorted(_chci414 - _mt414))
 if {"kvadr_schod", "zdivo_narozi"} & _mt414: _c414.append("puchart.glb má staré materiály %s (tapeta na kvádru)" % sorted({"kvadr_schod", "zdivo_narozi"} & _mt414))
 _mh414 = json.load(open(os.path.join(K, "hra/data/materialy_hrad.json"), encoding="utf-8"))
@@ -1730,7 +1730,7 @@ if _KL414 is not None and _nk414 != _KL414["bunek"]: _c414.append("buněk Kameny
 if any(n.startswith("Kameny") for n in [m.get("name", "") for m in json.loads(open(os.path.join(K, "hra/modely/hrady/puchart_daleko.glb"), "rb").read()[20:20 + struct.unpack("<I", open(os.path.join(K, "hra/modely/hrady/puchart_daleko.glb"), "rb").read()[12:16])[0]]).get("nodes", [])]): _c414.append("daleká verze má kameny LOD0")
 _hg414 = open(os.path.join(K, "hra/scripts/hlavni.gd"), encoding="utf-8").read()
 if 'begins_with("Kameny")' not in _hg414 or "visibility_range_end" not in _hg414: _c414.append("hlavni.gd nekreslí Kameny_* jen zblízka (visibility_range)")
-for _m414 in ("kamen_kus", "kamen_klenak", "kamen_stupen"):
+for _m414 in ("kamen_kus", "kamen_zdi", "kamen_klenak", "kamen_stupen"):
     if '"%s"' % _m414 not in _hg414: _c414.append("hlavni.gd TEXTURA_NAST bez %s" % _m414)
 TEST("kameny_lod0", not _c414, "; ".join(_c414) if _c414 else "zubů %d, korun %d, patek %d, nárožních kamenů %d (vynecháno u přiléhajících zdí %d), buněk %d, troj. LOD0 %d" % (
     _KL414["stat"]["stinek"], _KL414["stat"]["kryti"], _KL414["stat"]["patka"], _KL414["stat"]["narozi_kamenu"], _KL414["stat"]["narozi_vynechano"], _KL414["bunek"], _KL414["troj"]))

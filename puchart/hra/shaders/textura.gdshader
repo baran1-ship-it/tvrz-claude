@@ -24,7 +24,13 @@ uniform float skvrny = 0.0;
 uniform float budova = 0.0;
 uniform float mech = 0.0;
 uniform float jas = 1.0;
-uniform float sedost = 0.0;   // zvětralé dřevo zešedne (KCD: stříbřitě šedý šindel a prkna)
+uniform float sedost = 0.0;
+// Míša 26. 11. („ty hradby nesedí k sobě, ty dva styly kamení“): kameny zdi (kamen_zdi – zuby cimbuří, krycí kameny, patka)
+// stejně klidné jako zeď (zdivo.gdshader 19. 11.): desaturace a kontrast stažený k téže studené šedé
+uniform float klidny = 0.0;
+uniform float kl_sytost = 0.3;
+uniform float kl_kontrast = 0.55;
+uniform vec3 kl_tint = vec3(0.8, 0.78, 0.75);   // zvětralé dřevo zešedne (KCD: stříbřitě šedý šindel a prkna)
 
 varying vec3 wp;
 varying vec3 wn;
@@ -70,6 +76,12 @@ void fragment() {
 		c *= mix(1.0, 0.75 + 0.5 * noise(vec2(al * 0.45 + sd * 3.7, 0.5 + sd * 9.0)), kus);
 		c = mix(c, c * vec3(0.55, 0.5, 0.46), smoothstep(0.68, 0.84, noise(vec2(al * 3.6 + sd * 11.0, ac * 3.6 + sd * 5.0))) * 0.7 * kus);
 		c = mix(c, c * vec3(1.22, 1.15, 1.06), smoothstep(0.72, 0.86, noise(vec2(al * 2.2 + sd * 2.0 + 0.3, ac * 5.6 + sd * 9.0))) * 0.5 * kus);
+	}
+	if (klidny > 0.0) {   // stejný postup jako zdivo.gdshader (ka): tint kamene, sytost, kontrast k 0,62 × tint
+		vec3 kz = c * kl_tint; float kl = dot(kz, vec3(0.3, 0.59, 0.11));
+		kz = mix(vec3(kl), kz, kl_sytost);
+		kz = mix(vec3(0.62) * kl_tint, kz * 1.3, kl_kontrast) * vec3(1.0, 0.98, 0.94);
+		c = mix(c, kz, klidny);
 	}
 	float gg = dot(c, vec3(0.3, 0.59, 0.11));
 	c = mix(c, vec3(gg * 1.03, gg, gg * 0.94), sedost) * jas;

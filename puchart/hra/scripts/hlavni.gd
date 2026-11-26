@@ -670,7 +670,8 @@ const TEXTURA_NAST := {   # Havran scripts/svet.gd material(): šindel radky+skv
 	"dvere": {"kus": 1.0, "stekance": 0.3},
 	"omitka": {"skvrny": 0.7, "stekance": 0.45, "budova": 0.6},
 	"kvadr_okno": {"antitile": 1.0, "skvrny": 0.5},
-	"kamen_kus": {"antitile": 1.0, "skvrny": 0.45},   # 23. 11. kameny LOD0 (blender/kamenivo.py): zuby cimbuří, nároží, patky – odstín po kameni (COLOR.r)
+	"kamen_kus": {"antitile": 1.0, "skvrny": 0.45},
+	"kamen_zdi": {"antitile": 1.0, "skvrny": 0.25, "klidny": 1.0, "tint": Vector3(0.95, 0.92, 0.85)},   # Míša 26. 11.: zuby cimbuří, krycí kameny a patka stejným kamenem jako zeď (zdivo.gdshader); nároží dál kamen_kus   # 23. 11. kameny LOD0 (blender/kamenivo.py): zuby cimbuří, nároží, patky – odstín po kameni (COLOR.r)
 	"kamen_klenak": {"antitile": 1.0, "skvrny": 0.5}, "kamen_stupen": {"antitile": 1.0, "skvrny": 0.4},   # klenáky a kamenné stupně: UV po ploše kamene (bez natažení)
 }
 var _tex_mat: Dictionary = {}

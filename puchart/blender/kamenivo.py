@@ -227,7 +227,7 @@ def dokonci(parts):
                     STAT["narozi_vynechano"] += 1; continue
                 sz = (dep, h - 0.03, L)
                 if ZAP:   # blízká verze: jen kámen LOD0 (kvádr pod ním by stínil na jeho líc – pruhy); 28–60 m roh bez nárožních kvádrů, dál daleká verze s kvádry
-                    kamen(c, bz, sz, rg, cham=rg.uniform(*C["sraz_m"]), otluk=rg.uniform(0.02, 0.035))
+                    kamen(c, bz, sz, rg, cham=rg.uniform(*C["sraz_m"]), otluk=rg.uniform(0.02, 0.035), mat=C.get("material", "kamen_kus"))
                     STAT["narozi_kamenu"] += 1
                     for e, o in ((dxa, nxa), (dxb, nxb)):
                         q = R + e * 0.25 + o * 0.06 + UP * ym; NAR_BODY.append([round(q.x, 3), round(q.z, 3), round(q.y, 3)])
