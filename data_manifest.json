@@ -1,5 +1,5 @@
 {
- "verze": "0.9999995",
+ "verze": "0.9999996",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -4702,14 +4702,31 @@
    ]
   },
   "z_postavy": {
-   "src": "9aea85766260800220d769ed38951987",
-   "md5": "82702050772592a78e9dbdd85ac73941",
-   "size": 54984576,
+   "src": "05cff54580463c65016de4b163aac7cc",
+   "md5": "af8e67988cc0d0de4e2fcf2f5d3848c4",
+   "size": 117162048,
    "parts": [
     {
-     "file": "z_postavy-8270205077.pck.000",
-     "size": 54984576,
-     "md5": "82702050772592a78e9dbdd85ac73941"
+     "file": "z_postavy-af8e67988c.pck.000",
+     "size": 94371840,
+     "md5": "ccb7c454b0a6f5621121ac492cbadab8"
+    },
+    {
+     "file": "z_postavy-af8e67988c.pck.001",
+     "size": 22790208,
+     "md5": "0e85f6d8c158a1abb89e67c25055bfe1"
+    }
+   ]
+  },
+  "z_kone": {
+   "src": "4d3ded8aab68deb43c53b8baa8fec24f",
+   "md5": "1c392bde875690d006a84a57a885e204",
+   "size": 5540256,
+   "parts": [
+    {
+     "file": "z_kone-1c392bde87.pck.000",
+     "size": 5540256,
+     "md5": "1c392bde875690d006a84a57a885e204"
     }
    ]
   },
@@ -4838,18 +4855,6 @@
     }
    ]
   },
-  "z_kone": {
-   "src": "81744b3b4c63beec2e998d761779d579",
-   "md5": "ed73e0ee70700c5d9fe443bbe490a974",
-   "size": 34494176,
-   "parts": [
-    {
-     "file": "z_kone-ed73e0ee70.pck.000",
-     "size": 34494176,
-     "md5": "ed73e0ee70700c5d9fe443bbe490a974"
-    }
-   ]
-  },
   "z_mlyn": {
    "src": "98f768ba4ca156763b70ab7dddb522e7",
    "md5": "7121121c61daed2f36810b6e6bcb4e4e",
@@ -4928,14 +4933,11 @@
    ]
   }
  },
- "otisk_exportu": "c43df9f2f72a47ac9c20a258f5ebfa00",
+ "otisk_exportu": "44f63b978c629d6f7a4ddd3647104ec6",
  "otisk_vstupu": "21a307ae6d338534777ce5ba9172699a",
- "otisk_sady": "f4a76e1802a3ac01a98b2f8a4eac4644",
+ "otisk_sady": "983466bb53765c0ea34bcd2dc07f8801",
  "testovaci": [
   "POKRYTI_MATICE 0/114 (0 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, teren|predmet, voda|voda, voda|cesta",
-  "USPESNOST_MATICE 0/0 (0 %)",
-  "TEST stanoviste     CHYBA  v kosene louce: { \"kameni\": 557 }, priklad { \"kameni\": (3.154292, 70.96895) }",
-  "TEST ruiny_ves      CHYBA  dilu 15, roh max 0.30 m, v pruchodech 3, 3 chyb [\"shrub_02_0 v pruchodu (271.4, 369.1)\", \"shrub_02_1 v pruchodu (312.7, 378.4)\", \"mec",
-  "TEST stanoviste     CHYBA  v kosene louce: { \"kameni\": 557 }, priklad { \"kameni\": (3.154292, 70.96895) }"
+  "USPESNOST_MATICE 0/0 (0 %)"
  ]
 }
