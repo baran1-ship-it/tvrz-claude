@@ -1815,3 +1815,5 @@ Hotovo v kódu a datech (testy u každého):
 - 25. 11.: test `postavy_modif` CHYBA „kroku animace za snimek max 9 (strop 8)“ – izolovaně ověřeno, že **není** od nových
   vesničanů (stejný výsledek se starým `postavy_vzhled.json`, beh `modif_bez`). Předchozí výsledek testu v logu není –
   od kdy padá, NEOVĚŘENO; otevřené (strop kroků animace `postavy.json anim_strop_snimek` × počet postav v záběru).
+- 26. 11.: běhy testů končily `CHYBA rc=1` i když testy prošly – `scripts/diag.gd _zapis` při ukončení hry volal
+  `get_viewport()` mimo strom (null). Ochrana `is_inside_tree()`.

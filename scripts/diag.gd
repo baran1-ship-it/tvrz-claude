@@ -862,6 +862,9 @@ func _kontrola_rozpoctu() -> void:
 
 
 func _zapis(pozn: String, hned := true) -> void:
+	# 26. 11.: zapis pri ukonceni hry (uzel uz mimo strom) padal na get_viewport() null - beh testu pak hlasil CHYBA rc=1
+	if not is_inside_tree():
+		return
 	var p := Vector3.ZERO
 	if main and main.player:
 		p = main.player.global_position
