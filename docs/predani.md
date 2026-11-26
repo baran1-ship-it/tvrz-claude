@@ -1817,3 +1817,6 @@ Hotovo v kódu a datech (testy u každého):
   od kdy padá, NEOVĚŘENO; otevřené (strop kroků animace `postavy.json anim_strop_snimek` × počet postav v záběru).
 - 26. 11.: běhy testů končily `CHYBA rc=1` i když testy prošly – `scripts/diag.gd _zapis` při ukončení hry volal
   `get_viewport()` mimo strom (null). Ochrana `is_inside_tree()`.
+- 26. 11.: otěže – kroužky udidla se počítaly z aktuální pózy koně při nasednutí (ve světě kůň otáčel hlavou →
+  osa a boky hlavy šikmo, udidla 0,53 m od sebe). Teď z klidové pózy (`get_bone_global_rest`); test_otezi 0,22 m / 0,39 m.
+  Test `telo_zaber` měl natvrdo kost `BN_Head_01` (kůň henry) – bere `jizda.json kun.otezi.kost_hlavy`.

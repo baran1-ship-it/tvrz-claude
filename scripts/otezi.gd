@@ -46,7 +46,10 @@ func setup(kun: Node3D, data: Dictionary) -> bool:
 		if b < 0:
 			b = kostra.find_bone(String(sk_uzd.get_bind_name(i)))
 		kosti_vazby.append(b)
-	var hl_poza := kostra.get_bone_global_pose(_hlava)
+	# 26. 11. (test telo_zaber: udidla 0,53 m od sebe): ve svete kun pri nasednuti otacel hlavou - osa a boky hlavy z
+	# aktualni pozy sikmo, krouzky nesoumerne. Vypocet v klidove poze (kun_hero: klid = 1. snimek Idle, tools/kun_hero.py),
+	# krouzky v soustave kosti hlavy pak jdou s jeji pozou (udidla()).
+	var hl_poza := kostra.get_bone_global_rest(_hlava)
 	var do_hlavy := hl_poza.affine_inverse()
 	var v: PackedVector3Array = PackedVector3Array()
 	for si in uzd.mesh.get_surface_count():
@@ -63,12 +66,12 @@ func setup(kun: Node3D, data: Dictionary) -> bool:
 				var bi := bb[i * nv + k]
 				if w <= 0.0 or bi < 0 or bi >= kosti_vazby.size() or kosti_vazby[bi] < 0:
 					continue
-				p += (kostra.get_bone_global_pose(kosti_vazby[bi]) * sk_uzd.get_bind_pose(bi) * vv[i]) * w
+				p += (kostra.get_bone_global_rest(kosti_vazby[bi]) * sk_uzd.get_bind_pose(bi) * vv[i]) * w
 				ws += w
 			if ws > 0.0:
 				v.append(do_hlavy * (p / ws))
 	var a1 := Vector3.ZERO                                             # pocatek kosti hlavy
-	var a0 := do_hlavy * kostra.get_bone_global_pose(hl0).origin
+	var a0 := do_hlavy * kostra.get_bone_global_rest(hl0).origin
 	var osa := (a1 - a0).normalized()
 	var nahoru := ((kostra.global_basis * hl_poza.basis).inverse() * Vector3.UP).normalized()
 	var bok := osa.cross(nahoru).normalized()
@@ -111,7 +114,7 @@ func setup(kun: Node3D, data: Dictionary) -> bool:
 			st += kraj[i]
 		st /= float(n)
 		_krouzky.append(st)
-		print("otezi: krouzek %+.0f v kostre %s (hlava %s / %s, nos %.3f po ose)" % [strana, st, a0, a1, smax])
+		print_verbose("otezi: krouzek %+.0f v kostre %s (hlava %s / %s, nos %.3f po ose)" % [strana, st, a0, a1, smax])
 	_im = ImmediateMesh.new()
 	mesh = _im
 	top_level = true
