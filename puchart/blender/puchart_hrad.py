@@ -225,7 +225,11 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
             dily.append((yc, o[2])); yc = max(yc, o[2] + o[3])
         dily.append((yc, koruna))
         for ya, yb in dily:
-            if yb - ya > 0.05: kus(M((c.x, (ya + yb) / 2, c.z), basis=frame(d)), (t, yb - ya, s1 - s0), mat)
+            if yb - ya > 0.05:
+                nk_ = len(P.cols); kus(M((c.x, (ya + yb) / 2, c.z), basis=frame(d)), (t, yb - ya, s1 - s0), mat)
+                # koruna hradby s cimbuřím je pochozí (Míša 26. 11.: „jak se jde z malé věžičky po hradbě… není tam zábradlí“) –
+                # hlídač volných hran (hrany_a_zabradli) jí doplní zábradlí na hranu nad nádvořím, kde není pavlač ani navazující plocha
+                if parapet > 0 and cimburi and abs(yb - koruna) < 1e-6 and len(P.cols) > nk_ and t >= 1.2: POCH.append((P.cols[-1], koruna, "koruna", P))
     stinky = []; pz = []
     if parapet > 0:
         pc = vo * (t / 2 - 0.275)

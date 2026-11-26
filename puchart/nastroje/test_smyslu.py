@@ -619,6 +619,8 @@ for i, z in enumerate(_ZB):
         if z["s" + k]: continue
         for j, o in enumerate(_ZB):
             if i == j: continue
+            # přímo navazující díl téhož zábradlí (společný bod s druhým koncem) – krátký díl v rohu není „nenavazující“ (26. 11.)
+            if any(np.linalg.norm(np.array(z["b" if k == "a" else "a"]) - np.array(o[e_])) < 0.02 for e_ in ("a", "b")): continue
             dh, dv = _bod_usecka(z[k], o["a"], o["b"])
             if 0.02 < dh < 1.0 and dv < 0.3:   # mezera 0,6–1,0 m je v pořádku jen jako průchod (vede jí trasa průchodu – výstup schodů)
                 if dh >= 0.6 and any(_bod_usecka(z[k], [p_[0], p_[1], 0], [q_[0], q_[1], 0])[0] < dh + 0.3 for t_ in _TRZ for p_, q_ in zip(t_, t_[1:])): continue
