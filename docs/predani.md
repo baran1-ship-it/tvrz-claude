@@ -1845,3 +1845,7 @@ Hotovo v kódu a datech (testy u každého):
   `kun_terenem` = pozdní tráva v lese (louka), ne model. `lide_rozmisteni` (purkrabí 14:25 u brány) = rozvrh, ne vzhled.
 - **26. 11. `lide_rozmisteni` kolísá:** ve společném běhu (zbytek_vydani) 14:25 u brány 3 ze 7 (0,43 > 0,4 – purkrabí
   u stráže brány), samotný běh (rozm2) OK. Hraniční – při dalším selhání rozebrat rozvrh purkrabího (brana_straz).
+- **26. 11. vydání `--jen z_kone` spadlo na podsložce** `modely/kone/kun_hero_tex` (zdrojové PNG pro kun_hero.py) –
+  seznam balíku teď bere jen soubory (`os.path.isfile`, jako z_rostliny). Brány vydání tento den v pořadí: otisk
+  exportu (ruční přestavba postav → `otisk_exportu.py zapis`), starý import (.bin novější → smazat md5, touch .gltf,
+  --import), tabulky chyb (nejnovější výsledek testu), podsložka v balíku.
