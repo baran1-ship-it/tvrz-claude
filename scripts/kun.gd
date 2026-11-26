@@ -221,7 +221,6 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	# sedadlo = nejnizsi misto mezi hruskou a zadni rozsochou sedla, ktere do modelu dal jeho autor (sit sedadlo_sit,
 	# skryta) - kun_henry: ~15 cm pred kosti BN_Spine_01, trmeny modelu (BN_*_Stirrup) ~19 cm pred nim
 	var sed_b := _body_site(xk, String(Pravidla.cti("jizda", "kun").get("sedadlo_sit", "")))
-	print("kun: sedadlo_sit %d bodu" % sed_b.size())
 	if not sed_b.is_empty():
 		var sp := _sedadlo(sed_b, vpred, Vector3.UP.cross(vpred).normalized())
 		if sp != Vector3.INF:
@@ -674,8 +673,6 @@ static func _sedadlo(body: Array, vpred: Vector3, bok: Vector3) -> Vector3:
 	if i_s < 0:
 		return Vector3.INF
 	var a := a0 + (float(i_s) + 0.5) / n * (a1 - a0)
-	print("kun: sedadlo profil a %.2f..%.2f, zadni %d predni %d sedadlo %d (a %.2f), vysky %s" % [a0, a1, i_z, i_p, i_s, a,
-		top.map(func(v: float) -> String: return "%.2f" % v)])
 	return vpred * a + bok * bs + Vector3.UP * float(top[i_s])
 
 

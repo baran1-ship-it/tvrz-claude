@@ -11,7 +11,10 @@ Zdroj: Disk `1qW5K2xC0Ega4xWvTlq7xGVZ5r9ZBLDhL` (zip 2,6 GB, čten po kouskách 
    - kostra na tvar UAL: head→Head, kořen root, zkrutné kosti slité do rodiče;
    - **klidová póza jako UAL** (natočení kostí ke kloubům UAL, zapečeno do sítě) a **osy kostí jako UAL** – klipy Godotu
      jsou místní rotace kostí: bez toho postava ležela (osy) a měla ruce 25 cm od těla (A-póza);
-   - zmenšení po kusech (hlava a ruce 2× podíl) na ~13–15 tis. troj., textury 1K podle materiálu FBX
+   - zmenšení po kusech (hlava a ruce 2× podíl) na cíl 7 500 troj. (hlava a ruce 2× → skutečně 8,7–9,5 tis.), textury 1K podle materiálu FBX
      (`tools/postavy_q/muz_npc.json`; ruce a oči mají materiál hlavy).
 4. Výstup `modely/postavy/npc/npc_muz_*_cela.gltf` – sada jako ostatní (`scripts/vzhled.gd`), klipy UAL bez retargetu.
    Ověřeno `zk_muz/anim_test.gd`: osy 0,0° proti UAL, klouby v chůzi do 2 cm od postavy UAL.
+
+## Ženy (26. 11.)
+RAR UE4/UE5 z Disku `1zsi7XCa4KQxF2ZZkOQT9ysmVtTglzwZN` čten proudem (`curl | bsdtar`, 1,3 GB se neukládá), 5 žen `npc_zena_01..05`, vzor kostry `npc_anezka`, textury Character (kůže) / clothes / Hair. Druhé oděvy (Full_02) u mužů = tentýž oděv → nepoužity.

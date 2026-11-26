@@ -22,3 +22,7 @@ Postup: `python3 tools/kun_hero_tex.py <rozbaleno>` (PNG do modely/kone/kun_hero
 `/opt/bl/bin/python tools/kun_hero.py <rozbaleno> Bay Brown` → modely/kone/kun_hero.glb (tělo, hříva, ocas, PA_Harness
 = uzdečka s poprsníkem; sedlo/deka/třmeny/otěže/sukně postroje pryč), `godot --import`. Pravidla jizda.json kun
 (model, klipy_z_useku, kosti, otezi.uzdecka_sit PA_Harness, zivy.kosti, kosti_vzory); původní kůň v kun.henry.
+
+
+## 25.–26. 11. – původní sedlo (Míša „na koni nech original sedlo“)
+Sedlo, deka, třmeny a sukně z modelu zůstávají (`tools/kun_hero.py` maže jen otěže – vede je hra), sedlo Balt (`jizda.json kun.vystroj`) vypnuto, sedadlo jezdce ze sítě PA_Saddle. Kořen kostry `horse_BIP` měl ve snímku 0 posun 0,602 m (jezdec za sedlem) – klid = první snímek Idle. Postroj a hříva MASK (exporter dával BLEND). Text výše o odstranění sedla platí jen pro 24.–25. 11.

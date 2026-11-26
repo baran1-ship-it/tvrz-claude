@@ -101,4 +101,21 @@ for o in bpy.data.objects:
 cil = os.path.join(OUT, "kun_hero.glb")
 bpy.ops.export_scene.gltf(filepath=cil, export_format="GLB", export_animations=True, export_force_sampling=True,
                           export_image_format="AUTO", export_apply=False)
+# nezavisla kontrola 26. 11.: exporter glTF ignoruje blend_method CLIP a dal postroji (17 tis. troj.) i hrive BLEND -
+# na tabletu pruhledny pruchod a razeni; alfa postroje je z 93 % 255 -> orez MASK (jako muz_npc.py)
+import json  # noqa: E402
+import struct  # noqa: E402
+b = open(cil, "rb").read()
+n = struct.unpack("<I", b[12:16])[0]
+g = json.loads(b[20:20 + n])
+for m in g.get("materials", []):
+    if m.get("alphaMode") == "BLEND":
+        m["alphaMode"] = "MASK"
+        m["alphaCutoff"] = 0.5
+        print("KUN_HERO alfa MASK", m.get("name"))
+j = json.dumps(g, separators=(",", ":")).encode()
+j += b" " * ((4 - len(j) % 4) % 4)
+zbytek = b[20 + n:]
+vystup = struct.pack("<I", len(j)) + b"JSON" + j + zbytek
+open(cil, "wb").write(b[:8] + struct.pack("<I", 12 + len(vystup)) + vystup)
 print("KUN_HERO", cil, os.path.getsize(cil))
