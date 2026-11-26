@@ -171,6 +171,62 @@ print("OSY srovnano", srovnano, "z", len(arm.data.bones), "chybi v UAL", [b.name
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from q_obleceni import _skirt_bones, _skirt_leg_weights  # noqa: E402
 
+def _vahy_z_kalhot(o, k, z_top, pas=0.06):
+    """Vahy odevu pod z_top = vahy nejblizsiho bodu kalhot (barycentricky na trojuhelniku); v pasu `pas` m pod z_top
+    plynuly prechod z puvodnich vah odevu."""
+    from mathutils.bvhtree import BVHTree
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(k.data)
+    bm.transform(k.matrix_world)
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
+    bm.verts.ensure_lookup_table()
+    bm.faces.ensure_lookup_table()
+    strom = BVHTree.FromBMesh(bm)
+    kvg = {g.index: g.name for g in k.vertex_groups}
+    kw = [{kvg[g.group]: g.weight for g in v.groups} for v in k.data.vertices]
+    jm = {g.name for g in o.vertex_groups}
+    for n in {n for w in kw for n in w} - jm:
+        o.vertex_groups.new(name=n)
+    gi = {g.name: g for g in o.vertex_groups}
+    ovg = {g.index: g.name for g in o.vertex_groups}
+    hotovo = 0
+    for v in o.data.vertices:
+        p = o.matrix_world @ v.co
+        if p.z >= z_top:
+            continue
+        loc, _n, fi, _d = strom.find_nearest(p)
+        if loc is None:
+            continue
+        f = bm.faces[fi]
+        a, b, c = (x.co for x in f.verts)
+        # barycentricke souradnice loc v trojuhelniku
+        v0, v1, v2 = b - a, c - a, loc - a
+        d00, d01, d11, d20, d21 = v0.dot(v0), v0.dot(v1), v1.dot(v1), v2.dot(v0), v2.dot(v1)
+        den = d00 * d11 - d01 * d01 or 1e-12
+        wb = (d11 * d20 - d01 * d21) / den
+        wc = (d00 * d21 - d01 * d20) / den
+        bar = (1 - wb - wc, wb, wc)
+        nove = {}
+        for s, x in zip(bar, f.verts):
+            for n, w in kw[x.index].items():
+                nove[n] = nove.get(n, 0.0) + max(s, 0.0) * w
+        t = min(1.0, (z_top - p.z) / pas)
+        stare = {ovg[g.group]: g.weight for g in v.groups}
+        vys = {n: stare.get(n, 0.0) * (1 - t) + nove.get(n, 0.0) * t for n in set(stare) | set(nove)}
+        # nejvys 4 kosti (Godot), soucet 1
+        vys = dict(sorted(vys.items(), key=lambda q: -q[1])[:4])
+        s = sum(vys.values()) or 1.0
+        for n in stare:
+            gi[n].remove([v.index])
+        for n, w in vys.items():
+            if w / s > 0.005:
+                gi[n].add([v.index], w / s, "REPLACE")
+        hotovo += 1
+    bm.free()
+    print("VAHY z kalhot", o.name, "<-", k.name, "vrcholu", hotovo)
+
+
 pel_z = (arm.matrix_world @ arm.data.bones["pelvis"].head_local).z
 koleno_z = (arm.matrix_world @ arm.data.bones["calf_l"].head_local).z
 odev = [o for o in site if "cloth" in o.name.lower() and not any(x in o.name.lower() for x in ("pants", "shoes", "belt", "bag"))]
@@ -188,8 +244,17 @@ for o in odev:
     # kotle Quaternius (leva pulka leve stehno, prava prave), kosti sukne jen pro dlouhe sukne pod koleno.
     lem = min((o.matrix_world @ o.data.vertices[i].co).z for i in vyber)
     if lem > koleno_z + 0.03:
-        _skirt_leg_weights(o, arm, pel_z + 0.03, lem, ZENA)
-        print("SUKNE kratky odev (vahy stehen)", o.name, "lem %.2f koleno %.2f" % (lem, koleno_z))
+        # 26. 11. nezavisla kontrola pred vydanim (snimky chuze): nohavice muze 01 pres lem i s vahami stehen - lem
+        # tuniky mel vlastni vzorec (90 % stehno, stred 45/45), kalhoty pod ni vlastni vahy z balicku -> v kroku se
+        # vrstvy hybou jinak. Mereni klidu: nohavice vne tuniky 1 vrchol (1 cm) -> pricina jsou vahy, ne tvar.
+        # Vrstveny odev: vahy z nejblizsiho mista spodni vrstvy (kalhot), obe vrstvy se pak hybou stejne.
+        kal = [x for x in site if "pants" in x.name.lower()]
+        if kal:
+            _vahy_z_kalhot(o, kal[0], pel_z + 0.03)
+            print("SUKNE kratky odev (vahy z kalhot)", o.name, "lem %.2f koleno %.2f" % (lem, koleno_z))
+        else:
+            _skirt_leg_weights(o, arm, pel_z + 0.03, lem, ZENA)
+            print("SUKNE kratky odev (vahy stehen)", o.name, "lem %.2f koleno %.2f" % (lem, koleno_z))
         continue
     bpy.ops.object.select_all(action="DESELECT")
     bpy.context.view_layer.objects.active = o
