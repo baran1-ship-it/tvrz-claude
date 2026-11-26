@@ -165,6 +165,58 @@ bpy.ops.object.mode_set(mode="OBJECT")
 print("OSY srovnano", srovnano, "z", len(arm.data.bones), "chybi v UAL", [b.name for b in arm.data.bones if b.name not in osy])
 
 
+# --- sukne a dlouhe kabatce (nezavisla kontrola 26. 11., snimky chuze zblizka: noha prochazi suknemi zen 01/02 a
+# kabatci muzu 03-05): spodek odevu pod panvi vazany na stehna -> kosti sukne sukne_<i>_<j> jako sady Quaternius
+# (tools/postavy_q/q_obleceni.py _skirt_bones; ve hre ridi scripts/sukne_ridic.gd + pruzina, lide.gd _sukne)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from q_obleceni import _skirt_bones  # noqa: E402
+
+pel_z = (arm.matrix_world @ arm.data.bones["pelvis"].head_local).z
+odev = [o for o in site if "cloth" in o.name.lower() and not any(x in o.name.lower() for x in ("pants", "shoes", "belt", "bag"))]
+spodky = []
+for o in odev:
+    noha = [o.vertex_groups[g].index for g in ("thigh_l", "thigh_r", "calf_l", "calf_r") if g in o.vertex_groups]
+    vyber = [v.index for v in o.data.vertices if (o.matrix_world @ v.co).z < pel_z + 0.03
+             and any(g.group in noha and g.weight > 0.05 for g in v.groups)]
+    if len(vyber) < 50:
+        continue
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.context.view_layer.objects.active = o
+    o.select_set(True)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="DESELECT")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for i in vyber:
+        o.data.vertices[i].select = True
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.separate(type="SELECTED")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    novy = [x for x in bpy.context.selected_objects if x != o]
+    spodky += novy
+    print("SUKNE spodek", o.name, len(vyber), "vrcholu")
+if spodky:
+    bpy.ops.object.select_all(action="DESELECT")
+    for x in spodky:
+        x.select_set(True)
+    bpy.context.view_layer.objects.active = spodky[0]
+    bpy.ops.object.join()
+    sk = bpy.context.view_layer.objects.active
+    z_bot = min((sk.matrix_world @ v.co).z for v in sk.data.vertices)
+    _skirt_bones(sk, arm, pel_z + 0.03, z_bot)
+    # spodek zpet k odevu a sev (stejne vrcholy po oddeleni) spojit - pred zmensenim, jinak by se sev rozevrel
+    bpy.ops.object.select_all(action="DESELECT")
+    for x in odev + [sk]:
+        x.select_set(True)
+    bpy.context.view_layer.objects.active = odev[0]
+    bpy.ops.object.join()
+    od = bpy.context.view_layer.objects.active
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.remove_doubles(threshold=0.00001)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    site = [o for o in bpy.data.objects if o.type == "MESH" and any(m.type == "ARMATURE" for m in o.modifiers)]
+    print("SUKNE odev", od.name, len(od.data.vertices), "vrcholu")
+
 # --- materialy a textury 1K
 def obr(jm):
     p = os.path.join(TEX, jm)

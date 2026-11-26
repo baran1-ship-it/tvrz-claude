@@ -2167,7 +2167,8 @@ func _telo_zaber() -> void:
 			var kk0: Skeleton3D = kun.get("_kostra")
 			var hl1 := -1
 			for i in kk0.get_bone_count():
-				if kk0.get_bone_name(i).begins_with("BN_Head_01"):
+				# 26. 11.: kost hlavy z pravidel (drive natvrdo BN_Head_01 kone henry - u Hero Horse kost nenalezena)
+				if hl1 < 0 and kk0.get_bone_name(i).begins_with(String((Pravidla.cti("jizda", "kun", "otezi") as Dictionary)["kost_hlavy"])):
 					hl1 = i
 			var hp := kk0.global_transform * kk0.get_bone_global_pose(hl1).origin
 			var rozpeti := (kc[0] as Vector3).distance_to(kc[1])
