@@ -1994,8 +1994,12 @@ def postav_B(P):
         for k_, (vrch_, smer_) in enumerate(((a, -d), (b, d))):
             if ((i - 1) % len(U) if k_ == 0 else (i + 1) % len(U)) not in B.get("hradba_palac", []): continue
             sg_ = 1.0 if (vrch_ - pC).dot(ps) > 0 else -1.0; lic_ = pa_["hloubka"] / 2 + 0.55
-            potr_ = [(lic_ - sg_ * (c_ - pC).dot(ps)) / (sg_ * smer_.dot(ps)) for c_ in (vrch_ + vn * (t / 2), vrch_ - vn * (t / 2))
-                     if abs((c_ - pC).dot(pd)) > pL / 2 + 0.5 and sg_ * smer_.dot(ps) > 0.2]   # jen roh mimo palác (druhý je zalícovaný v jeho zdi)
+            # bod konce zdi v rovině bočního líce paláce (roh paláce): tam musí čelo lícovat, jinak u rohu zůstane stín
+            # (konec zdi je kolmý na zeď, ne na palác – vnější roh pak vystoupí o pár cm, vnitřní je v jeho zdi)
+            c1_, c2_ = vrch_ + vn * (t / 2), vrch_ - vn * (t / 2); bk_ = pL / 2 + 0.55
+            f1_, f2_ = abs((c1_ - pC).dot(pd)), abs((c2_ - pC).dot(pd))
+            body_ = [c1_ + (c2_ - c1_) * ((bk_ - f1_) / (f2_ - f1_))] if (f1_ - bk_) * (f2_ - bk_) < 0 else [c_ for c_ in (c1_, c2_) if abs((c_ - pC).dot(pd)) > bk_]
+            potr_ = [(lic_ - sg_ * (c_ - pC).dot(ps)) / (sg_ * smer_.dot(ps)) for c_ in body_ if sg_ * smer_.dot(ps) > 0.2]
             if potr_:
                 if k_ == 0: e0_ = max(potr_) + 0.03
                 else: e1_ = max(potr_) + 0.03

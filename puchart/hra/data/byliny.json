@@ -10,12 +10,12 @@
  "dosah_m": 40,
  "daleko": {
   "dosah_m": 110,
-  "bunek": 6,
+  "bunek": 10,
   "konec_m": [95, 110],
   "predstih_m": 14,
   "predpona": "byl_",
   "atlas": "byliny_vse",
-  "pozn": "Míša 26. 11. („pořád doskakují keře atd., musí tam něco být místo nich… nemůže tam být nic“): kapradí, kopřivy, ostružiny, pařezy, padlé kmeny, kameny, mech se objevovaly z ničeho v pásmu zanik_m (22–40 m). Teď druhá podoba jako keře (kere.json daleko): impostor 8×8 pohledů po 64 px (blender/impostory.py byl_<druh>, nastroje/kere_atlas.py → byliny_vse), uzel BylinyDaleko, přesný doplněk plného modelu po celých rostlinách, stejné polohy (stejné modely v _bunka_mista); za konec_m porost E2 v zemi. Velká buňka 6 × 10 m."
+  "pozn": "Míša 26. 11. („pořád doskakují keře atd., musí tam něco být místo nich… nemůže tam být nic“): kapradí, kopřivy, ostružiny, pařezy, padlé kmeny, kameny, mech se objevovaly z ničeho v pásmu zanik_m (22–40 m). Teď druhá podoba jako keře (kere.json daleko): impostor 8×8 pohledů po 64 px (blender/impostory.py byl_<druh>, nastroje/kere_atlas.py → byliny_vse), uzel BylinyDaleko, přesný doplněk plného modelu po celých rostlinách, stejné polohy (stejné modely v _bunka_mista); za konec_m porost E2 v zemi. Velká buňka 10 × 10 m (6 × 10 m přidávala 11 volání kreslení – KONTROLA_SCEN typ C 3/44 nad 1000, export 26. 11.)."
  },
  "bunka_m": 10,
  "tridy": {
