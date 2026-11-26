@@ -169,9 +169,10 @@ print("OSY srovnano", srovnano, "z", len(arm.data.bones), "chybi v UAL", [b.name
 # kabatci muzu 03-05): spodek odevu pod panvi vazany na stehna -> kosti sukne sukne_<i>_<j> jako sady Quaternius
 # (tools/postavy_q/q_obleceni.py _skirt_bones; ve hre ridi scripts/sukne_ridic.gd + pruzina, lide.gd _sukne)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from q_obleceni import _skirt_bones  # noqa: E402
+from q_obleceni import _skirt_bones, _skirt_leg_weights  # noqa: E402
 
 pel_z = (arm.matrix_world @ arm.data.bones["pelvis"].head_local).z
+koleno_z = (arm.matrix_world @ arm.data.bones["calf_l"].head_local).z
 odev = [o for o in site if "cloth" in o.name.lower() and not any(x in o.name.lower() for x in ("pants", "shoes", "belt", "bag"))]
 spodky = []
 for o in odev:
@@ -181,6 +182,14 @@ for o in odev:
     print("SUKNE kus", o.name, "pod panvi", len(vyber), "na nohou", sum(1 for i in vyber if any(
         g.group in noha and g.weight > 0.05 for g in o.data.vertices[i].groups)))
     if len(vyber) < 50:
+        continue
+    # 26. 11. novy rozbor (2. oprava nepomohla muzi 03-05): kosti sukne toci predni stred prumerem obou stehen - v kroku
+    # (noha vpred, druha vzad) stoji a kratkou tunikou projde stehno. Kratky odev (lem nad kolenem) = vahy stehen jako
+    # kotle Quaternius (leva pulka leve stehno, prava prave), kosti sukne jen pro dlouhe sukne pod koleno.
+    lem = min((o.matrix_world @ o.data.vertices[i].co).z for i in vyber)
+    if lem > koleno_z + 0.03:
+        _skirt_leg_weights(o, arm, pel_z + 0.03, lem, ZENA)
+        print("SUKNE kratky odev (vahy stehen)", o.name, "lem %.2f koleno %.2f" % (lem, koleno_z))
         continue
     bpy.ops.object.select_all(action="DESELECT")
     bpy.context.view_layer.objects.active = o
