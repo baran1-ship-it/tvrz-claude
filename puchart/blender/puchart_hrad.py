@@ -1988,7 +1988,19 @@ def postav_B(P):
         if iv:   # u konce úseku i přesah zdi za vrchol (t/2)
             s0_ = iv[0] - (t if iv[0] < 0.1 else 0.05); s1_ = iv[1] + (t if iv[1] > L - 0.1 else 0.05)
             ot.append(((s0_ + s1_) / 2, s1_ - s0_, pa_.get("podlaha_min_y", -100.0), 200.0))
-        e0_, e1_ = pokos_ext(hp, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0, cimburi=B.get("cimburi", True), cela=(False, False), ext0=e0_, ext1=e1_, patka=True)
+        e0_, e1_ = pokos_ext(hp, i, t); cel_ = [False, False]
+        # Míša 26. 11. (snímek x 61 z 154): hradba končící u nároží paláce (soused v hradba_palac) neměla čelo a končila 0,5 m za lícem
+        # paláce → svislá černá škvíra (vidět do zdi). Konec se protáhne k vnějšímu líci paláce a dostane čelo (klín naroze tu není).
+        for k_, (vrch_, smer_) in enumerate(((a, -d), (b, d))):
+            if ((i - 1) % len(U) if k_ == 0 else (i + 1) % len(U)) not in B.get("hradba_palac", []): continue
+            sg_ = 1.0 if (vrch_ - pC).dot(ps) > 0 else -1.0; lic_ = pa_["hloubka"] / 2 + 0.55
+            potr_ = [(lic_ - sg_ * (c_ - pC).dot(ps)) / (sg_ * smer_.dot(ps)) for c_ in (vrch_ + vn * (t / 2), vrch_ - vn * (t / 2))
+                     if abs((c_ - pC).dot(pd)) > pL / 2 + 0.5 and sg_ * smer_.dot(ps) > 0.2]   # jen roh mimo palác (druhý je zalícovaný v jeho zdi)
+            if potr_:
+                if k_ == 0: e0_ = max(potr_) + 0.03
+                else: e1_ = max(potr_) + 0.03
+                cel_[k_] = True
+        zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0, cimburi=B.get("cimburi", True), cela=tuple(cel_), ext0=e0_, ext1=e1_, patka=True)
     naroze(P, hp, t, kor, vynechat=tuple(k for k, q in enumerate(hp) if v_palaci(V(q), -t) or k in B.get("hradba_palac", []) or (k - 1) % len(hp) in B.get("hradba_palac", [])))   # rohy úseků, kde hranou je palác: klín by trčel do paláce (test 5. 11.)
     a, b, L, d, vn = U[br["usek"]]; G = a + d * br["stred_m"]; vnG = vn
     prah_B, vyk_B = portal_vyklenek(P, G - vn * (t / 2), -vn, br, B["dolni_y"], kor, t, B["most"]["sirka"] - 0.2, B["most"]["padaci_m"])

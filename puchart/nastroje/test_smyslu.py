@@ -1957,6 +1957,25 @@ if "impostory/byl_*" not in open(K + "/hra/export_presets.cfg").read(): _c32.app
 if '"BylinyDaleko"' not in open(K + "/hra/scripts/hlavni.gd").read() or '"BylinyDaleko"' not in open(K + "/hra/scripts/regulator.gd").read(): _c32.append("BylinyDaleko není v hlavni.gd / regulator.gd")
 TEST("kere_do_dalky", not _c32, "; ".join(_c32) if _c32 else "keře: plný model do %s m, impostor do %s m (%d druhů); byliny %s → %s m (%d druhů)" % (_kj32["zanik_m"][1], _dl32["dosah_m"], len(_kj32["modely"]), _bj32["zanik_m"][1], _bd32["dosah_m"], len(_bj32["modely"])))
 
+# hradba u nároží paláce B bez čela (Míša 26. 11., snímek x 61 z 154: svislá černá škvíra mezi palácem a hradbou): úsek hradby
+# vedle úseku hradba_palac končí u paláce; část zdi vyčnívající za boční líc paláce musí mít čelo v rovině vnějšího líce paláce –
+# vodorovné paprsky zvenku proti konci zdi (výšky 11–16 m) narazí do 0,2 m od roviny líce, ne dovnitř otevřené zdi
+_HB = json.load(open(K + "/pravidla/svet/hrad_puchart.json"))["B"]; _c433 = []; _n433 = 0
+_T433 = np.concatenate([T for jm, mt, T in _glb_svet(K + "/hra/modely/hrady/puchart.glb")[0] if "colonly" not in jm and "Kol" not in jm])
+_hp = [np.array(q, float) for q in _HB["hradba"]]; _pa = _HB["palac"]; _p0, _p1 = np.array(_pa["osa"][0], float), np.array(_pa["osa"][1], float)
+_pd = (_p1 - _p0) / np.linalg.norm(_p1 - _p0); _ps = np.array([-_pd[1], _pd[0]]); _pc = (_p0 + _p1) / 2; _pl = np.linalg.norm(_p1 - _p0) / 2 + 0.55
+for _k in _HB.get("hradba_palac", []):
+    for _v in (_hp[_k], _hp[(_k + 1) % len(_hp)]):
+        _sg = 1.0 if (_v - _pc) @ _ps > 0 else -1.0; _lic = _pa["hloubka"] / 2 + 0.55
+        _bok = 1.0 if (_v - _pc) @ _pd > 0 else -1.0
+        if abs((_v - _pc) @ _pd) < _pl - 1.2: continue   # vrchol uprostřed líce: konec zdi je celý v paláci
+        for _x in (0.1, 0.2, 0.3):   # za boční líc paláce, kde vyčnívá hradba
+            for _y in (11.0, 13.0, 15.0, 16.0):
+                _q = _pc + _pd * _bok * (_pl + _x) + _ps * _sg * (_lic + 3.0); _n433 += 1
+                _tt = _paprsek(_T433, np.array([_q[0], _y, _q[1]]), np.array([-_ps[0] * _sg, 0.0, -_ps[1] * _sg]))
+                if _tt is None or abs(_tt - 3.0) > 0.2: _c433.append("x %.2f z %.2f y %.0f: %s" % (_q[0], _q[1], _y, "nic" if _tt is None else "%.2f m za lícem" % (_tt - 3.0)))
+TEST("hradba_celo_u_palace", _n433 > 0 and not _c433, "; ".join(_c433[:5]) if _c433 else "%d paprsků proti konci hradby u nároží paláce B, čelo v líci" % _n433)
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)
