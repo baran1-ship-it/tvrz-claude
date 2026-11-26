@@ -1843,3 +1843,5 @@ Hotovo v kódu a datech (testy u každého):
 - **26. 11. izolace `kun_prekazky`** (starý kůň `kun_henry`, pravidla jizda.json z 0.9999995): NEPROJEL brod_lom,
   bystrice_240 **stejně jako s Hero Horse** → chyba není z nového koně (kolize koně je z pravidel, ne z modelu);
   `kun_terenem` = pozdní tráva v lese (louka), ne model. `lide_rozmisteni` (purkrabí 14:25 u brány) = rozvrh, ne vzhled.
+- **26. 11. `lide_rozmisteni` kolísá:** ve společném běhu (zbytek_vydani) 14:25 u brány 3 ze 7 (0,43 > 0,4 – purkrabí
+  u stráže brány), samotný běh (rozm2) OK. Hraniční – při dalším selhání rozebrat rozvrh purkrabího (brana_straz).
