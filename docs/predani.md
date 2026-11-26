@@ -1820,3 +1820,11 @@ Hotovo v kódu a datech (testy u každého):
 - 26. 11.: otěže – kroužky udidla se počítaly z aktuální pózy koně při nasednutí (ve světě kůň otáčel hlavou →
   osa a boky hlavy šikmo, udidla 0,53 m od sebe). Teď z klidové pózy (`get_bone_global_rest`); test_otezi 0,22 m / 0,39 m.
   Test `telo_zaber` měl natvrdo kost `BN_Head_01` (kůň henry) – bere `jizda.json kun.otezi.kost_hlavy`.
+
+### 26. 11. – plná sada před vydáním přesáhla limit pozadí
+- `tools/beh.sh skupiny_vydani skupiny "vse"` (149 testů) běžel přes 2 h a nástroj ho po limitu pozadí (7200 s) zastavil
+  na 127/149 – souhrnné řádky výsledků se nevypsaly, důvody chyb jen z výpisů testů. **Celou sadu pouštět ve dvou
+  polovinách** (seznam z `build/hlidaci_skupiny/<jm>/_testy.txt`), každou pod 2 h; nedoběhlé testy dopustit `testy "<seznam>"`.
+- Chyby bez vztahu ke koni a vesničanům (známé otevřené, misa_17_11_chyby.md / hlidaci_z_pucharta.md – neblokují):
+  `teren_svy`, `cesta_skoky`, `volne_hrany`, `povrch`, `strom_na_zemi`, `logika` (hrby/prohlubně), `pravidla_cteni`
+  (nepřečtené větve podle toho, co v běhu proběhlo – i staré postavy).
