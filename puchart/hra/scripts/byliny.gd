@@ -27,7 +27,8 @@ func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json", rezi
 		var dc: Dictionary = cfg["daleko"]
 		_nb = int(dc["bunek"])
 		cfg["dosah_m"] = float(dc["dosah_m"]); cfg["predstih_m"] = float(dc.get("predstih_m", 0.0))
-		cfg["trava_sada"] = false
+		# trava_sada a všechny modely se načtou i tady (bez _fade): _bunka_mista musí mít stejné druhy a počty variant jako
+		# plný uzel (přeskočený druh nebo jiná délka kmene v _lezici = jiná náhoda = jiné polohy); kreslí se jen impostory
 	# šum shluků: souřadnice se dělí vlna_m, frekvence 1 = vlna ~vlna_m (17. 11.: výchozí 0,01 dávala vlnu 100 × vlna_m = 4,8 km –
 	# „shluky“ keřů byly jeden pomalý přechod přes celou mapu, žádné houštiny a světliny)
 	_sum.frequency = float(cfg.get("shluky_frekvence", 1.0))
@@ -50,23 +51,23 @@ func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json", rezi
 		for mi in sada.find_children("*", "MeshInstance3D", true, false):
 			(vysoka if "vysoka" in mi.name else trava).append(mi.mesh)
 		var zk: Array = cfg.get("zanik_m", [])
-		if zk.size() == 2:
+		if zk.size() == 2 and not daleko:
 			trava = trava.map(func(x: Mesh) -> Mesh: return _fade(x, float(zk[0]), float(zk[1])))
 			vysoka = vysoka.map(func(x: Mesh) -> Mesh: return _fade(x, float(zk[0]), float(zk[1])))
 		meshe["trava"] = trava; meshe["vysoka"] = vysoka
 	var modely: Dictionary = cfg.get("modely", {})
 	var zanik: Array = cfg.get("zanik_m", [])
-	if daleko: _impostory(modely, zanik)
-	for k in (modely if not daleko else {}):   # druh -> modely (tabulka modely); se zanik_m rozpouštění ditheringem do dálky (žádné odskočení)
+	for k in modely:   # druh -> modely (tabulka modely); se zanik_m rozpouštění ditheringem do dálky (žádné odskočení)
 		meshe[k] = []
 		for d in modely[k]:
 			if not ResourceLoader.exists("res://modely/rostliny/%s.glb" % d): continue
 			var n: Node = load("res://modely/rostliny/%s.glb" % d).instantiate()
 			for mi in n.find_children("*", "MeshInstance3D", true, false):
 				var m: Mesh = (mi as MeshInstance3D).mesh
-				if zanik.size() == 2: m = _fade(m, float(zanik[0]), float(zanik[1]))
+				if zanik.size() == 2 and not daleko: m = _fade(m, float(zanik[0]), float(zanik[1]))
 				meshe[k].append(m)
 			n.queue_free()   # ne free(): okamžité uvolnění 3D uzlu během načítání shodilo hru na tabletu (renderer_scene_cull, 11. 11.)
+	if daleko: _impostory(zanik)
 	# pás u paty plotů a zdí (stavby_vegetace.py → data/pata_pas.json, byliny.json pata_pas; Míša 13. 11., KCD předloha vsi)
 	if cfg.has("pata_pas") and FileAccess.file_exists("res://data/pata_pas.json"):
 		var pp: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/pata_pas.json"))
@@ -92,36 +93,34 @@ func _zapoj_nas(x: float, z: float) -> float:   # násobek hustoty podle zápoje
 
 ## Impostory všech druhů v jednom atlasu (textury/impostory/kere_vse_*, nastroje/kere_atlas.py): jeden čtverec + jeden
 ## ShaderMaterial, druh se pozná z INSTANCE_CUSTOM (políčko, střed y, poloměr) – jeden MultiMesh na buňku = 1 volání kreslení
-## (hlídač scén 23. 11.: 11 druhů zvlášť přidalo 60–94 volání). meshe[druh] = [čtverec] jen kvůli stejnému přeskakování
-## v _bunka_mista jako u plného uzlu (druh bez plného modelu zůstane prázdný – jinak by se rozešla náhoda a polohy).
+## (hlídač scén 23. 11.: 11 druhů zvlášť přidalo 60–94 volání).
+## Druh se pozná z INSTANCE_CUSTOM; meshe jsou skutečné modely jako v plném uzlu (jen pro _bunka_mista – stejná náhoda a polohy).
+## daleko.predpona / daleko.atlas: ker_ / kere_vse (keře), byl_ / byliny_vse (byliny, Míša 26. 11.).
 var _imp_mesh: ArrayMesh = null
 var _imp_par := {}   # druh -> [políčko, střed y, poloměr]
-func _impostory(modely: Dictionary, zanik: Array) -> void:
+func _impostory(zanik: Array) -> void:
 	var dc: Dictionary = cfg["daleko"]
+	var pre: String = dc.get("predpona", "ker_"); var atlas: String = dc.get("atlas", "kere_vse")
 	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://textury/impostory/impostory.json"))
-	var at: Dictionary = meta.get("kere_atlas", {})
+	var at: Dictionary = meta.get(atlas, {})
 	var q := ArrayMesh.new(); var a := []; a.resize(Mesh.ARRAY_MAX)
 	a[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3(-1, 0, 0), Vector3(1, 0, 0), Vector3(1, 2, 0), Vector3(-1, 2, 0)])
 	a[Mesh.ARRAY_TEX_UV] = PackedVector2Array([Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)])
 	a[Mesh.ARRAY_INDEX] = PackedInt32Array([0, 1, 2, 0, 2, 3])
 	q.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a)
-	var rmax := 1.0; var hmax := 1.0
-	for k: String in modely:
-		meshe[k] = []
-		var ma := false
-		for d in modely[k]: ma = ma or ResourceLoader.exists("res://modely/rostliny/%s.glb" % d)
-		if not ma: continue
-		var ik := "ker_" + k
+	var rmax := 0.5; var hmax := 0.5
+	for k: String in cfg.get("modely", {}):
+		if (meshe.get(k, []) as Array).is_empty(): continue
+		var ik := pre + k
 		if not meta.has(ik) or not (at.get("druhy", {}) as Dictionary).has(k):
-			push_warning("keře daleko: chybí impostor " + ik); continue
+			push_warning("daleko: chybí impostor " + ik); continue
 		var r := float(meta[ik]["polomer"]); var st: Array = meta[ik]["stred"]
 		_imp_par[k] = [float(at["druhy"][k]), float(st[1]), r]
 		rmax = maxf(rmax, r); hmax = maxf(hmax, float(meta[ik]["vyska"]) + r)
-		meshe[k] = [q]
 	q.custom_aabb = AABB(Vector3(-rmax, 0.0, -rmax), Vector3(rmax * 2.0, hmax, rmax * 2.0))   # čtverec se natahuje v shaderu
 	var m := ShaderMaterial.new(); m.shader = load("res://shaders/ker_impostor.gdshader")
-	m.set_shader_parameter("barva", load("res://textury/impostory/kere_vse_a.png"))
-	m.set_shader_parameter("normaly", load("res://textury/impostory/kere_vse_n.png"))
+	m.set_shader_parameter("barva", load("res://textury/impostory/%s_a.png" % atlas))
+	m.set_shader_parameter("normaly", load("res://textury/impostory/%s_n.png" % atlas))
 	m.set_shader_parameter("policek", Vector2(float(at.get("sloupcu", 4)), float(at.get("radku", 3))))
 	if zanik.size() == 2: m.set_shader_parameter("zanik", Vector2(float(zanik[1]), float(zanik[0])))
 	var ko: Array = dc["konec_m"]
@@ -169,6 +168,7 @@ func _zanik_inst(mat: BaseMaterial3D, do_: float, od: float) -> ShaderMaterial:
 
 func vsechny_site() -> Array:
 	var a := []
+	if daleko: return [_imp_mesh] if _imp_mesh else []   # kreslí se jen impostory
 	for k in meshe: a.append_array(meshe[k])
 	return a
 

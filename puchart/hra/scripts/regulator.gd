@@ -138,7 +138,7 @@ func _trava(f: float) -> void:
 ## Keře a byliny (byliny.gd _fade): rozpouštění do dálky blíž – listí (listi.gdshader zanik), ostatní distance_fade.
 func _kere(f: float) -> void:
 	if _scena() == null: return
-	for jm in ["Kere", "KereDaleko", "Byliny"]:
+	for jm in ["Kere", "KereDaleko", "Byliny", "BylinyDaleko"]:
 		var n := _scena().get_node_or_null(jm)
 		if n == null or not n.has_method("vsechny_site"): continue
 		for m: Mesh in n.vsechny_site():

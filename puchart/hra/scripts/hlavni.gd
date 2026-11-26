@@ -220,11 +220,13 @@ func _start() -> void:
 	ker.postav(svet, cam, "res://data/kere.json")
 	var ker_d: Node3D = load("res://scripts/byliny.gd").new(); ker_d.name = "KereDaleko"; add_child(ker_d)   # tytéž keře jako impostor do dálky (Míša 23. 11.)
 	ker_d.postav(svet, cam, "res://data/kere.json", true)
+	var byl_d: Node3D = load("res://scripts/byliny.gd").new(); byl_d.name = "BylinyDaleko"; add_child(byl_d)   # byliny, pařezy, kmeny, kameny jako impostor (Míša 26. 11.)
+	byl_d.postav(svet, cam, "res://data/byliny.json", true)
 	_kolize_hradu.call_deferred()   # před předehřátím: predehrati.gd čeká na ohne.gd a ohně čekají na kolize hradu
 	Denik.zapis("předehřátí shaderů")
 	if _foto == "" and OS.get_environment("PUCHART_TEST") == "" and _pr.get("predehrati", {}).get("zapojeno", false):   # shadery všech materiálů sestavit hned, ne až za chůze (záseky při 1. průchodu – Havran 0.62)
 		await get_tree().process_frame
-		await load("res://scripts/predehrati.gd").predehrej(self, cam, byl.vsechny_site() + ker.vsechny_site() + ker_d.vsechny_site() + _vzory_bunek(), int(_pr.get("predehrati", {}).get("snimku", 4)))
+		await load("res://scripts/predehrati.gd").predehrej(self, cam, byl.vsechny_site() + ker.vsechny_site() + ker_d.vsechny_site() + byl_d.vsechny_site() + _vzory_bunek(), int(_pr.get("predehrati", {}).get("snimku", 4)))
 	# rozpočet uzlů (pád na tabletu 11. 11.: 115 tis. buněk lesu = nedostatek paměti) – výpis po vrstvách
 	var uz := []
 	for ch in get_children(): uz.append("%s %d" % [ch.name, ch.find_children("*", "", true, false).size()])
@@ -566,6 +568,7 @@ func _prostredi() -> void:
 	slunce.shadow_enabled = true
 	slunce.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	slunce.directional_shadow_max_distance = 40.0
+	slunce.directional_shadow_blend_splits = true   # Míša 26. 11. (cesta v lese): ostrá hrana stínu korun na hranici 1. a 2. pásma stínu se posouvala s hráčem – pásma se prolínají
 	# stíny jen do 40 m: v lese byl kruh stínu korun kolem hráče ostře useknutý – tmavá skvrna, která chodila s hráčem
 	# (Míša 4. 11.: „můj stín jako stín budovy, pokrýval obrovskou plochu“) → stín plynule slábne od 35 % dosahu
 	slunce.directional_shadow_fade_start = float(_pr.get("stin_slabne_od", 0.35))

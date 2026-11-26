@@ -1931,7 +1931,7 @@ _c32 = []; _kj32 = json.load(open(K + "/hra/data/kere.json")); _dl32 = _kj32.get
 if _kj32 != json.load(open(K + "/pravidla/svet/kere.json")): _c32.append("hra/data/kere.json ≠ pravidla")
 if float(_dl32.get("dosah_m", 0)) < 3 * float(_kj32["zanik_m"][1]): _c32.append("daleko.dosah_m %s < 3 × konec plného keře" % _dl32.get("dosah_m"))
 _im32 = json.load(open(K + "/hra/textury/impostory/impostory.json"))
-_at32 = _im32.get("kere_atlas", {}).get("druhy", {})   # společný atlas (nastroje/kere_atlas.py): 1 MultiMesh na buňku
+_at32 = _im32.get("kere_vse", {}).get("druhy", {})   # společný atlas (nastroje/kere_atlas.py): 1 MultiMesh na buňku
 for _d32 in _kj32["modely"]:
     if "ker_" + _d32 not in _im32 or _d32 not in _at32: _c32.append("chybí impostor ker_%s v atlasu kere_vse" % _d32)
 for _s32 in ("a", "n"):
@@ -1941,7 +1941,19 @@ _h32 = "floor(wp.xz * 8.0 + 0.5) * 0.125"
 for _f32 in ("listi", "bylina", "ker_impostor"):
     if _h32 not in open(K + "/hra/shaders/%s.gdshader" % _f32).read(): _c32.append("%s.gdshader: jiný hash keře (doplněk by nesedl)" % _f32)
 if '"KereDaleko"' not in open(K + "/hra/scripts/hlavni.gd").read() or '"KereDaleko"' not in open(K + "/hra/scripts/regulator.gd").read(): _c32.append("KereDaleko není v hlavni.gd / regulator.gd")
-TEST("kere_do_dalky", not _c32, "; ".join(_c32) if _c32 else "keře: plný model do %s m, impostor do %s m (%d druhů)" % (_kj32["zanik_m"][1], _dl32["dosah_m"], len(_kj32["modely"])))
+# byliny do dálky (Míša 26. 11.: „pořád doskakují keře atd., musí tam něco být místo nich… nemůže tam být nic“): každý druh bylin
+# (kapradí, kopřivy, pařezy, kmeny, kameny…) má impostor v atlasu byliny_vse, uzel BylinyDaleko sahá ≥ 2,5× dál než plná podoba
+_bj32 = json.load(open(K + "/hra/data/byliny.json")); _bd32 = _bj32.get("daleko", {})
+if _bj32 != json.load(open(K + "/pravidla/svet/byliny.json")): _c32.append("hra/data/byliny.json ≠ pravidla")
+if float(_bd32.get("dosah_m", 0)) < 2.5 * float(_bj32["zanik_m"][1]): _c32.append("byliny daleko.dosah_m %s < 2,5 × konec plné byliny" % _bd32.get("dosah_m"))
+_ab32 = _im32.get(_bd32.get("atlas", "-"), {}).get("druhy", {})
+for _d32 in _bj32["modely"]:
+    if _d32 not in _ab32: _c32.append("chybí impostor byl_%s v atlasu %s" % (_d32, _bd32.get("atlas")))
+for _s32 in ("a", "n"):
+    if not os.path.exists(K + "/hra/textury/impostory/%s_%s.png" % (_bd32.get("atlas"), _s32)): _c32.append("chybí %s_%s.png" % (_bd32.get("atlas"), _s32))
+if "impostory/byl_*" not in open(K + "/hra/export_presets.cfg").read(): _c32.append("byl_* atlasy jednotlivě v APK (exclude_filter)")
+if '"BylinyDaleko"' not in open(K + "/hra/scripts/hlavni.gd").read() or '"BylinyDaleko"' not in open(K + "/hra/scripts/regulator.gd").read(): _c32.append("BylinyDaleko není v hlavni.gd / regulator.gd")
+TEST("kere_do_dalky", not _c32, "; ".join(_c32) if _c32 else "keře: plný model do %s m, impostor do %s m (%d druhů); byliny %s → %s m (%d druhů)" % (_kj32["zanik_m"][1], _dl32["dosah_m"], len(_kj32["modely"]), _bj32["zanik_m"][1], _bd32["dosah_m"], len(_bj32["modely"])))
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)

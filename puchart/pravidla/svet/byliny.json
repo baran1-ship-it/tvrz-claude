@@ -8,6 +8,15 @@
   "popis": "17. 11. (Havran les_podrost.json, Míša 17. 11.): trsy trávy bylin × násobek zápoje korun (hra/data/kryt.png, pravidlo pravidla/svet/louka.json les) – pod zapojenými korunami žádná tráva; kapradí, mech, ostružiník, pařezy beze změny = řídký podrost (KCD docs/reference/les/kcd_les_svetlo_havran_9_11.png)"
  },
  "dosah_m": 40,
+ "daleko": {
+  "dosah_m": 110,
+  "bunek": 6,
+  "konec_m": [95, 110],
+  "predstih_m": 14,
+  "predpona": "byl_",
+  "atlas": "byliny_vse",
+  "pozn": "Míša 26. 11. („pořád doskakují keře atd., musí tam něco být místo nich… nemůže tam být nic“): kapradí, kopřivy, ostružiny, pařezy, padlé kmeny, kameny, mech se objevovaly z ničeho v pásmu zanik_m (22–40 m). Teď druhá podoba jako keře (kere.json daleko): impostor 8×8 pohledů po 64 px (blender/impostory.py byl_<druh>, nastroje/kere_atlas.py → byliny_vse), uzel BylinyDaleko, přesný doplněk plného modelu po celých rostlinách, stejné polohy (stejné modely v _bunka_mista); za konec_m porost E2 v zemi. Velká buňka 6 × 10 m."
+ },
  "bunka_m": 10,
  "tridy": {
   "louka_kosena": {

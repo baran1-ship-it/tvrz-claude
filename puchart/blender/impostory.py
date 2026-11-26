@@ -24,6 +24,10 @@ DRUHY = {d: (d + ("_stredni"), None) for d in ("buk", "jedle", "smrk", "dub", "l
 # kere.json modely, adresář modely/rostliny, výstup ker_<druh>_a/_n.png (byliny.gd režim daleko)
 _KERE = json.load(open(os.path.join(ROOT, "pravidla/svet/kere.json")))["modely"]
 DRUHY.update({"ker_" + d: ("rostliny/" + v[0], None) for d, v in _KERE.items()})
+# Byliny, pařezy, kmeny, kameny (Míša 26. 11.: „pořád doskakují keře atd., musí tam něco být místo nich“): byl_<druh>, 64 px
+_BYL = json.load(open(os.path.join(ROOT, "pravidla/svet/byliny.json")))["modely"]
+DRUHY.update({"byl_" + d: ("rostliny/" + v[0], None) for d, v in _BYL.items()})
+PX_BYL = 64
 
 
 def smer(i, j):
@@ -79,7 +83,7 @@ def _emise(mat, normal):
 
 def druh(name, soubor, uzel, meta):
     global PX
-    PX = PX_KER if name.startswith("ker_") else PX_STROM   # keř je od 36 m malý: 128 px na pohled (atlas 1024)
+    PX = PX_KER if name.startswith("ker_") else PX_BYL if name.startswith("byl_") else PX_STROM   # keř je od 36 m malý: 128 px na pohled (atlas 1024)
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, "hra", "modely", soubor if "/" in soubor else "stromy/" + soubor) + ".glb")
     ob = bpy.data.objects.get(uzel) if uzel else next((o for o in bpy.data.objects if o.type == "MESH"), None)
