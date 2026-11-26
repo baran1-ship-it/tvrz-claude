@@ -176,8 +176,10 @@ odev = [o for o in site if "cloth" in o.name.lower() and not any(x in o.name.low
 spodky = []
 for o in odev:
     noha = [o.vertex_groups[g].index for g in ("thigh_l", "thigh_r", "calf_l", "calf_r") if g in o.vertex_groups]
-    vyber = [v.index for v in o.data.vertices if (o.matrix_world @ v.co).z < pel_z + 0.03
-             and any(g.group in noha and g.weight > 0.05 for g in v.groups)]
+    # vse pod panvi (sukne zen jsou cele na panvi - tuhy zvon, noha jim prochazi; kabatce muzu na stehnech)
+    vyber = [v.index for v in o.data.vertices if (o.matrix_world @ v.co).z < pel_z + 0.03]
+    print("SUKNE kus", o.name, "pod panvi", len(vyber), "na nohou", sum(1 for i in vyber if any(
+        g.group in noha and g.weight > 0.05 for g in o.data.vertices[i].groups)))
     if len(vyber) < 50:
         continue
     bpy.ops.object.select_all(action="DESELECT")
