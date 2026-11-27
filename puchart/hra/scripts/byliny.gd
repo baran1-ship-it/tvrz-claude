@@ -131,6 +131,8 @@ func _impostory(zanik: Array) -> void:
 	if zanik.size() == 2: m.set_shader_parameter("zanik", Vector2(float(zanik[1]), float(zanik[0])))
 	var ko: Array = dc["konec_m"]
 	m.set_shader_parameter("konec", Vector2(float(ko[1]), float(ko[0])))
+	var ti: Array = dc.get("tint", [1.0, 1.0, 1.0])   # barevné vyrovnání s plným keřem (kere.json daleko.tint, měřeno 27. 11.)
+	m.set_shader_parameter("tint", Color(float(ti[0]), float(ti[1]), float(ti[2])))
 	q.surface_set_material(0, m)
 	_imp_mesh = q
 

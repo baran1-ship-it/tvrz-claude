@@ -6,6 +6,8 @@
   "bunek": 4,
   "konec_m": [130, 150],
   "predstih_m": 20,
+  "tint": [0.92, 0.95, 0.86],
+  "pozn_tint": "Míša 27. 11. („pořád něco doskakuje“): chůze kamerou (nastroje/doskakovani.py) – keř při přechodu impostor → plný model ztmavl. Změřeno na stejných keřích (vše plné / vše impostor, x 133,5 z 82,4): plný/impostor v protisvětle 0,90/0,93/0,76, po světle 0,95/0,97/0,97 → průměr. Násobí jen listí impostoru (ker_impostor.gdshader li).",
   "pozn": "Míša 23. 11. („to vyskakování a růst keřů přede mnou je hrozný“; „máme 3 a více podoby trávy, keřů a stromů a do dálky plno“): keře měly jen plný model (7–14 tis. troj.) do 46 m a v pásmu zanik_m se objevovaly celé. Teď druhá podoba – impostor 8×8 pohledů (blender/impostory.py ker_<druh>, shaders/ker_impostor.gdshader), přesný doplněk plného keře po celých keřích (hash polohy), do dosah_m; na konci (konec_m) mizí po celých keřích u porostu E2 v zemi (louka.json porost_dalka od 110 m). Velká buňka = bunek × bunek buněk bunka_m (stejné polohy, málo volání kreslení). Všechny druhy v jednom atlasu (nastroje/kere_atlas.py → kere_vse_*, druh v INSTANCE_CUSTOM) = 1 volání na buňku – hlídač scén 23. 11.: 11 druhů zvlášť přidalo 60–94 volání a typ C přešel 1000. Zdroj: stromy (les.gd impostory, Havran svet.gd), Míša 23. 11."
  },
  "bunka_m": 14,

@@ -2003,6 +2003,8 @@ TEST("hmota_daleko_velikost", _n434 > 30 and not _c434, "; ".join(_c434[:6]) if 
 # paty stromu – AABB buněk blízkých stromů musí mít střed u paty (les.gd _vyrob_blizko custom_aabb souměrný kolem paty)
 _lg435 = open(K + "/hra/scripts/les.gd").read(); _f435 = _lg435[_lg435.index("func _vyrob_blizko"):]; _f435 = _f435[:_f435.index("\nfunc ")]
 _ok435 = "custom_aabb" in _f435 and "ab.position.y - ab.size.y" in _f435 and "ab.size.y * 2.0" in _f435
+_kd436 = json.load(open(K + "/pravidla/svet/kere.json"))["daleko"]
+if len(_kd436.get("tint", [])) != 3 or 'set_shader_parameter("tint"' not in open(K + "/hra/scripts/byliny.gd").read(): _ok435 = False
 TEST("les_lod_bez_mezery", _ok435, "AABB buněk blízkých stromů souměrný kolem paty (visibility_range = vzdálenost paty jako shader)" if _ok435 else "les.gd _vyrob_blizko: AABB buňky se středem v korunách – strom v pásmu LOD zmizí")
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
