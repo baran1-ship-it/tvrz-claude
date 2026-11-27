@@ -115,8 +115,14 @@ func _impostory(zanik: Array) -> void:
 		if not meta.has(ik) or not (at.get("druhy", {}) as Dictionary).has(k):
 			push_warning("daleko: chybí impostor " + ik); continue
 		var r := float(meta[ik]["polomer"]); var st: Array = meta[ik]["stred"]
-		_imp_par[k] = [float(at["druhy"][k]), float(st[1]), r]
-		rmax = maxf(rmax, r); hmax = maxf(hmax, float(meta[ik]["vyska"]) + r)
+		# velikost po variantách (Míša 27. 11.: „hmota i vzdálená má mít stejný rozměr jako ta nablízko“): impostor je upečený
+		# z varianty 0, ostatní varianty téhož druhu jsou jinak velké → střed a poloměr × výška varianty / výška varianty 0
+		var h0 := maxf(0.01, (meshe[k][0] as Mesh).get_aabb().size.y); var sv := PackedFloat32Array()
+		for mv: Mesh in meshe[k]: sv.append(mv.get_aabb().size.y / h0)
+		_imp_par[k] = [float(at["druhy"][k]), float(st[1]), r, sv]
+		var smax := 1.0
+		for x_ in sv: smax = maxf(smax, x_)
+		rmax = maxf(rmax, r * smax); hmax = maxf(hmax, (float(meta[ik]["vyska"]) + r) * smax)
 	q.custom_aabb = AABB(Vector3(-rmax, 0.0, -rmax), Vector3(rmax * 2.0, hmax, rmax * 2.0))   # čtverec se natahuje v shaderu
 	var m := ShaderMaterial.new(); m.shader = load("res://shaders/ker_impostor.gdshader")
 	m.set_shader_parameter("barva", load("res://textury/impostory/%s_a.png" % atlas))
@@ -246,7 +252,7 @@ func _pocitej(i: int, j: int, B: float) -> Dictionary:
 		for a in _nb:
 			for b in _nb:
 				for tf: Array in _bunka_mista(i * _nb + a, j * _nb + b, bm):
-					mista.append([String(tf[0]).rstrip("0123456789") + "0", tf[1]])
+					mista.append(tf)   # varianta zůstává (velikost impostoru podle ní)
 	else:
 		mista = _bunka_mista(i, j, B)
 	for tf: Array in mista:
@@ -255,9 +261,11 @@ func _pocitej(i: int, j: int, B: float) -> Dictionary:
 		var bs := t.basis; var o := t.origin
 		var radek := PackedFloat32Array([bs.x.x, bs.y.x, bs.z.x, o.x - (i + 0.5) * B, bs.x.y, bs.y.y, bs.z.y, o.y, bs.x.z, bs.y.z, bs.z.z, o.z - (j + 0.5) * B])
 		if daleko:   # všechny druhy do jednoho MultiMeshe (custom = políčko atlasu, střed y, poloměr)
-			var pr: Array = _imp_par.get(klic.rstrip("0123456789"), [])
+			var dr := klic.rstrip("0123456789"); var pr: Array = _imp_par.get(dr, [])
 			if pr.is_empty(): continue
-			radek.append_array(PackedFloat32Array([pr[0], pr[1], pr[2], 0.0])); klic = "_imp"
+			var vi := int(klic.substr(dr.length())) if klic.length() > dr.length() else 0
+			var sv: PackedFloat32Array = pr[3]; var s_ := sv[vi] if vi < sv.size() else 1.0
+			radek.append_array(PackedFloat32Array([pr[0], pr[1] * s_, pr[2] * s_, 0.0])); klic = "_imp"
 		if not out.has(klic): out[klic] = PackedFloat32Array()
 		out[klic].append_array(radek)
 	out["_stred"] = Vector3((i + 0.5) * B, 0.0, (j + 0.5) * B)   # uzel buňky ve středu: visibility_range měří od polohy uzlu

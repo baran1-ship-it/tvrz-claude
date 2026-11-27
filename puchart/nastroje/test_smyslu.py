@@ -1976,6 +1976,28 @@ for _k in _HB.get("hradba_palac", []):
                 if _tt is None or abs(_tt - 3.0) > 0.2: _c433.append("x %.2f z %.2f y %.0f: %s" % (_q[0], _q[1], _y, "nic" if _tt is None else "%.2f m za lícem" % (_tt - 3.0)))
 TEST("hradba_celo_u_palace", _n433 > 0 and not _c433, "; ".join(_c433[:5]) if _c433 else "%d paprsků proti konci hradby u nároží paláce B, čelo v líci" % _n433)
 
+# vzdálená hmota stejně velká jako blízká (Míša 27. 11.: „křivé stromy – nejdřív obří, přijdeš blíž a je o polovinu menší“):
+# (1) výšky variant stromů v stromy_modely.json = skutečná výška glb (±3 %; jilm střední byl 15 m v datech, model 7,6 m);
+# (2) les.gd zvětšuje impostor podle výšky modelu (get_aabb), ne podle čísla z dat; (3) byliny.gd (keře/byliny daleko) bere
+# velikost impostoru podle varianty (upečený je z varianty 0, ostatní jsou jinak velké)
+_SM = json.load(open(K + "/pravidla/svet/stromy_modely.json")); _c434 = []; _n434 = 0
+def _vys434(f):
+    b = open(f, "rb").read(); n = struct.unpack("<I", b[12:16])[0]; j = json.loads(b[20:20 + n]); lo, hi = 1e9, -1e9
+    for a in j["accessors"]:
+        if a.get("type") == "VEC3" and "min" in a and a["max"][1] - a["min"][1] < 200: lo = min(lo, a["min"][1]); hi = max(hi, a["max"][1])
+    return hi - lo
+for _d, _vv in _SM["varianty"].items():
+    for _v, _h in _vv.items():
+        _f = "%s/hra/modely/stromy/%s_%s.glb" % (K, _d, _v)
+        if not os.path.exists(_f): continue
+        _n434 += 1; _H = _vys434(_f)
+        if abs(_H - _h) / _H > 0.03: _c434.append("%s %s data %.1f m, model %.1f m" % (_d, _v, _h, _H))
+if json.load(open(K + "/hra/data/stromy_modely.json"))["varianty"] != _SM["varianty"]: _c434.append("hra/data/stromy_modely.json ≠ pravidla")
+_lg = open(K + "/hra/scripts/les.gd").read(); _bg = open(K + "/hra/scripts/byliny.gd").read()
+if ".get_aabb().size.y" not in _lg or "Hm * t.basis" not in _lg or 'cfg["varianty"][druh][k.substr' in _lg: _c434.append("les.gd: impostor podle výšky z dat, ne modelu")
+if "sv[vi]" not in _bg or 'rstrip("0123456789") + "0"' in _bg: _c434.append("byliny.gd: impostor bez velikosti varianty")
+TEST("hmota_daleko_velikost", _n434 > 30 and not _c434, "; ".join(_c434[:6]) if _c434 else "%d variant stromů = výška modelu; impostory stromů podle modelu, keřů a bylin podle varianty" % _n434)
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

@@ -1,5 +1,5 @@
 {
- "popis": "Dřevina (zkratka z historie_vegetace.json) -> model stromu z Havrana (modely/nove, CC0/vlastní). varianty = nativní výška modelu v m (změřeno z glb 29. 10.); hra vybere variantu nejbližší výšce stromu a dorovná měřítkem v mezích meritko. zastupuje = model chybí, použit podobný habitus. Javor klen, jasan, habr, jilm (2. 11.): blender/havran/strom2.py z fotoskenů listů ambientCG (LeafSet010/013/014/018, CC0) a kůry Poly Haven (CC0).",
+ "popis": "Dřevina (zkratka z historie_vegetace.json) -> model stromu z Havrana (modely/nove, CC0/vlastní). varianty = nativní výška modelu v m (změřeno z glb 29. 10.; 27. 11. přeměřeno – javor, jasan, habr, jilm po přegenerování neseděly až o 50 %, impostor pak 2× větší než strom, Míša 27. 11.); hra vybere variantu nejbližší výšce stromu a dorovná měřítkem v mezích meritko. zastupuje = model chybí, použit podobný habitus. Javor klen, jasan, habr, jilm (2. 11.): blender/havran/strom2.py z fotoskenů listů ambientCG (LeafSet010/013/014/018, CC0) a kůry Poly Haven (CC0).",
  "meritko": [
   0.75,
   1.35
@@ -59,12 +59,12 @@
    "stary": 24.2
   },
   "jedle": {
-   "mlada": 6.18,
-   "stredni": 14.22,
+   "mlada": 6.79,
+   "stredni": 14.73,
    "stara": 27.18
   },
   "smrk": {
-   "mlady": 8.22,
+   "mlady": 8.92,
    "stredni": 14.05,
    "stary": 22.27
   },
@@ -84,9 +84,9 @@
    "stara": 20.55
   },
   "vrba": {
-   "mlada": 7.19,
+   "mlada": 7.41,
    "stredni": 11.81,
-   "stara": 18.07
+   "stara": 18.64
   },
   "briza": {
    "mlada": 7.96,
@@ -99,24 +99,24 @@
    "stara": 21.37
   },
   "habr": {
-   "mlady": 6.3,
-   "stredni": 10.5,
-   "stary": 14.0
+   "mlady": 4.66,
+   "stredni": 8.04,
+   "stary": 8.57
   },
   "javor": {
-   "mlady": 9.0,
-   "stredni": 15.0,
-   "stary": 20.0
+   "mlady": 8.55,
+   "stredni": 13.17,
+   "stary": 18.28
   },
   "jasan": {
-   "mlady": 9.9,
-   "stredni": 16.5,
+   "mlady": 10.25,
+   "stredni": 15.05,
    "stary": 22.0
   },
   "jilm": {
-   "mlady": 9.0,
-   "stredni": 15.0,
-   "stary": 20.0
+   "mlady": 7.5,
+   "stredni": 7.6,
+   "stary": 11.9
   }
  },
  "pozn_rozpocet": "29. 10. PC: blizko 44 m / buňka 32 m = 3,43 M troj., VRAM 1430 MB (textury stromů nekomprimované) -> 32 m / 24 m, textury VRAM + max 1024 (pravidla_modelu.json strom textura_px).",

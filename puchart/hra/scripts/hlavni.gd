@@ -535,6 +535,8 @@ func _process(_d: float) -> void:
 			_foto_louc.light_energy = 1.8 * float(sv_.get("energie_nasobek", 1.0)); _foto_louc.omni_range = 9.0 * float(sv_.get("dosah_nasobek", 1.0))
 			get_viewport().get_camera_3d().add_child(_foto_louc)
 		_foto_louc.visible = den.is_night()
+	if _snimek >= 40 and OS.get_environment("PUCHART_FOTO_CHUZE") != "":   # hledání doskakování: chůze kamerou po snímcích
+		_chuze(); return
 	if _snimek == 40:
 		var c := _foto.split(";")
 		# víc denních dob z jednoho startu (plán B3, nastroje/foto_tri_svetla.sh): PUCHART_FOTO_CASY="7,12,19.6,23" →
@@ -555,6 +557,25 @@ func _process(_d: float) -> void:
 		get_tree().quit()
 
 var _pr: Dictionary = {}
+
+## PUCHART_FOTO_CHUZE="snímků,krok_m,každý" (Míša 27. 11.: „pořád něco doskakuje“): kamera jde od bodu PUCHART_FOTO k cíli
+## po krok_m za snímek hry (1,4 m/s při 30 fps = 0,047), výška 1,65 m nad terénem; každý N-tý snímek se uloží jako
+## <soubor>_NNN.png – nastroje/doskakovani.py v nich hledá skoky (věc, která se mezi dvěma snímky objeví nebo zmizí)
+var _ch_i := 0
+func _chuze() -> void:
+	var a := OS.get_environment("PUCHART_FOTO_CHUZE").split_floats(",")
+	var cam := get_viewport().get_camera_3d(); var c := _foto.split(";")
+	var v := c[0].split_floats(",")
+	var cil := Vector3(v[3], 0.0, v[4]); var p := cam.global_position
+	var sm := (cil - Vector3(p.x, 0.0, p.z)); sm.y = 0.0
+	if sm.length() > 0.5:
+		p += sm.normalized() * a[1]; p.y = svet.vyska(p.x, p.z) + 1.65
+		cam.look_at_from_position(p, Vector3(cil.x, svet.vyska(cil.x, cil.z) + 1.5, cil.z), Vector3.UP)
+		hrac.position = p - Vector3(0, 1.65, 0)
+	if (_snimek - 40) % int(a[2]) == 0:
+		get_viewport().get_texture().get_image().save_png("%s_%03d.png" % [c[1].trim_suffix(".png"), _ch_i])
+		_ch_i += 1
+		if _ch_i >= int(a[0]): print("CHUZE ", _ch_i, " snímků"); get_tree().quit()
 
 func _prostredi() -> void:
 	if FileAccess.file_exists("res://data/prostredi.json"):
