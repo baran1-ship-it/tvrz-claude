@@ -1998,6 +1998,13 @@ if ".get_aabb().size.y" not in _lg or "Hm * t.basis" not in _lg or 'cfg["variant
 if "sv[vi]" not in _bg or 'rstrip("0123456789") + "0"' in _bg: _c434.append("byliny.gd: impostor bez velikosti varianty")
 TEST("hmota_daleko_velikost", _n434 > 30 and not _c434, "; ".join(_c434[:6]) if _c434 else "%d variant stromů = výška modelu; impostory stromů podle modelu, keřů a bylin podle varianty" % _n434)
 
+# stromy nemizí v pásmu přechodu LOD (Míša 27. 11.: „pořád něco doskakuje“; nastroje/doskakovani.py na chůzi les x 141 z 112 →
+# x 125 z 50: jedle u cesty zmizela na ~1 m chůze): Godot měří visibility_range ke středu AABB buňky, shader volí stupeň podle
+# paty stromu – AABB buněk blízkých stromů musí mít střed u paty (les.gd _vyrob_blizko custom_aabb souměrný kolem paty)
+_lg435 = open(K + "/hra/scripts/les.gd").read(); _f435 = _lg435[_lg435.index("func _vyrob_blizko"):]; _f435 = _f435[:_f435.index("\nfunc ")]
+_ok435 = "custom_aabb" in _f435 and "ab.position.y - ab.size.y" in _f435 and "ab.size.y * 2.0" in _f435
+TEST("les_lod_bez_mezery", _ok435, "AABB buněk blízkých stromů souměrný kolem paty (visibility_range = vzdálenost paty jako shader)" if _ok435 else "les.gd _vyrob_blizko: AABB buňky se středem v korunách – strom v pásmu LOD zmizí")
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

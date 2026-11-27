@@ -308,6 +308,12 @@ func _vyrob_blizko(sada: int, buf: PackedFloat32Array, n: int) -> Array:
 	var sd: Dictionary = _bl_sady[sada]; var out := []
 	for lod in 2:
 		var mi := BunkyKolem.mmi(sd["m0"] if lod == 0 else sd["m1"], buf, n)
+		# Míša 27. 11. („pořád něco doskakuje“; chůze kamerou nastroje/doskakovani.py, les x 137,8 z 98,8): Godot měří
+		# visibility_range ke středu AABB buňky – ten byl vysoko v korunách, shader ale volí stupeň podle paty stromu (lod_mez).
+		# Vysoký strom v 15 m: střed buňky ~20 m → LOD0 buňka vypnutá, LOD1 shader ještě skrytý → strom na ~1 m chůze zmizel.
+		# AABB souměrný kolem paty: střed u země (vzdálenost jako v shaderu), koruny dál uvnitř (ořez záběrem správný).
+		var ab := mi.multimesh.get_aabb()
+		mi.custom_aabb = AABB(Vector3(ab.position.x, ab.position.y - ab.size.y, ab.position.z), Vector3(ab.size.x, ab.size.y * 2.0, ab.size.z))
 		var v: Vector2 = sd["v0"] if lod == 0 else sd["v1"]
 		mi.visibility_range_begin = v.x; mi.visibility_range_end = v.y
 		mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED

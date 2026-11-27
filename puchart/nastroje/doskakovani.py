@@ -15,7 +15,7 @@ from PIL import Image, ImageFilter
 
 ap = argparse.ArgumentParser()
 ap.add_argument("adr"); ap.add_argument("--prah", type=float, default=60.0); ap.add_argument("--plocha", type=int, default=40)
-ap.add_argument("--od", type=float, default=0.25); ap.add_argument("--do", type=float, default=0.7); ap.add_argument("--vyrez", action="store_true")
+ap.add_argument("--od", type=float, default=0.25); ap.add_argument("--do", type=float, default=0.7); ap.add_argument("--vyrez", action="store_true"); ap.add_argument("--pomer", type=float, default=5.0)
 a = ap.parse_args()
 fs = sorted(glob.glob(os.path.join(a.adr, "*_[0-9][0-9][0-9].png")))
 if len(fs) < 2: sys.exit("málo snímků")
@@ -38,17 +38,21 @@ def skvrny(m):   # souvislé oblasti (4-sousedství) -> [(plocha, x0, y0, x1, y1
         out.append((n, x0, y0, x1, y1))
     return out
 
-pred = nacti(fs[0]); h = pred.shape[0]; r0, r1 = int(h * a.od), int(h * a.do); nalezy = []
-for i in range(1, len(fs)):
-    po = nacti(fs[i]); d = np.abs(po - pred)[r0:r1]
-    sk = [s for s in skvrny(d > a.prah) if s[0] >= a.plocha]
-    if sk:
-        nej = max(sk); nalezy.append((i, nej))
-        print("SKOK %s plocha %d obdélník x %d–%d y %d–%d" % (os.path.basename(fs[i]), nej[0], nej[1], nej[3], nej[2] + r0, nej[4] + r0))
-        if a.vyrez:
-            x0, x1 = max(0, nej[1] - 40), nej[3] + 40; y0, y1 = max(0, nej[2] + r0 - 40), nej[4] + r0 + 40
-            A = Image.open(fs[i - 1]).crop((x0, y0, x1, y1)); B = Image.open(fs[i]).crop((x0, y0, x1, y1))
-            W = Image.new("RGB", (A.width * 2 + 4, A.height), (255, 0, 0)); W.paste(A, (0, 0)); W.paste(B, (A.width + 4, 0))
-            W = W.resize((W.width * 2, W.height * 2)); W.save(os.path.join(a.adr, "skok_%03d.png" % i))
-    pred = po
+# skok = velká změna mezi i−1 a i v místě, kde je obraz před (i−2 → i−1) i po (i → i+1) klidný (vítr a pohyb mění obraz
+# pořád, doskočení jen jednou)
+img = [nacti(f) for f in fs]; h = img[0].shape[0]; r0, r1 = int(h * a.od), int(h * a.do); nalezy = []
+for i in range(2, len(fs) - 1):
+    d = np.abs(img[i] - img[i - 1])[r0:r1]
+    dp = np.abs(img[i - 1] - img[i - 2])[r0:r1]; dn = np.abs(img[i + 1] - img[i])[r0:r1]
+    for s_ in sorted((s for s in skvrny(d > a.prah) if s[0] >= a.plocha), reverse=True):
+        n, x0, y0, x1, y1 = s_; R = (slice(y0, y1 + 1), slice(x0, x1 + 1))
+        if d[R].mean() > a.pomer * max(dp[R].mean(), dn[R].mean(), 1.0):
+            nalezy.append((i, s_))
+            print("SKOK %s plocha %d obdélník x %d–%d y %d–%d (změna %.0f, před %.0f, po %.0f)" % (os.path.basename(fs[i]), n, x0, x1, y0 + r0, y1 + r0, d[R].mean(), dp[R].mean(), dn[R].mean()))
+            if a.vyrez:
+                X0, X1 = max(0, x0 - 40), x1 + 40; Y0, Y1 = max(0, y0 + r0 - 40), y1 + r0 + 40
+                A = Image.open(fs[i - 1]).crop((X0, Y0, X1, Y1)); B = Image.open(fs[i]).crop((X0, Y0, X1, Y1))
+                W = Image.new("RGB", (A.width * 2 + 4, A.height), (255, 0, 0)); W.paste(A, (0, 0)); W.paste(B, (A.width + 4, 0))
+                W.resize((W.width * 2, W.height * 2)).save(os.path.join(a.adr, "skok_%03d.png" % i))
+            break
 print("DOSKAKOVANI %d skoků v %d snímcích" % (len(nalezy), len(fs)))
