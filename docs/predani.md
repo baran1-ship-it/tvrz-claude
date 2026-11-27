@@ -1882,3 +1882,9 @@ Hotovo v kódu a datech (testy u každého):
   (zelená složka, mřížka 2 m), hlína cest = shader podle `v_c0.x` (okraj cesty, `rd`). Mezi koncem hlíny dvora a okrajem
   cesty zůstane pás, kde vrchol nese „trávu“ a cesta už nekreslí. Oprava v exportu (Blender vertex color: hlína pod
   pásem cesty, kde sousedí s hliněnou plochou), ne v shaderu – NEOVĚŘENO měřením barvy vrcholů, další krok.
+- **Přestavba vesničanů v kontejneru z balíků (27. 11.):** Blender exporter zapíše nové PNG textur vedle `.gltf` a Godot je
+  importuje s výchozím nastavením (bez komprese pro GPU a bez mipmap) – po přestavbě nastavit v jejich `.import`
+  `compress/mode=2`, `mipmaps/generate=true`, `detect_3d/compress_to=0` (normály `compress/normal_map=1`) a znovu `--import`.
+  Vzor kostry `npc_bartos_cela.gltf` v kontejneru není (jen import) → `tools/postavy_q/vyvoz_res.gd` a `UAL_SADA=<glb>`.
+  Zdroj: Disk „Medieval muzi“ `npc-characters-male-pack.zip` (FBX `SK_NPC_Character_0N_Full_01`) → `zk_muz/muzNN01.fbx`
+  → `zk_muz/vyvoz.gd` → `muz_npc.py`.

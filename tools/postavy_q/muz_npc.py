@@ -8,11 +8,12 @@ Co dela:
  - site spojene do jedne, zmenseni (Decimate collapse) na cil trojuhelniku (vychozi 12 000, tablet)
  - materialy: telo+odev, hlava, vlasy/vousy (alfa) s texturami 1K (PNG z TGA 4096)
 """
+import math
 import os
 import sys
 
 import bpy
-from mathutils import Matrix
+from mathutils import Matrix, Vector
 
 ARG = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
 HLAVA_Z = ARG[ARG.index("--hlava") + 1] if "--hlava" in ARG else ""
@@ -98,6 +99,8 @@ bpy.ops.object.mode_set(mode="OBJECT")
 ZENA = SADA.startswith("npc_zena")
 # vzor klidu a os: sada UAL stejneho pohlavi (proporce ramen a panve)
 UAL_SADA = os.path.join(OUT, "npc_anezka_cela.gltf" if ZENA else "npc_bartos_cela.gltf")
+# kontejner s daty jen z baliku (bez zdroje .gltf): vzor vyvezeny Godotem z importu (tools/postavy_q/vyvoz_res.gd)
+UAL_SADA = os.environ.get("UAL_SADA_ZENA" if ZENA else "UAL_SADA", UAL_SADA)
 pred = set(bpy.data.objects)
 bpy.ops.import_scene.gltf(filepath=UAL_SADA)
 nove = [o for o in bpy.data.objects if o not in pred]
@@ -312,6 +315,98 @@ druhy = {o.name: druh(o) for o in site}  # pred smazanim materialu (druh podle m
 for o in site:
     o.data.materials.clear()
     o.data.materials.append(mat[druhy[o.name]])
+
+# --- vlasy (Misa 27. 11. „vlasy borec na dvore“; rešerše reserse_animace_postavy_27_11.md kap. 2): karty vlasu se
+# nezmensuji collapse (roztrhal je), ale vnejsi karty se nechaji cele do rozpoctu vlasy_troj_max a vnitrni (zakryte)
+# vypadnou; pod vlasy nepruhledna cepice (kopie kuze hlavy pod vlasy) v barve vlasu z husteho bloku textury vlasu -
+# mezerami prosvita vlas, ne bila kuze temene (muz_npc.json cepice)
+import bmesh  # noqa: E402
+import numpy as np  # noqa: E402
+from mathutils.kdtree import KDTree  # noqa: E402
+
+
+def _hustý_blok(img, n=64):
+    w, h = img.size
+    al = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)[..., 3]
+    ii = np.cumsum(np.cumsum(np.pad(al, ((1, 0), (1, 0))), 0), 1)
+    sm = ii[n:, n:] - ii[:-n, n:] - ii[n:, :-n] + ii[:-n, :-n]
+    y, x = np.unravel_index(np.argmax(sm), sm.shape)
+    return (x / w, y / h, (x + n) / w, (y + n) / h)
+
+
+VL = _tx.get("vlasy_karty")
+vlasy_o = [o for o in site if "hair" in o.name.lower()]
+hlava_o = next((o for o in site if "head" in o.name.lower()), None)
+if VL and vlasy_o and hlava_o:
+    stred = sum((hlava_o.matrix_world @ v.co for v in hlava_o.data.vertices), Vector()) / len(hlava_o.data.vertices)
+    kd = KDTree(sum(len(o.data.vertices) for o in vlasy_o))
+    k = 0
+    for o in vlasy_o:
+        for v in o.data.vertices:
+            kd.insert(o.matrix_world @ v.co, k)
+            k += 1
+    kd.balance()
+    for o in vlasy_o:
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        bm.faces.ensure_lookup_table()
+        ostrovy = []
+        hotovo = set()
+        for f in bm.faces:
+            if f.index in hotovo:
+                continue
+            fr, ost = [f], []
+            hotovo.add(f.index)
+            while fr:
+                g = fr.pop()
+                ost.append(g)
+                for e in g.edges:
+                    for g2 in e.link_faces:
+                        if g2.index not in hotovo:
+                            hotovo.add(g2.index)
+                            fr.append(g2)
+            c = sum((o.matrix_world @ g.calc_center_median() for g in ost), Vector()) / len(ost)
+            ostrovy.append(((c - stred).length, sum(len(g.verts) - 2 for g in ost), ost))
+        ostrovy.sort(key=lambda e: -e[0])
+        troj, pryc = 0, []
+        for d, t, ost in ostrovy:
+            if troj + t <= int(VL["troj_max"]):
+                troj += t
+            else:
+                pryc.extend(ost)
+        bmesh.ops.delete(bm, geom=pryc, context="FACES")
+        bm.to_mesh(o.data)
+        bm.free()
+        print("VLASY", o.name, "karet", len(ostrovy), "troj", troj, "(vnejsi do troj_max)")
+    # cepice: plochy hlavy, jejichz vsechny vrcholy jsou do vzdal_m od vlasu
+    cep = hlava_o.copy()
+    cep.data = hlava_o.data.copy()
+    cep.name = "Cepice_vlasu"   # zmensuje se jako telo (jednoducha nepruhledna slupka), ne jako karty vlasu
+    bpy.context.collection.objects.link(cep)
+    bm = bmesh.new()
+    bm.from_mesh(cep.data)
+    vz = float(VL["cepice_vzdal_m"])
+    pryc = [f for f in bm.faces if not all(kd.find(cep.matrix_world @ v.co)[2] < vz for v in f.verts)]
+    bmesh.ops.delete(bm, geom=pryc, context="FACES")
+    for v in bm.verts:
+        v.co += v.normal * float(VL["cepice_posun_m"])
+    uvl = bm.loops.layers.uv.active
+    img_v = mat["vlasy"].node_tree.nodes["Image Texture"].image if "Image Texture" in mat["vlasy"].node_tree.nodes else None
+    if uvl and img_v:
+        u0, v0, u1, v1 = _hustý_blok(img_v)
+        xs = [v.co.x for v in bm.verts] or [0.0]
+        ys = [v.co.y for v in bm.verts] or [0.0]
+        for f in bm.faces:
+            for lp in f.loops:
+                lp[uvl].uv = (u0 + (u1 - u0) * (lp.vert.co.x - min(xs)) / max(1e-6, max(xs) - min(xs)),
+                              v0 + (v1 - v0) * (lp.vert.co.y - min(ys)) / max(1e-6, max(ys) - min(ys)))
+    bm.to_mesh(cep.data)
+    bm.free()
+    cep.data.materials.clear()
+    cep.data.materials.append(mat["vlasy"])
+    site.append(cep)
+    print("CEPICE ploch", len(cep.data.polygons))
+
 
 # --- zmenseni pro tablet (kazdy kus zvlast: hlava a ruce dvojnasobny podil - oblicej a prsty), pak jedna sit
 troj = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in site)
