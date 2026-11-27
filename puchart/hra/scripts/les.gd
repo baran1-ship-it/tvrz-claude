@@ -79,8 +79,8 @@ func postav(s: Node3D) -> void:
 			var V: float = imp_meta[druh]["vyska"]
 			# skutečná výška modelu, ne výška ze stromy_modely.json varianty (Míša 27. 11.: „křivé stromy – nejdřív obří, přijdeš blíž
 			# a je o polovinu menší“): jilm střední 15 m v datech, model 7,6 m → impostor 2× větší než plný strom (habr, javor, jasan též)
-			var k_m := k + ("_lod1" if (k.ends_with("_stary") or k.ends_with("_stara")) else "")
-			var Hm := _mesh("res://modely/stromy/%s.glb" % k_m).get_aabb().size.y
+			var k_m: String = k + ("_lod1" if (k.ends_with("_stary") or k.ends_with("_stara")) else "")
+			var Hm: float = _mesh("res://modely/stromy/%s.glb" % k_m).get_aabb().size.y
 			for t: Transform3D in skupiny[k]:
 				var h := Hm * t.basis.get_scale().y
 				var rot := fposmod(atan2(t.basis.x.z, t.basis.x.x) * -1.0, TAU)

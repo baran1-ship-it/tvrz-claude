@@ -263,8 +263,8 @@ func _pocitej(i: int, j: int, B: float) -> Dictionary:
 		if daleko:   # všechny druhy do jednoho MultiMeshe (custom = políčko atlasu, střed y, poloměr)
 			var dr := klic.rstrip("0123456789"); var pr: Array = _imp_par.get(dr, [])
 			if pr.is_empty(): continue
-			var vi := int(klic.substr(dr.length())) if klic.length() > dr.length() else 0
-			var sv: PackedFloat32Array = pr[3]; var s_ := sv[vi] if vi < sv.size() else 1.0
+			var vi: int = int(klic.substr(dr.length())) if klic.length() > dr.length() else 0
+			var sv: PackedFloat32Array = pr[3]; var s_: float = sv[vi] if vi < sv.size() else 1.0
 			radek.append_array(PackedFloat32Array([pr[0], pr[1] * s_, pr[2] * s_, 0.0])); klic = "_imp"
 		if not out.has(klic): out[klic] = PackedFloat32Array()
 		out[klic].append_array(radek)
