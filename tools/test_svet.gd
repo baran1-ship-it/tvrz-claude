@@ -8142,6 +8142,37 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 					ch.call("vyznam: %s sed klip %s v cinnosti bez sedu" % [ck, kl])
 			elif not povol.has(v):
 				ch.call("vyznam: %s klip %s (%s) nepatri k cinnosti (vysky %s)" % [ck, kl, v, str(povol)])
+	# Misa 27. 11. (kucharka lezela v ohni): misto s ohnem je mimo zakazanou zonu ohne (size + u_ohne.odstup_m) a klip
+	# s cilovym predmetem (klipy_cil) ma predmet v dosahu kazdeho mista s polohou p, kde ho cinnost hraje
+	var uo: Dictionary = Pravidla.cti("postavy", "u_ohne")
+	var ohne := {}
+	for oh: Dictionary in sv.data.get("ohne", []):
+		if oh.has("name"):
+			ohne[String(oh["name"])] = oh
+	for mk: String in P["mista"]:
+		var mo: Variant = P["mista"][mk]
+		if not (mo is Dictionary) or not (mo as Dictionary).has("ohen"):
+			continue
+		var oh2: Dictionary = ohne.get(String(mo["ohen"]), {})
+		if oh2.is_empty():
+			ch.call("ohen: misto %s - ohen %s ve svete neni" % [mk, mo["ohen"]])
+			continue
+		var dd := Vector2(float(mo["p"][0]) - float(oh2["pos"][0]), float(mo["p"][1]) - float(oh2["pos"][2])).length()
+		if dd < float(oh2.get("size", 0.5)) + float(uo["odstup_m"]):
+			ch.call("ohen: misto %s %.2f m od ohne %s (min %.2f)" % [mk, dd, mo["ohen"], float(oh2.get("size", 0.5)) + float(uo["odstup_m"])])
+	var kcil: Dictionary = Pravidla.cti("postavy", "klipy_cil")
+	for c: Dictionary in ll:
+		for bl: Dictionary in c["role"]["rozvrh"]:
+			var cnb: Variant = P["cinnosti"].get(String(bl["cinnost"]))
+			var mb: Variant = P["mista"].get(String(bl["kde"]))
+			if not (cnb is Dictionary) or not (mb is Dictionary) or not (mb as Dictionary).has("p"):
+				continue
+			var kl_b: Array = []
+			for lst: Variant in [cnb.get("klipy", [])] + (cnb.get("sceny", []) as Array):
+				kl_b.append_array(lst)
+			for kl: String in kl_b:
+				if kcil.has(kl) and not lide.call("_cil_ok", kl, Vector2(float(mb["p"][0]), float(mb["p"][1]))):
+					ch.call("cil: %s klip %s na miste %s bez %s v dosahu" % [bl["cinnost"], kl, bl["kde"], str(kcil[kl])])
 	# Misa 11. 11. spolecne sceny: ucastnici maji v cas sceny blok se stejnou cinnosti na stejnem miste
 	for sc: Dictionary in Pravidla.cti("postavy", "spolecne_sceny"):
 		var cinn := {}

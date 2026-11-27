@@ -38,7 +38,35 @@ static var P: Dictionary = {
 	"u_steny": Pravidla.cti("postavy", "u_steny"),
 	"pohledy": Pravidla.cti("postavy", "pohledy"), "kostky": Pravidla.cti("postavy", "kostky"),
 	"poutnici": Pravidla.cti("postavy", "poutnici"), "sukne": Pravidla.cti("postavy", "sukne"),
-	"u_stromu": Pravidla.cti("postavy", "u_stromu"), "vyznam": Pravidla.cti("postavy", "klipy_vyznam")}
+	"u_stromu": Pravidla.cti("postavy", "u_stromu"), "vyznam": Pravidla.cti("postavy", "klipy_vyznam"),
+	"klipy_cil": Pravidla.cti("postavy", "klipy_cil"), "klipy_cil_dosah": float(Pravidla.cti("postavy", "klipy_cil_dosah_m"))}
+## Klip s cilovym predmetem (postavy.json klipy_cil, napr. truhla): predmet ve vybaveni sveta do klipy_cil_dosah m od
+## postavy (Misa 27. 11.: kucharka otevirala virtualni truhlu u kotliku = klecela v ohni). Mrizka predmetu po 4 m.
+var _cil_mriz := {}
+
+
+func _cil_ok(jm: String, p: Vector2) -> bool:
+	var pot: Array = (P["klipy_cil"] as Dictionary).get(jm, [])
+	if pot.is_empty():
+		return true
+	if _cil_mriz.is_empty() and main and main.svet:
+		for r: Dictionary in main.svet.data.get("vybaveni", []):
+			var k := Vector2i(floori(float(r["p"][0]) / 4.0), floori(float(r["p"][2]) / 4.0))
+			if not _cil_mriz.has(k):
+				_cil_mriz[k] = []
+			(_cil_mriz[k] as Array).append([String(r["id"]), Vector2(float(r["p"][0]), float(r["p"][2]))])
+	var dos := float(P["klipy_cil_dosah"])
+	var c := Vector2i(floori(p.x / 4.0), floori(p.y / 4.0))
+	for i in range(-1, 2):
+		for j in range(-1, 2):
+			for e: Array in _cil_mriz.get(c + Vector2i(i, j), []):
+				if (e[1] as Vector2).distance_to(p) <= dos:
+					for pr: String in pot:
+						if String(e[0]).begins_with(pr):
+							return true
+	return false
+
+
 ## stin postav jen zblizka: trida postava v pravidla_modelu.json (stin_m) - jeden zdroj s testem modelu
 static var STIN_M: float = _stin_m()
 const PREDMETY_DIR := "res://modely/predmety/"
@@ -2566,6 +2594,11 @@ func _process_vlastni(dt: float) -> void:
 					if bez and not c.has("stoji_u"):
 						kl = P["sedani"]["stoji_sam"]     # Misa 11. 11.: sam bez partnera nemluvi do prazdna
 
+					# Misa 27. 11. (kucharka klecela v ohni u virtualni truhly): klip s cilovym predmetem (klipy_cil) jen s predmetem
+					# v dosahu - jinak z vyberu i scen pryc
+					kl = kl.filter(func(k: String) -> bool: return _cil_ok(k, p))
+					if kl.is_empty():
+						kl = ["Idle_Loop"]
 					var jm_k := String(kl[_rng.randi() % kl.size()])
 					# sceny (Misa 10. 11., KCD): rozehrana scena pokracuje dalsim klipem; jinak scena nebo jeden klip
 					var sc: Array = c.get("scena", [])
@@ -2573,7 +2606,10 @@ func _process_vlastni(dt: float) -> void:
 						jm_k = String(sc.pop_front())
 					elif not bez and cn.has("sceny") and _rng.randi() % (kl.size() + (cn["sceny"] as Array).size()) >= kl.size():
 						sc = ((cn["sceny"] as Array)[_rng.randi() % (cn["sceny"] as Array).size()] as Array).duplicate()
-						jm_k = String(sc.pop_front())
+						if sc.all(func(k: String) -> bool: return _cil_ok(k, p)):
+							jm_k = String(sc.pop_front())
+						else:
+							sc = []
 					c["scena"] = sc
 					if jm_k == String(P["stani"]["nahrazuje"]):
 						c["stani"] = _vazeny(P["stani"]["klipy"])      # stani se stridaji (r. 100)
