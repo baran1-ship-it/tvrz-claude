@@ -1,0 +1,11 @@
+{
+ "_popis": "Pravidla interakce postav s predmety (Misa 27. 11. body uchopu a vstupu; rešerše reserse_body_predmetu_27_11.md kap. 3.3). Body predmetu jsou v pravidla/svet/predmety_body.json; misto cinnosti postavy.json mista.<kde>.u_slotu = {predmet, slot, blizko [x, z]} vybere nejblizsi kus predmetu k bodu blizko a jeho slot.",
+ "rezerva_zony_m": 0.35,
+ "_rezerva_zony_m": "pridava se k polomeru zakazane zony (odhad z rešerše kap. 1.3 bod 2, overit snimkem)",
+ "hledat_predmet_m": 3.0,
+ "_hledat_predmet_m": "kus predmetu pro slot se hleda do tolika m od bodu blizko",
+ "testy": {
+  "vstup_od_slotu_max_m": 1.5,
+  "_": "test lide_chovani (sloty): kazdy slot mista mimo vsechny zakazane zony predmetu v okoli + rezerva, vstup do vstup_od_slotu_max_m"
+ }
+}

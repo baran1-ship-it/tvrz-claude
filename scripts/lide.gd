@@ -39,10 +39,50 @@ static var P: Dictionary = {
 	"pohledy": Pravidla.cti("postavy", "pohledy"), "kostky": Pravidla.cti("postavy", "kostky"),
 	"poutnici": Pravidla.cti("postavy", "poutnici"), "sukne": Pravidla.cti("postavy", "sukne"),
 	"u_stromu": Pravidla.cti("postavy", "u_stromu"), "vyznam": Pravidla.cti("postavy", "klipy_vyznam"),
-	"klipy_cil": Pravidla.cti("postavy", "klipy_cil"), "klipy_cil_dosah": float(Pravidla.cti("postavy", "klipy_cil_dosah_m"))}
+	"klipy_cil": Pravidla.cti("postavy", "klipy_cil"), "klipy_cil_dosah": float(Pravidla.cti("postavy", "klipy_cil_dosah_m")),
+	"interakce": Pravidla.cti("interakce", "hledat_predmet_m")}
+## Slot predmetu pro misto (mista.<kde>.u_slotu = {predmet, slot, blizko [x, z]}): [poloha xz, yaw celem k predmetu,
+## vyznamy klipu slotu, kus vybaveni, slot] nebo [] (predmet nebo slot chybi). Vola i test lide_chovani.
+func slot_mista(z: Dictionary) -> Array:
+	var us: Dictionary = z["u_slotu"]
+	var body: Variant = Pravidla.cti("predmety_body", String(us["predmet"]))
+	if not (body is Dictionary):
+		return []
+	var slot: Dictionary = {}
+	for s2: Dictionary in body.get("sloty", []):
+		if String(s2["id"]) == String(us["slot"]):
+			slot = s2
+	if slot.is_empty():
+		return []
+	var bl := Vector2(float(us["blizko"][0]), float(us["blizko"][1]))
+	var nej: Dictionary = {}
+	var nd := float(P["interakce"])
+	for r: Dictionary in main.svet.data.get("vybaveni", []):
+		if String(r["id"]) != String(us["predmet"]):
+			continue
+		var d := Vector2(float(r["p"][0]), float(r["p"][2])).distance_to(bl)
+		if d <= nd:
+			nd = d
+			nej = r
+	if nej.is_empty():
+		return []
+	var yaw := float(nej.get("yaw", 0.0))
+	var lp := Vector3(float(slot["pos"][0]), 0.0, float(slot["pos"][2])).rotated(Vector3.UP, yaw)
+	var q := Vector2(float(nej["p"][0]) + lp.x, float(nej["p"][2]) + lp.z)
+	var smer := Vector2(float(nej["p"][0]), float(nej["p"][2])) - q
+	var ya := atan2(smer.x, smer.y) if String(slot.get("pohled", "predmet")) == "predmet" else yaw + deg_to_rad(float(slot.get("yaw_st", 0.0)))
+	return [q, ya, slot.get("vyznamy", []), nej, slot]
+
+
 ## Klip s cilovym predmetem (postavy.json klipy_cil, napr. truhla): predmet ve vybaveni sveta do klipy_cil_dosah m od
 ## postavy (Misa 27. 11.: kucharka otevirala virtualni truhlu u kotliku = klecela v ohni). Mrizka predmetu po 4 m.
 var _cil_mriz := {}
+
+
+## Klip smi do slotu predmetu jen s vyznamem, ktery slot dovoli (Misa 27. 11.: u kotliku zadny klek ani stul).
+func _slot_ok(c: Dictionary, jm: String) -> bool:
+	var vz: Array = c.get("slot_vyznamy", [])
+	return vz.is_empty() or vz.has(String((P["vyznam"] as Dictionary).get(jm, "")))
 
 
 func _cil_ok(jm: String, p: Vector2) -> bool:
@@ -513,6 +553,7 @@ func _volno(a: Vector2, b: Vector2) -> bool:
 ## Poloha mista (zaznam postavy.json mista nebo domov/dvere/zahrada obyvatele) -> [Vector2, yaw nebo INF].
 func _misto(c: Dictionary, kde: String) -> Array:
 	var o: Dictionary = c["o"]
+	c.erase("slot_vyznamy")
 	if kde == "prace":
 		kde = String(o.get("prace", "dvere"))
 	if kde == "naves":
@@ -544,9 +585,14 @@ func _misto(c: Dictionary, kde: String) -> Array:
 			return [Vector2(w.x, w.z), atan2(ven.x, ven.z)]
 		push_warning("lide %s: domov %s nenalezen" % [c["id"], str(dm)])
 		return [Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z), INF]
+	var z: Dictionary = P["mista"].get(kde, {})
+	if z.has("u_slotu"):
+		var sl_v: Variant = Pravidla.cti("predmety_body", String(z["u_slotu"]["predmet"]))
+		for s3: Dictionary in (sl_v.get("sloty", []) if sl_v is Dictionary else []):
+			if String(s3["id"]) == String(z["u_slotu"]["slot"]):
+				c["slot_vyznamy"] = s3.get("vyznamy", [])
 	if _misto_xz.has(kde):
 		return _misto_xz[kde]
-	var z: Dictionary = P["mista"].get(kde, {})
 	var out := [Vector2.ZERO, INF]
 	if z.has("p"):
 		out = [Vector2(float(z["p"][0]), float(z["p"][1])), deg_to_rad(float(z["yaw_st"])) if z.has("yaw_st") else INF]
@@ -617,6 +663,14 @@ func _misto(c: Dictionary, kde: String) -> Array:
 		out = [q, deg_to_rad(float(z["yaw_st"]))]
 		if not hotovo:
 			return out                                  # kolize skaly/leseni jeste nejsou - zkusit priste, nepamatovat
+	elif z.has("u_slotu") and main.svet != null:
+		# Misa 27. 11. (body predmetu, rešerše reserse_body_predmetu_27_11.md): slot predmetu (predmety_body.json) na
+		# nejblizsim kusu predmetu k bodu blizko; poloha slotu v soustave predmetu, celem k predmetu
+		var sl: Array = slot_mista(z)
+		if sl.is_empty():
+			push_warning("lide: misto %s - slot %s nenalezen" % [kde, str(z["u_slotu"])])
+			return [Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z), INF]
+		out = [sl[0], sl[1]]
 	elif z.has("u_predmetu") and main.svet != null:
 		# u predmetu v mistnosti (obsluha u stolu, Misa r. 57): predmety daneho id v mistnosti podle x, poradi
 		var vb: Array = main.svet.data.get("vybaveni", [])
@@ -2596,7 +2650,7 @@ func _process_vlastni(dt: float) -> void:
 
 					# Misa 27. 11. (kucharka klecela v ohni u virtualni truhly): klip s cilovym predmetem (klipy_cil) jen s predmetem
 					# v dosahu - jinak z vyberu i scen pryc
-					kl = kl.filter(func(k: String) -> bool: return _cil_ok(k, p))
+					kl = kl.filter(func(k: String) -> bool: return _cil_ok(k, p) and _slot_ok(c, k))
 					if kl.is_empty():
 						kl = ["Idle_Loop"]
 					var jm_k := String(kl[_rng.randi() % kl.size()])
@@ -2606,7 +2660,7 @@ func _process_vlastni(dt: float) -> void:
 						jm_k = String(sc.pop_front())
 					elif not bez and cn.has("sceny") and _rng.randi() % (kl.size() + (cn["sceny"] as Array).size()) >= kl.size():
 						sc = ((cn["sceny"] as Array)[_rng.randi() % (cn["sceny"] as Array).size()] as Array).duplicate()
-						if sc.all(func(k: String) -> bool: return _cil_ok(k, p)):
+						if sc.all(func(k: String) -> bool: return _cil_ok(k, p) and _slot_ok(c, k)):
 							jm_k = String(sc.pop_front())
 						else:
 							sc = []

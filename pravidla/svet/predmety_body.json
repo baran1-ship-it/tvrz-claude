@@ -1,0 +1,22 @@
+{
+ "_popis": "Body predmetu pro postavy (Misa 27. 11. „podle me ma vse svoje body uchopu a vstupu, a poradne“; rešerše docs/rozpracovane/reserse_body_predmetu_27_11.md kap. 3: Sims sloty, UE Smart Objects, GTA V archetyp, KCD helpery). Klic = id predmetu katalogu (modely/predmety.json, vybaveni sveta). Souradnice v soustave predmetu (Godot: x vpravo, y nahoru, z vpred = +z modelu; m), natoceni predmetu z vybaveni (yaw). sloty[]: id, druh (stani|sed|leh|drep|klek = postura korene), pos (y se ignoruje u stani - postava stoji na zemi/podlaze), pohled (\"predmet\" = celem ke stredu predmetu, jinak yaw_st v soustave predmetu), vyznamy = ktere vyznamy klipu (postavy.json klipy_vyznam) slot dovoli; vstupy[]: odkud se do slotu chodi (pos, slot); uchopy[]: cil ruky (pos, ruka l|r|lr, poza z uchop_pozy.json) - etapa 3; zakazane_zony[]: valec (pos stredu podstavy, r, v) nebo kvadr, pro = koren|ruce|hlava|nohy, rezerva_m (interakce.json vychozi). Etapa 1 (27. 11.): kotlik_trojnozka - postupne dalsi predmety cinnosti (stul, kovadlina, truhla, studna, lavice, postele). Polohy bodu namerene z rozmeru katalogu a poloh sveta, NEOVERENO snimkem tam, kde neni poznamka.",
+ "kotlik_trojnozka": {
+  "max_uzivatelu": 1,
+  "sloty": [
+   {
+    "id": "michani",
+    "druh": "stani",
+    "pos": [0.13, 0.0, 0.92],
+    "pohled": "predmet",
+    "vyznamy": ["stoji", "pas"],
+    "_": "kucharka u kotliku (Misa 27. 11.): 0,93 m od stredu ohniste (polomer 0,55 + rezerva 0,35), u stolu kuchyne (stul_selsky z -11,31) volno; kotlik na lozi ohniste 0,57 m - klip Interact (ruce ve vysce hrudi) sahne na kotlik, PickUp_Table (vyska stolu) a klek ne"
+   }
+  ],
+  "vstupy": [
+   {"slot": "michani", "pos": [0.13, 0.0, 1.5]}
+  ],
+  "zakazane_zony": [
+   {"id": "ohen", "tvar": "valec", "pos": [0.0, -0.57, 0.0], "r": 0.55, "v": 1.2, "pro": ["koren", "ruce", "hlava", "nohy"]}
+  ]
+ }
+}

@@ -8142,24 +8142,39 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 					ch.call("vyznam: %s sed klip %s v cinnosti bez sedu" % [ck, kl])
 			elif not povol.has(v):
 				ch.call("vyznam: %s klip %s (%s) nepatri k cinnosti (vysky %s)" % [ck, kl, v, str(povol)])
-	# Misa 27. 11. (kucharka lezela v ohni): misto s ohnem je mimo zakazanou zonu ohne (size + u_ohne.odstup_m) a klip
-	# s cilovym predmetem (klipy_cil) ma predmet v dosahu kazdeho mista s polohou p, kde ho cinnost hraje
-	var uo: Dictionary = Pravidla.cti("postavy", "u_ohne")
-	var ohne := {}
-	for oh: Dictionary in sv.data.get("ohne", []):
-		if oh.has("name"):
-			ohne[String(oh["name"])] = oh
+	# Misa 27. 11. (kucharka lezela v ohni; „vse ma svoje body uchopu a vstupu“): misto se slotem predmetu (u_slotu) -
+	# slot nalezen, mimo vsechny zakazane zony predmetu s body do hledat_predmet_m + rezerva, vstup slotu do
+	# vstup_od_slotu_max_m (pravidla/svet/predmety_body.json, interakce.json)
+	var ia: Dictionary = Pravidla.cti("interakce", "testy")
+	var rez := float(Pravidla.cti("interakce", "rezerva_zony_m"))
 	for mk: String in P["mista"]:
 		var mo: Variant = P["mista"][mk]
-		if not (mo is Dictionary) or not (mo as Dictionary).has("ohen"):
+		if not (mo is Dictionary) or not (mo as Dictionary).has("u_slotu"):
 			continue
-		var oh2: Dictionary = ohne.get(String(mo["ohen"]), {})
-		if oh2.is_empty():
-			ch.call("ohen: misto %s - ohen %s ve svete neni" % [mk, mo["ohen"]])
+		var sl: Array = lide.call("slot_mista", mo)
+		if sl.is_empty():
+			ch.call("slot: misto %s - predmet nebo slot %s nenalezen" % [mk, str(mo["u_slotu"])])
 			continue
-		var dd := Vector2(float(mo["p"][0]) - float(oh2["pos"][0]), float(mo["p"][1]) - float(oh2["pos"][2])).length()
-		if dd < float(oh2.get("size", 0.5)) + float(uo["odstup_m"]):
-			ch.call("ohen: misto %s %.2f m od ohne %s (min %.2f)" % [mk, dd, mo["ohen"], float(oh2.get("size", 0.5)) + float(uo["odstup_m"])])
+		var q: Vector2 = sl[0]
+		for vr: Dictionary in sv.data.get("vybaveni", []):
+			var bd: Variant = Pravidla.cti("predmety_body", String(vr["id"]))
+			if not (bd is Dictionary):
+				continue
+			var vyaw := float(vr.get("yaw", 0.0))
+			for zn: Dictionary in bd.get("zakazane_zony", []):
+				var zc := Vector3(float(zn["pos"][0]), 0.0, float(zn["pos"][2])).rotated(Vector3.UP, vyaw)
+				var dz := q.distance_to(Vector2(float(vr["p"][0]) + zc.x, float(vr["p"][2]) + zc.z))
+				if dz < float(zn["r"]) + rez:
+					ch.call("slot: misto %s %.2f m od zony %s predmetu %s (min %.2f)" % [mk, dz, zn["id"], vr["id"], float(zn["r"]) + rez])
+		var sd: Dictionary = sl[4]
+		var r0: Dictionary = sl[3]
+		for vs: Dictionary in Pravidla.cti("predmety_body", String(r0["id"])).get("vstupy", []):
+			if String(vs["slot"]) != String(sd["id"]):
+				continue
+			var vp := Vector3(float(vs["pos"][0]), 0.0, float(vs["pos"][2])).rotated(Vector3.UP, float(r0.get("yaw", 0.0)))
+			var dv := q.distance_to(Vector2(float(r0["p"][0]) + vp.x, float(r0["p"][2]) + vp.z))
+			if dv > float(ia["vstup_od_slotu_max_m"]):
+				ch.call("slot: misto %s vstup %.2f m od slotu (max %.2f)" % [mk, dv, float(ia["vstup_od_slotu_max_m"])])
 	var kcil: Dictionary = Pravidla.cti("postavy", "klipy_cil")
 	for c: Dictionary in ll:
 		for bl: Dictionary in c["role"]["rozvrh"]:

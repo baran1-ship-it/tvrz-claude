@@ -424,12 +424,14 @@
    ]
   },
   "tvrz_kuchyne": {
-   "p": [
-    -0.87,
-    -11.78
-   ],
-   "ohen": "kuchyne_tvrz",
-   "yaw_st": -170.0,
+   "u_slotu": {
+    "predmet": "kotlik_trojnozka",
+    "slot": "michani",
+    "blizko": [
+     -1.0,
+     -12.7
+    ]
+   },
    "mistnost": "kuchyne",
    "dvere": "Pohyb_dvere8",
    "venku": [
@@ -440,7 +442,7 @@
     -0.05,
     -8.3
    ],
-   "_p": "9. 11. (kontrola snimku kuchyne.jpg: kucharka stala v desce stolu): u kotliku mimo stul (stul_selsky 1,93 x 0,82 m na (0,3; -10,9) -> x -0,66..1,26, z -11,31..-10,49), celem ke kotliku (-1,0; -12,7) | Misa 27. 11. (kucharka v ohni): p 0,71 m od stredu ohniste (polomer 0,55) = na kameni ohniste; posun po primce od kotliku na 0,93 m (u_ohne.odstup_m), stul z -11,31 dal"
+   "_p": "9. 11. (kontrola snimku kuchyne.jpg: kucharka stala v desce stolu): u kotliku mimo stul (stul_selsky 1,93 x 0,82 m na (0,3; -10,9) -> x -0,66..1,26, z -11,31..-10,49), celem ke kotliku (-1,0; -12,7) | Misa 27. 11. (kucharka v ohni): p 0,71 m od stredu ohniste (polomer 0,55) = na kameni ohniste; misto = slot michani kotliku (pravidla/svet/predmety_body.json, mimo zonu ohne + interakce.rezerva_zony_m)"
   },
   "hostinec_stul_1": {
    "u_predmetu": "stul_hospoda",
@@ -6661,10 +6663,6 @@
  },
  "klipy_cil_dosah_m": 1.5,
  "_klipy_cil": "Misa 27. 11. (kucharka klecela/lezela v ohni - scena s truhlou u kotliku, kde truhla neni; potreti po hostinskem u krbu 14. 11. a krcmari u pultu 18. 11., vzdy opraveno smazanim klipu u jednoho mista). Rešerše reserse_animace_postavy_27_11.md kap. 1 (Unreal Smart Objects, Witcher 3 action points): klip, ktery pracuje s predmetem, ho potrebuje - id predmetu (zacatek id ve vybaveni sveta) do klipy_cil_dosah_m od postavy; jinak ho lide.gd nezahraje (ani ve scene) a test lide_chovani hlasi misto cinnosti, kde cil chybi.",
- "u_ohne": {
-  "odstup_m": 0.35,
-  "_": "Misa 27. 11. („kucharka nemuze lezet v ohni ani na nej sahat, kotlik je pro ni cil“; rešerše kap. 1.3 bod 2): misto cinnosti s ohen (jmeno ohne ze svet.json ohne) je od stredu ohne aspon size ohne + odstup_m (zakazana zona pro koren postavy; odhad z rešerše, overit snimkem); test lide_chovani"
- },
  "klipy_vyznam": {
   "Consume": "stoji",
   "Farm_Harvest": "zem",
