@@ -349,7 +349,9 @@ def main():
             x, z = gx0 + i * gk, gz0 + k * gk
             hs.append(int(round(F.land(x, z) * 100.0)))
             g, les, pole = kraj.ground_attrs(x, z)
-            m = max(0.0, min(1.0, (g - 0.3) / 0.45)) * (1.0 - 0.7 * les) * (0.5 if pole > 0.5 else 1.0)
+            # Misa 27. 11. („za vesnici louky jsou nejake chude“): les ubira travu jen svetlem pod korunami ve hre
+            # (louka.gd _svetlo_lesa, pravidla/svet/les_podrost.json) - drive i tady (1 - 0,7 les): ridky les 25 % dvakrat
+            m = max(0.0, min(1.0, (g - 0.3) / 0.45)) * (0.5 if pole > 0.5 else 1.0)
             m *= vesnice.okraj_stavby(x, z)          # okraj stavby: totez pravidlo jako barva (kraj.ground_attrs)
             # vyslapano u staveb (okap, pred vstupy, kovarna, dvur) jde pres g (kraj.placek); naves ridsi (Misa 15. 11. ř. 11)
             m *= vesnice.trava_naves(x, z)
@@ -376,7 +378,8 @@ def main():
             tvrz = abs(x + 4.0) < 36.0 and abs(z) < 32.0
             if not ves and not tvrz:
                 g, les, pole = kraj.ground_attrs(x, z)
-                m = max(0.0, min(1.0, (g - 0.3) / 0.45)) * (1.0 - 0.75 * les) * (0.35 if pole > 0.5 else 1.0)
+                # Misa 27. 11. (louky za vsi 23-25 %, test louka_bod): les jen svetlem ve hre (les_podrost.json), ne tady
+                m = max(0.0, min(1.0, (g - 0.3) / 0.45)) * (0.35 if pole > 0.5 else 1.0)
                 if m > 0.0:
                     rv = kraj.river(x, z) if not kraj._NO_RIVER else None
                     if (rv is not None and rv[0] < 3.5 * (1.0 + 0.75 * rv[2])) or vesnice.pond_depth(x, z) > 0.15 or vesnice._in_building(x, z, 1.6):
