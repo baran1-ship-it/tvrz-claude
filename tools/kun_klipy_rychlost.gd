@@ -23,6 +23,8 @@ func _initialize() -> void:
 	var ap: AnimationPlayer = kun.get("_ap")
 	var at: AnimationTree = kun.get("_at")
 	at.active = false
+	ap.active = true
+	ap.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	var sk: Skeleton3D = kun.get("_kostra")
 	var kopyta: Array = []
 	for i in sk.get_bone_count():
@@ -48,7 +50,7 @@ func _initialize() -> void:
 		var t := 0.0
 		while t < dl:
 			ap.seek(t, true)
-			sk.force_update_all_bone_transforms() if sk.has_method("force_update_all_bone_transforms") else null
+			ap.advance(0.0)
 			for b: int in kopyta:
 				var g := sk.global_transform * sk.get_bone_global_pose(b).origin
 				vz.append([t, b, inv * g])
