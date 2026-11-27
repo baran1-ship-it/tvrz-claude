@@ -1605,7 +1605,9 @@ _by191 = open(os.path.join(K, "hra/scripts/byliny.gd"), encoding="utf-8").read()
 if "DISTANCE_FADE_PIXEL_DITHER" in _by191: _c191.append("byliny.gd: distance_fade PIXEL_DITHER")
 if "zanik_inst" not in _by191: _c191.append("byliny.gd: keře bez zanik_inst")
 _bsh191 = open(os.path.join(K, "hra/shaders/bylina.gdshader"), encoding="utf-8").read()
-if "bayer" in _bsh191 or "discard" in _bsh191 or "VERTEX *=" not in _bsh191: _c191.append("bylina.gdshader: ne zmenšení instance")
+# dithering jen v časovaném prolnutí (chyby.md 436: 0,25 s po překročení prahu, v_cas), ne trvalá šachovnice v pásmu
+_bfr191 = _bsh191[_bsh191.index("void fragment"):]
+if ("discard" in _bfr191 and "v_cas < 1.0" not in _bfr191) or "VERTEX *=" not in _bsh191: _c191.append("bylina.gdshader: ne zmenšení instance (dithering mimo časované prolnutí)")
 _zk191 = json.load(open(os.path.join(K, "pravidla/svet/byliny.json"), encoding="utf-8"))
 _bdo191 = float(_zk191.get("dosah_m", 0)); _z191 = _zk191.get("zanik_m", [0, 0])
 if not (_z191[1] - _z191[0] >= 12 and _z191[1] <= _bdo191): _c191.append("byliny zanik_m %s: pásmo < 12 m nebo za dosahem %s" % (_z191, _bdo191))
@@ -2006,6 +2008,20 @@ _ok435 = "custom_aabb" in _f435 and "ab.position.y - ab.size.y" in _f435 and "ab
 _kd436 = json.load(open(K + "/pravidla/svet/kere.json"))["daleko"]
 if len(_kd436.get("tint", [])) != 3 or 'set_shader_parameter("tint"' not in open(K + "/hra/scripts/byliny.gd").read(): _ok435 = False
 TEST("les_lod_bez_mezery", _ok435, "AABB buněk blízkých stromů souměrný kolem paty (visibility_range = vzdálenost paty jako shader)" if _ok435 else "les.gd _vyrob_blizko: AABB buňky se středem v korunách – strom v pásmu LOD zmizí")
+
+# tráva a rostliny nenaskakují (Míša 27. 11.: „ne, doskakovala tráva“ – fotky po krocích, trsy u cesty se objevovaly celé
+# v pásmu 20–40 m; video 16. 11.: časované prolnutí 0,25 s jako u stromů): trs louky (stebla), bylina a sada trav
+# (bylina), keř (listi zanik_inst) a impostor keře/byliny (ker_impostor) se při překročení prahu prolnou ditheringem –
+# shader porovná stav pro kameru teď a před cas_s (kamera_pred); louka.gd a byliny.gd předávají polohu z les.gd
+_c436 = []
+for _sh, _zn in (("stebla", "v_cas"), ("bylina", "v_cas"), ("listi", "v_kcas"), ("ker_impostor", "v_kcas")):
+    _t = open(K + "/hra/shaders/%s.gdshader" % _sh).read()
+    if "uniform vec3 kamera_pred" not in _t or "lod_cas > 0.5" not in _t or "discard" not in _t[_t.index("void fragment"):] or _zn not in _t[_t.index("void fragment"):]: _c436.append(_sh)
+for _sc in ("louka", "byliny"):
+    _t = open(K + "/hra/scripts/%s.gd" % _sc).read()
+    if 'set_shader_parameter("kamera_pred"' not in _t or "kamera_pred_ted" not in _t: _c436.append(_sc + ".gd")
+if "kamera_pred_ted = kpred" not in open(K + "/hra/scripts/les.gd").read(): _c436.append("les.gd kamera_pred_ted")
+TEST("rostliny_casove_prolnuti", not _c436, ("bez časovaného prolnutí: %s" % _c436) if _c436 else "trsy louky, byliny, sada trav, keře a jejich impostory se prolnou 0,25 s (kamera_pred z les.gd)")
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)

@@ -21,6 +21,9 @@ varying vec2 bunka;
 varying vec2 policko;
 varying float otoc;
 varying float odst;
+uniform vec3 kamera_pred;   // Míša 27. 11.: časované prolnutí s plným keřem/bylinou (listi.gdshader, bylina.gdshader)
+uniform float lod_cas = 0.0;
+varying float v_kcas;   // podíl plného (0 = jen impostor); impostor kreslí pixely b >= v_kcas
 
 // stejný hash jako listi.gdshader / bylina.gdshader (poloha zaokrouhlená na 1/8 m – plný keř a impostor jsou v různých
 // buňkách, poloha se liší v posledních bitech; nezaokrouhlený sin-hash by dal jiné číslo)
@@ -44,9 +47,18 @@ void vertex() {
 	float hz = hash_ker(wp);
 	odst = fract(hz * 7.31);
 	bool vid = true;
+	v_kcas = 0.0;
 	if (zanik.x != zanik.y) {
 		float vz = clamp((d - zanik.x) / (zanik.y - zanik.x), 0.0, 1.0);
 		vid = vz < hz * 0.8;   // přesný doplněk k plnému keři
+		if (lod_cas > 0.5) {
+			float vp = clamp((length(wp - kamera_pred) - zanik.x) / (zanik.y - zanik.x), 0.0, 1.0);
+			bool plny = !vid;
+			if (plny != (vp >= hz * 0.8) && abs(vz - vp) > 1e-5) {
+				float e = clamp((vz - hz * 0.8) / (vz - vp), 0.0, 1.0);
+				v_kcas = plny ? e : 1.0 - e; vid = true;
+			}
+		}
 	}
 	float vk = clamp((d - konec.x) / (konec.y - konec.x), 0.0, 1.0);
 	if (vk < fract(hz * 13.7 + 0.29)) vid = false;
@@ -70,6 +82,11 @@ void fragment() {
 	vec2 uv = policko + (bunka + clamp(UV, vec2(0.01), vec2(0.99)) / N) / policek;
 	vec4 a = texture(barva, uv);
 	if (a.a < 0.5) discard;
+	if (v_kcas > 0.0) {   // přechod s plným keřem: doplňkový dithering (každý pixel jen jedna podoba)
+		ivec2 q = ivec2(mod(FRAGCOORD.xy, 4.0)); int i = q.x + q.y * 4;
+		int bm[16] = int[16](0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5);
+		if ((float(bm[i]) + 0.5) / 16.0 < v_kcas) discard;
+	}
 	float li = smoothstep(0.0, 0.08, a.g - max(a.r, a.b) * 0.8);
 	vec3 var = vec3(0.9 + 0.2 * odst, 0.92 + 0.16 * fract(odst * 7.31), 0.9 + 0.18 * fract(odst * 3.17));
 	ALBEDO = a.rgb * mix(vec3(1.0), tint.rgb * var, li) * mix(0.7, 0.95, 1.0 - UV.y);

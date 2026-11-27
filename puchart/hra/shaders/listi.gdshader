@@ -37,13 +37,14 @@ float lod_casove(float d_ted, float d_pred, float mez) {
 	return dal ? 1.0 : 0.0;
 }
 varying float v_lod;
+varying float v_kcas;   // keř: časované prolnutí s impostorem (1 = celý)
 varying float v_far;   // Puchart: jako distance_fade (min, max): průhlednost = (d − min)/(max − min); min > max = mizí s dálkou
 varying float v_ao;          // vnitrek koruny tmavsi (Misa 0.61 "placacky": koruna jako jedna plocha bez hloubky)
 varying vec3 v_tint;         // kazdy trs listi trochu jinak (svetlejsi, zlutejsi, tmavsi)
 
 void vertex() {
 	vec3 wp = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-	v_lod = 1.0; v_far = 1.0;
+	v_lod = 1.0; v_far = 1.0; v_kcas = 1.0;
 	if (lod_mez.z > 0.5) {
 		float di = length((MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz - kamera_hrace);
 		if (lod_cas > 0.5) {
@@ -60,7 +61,15 @@ void vertex() {
 	if (zanik_inst && zanik.x != zanik.y) {   // Puchart (Míša 19. 11., plán E1 krok 1): mizení po rostlinách – práh z hashe pozice instance, rostlina se ke konci dosahu srazí k patě (ne šachovnice ditheru)
 		float vz = clamp((length(wp - INV_VIEW_MATRIX[3].xyz) - zanik.x) / (zanik.y - zanik.x), 0.0, 1.0);
 		float hz = fract(sin(dot(floor(wp.xz * 8.0 + 0.5) * 0.125, vec2(12.9898, 78.233))) * 43758.5453);   // poloha na 1/8 m – stejný hash jako ker_impostor.gdshader (Míša 23. 11.)
-		VERTEX *= step(hz * 0.8, vz);   // Míša 20. 11.: „před očima mi lezou stromy a keře ze země“ – žádné zvětšování od paty, rostlina se objeví celá v náhodné vzdálenosti pásma
+		bool ted_ = vz >= hz * 0.8;
+		if (lod_cas > 0.5 && lod_mez.z < 0.5) {   // keř: časované prolnutí s impostorem (Míša 27. 11., viz bylina.gdshader)
+			float vp = clamp((length(wp - kamera_pred) - zanik.x) / (zanik.y - zanik.x), 0.0, 1.0);
+			if (ted_ != (vp >= hz * 0.8) && abs(vz - vp) > 1e-5) {
+				float e = clamp((vz - hz * 0.8) / (vz - vp), 0.0, 1.0);
+				v_kcas = ted_ ? e : 1.0 - e; ted_ = true;
+			}
+		}
+		VERTEX *= ted_ ? 1.0 : 0.0;   // Míša 20. 11.: „před očima mi lezou stromy a keře ze země“ – žádné zvětšování od paty, rostlina se objeví celá v náhodné vzdálenosti pásma
 	}
 	float h = clamp(VERTEX.y / max(vyska, 1.0), 0.0, 1.0);
 	float faze = wp.x * 0.13 + wp.z * 0.11;
@@ -96,6 +105,7 @@ void fragment() {
 		if (lod_mez.z < 1.5) { if (b < v_lod) discard; }
 		else { if (b >= v_lod || b >= v_far) discard; }
 	}
+	if (v_kcas < 1.0 && v_kcas <= bayer4(FRAGCOORD.xy)) discard;   // keř: plný kreslí b < v, impostor b >= v
 	if (!zanik_inst && zanik.x != zanik.y) {   // stejné jako distance_fade PIXEL_DITHER (les.gd); keře bylin po instancích ve vertex() (Míša 19. 11.: šachovnice)
 		float f = clamp((length(VERTEX) - zanik.x) / (zanik.y - zanik.x), 0.0, 1.0);
 		if (f < bayer4(FRAGCOORD.xy)) discard;

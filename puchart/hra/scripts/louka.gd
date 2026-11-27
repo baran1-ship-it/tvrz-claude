@@ -211,9 +211,16 @@ func _trida(x: float, z: float) -> String:
 	if c < 0 or r < 0 or c >= st.get_width() or r >= st.get_height(): return ""
 	return sj["tridy"][int(st.get_pixel(c, r).r8)]
 
+var _les = null
 func _process(_d: float) -> void:
 	if cam == null or _trs == null: return
 	_svetlo_travy(_d)
+	# časované prolnutí trsů (Míša 27. 11. „doskakovala tráva“): poloha kamery před 0,25 s z lesa (les.gd _kamera_pred)
+	if _les == null: _les = get_tree().root.find_child("Les", true, false)
+	var lc_: float = 1.0 if (_les != null and _les.cfg.get("lod_casove", {}).get("zapnuto", false) and OS.get_environment("PUCHART_LOD_PASMO") == "") else 0.0
+	var kpr: Vector3 = _les.kamera_pred_ted if _les != null else cam.global_position
+	for mt_: Variant in [_trs.surface_get_material(0), _pas.surface_get_material(0) if _pas != null else null]:
+		if mt_ is ShaderMaterial: (mt_ as ShaderMaterial).set_shader_parameter("kamera_pred", kpr); (mt_ as ShaderMaterial).set_shader_parameter("lod_cas", lc_)
 	var oh: Dictionary = cfg.get("ohyb", {})   # plán C6: tráva se ohýbá od hráče (jemné trsy, stebla.gdshader ohyb_hrac)
 	if not oh.is_empty() and bool(oh.get("zapnuto", true)):
 		var pc := cam.global_position

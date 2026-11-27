@@ -34,6 +34,11 @@ uniform vec3 svetlo = vec3(1.0);            // normala nahoru (vertex) rozsvitil
 uniform vec3 slunce = vec3(0.0);
 uniform float stin_korun = 0.0;
 varying float sl_k;
+// Míša 27. 11. („ne, doskakovala tráva“; video 16. 11.: tráva jako stromy časovaným prolnutím 0,25 s): trs, který právě překročil
+// mez hustoty (hu − hs mění znaménko mezi polohou kamery teď a před lod_cas_s), se prolne ditheringem místo naskočení/zmizení
+uniform vec3 kamera_pred;
+uniform float lod_cas = 0.0;
+varying float v_cas;
 uniform float hust_konec = 1e6;
 uniform float hust_do = 130.0;
 uniform float konec_sirka = 30.0;
@@ -105,11 +110,17 @@ varying vec4 ic;           // MultiMesh custom: r = suchost (zluta trava), g = o
 varying vec2 bunka;        // levy horni roh bunky v atlasu
 varying float svisla;      // 1 = svisla karta (pata nepruhledna), 0 = karta shora
 
+float hu_z(float d) {   // hustota louky ve vzdálenosti d (stejně jako ve vertex(), z_custom)
+	if (rezim == 2) return smoothstep(pas_od.x, pas_od.y, d) * (1.0 - smoothstep(hust_konec, hust_konec + konec_sirka, d)) * hustota * 1.1;
+	return mix(1.0, hust_zbytek, smoothstep(hust_od, hust_do, d)) * (1.0 - smoothstep(hust_konec, hust_konec + konec_sirka, d)) * hustota * 1.1;
+}
+
 void vertex() {
 	svisla = abs(NORMAL.y) < 0.5 ? 1.0 : 0.0;
 	vyska = 1.0 - UV.y;                                     // 0 pata, 1 spicka
 	ic = INSTANCE_CUSTOM;
 	viditelnost = 1.0;
+	v_cas = 1.0;
 	if (mrizka) {
 		vec2 off = INSTANCE_CUSTOM.xy;
 		vec3 org = MODEL_MATRIX[3].xyz;
@@ -176,6 +187,15 @@ void vertex() {
 		if (rezim >= 1) {
 			bun = druh;
 		}
+		if (lod_cas > 0.5) {   // časované prolnutí trsu (viz kamera_pred)
+			float hp = hu_z(distance(pw.xz, kamera_pred.xz));
+			bool ted = hu > hs;
+			if (ted != (hp > hs) && abs(hu - hp) > 1e-5) {
+				float e = clamp((hu - hs) / (hu - hp), 0.0, 1.0);
+				v_cas = ted ? e : 1.0 - e;
+				if (!ted) hu = hs + prechod_trsu;   // mizející trs se ještě kreslí celý a rozpouští se
+			}
+		}
 		float s = h * navic * mix(0.75, 1.25, fract(hs * 17.31)) * clamp((hu - hs) / prechod_trsu, 0.0, 1.0) * mix(1.0, 1.6, dal);
 		if (rezim == 2) s *= mix(1.0, pas_rust, smoothstep(pas_od.y, hust_konec + konec_sirka, d));
 		float a = fract(hs * 91.7 + 0.13) * 6.2831853;
@@ -231,6 +251,7 @@ void fragment() {
 	float bayer[16] = float[](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
 	float prah_trsu = ic.a > 0.5 ? fract(ic.g * 13.71 + 0.37) : 0.5;
 	float vid = viditelnost < mix(prah_trsu, (bayer[idx] + 0.5) / 16.0, 0.08) ? 0.0 : 1.0;
+	if (v_cas < 1.0 && v_cas <= (bayer[idx] + 0.5) / 16.0) discard;   // časované prolnutí trsu
 	if (shora_mizi) {
 		float vy = (INV_VIEW_MATRIX * vec4(VIEW, 0.0)).y;          // k kamere: 1 = kamera primo nad
 		vid *= step((bayer[idx] + 0.5) / 16.0, 1.0 - smoothstep(0.35, 0.6, vy));

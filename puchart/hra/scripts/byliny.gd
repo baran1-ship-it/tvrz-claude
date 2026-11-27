@@ -131,12 +131,26 @@ func _impostory(zanik: Array) -> void:
 	if zanik.size() == 2: m.set_shader_parameter("zanik", Vector2(float(zanik[1]), float(zanik[0])))
 	var ko: Array = dc["konec_m"]
 	m.set_shader_parameter("konec", Vector2(float(ko[1]), float(ko[0])))
+	_cas_mat.append(m)
 	var ti: Array = dc.get("tint", [1.0, 1.0, 1.0])   # barevné vyrovnání s plným keřem (kere.json daleko.tint, měřeno 27. 11.)
 	m.set_shader_parameter("tint", Color(float(ti[0]), float(ti[1]), float(ti[2])))
 	q.surface_set_material(0, m)
 	_imp_mesh = q
 
 var _pas := {}   # "i,j" -> skvrny [x0, z0, x1, z1, nx, nz, šířka, zdroj]
+
+## Časované prolnutí rostlin (Míša 27. 11. „ne, doskakovala tráva“; video 16. 11.): poloha kamery před lod_casove.cas_s
+## z lesa (les.gd kamera_pred_ted) do materiálů bylin, keřů a jejich impostorů (bylina, listi, ker_impostor .gdshader)
+var _cas_mat: Array[ShaderMaterial] = []
+var _les_cas = null
+func _cas_tick() -> void:
+	if _cas_mat.is_empty(): return
+	if _les_cas == null: _les_cas = get_tree().root.find_child("Les", true, false)
+	var kc := get_viewport().get_camera_3d()
+	if kc == null: return
+	var on := _les_cas != null and bool(_les_cas.cfg.get("lod_casove", {}).get("zapnuto", false)) and OS.get_environment("PUCHART_LOD_PASMO") == ""
+	var kp: Vector3 = _les_cas.kamera_pred_ted if on else kc.global_position
+	for m_: ShaderMaterial in _cas_mat: m_.set_shader_parameter("kamera_pred", kp); m_.set_shader_parameter("lod_cas", 1.0 if on else 0.0)
 
 var _listi_sh: Shader
 func _fade(m: Mesh, od: float, do_: float) -> Mesh:
@@ -152,7 +166,7 @@ func _fade(m: Mesh, od: float, do_: float) -> Mesh:
 			sm.set_shader_parameter("stred", Vector3(bb.get_center().x, bb.position.y + bb.size.y * 0.5, bb.get_center().z))
 			sm.set_shader_parameter("vyska", maxf(bb.end.y, 0.5)); sm.set_shader_parameter("sila_vetru", 0.6); sm.set_shader_parameter("objem", 0.5)
 			sm.set_shader_parameter("zanik", Vector2(do_, od)); sm.set_shader_parameter("zanik_inst", true)
-			mm.surface_set_material(i, sm); continue
+			_cas_mat.append(sm); mm.surface_set_material(i, sm); continue
 		if mat is BaseMaterial3D:
 			mm.surface_set_material(i, _zanik_inst(mat as BaseMaterial3D, do_, od))   # dřív distance_fade PIXEL_DITHER = šachovnice
 	return mm
@@ -172,6 +186,7 @@ func _zanik_inst(mat: BaseMaterial3D, do_: float, od: float) -> ShaderMaterial:
 	sm.set_shader_parameter("drsnost", mat.roughness)
 	sm.set_shader_parameter("uv_meritko", mat.uv1_scale); sm.set_shader_parameter("uv_posun", mat.uv1_offset)
 	sm.set_shader_parameter("zanik", Vector2(do_, od))
+	_cas_mat.append(sm)
 	return sm
 
 func vsechny_site() -> Array:
@@ -188,6 +203,7 @@ func _trida(x: float, z: float) -> String:
 	return sj["tridy"][int(st.get_pixel(c, r).r8)]
 
 func _process(_d: float) -> void:
+	_cas_tick()
 	var nb: Dictionary = cfg.get("nove_bunky", {"kazdych_snimku": 10, "pocet": 3})   # byliny.json (2. 11.: nárazová práce = zásek)
 	if cam and Engine.get_process_frames() % int(nb["kazdych_snimku"]) == 0:
 		aktualizuj(int(nb["pocet"]))

@@ -17,7 +17,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("adr"); ap.add_argument("--prah", type=float, default=60.0); ap.add_argument("--plocha", type=int, default=40)
 ap.add_argument("--od", type=float, default=0.25); ap.add_argument("--do", type=float, default=0.7); ap.add_argument("--vyrez", action="store_true"); ap.add_argument("--pomer", type=float, default=5.0)
 a = ap.parse_args()
-fs = sorted(glob.glob(os.path.join(a.adr, "*_[0-9][0-9][0-9].png")))
+fs = sorted(f for f in glob.glob(os.path.join(a.adr, "*_[0-9][0-9][0-9].png")) if not os.path.basename(f).startswith("skok_"))
 if len(fs) < 2: sys.exit("málo snímků")
 
 def nacti(f):

@@ -98,7 +98,7 @@ func _process(d: float) -> void:
 	var kc := get_viewport().get_camera_3d()
 	if kc:   # LOD po stromech: poloha kamery do materiálů listí, kůry a impostorů (ne global uniform – 12. 11.)
 		var kp := kc.global_position
-		var kpred := _kamera_pred(kp)
+		var kpred := _kamera_pred(kp); kamera_pred_ted = kpred   # louka.gd (tráva) bere tutéž polohu
 		for m: ShaderMaterial in _lod_mat:
 			m.set_shader_parameter("kamera_hrace", kp); m.set_shader_parameter("kamera_pred", kpred)
 	_kol_cas -= d
@@ -216,6 +216,7 @@ func _lod_cas() -> float:
 	return 1.0 if bool(cfg.get("lod_casove", {}).get("zapnuto", false)) and OS.get_environment("PUCHART_LOD_PASMO") == "" else 0.0
 
 var _listi_sh: Shader
+var kamera_pred_ted := Vector3.ZERO   # poloha kamery před lod_casove.cas_s (pro louka.gd)
 var _lod_mat: Array[ShaderMaterial] = []   # materiály s kamera_hrace (listí, kůra, impostory)
 var _kura_sh: Shader
 func _listi(m: Mesh, od := 0.0, do_ := 0.0, strom := true, lod := Vector3.ZERO, daleko := Vector2.ZERO) -> Mesh:
