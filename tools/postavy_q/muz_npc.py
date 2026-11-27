@@ -317,8 +317,8 @@ for o in site:
     o.data.materials.append(mat[druhy[o.name]])
 
 # --- vlasy (Misa 27. 11. „vlasy borec na dvore“; rešerše reserse_animace_postavy_27_11.md kap. 2): karty vlasu se
-# nezmensuji collapse (roztrhal je), ale vnejsi karty se nechaji cele do rozpoctu vlasy_troj_max a vnitrni (zakryte)
-# vypadnou; pod vlasy nepruhledna cepice (kopie kuze hlavy pod vlasy) v barve vlasu z husteho bloku textury vlasu -
+# nezmensuji collapse (roztrhal je), ale nejvetsi karty (plocha) se nechaji cele do rozpoctu vlasy_troj_max a male
+# (odstavajici prameny, zakryte) vypadnou; pod vlasy nepruhledna cepice (kopie kuze hlavy pod vlasy) v barve vlasu z husteho bloku textury vlasu -
 # mezerami prosvita vlas, ne bila kuze temene (muz_npc.json cepice)
 import bmesh  # noqa: E402
 import numpy as np  # noqa: E402
@@ -365,8 +365,9 @@ if VL and vlasy_o and hlava_o:
                         if g2.index not in hotovo:
                             hotovo.add(g2.index)
                             fr.append(g2)
-            c = sum((o.matrix_world @ g.calc_center_median() for g in ost), Vector()) / len(ost)
-            ostrovy.append(((c - stred).length, sum(len(g.verts) - 2 for g in ost), ost))
+            # nejvic kryje nejvetsi karta (plocha); vnejsi poradi vybralo odstavajici prameny - oblouky nad hlavou (02, 05)
+            plocha = sum(g.calc_area() for g in ost)
+            ostrovy.append((plocha, sum(len(g.verts) - 2 for g in ost), ost))
         ostrovy.sort(key=lambda e: -e[0])
         troj, pryc = 0, []
         for d, t, ost in ostrovy:
@@ -377,7 +378,7 @@ if VL and vlasy_o and hlava_o:
         bmesh.ops.delete(bm, geom=pryc, context="FACES")
         bm.to_mesh(o.data)
         bm.free()
-        print("VLASY", o.name, "karet", len(ostrovy), "troj", troj, "(vnejsi do troj_max)")
+        print("VLASY", o.name, "karet", len(ostrovy), "troj", troj, "(nejvetsi do troj_max)")
     # cepice: plochy hlavy, jejichz vsechny vrcholy jsou do vzdal_m od vlasu
     cep = hlava_o.copy()
     cep.data = hlava_o.data.copy()
