@@ -263,9 +263,37 @@ c = SADA.split("_")[2]  # npc_muz_<cislo postavy 01..05>[_varianta], npc_zena_<c
 _tx = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "muz_npc.json")))
 TX = _tx["zena_" + c] if ZENA else _tx[c]
 mat = {}
+def vlasy_dilatace(img):
+    """Barva pramenu do pruhledne casti a alfa x nasobek (muz_npc.json vlasy_textura) - cerne okraje na mipmapach."""
+    import numpy as np
+    vt = _tx["vlasy_textura"]
+    w, h = img.size
+    a = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    zn = a[..., 3] > 0.5
+    rgb = a[..., :3] * zn[..., None]
+    vah = zn.astype(np.float32)
+    for _ in range(int(vt["dilatace_px"])):
+        s = np.zeros_like(rgb)
+        n = np.zeros_like(vah)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            s += np.roll(rgb, (dy, dx), (0, 1))
+            n += np.roll(vah, (dy, dx), (0, 1))
+        nove = (vah == 0) & (n > 0)
+        rgb[nove] = s[nove] / n[nove][:, None]
+        vah[nove] = 1.0
+    a[..., :3] = np.where(zn[..., None], a[..., :3], rgb)
+    a[..., 3] = np.clip(a[..., 3] * float(vt["alfa_nasobek"]), 0.0, 1.0)
+    img.pixels[:] = a.ravel()
+    img.update()
+    return img
+
+
 for k in ("telo", "hlava", "vlasy"):
     mat[k] = bpy.data.materials.new(SADA + "_" + k)
-    material(mat[k], obr(TX[k][0] + ".png"), obr(TX[k][1] + ".png"), k != "hlava")
+    bv = obr(TX[k][0] + ".png")
+    if k == "vlasy" and bv is not None:
+        bv = vlasy_dilatace(bv)
+    material(mat[k], bv, obr(TX[k][1] + ".png"), k != "hlava")
 
 
 def druh(o):
@@ -293,7 +321,7 @@ for o in site:
     r = min(1.0, pomer * (2.0 if ("head" in j or "hands" in j) else 1.0))
     # Misa 26. 11. (0.9999996 „nemaji oci, strasidelne obliceje“): bulva 201 vrcholu po zmenseni ~20 - duhovka z atlasu
     # hlavy rozmazana do kruhu; oci (2 x 200 troj.) se nezmensuji
-    if "eyes" in j:
+    if any(x in j for x in _tx["nezmensovat"]):
         r = 1.0
     if r < 1.0:
         bpy.context.view_layer.objects.active = o

@@ -1,5 +1,18 @@
 {
  "_popis": "Textury postav NPC Character Pack (Misa 25. 11., Disk 1qW5K2xC0Ega4xWvTlq7xGVZ5r9ZBLDhL) pro tools/postavy_q/muz_npc.py: druh povrchu (podle materialu FBX: Cloth*/Default = telo, Head = hlava + ruce + oci, Hair = vlasy, Default u vousu/vlasu = vlasy) -> [albedo, normaly] (PNG 1K z TGA). Postavy 03-05 vlastni hlavu nemaji - hlava muzu z postavy 02 (T_NPC_Male_Heads).",
+ "nezmensovat": [
+  "eyes",
+  "hair",
+  "beard",
+  "mustache",
+  "brow"
+ ],
+ "_nezmensovat": "Misa 26. 11. oci a 27. 11. („vlasy borec na dvore“ - cerne strepy, snimek build/vlasy/tvar_pred.png): karty vlasu po zmenseni (Decimate collapse) ridke a roztrhane, kuze temene prosvita; kusy s temito slovy ve jmene se nezmensuji",
+ "vlasy_textura": {
+  "dilatace_px": 24,
+  "alfa_nasobek": 1.35
+ },
+ "_vlasy_textura": "rešerše reserse_animace_postavy_27_11.md kap. 2 (The Witness / Castaño): pod pruhlednou casti textury vlasu byla skoro cerna barva (jas 24/255) - na mipmapach cerne okraje; barva pramenu se roztahne do pruhledne casti (dilatace_px kroku) a alfa x alfa_nasobek (vic pokryti pri orezu 0,5 na mipmapach; odhad, overit snimkem)",
  "01": {
   "telo": [
    "T_NPC_Character_01_Albedo",
