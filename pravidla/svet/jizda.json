@@ -231,6 +231,11 @@
     25.0
    ],
    "sklon_hlavy_s": 1.6,
+   "pastva_klip": "Eat",
+   "test_pastva_pod_m": 0.4,
+   "test_pastva_pred_m": 0.2,
+   "_test_pastva": "tools/foto_kun_pastva.gd (test kun_pastva): hlava pri pastve aspon tolik m pod kosti horse Neck (konec krku u hrudi) a aspon tolik m pred ni ve smeru kone - oblouk krku (Misa 27. 11.) mel hlavu pod hrudi (pred < 0). Namereno 27. 11. klip Eat: 0,55 m pod, 0,53 m pred",
+   "_pastva_klip": "Misa 27. 11. („kun zere s ohnutym krkem“, snimek build/foto_kun_pastva/souhrn.png): pastva skriptem (krk 75 st. rozdeleny rovnomerne po kostech + hlava 18 st.) stocila krk Hero Horse do oblouku, huba ke hrudi; autorsky klip modelu eating (snimky 546-646) = krk vpred dolu, huba u travy. Je-li klip v modelu, kun.gd ho prolina ve smycce podle _pastva (kun_zivy dal ridi jen cas pastvy) a kun_zivy krk, hlavu ani celist pri pastve neohyba; pastva_krk_st a pastva_hlava_st jen pro model bez klipu pastvy.",
    "pastva_krk_st": 75.0,
    "pastva_hlava_st": 18.0,
    "zvykani_hz": 1.3,

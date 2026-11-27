@@ -109,6 +109,7 @@ var _krok := 0.0
 var _past := 0.0
 var _cesta_mriz := {}             # bunka 8 m -> [[index osy, index bodu]]
 var _zivy: Node = null            # scripts/kun_zivy.gd (SkeletonModifier3D)
+var _pastva_v_klipu := false      # pastva = klip modelu (jizda.json kun.zivy.pastva_klip), kun_zivy jen ridi cas
 var _jizda_m := 0.0               # ujeto od posledni udalosti jizda_100m (dovednosti: Jizda)
 var plave := false                # hloubka >= PLAVAT_OD: kun plave (klip Swim, vznasi se u hladiny)
 var hloubka := 0.0                # voda pod konem (svet.hladina - povrch pod kopyty), 0 = sucho
@@ -310,6 +311,7 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	# pohyby navic po animaci (pastva, ocas, usi, dech - Misa 0.99 „kun se vubec nepohnul“)
 	_zivy = preload("res://scripts/kun_zivy.gd").new()
 	_zivy.name = "Zivy"
+	_zivy.set_meta("pastva_klipem", _pastva_v_klipu)
 	_kostra.add_child(_zivy)
 	global_position = poloha
 	_yaw = yaw
@@ -563,7 +565,20 @@ func _strom() -> void:
 	bt.add_node("plavani", sw)
 	bt.connect_node("voda", 0, "tempo")
 	bt.connect_node("voda", 1, "plavani")
-	bt.connect_node("jednou", 0, "voda")
+	# pastva (Misa 27. 11.): autorsky klip pastvy modelu ve smycce prolnuty pres stani podle kun_zivy._pastva
+	var pk := _klip(String((Pravidla.cti("jizda", "kun", "zivy") as Dictionary).get("pastva_klip", "")))
+	if pk != "":
+		_ap.get_animation(pk).loop_mode = Animation.LOOP_LINEAR
+		bt.add_node("pastva", AnimationNodeBlend2.new())
+		var pa := AnimationNodeAnimation.new()
+		pa.animation = pk
+		bt.add_node("pastva_klip", pa)
+		bt.connect_node("pastva", 0, "voda")
+		bt.connect_node("pastva", 1, "pastva_klip")
+		bt.connect_node("jednou", 0, "pastva")
+		_pastva_v_klipu = true
+	else:
+		bt.connect_node("jednou", 0, "voda")
 	bt.connect_node("jednou", 1, "jednou_klip")
 	bt.connect_node("output", 0, "jednou")
 	_at.tree_root = bt
@@ -1073,6 +1088,8 @@ func _physics_process(delta: float) -> void:
 	if _zivy:
 		_zivy.set("stoji", absf(_rych) < 0.3)
 		_zivy.set("volny", jezdec == null)
+		if _pastva_v_klipu:
+			_at.set("parameters/pastva/blend_amount", smoothstep(0.0, 1.0, float(_zivy.get("_pastva"))))
 	# volny kun se obcas rozhledne (pastvu dela kun_zivy)
 	if jezdec == null and absf(_rych) < 0.1 and float(_zivy.get("_pastva") if _zivy else 0.0) < 0.05:
 		_past -= delta

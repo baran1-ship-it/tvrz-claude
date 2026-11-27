@@ -87,6 +87,8 @@ func _process_modification() -> void:
 		_pastva_t = _rng.randf_range(float(r[0]), float(r[1]))
 	_pastva = move_toward(_pastva, _pastva_cil, dt / float(Z["sklon_hlavy_s"]))
 	var p := smoothstep(0.0, 1.0, _pastva)
+	# pastva klipem modelu (jizda.json zivy.pastva_klip, kun.gd): krk, hlavu ani celist tu neohybat (oblouk, Misa 27. 11.)
+	var pk := 0.0 if bool(get_meta("pastva_klipem", false)) else p
 	# ocas: stale mirne kyvani + obcas svihnuti (mouchy) - i v pohybu
 	_ocas_t -= dt
 	if _ocas_t <= 0.0:
@@ -117,14 +119,14 @@ func _process_modification() -> void:
 		_toc(sk, i, _bok.cross(_nahoru), sin(_t * 0.21) * deg_to_rad(float(Z["vaha_st"])) * st)
 	# krk a hlava: pastva dolu (kladny uhel kolem _bok = osa vpred k nebi, proto zaporne) (rozdeleni uhlu po kostech krku), pohozeni nahoru-dolu, zvykani
 	var krk: Array = _kosti.get("krk", [])
-	var dolu := deg_to_rad(float(Z["pastva_krk_st"])) * p
+	var dolu := deg_to_rad(float(Z["pastva_krk_st"])) * pk
 	var poh := sin(_hlava * PI * 2.0) * deg_to_rad(12.0) * _hlava
 	for j in krk.size():
 		_toc(sk, krk[j], _bok, -(dolu + poh) / float(krk.size()) + sin(_t * 0.6 + j) * deg_to_rad(0.6))
 	for i: int in _kosti.get("hlava", []):
-		_toc(sk, i, _bok, -deg_to_rad(float(Z["pastva_hlava_st"])) * p + sin(_t * 0.37) * deg_to_rad(1.5))
+		_toc(sk, i, _bok, -deg_to_rad(float(Z["pastva_hlava_st"])) * pk + sin(_t * 0.37) * deg_to_rad(1.5))
 	for i: int in _kosti.get("celist", []):
-		_toc(sk, i, _bok, -absf(sin(_t * TAU * float(Z["zvykani_hz"]))) * deg_to_rad(6.0) * p)
+		_toc(sk, i, _bok, -absf(sin(_t * TAU * float(Z["zvykani_hz"]))) * deg_to_rad(6.0) * pk)
 	# usi
 	var us: Array = _kosti.get("usi", [])
 	for k in mini(2, us.size()):

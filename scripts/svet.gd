@@ -14998,14 +14998,8 @@ func _krajina() -> void:
 			if k != "":
 				pridej.call(k, px, pz, sc, ponor * sc if not k.begins_with("kamen") else -0.3, 0.25)
 				pocty[k.substr(0, k.rfind("_"))] = int(pocty.get(k.substr(0, k.rfind("_")), 0)) + 1
-				# vyvraceny koren (hlaseni 0.54 bod 3): jen v lese vedle padleho kmene, ne sam na louce
-				if k.begins_with("dead_tree") and les > 0.6:
-					var rk := RandomNumberGenerator.new()
-					rk.seed = hash(Vector2(pz, px))
-					var ko := Vector2.from_angle(rk.randf() * TAU) * rk.randf_range(1.5, 3.0)
-					if _les(px + ko.x, pz + ko.y) > 0.6 and _st(3, px + ko.x, pz + ko.y) < 0.4:
-						pridej.call("root_cluster_01_0", px + ko.x, pz + ko.y, 1.0, 0.1, 0.25)
-						pocty["root_cluster_01"] = int(pocty.get("root_cluster_01", 0)) + 1
+				# vyvraceny koren: Misa 27. 11. („v lese koren, ktery uz ve hre nema cil“) - samostatny korenovy talir 1,5-3 m
+				# od kmene s nicim nesouvisel; vyvrat = kmen s korenem na konci (jeden zaznam), dokud ho nemame, koren se nesazi
 		z += krok
 	_vychozy(rng, pridej, pocty)
 	_pata_sten(pridej, pocty)
