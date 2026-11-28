@@ -1888,3 +1888,5 @@ Hotovo v kódu a datech (testy u každého):
   Vzor kostry `npc_bartos_cela.gltf` v kontejneru není (jen import) → `tools/postavy_q/vyvoz_res.gd` a `UAL_SADA=<glb>`.
   Zdroj: Disk „Medieval muzi“ `npc-characters-male-pack.zip` (FBX `SK_NPC_Character_0N_Full_01`) → `zk_muz/muzNN01.fbx`
   → `zk_muz/vyvoz.gd` → `muz_npc.py`.
+- **Nový kontejner (28. 11.):** test smyslu před exportem potřebuje `tools/krok_b/vysky.json` (v repu není) →
+  `/opt/bl/bin/python tools/krok_b/vysky.py tools/krok_b/vysky.json` (několik minut) před prvním `tools/export.sh`.
