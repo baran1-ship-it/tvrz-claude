@@ -18,6 +18,9 @@ krok "origin/main (nove.py cte modely/nove/*.glb)"
 git fetch -q --depth 1 origin main || true
 krok "vysky.json (test smyslu)"
 [ -f tools/krok_b/vysky.json ] || $B tools/krok_b/vysky.py tools/krok_b/vysky.json
+krok "jablon (strom2.py, predani 15. 11.) a barvy vrcholu linearni -> sRGB (barvy_vrcholu.json soubory; 28. 11. rychle.sh barvy)"
+[ -f modely/nove/jablon.glb ] || $B blender/strom2.py -- jablon || [ -f modely/nove/jablon.glb ]
+python3 tools/barvy_vrcholu.py
 krok "procedurální textury"
 python3 tools/gen_tex.py > /dev/null
 echo "PRIPRAVA OK (borovice z Disku, jablon strom2.py, domy vsi a dvere tvrz-modely: viz predani.md 15. 11. - kontroluje export)"

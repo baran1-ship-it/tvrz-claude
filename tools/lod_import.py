@@ -141,7 +141,13 @@ def zapis(p, cil):
     t = cti_import(p)
     if cil is None:
         t2 = re.sub(r"\nmeshes/generate_lods=\w+", "\nmeshes/generate_lods=false", t)
+        if "\nmeshes/generate_lods=" not in t2:
+            # .import bez [params] (novy soubor po prestavbe, predani 28. 11.): Godot doplni vychozi = LOD zapnute
+            t2 = t2.rstrip("\n") + ("\n" if "\n[params]" in t2 else "\n\n[params]\n") + "\nmeshes/generate_lods=false\n"
     else:
+        if subresources(t)[0] is None:
+            # .import bez _subresources (novy soubor, jen [remap]/[deps] - predani 28. 11.): doplnit prazdne na konec [params]
+            t = t.rstrip("\n") + ("\n" if "\n[params]" in t else "\n\n[params]\n") + "\n_subresources={}\n"
         sub, (a, b) = subresources(t)
         sub = sub or {}
         sm = sub.setdefault("meshes", {})

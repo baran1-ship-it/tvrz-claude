@@ -1890,3 +1890,9 @@ Hotovo v kódu a datech (testy u každého):
   → `zk_muz/vyvoz.gd` → `muz_npc.py`.
 - **Nový kontejner (28. 11.):** test smyslu před exportem potřebuje `tools/krok_b/vysky.json` (v repu není) →
   `/opt/bl/bin/python tools/krok_b/vysky.py tools/krok_b/vysky.json` (několik minut) před prvním `tools/export.sh`.
+- **Export 28. 11. spadl na `lod_import.py` (rc 19):** nově postavené GLB (domy vsi po `ves_domy.py`, přestavěné postavy)
+  mají `.import` jen s `[remap]` bez `[params]`/`_subresources` → `zapis` padal na rozbalení None, u celého souboru
+  regex nic nenahradil (Godot by doplnil výchozí = LOD zapnuté). Opraveno v nástroji: chybějící sekci doplní.
+  Jabloň z `strom2.py` je třeba převést `python3 tools/barvy_vrcholu.py` (barvy vrcholů lineární → sRGB, značka) –
+  oba kroky jsou teď v `tools/export_priprava.sh`. `rychle.sh barvy` hlásí „výjimka bez souboru krcma_L.glb“, když
+  model krčmy v kontejneru není (balík z minulého vydání) – neškodné.
