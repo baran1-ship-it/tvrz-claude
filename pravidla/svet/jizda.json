@@ -436,6 +436,11 @@
   "_25_11_sedlo": "Misa 25. 11. „na koni nech original sedlo“: sedlo, deka, trmeny a sukne z modelu Hero Horse (tools/kun_hero.py), sedadlo jezdce z site PA_Saddle (kun.gd _sedadlo), dobove sedlo Balt Horse (vystroj) vypnuto; postroj do mereni kohoutku nepocitan",
   "_klipy_z_useku_26_11": "Misa 26. 11. (0.9999997: kun v klusu „blik a znovu“, telo se chveje a preskakuje): cas = snimek/30 (stopa 1555 snimku = 51,83 s), ne (snimek-1)/30; useky podle nejmensiho svu smycky (zk_muz/kun_svy.gd: max posun kosti mezi prvnim a poslednim snimkem) - drive sev cvalu 29 cm, kroku 19, kroku vlevo 57 cm; ted pod 1 cm (krok vpravo 5,8)",
   "klus_m_s": 3.6,
+  "klip_m_s": {
+   "Walk": 1.18,
+   "Gallop": 11.55
+  },
+  "_klip_m_s": "Misa 27. 11. („jizda nic moc oproti puvodnimu, musis to sladit“; rešerše reserse_animace_postavy_27_11.md kap. 4, RDR2 GDC 2021: tempo klipu podle zmerene rychlosti): rychlost, kterou klip modelu sam „jde“ - kopyto v opore vuci telu, ZMERENO tools/kun_klipy_rychlost.gd 28. 11. (kun_hero: pri krok 1,7 m/s kopyta 1,18 m/s = klouzala dopredu; pri cval 6,5 m/s 11,55 m/s = nohy dvakrat rychleji nez kun - klip Gallop je trysk). kun.gd: tempo = rychlost kone / rychlost klipu podle chodu (krok Walk, cval a trysk Gallop, klus prolnuti); klip bez zaznamu tempo 1. Trot NEZMERENO (klus jen v prechodu).",
   "_klus_m_s": "Misa 26. 11. (klus „chveje se a preskakuje“): bod klipu Trot v BlendSpace2D mezi krokem a cvalem (kun.gd _strom) - jinak se v klusu michal krok 1,13 s s cvalem 0,5 s bez sladeni; skutecny klus kone 3,5-4,5 m/s; jen kdyz model klip Trot ma"
  },
  "telo": {

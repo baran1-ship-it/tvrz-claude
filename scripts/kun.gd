@@ -40,6 +40,7 @@ static var CESTA_DOHLED := float(Pravidla.cti("jizda", "kun", "cesta_dohled_m"))
 static var CESTA_DOHLED_V := float(Pravidla.cti("jizda", "kun", "cesta_dohled_za_rychlost"))
 static var CESTA_ODBOCKA := deg_to_rad(float(Pravidla.cti("jizda", "kun", "cesta_odbocka_st")))
 static var PASTVA: Array = Pravidla.cti("jizda", "kun", "pastva_s")
+static var KLIP_M_S: Dictionary = Pravidla.cti("jizda", "kun").get("klip_m_s", {})
 static var DOSAH := float(Pravidla.cti("jizda", "kun", "dosah_m"))
 static var KOLIZE: Array = Pravidla.cti("jizda", "kun", "kolize_m")
 static var KOLIZE_Y := float(Pravidla.cti("jizda", "kun", "kolize_vyska_m"))
@@ -1063,7 +1064,15 @@ func _physics_process(delta: float) -> void:
 	# kopyta neklouzala (4. 11., kun_henry); krok podobne podle krok
 	var rv := absf(_rych)
 	var tempo := 1.0
-	if rv > float(CHODY["cval"]):
+	if not KLIP_M_S.is_empty():
+		# Misa 27. 11. (jizda horsi nez s puvodnim konem): tempo = rychlost kone / zmerena rychlost klipu (jizda.json
+		# klip_m_s) - kopyta neklouzou; mezi krokem a cvalem prolnuti rychlosti klipu jako prolnuti BlendSpace
+		var vw := float(KLIP_M_S.get("Walk", CHODY["krok"]))
+		var vg := float(KLIP_M_S.get("Gallop", CHODY["cval"]))
+		var u := clampf((rv - float(CHODY["krok"])) / maxf(float(CHODY["cval"]) - float(CHODY["krok"]), 0.01), 0.0, 1.0)
+		tempo = rv / lerpf(vw, vg, u) if rv > 0.2 else 1.0
+		tempo = maxf(tempo, 0.3)
+	elif rv > float(CHODY["cval"]):
 		tempo = clampf(rv / float(CHODY["cval"]), 1.0, 1.6)
 	elif rv > 0.2 and rv < float(CHODY["krok"]):
 		tempo = clampf(rv / float(CHODY["krok"]), 0.6, 1.0)
