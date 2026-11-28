@@ -404,19 +404,7 @@ if VL and vlasy_o and hlava_o:
     bm.to_mesh(cep.data)
     bm.free()
     cep.data.materials.clear()
-    # 28. 11. (kontrola pred vydanim, muzi 01 a 02 s holym temenem): cepice s materialem vlasu (alfa, orez 0,5) byla
-    # deravá vsude, kde ma husty blok alfu pod orezem -> vlastni NEPRUHLEDNY material v prumerne barve pramenu (alfa > 0,5)
-    mc = bpy.data.materials.new(SADA + "_cepice")
-    mc.use_nodes = True
-    if img_v:
-        px = np.array(img_v.pixels[:], dtype=np.float32).reshape(-1, 4)
-        px = px[px[:, 3] > 0.5] if (px[:, 3] > 0.5).any() else px
-        c = px[:, :3].mean(0)
-        if img_v.colorspace_settings.name == "sRGB" and not img_v.is_float:
-            c = np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
-        mc.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (float(c[0]), float(c[1]), float(c[2]), 1.0)
-    mc.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.85
-    cep.data.materials.append(mc)
+    cep.data.materials.append(mat["vlasy"])
     site.append(cep)
     print("CEPICE ploch", len(cep.data.polygons))
 
