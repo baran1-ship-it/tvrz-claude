@@ -16,9 +16,7 @@
  "vlasy_karty": {
   "troj_max": 2000,
   "cepice_vzdal_m": 0.02,
-  "cepice_posun_m": 0.002,
-  "cepice_zmenseni": 1.0,
-  "_cepice_zmenseni": "28. 11.: pomer zmenseni cepice pod vlasy (1 = nezmensovat). Pri zmenseni jako telo (muz 01: 1490 ploch -> 165 troj.) cepice derava = hole temeno muzu 01, 02; neprusvitny material misto alfy byl slepa ulicka (zeny s hladkou helmou)"
+  "cepice_posun_m": 0.002
  },
  "_vlasy_karty": "Misa 27. 11.: vlasy postavy 03 maji 16 353 troj. (2x cely rozpocet postavy 7 500); collapse je roztrhal, rovinne slouceni ubralo jen 5 % (karty zakrivene). Karty se nechaji cele: nejvetsi (plocha) do troj_max, male vypadnou (27. 11.: poradi „nejdal od stredu“ vybralo odstavajici prameny - oblouky nad hlavou u 02 a 05); troj_max 2 500 -> 2 000 (postavy 14,4 tis. troj. proti ~9,5 dřív); pod vlasy cepice = plochy hlavy do cepice_vzdal_m od vlasu, posunute o cepice_posun_m ven, material vlasu s UV do husteho bloku textury (vyhledano automaticky); troj_max a vzdalenosti odhad - overit snimkem a rozpoctem | 27. 11.: cepice_vzdal_m 0,035 zasahla na celo (seda skvrna pod ofinou, snimek build/vlasy/vlasy_pred_po2.png) - 0,02",
  "01": {

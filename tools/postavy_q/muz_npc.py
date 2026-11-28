@@ -415,8 +415,6 @@ pomer = min(1.0, CIL / troj)
 for o in site:
     j = o.name.lower()
     r = min(1.0, pomer * (2.0 if ("head" in j or "hands" in j) else 1.0))
-    if j == "cepice_vlasu" and VL:
-        r = min(1.0, float(VL.get("cepice_zmenseni", 1.0)))     # pomer pro cepici primo (1 = nezmensovat)
     # Misa 26. 11. (0.9999996 „nemaji oci, strasidelne obliceje“): bulva 201 vrcholu po zmenseni ~20 - duhovka z atlasu
     # hlavy rozmazana do kruhu; oci (2 x 200 troj.) se nezmensuji
     if any(x in j for x in _tx["nezmensovat"]):
