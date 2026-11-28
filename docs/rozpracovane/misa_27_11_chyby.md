@@ -8,7 +8,7 @@ jak to řeší jiné hry, a s tím se řiď“.
 
 | # | Co Míša viděla | Rozbor | Oprava (záznam/pravidlo) | Kontrola | Stav |
 |---|---|---|---|---|---|
-| 1 | Břehy potoka zubaté, nepřirozené (11, x −2 z 25 u tvrze) | | | | ROZBOR |
+| 1 | Břehy potoka zubaté, nepřirozené (11, x −2 z 25 u tvrze) | POTVRZENO (snímek `build/f27/breh_misa.png`, kód): je to příkop tvrze (`blender/fort.py`): drobné výmoly (vlna 2,6 m) na mřížce 1 m = zuby na čáře vody, bahno se zapínalo tvrdě po vrcholech (schody) | u čáry vody jen velké zátoky (`prikop.vymoly_bez_m`), bahno plynule do trávy (`bahno_prechod_m`); rešerše Unreal splajny | snímek po exportu | OPRAVENO v exportu, čeká export |
 | 2 | Louky za vesnicí chudé (02–04, x 364–558 z 1037–1062) | NAMĚŘENO (test louka_bod, TVRZ_CO 340–580 × 1020–1080): hustota trsů 23–25 % na celé ploše; POTVRZENO v kódu: `export_game.py` mřížky trávy × (1 − 0,75 les) podle plánu „les“ a hra znovu × světlo pod korunami (`louka._svetlo_lesa`) – řídký les srážka dvakrát | les ubírá trávu jen světlem ve hře (`les_podrost.json`), Blender bez srážky za les | louka_bod po exportu; výkon NEOVĚŘENO na tabletu | OPRAVENO v exportu, čeká export |
 | 3 | FPS dobré, ale bez trávy (GPU tráva vypnutá?) | | | | ROZBOR |
 | 4 | V lese kořen bez smyslu (09, x 227 z 363) | POTVRZENO (kód): kořenový talíř `root_cluster_01` sázel `svet._krajina` samostatně 1,5–3 m od padlého kmene – s ničím nesouvisel | samostatný kořen se nesází; vývrat = kmen s kořenem jako jeden záznam (zatím není) | NEOVĚŘENO snímkem | OPRAVENO v kódu |

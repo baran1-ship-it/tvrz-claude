@@ -40,6 +40,32 @@ def smooth(a, b, x):
     return t * t * (3 - 2 * t)
 
 
+def _cara_vody():
+    """Vzdalenosti od zdi (rect_dist), kde profil prikopu protne hladinu: vnitrni a vnejsi breh."""
+    h = _PRIKOP["hladina_y"]
+    out, pred = [], None
+    for i in range(0, 1400):
+        d = i * 0.01
+        p = _profil(d)
+        if pred is not None and (pred - h) * (p - h) <= 0.0:
+            out.append(d)
+        pred = p
+    return out
+
+
+def _profil(d):
+    if d < 1.5:
+        return -0.35
+    if d < 5.5:
+        return -0.35 + (-3.6 + 0.35) * smooth(1.5, 5.5, d)
+    if d < 8.5:
+        return -3.6
+    return -3.6 + 2.3 * smooth(8.5, 12.5, d)
+
+
+_CARA_VODY = []
+
+
 def land(x, z, flat=True, pads=True, zaznam=None, voda=True, ulice=True):
     """Profil jako v terrain.gd: tesne u zdi bermа, pak prikop a val; daleko kopce, vesnice a cesty (kraj.py).
     zaznam: seznam, do ktereho se po kazdem kroku stavby zapise (krok, y) - protokol stavby Blenderu
@@ -52,15 +78,12 @@ def land(x, z, flat=True, pads=True, zaznam=None, voda=True, ulice=True):
         w = smooth(1.2, 2.5, d) * (1.0 - smooth(26.0, 40.0, d))
         if z > 15.0:
             w *= smooth(3.5, 8.0, abs(x))
-        d += w * (1.3 * kraj.perlin(x / 7.0 + 3.3, z / 7.0 - 1.9) + 0.55 * kraj.perlin(x / 2.6 - 7.1, z / 2.6 + 4.2))
-    if d < 1.5:
-        prof = -0.35
-    elif d < 5.5:
-        prof = -0.35 + (-3.6 + 0.35) * smooth(1.5, 5.5, d)
-    elif d < 8.5:
-        prof = -3.6
-    else:
-        prof = -3.6 + 2.3 * smooth(8.5, 12.5, d)
+        # Misa 27. 11. („brehy zubate neprirozene“): drobne vymoly (vlna 2,6 m) na mrizce 1 m delaly zuby hrany u vody -
+        # kolem hladiny (pas prikop.vymoly_bez_m od cary vody) jen velke zatoky (rešerše: breh podle vzdalenosti, ne mrizky)
+        d_vody = min(abs(d - c) for c in _CARA_VODY) if _CARA_VODY else 99.0
+        drob = smooth(_PRIKOP["vymoly_bez_m"] * 0.5, _PRIKOP["vymoly_bez_m"], d_vody)
+        d += w * (1.3 * kraj.perlin(x / 7.0 + 3.3, z / 7.0 - 1.9) + 0.55 * drob * kraj.perlin(x / 2.6 - 7.1, z / 2.6 + 4.2))
+    prof = _profil(d)
     far = -1.3 + 1.2 * math.sin(x * 0.05) * math.cos(z * 0.04) - 4.0 * smooth(30, 120, math.hypot(x, z))
     y = prof + (far - (-1.3)) * smooth(11.5, 34.0, d)
     # kopecky a dolinky: u zdi jen mirne zvlneni, na svazich prikopu vic, za valem vyrazne
@@ -105,6 +128,9 @@ def land(x, z, flat=True, pads=True, zaznam=None, voda=True, ulice=True):
     zap(("voda (voda_tvar)", y))
     return y
 
+
+
+_CARA_VODY[:] = _cara_vody()            # vnitrni a vnejsi cara vody prikopu (vymoly u ni ne)
 
 # nahodne, ale pevne vlny (stejne pri kazdem buildu)
 _WAVES = []
@@ -161,8 +187,11 @@ def terrain(coll):
         d = rect_dist(x, z)
         road = abs(x) < 2.2 and z > 16
         g = 0.0 if road else 0.4 + 0.45 * smooth(0.5, 2.0, d)
-        if land(x, z) < _PRIKOP["hladina_y"] + _PRIKOP["bahno_nad_hladinou_m"] and d < 16.0:
-            g = 0.1          # bahnity breh a dno prikopu (pod hladinou ne trava - Misa 0.98, mez byla stara hladina -2,75)
+        if d < 16.0:
+            # bahnity breh a dno prikopu (pod hladinou ne trava - Misa 0.98); Misa 27. 11. (zubaty breh): plynuly prechod
+            # bahna do travy pres pas prikop.bahno_prechod_m nad bahno_nad_hladinou_m (drive tvrda mez po vrcholech = schody)
+            yb = land(x, z) - _PRIKOP["hladina_y"] - _PRIKOP["bahno_nad_hladinou_m"]
+            g = 0.1 + (g - 0.1) * smooth(0.0, _PRIKOP["bahno_prechod_m"], yb)
         vals.append(g + 0.1 * kraj.sum_m(x, z, 3.0))       # sum, ne nahoda po vrcholu (rastr 1 m, kraj.sum_m)
     at.data.foreach_set("value", vals)
     kraj.tiles(coll, land)
