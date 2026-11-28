@@ -53,7 +53,14 @@ if [ "$REZIM" != "--jen-po" ]; then
     krok 15 "jas dreva (Misa 13. 11. cerne drevo)" python3 tools/export_kontroly.py drevo
     krok 14 "UV modelu s texturou (hlidac 0.996 strechy stodol)" python3 tools/test_uv.py
     krok 11 "datove textury bezztratove pred importem" python3 tools/datove_textury_import.py
+    # 28. 11.: osirele .import textur bez souboru (stary pokus o domy) brani Godotu rozbalit textury z GLB znovu -> smazat
+    for f in modely/ves/*.jpg.import modely/ves/*.png.import; do [ -f "$f" ] && [ ! -f "${f%.import}" ] && rm -f "$f"; done
     krok 8 "import Godotu (build/beh/export_import.log)" bash -c "godot --headless --path . --import > build/beh/export_import.log 2>&1"
+    # 28. 11. (3. pad, predani 15. 11.): textury novych domu vsi se z domy.glb rozbali az behem importu a domy_stredni.glb je
+    # cte driv -> jeden import navic, kdyz prvni hlasi nenactene zdroje
+    if grep -q "Failed loading resource" build/beh/export_import.log; then
+        krok 8 "import Godotu znovu (rozbalene textury)" bash -c "godot --headless --path . --import > build/beh/export_import.log 2>&1"
+    fi
     krok 8 "chyby v logu importu" python3 tools/export_kontroly.py import build/beh/export_import.log
     krok 11 "textury pro tablet" python3 tools/textury_tablet.py
     krok 11 "datove textury bezztratove (potok - schody vody na tabletu 0.9997)" python3 tools/kontrola_datovych_textur.py

@@ -1896,3 +1896,7 @@ Hotovo v kódu a datech (testy u každého):
   Jabloň z `strom2.py` je třeba převést `python3 tools/barvy_vrcholu.py` (barvy vrcholů lineární → sRGB, značka) –
   oba kroky jsou teď v `tools/export_priprava.sh`. `rychle.sh barvy` hlásí „výjimka bez souboru krcma_L.glb“, když
   model krčmy v kontejneru není (balík z minulého vydání) – neškodné.
+- **Export 28. 11. spadl na importu (rc 8, „Failed loading resource modely/ves/domy_*_diff.jpg“):** v `modely/ves`
+  zůstaly osiřelé `domy_*.jpg.import` bez obrázků (z dřívějšího pokusu) – Godot pak tyto textury z `domy.glb` znovu
+  nerozbalí (rozbalil jen ty bez .import). `export.sh` krok 8 teď osiřelé .import v `modely/ves` maže a import zopakuje,
+  když log hlásí nenačtené zdroje.
