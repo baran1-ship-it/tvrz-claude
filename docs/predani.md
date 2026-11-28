@@ -1900,9 +1900,9 @@ Hotovo v kódu a datech (testy u každého):
   zůstaly osiřelé `domy_*.jpg.import` bez obrázků (z dřívějšího pokusu) – Godot pak tyto textury z `domy.glb` znovu
   nerozbalí (rozbalil jen ty bez .import). `export.sh` krok 8 teď osiřelé .import v `modely/ves` maže a import zopakuje,
   když log hlásí nenačtené zdroje.
-- **Vlasy vesničanů – 3. pokus (28. 11., kontrola před vydáním):** muži 01 a 02 měli po dvou opravách dál holé světlé
-  temeno. Rozbor: kůže temene je světlá (textura hlavy ~217/166/156, na snímku bílá), čepice pod vlasy měla materiál
-  vlasů (MASK, ořez 0,5) a v „hustém bloku“ textury je alfa místy pod ořezem → čepice děravá. Oprava: čepice má vlastní
-  NEPRŮHLEDNÝ materiál `<sada>_cepice` v průměrné barvě pramenů (alfa > 0,5) – 4. povrch sady (+1 volání kreslení na postavu).
-  **Poučení:** snímek opravy postav hodnotit u KAŽDÉ postavy na snímku, ne jen u té nahlášené (2. pokus jsem uzavřel
-  podle postavy 03 a přehlédl 01/02).
+- **Vlasy vesničanů – „holé temeno“ mužů 01 a 02 (28. 11., kontrola před vydáním) = NENÍ CHYBA převodu:** izolovaný test
+  se VŠEMI kartami vlasů (troj_max 100 000: muž 01 6 790, muž 02 14 464 troj.) dal stejný snímek – muž 01 je ve zdroji
+  plešatý (vlasy po stranách), muž 02 má řídkou ofinu; „bílá“ = světlá kůže (albedo ~217/166/156) přesvícená ve focení
+  `foto_vzhled.gd` (holohlavý muž 04 i ruce všech postav stejně bílé; ve hře Míšin snímek 14 kůže přirozená). Dva pokusy
+  (neprůhledná čepice → ženy s plastovou helmou; čepice bez zmenšení → beze změny) vráceny. **Poučení:** u „díry ve vlasech“
+  nejdřív izolovaný test bez rozpočtu karet (zdroj vs převod), teprve pak oprava; snímek hodnotit u KAŽDÉ postavy.
