@@ -8165,7 +8165,7 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 		else:
 			continue
 		for vr: Dictionary in sv.data.get("vybaveni", []):
-			var bd: Variant = Pravidla.cti("predmety_body", String(vr["id"]))
+			var bd: Variant = Pravidla.soubor("predmety_body").get(String(vr["id"]))
 			if not (bd is Dictionary):
 				continue
 			var vyaw := float(vr.get("yaw", 0.0))

@@ -41,6 +41,8 @@ static var CESTA_DOHLED_V := float(Pravidla.cti("jizda", "kun", "cesta_dohled_za
 static var CESTA_ODBOCKA := deg_to_rad(float(Pravidla.cti("jizda", "kun", "cesta_odbocka_st")))
 static var PASTVA: Array = Pravidla.cti("jizda", "kun", "pastva_s")
 static var KLIP_M_S: Dictionary = Pravidla.cti("jizda", "kun").get("klip_m_s", {})
+static var KLUS_M_S := float(Pravidla.cti("jizda", "kun").get("klus_m_s", 0.0))
+static var KLIP_TEMPO_MIN := float(Pravidla.cti("jizda", "kun", "klip_tempo_min"))
 static var DOSAH := float(Pravidla.cti("jizda", "kun", "dosah_m"))
 static var KOLIZE: Array = Pravidla.cti("jizda", "kun", "kolize_m")
 static var KOLIZE_Y := float(Pravidla.cti("jizda", "kun", "kolize_vyska_m"))
@@ -1067,11 +1069,19 @@ func _physics_process(delta: float) -> void:
 	if not KLIP_M_S.is_empty():
 		# Misa 27. 11. (jizda horsi nez s puvodnim konem): tempo = rychlost kone / zmerena rychlost klipu (jizda.json
 		# klip_m_s) - kopyta neklouzou; mezi krokem a cvalem prolnuti rychlosti klipu jako prolnuti BlendSpace
-		var vw := float(KLIP_M_S.get("Walk", CHODY["krok"]))
-		var vg := float(KLIP_M_S.get("Gallop", CHODY["cval"]))
-		var u := clampf((rv - float(CHODY["krok"])) / maxf(float(CHODY["cval"]) - float(CHODY["krok"]), 0.01), 0.0, 1.0)
-		tempo = rv / lerpf(vw, vg, u) if rv > 0.2 else 1.0
-		tempo = maxf(tempo, 0.3)
+		# body (rychlost chodu, rychlost klipu): krok-Walk, klus-Trot (nezmereny = tempo 1), cval-Gallop; mezi nimi linearne
+		var body: Array = [[float(CHODY["krok"]), float(KLIP_M_S.get("Walk", CHODY["krok"]))]]
+		var klus_v := KLUS_M_S
+		if klus_v > float(CHODY["krok"]) and klus_v < float(CHODY["cval"]):
+			body.append([klus_v, float(KLIP_M_S.get("Trot", klus_v))])
+		body.append([float(CHODY["cval"]), float(KLIP_M_S.get("Gallop", CHODY["cval"]))])
+		var vk := float(body[0][1])
+		for i in range(1, body.size()):
+			if rv > float(body[i - 1][0]):
+				var u := clampf((rv - float(body[i - 1][0])) / maxf(float(body[i][0]) - float(body[i - 1][0]), 0.01), 0.0, 1.0)
+				vk = lerpf(float(body[i - 1][1]), float(body[i][1]), u)
+		tempo = rv / vk if rv > 0.2 else 1.0
+		tempo = maxf(tempo, KLIP_TEMPO_MIN)
 	elif rv > float(CHODY["cval"]):
 		tempo = clampf(rv / float(CHODY["cval"]), 1.0, 1.6)
 	elif rv > 0.2 and rv < float(CHODY["krok"]):

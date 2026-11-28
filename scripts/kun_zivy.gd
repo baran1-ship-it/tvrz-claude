@@ -85,7 +85,7 @@ func _process_modification() -> void:
 		_pastva_cil = 1.0 - _pastva_cil
 		var r: Array = Z["pastva_s"] if _pastva_cil > 0.5 else Z["zvednuta_s"]
 		_pastva_t = _rng.randf_range(float(r[0]), float(r[1]))
-	_pastva = move_toward(_pastva, _pastva_cil, dt / float(Z["sklon_hlavy_s"]))
+	_pastva = move_toward(_pastva, _pastva_cil, dt / float(Z["sklon_hlavy_s"] if stoji and volny else Z["pastva_konec_s"]))
 	var p := smoothstep(0.0, 1.0, _pastva)
 	# pastva klipem modelu (jizda.json zivy.pastva_klip, kun.gd): krk, hlavu ani celist tu neohybat (oblouk, Misa 27. 11.)
 	var pk := 0.0 if bool(get_meta("pastva_klipem", false)) else p

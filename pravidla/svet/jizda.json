@@ -256,7 +256,9 @@
    ],
    "dech_s": 3.6,
    "dech_st": 0.7,
-   "vaha_st": 1.5
+   "vaha_st": 1.5,
+   "pastva_konec_s": 0.35,
+   "_pastva_konec_s": "28. 11. (kontrola pred vydanim): kdyz se kun rozejde nebo na nej jezdec nasedne, pastva (klip Eat) mizi za tolik s, ne za sklon_hlavy_s 1,6 s - jinak kun klouze s hlavou u zeme; odhad, NEOVERENO snimkem"
   },
   "_zivy": "Misa 0.99 „kun stal v poze behu, vubec se nepohnul“ (reserse_potok_1osoba_kun.md, IFCE: volny kun se pase aspon 60 % casu - pastva_s 25-70 s / zvednuta hlava 8-25 s = 70 %; ocas svihne pres 45 st. kazdych 3-10 s; usi kazde zvlast; dech ~16/min = 3,6 s). scripts/kun_zivy.gd po animaci. Idle = usek 18,6-23,4 s (nohy v klidu, rozbor kosti po 0,5 s 29. 10.: driv 16,3-18,3 = konec kroku - kun stal v poze kroku). Eat a Eat2 z modelu pryc (krk se pohne o 3 st.) - pastvu dela kun_zivy",
   "rozhled_st": 95.0,
@@ -441,7 +443,9 @@
    "Gallop": 11.55
   },
   "_klip_m_s": "Misa 27. 11. („jizda nic moc oproti puvodnimu, musis to sladit“; rešerše reserse_animace_postavy_27_11.md kap. 4, RDR2 GDC 2021: tempo klipu podle zmerene rychlosti): rychlost, kterou klip modelu sam „jde“ - kopyto v opore vuci telu, ZMERENO tools/kun_klipy_rychlost.gd 28. 11. (kun_hero: pri krok 1,7 m/s kopyta 1,18 m/s = klouzala dopredu; pri cval 6,5 m/s 11,55 m/s = nohy dvakrat rychleji nez kun - klip Gallop je trysk). kun.gd: tempo = rychlost kone / rychlost klipu podle chodu (krok Walk, cval a trysk Gallop, klus prolnuti); klip bez zaznamu tempo 1. Trot NEZMERENO (klus jen v prechodu).",
-  "_klus_m_s": "Misa 26. 11. (klus „chveje se a preskakuje“): bod klipu Trot v BlendSpace2D mezi krokem a cvalem (kun.gd _strom) - jinak se v klusu michal krok 1,13 s s cvalem 0,5 s bez sladeni; skutecny klus kone 3,5-4,5 m/s; jen kdyz model klip Trot ma"
+  "_klus_m_s": "Misa 26. 11. (klus „chveje se a preskakuje“): bod klipu Trot v BlendSpace2D mezi krokem a cvalem (kun.gd _strom) - jinak se v klusu michal krok 1,13 s s cvalem 0,5 s bez sladeni; skutecny klus kone 3,5-4,5 m/s; jen kdyz model klip Trot ma",
+  "klip_tempo_min": 0.3,
+  "_klip_tempo_min": "nejnizsi tempo klipu chodu (pod krokem: rozjezd); drive cislo v kodu. Klus: Trot neni zmereny - tempo v bode klus_m_s = 1 (puvodni), mezi body linearne po usecich krok-klus-cval (28. 11., kontrola pred vydanim: lerp Walk-Gallop zpomalil klus na 0,68)"
  },
  "telo": {
   "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",

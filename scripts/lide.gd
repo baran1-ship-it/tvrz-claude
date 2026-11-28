@@ -85,6 +85,21 @@ func _slot_ok(c: Dictionary, jm: String) -> bool:
 	return vz.is_empty() or vz.has(String((P["vyznam"] as Dictionary).get(jm, "")))
 
 
+## Vyznamy slotu mista kde (u_slotu), jinak [] = bez omezeni. Nastavuje se jen tam, kde postava misto opravdu zabira
+## (c["misto"]) - _misto se vola i jako dotaz na jina mista (kontrola pred vydanim 28. 11.).
+func _slot_vyznamy(c: Dictionary, kde: String) -> Array:
+	if kde == "prace":
+		kde = String((c["o"] as Dictionary).get("prace", "dvere"))
+	var z: Variant = P["mista"].get(kde, {})
+	if not (z is Dictionary) or not (z as Dictionary).has("u_slotu"):
+		return []
+	var sl_v: Variant = Pravidla.soubor("predmety_body").get(String(z["u_slotu"]["predmet"]))
+	for s3: Dictionary in (sl_v.get("sloty", []) if sl_v is Dictionary else []):
+		if String(s3["id"]) == String(z["u_slotu"]["slot"]):
+			return s3.get("vyznamy", [])
+	return []
+
+
 func _cil_ok(jm: String, p: Vector2) -> bool:
 	var pot: Array = (P["klipy_cil"] as Dictionary).get(jm, [])
 	if pot.is_empty():
@@ -553,7 +568,6 @@ func _volno(a: Vector2, b: Vector2) -> bool:
 ## Poloha mista (zaznam postavy.json mista nebo domov/dvere/zahrada obyvatele) -> [Vector2, yaw nebo INF].
 func _misto(c: Dictionary, kde: String) -> Array:
 	var o: Dictionary = c["o"]
-	c.erase("slot_vyznamy")
 	if kde == "prace":
 		kde = String(o.get("prace", "dvere"))
 	if kde == "naves":
@@ -586,11 +600,6 @@ func _misto(c: Dictionary, kde: String) -> Array:
 		push_warning("lide %s: domov %s nenalezen" % [c["id"], str(dm)])
 		return [Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z), INF]
 	var z: Dictionary = P["mista"].get(kde, {})
-	if z.has("u_slotu"):
-		var sl_v: Variant = Pravidla.cti("predmety_body", String(z["u_slotu"]["predmet"]))
-		for s3: Dictionary in (sl_v.get("sloty", []) if sl_v is Dictionary else []):
-			if String(s3["id"]) == String(z["u_slotu"]["slot"]):
-				c["slot_vyznamy"] = s3.get("vyznamy", [])
 	if _misto_xz.has(kde):
 		return _misto_xz[kde]
 	var out := [Vector2.ZERO, INF]
@@ -1227,6 +1236,7 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 		if _profil and Time.get_ticks_usec() - _tr > 1000:
 			print("LIDE_PROFIL rozestup %s %.1f ms" % [c["id"], (Time.get_ticks_usec() - _tr) / 1000.0])
 	c["misto"] = m[0]
+	c["slot_vyznamy"] = _slot_vyznamy(c, kde_b)
 	c["yaw_mista"] = m[1]
 	c["cn"] = cn
 	# obchuzka zacina mistem bloku (Misa r. 63: tri s kbeliky sly stejne kolo za sebou a v sobe); poutnici nahodne
@@ -1438,6 +1448,7 @@ func _obchuzka_dalsi(c: Dictionary, cn: Dictionary, p: Vector2) -> void:
 	if not (P["mista"].get(kde, {}) as Dictionary).has("u_steny"):
 		m = [_rozestup(c, m[0]), m[1]]
 	c["misto"] = m[0]
+	c["slot_vyznamy"] = _slot_vyznamy(c, kde)
 	c["yaw_mista"] = m[1]
 	c["obch_hraje"] = false
 	c.erase("pozor_cil")
@@ -1845,10 +1856,37 @@ func _rozestup(c: Dictionary, q: Vector2) -> Vector2:
 		for i in n:
 			var a := TAU * float(i) / n
 			var q2: Vector2 = q + Vector2(sin(a), cos(a)) * r * float(kruh)
-			if _cil_obsazen(c, q2, r) or is_nan(_nav_bunka(_nav_ij(q2), podlaha(q2))):
+			if _cil_obsazen(c, q2, r) or is_nan(_nav_bunka(_nav_ij(q2), podlaha(q2))) or v_zone(q2):
 				continue
 			return q2
 	return q
+
+
+## Zakazane zony v pudorysu (28. 11., kontrola pred vydanim: druha postava u kotliku odsunuta rozestupem do ohne):
+## ohne sveta (svet.json ohne, interakce.json ohne_zona) a zakazane_zony predmetu (predmety_body.json) jako kruhy
+## [stred, r + rezerva_zony_m]; spocteno jednou. Pouziva _rozestup a test lide_chovani.
+var _zony_xz: Array = []
+func v_zone(q: Vector2) -> bool:
+	if _zony_xz.is_empty() and main != null and main.svet != null:
+		var rez := float(Pravidla.cti("interakce", "rezerva_zony_m"))
+		var oz: Dictionary = Pravidla.cti("interakce", "ohne_zona")
+		for oh: Dictionary in main.svet.data.get("ohne", []):
+			var od := String(oh.get("kind", ""))
+			if (oz["druhy"] as Array).has(od):
+				_zony_xz.append([Vector2(float(oh["pos"][0]), float(oh["pos"][2])), float(oh.get("size", (oz["r_m"] as Dictionary).get(od, 0.0))) + rez])
+		for vr: Dictionary in main.svet.data.get("vybaveni", []):
+			var bd: Variant = Pravidla.soubor("predmety_body").get(String(vr["id"]))
+			if not (bd is Dictionary):
+				continue
+			for zn: Dictionary in (bd as Dictionary).get("zakazane_zony", []):
+				var zc := Vector3(float(zn["pos"][0]), 0.0, float(zn["pos"][2])).rotated(Vector3.UP, float(vr.get("yaw", 0.0)))
+				_zony_xz.append([Vector2(float(vr["p"][0]) + zc.x, float(vr["p"][2]) + zc.z), float(zn["r"]) + rez])
+		if _zony_xz.is_empty():
+			_zony_xz.append([Vector2.INF, 0.0])
+	for z: Array in _zony_xz:
+		if q.distance_to(z[0]) < float(z[1]):
+			return true
+	return false
 
 
 ## Chuze za jinou postavou (rozestup.chuze_m, kuzel 60 st. pred sebou): pocka, nejvys cekani_max_s; na postavu, ktera
@@ -2892,6 +2930,7 @@ func _daleko_krok(c: Dictionary, dt: float) -> void:
 		c["obch"] = _poutnik_volny(c, ob, int(c["obch"]) + 1)
 		var m: Array = _misto(c, String(ob[int(c["obch"])]))
 		c["misto"] = m[0]
+		c["slot_vyznamy"] = _slot_vyznamy(c, String(ob[int(c["obch"])]))
 		c["yaw_mista"] = m[1]
 		c["cesta"] = PackedVector2Array([m[0]])
 		c["i"] = 0
