@@ -8149,13 +8149,21 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 	var rez := float(Pravidla.cti("interakce", "rezerva_zony_m"))
 	for mk: String in P["mista"]:
 		var mo: Variant = P["mista"][mk]
-		if not (mo is Dictionary) or not (mo as Dictionary).has("u_slotu"):
+		if not (mo is Dictionary):
 			continue
-		var sl: Array = lide.call("slot_mista", mo)
-		if sl.is_empty():
-			ch.call("slot: misto %s - predmet nebo slot %s nenalezen" % [mk, str(mo["u_slotu"])])
+		# 28. 11.: zony (ohen, sachta studny...) plati pro kazde misto s polohou p, nejen pro sloty
+		var sl: Array = []
+		var q := Vector2.INF
+		if (mo as Dictionary).has("u_slotu"):
+			sl = lide.call("slot_mista", mo)
+			if sl.is_empty():
+				ch.call("slot: misto %s - predmet nebo slot %s nenalezen" % [mk, str(mo["u_slotu"])])
+				continue
+			q = sl[0]
+		elif (mo as Dictionary).has("p"):
+			q = Vector2(float(mo["p"][0]), float(mo["p"][1]))
+		else:
 			continue
-		var q: Vector2 = sl[0]
 		for vr: Dictionary in sv.data.get("vybaveni", []):
 			var bd: Variant = Pravidla.cti("predmety_body", String(vr["id"]))
 			if not (bd is Dictionary):
@@ -8166,6 +8174,17 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 				var dz := q.distance_to(Vector2(float(vr["p"][0]) + zc.x, float(vr["p"][2]) + zc.z))
 				if dz < float(zn["r"]) + rez:
 					ch.call("slot: misto %s %.2f m od zony %s predmetu %s (min %.2f)" % [mk, dz, zn["id"], vr["id"], float(zn["r"]) + rez])
+		var oz: Dictionary = Pravidla.cti("interakce", "ohne_zona")
+		for oh: Dictionary in sv.data.get("ohne", []):
+			var od := String(oh.get("kind", ""))
+			if not (oz["druhy"] as Array).has(od):
+				continue
+			var ro := float(oh.get("size", (oz["r_m"] as Dictionary).get(od, 0.0)))
+			var dho := q.distance_to(Vector2(float(oh["pos"][0]), float(oh["pos"][2])))
+			if dho < ro + rez:
+				ch.call("slot: misto %s %.2f m od ohne %s (min %.2f)" % [mk, dho, oh.get("name", od), ro + rez])
+		if sl.is_empty():
+			continue
 		var sd: Dictionary = sl[4]
 		var r0: Dictionary = sl[3]
 		for vs: Dictionary in Pravidla.cti("predmety_body", String(r0["id"])).get("vstupy", []):

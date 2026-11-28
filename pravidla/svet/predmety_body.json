@@ -6,17 +6,47 @@
    {
     "id": "michani",
     "druh": "stani",
-    "pos": [0.13, 0.0, 0.92],
+    "pos": [
+     0.13,
+     0.0,
+     0.92
+    ],
     "pohled": "predmet",
-    "vyznamy": ["stoji", "pas"],
+    "vyznamy": [
+     "stoji",
+     "pas"
+    ],
     "_": "kucharka u kotliku (Misa 27. 11.): 0,93 m od stredu ohniste (polomer 0,55 + rezerva 0,35), u stolu kuchyne (stul_selsky z -11,31) volno; kotlik na lozi ohniste 0,57 m - klip Interact (ruce ve vysce hrudi) sahne na kotlik, PickUp_Table (vyska stolu) a klek ne"
    }
   ],
   "vstupy": [
-   {"slot": "michani", "pos": [0.13, 0.0, 1.5]}
+   {
+    "slot": "michani",
+    "pos": [
+     0.13,
+     0.0,
+     1.5
+    ]
+   }
   ],
   "zakazane_zony": [
-   {"id": "ohen", "tvar": "valec", "pos": [0.0, -0.57, 0.0], "r": 0.55, "v": 1.2, "pro": ["koren", "ruce", "hlava", "nohy"]}
+   {
+    "id": "ohen",
+    "tvar": "valec",
+    "pos": [
+     0.0,
+     -0.57,
+     0.0
+    ],
+    "r": 0.55,
+    "v": 1.2,
+    "pro": [
+     "koren",
+     "ruce",
+     "hlava",
+     "nohy"
+    ]
+   }
   ]
  }
 }

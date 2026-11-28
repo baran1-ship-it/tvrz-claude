@@ -7,5 +7,15 @@
  "testy": {
   "vstup_od_slotu_max_m": 1.5,
   "_": "test lide_chovani (sloty): kazdy slot mista mimo vsechny zakazane zony predmetu v okoli + rezerva, vstup do vstup_od_slotu_max_m"
+ },
+ "ohne_zona": {
+  "druhy": [
+   "hearth",
+   "forge"
+  ],
+  "r_m": {
+   "forge": 0.5
+  },
+  "_": "28. 11. (kucharka v ohni): kazde misto postavy s polohou nebo slotem stoji od ohne sveta (svet.json ohne) aspon r + rezerva_zony_m; r = size ohne (ohniste 0,55, krb 0,75-1,0), vyhen nema size - polovina hloubky vyhne 0,99 m; test lide_chovani"
  }
 }
