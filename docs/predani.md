@@ -1906,3 +1906,6 @@ Hotovo v kódu a datech (testy u každého):
   `foto_vzhled.gd` (holohlavý muž 04 i ruce všech postav stejně bílé; ve hře Míšin snímek 14 kůže přirozená). Dva pokusy
   (neprůhledná čepice → ženy s plastovou helmou; čepice bez zmenšení → beze změny) vráceny. **Poučení:** u „díry ve vlasech“
   nejdřív izolovaný test bez rozpočtu karet (zdroj vs převod), teprve pak oprava; snímek hodnotit u KAŽDÉ postavy.
+- **Vydání 28. 11. – pojistka „starý import scény“ (npc_muz_04):** po přestavbě postav Godot jednu sadu nepřeimportoval
+  (stejný obsah .gltf, novější .bin). Po každé přestavbě postav: `rm .godot/imported/npc_*_cela.gltf-*.md5`,
+  `touch modely/postavy/npc/npc_*_cela.gltf`, pak `godot --import` – teprve potom snímky a vydání.
