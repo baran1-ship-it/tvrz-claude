@@ -1,5 +1,5 @@
 {
- "verze": "0.9999999",
+ "verze": "0.99999991",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -4701,6 +4701,81 @@
     }
    ]
   },
+  "z_postavy": {
+   "src": "b4730e84bc868832fbbd3a8793aed38d",
+   "md5": "12a9112d1a4e3d85f07c52f19f641ede",
+   "size": 223485536,
+   "parts": [
+    {
+     "file": "z_postavy-12a9112d1a.pck.000",
+     "size": 94371840,
+     "md5": "2a0216330bc96c2b63fcc5a0b1f24d77"
+    },
+    {
+     "file": "z_postavy-12a9112d1a.pck.001",
+     "size": 94371840,
+     "md5": "8818a251336a4c54467363a4a4f45059"
+    },
+    {
+     "file": "z_postavy-12a9112d1a.pck.002",
+     "size": 34741856,
+     "md5": "f79e4fdd31aebdb1de0442ac36f4277f"
+    }
+   ]
+  },
+  "z_rostliny": {
+   "src": "039eebd1bb850fde2b8e79685db52082",
+   "md5": "c3e4a6cb8308d6e8017b4164ccaa00e1",
+   "size": 105488672,
+   "parts": [
+    {
+     "file": "z_rostliny-c3e4a6cb83.pck.000",
+     "size": 94371840,
+     "md5": "d9da4495773f6e631762006c9c24ea5b"
+    },
+    {
+     "file": "z_rostliny-c3e4a6cb83.pck.001",
+     "size": 11116832,
+     "md5": "fd22b45c3ac0c23a6da2afe0ff2e8b51"
+    }
+   ]
+  },
+  "z_svet": {
+   "src": "a6cf3d93388308012ca647593c2c4931",
+   "md5": "c234cb3925dc707126f33296a6773402",
+   "size": 53666688,
+   "parts": [
+    {
+     "file": "z_svet-c234cb3925.pck.000",
+     "size": 53666688,
+     "md5": "c234cb3925dc707126f33296a6773402"
+    }
+   ]
+  },
+  "z_dlazdice": {
+   "src": "f9c66fcc101fa076e7f5351e47b9f6a2",
+   "md5": "141363b11a2743c04a44ddcf9c9129c7",
+   "size": 22970560,
+   "parts": [
+    {
+     "file": "z_dlazdice-141363b11a.pck.000",
+     "size": 22970560,
+     "md5": "141363b11a2743c04a44ddcf9c9129c7"
+    }
+   ]
+  },
+  "z_reka": {
+   "src": "3391f2a28f02ba7400987add54b4c71d",
+   "md5": "4abdb92532fb936189c406a27e73f4f6",
+   "size": 1678656,
+   "parts": [
+    {
+     "file": "z_reka-4abdb92532.pck.000",
+     "size": 1678656,
+     "md5": "4abdb92532fb936189c406a27e73f4f6"
+    }
+   ]
+  },
   "z_krcma": {
    "src": "fd1f40282dbd85e8b74c0f0f28ee19c5",
    "md5": "2bdc78e275fc3cbc6399a5e28a2a2d36",
@@ -4722,45 +4797,6 @@
      "file": "z_kone-1c392bde87.pck.000",
      "size": 5540256,
      "md5": "1c392bde875690d006a84a57a885e204"
-    }
-   ]
-  },
-  "z_postavy": {
-   "src": "2b400d82a3f31f117dfd8dbe1a9142b5",
-   "md5": "3769c744bbc4031c3d9e3176015bb34b",
-   "size": 189598112,
-   "parts": [
-    {
-     "file": "z_postavy-3769c744bb.pck.000",
-     "size": 94371840,
-     "md5": "155f32037dc9046cdde50f89f0c4363b"
-    },
-    {
-     "file": "z_postavy-3769c744bb.pck.001",
-     "size": 94371840,
-     "md5": "d84876ce2508d2ea5f9142466aae9266"
-    },
-    {
-     "file": "z_postavy-3769c744bb.pck.002",
-     "size": 854432,
-     "md5": "383bce5feec860da91ecf09edfaf6df5"
-    }
-   ]
-  },
-  "z_rostliny": {
-   "src": "1ea065dff1cd138fc25ed26fda7653c0",
-   "md5": "dc0c1fd1955e6124ca9edb976d909d6f",
-   "size": 132229152,
-   "parts": [
-    {
-     "file": "z_rostliny-dc0c1fd195.pck.000",
-     "size": 94371840,
-     "md5": "42a68c05ec5b39212f808e29c32020e1"
-    },
-    {
-     "file": "z_rostliny-dc0c1fd195.pck.001",
-     "size": 37857312,
-     "md5": "36b4e04ce40a03d07237afd48056c890"
     }
    ]
   },
@@ -4809,42 +4845,6 @@
      "file": "z_ves-6147262474.pck.000",
      "size": 64198816,
      "md5": "6147262474e0507f1a6068cd7d492909"
-    }
-   ]
-  },
-  "z_svet": {
-   "src": "10de8f58ef7aeee365058290f9cfad75",
-   "md5": "cad41f203099da3e3a5fa172c4b9b9e3",
-   "size": 53714240,
-   "parts": [
-    {
-     "file": "z_svet-cad41f2030.pck.000",
-     "size": 53714240,
-     "md5": "cad41f203099da3e3a5fa172c4b9b9e3"
-    }
-   ]
-  },
-  "z_dlazdice": {
-   "src": "0014d2329e8990aee72a4e590575a767",
-   "md5": "aaac3d3b4934b1ec7e7b7a6015e2b6e4",
-   "size": 22975072,
-   "parts": [
-    {
-     "file": "z_dlazdice-aaac3d3b49.pck.000",
-     "size": 22975072,
-     "md5": "aaac3d3b4934b1ec7e7b7a6015e2b6e4"
-    }
-   ]
-  },
-  "z_reka": {
-   "src": "efa47dab720d3e2ed7c9ea082db2c37b",
-   "md5": "2052c761e98b42e63cf97bbbaeb988f8",
-   "size": 1568224,
-   "parts": [
-    {
-     "file": "z_reka-2052c761e9.pck.000",
-     "size": 1568224,
-     "md5": "2052c761e98b42e63cf97bbbaeb988f8"
     }
    ]
   },
@@ -4938,9 +4938,9 @@
    ]
   }
  },
- "otisk_exportu": "436f2ed139c5f9c99fb0b220a4df6a68",
- "otisk_vstupu": "21a307ae6d338534777ce5ba9172699a",
- "otisk_sady": "61028447932ff56fac895375101ca43a",
+ "otisk_exportu": "8f8fba2d114ff69e8e81358c740b0412",
+ "otisk_vstupu": "61890a6030e4414b864c0da8b9954593",
+ "otisk_sady": "2d039f879a3d1880d756596cc4ecc933",
  "testovaci": [
   "POKRYTI_MATICE 0/114 (0 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, teren|predmet, voda|voda, voda|cesta",
   "USPESNOST_MATICE 0/0 (0 %)"
